@@ -1,5 +1,6 @@
 import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
 import { useEffect, useRef, type HTMLAttributes } from "react";
+import { useTheme, type Theme } from "@mui/material/styles";
 import "./Galaxy.css";
 
 const vertexShader = `
@@ -36,10 +37,16 @@ uniform float uMouseActiveFactor;
 uniform float uAutoCenterRepulsion;
 uniform bool uTransparent;
 
+uniform vec3 uColorRed;
+uniform vec3 uColorOrange;
+uniform vec3 uColorYellow;
+uniform vec3 uColorWhite;
+uniform vec3 uColorBlue;
+uniform vec3 uBackgroundColor;
+
 varying vec2 vUv;
 
 #define NUM_LAYER 4.0
-#define STAR_COLOR_CUTOFF 0.2
 #define MAT45 mat2(0.7071, -0.7071, 0.7071, 0.7071)
 #define PERIOD 3.0
 
@@ -63,10 +70,19 @@ float trisn(float x) {
   return 2.0 * (1.0 - smoothstep(0.0, 1.0, abs(2.0 * t - 1.0))) - 1.0;
 }
 
-vec3 hsv2rgb(vec3 c) {
-  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+vec3 getRealisticStarColor(float tempRand) {
+  // Realistic stellar blackbody spectrum:
+  // Red (0.00-0.25) -> Orange (0.25-0.50) -> Yellow (0.50-0.75) -> White (0.75-0.90) -> Light Blue (0.90-1.00)
+  // Strictly excludes green, cyan, purple, pink, and dark blue.
+  if (tempRand < 0.25) {
+    return mix(uColorRed, uColorOrange, tempRand * 4.0);
+  } else if (tempRand < 0.50) {
+    return mix(uColorOrange, uColorYellow, (tempRand - 0.25) * 4.0);
+  } else if (tempRand < 0.75) {
+    return mix(uColorYellow, uColorWhite, (tempRand - 0.50) * 4.0);
+  } else {
+    return mix(uColorWhite, uColorBlue, (tempRand - 0.75) * 4.0);
+  }
 }
 
 float Star(vec2 uv, float flare) {
@@ -96,27 +112,18 @@ vec3 StarLayer(vec2 uv) {
       float glossLocal = tri(uStarSpeed / (PERIOD * seed + 1.0));
       float flareSize = smoothstep(0.9, 1.0, size) * glossLocal;
 
-      float red = smoothstep(STAR_COLOR_CUTOFF, 1.0, Hash21(si + 1.0)) + STAR_COLOR_CUTOFF;
-      float blu = smoothstep(STAR_COLOR_CUTOFF, 1.0, Hash21(si + 3.0)) + STAR_COLOR_CUTOFF;
-      float grn = min(red, blu) * seed;
-      vec3 base = vec3(red, grn, blu);
-      
-      float hue = atan(base.g - base.r, base.b - base.r) / (2.0 * 3.14159) + 0.5;
-      hue = fract(hue + uHueShift / 360.0);
-      float sat = length(base - vec3(dot(base, vec3(0.299, 0.587, 0.114)))) * uSaturation;
-      float maxComponent = max(max(base.r, base.g), base.b);
-      base = hsv2rgb(vec3(hue, sat, maxComponent));
+      float tempRand = fract(seed * 789.123);
+      vec3 starBaseColor = getRealisticStarColor(tempRand);
 
       vec2 pad = vec2(tris(seed * 34.0 + uTime * uSpeed / 10.0), tris(seed * 38.0 + uTime * uSpeed / 30.0)) - 0.5;
 
       float star = Star(gv - offset - pad, flareSize);
-      vec3 color = base;
 
       float twinkle = trisn(uTime * uSpeed + seed * 6.2831) * 0.5 + 1.0;
       twinkle = mix(1.0, twinkle, uTwinkleIntensity);
       star *= twinkle;
       
-      col += star * size * color;
+      col += star * size * starBaseColor;
     }
   }
 
@@ -165,10 +172,22 @@ void main() {
     alpha = min(alpha, 1.0);
     gl_FragColor = vec4(col, alpha);
   } else {
-    gl_FragColor = vec4(col, 1.0);
+    float alpha = length(col);
+    alpha = smoothstep(0.0, 0.3, alpha);
+    alpha = min(alpha, 1.0);
+    vec3 finalColor = mix(uBackgroundColor, col, alpha);
+    gl_FragColor = vec4(finalColor, 1.0);
   }
 }
 `;
+
+export interface GalaxyStarColors {
+  red?: string;
+  orange?: string;
+  yellow?: string;
+  white?: string;
+  blue?: string;
+}
 
 export interface GalaxyProps extends HTMLAttributes<HTMLDivElement> {
   focal?: [number, number];
@@ -187,6 +206,8 @@ export interface GalaxyProps extends HTMLAttributes<HTMLDivElement> {
   repulsionStrength?: number;
   autoCenterRepulsion?: number;
   transparent?: boolean;
+  backgroundColor?: string;
+  starColors?: GalaxyStarColors;
 }
 
 interface GalaxySettings {
@@ -206,6 +227,17 @@ interface GalaxySettings {
   repulsionStrength: number;
   autoCenterRepulsion: number;
   transparent: boolean;
+  backgroundColor?: string;
+  starColors?: GalaxyStarColors;
+}
+
+interface ResolvedGalaxyColors {
+  red: [number, number, number];
+  orange: [number, number, number];
+  yellow: [number, number, number];
+  white: [number, number, number];
+  blue: [number, number, number];
+  background: [number, number, number];
 }
 
 const DEFAULT_SETTINGS: GalaxySettings = {
@@ -244,7 +276,73 @@ const GALAXY_PROP_KEYS = new Set<string>([
   "repulsionStrength",
   "autoCenterRepulsion",
   "transparent",
+  "backgroundColor",
+  "starColors",
 ]);
+
+function parseHex(hexStr: string): [number, number, number] {
+  const cleanHex = hexStr.replace(/^#/, "");
+  if (cleanHex.length === 3 || cleanHex.length === 4) {
+    return [
+      parseInt(cleanHex[0] + cleanHex[0], 16) / 255,
+      parseInt(cleanHex[1] + cleanHex[1], 16) / 255,
+      parseInt(cleanHex[2] + cleanHex[2], 16) / 255,
+    ];
+  }
+  return [
+    parseInt(cleanHex.slice(0, 2), 16) / 255,
+    parseInt(cleanHex.slice(2, 4), 16) / 255,
+    parseInt(cleanHex.slice(4, 6), 16) / 255,
+  ];
+}
+
+function parseColorToRgb(color: string): [number, number, number] {
+  if (!color) return [1, 1, 1];
+  const trimmed = color.trim().toLowerCase();
+  if (trimmed.startsWith("#")) {
+    return parseHex(trimmed);
+  }
+  if (trimmed.startsWith("rgb")) {
+    const match = trimmed.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+      return [
+        parseInt(match[1], 10) / 255,
+        parseInt(match[2], 10) / 255,
+        parseInt(match[3], 10) / 255,
+      ];
+    }
+  }
+  return [1, 1, 1];
+}
+
+function resolveBackgroundHex(theme: Theme, customBg?: string): string {
+  if (customBg) {
+    return customBg;
+  }
+  if (theme.palette.mode === "dark") {
+    return theme.palette.background.default;
+  }
+  return theme.palette.common.black;
+}
+
+function resolveThemeColors(
+  theme: Theme,
+  starColors?: GalaxyStarColors,
+  customBg?: string,
+): ResolvedGalaxyColors {
+  const palette = theme.palette;
+  const custom = starColors ?? {};
+  const bgHex = resolveBackgroundHex(theme, customBg);
+
+  return {
+    red: parseColorToRgb(custom.red ?? palette.error.light),
+    orange: parseColorToRgb(custom.orange ?? palette.warning.main),
+    yellow: parseColorToRgb(custom.yellow ?? palette.warning.light),
+    white: parseColorToRgb(custom.white ?? palette.common.white),
+    blue: parseColorToRgb(custom.blue ?? palette.info.light),
+    background: parseColorToRgb(bgHex),
+  };
+}
 
 function extractProps(props: GalaxyProps): {
   settings: GalaxySettings;
@@ -272,6 +370,7 @@ function extractProps(props: GalaxyProps): {
 function createGalaxyProgram(
   gl: Renderer["gl"],
   settings: GalaxySettings,
+  colors: ResolvedGalaxyColors,
   initialMouse: { x: number; y: number },
 ): Program {
   return new Program(gl, {
@@ -304,23 +403,40 @@ function createGalaxyProgram(
       uMouseActiveFactor: { value: 0.0 },
       uAutoCenterRepulsion: { value: settings.autoCenterRepulsion },
       uTransparent: { value: settings.transparent },
+      uColorRed: { value: new Float32Array(colors.red) },
+      uColorOrange: { value: new Float32Array(colors.orange) },
+      uColorYellow: { value: new Float32Array(colors.yellow) },
+      uColorWhite: { value: new Float32Array(colors.white) },
+      uColorBlue: { value: new Float32Array(colors.blue) },
+      uBackgroundColor: { value: new Float32Array(colors.background) },
     },
   });
 }
 
-function setupGlBlending(gl: Renderer["gl"], transparent: boolean) {
+function setupGlBlending(
+  gl: Renderer["gl"],
+  transparent: boolean,
+  bg: [number, number, number],
+) {
   if (transparent) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.clearColor(0, 0, 0, 0);
   } else {
-    gl.clearColor(0, 0, 0, 1);
+    gl.clearColor(bg[0], bg[1], bg[2], 1);
   }
 }
 
 export default function Galaxy(props: GalaxyProps) {
+  const theme = useTheme();
   const { settings, domProps } = extractProps(props);
   const { className, ...cleanDomProps } = domProps;
+
+  const colors = resolveThemeColors(
+    theme,
+    settings.starColors,
+    settings.backgroundColor,
+  );
 
   const ctnDom = useRef<HTMLDivElement>(null);
   const targetMousePos = useRef({ x: 0.5, y: 0.5 });
@@ -337,9 +453,14 @@ export default function Galaxy(props: GalaxyProps) {
       premultipliedAlpha: false,
     });
     const gl = renderer.gl;
-    setupGlBlending(gl, settings.transparent);
+    setupGlBlending(gl, settings.transparent, colors.background);
 
-    const program = createGalaxyProgram(gl, settings, smoothMousePos.current);
+    const program = createGalaxyProgram(
+      gl,
+      settings,
+      colors,
+      smoothMousePos.current,
+    );
 
     const resize = () => {
       renderer.setSize(ctn.offsetWidth, ctn.offsetHeight);
@@ -412,7 +533,7 @@ export default function Galaxy(props: GalaxyProps) {
       }
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
-  }, [settings]);
+  }, [settings, colors]);
 
   const containerClass = className
     ? `galaxy-container ${className}`

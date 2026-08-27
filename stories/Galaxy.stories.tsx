@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import Galaxy from "../app/components/atoms/Galaxy";
 
 const meta = {
@@ -86,15 +87,9 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const DefaultTheme: Story = {
   render: (args) => (
-    <div
-      style={{
-        width: "100%",
-        height: "100vh",
-        backgroundColor: args.transparent ? "#0a0a14" : undefined,
-      }}
-    >
+    <div style={{ width: "100%", height: "100vh", position: "relative" }}>
       <Galaxy {...args} />
     </div>
   ),
@@ -102,61 +97,71 @@ export const Default: Story = {
     focal: [0.5, 0.5],
     rotation: [1.0, 0.0],
     starSpeed: 0.5,
-    density: 1,
-    hueShift: 140,
-    disableAnimation: false,
+    density: 1.2,
     speed: 1.0,
     mouseInteraction: true,
-    glowIntensity: 0.3,
-    saturation: 0.0,
+    glowIntensity: 0.4,
     mouseRepulsion: true,
-    repulsionStrength: 2,
-    twinkleIntensity: 0.3,
+    repulsionStrength: 3,
+    twinkleIntensity: 0.4,
     rotationSpeed: 0.1,
-    autoCenterRepulsion: 0,
-    transparent: true,
+    transparent: false,
   },
 };
 
-export const DeepSpaceVibrant: Story = {
+const customDarkTheme = createTheme({
+  palette: {
+    mode: "dark",
+    background: {
+      default: "#04040c",
+    },
+    error: {
+      main: "#f44336",
+      light: "#ff4d4d",
+    },
+    warning: {
+      main: "#ff944d",
+      light: "#ffeb3b",
+    },
+    common: {
+      white: "#f8fafc",
+      black: "#04040c",
+    },
+  },
+});
+
+export const CustomMuiThemed: Story = {
   render: (args) => (
-    <div
-      style={{
-        width: "100%",
-        height: "100vh",
-        backgroundColor: "#030014",
-      }}
-    >
-      <Galaxy {...args} />
-    </div>
+    <ThemeProvider theme={customDarkTheme}>
+      <div style={{ width: "100%", height: "100vh", position: "relative" }}>
+        <Galaxy {...args} />
+      </div>
+    </ThemeProvider>
   ),
   args: {
     focal: [0.5, 0.5],
     rotation: [1.0, 0.0],
     starSpeed: 0.8,
     density: 1.8,
-    hueShift: 240,
-    disableAnimation: false,
     speed: 1.2,
     mouseInteraction: true,
     glowIntensity: 0.6,
-    saturation: 0.9,
     mouseRepulsion: true,
     repulsionStrength: 6,
     twinkleIntensity: 0.5,
     rotationSpeed: 0.15,
-    autoCenterRepulsion: 0,
-    transparent: true,
+    transparent: false,
   },
 };
 
-export const CosmicVortex: Story = {
+export const TransparentOverLay: Story = {
   render: (args) => (
     <div
       style={{
         width: "100%",
         height: "100vh",
-        backgroundColor: "#050505",
+        background: "linear-gradient(180deg, #0b0f19 0%, #1a1f35 100%)",
+        position: "relative",
       }}
     >
       <Galaxy {...args} />
@@ -165,19 +170,15 @@ export const CosmicVortex: Story = {
   args: {
     focal: [0.5, 0.5],
     rotation: [0.7, 0.7],
-    starSpeed: 1.2,
-    density: 2.2,
-    hueShift: 310,
-    disableAnimation: false,
-    speed: 1.5,
+    starSpeed: 1.0,
+    density: 2.0,
+    speed: 1.4,
     mouseInteraction: true,
-    glowIntensity: 0.8,
-    saturation: 1.0,
+    glowIntensity: 0.7,
     mouseRepulsion: true,
     repulsionStrength: 4,
-    twinkleIntensity: 0.7,
-    rotationSpeed: 0.3,
-    autoCenterRepulsion: 1.5,
+    twinkleIntensity: 0.6,
+    rotationSpeed: 0.2,
     transparent: true,
   },
 };
