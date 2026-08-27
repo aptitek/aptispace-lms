@@ -20,7 +20,12 @@ const isTestOrStorybook =
 export default defineConfig({
   plugins: [tailwindcss(), !isTestOrStorybook && reactRouter()].filter(Boolean),
   resolve: {
-    tsconfigPaths: true,
+    alias: {
+      "~": path.resolve(dirname, "./app"),
+    },
+  },
+  optimizeDeps: {
+    include: ["framer-motion"],
   },
   test: {
     projects: [
