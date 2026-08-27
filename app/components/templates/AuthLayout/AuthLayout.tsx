@@ -39,6 +39,10 @@ const ContentWrapper = styled("main")(({ theme }) => ({
   justifyContent: "center",
   padding: theme.spacing(3),
   boxSizing: "border-box",
+  pointerEvents: "none",
+  "& > *": {
+    pointerEvents: "auto",
+  },
 }));
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
@@ -51,7 +55,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           glowIntensity={0.35}
           mouseInteraction
           mouseRepulsion
-          transparent
+          repulsionStrength={4}
         />
       </CanvasBackdrop>
 

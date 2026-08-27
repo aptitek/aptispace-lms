@@ -167,15 +167,11 @@ void main() {
   }
 
   if (uTransparent) {
-    float alpha = length(col);
-    alpha = smoothstep(0.0, 0.3, alpha);
-    alpha = min(alpha, 1.0);
-    gl_FragColor = vec4(col, alpha);
+    // Premultiplied alpha additive output: leaves DOM backdrop 100% intact and adds star light
+    gl_FragColor = vec4(col, 0.0);
   } else {
-    float alpha = length(col);
-    alpha = smoothstep(0.0, 0.3, alpha);
-    alpha = min(alpha, 1.0);
-    vec3 finalColor = mix(uBackgroundColor, col, alpha);
+    // Pure additive light onto background color: stars only add illumination and never darken background
+    vec3 finalColor = min(uBackgroundColor + col, vec3(1.0));
     gl_FragColor = vec4(finalColor, 1.0);
   }
 }
@@ -256,7 +252,7 @@ const DEFAULT_SETTINGS: GalaxySettings = {
   twinkleIntensity: 0.3,
   rotationSpeed: 0.1,
   autoCenterRepulsion: 0,
-  transparent: true,
+  transparent: false,
 };
 
 const GALAXY_PROP_KEYS = new Set<string>([
@@ -420,7 +416,7 @@ function setupGlBlending(
 ) {
   if (transparent) {
     gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.clearColor(0, 0, 0, 0);
   } else {
     gl.clearColor(bg[0], bg[1], bg[2], 1);
@@ -450,7 +446,7 @@ export default function Galaxy(props: GalaxyProps) {
 
     const renderer = new Renderer({
       alpha: settings.transparent,
-      premultipliedAlpha: false,
+      premultipliedAlpha: true,
     });
     const gl = renderer.gl;
     setupGlBlending(gl, settings.transparent, colors.background);
@@ -508,8 +504,17 @@ export default function Galaxy(props: GalaxyProps) {
       const rect = ctn.getBoundingClientRect();
       const mouseX = (event.clientX - rect.left) / rect.width;
       const mouseY = 1.0 - (event.clientY - rect.top) / rect.height;
-      targetMousePos.current = { x: mouseX, y: mouseY };
-      targetMouseActive.current = 1.0;
+      if (
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+      ) {
+        targetMousePos.current = { x: mouseX, y: mouseY };
+        targetMouseActive.current = 1.0;
+      } else {
+        targetMouseActive.current = 0.0;
+      }
     };
 
     const handleMouseLeave = () => {
@@ -517,16 +522,16 @@ export default function Galaxy(props: GalaxyProps) {
     };
 
     if (settings.mouseInteraction) {
-      ctn.addEventListener("mousemove", handleMouseMove);
-      ctn.addEventListener("mouseleave", handleMouseLeave);
+      window.addEventListener("mousemove", handleMouseMove, { passive: true });
+      document.addEventListener("mouseleave", handleMouseLeave);
     }
 
     return () => {
       cancelAnimationFrame(animateId);
       window.removeEventListener("resize", resize);
       if (settings.mouseInteraction) {
-        ctn.removeEventListener("mousemove", handleMouseMove);
-        ctn.removeEventListener("mouseleave", handleMouseLeave);
+        window.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseleave", handleMouseLeave);
       }
       if (gl.canvas.parentNode === ctn) {
         ctn.removeChild(gl.canvas);
@@ -535,9 +540,13 @@ export default function Galaxy(props: GalaxyProps) {
     };
   }, [settings, colors]);
 
-  const containerClass = className
-    ? `galaxy-container ${className}`
-    : "galaxy-container";
+  const containerClass = [
+    "galaxy-container",
+    settings.transparent ? "galaxy-transparent" : "",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return <div ref={ctnDom} className={containerClass} {...cleanDomProps} />;
 }
