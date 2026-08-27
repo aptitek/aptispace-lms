@@ -1,5 +1,8 @@
 import { styled } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
 import CraftedByBadge from "~/components/atoms/CraftedByBadge/CraftedByBadge";
+import LanguageToggle from "~/components/atoms/LanguageToggle/LanguageToggle";
+import ThemeToggle from "~/components/atoms/ThemeToggle/ThemeToggle";
 
 export interface FooterProps {
   className?: string;
@@ -34,6 +37,17 @@ const CopyrightText = styled("span")(({ theme }) => ({
   letterSpacing: "0.02em",
 }));
 
+const FooterRight = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1.5),
+
+  [theme.breakpoints.down("sm")]: {
+    flexDirection: "column",
+    gap: theme.spacing(1),
+  },
+}));
+
 const SystemStatus = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
@@ -54,16 +68,21 @@ const StatusDot = styled("span")(({ theme }) => ({
 }));
 
 export default function Footer({ className }: FooterProps) {
+  const { t } = useTranslation("common");
+  const currentYear = new Date().getFullYear();
+
   return (
     <FooterRoot className={className}>
-      <CopyrightText>
-        &copy; {new Date().getFullYear()} AptiSpace LMS. All rights reserved.
-      </CopyrightText>
+      <CopyrightText>{t("copyright", { year: currentYear })}</CopyrightText>
       <CraftedByBadge size="small" />
-      <SystemStatus>
-        <StatusDot />
-        <span>STATION GATEWAY: ONLINE</span>
-      </SystemStatus>
+      <FooterRight>
+        <ThemeToggle size="small" />
+        <LanguageToggle size="small" />
+        <SystemStatus>
+          <StatusDot />
+          <span>{t("systemStatus.gateway")}</span>
+        </SystemStatus>
+      </FooterRight>
     </FooterRoot>
   );
 }

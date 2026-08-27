@@ -1,5 +1,6 @@
 import { type ButtonHTMLAttributes } from "react";
 import { styled } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import CircularProgress from "@mui/material/CircularProgress";
 
@@ -7,6 +8,7 @@ export interface GitHubButtonProps extends ButtonHTMLAttributes<HTMLButtonElemen
   loading?: boolean;
   fullWidth?: boolean;
   label?: string;
+  loadingLabel?: string;
 }
 
 const StyledButton = styled("button")<{ fullWidth?: boolean }>(({
@@ -77,10 +79,15 @@ const IconWrapper = styled("span")(({ theme }) => ({
 export default function GitHubButton({
   loading = false,
   fullWidth = true,
-  label = "Sign in with GitHub",
+  label,
+  loadingLabel,
   disabled,
   ...rest
 }: GitHubButtonProps) {
+  const { t } = useTranslation("auth");
+  const displayLabel = label ?? t("loginCard.continueWithGitHub");
+  const displayLoadingLabel = loadingLabel ?? t("loginCard.authenticating");
+
   return (
     <StyledButton
       type="button"
@@ -96,7 +103,7 @@ export default function GitHubButton({
           <GitHubIcon />
         </IconWrapper>
       )}
-      <span>{loading ? "Authenticating..." : label}</span>
+      <span>{loading ? displayLoadingLabel : displayLabel}</span>
     </StyledButton>
   );
 }

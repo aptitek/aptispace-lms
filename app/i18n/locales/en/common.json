@@ -1,0 +1,24 @@
+{
+  "copyright": "© {{year}} AptiSpace LMS. All rights reserved.",
+  "craftedBy": "Crafted by",
+  "craftedByAria": "Crafted by Aptitek",
+  "systemStatus": {
+    "gateway": "STATION GATEWAY: ONLINE"
+  },
+  "language": {
+    "toggleLabel": "Select language",
+    "en": "English",
+    "fr": "Français",
+    "enShort": "EN",
+    "frShort": "FR",
+    "switchToEn": "Switch to English",
+    "switchToFr": "Switch to French"
+  },
+  "theme": {
+    "toggleLabel": "Select color mode",
+    "dark": "Dark",
+    "light": "Light",
+    "switchToDark": "Switch to Dark Mode",
+    "switchToLight": "Switch to Light Mode"
+  }
+}

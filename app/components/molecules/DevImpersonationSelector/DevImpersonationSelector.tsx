@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { styled } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
 import RoleChip from "~/components/atoms/RoleChip/RoleChip";
 import {
   DEV_PERSONAS,
@@ -138,6 +139,7 @@ export default function DevImpersonationSelector({
   onSelectPersona,
   loading = false,
 }: DevImpersonationSelectorProps) {
+  const { t } = useTranslation("auth");
   const [selectedRole, setSelectedRole] = useState<UserRole>("admin");
 
   const handleSelect = (persona: PersonaDefinition) => {
@@ -146,18 +148,26 @@ export default function DevImpersonationSelector({
   };
 
   return (
-    <DevContainer aria-label="Developer Impersonation Mode">
+    <DevContainer aria-label={t("devTool.ariaLabel")}>
       <HeaderBar>
         <HeaderTitle>
           <BugReportIcon />
-          <span>Dev Impersonation Tool</span>
+          <span>{t("devTool.title")}</span>
         </HeaderTitle>
-        <ModeBadge>DEV ONLY</ModeBadge>
+        <ModeBadge>{t("devTool.modeBadge")}</ModeBadge>
       </HeaderBar>
 
-      <PersonaList role="group" aria-label="Available Personas">
+      <PersonaList role="group" aria-label={t("devTool.groupAriaLabel")}>
         {DEV_PERSONAS.map((persona) => {
           const isSelected = selectedRole === persona.role;
+          const translatedName = t(
+            `devTool.personas.${persona.role}.name` as const,
+            { defaultValue: persona.name },
+          );
+          const translatedBadge = t(`devTool.roles.${persona.role}` as const, {
+            defaultValue: persona.badge,
+          });
+
           return (
             <PersonaItem
               key={persona.id}
@@ -169,8 +179,8 @@ export default function DevImpersonationSelector({
             >
               <PersonaDetails>
                 <PersonaName>
-                  {persona.name}
-                  <RoleChip role={persona.role} label={persona.badge} />
+                  {translatedName}
+                  <RoleChip role={persona.role} label={translatedBadge} />
                 </PersonaName>
                 <PersonaEmail>{persona.email}</PersonaEmail>
               </PersonaDetails>

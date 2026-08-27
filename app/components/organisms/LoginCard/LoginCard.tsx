@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { styled } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
 import BrandLogo from "~/components/atoms/BrandLogo/BrandLogo";
 import GitHubButton from "~/components/atoms/GitHubButton/GitHubButton";
 import DevImpersonationSelector from "~/components/molecules/DevImpersonationSelector/DevImpersonationSelector";
@@ -95,6 +96,7 @@ export default function LoginCard({
   onSuccess,
   showDevTool = import.meta.env.DEV,
 }: LoginCardProps) {
+  const { t } = useTranslation("auth");
   const [loading, setLoading] = useState(false);
   const [activeUser, setActiveUser] = useState<AuthUser | null>(null);
 
@@ -122,32 +124,28 @@ export default function LoginCard({
     <CardContainer>
       <HeaderSection>
         <BrandLogo size="medium" />
-        <DescriptionText>
-          Authenticate securely using your GitHub account to access awesome
-          course modules!
-        </DescriptionText>
+        <DescriptionText>{t("loginCard.description")}</DescriptionText>
       </HeaderSection>
 
       {activeUser && (
         <StatusBanner role="status">
           <CheckCircleIcon />
           <span>
-            Connected as <strong>{activeUser.name}</strong> ({activeUser.role})
+            {t("loginCard.connectedAs")} <strong>{activeUser.name}</strong> (
+            {t(`devTool.roles.${activeUser.role}` as const, {
+              defaultValue: activeUser.role,
+            })}
+            )
           </span>
         </StatusBanner>
       )}
 
       <ActionSection>
-        <GitHubButton
-          onClick={handleGitHubLogin}
-          loading={loading}
-          fullWidth
-          label="Continue with GitHub"
-        />
+        <GitHubButton onClick={handleGitHubLogin} loading={loading} fullWidth />
 
         <SecurityNote>
           <LockOutlinedIcon />
-          <span>OAuth 2.0 Encrypted • Single Sign-On</span>
+          <span>{t("loginCard.securityNote")}</span>
         </SecurityNote>
       </ActionSection>
 

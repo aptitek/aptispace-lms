@@ -59,7 +59,7 @@ export default tseslint.config(
         { type: "templates", pattern: "templates/*", base: "app/components" },
         { type: "pages", pattern: "routes/*", base: "app" },
         { type: "tokens", pattern: "tokens/*", base: "app" },
-        { type: "shared", pattern: "utils/*", base: "app" },
+        { type: "shared", pattern: "{utils,i18n}/*", base: "app" },
       ],
     },
     plugins: {

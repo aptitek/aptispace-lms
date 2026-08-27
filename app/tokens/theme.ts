@@ -102,6 +102,7 @@ export const darkThemeOptions: ThemeOptions = {
         body: {
           backgroundColor: SOLARIZED_BASE.base03,
           color: SOLARIZED_BASE.base0,
+          transition: "background-color 0.3s ease, color 0.3s ease",
           scrollbarColor: `${SOLARIZED_BASE.base01} ${SOLARIZED_BASE.base03}`,
           "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
             width: 8,
@@ -121,4 +122,113 @@ export const darkThemeOptions: ThemeOptions = {
 };
 
 export const darkTheme = createTheme(darkThemeOptions);
+
+export const lightThemeOptions: ThemeOptions = {
+  palette: {
+    mode: "light",
+    primary: {
+      main: SOLARIZED_BASE.blue,
+      light: SOLARIZED_BASE.cyan,
+      dark: "#1e6fa8",
+      contrastText: SOLARIZED_BASE.base3,
+    },
+    secondary: {
+      main: SOLARIZED_BASE.magenta,
+      light: "#e0589c",
+      dark: "#a82161",
+      contrastText: SOLARIZED_BASE.base3,
+    },
+    error: {
+      main: SOLARIZED_BASE.red,
+      light: "#e75856",
+      dark: "#b02421",
+      contrastText: SOLARIZED_BASE.base3,
+    },
+    warning: {
+      main: SOLARIZED_BASE.yellow,
+      light: "#d4a400",
+      dark: "#8f6c00",
+      contrastText: SOLARIZED_BASE.base03,
+    },
+    info: {
+      main: SOLARIZED_BASE.violet,
+      light: "#8a8ed4",
+      dark: "#53579c",
+      contrastText: SOLARIZED_BASE.base3,
+    },
+    success: {
+      main: SOLARIZED_BASE.green,
+      light: "#a1b700",
+      dark: "#687a00",
+      contrastText: SOLARIZED_BASE.base03,
+    },
+    background: {
+      default: SOLARIZED_BASE.base3,
+      paper: SOLARIZED_BASE.base2,
+    },
+    text: {
+      primary: SOLARIZED_BASE.base00,
+      secondary: SOLARIZED_BASE.base01,
+      disabled: SOLARIZED_BASE.base1,
+    },
+    divider: "rgba(88, 110, 117, 0.2)",
+    action: {
+      active: SOLARIZED_BASE.base01,
+      hover: "rgba(88, 110, 117, 0.08)",
+      selected: "rgba(88, 110, 117, 0.16)",
+      disabled: "rgba(88, 110, 117, 0.38)",
+      disabledBackground: "rgba(238, 232, 213, 0.5)",
+      focus: "rgba(38, 139, 210, 0.25)",
+    },
+  },
+  typography: {
+    fontFamily:
+      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    h1: { fontWeight: 700, letterSpacing: "-0.02em" },
+    h2: { fontWeight: 700, letterSpacing: "-0.015em" },
+    h3: { fontWeight: 600, letterSpacing: "-0.01em" },
+    h4: { fontWeight: 600, letterSpacing: "-0.005em" },
+    h5: { fontWeight: 600 },
+    h6: { fontWeight: 600 },
+    subtitle1: { letterSpacing: "0.01em" },
+    subtitle2: { letterSpacing: "0.01em" },
+    body1: { letterSpacing: "0.01em", lineHeight: 1.6 },
+    body2: { letterSpacing: "0.01em", lineHeight: 1.5 },
+    button: { textTransform: "none", fontWeight: 600 },
+  },
+  shape: {
+    borderRadius: 12,
+  },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundColor: SOLARIZED_BASE.base3,
+          color: SOLARIZED_BASE.base00,
+          transition: "background-color 0.3s ease, color 0.3s ease",
+          scrollbarColor: `${SOLARIZED_BASE.base1} ${SOLARIZED_BASE.base3}`,
+          "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
+            width: 8,
+            height: 8,
+          },
+          "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
+            borderRadius: 8,
+            backgroundColor: SOLARIZED_BASE.base1,
+          },
+          "&::-webkit-scrollbar-track, & *::-webkit-scrollbar-track": {
+            backgroundColor: SOLARIZED_BASE.base3,
+          },
+        },
+      },
+    },
+  },
+};
+
+export const lightTheme = createTheme(lightThemeOptions);
 export const appTheme = darkTheme;
+
+export type ThemeMode = "dark" | "light";
+
+export function getThemeByMode(mode: ThemeMode) {
+  return mode === "light" ? lightTheme : darkTheme;
+}

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -8,9 +9,12 @@ import {
 } from "react-router";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import { useTranslation } from "react-i18next";
 
 import type { Route } from "./+types/root";
-import { appTheme } from "./tokens/theme";
+import { getThemeByMode } from "./tokens/theme";
+import { ThemeModeProvider, useThemeMode } from "./utils/themeContext";
+import "~/i18n";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -26,9 +30,24 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+function AppThemeContainer({ children }: { children: React.ReactNode }) {
+  const { mode } = useThemeMode();
+  const theme = useMemo(() => getThemeByMode(mode), [mode]);
+
   return (
-    <html lang="en">
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {children}
+    </ThemeProvider>
+  );
+}
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  const { i18n } = useTranslation();
+  const currentLang = i18n.resolvedLanguage || i18n.language || "en";
+
+  return (
+    <html lang={currentLang}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -36,10 +55,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <ThemeProvider theme={appTheme}>
-          <CssBaseline />
-          {children}
-        </ThemeProvider>
+        <ThemeModeProvider>
+          <AppThemeContainer>{children}</AppThemeContainer>
+        </ThemeModeProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -52,16 +70,15 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
-  let details = "An unexpected error occurred.";
+  const { t } = useTranslation("errors");
+  let message = t("oops");
+  let details = t("unexpected");
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
+    message = error.status === 404 ? t("notFound") : "Error";
     details =
-      error.status === 404
-        ? "The requested page could not be found."
-        : error.statusText || details;
+      error.status === 404 ? t("pageNotFound") : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;

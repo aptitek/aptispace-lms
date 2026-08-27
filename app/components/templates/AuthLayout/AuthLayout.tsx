@@ -17,6 +17,10 @@ const LayoutRoot = styled("div")(({ theme }) => ({
   alignItems: "center",
   overflow: "hidden",
   backgroundColor: theme.palette.background.default,
+  transition: theme.transitions.create(
+    ["background-color", "color", "border-color"],
+    { duration: theme.transitions.duration.standard },
+  ),
 }));
 
 const CanvasBackdrop = styled("div")({

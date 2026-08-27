@@ -119,6 +119,7 @@
     "react": "^19.2.7",
     "react-card-flip": "^1.2.3",
     "react-dom": "^19.2.7",
+    "react-i18next": "^17.0.12",
     "react-router": "^8",
     "sonner": "^2.0.8",
     "three": "^0.185.1"

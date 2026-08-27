@@ -1,0 +1,24 @@
+{
+  "copyright": "© {{year}} AptiSpace LMS. Tous droits réservés.",
+  "craftedBy": "Créé par",
+  "craftedByAria": "Créé par Aptitek",
+  "systemStatus": {
+    "gateway": "PASSERELLE STATION : EN LIGNE"
+  },
+  "language": {
+    "toggleLabel": "Sélectionner la langue",
+    "en": "English",
+    "fr": "Français",
+    "enShort": "EN",
+    "frShort": "FR",
+    "switchToEn": "Passer en anglais",
+    "switchToFr": "Passer en français"
+  },
+  "theme": {
+    "toggleLabel": "Sélectionner le mode",
+    "dark": "Sombre",
+    "light": "Clair",
+    "switchToDark": "Passer en mode sombre",
+    "switchToLight": "Passer en mode clair"
+  }
+}

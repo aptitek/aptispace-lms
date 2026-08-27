@@ -1,5 +1,6 @@
 import { type AnchorHTMLAttributes } from "react";
 import { styled } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
 
 export interface CraftedByBadgeProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   size?: "small" | "medium";
@@ -76,16 +77,18 @@ export default function CraftedByBadge({
   rel = "noopener noreferrer",
   ...rest
 }: CraftedByBadgeProps) {
+  const { t } = useTranslation("common");
+
   return (
     <BadgeLink
       href={href}
       target={target}
       rel={rel}
       badgeSize={size}
-      aria-label="Crafted by Aptitek"
+      aria-label={t("craftedByAria")}
       {...rest}
     >
-      <LabelText>Crafted by</LabelText>
+      <LabelText>{t("craftedBy")}</LabelText>
       <LogoImg src="/aptitek-logo.svg" alt="Aptitek" badgeSize={size} />
     </BadgeLink>
   );
