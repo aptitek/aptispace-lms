@@ -13,19 +13,15 @@ import {
   FrFlag,
   UkMapSilhouette,
   FranceMapSilhouette,
-  AirplaneIcon,
 } from "./MeridianGlyphs";
 import {
   type MeridianSize,
   MERIDIAN_SIZE_CONFIGS,
   FLIGHT_SPRING,
-  BEACON_SPRING,
   MeridianTrack,
   FlightArcSvg,
   CountryMapZone,
   FlightPuck,
-  AirplaneFlightContainer,
-  AirportCodeBadge,
   StateRippleLayer,
   ToggleWrapper,
 } from "./LanguageToggle.styles";
@@ -102,20 +98,49 @@ function CountrySilhouettes({
   );
 }
 
-function FlightPuckWithAirplane({
+function FlagGraphic({
+  isFrench,
+  flagSize,
+}: {
+  isFrench: boolean;
+  flagSize: number;
+}) {
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      {isFrench ? (
+        <motion.div
+          key="fr-flag"
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.6 }}
+          transition={{ duration: 0.18 }}
+        >
+          <FrFlag size={flagSize} />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="uk-flag"
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.6 }}
+          transition={{ duration: 0.18 }}
+        >
+          <UkFlag size={flagSize} />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function FlightPuckWithFlag({
   cfg,
   isFrench,
-  isHovered,
   isFlying,
 }: {
   cfg: (typeof MERIDIAN_SIZE_CONFIGS)[MeridianSize];
   isFrench: boolean;
-  isHovered: boolean;
   isFlying: boolean;
 }) {
-  const bankAngle = isFlying ? (isFrench ? 22 : -22) : 0;
-  const altitudeY = isFlying ? -4 : isHovered ? -2 : 0;
-
   return (
     <FlightPuck
       $cfg={cfg}
@@ -125,40 +150,7 @@ function FlightPuckWithAirplane({
       }}
       transition={FLIGHT_SPRING}
     >
-      <AnimatePresence mode="wait" initial={false}>
-        {isFrench ? (
-          <motion.div
-            key="fr-flag"
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.6 }}
-            transition={{ duration: 0.18 }}
-          >
-            <FrFlag size={cfg.flagSize} />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="uk-flag"
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.6 }}
-            transition={{ duration: 0.18 }}
-          >
-            <UkFlag size={cfg.flagSize} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AirplaneFlightContainer
-        animate={{
-          y: altitudeY,
-          rotate: bankAngle,
-          scale: isHovered || isFlying ? 1.15 : 0.95,
-        }}
-        transition={BEACON_SPRING}
-      >
-        <AirplaneIcon size={cfg.planeSize} />
-      </AirplaneFlightContainer>
+      <FlagGraphic isFrench={isFrench} flagSize={cfg.flagSize} />
     </FlightPuck>
   );
 }
@@ -232,8 +224,7 @@ function resolveCurrentLanguage(
 /**
  * Meridian Language Switch Toggle
  *
- * Take flight between countries! The airplane takes off from one country map outline
- * and lands on the other with flag badges, flight contrails, and runway radar pulses.
+ * Travel between countries with country map silhouettes and animated flag puck indicator.
  */
 export const MeridianToggle = forwardRef<
   HTMLButtonElement,
@@ -315,12 +306,9 @@ export const MeridianToggle = forwardRef<
         isHovered={controller.isHovered}
       />
 
-      <AirportCodeBadge $cfg={cfg}>{isFrench ? "FR" : "EN"}</AirportCodeBadge>
-
-      <FlightPuckWithAirplane
+      <FlightPuckWithFlag
         cfg={cfg}
         isFrench={isFrench}
-        isHovered={controller.isHovered}
         isFlying={controller.isFlying}
       />
     </MeridianTrack>

@@ -5,49 +5,43 @@ export type MeridianSize = "small" | "medium" | "large";
 
 export const MERIDIAN_SIZE_CONFIGS = {
   small: {
-    width: 54,
+    width: 46,
     height: 26,
     borderRadius: 13,
     puckSize: 20,
     flagSize: 15,
-    planeSize: 14,
     mapWidth: 20,
     mapHeight: 18,
-    travelX: 28, // 54 - 20 - 3 - 3 = 28
+    travelX: 20, // 46 - 20 - 3 - 3 = 20
     padX: 3,
     padY: 3,
-    stateLayerSize: 36,
-    codeFontSize: "0.6rem",
+    stateLayerSize: 34,
   },
   medium: {
-    width: 64,
+    width: 56,
     height: 32,
     borderRadius: 16,
     puckSize: 24,
     flagSize: 18,
-    planeSize: 17,
     mapWidth: 24,
     mapHeight: 22,
-    travelX: 32, // 64 - 24 - 4 - 4 = 32
+    travelX: 24, // 56 - 24 - 4 - 4 = 24
     padX: 4,
     padY: 4,
-    stateLayerSize: 44,
-    codeFontSize: "0.7rem",
+    stateLayerSize: 42,
   },
   large: {
-    width: 80,
+    width: 72,
     height: 40,
     borderRadius: 20,
     puckSize: 30,
     flagSize: 23,
-    planeSize: 22,
     mapWidth: 30,
     mapHeight: 27,
-    travelX: 40, // 80 - 30 - 5 - 5 = 40
+    travelX: 32, // 72 - 30 - 5 - 5 = 32
     padX: 5,
     padY: 5,
-    stateLayerSize: 54,
-    codeFontSize: "0.85rem",
+    stateLayerSize: 52,
   },
 } as const;
 
@@ -56,13 +50,6 @@ export const FLIGHT_SPRING: Transition = {
   stiffness: 440,
   damping: 26,
   mass: 0.75,
-};
-
-export const BEACON_SPRING: Transition = {
-  type: "spring",
-  stiffness: 350,
-  damping: 20,
-  mass: 0.6,
 };
 
 const filterDollarProp = (prop: PropertyKey) =>
@@ -159,32 +146,6 @@ export const FlightPuck = styled(motion.span, {
   cursor: "inherit",
   background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
   boxShadow: `0 0 10px ${theme.palette.primary.main}, 0 2px 6px rgba(0, 0, 0, 0.4)`,
-}));
-
-export const AirplaneFlightContainer = styled(motion.div)({
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 5,
-  pointerEvents: "none",
-});
-
-export const AirportCodeBadge = styled("span")<{
-  $cfg: (typeof MERIDIAN_SIZE_CONFIGS)[MeridianSize];
-}>(({ theme, $cfg }) => ({
-  fontFamily: theme.typography.fontFamily,
-  fontSize: $cfg.codeFontSize,
-  fontWeight: 800,
-  letterSpacing: "0.08em",
-  textTransform: "uppercase",
-  color: theme.palette.text.secondary,
-  userSelect: "none",
-  zIndex: 2,
-  lineHeight: 1,
 }));
 
 export const StateRippleLayer = styled(motion.div, {

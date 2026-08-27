@@ -25,7 +25,17 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["framer-motion"],
+    include: [
+      "framer-motion",
+      "@mui/icons-material/DarkMode",
+      "@mui/icons-material/LightMode",
+      "@mui/icons-material/Flight",
+      "@mui/icons-material/WbSunny",
+      "@mui/icons-material/NightlightRound",
+      "@mui/icons-material/Language",
+      "@emotion/react",
+      "@emotion/styled",
+    ],
   },
   test: {
     projects: [

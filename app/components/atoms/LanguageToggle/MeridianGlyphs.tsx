@@ -60,7 +60,7 @@ const UkFlagBackground = styled("rect")(({ theme }) => ({
 }));
 
 const UkFlagWhiteCross = styled("path")(({ theme }) => ({
-  stroke: theme.palette.background.default,
+  stroke: theme.palette.common.white,
 }));
 
 const UkFlagRedCross = styled("path")(({ theme }) => ({
@@ -96,7 +96,7 @@ const FrStripeBlue = styled("rect")(({ theme }) => ({
 }));
 
 const FrStripeWhite = styled("rect")(({ theme }) => ({
-  fill: theme.palette.background.default,
+  fill: theme.palette.common.white,
 }));
 
 const FrStripeRed = styled("rect")(({ theme }) => ({
@@ -122,47 +122,5 @@ export const FrFlag: React.FC<{ size: number }> = ({ size }) => (
       />
       <FrStripeRed x={FR_STRIPE_X3} width={FR_STRIPE_W} height={FLAG_VIEWBOX} />
     </g>
-  </StyledSvg>
-);
-
-const JetFuselage = styled("path")(({ theme }) => ({
-  fill: theme.palette.common?.white ?? "currentColor",
-}));
-
-const JetThrust = styled("circle")(({ theme }) => ({
-  fill: theme.palette.warning.light,
-}));
-
-/**
- * Supersonic Jet Airplane Silhouette for Meridian Travel
- */
-export const AirplaneIcon: React.FC<{ size: number }> = ({ size }) => (
-  <StyledSvg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden="true"
-  >
-    <JetThrust cx="3.5" cy="12" r="2" opacity="0.9" />
-    <JetFuselage d="M21.5 12L14 7.5L14 3C14 2.45 13.55 2 13 2C12.45 2 12 2.45 12 3L12 7.5L4.5 12L2 12L4 13.5L12 13.5L12 18.5L9.5 20.5L9.5 22L13 21L16.5 22L16.5 20.5L14 18.5L14 13.5L22 13.5L24 12L21.5 12Z" />
-  </StyledSvg>
-);
-
-const BeaconCircle = styled("circle")(({ theme }) => ({
-  stroke: theme.palette.primary.main,
-  strokeWidth: 1.5,
-}));
-
-export const RunwayBeacon: React.FC<{ size: number }> = ({ size }) => (
-  <StyledSvg
-    width={size}
-    height={size}
-    viewBox="0 0 16 16"
-    fill="none"
-    aria-hidden="true"
-  >
-    <BeaconCircle cx="8" cy="8" r="6" strokeDasharray="2 2" />
-    <BeaconCircle cx="8" cy="8" r="2" fill="currentColor" />
   </StyledSvg>
 );
