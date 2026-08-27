@@ -1,7 +1,76 @@
-.DS_Store
-.env
-/node_modules/
+# Dependencies
+node_modules/
+.pnpm-store/
+.pnpm_patches/
 
-# React Router
-/.react-router/
+# Production & Build Outputs
 /build/
+/dist/
+/out/
+/storybook-static/
+/.output/
+
+# Framework & Tool Caches
+/.react-router/
+/.wireit/
+/.wrangler/
+/.turbo/
+/.cache/
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+.prettiercache
+
+# Testing & Coverage
+/coverage/
+/.vitest/
+/test-results/
+/playwright-report/
+/blob-report/
+
+# Logs
+*.log
+logs/
+*storybook.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment & Secrets (keep template/example committed)
+.env
+.env.*
+!.env.example
+!.env.template
+*.pem
+*.key
+*.crt
+
+# Local Databases & Miniflare
+*.sqlite
+*.sqlite-journal
+*.db
+*.db-journal
+.mf/
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editor Specific
+.idea/
+.fleet/
+.zed/
+*.sublime-project
+*.sublime-workspace
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
