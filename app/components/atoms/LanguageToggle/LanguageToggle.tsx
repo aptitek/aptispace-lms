@@ -1,99 +1,350 @@
-import { styled } from "@mui/material/styles";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import LanguageIcon from "@mui/icons-material/Language";
+import {
+  forwardRef,
+  useState,
+  useCallback,
+  type KeyboardEvent,
+  type MouseEvent,
+} from "react";
+import { motion, AnimatePresence, type HTMLMotionProps } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import type { SupportedLanguage } from "~/i18n";
+import {
+  UkFlag,
+  FrFlag,
+  UkMapSilhouette,
+  FranceMapSilhouette,
+  AirplaneIcon,
+} from "./MeridianGlyphs";
+import {
+  type MeridianSize,
+  MERIDIAN_SIZE_CONFIGS,
+  FLIGHT_SPRING,
+  BEACON_SPRING,
+  MeridianTrack,
+  FlightArcSvg,
+  CountryMapZone,
+  FlightPuck,
+  AirplaneFlightContainer,
+  AirportCodeBadge,
+  StateRippleLayer,
+  ToggleWrapper,
+} from "./LanguageToggle.styles";
+
+export type { MeridianSize };
+
+export interface MeridianToggleProps extends Omit<
+  HTMLMotionProps<"button">,
+  "size" | "onChange" | "onToggle" | "children"
+> {
+  language?: SupportedLanguage;
+  size?: MeridianSize;
+  onLanguageChange?: (lang: SupportedLanguage) => void;
+  disabled?: boolean;
+  className?: string;
+  "data-testid"?: string;
+}
 
 export interface LanguageToggleProps {
   className?: string;
-  size?: "small" | "medium";
+  size?: MeridianSize;
+  disabled?: boolean;
+  "data-testid"?: string;
 }
 
-const ToggleWrapper = styled("div")(({ theme }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: theme.spacing(0.75),
-}));
+function MeridianFlightTrajectory({
+  cfg,
+}: {
+  cfg: (typeof MERIDIAN_SIZE_CONFIGS)[MeridianSize];
+}) {
+  const startX = cfg.padX + 4;
+  const endX = cfg.width - cfg.padX - 4;
+  const midX = cfg.width / 2;
+  const pathD = `M ${startX} ${cfg.height - 7} Q ${midX} 4 ${endX} ${cfg.height - 7}`;
 
-const IconIndicator = styled(LanguageIcon)(({ theme }) => ({
-  fontSize: "1rem",
-  color: theme.palette.text.secondary,
-  opacity: 0.8,
-}));
+  return (
+    <FlightArcSvg viewBox={`0 0 ${cfg.width} ${cfg.height}`}>
+      <path
+        d={pathD}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeDasharray="2 3"
+        opacity={0.4}
+      />
+    </FlightArcSvg>
+  );
+}
 
-const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => {
-  const radius = Number(theme.shape.borderRadius) || 8;
-  return {
-    backgroundColor: theme.palette.action.hover,
-    borderRadius: radius * 1.25,
-    padding: theme.spacing(0.25),
-    border: `1px solid ${theme.palette.divider}`,
-    height: 30,
+function CountrySilhouettes({
+  cfg,
+  isFrench,
+  isHovered,
+}: {
+  cfg: (typeof MERIDIAN_SIZE_CONFIGS)[MeridianSize];
+  isFrench: boolean;
+  isHovered: boolean;
+}) {
+  return (
+    <>
+      <CountryMapZone $position="left" $cfg={cfg}>
+        <UkMapSilhouette
+          size={cfg.mapWidth}
+          active={!isFrench || (isHovered && isFrench)}
+        />
+      </CountryMapZone>
+      <CountryMapZone $position="right" $cfg={cfg}>
+        <FranceMapSilhouette
+          size={cfg.mapWidth}
+          active={isFrench || (isHovered && !isFrench)}
+        />
+      </CountryMapZone>
+    </>
+  );
+}
 
-    "& .MuiToggleButtonGroup-grouped": {
-      border: 0,
-      borderRadius: radius,
-      color: theme.palette.text.secondary,
-      padding: theme.spacing(0.25, 1),
-      fontSize: "0.75rem",
-      fontWeight: 700,
-      letterSpacing: "0.05em",
-      textTransform: "uppercase",
-      minWidth: 34,
-      lineHeight: 1,
-      transition: theme.transitions.create(
-        ["background-color", "color", "box-shadow", "transform"],
-        {
-          duration: theme.transitions.duration.shorter,
-        },
-      ),
+function FlightPuckWithAirplane({
+  cfg,
+  isFrench,
+  isHovered,
+  isFlying,
+}: {
+  cfg: (typeof MERIDIAN_SIZE_CONFIGS)[MeridianSize];
+  isFrench: boolean;
+  isHovered: boolean;
+  isFlying: boolean;
+}) {
+  const bankAngle = isFlying ? (isFrench ? 22 : -22) : 0;
+  const altitudeY = isFlying ? -4 : isHovered ? -2 : 0;
 
-      "&:hover": {
-        backgroundColor: theme.palette.action.selected,
-        color: theme.palette.text.primary,
-      },
+  return (
+    <FlightPuck
+      $cfg={cfg}
+      animate={{
+        x: isFrench ? cfg.travelX : 0,
+        scale: isFlying ? 1.08 : 1,
+      }}
+      transition={FLIGHT_SPRING}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {isFrench ? (
+          <motion.div
+            key="fr-flag"
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.6 }}
+            transition={{ duration: 0.18 }}
+          >
+            <FrFlag size={cfg.flagSize} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="uk-flag"
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.6 }}
+            transition={{ duration: 0.18 }}
+          >
+            <UkFlag size={cfg.flagSize} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      "&.Mui-selected": {
-        backgroundColor: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
-        boxShadow: `0 2px 8px ${theme.palette.action.focus}`,
+      <AirplaneFlightContainer
+        animate={{
+          y: altitudeY,
+          rotate: bankAngle,
+          scale: isHovered || isFlying ? 1.15 : 0.95,
+        }}
+        transition={BEACON_SPRING}
+      >
+        <AirplaneIcon size={cfg.planeSize} />
+      </AirplaneFlightContainer>
+    </FlightPuck>
+  );
+}
 
-        "&:hover": {
-          backgroundColor: theme.palette.primary.dark,
-        },
-      },
+interface ControllerConfig {
+  disabled: boolean;
+  currentLang: SupportedLanguage;
+  onLanguageChange?: (lang: SupportedLanguage) => void;
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+  onKeyDown?: (e: KeyboardEvent<HTMLButtonElement>) => void;
+  onMouseEnter?: (e: MouseEvent<HTMLButtonElement>) => void;
+  onMouseLeave?: (e: MouseEvent<HTMLButtonElement>) => void;
+}
 
-      "&:not(:first-of-type)": {
-        marginLeft: theme.spacing(0.25),
-      },
-    },
+function useMeridianController(config: ControllerConfig) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFlying, setIsFlying] = useState(false);
+
+  const handleFlight = useCallback(() => {
+    if (config.disabled) return;
+    const nextLang: SupportedLanguage =
+      config.currentLang === "fr" ? "en" : "fr";
+    setIsFlying(true);
+    config.onLanguageChange?.(nextLang);
+    setTimeout(() => setIsFlying(false), 380);
+  }, [config]);
+
+  const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
+    config.onClick?.(e);
+    if (!e.defaultPrevented) handleFlight();
   };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+    config.onKeyDown?.(e);
+    if (!e.defaultPrevented && (e.key === " " || e.key === "Enter")) {
+      e.preventDefault();
+      handleFlight();
+    }
+  };
+
+  const handleMouseEnter = (e: MouseEvent<HTMLButtonElement>) => {
+    setIsHovered(true);
+    config.onMouseEnter?.(e);
+  };
+
+  const handleMouseLeave = (e: MouseEvent<HTMLButtonElement>) => {
+    setIsHovered(false);
+    setIsFlying(false);
+    config.onMouseLeave?.(e);
+  };
+
+  return {
+    isHovered,
+    isFlying,
+    handleClick,
+    handleKeyDown,
+    handleMouseEnter,
+    handleMouseLeave,
+  };
+}
+
+function resolveCurrentLanguage(
+  languageProp: SupportedLanguage | undefined,
+  i18nLang: string | undefined,
+): SupportedLanguage {
+  if (languageProp) return languageProp;
+  if (i18nLang?.startsWith("fr")) return "fr";
+  return "en";
+}
+
+/**
+ * Meridian Language Switch Toggle
+ *
+ * Take flight between countries! The airplane takes off from one country map outline
+ * and lands on the other with flag badges, flight contrails, and runway radar pulses.
+ */
+export const MeridianToggle = forwardRef<
+  HTMLButtonElement,
+  MeridianToggleProps
+>((props, ref) => {
+  const {
+    language,
+    size,
+    onLanguageChange,
+    disabled,
+    className,
+    "data-testid": dataTestId,
+    onClick,
+    onKeyDown,
+    onMouseEnter,
+    onMouseLeave,
+    ...restProps
+  } = props;
+
+  const { t, i18n } = useTranslation("common");
+  const currentLang = resolveCurrentLanguage(language, i18n.language);
+  const isFrench = currentLang === "fr";
+  const resolvedSize = size ?? "medium";
+  const cfg =
+    MERIDIAN_SIZE_CONFIGS[resolvedSize] ?? MERIDIAN_SIZE_CONFIGS.medium;
+  const isSwitchDisabled = Boolean(disabled);
+
+  const controller = useMeridianController({
+    disabled: isSwitchDisabled,
+    currentLang,
+    onLanguageChange,
+    onClick,
+    onKeyDown,
+    onMouseEnter,
+    onMouseLeave,
+  });
+
+  const ariaLabel = isFrench
+    ? t("language.switchToEn", "Switch to English")
+    : t("language.switchToFr", "Switch to French");
+
+  return (
+    <MeridianTrack
+      ref={ref}
+      type="button"
+      role="button"
+      aria-label={ariaLabel}
+      title={ariaLabel}
+      disabled={isSwitchDisabled}
+      $cfg={cfg}
+      $disabled={isSwitchDisabled}
+      className={className ?? ""}
+      data-testid={dataTestId ?? "meridian-language-toggle"}
+      data-lang={currentLang}
+      onClick={controller.handleClick}
+      onKeyDown={controller.handleKeyDown}
+      onMouseEnter={controller.handleMouseEnter}
+      onMouseLeave={controller.handleMouseLeave}
+      whileTap={isSwitchDisabled ? undefined : { scale: 0.96 }}
+      {...restProps}
+    >
+      <AnimatePresence>
+        {controller.isHovered && !isSwitchDisabled && (
+          <StateRippleLayer
+            $cfg={cfg}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.2 }}
+          />
+        )}
+      </AnimatePresence>
+
+      <MeridianFlightTrajectory cfg={cfg} />
+
+      <CountrySilhouettes
+        cfg={cfg}
+        isFrench={isFrench}
+        isHovered={controller.isHovered}
+      />
+
+      <AirportCodeBadge $cfg={cfg}>{isFrench ? "FR" : "EN"}</AirportCodeBadge>
+
+      <FlightPuckWithAirplane
+        cfg={cfg}
+        isFrench={isFrench}
+        isHovered={controller.isHovered}
+        isFlying={controller.isFlying}
+      />
+    </MeridianTrack>
+  );
 });
 
+MeridianToggle.displayName = "MeridianToggle";
+
+/**
+ * LanguageToggle Component
+ * Connected to `react-i18next`.
+ */
 export default function LanguageToggle({
   className,
   size = "small",
+  disabled = false,
+  "data-testid": dataTestId = "language-toggle",
 }: LanguageToggleProps) {
-  const { i18n, t } = useTranslation("common");
+  const { i18n } = useTranslation("common");
 
-  const currentLang = (
-    i18n.resolvedLanguage ||
-    i18n.language ||
-    "en"
-  ).startsWith("fr")
-    ? "fr"
-    : "en";
-
-  const handleLanguageChange = (
-    _event: React.MouseEvent<HTMLElement>,
-    nextLanguage: SupportedLanguage | null,
-  ) => {
-    if (nextLanguage && nextLanguage !== currentLang) {
-      i18n.changeLanguage(nextLanguage);
-      if (typeof document !== "undefined") {
-        document.documentElement.lang = nextLanguage;
-      }
+  const handleLanguageChange = (nextLang: SupportedLanguage) => {
+    void i18n.changeLanguage(nextLang);
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = nextLang;
     }
   };
 
@@ -101,31 +352,14 @@ export default function LanguageToggle({
     <ToggleWrapper
       className={className}
       role="region"
-      aria-label={t("language.toggleLabel")}
+      aria-label="Language Selector"
     >
-      <IconIndicator aria-hidden="true" />
-      <StyledToggleButtonGroup
-        value={currentLang}
-        exclusive
-        onChange={handleLanguageChange}
-        aria-label={t("language.toggleLabel")}
+      <MeridianToggle
         size={size}
-      >
-        <ToggleButton
-          value="en"
-          aria-label={t("language.switchToEn")}
-          title={t("language.en")}
-        >
-          {t("language.enShort")}
-        </ToggleButton>
-        <ToggleButton
-          value="fr"
-          aria-label={t("language.switchToFr")}
-          title={t("language.fr")}
-        >
-          {t("language.frShort")}
-        </ToggleButton>
-      </StyledToggleButtonGroup>
+        disabled={disabled}
+        data-testid={dataTestId}
+        onLanguageChange={handleLanguageChange}
+      />
     </ToggleWrapper>
   );
 }
