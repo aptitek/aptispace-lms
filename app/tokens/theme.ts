@@ -30,10 +30,10 @@ export const darkThemeOptions: ThemeOptions = {
       contrastText: SOLARIZED_BASE.base3,
     },
     secondary: {
-      main: SOLARIZED_BASE.cyan,
-      light: "#38c3b9",
-      dark: "#207e77",
-      contrastText: SOLARIZED_BASE.base03,
+      main: SOLARIZED_BASE.magenta,
+      light: "#e0589c",
+      dark: "#a82161",
+      contrastText: SOLARIZED_BASE.base3,
     },
     error: {
       main: SOLARIZED_BASE.red,

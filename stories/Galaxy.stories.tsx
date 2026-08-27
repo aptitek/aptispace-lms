@@ -182,3 +182,48 @@ export const TransparentOverLay: Story = {
     transparent: true,
   },
 };
+
+const customLightTheme = createTheme({
+  palette: {
+    mode: "light",
+    background: {
+      default: "#fdf6e3",
+    },
+    error: {
+      main: "#dc322f",
+      light: "#e75856",
+    },
+    warning: {
+      main: "#b58900",
+      light: "#d4a400",
+    },
+    common: {
+      white: "#fdf6e3",
+      black: "#002b36",
+    },
+  },
+});
+
+export const CustomLightThemed: Story = {
+  render: (args) => (
+    <ThemeProvider theme={customLightTheme}>
+      <div style={{ width: "100%", height: "100vh", position: "relative" }}>
+        <Galaxy {...args} />
+      </div>
+    </ThemeProvider>
+  ),
+  args: {
+    focal: [0.5, 0.5],
+    rotation: [1.0, 0.0],
+    starSpeed: 0.8,
+    density: 1.8,
+    speed: 1.2,
+    mouseInteraction: true,
+    glowIntensity: 0.6,
+    mouseRepulsion: true,
+    repulsionStrength: 6,
+    twinkleIntensity: 0.5,
+    rotationSpeed: 0.15,
+    transparent: false,
+  },
+};

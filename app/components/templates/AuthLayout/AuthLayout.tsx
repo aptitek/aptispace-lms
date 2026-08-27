@@ -1,6 +1,7 @@
 import { type ReactNode } from "react";
 import { styled } from "@mui/material/styles";
 import Galaxy from "~/components/atoms/Galaxy/Galaxy";
+import Footer from "~/components/organisms/Footer/Footer";
 
 export interface AuthLayoutProps {
   children: ReactNode;
@@ -40,40 +41,6 @@ const ContentWrapper = styled("main")(({ theme }) => ({
   boxSizing: "border-box",
 }));
 
-const FooterBar = styled("footer")(({ theme }) => ({
-  position: "relative",
-  zIndex: 1,
-  width: "100%",
-  padding: theme.spacing(2, 3),
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  fontSize: theme.typography.caption.fontSize ?? "0.75rem",
-  color: theme.palette.text.secondary,
-  boxSizing: "border-box",
-
-  [theme.breakpoints.down("sm")]: {
-    flexDirection: "column",
-    gap: theme.spacing(0.5),
-    textAlign: "center",
-  },
-}));
-
-const SystemStatus = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  fontFamily: "monospace",
-}));
-
-const StatusDot = styled("span")(({ theme }) => ({
-  width: 8,
-  height: 8,
-  borderRadius: "50%",
-  backgroundColor: theme.palette.success.main,
-  boxShadow: `0 0 8px ${theme.palette.success.main}`,
-}));
-
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <LayoutRoot>
@@ -90,15 +57,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
       <ContentWrapper>{children}</ContentWrapper>
 
-      <FooterBar>
-        <span>
-          &copy; {new Date().getFullYear()} AptiSpace LMS. All rights reserved.
-        </span>
-        <SystemStatus>
-          <StatusDot />
-          <span>STATION GATEWAY: ONLINE</span>
-        </SystemStatus>
-      </FooterBar>
+      <Footer />
     </LayoutRoot>
   );
 }

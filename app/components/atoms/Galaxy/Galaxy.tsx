@@ -320,9 +320,9 @@ function resolveBackgroundHex(theme: Theme, customBg?: string): string {
     return customBg;
   }
   if (theme.palette.mode === "dark") {
-    return theme.palette.background.default;
+    return theme.palette.background.default || theme.palette.common.black;
   }
-  return theme.palette.common.black;
+  return theme.palette.background.default || theme.palette.common.white;
 }
 
 function resolveThemeColors(

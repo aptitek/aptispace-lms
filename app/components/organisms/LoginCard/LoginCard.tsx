@@ -123,8 +123,8 @@ export default function LoginCard({
       <HeaderSection>
         <BrandLogo size="medium" />
         <DescriptionText>
-          Authenticate securely using your GitHub account to access course
-          modules, interactive 3D sandboxes, and personalized learning tracks.
+          Authenticate securely using your GitHub account to access awesome
+          course modules!
         </DescriptionText>
       </HeaderSection>
 

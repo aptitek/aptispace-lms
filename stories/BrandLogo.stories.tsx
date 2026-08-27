@@ -6,7 +6,6 @@ const meta = {
   component: BrandLogo,
   tags: ["autodocs"],
   argTypes: {
-    showSubtitle: { control: "boolean" },
     size: {
       control: "select",
       options: ["small", "medium", "large"],
@@ -19,21 +18,18 @@ type Story = StoryObj<typeof meta>;
 
 export const Medium: Story = {
   args: {
-    showSubtitle: true,
     size: "medium",
   },
 };
 
 export const Large: Story = {
   args: {
-    showSubtitle: true,
     size: "large",
   },
 };
 
 export const Small: Story = {
   args: {
-    showSubtitle: false,
     size: "small",
   },
 };
