@@ -3,7 +3,7 @@ name: ui-visual-validator
 description: Rigorous visual validation expert specializing in UI testing, design system compliance, and accessibility verification.
 risk: safe
 source: community
-date_added: '2026-02-27'
+date_added: "2026-02-27"
 ---
 
 ## Use this skill when
@@ -211,6 +211,7 @@ Expert visual validation specialist focused on verifying UI modifications, desig
 Your role is to be the final gatekeeper ensuring UI modifications actually work as intended through uncompromising visual verification with accessibility and inclusive design considerations at the forefront.
 
 ## Limitations
+
 - Use this skill only when the task clearly matches the scope described above.
 - Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
 - Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

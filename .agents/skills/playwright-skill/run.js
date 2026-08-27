@@ -10,26 +10,29 @@
  * Ensures proper module resolution by running from skill directory.
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-const sanitizeFilename = require('sanitize-filename');
+const fs = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
+const sanitizeFilename = require("sanitize-filename");
 
 // Change to skill directory for proper module resolution
 process.chdir(__dirname);
 
 function safeUserPath(pathValue, baseDir = process.cwd()) {
   const root = path.resolve(baseDir);
-  const segments = String(pathValue ?? '').split(/[\\/]+/).filter(Boolean).map((segment) => {
-    const sanitized = sanitizeFilename(segment);
-    if (sanitized !== segment || !sanitized) {
-      throw new Error(`Unsafe path segment: ${segment}`);
-    }
-    return sanitized;
-  });
+  const segments = String(pathValue ?? "")
+    .split(/[\\/]+/)
+    .filter(Boolean)
+    .map((segment) => {
+      const sanitized = sanitizeFilename(segment);
+      if (sanitized !== segment || !sanitized) {
+        throw new Error(`Unsafe path segment: ${segment}`);
+      }
+      return sanitized;
+    });
   const target = path.resolve(root, ...segments);
   const rel = path.relative(root, target);
-  if (rel.startsWith('..') || path.isAbsolute(rel)) {
+  if (rel.startsWith("..") || path.isAbsolute(rel)) {
     throw new Error(`Path escapes allowed directory: ${pathValue}`);
   }
   return target;
@@ -40,7 +43,7 @@ function safeUserPath(pathValue, baseDir = process.cwd()) {
  */
 function checkPlaywrightInstalled() {
   try {
-    require.resolve('playwright');
+    require.resolve("playwright");
     return true;
   } catch (e) {
     return false;
@@ -51,15 +54,18 @@ function checkPlaywrightInstalled() {
  * Install Playwright if missing
  */
 function installPlaywright() {
-  console.log('📦 Playwright not found. Installing...');
+  console.log("📦 Playwright not found. Installing...");
   try {
-    execSync('npm install', { stdio: 'inherit', cwd: __dirname });
-    execSync('npx playwright install chromium', { stdio: 'inherit', cwd: __dirname });
-    console.log('✅ Playwright installed successfully');
+    execSync("npm install", { stdio: "inherit", cwd: __dirname });
+    execSync("npx playwright install chromium", {
+      stdio: "inherit",
+      cwd: __dirname,
+    });
+    console.log("✅ Playwright installed successfully");
     return true;
   } catch (e) {
-    console.error('❌ Failed to install Playwright:', e.message);
-    console.error('Please run manually: cd', __dirname, '&& npm run setup');
+    console.error("❌ Failed to install Playwright:", e.message);
+    console.error("Please run manually: cd", __dirname, "&& npm run setup");
     return false;
   }
 }
@@ -74,27 +80,27 @@ function getCodeToExecute() {
   if (args.length > 0 && fs.existsSync(args[0])) {
     const filePath = safeUserPath(args[0]);
     console.log(`📄 Executing file: ${filePath}`);
-    return fs.readFileSync(filePath, 'utf8');
+    return fs.readFileSync(filePath, "utf8");
   }
 
   // Case 2: Inline code provided as argument
   if (args.length > 0) {
-    console.log('⚡ Executing inline code');
-    return args.join(' ');
+    console.log("⚡ Executing inline code");
+    return args.join(" ");
   }
 
   // Case 3: Code from stdin
   if (!process.stdin.isTTY) {
-    console.log('📥 Reading from stdin');
-    return fs.readFileSync(0, 'utf8');
+    console.log("📥 Reading from stdin");
+    return fs.readFileSync(0, "utf8");
   }
 
   // No input
-  console.error('❌ No code to execute');
-  console.error('Usage:');
-  console.error('  node run.js script.js          # Execute file');
+  console.error("❌ No code to execute");
+  console.error("Usage:");
+  console.error("  node run.js script.js          # Execute file");
   console.error('  node run.js "code here"        # Execute inline');
-  console.error('  cat script.js | node run.js    # Execute from stdin');
+  console.error("  cat script.js | node run.js    # Execute from stdin");
   process.exit(1);
 }
 
@@ -104,10 +110,12 @@ function getCodeToExecute() {
 function cleanupOldTempFiles() {
   try {
     const files = fs.readdirSync(__dirname);
-    const tempFiles = files.filter(f => f.startsWith('.temp-execution-') && f.endsWith('.js'));
+    const tempFiles = files.filter(
+      (f) => f.startsWith(".temp-execution-") && f.endsWith(".js"),
+    );
 
     if (tempFiles.length > 0) {
-      tempFiles.forEach(file => {
+      tempFiles.forEach((file) => {
         const filePath = path.join(__dirname, file);
         try {
           fs.unlinkSync(filePath);
@@ -126,8 +134,9 @@ function cleanupOldTempFiles() {
  */
 function wrapCodeIfNeeded(code) {
   // Check if code already has require() and async structure
-  const hasRequire = code.includes('require(');
-  const hasAsyncIIFE = code.includes('(async () => {') || code.includes('(async()=>{');
+  const hasRequire = code.includes("require(");
+  const hasAsyncIIFE =
+    code.includes("(async () => {") || code.includes("(async()=>{");
 
   // If it's already a complete script, return as-is
   if (hasRequire && hasAsyncIIFE) {
@@ -198,7 +207,7 @@ function getContextOptionsWithHeaders(options = {}) {
  * Main execution
  */
 async function main() {
-  console.log('🎭 Playwright Skill - Universal Executor\n');
+  console.log("🎭 Playwright Skill - Universal Executor\n");
 
   // Clean up old temp files from previous runs
   cleanupOldTempFiles();
@@ -220,19 +229,18 @@ async function main() {
 
   try {
     // Write code to temp file
-    fs.writeFileSync(tempFile, code, 'utf8');
+    fs.writeFileSync(tempFile, code, "utf8");
 
     // Execute the code
-    console.log('🚀 Starting automation...\n');
+    console.log("🚀 Starting automation...\n");
     require(tempFile);
 
     // Note: Temp file will be cleaned up on next run
     // This allows long-running async operations to complete safely
-
   } catch (error) {
-    console.error('❌ Execution failed:', error.message);
+    console.error("❌ Execution failed:", error.message);
     if (error.stack) {
-      console.error('\n📋 Stack trace:');
+      console.error("\n📋 Stack trace:");
       console.error(error.stack);
     }
     process.exit(1);
@@ -240,7 +248,7 @@ async function main() {
 }
 
 // Run main function
-main().catch(error => {
-  console.error('❌ Fatal error:', error.message);
+main().catch((error) => {
+  console.error("❌ Fatal error:", error.message);
   process.exit(1);
 });

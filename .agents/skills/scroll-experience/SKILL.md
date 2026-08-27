@@ -54,27 +54,29 @@ Tools and techniques for scroll animations
 ## Scroll Animation Stack
 
 ### Library Options
-| Library | Best For | Learning Curve |
-|---------|----------|----------------|
-| GSAP ScrollTrigger | Complex animations | Medium |
-| Framer Motion | React projects | Low |
-| Locomotive Scroll | Smooth scroll + parallax | Medium |
-| Lenis | Smooth scroll only | Low |
-| CSS scroll-timeline | Simple, native | Low |
+
+| Library             | Best For                 | Learning Curve |
+| ------------------- | ------------------------ | -------------- |
+| GSAP ScrollTrigger  | Complex animations       | Medium         |
+| Framer Motion       | React projects           | Low            |
+| Locomotive Scroll   | Smooth scroll + parallax | Medium         |
+| Lenis               | Smooth scroll only       | Low            |
+| CSS scroll-timeline | Simple, native           | Low            |
 
 ### GSAP ScrollTrigger Setup
+
 ```javascript
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
 // Basic scroll animation
-gsap.to('.element', {
+gsap.to(".element", {
   scrollTrigger: {
-    trigger: '.element',
-    start: 'top center',
-    end: 'bottom center',
+    trigger: ".element",
+    start: "top center",
+    end: "bottom center",
     scrub: true, // Links animation to scroll position
   },
   y: -100,
@@ -83,26 +85,30 @@ gsap.to('.element', {
 ```
 
 ### Framer Motion Scroll
+
 ```jsx
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform } from "framer-motion";
 
 function ParallaxSection() {
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], [0, -200]);
 
-  return (
-    <motion.div style={{ y }}>
-      Content moves with scroll
-    </motion.div>
-  );
+  return <motion.div style={{ y }}>Content moves with scroll</motion.div>;
 }
 ```
 
 ### CSS Native (2024+)
+
 ```css
 @keyframes reveal {
-  from { opacity: 0; transform: translateY(50px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-on-scroll {
@@ -121,33 +127,36 @@ Tell stories through scroll depth
 ## Parallax Storytelling
 
 ### Layer Speeds
-| Layer | Speed | Effect |
-|-------|-------|--------|
-| Background | 0.2x | Far away, slow |
-| Midground | 0.5x | Middle depth |
-| Foreground | 1.0x | Normal scroll |
-| Content | 1.0x | Readable |
-| Floating elements | 1.2x | Pop forward |
+
+| Layer             | Speed | Effect         |
+| ----------------- | ----- | -------------- |
+| Background        | 0.2x  | Far away, slow |
+| Midground         | 0.5x  | Middle depth   |
+| Foreground        | 1.0x  | Normal scroll  |
+| Content           | 1.0x  | Readable       |
+| Floating elements | 1.2x  | Pop forward    |
 
 ### Creating Depth
+
 ```javascript
 // GSAP parallax layers
-gsap.to('.background', {
+gsap.to(".background", {
   scrollTrigger: {
-    scrub: true
+    scrub: true,
   },
-  y: '-20%', // Moves slower
+  y: "-20%", // Moves slower
 });
 
-gsap.to('.foreground', {
+gsap.to(".foreground", {
   scrollTrigger: {
-    scrub: true
+    scrub: true,
   },
-  y: '-50%', // Moves faster
+  y: "-50%", // Moves faster
 });
 ```
 
 ### Story Beats
+
 ```
 Section 1: Hook (full viewport, striking visual)
     ↓ scroll
@@ -161,6 +170,7 @@ Section 5: Resolution (CTA or conclusion)
 ```
 
 ### Text Reveals
+
 - Fade in on scroll
 - Typewriter effect on trigger
 - Word-by-word highlight
@@ -175,6 +185,7 @@ Pin elements while scrolling through content
 ## Sticky Sections
 
 ### CSS Sticky
+
 ```css
 .sticky-container {
   height: 300vh; /* Space for scrolling */
@@ -188,37 +199,41 @@ Pin elements while scrolling through content
 ```
 
 ### GSAP Pin
+
 ```javascript
-gsap.to('.content', {
+gsap.to(".content", {
   scrollTrigger: {
-    trigger: '.section',
+    trigger: ".section",
     pin: true, // Pins the section
-    start: 'top top',
-    end: '+=1000', // Pin for 1000px of scroll
+    start: "top top",
+    end: "+=1000", // Pin for 1000px of scroll
     scrub: true,
   },
   // Animate while pinned
-  x: '-100vw',
+  x: "-100vw",
 });
 ```
 
 ### Horizontal Scroll Section
+
 ```javascript
-const sections = gsap.utils.toArray('.panel');
+const sections = gsap.utils.toArray(".panel");
 
 gsap.to(sections, {
   xPercent: -100 * (sections.length - 1),
-  ease: 'none',
+  ease: "none",
   scrollTrigger: {
-    trigger: '.horizontal-container',
+    trigger: ".horizontal-container",
     pin: true,
     scrub: 1,
-    end: () => '+=' + document.querySelector('.horizontal-container').offsetWidth,
+    end: () =>
+      "+=" + document.querySelector(".horizontal-container").offsetWidth,
   },
 });
 ```
 
 ### Use Cases
+
 - Product feature walkthrough
 - Before/after comparisons
 - Step-by-step processes
@@ -233,36 +248,41 @@ Keep scroll experiences smooth
 ## Performance Optimization
 
 ### The 60fps Rule
+
 - Animations must hit 60fps
 - Only animate transform and opacity
 - Use will-change sparingly
 - Test on real mobile devices
 
 ### GPU-Friendly Properties
-| Safe to Animate | Avoid Animating |
-|-----------------|-----------------|
-| transform | width/height |
-| opacity | top/left/right/bottom |
-| filter | margin/padding |
-| clip-path | font-size |
+
+| Safe to Animate | Avoid Animating       |
+| --------------- | --------------------- |
+| transform       | width/height          |
+| opacity         | top/left/right/bottom |
+| filter          | margin/padding        |
+| clip-path       | font-size             |
 
 ### Lazy Loading
+
 ```javascript
 // Only animate when in viewport
 ScrollTrigger.create({
-  trigger: '.heavy-section',
+  trigger: ".heavy-section",
   onEnter: () => initHeavyAnimation(),
   onLeave: () => destroyHeavyAnimation(),
 });
 ```
 
 ### Mobile Considerations
+
 - Reduce parallax intensity
 - Fewer animated layers
 - Consider disabling on low-end
 - Test on throttled CPU
 
 ### Debug Tools
+
 ```javascript
 // GSAP markers for debugging
 scrollTrigger: {
@@ -279,6 +299,7 @@ Severity: HIGH
 Situation: Scroll animations aren't smooth 60fps
 
 Symptoms:
+
 - Choppy animations
 - Laggy scroll
 - CPU spikes during scroll
@@ -295,6 +316,7 @@ Recommended fix:
 ## Fixing Scroll Jank
 
 ### Only Animate These
+
 ```css
 /* GPU-accelerated, smooth */
 transform: translateX(), translateY(), scale(), rotate()
@@ -305,6 +327,7 @@ width, height, top, left, margin, padding
 ```
 
 ### Force GPU Acceleration
+
 ```css
 .animated-element {
   will-change: transform;
@@ -313,13 +336,14 @@ width, height, top, left, margin, padding
 ```
 
 ### Throttle Scroll Events
+
 ```javascript
 // Don't do this
-window.addEventListener('scroll', heavyFunction);
+window.addEventListener("scroll", heavyFunction);
 
 // Do this instead
 let ticking = false;
-window.addEventListener('scroll', () => {
+window.addEventListener("scroll", () => {
   if (!ticking) {
     requestAnimationFrame(() => {
       heavyFunction();
@@ -333,6 +357,7 @@ window.addEventListener('scroll', () => {
 ```
 
 ### Debug Performance
+
 - Chrome DevTools → Performance tab
 - Record scroll, look for red frames
 - Check "Rendering" → Paint flashing
@@ -345,6 +370,7 @@ Severity: HIGH
 Situation: Parallax effects glitch on iOS/Android
 
 Symptoms:
+
 - Glitchy on iPhone
 - Stuttering on scroll
 - Elements jumping
@@ -361,6 +387,7 @@ Recommended fix:
 ## Mobile-Safe Parallax
 
 ### Detection
+
 ```javascript
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 // Or better: check viewport width
@@ -368,16 +395,17 @@ const isMobile = window.innerWidth < 768;
 ```
 
 ### Reduce or Disable
+
 ```javascript
 if (isMobile) {
   // Simpler animations
-  gsap.to('.element', {
+  gsap.to(".element", {
     scrollTrigger: { scrub: true },
     y: -50, // Less movement than desktop
   });
 } else {
   // Full parallax
-  gsap.to('.element', {
+  gsap.to(".element", {
     scrollTrigger: { scrub: true },
     y: -200,
   });
@@ -385,6 +413,7 @@ if (isMobile) {
 ```
 
 ### iOS-Specific Fix
+
 ```css
 /* Helps with iOS scroll issues */
 .scroll-container {
@@ -398,6 +427,7 @@ if (isMobile) {
 ```
 
 ### Alternative: CSS Only
+
 ```css
 /* Works better on mobile */
 @supports (animation-timeline: scroll()) {
@@ -415,6 +445,7 @@ Severity: MEDIUM
 Situation: Screen readers and keyboard users can't use the site
 
 Symptoms:
+
 - Failed accessibility audit
 - Can't navigate with keyboard
 - Screen reader doesn't work
@@ -431,9 +462,12 @@ Recommended fix:
 ## Accessible Scroll Experiences
 
 ### Respect Reduced Motion
+
 ```css
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
@@ -443,7 +477,7 @@ Recommended fix:
 
 ```javascript
 const prefersReducedMotion = window.matchMedia(
-  '(prefers-reduced-motion: reduce)'
+  "(prefers-reduced-motion: reduce)",
 ).matches;
 
 if (!prefersReducedMotion) {
@@ -452,16 +486,18 @@ if (!prefersReducedMotion) {
 ```
 
 ### Content Always Accessible
+
 - Don't hide content behind animations
 - Ensure text is readable without JS
 - Provide skip links
 - Test with screen reader
 
 ### Keyboard Navigation
+
 ```javascript
 // Ensure scroll sections are keyboard navigable
-document.querySelectorAll('.scroll-section').forEach(section => {
-  section.setAttribute('tabindex', '0');
+document.querySelectorAll(".scroll-section").forEach((section) => {
+  section.setAttribute("tabindex", "0");
 });
 ```
 
@@ -472,6 +508,7 @@ Severity: MEDIUM
 Situation: Users have to scroll through animations to find content
 
 Symptoms:
+
 - High bounce rate
 - Low time on page (paradoxically)
 - SEO ranking issues
@@ -488,12 +525,14 @@ Recommended fix:
 ## Content-First Scroll Design
 
 ### Above-the-Fold Content
+
 - Key message visible immediately
 - CTA visible without scroll
 - Value proposition clear
 - Skip animation option
 
 ### Progressive Enhancement
+
 ```
 Level 1: Content readable without JS
 Level 2: Basic styling and layout
@@ -501,12 +540,14 @@ Level 3: Scroll animations enhance
 ```
 
 ### SEO Considerations
+
 - Text in DOM, not just in canvas
 - Proper heading hierarchy
 - Content not hidden by default
 - Fast initial load
 
 ### Quick Exit Points
+
 - Clear navigation always visible
 - Skip to content links
 - Don't trap users in experience
@@ -595,6 +636,7 @@ Workflow:
 Works well with: `3d-web-experience`, `frontend`, `ui-design`, `landing-page-design`
 
 ## When to Use
+
 - User mentions or implies: scroll animation
 - User mentions or implies: parallax
 - User mentions or implies: scroll storytelling
@@ -604,6 +646,7 @@ Works well with: `3d-web-experience`, `frontend`, `ui-design`, `landing-page-des
 - User mentions or implies: immersive web
 
 ## Limitations
+
 - Use this skill only when the task clearly matches the scope described above.
 - Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
 - Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

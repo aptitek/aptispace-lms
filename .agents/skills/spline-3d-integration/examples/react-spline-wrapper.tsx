@@ -5,9 +5,9 @@
 // Usage:
 //   <SplineBackground sceneUrl="https://prod.spline.design/XXXXX/scene.splinecode" />
 
-import { lazy, Suspense, useState, useEffect, useRef } from 'react';
+import { lazy, Suspense, useState, useEffect, useRef } from "react";
 
-const Spline = lazy(() => import('@splinetool/react-spline'));
+const Spline = lazy(() => import("@splinetool/react-spline"));
 
 interface SplineBackgroundProps {
   sceneUrl: string;
@@ -19,14 +19,14 @@ interface SplineBackgroundProps {
 }
 
 function shouldLoadSpline(mobileBreakpoint: number): boolean {
-  if (typeof window === 'undefined') return false; // SSR guard
+  if (typeof window === "undefined") return false; // SSR guard
 
   const isMobile = window.innerWidth < mobileBreakpoint;
   const isLowEnd = navigator.hardwareConcurrency <= 2;
 
   // Check WebGL support
-  const canvas = document.createElement('canvas');
-  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+  const canvas = document.createElement("canvas");
+  const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
   const noWebGL = !gl;
 
   return !isMobile && !isLowEnd && !noWebGL;
@@ -34,10 +34,10 @@ function shouldLoadSpline(mobileBreakpoint: number): boolean {
 
 export default function SplineBackground({
   sceneUrl,
-  fallbackColor = '#0a0a0a',
+  fallbackColor = "#0a0a0a",
   fallbackImageUrl,
   mobileBreakpoint = 768,
-  className = '',
+  className = "",
   children,
 }: SplineBackgroundProps) {
   const [splineLoaded, setSplineLoaded] = useState(false);
@@ -72,12 +72,17 @@ export default function SplineBackground({
   return (
     <div
       className={className}
-      style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100vh",
+        overflow: "hidden",
+      }}
     >
       {/* Fallback layer — always rendered underneath */}
       <div
         style={{
-          position: 'absolute',
+          position: "absolute",
           inset: 0,
           zIndex: 0,
           background: fallbackImageUrl
@@ -85,7 +90,7 @@ export default function SplineBackground({
             : fallbackColor,
           // Fade out once Spline loads
           opacity: splineLoaded && !showFallback ? 0 : 1,
-          transition: 'opacity 0.6s ease',
+          transition: "opacity 0.6s ease",
         }}
       />
 
@@ -96,18 +101,18 @@ export default function SplineBackground({
             scene={sceneUrl}
             onLoad={onLoad}
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 0,
               left: 0,
-              width: '100%',
-              height: '100%',
+              width: "100%",
+              height: "100%",
               zIndex: 0,
               // Fade in when ready
               opacity: splineLoaded ? 1 : 0,
-              transition: 'opacity 0.6s ease',
+              transition: "opacity 0.6s ease",
               // Don't block clicks on content above
               // Change to 'all' if you want mouse interaction with the scene
-              pointerEvents: 'none',
+              pointerEvents: "none",
             }}
           />
         </Suspense>
@@ -115,9 +120,7 @@ export default function SplineBackground({
 
       {/* Content sits on top of everything */}
       {children && (
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          {children}
-        </div>
+        <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
       )}
     </div>
   );

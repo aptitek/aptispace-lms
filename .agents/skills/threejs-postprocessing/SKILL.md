@@ -8,6 +8,7 @@ source: community
 # Three.js Post-Processing
 
 ## When to Use
+
 - You need screen-space visual effects in a Three.js render pipeline.
 - The task involves `EffectComposer`, bloom, depth of field, color grading, blur, or custom passes.
 - You are enhancing the final rendered image rather than base scene setup alone.
@@ -558,13 +559,13 @@ renderer.setAnimationLoop(() => {
 
 ### Key Differences from EffectComposer
 
-| EffectComposer (WebGL)          | PostProcessing (WebGPU)          |
-| ------------------------------- | -------------------------------- |
-| `addPass(new RenderPass(...))`  | `pass(scene, camera)`            |
-| `addPass(new UnrealBloomPass)` | `bloom(scenePass, ...)`          |
-| `composer.render()`             | `postProcessing.render()`        |
-| Chain of passes                 | Node graph with `outputNode`     |
-| GLSL shader passes              | TSL node-based effects           |
+| EffectComposer (WebGL)         | PostProcessing (WebGPU)      |
+| ------------------------------ | ---------------------------- |
+| `addPass(new RenderPass(...))` | `pass(scene, camera)`        |
+| `addPass(new UnrealBloomPass)` | `bloom(scenePass, ...)`      |
+| `composer.render()`            | `postProcessing.render()`    |
+| Chain of passes                | Node graph with `outputNode` |
+| GLSL shader passes             | TSL node-based effects       |
 
 ## Performance Tips
 
@@ -630,6 +631,7 @@ window.addEventListener("resize", onWindowResize);
 - `threejs-fundamentals` - Renderer setup
 
 ## Limitations
+
 - Use this skill only when the task clearly matches the scope described above.
 - Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
 - Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

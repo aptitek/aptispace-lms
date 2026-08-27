@@ -1,13 +1,22 @@
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import AuthLayout from "~/components/templates/AuthLayout/AuthLayout";
+import LoginCard from "~/components/organisms/LoginCard/LoginCard";
 
 export function meta(_args: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "AptiSpace LMS • Orbital Gateway Login" },
+    {
+      name: "description",
+      content:
+        "Welcome to AptiSpace LMS. Secure single sign-on via GitHub to access courses and simulations.",
+    },
   ];
 }
 
 export default function Home() {
-  return <Welcome />;
+  return (
+    <AuthLayout>
+      <LoginCard />
+    </AuthLayout>
+  );
 }

@@ -10,6 +10,7 @@ source: community
 Follow these conventions when creating commits for Sentry projects.
 
 ## When to Use
+
 - The user asks to commit code, prepare a commit message, or save changes in git.
 - You need Sentry-style commit formatting with conventional commit structure and issue references.
 - The task requires enforcing branch safety before committing, especially avoiding direct commits on `main` or `master`.
@@ -46,20 +47,20 @@ The header is required. Scope is optional. All lines must stay under 100 charact
 
 ## Commit Types
 
-| Type | Purpose |
-|------|---------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `ref` | Refactoring (no behavior change) |
-| `perf` | Performance improvement |
-| `docs` | Documentation only |
-| `test` | Test additions or corrections |
-| `build` | Build system or dependencies |
-| `ci` | CI configuration |
-| `chore` | Maintenance tasks |
-| `style` | Code formatting (no logic change) |
-| `meta` | Repository metadata |
-| `license` | License changes |
+| Type      | Purpose                           |
+| --------- | --------------------------------- |
+| `feat`    | New feature                       |
+| `fix`     | Bug fix                           |
+| `ref`     | Refactoring (no behavior change)  |
+| `perf`    | Performance improvement           |
+| `docs`    | Documentation only                |
+| `test`    | Test additions or corrections     |
+| `build`   | Build system or dependencies      |
+| `ci`      | CI configuration                  |
+| `chore`   | Maintenance tasks                 |
+| `style`   | Code formatting (no logic change) |
+| `meta`    | Repository metadata               |
+| `license` | License changes                   |
 
 ## Subject Line Rules
 
@@ -167,6 +168,7 @@ Reason: Caused performance regression in production.
 - [Sentry Commit Messages](https://develop.sentry.dev/engineering-practices/commit-messages/)
 
 ## Limitations
+
 - Use this skill only when the task clearly matches the scope described above.
 - Direct-to-main instructions remain subordinate to server-side branch protection and required checks.
 - Do not treat the output as a substitute for environment-specific validation, testing, or expert review.

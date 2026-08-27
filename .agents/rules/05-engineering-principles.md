@@ -46,13 +46,13 @@ Every piece of code in AptiSpace LMS must adhere to foundational software craft 
 
 These thresholds are enforced by ESLint in [eslint.config.js](file:///home/aptitek/50-59_Code/51_Websites/aptispace-lms-04/eslint.config.js):
 
-| Metric | Limit | Rule Name | Rationale |
-| :--- | :--- | :--- | :--- |
-| **Max File Length** | **500 lines** | `max-lines` | Keeps modules bite-sized, readable, and focused. |
-| **Cyclomatic Complexity** | $\le \mathbf{10}$ | `complexity` | Forces decomposition of complex branching and loops. |
-| **Max Nesting Depth** | $\le \mathbf{4}$ | `max-depth` | Prevents deep callback and block nesting pyramids. |
-| **Max Parameters** | $\le \mathbf{4}$ | `max-params` | Functions with $>4$ parameters must use a typed Options/DTO object. |
-| **Max Callbacks** | $\le \mathbf{3}$ | `max-nested-callbacks` | Eliminates callback hell. |
+| Metric                    | Limit             | Rule Name              | Rationale                                                           |
+| :------------------------ | :---------------- | :--------------------- | :------------------------------------------------------------------ |
+| **Max File Length**       | **500 lines**     | `max-lines`            | Keeps modules bite-sized, readable, and focused.                    |
+| **Cyclomatic Complexity** | $\le \mathbf{10}$ | `complexity`           | Forces decomposition of complex branching and loops.                |
+| **Max Nesting Depth**     | $\le \mathbf{4}$  | `max-depth`            | Prevents deep callback and block nesting pyramids.                  |
+| **Max Parameters**        | $\le \mathbf{4}$  | `max-params`           | Functions with $>4$ parameters must use a typed Options/DTO object. |
+| **Max Callbacks**         | $\le \mathbf{3}$  | `max-nested-callbacks` | Eliminates callback hell.                                           |
 
 ---
 

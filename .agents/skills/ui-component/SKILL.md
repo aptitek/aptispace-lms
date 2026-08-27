@@ -11,10 +11,10 @@ license_source: https://github.com/bitjaru/styleseed/blob/main/LICENSE
 ---
 
 # UI Component Generator
+
 ## When to Use
 
 Use this skill when you need generate a new UI component following the StyleSeed design conventions.
-
 
 ## When NOT to use
 

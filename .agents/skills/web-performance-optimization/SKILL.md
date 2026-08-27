@@ -28,6 +28,7 @@ Help developers optimize website and web application performance to improve user
 ### Step 1: Measure Current Performance
 
 I'll help you establish baseline metrics:
+
 - Run Lighthouse audits
 - Measure Core Web Vitals (LCP, FID, CLS)
 - Check bundle sizes
@@ -37,6 +38,7 @@ I'll help you establish baseline metrics:
 ### Step 2: Identify Issues
 
 Analyze performance problems:
+
 - Large JavaScript bundles
 - Unoptimized images
 - Render-blocking resources
@@ -48,6 +50,7 @@ Analyze performance problems:
 ### Step 3: Prioritize Optimizations
 
 Focus on high-impact improvements:
+
 - Critical rendering path optimization
 - Code splitting and lazy loading
 - Image optimization
@@ -57,6 +60,7 @@ Focus on high-impact improvements:
 ### Step 4: Implement Optimizations
 
 Apply performance improvements:
+
 - Optimize assets (images, fonts, CSS, JS)
 - Implement code splitting
 - Add caching headers
@@ -66,6 +70,7 @@ Apply performance improvements:
 ### Step 5: Verify Improvements
 
 Measure impact of changes:
+
 - Re-run Lighthouse audits
 - Compare before/after metrics
 - Monitor real user metrics (RUM)
@@ -79,6 +84,7 @@ Measure impact of changes:
 ## Performance Audit Results
 
 ### Current Metrics (Before Optimization)
+
 - **LCP (Largest Contentful Paint):** 4.2s ❌ (should be < 2.5s)
 - **FID (First Input Delay):** 180ms ❌ (should be < 100ms)
 - **CLS (Cumulative Layout Shift):** 0.25 ❌ (should be < 0.1)
@@ -117,6 +123,7 @@ Measure impact of changes:
 \`\`\`
 
 **Additional optimizations:**
+
 - Compress image to < 200KB
 - Use CDN for faster delivery
 - Preload hero image: `<link rel="preload" as="image" href="/hero.avif">`
@@ -128,11 +135,11 @@ Measure impact of changes:
 **Solutions:**
 
 1. **Code Splitting:**
-\`\`\`javascript
-// Before: Everything in one bundle
-import { HeavyComponent } from './HeavyComponent';
-import { Analytics } from './analytics';
-import { ChatWidget } from './chat';
+   \`\`\`javascript
+   // Before: Everything in one bundle
+   import { HeavyComponent } from './HeavyComponent';
+   import { Analytics } from './analytics';
+   import { ChatWidget } from './chat';
 
 // After: Lazy load non-critical code
 const HeavyComponent = lazy(() => import('./HeavyComponent'));
@@ -140,31 +147,36 @@ const ChatWidget = lazy(() => import('./chat'));
 
 // Load analytics after page interactive
 if (typeof window !== 'undefined') {
-  window.addEventListener('load', () => {
-    import('./analytics').then(({ Analytics }) => {
-      Analytics.init();
-    });
-  });
+window.addEventListener('load', () => {
+import('./analytics').then(({ Analytics }) => {
+Analytics.init();
+});
+});
 }
 \`\`\`
 
 2. **Remove Unused Dependencies:**
-\`\`\`bash
+   \`\`\`bash
+
 # Analyze bundle
+
 npx webpack-bundle-analyzer
 
 # Remove unused packages
-npm uninstall moment  # Use date-fns instead (smaller)
+
+npm uninstall moment # Use date-fns instead (smaller)
 npm install date-fns
 \`\`\`
 
 3. **Defer Non-Critical Scripts:**
-\`\`\`html
+   \`\`\`html
+
 <!-- Before: Blocks rendering -->
 <script src="/analytics.js"></script>
 
 <!-- After: Deferred -->
 <script src="/analytics.js" defer></script>
+
 \`\`\`
 
 #### Fix CLS (Cumulative Layout Shift)
@@ -177,28 +189,31 @@ npm install date-fns
 <img src="/product.jpg" alt="Product">
 
 <!-- After: With dimensions -->
-<img 
-  src="/product.jpg" 
-  alt="Product"
-  width="400" 
-  height="300"
-  style="aspect-ratio: 4/3;"
+
+<img
+src="/product.jpg"
+alt="Product"
+width="400"
+height="300"
+style="aspect-ratio: 4/3;"
+
 >
+
 \`\`\`
 
 **For dynamic content:**
 \`\`\`css
 /* Reserve space for content that loads later */
 .skeleton-loader {
-  min-height: 200px;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
+min-height: 200px;
+background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+background-size: 200% 100%;
+animation: loading 1.5s infinite;
 }
 
 @keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+0% { background-position: 200% 0; }
+100% { background-position: -200% 0; }
 }
 \`\`\`
 
@@ -216,6 +231,7 @@ npm install date-fns
 ## Bundle Size Optimization
 
 ### Current State
+
 - **Total Bundle:** 850KB (gzipped: 280KB)
 - **Main Bundle:** 650KB
 - **Vendor Bundle:** 200KB
@@ -224,11 +240,14 @@ npm install date-fns
 ### Analysis
 
 \`\`\`bash
+
 # Analyze bundle composition
+
 npx webpack-bundle-analyzer dist/stats.json
 \`\`\`
 
 **Findings:**
+
 1. Moment.js: 67KB (can replace with date-fns: 12KB)
 2. Lodash: 72KB (using entire library, only need 5 functions)
 3. Unused code: ~150KB of dead code
@@ -239,15 +258,19 @@ npx webpack-bundle-analyzer dist/stats.json
 #### 1. Replace Heavy Dependencies
 
 \`\`\`bash
+
 # Remove moment.js (67KB) → Use date-fns (12KB)
+
 npm uninstall moment
 npm install date-fns
 
 # Before
+
 import moment from 'moment';
 const formatted = moment(date).format('YYYY-MM-DD');
 
 # After
+
 import { format } from 'date-fns';
 const formatted = format(date, 'yyyy-MM-dd');
 \`\`\`
@@ -279,12 +302,12 @@ import dynamic from 'next/dynamic';
 
 // Lazy load heavy components
 const Chart = dynamic(() => import('./Chart'), {
-  loading: () => <div>Loading chart...</div>,
-  ssr: false
+loading: () => <div>Loading chart...</div>,
+ssr: false
 });
 
 const AdminPanel = dynamic(() => import('./AdminPanel'), {
-  loading: () => <div>Loading...</div>
+loading: () => <div>Loading...</div>
 });
 
 // Route-based code splitting (automatic in Next.js)
@@ -297,16 +320,16 @@ const AdminPanel = dynamic(() => import('./AdminPanel'), {
 \`\`\`javascript
 // Enable tree shaking in webpack.config.js
 module.exports = {
-  mode: 'production',
-  optimization: {
-    usedExports: true,
-    sideEffects: false
-  }
+mode: 'production',
+optimization: {
+usedExports: true,
+sideEffects: false
+}
 };
 
 // In package.json
 {
-  "sideEffects": false
+"sideEffects": false
 }
 \`\`\`
 
@@ -325,6 +348,7 @@ module.exports = {
     document.body.appendChild(script);
   });
 </script>
+
 \`\`\`
 
 ### Results
@@ -341,6 +365,7 @@ module.exports = {
 ## Image Optimization
 
 ### Current Issues
+
 - 15 images totaling 12MB
 - No modern formats (WebP, AVIF)
 - No responsive images
@@ -351,37 +376,40 @@ module.exports = {
 #### 1. Convert to Modern Formats
 
 \`\`\`bash
+
 # Install image optimization tools
+
 npm install sharp
 
 # Conversion script (optimize-images.js)
+
 const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
 async function optimizeImage(inputPath, outputDir) {
-  const filename = path.basename(inputPath, path.extname(inputPath));
-  
-  // Generate WebP
-  await sharp(inputPath)
-    .webp({ quality: 80 })
-    .toFile(path.join(outputDir, \`\${filename}.webp\`));
-  
-  // Generate AVIF (best compression)
-  await sharp(inputPath)
-    .avif({ quality: 70 })
-    .toFile(path.join(outputDir, \`\${filename}.avif\`));
-  
-  // Generate optimized JPEG fallback
-  await sharp(inputPath)
-    .jpeg({ quality: 80, progressive: true })
-    .toFile(path.join(outputDir, \`\${filename}.jpg\`));
+const filename = path.basename(inputPath, path.extname(inputPath));
+
+// Generate WebP
+await sharp(inputPath)
+.webp({ quality: 80 })
+.toFile(path.join(outputDir, \`\${filename}.webp\`));
+
+// Generate AVIF (best compression)
+await sharp(inputPath)
+.avif({ quality: 70 })
+.toFile(path.join(outputDir, \`\${filename}.avif\`));
+
+// Generate optimized JPEG fallback
+await sharp(inputPath)
+.jpeg({ quality: 80, progressive: true })
+.toFile(path.join(outputDir, \`\${filename}.jpg\`));
 }
 
 // Process all images
 const images = fs.readdirSync('./images');
 images.forEach(img => {
-  optimizeImage(\`./images/\${img}\`, './images/optimized');
+optimizeImage(\`./images/\${img}\`, './images/optimized');
 });
 \`\`\`
 
@@ -400,32 +428,37 @@ images.forEach(img => {
     type="image/avif"
     sizes="(max-width: 768px) 100vw, 50vw"
   >
-  
+
   <!-- WebP for browsers that support it -->
-  <source 
-    srcset="
-      /images/hero-400.webp 400w,
-      /images/hero-800.webp 800w,
-      /images/hero-1200.webp 1200w
-    "
-    type="image/webp"
-    sizes="(max-width: 768px) 100vw, 50vw"
-  >
-  
+
+<source
+srcset="
+/images/hero-400.webp 400w,
+/images/hero-800.webp 800w,
+/images/hero-1200.webp 1200w
+"
+type="image/webp"
+sizes="(max-width: 768px) 100vw, 50vw"
+
+>
+
   <!-- JPEG fallback -->
-  <img 
-    src="/images/hero-800.jpg"
-    srcset="
-      /images/hero-400.jpg 400w,
-      /images/hero-800.jpg 800w,
-      /images/hero-1200.jpg 1200w
-    "
-    sizes="(max-width: 768px) 100vw, 50vw"
-    alt="Hero image"
-    width="1200"
-    height="600"
-    loading="lazy"
-  >
+
+<img
+src="/images/hero-800.jpg"
+srcset="
+/images/hero-400.jpg 400w,
+/images/hero-800.jpg 800w,
+/images/hero-1200.jpg 1200w
+"
+sizes="(max-width: 768px) 100vw, 50vw"
+alt="Hero image"
+width="1200"
+height="600"
+loading="lazy"
+
+>
+
 </picture>
 \`\`\`
 
@@ -433,21 +466,26 @@ images.forEach(img => {
 
 \`\`\`html
 <!-- Native lazy loading -->
-<img 
-  src="/image.jpg" 
-  alt="Description"
-  loading="lazy"
-  width="800"
-  height="600"
+
+<img
+src="/image.jpg"
+alt="Description"
+loading="lazy"
+width="800"
+height="600"
+
 >
 
 <!-- Eager loading for above-the-fold images -->
-<img 
-  src="/hero.jpg" 
-  alt="Hero"
-  loading="eager"
-  fetchpriority="high"
+
+<img
+src="/hero.jpg"
+alt="Hero"
+loading="eager"
+fetchpriority="high"
+
 >
+
 \`\`\`
 
 #### 4. Next.js Image Component
@@ -457,12 +495,12 @@ import Image from 'next/image';
 
 // Automatic optimization
 <Image
-  src="/hero.jpg"
-  alt="Hero"
-  width={1200}
-  height={600}
-  priority  // For above-the-fold images
-  quality={80}
+src="/hero.jpg"
+alt="Hero"
+width={1200}
+height={600}
+priority // For above-the-fold images
+quality={80}
 />
 
 // Lazy loaded
@@ -477,11 +515,11 @@ import Image from 'next/image';
 
 ### Results
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Total Image Size | 12MB | 1.8MB | 85% reduction |
-| LCP | 4.5s | 1.6s | 64% faster |
-| Page Load (3G) | 18s | 4.2s | 77% faster |
+| Metric           | Before | After | Improvement   |
+| ---------------- | ------ | ----- | ------------- |
+| Total Image Size | 12MB   | 1.8MB | 85% reduction |
+| LCP              | 4.5s   | 1.6s  | 64% faster    |
+| Page Load (3G)   | 18s    | 4.2s  | 77% faster    |
 ```
 
 ## Best Practices
@@ -513,35 +551,44 @@ import Image from 'next/image';
 ## Common Pitfalls
 
 ### Problem: Optimized for Desktop but Slow on Mobile
+
 **Symptoms:** Good Lighthouse score on desktop, poor on mobile
 **Solution:**
+
 - Test on real mobile devices
 - Use Chrome DevTools mobile throttling
 - Optimize for 3G/4G networks
 - Reduce JavaScript execution time
+
 ```bash
 # Test with throttling
 lighthouse https://yoursite.com --throttling.cpuSlowdownMultiplier=4
 ```
 
 ### Problem: Large JavaScript Bundle
+
 **Symptoms:** Long Time to Interactive (TTI), high FID
 **Solution:**
+
 - Analyze bundle with webpack-bundle-analyzer
 - Remove unused dependencies
 - Implement code splitting
 - Lazy load non-critical code
+
 ```bash
 # Analyze bundle
 npx webpack-bundle-analyzer dist/stats.json
 ```
 
 ### Problem: Images Causing Layout Shifts
+
 **Symptoms:** High CLS score, content jumping
 **Solution:**
+
 - Always specify width and height
 - Use aspect-ratio CSS property
 - Reserve space with skeleton loaders
+
 ```css
 img {
   aspect-ratio: 16 / 9;
@@ -551,19 +598,22 @@ img {
 ```
 
 ### Problem: Slow Server Response Time
+
 **Symptoms:** High TTFB (Time to First Byte)
 **Solution:**
+
 - Implement server-side caching
 - Use CDN for static assets
 - Optimize database queries
 - Consider static site generation (SSG)
+
 ```javascript
 // Next.js: Static generation
 export async function getStaticProps() {
   const data = await fetchData();
   return {
     props: { data },
-    revalidate: 60 // Regenerate every 60 seconds
+    revalidate: 60, // Regenerate every 60 seconds
   };
 }
 ```
@@ -571,6 +621,7 @@ export async function getStaticProps() {
 ## Performance Checklist
 
 ### Images
+
 - [ ] Convert to modern formats (WebP, AVIF)
 - [ ] Implement responsive images
 - [ ] Add lazy loading
@@ -579,6 +630,7 @@ export async function getStaticProps() {
 - [ ] Use CDN for delivery
 
 ### JavaScript
+
 - [ ] Bundle size < 200KB (gzipped)
 - [ ] Implement code splitting
 - [ ] Lazy load non-critical code
@@ -587,6 +639,7 @@ export async function getStaticProps() {
 - [ ] Use async/defer for scripts
 
 ### CSS
+
 - [ ] Inline critical CSS
 - [ ] Defer non-critical CSS
 - [ ] Remove unused CSS
@@ -594,6 +647,7 @@ export async function getStaticProps() {
 - [ ] Use CSS containment
 
 ### Caching
+
 - [ ] Set cache headers for static assets
 - [ ] Implement service worker
 - [ ] Use CDN caching
@@ -601,6 +655,7 @@ export async function getStaticProps() {
 - [ ] Version static assets
 
 ### Core Web Vitals
+
 - [ ] LCP < 2.5s
 - [ ] FID < 100ms
 - [ ] CLS < 0.1
@@ -610,6 +665,7 @@ export async function getStaticProps() {
 ## Performance Tools
 
 ### Measurement Tools
+
 - **Lighthouse** - Comprehensive performance audit
 - **WebPageTest** - Detailed waterfall analysis
 - **Chrome DevTools** - Performance profiling
@@ -617,12 +673,14 @@ export async function getStaticProps() {
 - **Web Vitals Extension** - Monitor Core Web Vitals
 
 ### Analysis Tools
+
 - **webpack-bundle-analyzer** - Visualize bundle composition
 - **source-map-explorer** - Analyze bundle size
 - **Bundlephobia** - Check package sizes before installing
 - **ImageOptim** - Image compression tool
 
 ### Monitoring Tools
+
 - **Google Analytics** - Track Core Web Vitals
 - **Sentry** - Performance monitoring
 - **New Relic** - Application performance monitoring
@@ -649,6 +707,7 @@ export async function getStaticProps() {
 **Pro Tip:** Focus on Core Web Vitals (LCP, FID, CLS) first - they have the biggest impact on user experience and SEO rankings!
 
 ## Limitations
+
 - Use this skill only when the task clearly matches the scope described above.
 - Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
 - Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

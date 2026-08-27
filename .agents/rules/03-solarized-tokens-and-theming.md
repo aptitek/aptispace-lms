@@ -42,6 +42,7 @@ AptiSpace LMS uses a customized implementation of the **Solarized** color system
 The typography uses **Recursive**, a variable font configured in **Casual** mode (`CASL 1`, `CRSV 1`). This provides a friendly, casual, approachable warmth while maintaining crisp geometry and sleek modern readability.
 
 ### 2.1 Font Configuration
+
 ```typescript
 typography: {
   fontFamily: '"Recursive", ui-sans-serif, system-ui, sans-serif',
@@ -126,6 +127,7 @@ All new styled components must use the `styled` primitive from `@mui/material/st
 
 > [!IMPORTANT]
 > **Strict Import Invariants:**
+>
 > - `import { styled } from "@mui/material/styles";` ✅ **CORRECT**
 > - `import styled from "@emotion/styled";` ❌ **FORBIDDEN (ESLint Error)**
 > - `import { styled } from "@mui/material";` ❌ **FORBIDDEN (ESLint Error)**
@@ -143,40 +145,48 @@ export interface ExpressiveCardProps extends HTMLAttributes<HTMLDivElement> {
 
 const StyledCardRoot = styled("div", {
   shouldForwardProp: (prop) => !prop.startsWith("$"),
-})<ExpressiveCardProps>(({ theme, $variant = "standard", $interactive = false }) => ({
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.text.primary,
-  borderRadius: theme.shape.borderRadius * 1.5,
-  padding: theme.spacing(3),
-  border: `1px solid ${theme.palette.divider}`,
-  transition: theme.transitions.create(["transform", "box-shadow", "border-color"], {
-    duration: theme.transitions.duration.shorter,
-  }),
+})<ExpressiveCardProps>(
+  ({ theme, $variant = "standard", $interactive = false }) => ({
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
+    borderRadius: theme.shape.borderRadius * 1.5,
+    padding: theme.spacing(3),
+    border: `1px solid ${theme.palette.divider}`,
+    transition: theme.transitions.create(
+      ["transform", "box-shadow", "border-color"],
+      {
+        duration: theme.transitions.duration.shorter,
+      },
+    ),
 
-  ...($interactive && {
-    cursor: "pointer",
-    "&:hover": {
-      transform: "translateY(-3px)",
-      borderColor: theme.palette.primary.main,
-      boxShadow: `0 12px 32px ${
-        theme.palette.mode === "dark" ? "rgba(0, 43, 54, 0.7)" : "rgba(238, 232, 213, 0.9)"
-      }`,
-    },
-    "&:focus-visible": {
-      outline: `2px solid ${theme.palette.primary.main}`,
-      outlineOffset: "2px",
-    },
+    ...($interactive && {
+      cursor: "pointer",
+      "&:hover": {
+        transform: "translateY(-3px)",
+        borderColor: theme.palette.primary.main,
+        boxShadow: `0 12px 32px ${
+          theme.palette.mode === "dark"
+            ? "rgba(0, 43, 54, 0.7)"
+            : "rgba(238, 232, 213, 0.9)"
+        }`,
+      },
+      "&:focus-visible": {
+        outline: `2px solid ${theme.palette.primary.main}`,
+        outlineOffset: "2px",
+      },
+    }),
   }),
-}));
+);
 
 export const ExpressiveCard = forwardRef<HTMLDivElement, ExpressiveCardProps>(
   function ExpressiveCard(props, ref) {
     return <StyledCardRoot ref={ref} {...props} />;
-  }
+  },
 );
 ```
 
 ### 4.2 Prohibited Patterns
+
 1. ❌ **No Hardcoded Hex/RGB:** `color: "#268bd2"` $\rightarrow$ must use `color: theme.palette.primary.main`.
 2. ❌ **No Inline Style Objects:** `<div style={{ backgroundColor: "#002b36" }}>` $\rightarrow$ use `styled()` component.
 3. ❌ **No Arbitrary Pixel Spacing:** `padding: "23px"` $\rightarrow$ use `padding: theme.spacing(3)`.

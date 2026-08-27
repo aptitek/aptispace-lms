@@ -11,10 +11,10 @@ license_source: https://github.com/bitjaru/styleseed/blob/main/LICENSE
 ---
 
 # Motion Seed Applier
+
 ## When to Use
 
 Use this skill when you need apply a named StyleSeed motion to a component — either one of the 5 personality seeds (Spring/Silk/Snap/Float/Pulse × entrance/exit/hover/press/layout) or a distinctive keyword move from the motion library (toggle-flip, toggle-curtain, reveal-blur, pop-in, shimmer, …). Translates vibe...
-
 
 ## When NOT to use
 
@@ -27,50 +27,51 @@ Use this skill when you need apply a named StyleSeed motion to a component — e
 
 Translate the user's prompt to one of the five seeds before applying. Use this lookup table from `engine/motion/index.ts`:
 
-| Words the user might say | Seed |
-|---|---|
-| bouncy, springy, playful, energetic, alive | **Spring** |
-| smooth, silky, fluid, elegant, composed, continuous | **Silk** |
-| snappy, quick, instant, decisive, sharp, precise | **Snap** |
-| floaty, gentle, weightless, dreamy, ambient, drifting | **Float** |
-| rhythmic, punchy, pulsing, heartbeat, beat | **Pulse** |
-| "Toss style", "Arc style" | **Spring** (per brand default) |
-| "Stripe style", "Notion style" | **Silk** |
-| "Linear style", "Raycast style", "Vercel style" | **Snap** |
+| Words the user might say                              | Seed                           |
+| ----------------------------------------------------- | ------------------------------ |
+| bouncy, springy, playful, energetic, alive            | **Spring**                     |
+| smooth, silky, fluid, elegant, composed, continuous   | **Silk**                       |
+| snappy, quick, instant, decisive, sharp, precise      | **Snap**                       |
+| floaty, gentle, weightless, dreamy, ambient, drifting | **Float**                      |
+| rhythmic, punchy, pulsing, heartbeat, beat            | **Pulse**                      |
+| "Toss style", "Arc style"                             | **Spring** (per brand default) |
+| "Stripe style", "Notion style"                        | **Silk**                       |
+| "Linear style", "Raycast style", "Vercel style"       | **Snap**                       |
 
-If the user says only a *brand* name, use that brand's default seed from `BRAND_DEFAULT_SEED`. If the user is explicit about a seed name (`spring`, `silk`, etc.), respect it verbatim.
+If the user says only a _brand_ name, use that brand's default seed from `BRAND_DEFAULT_SEED`. If the user is explicit about a seed name (`spring`, `silk`, etc.), respect it verbatim.
 
-## Recommend mode — use-case → motion (when the user describes the *moment*, not the vibe)
+## Recommend mode — use-case → motion (when the user describes the _moment_, not the vibe)
 
 If the user describes **what the thing is** ("a like button", "a modal", "the loading
 state", "items in a feed") rather than a feeling, recommend from the use-case map
 (`MOTION_BY_USECASE` in `engine/motion/library.ts`, exported from `@engine/motion`):
 
-| Use case | Reach for | Why |
-|---|---|---|
-| Primary button / CTA press | `spring · press` | tactile, confident — the press should "give" |
-| Modal / dialog / sheet enter | `silk · entrance` | smooth; never bounce serious/destructive content |
-| Dropdown / popover / menu | `snap · entrance` | instant, precise — frequent UI shouldn't wait |
-| Toast / inline notification | `spring · entrance` | small friendly arrival, non-blocking |
-| List / feed items appearing | `stagger-cascade` | choreograph order, gently |
-| Feature / marketing card hover | `tilt-3d` | depth/flair OK on content-light marketing |
-| Dashboard / data card hover | `snap · hover` | a subtle lift only — keep dense UI calm |
-| Like / favorite / reaction | `like-burst` | a celebratory one-shot; reward the tap |
-| Live / online / recording dot | `pulse-beat` | looping heartbeat = "alive" |
-| Loading / skeleton | `shimmer` | calm directional progress |
-| Success / confirmation | `pop-in` | positive little "done" |
-| Toggle / tab / segment switch | `toggle-flip` | distinctive, recognizable switch |
-| Page / route transition | `silk · entrance` | smooth, minimal, get out of the way |
-| Number / balance / KPI / price reveal | **none** | don't animate the payload — it must read instantly |
+| Use case                              | Reach for           | Why                                                |
+| ------------------------------------- | ------------------- | -------------------------------------------------- |
+| Primary button / CTA press            | `spring · press`    | tactile, confident — the press should "give"       |
+| Modal / dialog / sheet enter          | `silk · entrance`   | smooth; never bounce serious/destructive content   |
+| Dropdown / popover / menu             | `snap · entrance`   | instant, precise — frequent UI shouldn't wait      |
+| Toast / inline notification           | `spring · entrance` | small friendly arrival, non-blocking               |
+| List / feed items appearing           | `stagger-cascade`   | choreograph order, gently                          |
+| Feature / marketing card hover        | `tilt-3d`           | depth/flair OK on content-light marketing          |
+| Dashboard / data card hover           | `snap · hover`      | a subtle lift only — keep dense UI calm            |
+| Like / favorite / reaction            | `like-burst`        | a celebratory one-shot; reward the tap             |
+| Live / online / recording dot         | `pulse-beat`        | looping heartbeat = "alive"                        |
+| Loading / skeleton                    | `shimmer`           | calm directional progress                          |
+| Success / confirmation                | `pop-in`            | positive little "done"                             |
+| Toggle / tab / segment switch         | `toggle-flip`       | distinctive, recognizable switch                   |
+| Page / route transition               | `silk · entrance`   | smooth, minimal, get out of the way                |
+| Number / balance / KPI / price reveal | **none**            | don't animate the payload — it must read instantly |
 
 **Two anti-rules override the table** (state them if you deviate):
+
 1. **One seed per product.** If the project already uses a seed, match it — don't introduce a second personality.
 2. **Never delay the payload.** Don't animate a balance, price, or search result into view; motion is for affordance, not content.
 
 ## Named motion keywords (distinctive moves)
 
-Seeds set a *personality* (how a fade/scale feels). The **motion library** in
-`engine/motion/library.ts` adds *distinctive moves* — a flip, a curtain wipe, a
+Seeds set a _personality_ (how a fade/scale feels). The **motion library** in
+`engine/motion/library.ts` adds _distinctive moves_ — a flip, a curtain wipe, a
 morph — each behind a unique keyword. Prefer a keyword when the user wants a
 specific, recognizable motion rather than a generic feel.
 
@@ -78,22 +79,22 @@ specific, recognizable motion rather than a generic feel.
 `@engine/motion`) is the **single source of truth** — every keyword carries its
 own runnable `snippet`. Pull the snippet from there; never hand-write the params.
 
-| Keyword | Move | Say it when the user wants… |
-|---|---|---|
-| `toggle-flip` | 3D Y-axis card flip | a switch/toggle to flip between two faces |
-| `toggle-slide` | slide-stack swap | a value to slide out and the next to slide in |
-| `toggle-morph` | pill ⇄ circle morph | a control to change shape on toggle |
-| `toggle-curtain` | top→bottom clip-path wipe | a panel to reveal like a curtain |
-| `reveal-blur` | blur(12px)→0 focus-in | content to focus-pull into place |
-| `reveal-rise` | masked clip-path text rise | a headline/text to climb into view |
-| `reveal-unfold` | scaleY from top edge | an accordion/panel to unfold |
-| `pop-in` | spring overshoot from 0 | a badge/checkmark to pop in bouncily |
-| `press-squish` | scale-down + skew | a button to feel jelly/tactile on tap |
-| `tap-ripple` | radial ripple from tap | Material-style press feedback |
-| `pulse-beat` | looping scale pulse | a live/recording/heartbeat indicator |
-| `wiggle` | quick horizontal shake | error / invalid-input feedback |
-| `shimmer` | skeleton loading sweep | a loading placeholder |
-| `stagger-cascade` | children fade-up in sequence | a list to animate in one-by-one |
+| Keyword           | Move                         | Say it when the user wants…                   |
+| ----------------- | ---------------------------- | --------------------------------------------- |
+| `toggle-flip`     | 3D Y-axis card flip          | a switch/toggle to flip between two faces     |
+| `toggle-slide`    | slide-stack swap             | a value to slide out and the next to slide in |
+| `toggle-morph`    | pill ⇄ circle morph          | a control to change shape on toggle           |
+| `toggle-curtain`  | top→bottom clip-path wipe    | a panel to reveal like a curtain              |
+| `reveal-blur`     | blur(12px)→0 focus-in        | content to focus-pull into place              |
+| `reveal-rise`     | masked clip-path text rise   | a headline/text to climb into view            |
+| `reveal-unfold`   | scaleY from top edge         | an accordion/panel to unfold                  |
+| `pop-in`          | spring overshoot from 0      | a badge/checkmark to pop in bouncily          |
+| `press-squish`    | scale-down + skew            | a button to feel jelly/tactile on tap         |
+| `tap-ripple`      | radial ripple from tap       | Material-style press feedback                 |
+| `pulse-beat`      | looping scale pulse          | a live/recording/heartbeat indicator          |
+| `wiggle`          | quick horizontal shake       | error / invalid-input feedback                |
+| `shimmer`         | skeleton loading sweep       | a loading placeholder                         |
+| `stagger-cascade` | children fade-up in sequence | a list to animate in one-by-one               |
 
 **Applying a keyword:**
 

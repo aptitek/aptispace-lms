@@ -13,6 +13,7 @@ date_added: "2026-03-25"
 Identify render hotspots, isolate expensive updates, and apply targeted optimizations without changing UI behavior.
 
 ## When to Use
+
 - When the user asks to profile or improve a slow React component.
 - When you need to reduce re-renders, list lag, or expensive render work in React UI.
 
@@ -49,7 +50,7 @@ Move a timer or animation counter into a child so the parent list never re-rende
 function Dashboard({ items }: { items: Item[] }) {
   const [tick, setTick] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 1000);
+    const id = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(id);
   }, []);
   return (
@@ -64,7 +65,7 @@ function Dashboard({ items }: { items: Item[] }) {
 function Clock() {
   const [tick, setTick] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 1000);
+    const id = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(id);
   }, []);
   return <span>{tick}s</span>;
@@ -86,7 +87,9 @@ function Dashboard({ items }: { items: Item[] }) {
 // ❌ Before – new handler reference on every render busts Row memo
 function List({ items }: { items: Item[] }) {
   const handleClick = (id: string) => console.log(id); // new ref each render
-  return items.map(item => <Row key={item.id} item={item} onClick={handleClick} />);
+  return items.map((item) => (
+    <Row key={item.id} item={item} onClick={handleClick} />
+  ));
 }
 
 // ✅ After – stable handler; Row only re-renders when its own item changes
@@ -96,7 +99,9 @@ const Row = memo(({ item, onClick }: RowProps) => (
 
 function List({ items }: { items: Item[] }) {
   const handleClick = useCallback((id: string) => console.log(id), []);
-  return items.map(item => <Row key={item.id} item={item} onClick={handleClick} />);
+  return items.map((item) => (
+    <Row key={item.id} item={item} onClick={handleClick} />
+  ));
 }
 ```
 
@@ -111,7 +116,10 @@ function Summary({ orders }: { orders: Order[] }) {
 
 // ✅ After – recomputes only when orders changes
 function Summary({ orders }: { orders: Order[] }) {
-  const total = useMemo(() => orders.reduce((sum, o) => sum + o.amount, 0), [orders]);
+  const total = useMemo(
+    () => orders.reduce((sum, o) => sum + o.amount, 0),
+    [orders],
+  );
   return <p>Total: {total}</p>;
 }
 ```
@@ -134,6 +142,7 @@ function Summary({ orders }: { orders: Order[] }) {
 Load `references/examples.md` when the user wants a concrete refactor example.
 
 ## Limitations
+
 - Use this skill only when the task clearly matches the scope described above.
 - Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
 - Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

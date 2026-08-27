@@ -7,7 +7,8 @@ source: self
 source_type: self
 date_added: "2026-06-25"
 author: Rsmiyani
-tags: [threejs, webgl, shaders, post-processing, creative-coding, premium-design]
+tags:
+  [threejs, webgl, shaders, post-processing, creative-coding, premium-design]
 tools: [claude, cursor, gemini]
 ---
 
@@ -28,15 +29,19 @@ This skill provides architectural guidelines and code patterns for developing pr
 ## How It Works
 
 ### Step 1: Establish the Render Loop and Scene Architecture
+
 Setting up a robust WebGL context with proper resize handling and performance-friendly pixel ratios is crucial. Keep pixel ratios capped at a maximum of 2 to avoid rendering too many pixels on high-DPI screens.
 
 ### Step 2: Implement Shader Effects and Post-Processing
+
 Incorporate post-processing pipelines (using `EffectComposer` or `@react-three/postprocessing`) to add bloom, chromatic aberration, depth of field, or film grain. Keep pass counts low and combine custom fragment shaders to minimize draw calls.
 
 ### Step 3: Integrate Interactive Physics and Motion
+
 Utilize physics frameworks (such as Cannon.js or Rapier) or procedural spring animations to make 3D objects react to mouse hover, drag, and click inputs with organic feedback.
 
 ### Step 4: Asset Pipeline and Preloader
+
 Optimize 3D models (using Draco compression) and load them using custom loading managers. Render interactive preloaders to entertain users while heavy assets are fetched in the background.
 
 ## Examples
@@ -44,20 +49,33 @@ Optimize 3D models (using Draco compression) and load them using custom loading 
 ### Example 1: Custom Post-processing in React Three Fiber (R3F)
 
 ```jsx
-import { Canvas } from '@react-three/fiber';
-import { EffectComposer, Bloom, DepthOfField, Vignette } from '@react-three/postprocessing';
+import { Canvas } from "@react-three/fiber";
+import {
+  EffectComposer,
+  Bloom,
+  DepthOfField,
+  Vignette,
+} from "@react-three/postprocessing";
 
 export default function PremiumComposer() {
   return (
-    <Canvas dpr={[1, 2]} gl={{ powerPreference: "high-performance", antialias: false }}>
+    <Canvas
+      dpr={[1, 2]}
+      gl={{ powerPreference: "high-performance", antialias: false }}
+    >
       <ambientLight intensity={0.5} />
       <mesh>
         <boxGeometry />
         <meshStandardMaterial emissive="orange" emissiveIntensity={2.0} />
       </mesh>
-      
+
       <EffectComposer disableNormalPass>
-        <DepthOfField focusDistance={0} focalLength={0.02} bokehScale={2} height={480} />
+        <DepthOfField
+          focusDistance={0}
+          focalLength={0.02}
+          bokehScale={2}
+          height={480}
+        />
         <Bloom luminanceThreshold={0.3} luminanceSmoothing={0.9} height={300} />
         <Vignette eskil={false} offset={0.1} darkness={1.1} />
       </EffectComposer>
@@ -69,7 +87,7 @@ export default function PremiumComposer() {
 ### Example 2: Custom GLSL Shader Material for Liquid/Wavy Effects
 
 ```javascript
-import * as THREE from 'three';
+import * as THREE from "three";
 
 const CustomWavyMaterial = new THREE.ShaderMaterial({
   vertexShader: `
@@ -94,8 +112,8 @@ const CustomWavyMaterial = new THREE.ShaderMaterial({
   `,
   uniforms: {
     uTime: { value: 0.0 },
-    uColor: { value: new THREE.Color('#3b82f6') }
-  }
+    uColor: { value: new THREE.Color("#3b82f6") },
+  },
 });
 ```
 

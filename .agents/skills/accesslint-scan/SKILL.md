@@ -9,6 +9,7 @@ date_added: "2026-06-02"
 Audit a live page and report what's broken and where. Locate; don't fix. If no URL in `$ARGUMENTS`, ask for one.
 
 ## When to Use
+
 - Use this skill when the task matches this description: Audit a live page for accessibility issues, locate each WCAG violation precisely, and return a selector-grounded fix worklist without editing.
 
 ## 1. Audit
@@ -42,6 +43,7 @@ npx -y @accesslint/chrome@latest stop --all  # skip if ensure reported "managed"
 - CLI exit 2 = bad URL or page never loaded; check the dev server.
 
 ## Limitations
+
 - Use this skill only when the task clearly matches the scope described above.
 - Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
 - Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

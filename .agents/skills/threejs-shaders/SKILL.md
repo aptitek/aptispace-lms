@@ -8,6 +8,7 @@ source: community
 # Three.js Shaders
 
 ## When to Use
+
 - You need custom shader logic in Three.js.
 - The task involves `ShaderMaterial`, uniforms, GLSL, vertex deformation, or fragment-based effects.
 - You are extending material behavior beyond what built-in materials provide.
@@ -501,9 +502,7 @@ textureSize(sampler, lod)
 
 ```javascript
 const material = new THREE.ShaderMaterial({
-  uniforms: {
-    /* ... */
-  },
+  uniforms: {/* ... */},
   vertexShader: "/* ... */",
   fragmentShader: "/* ... */",
 
@@ -651,8 +650,16 @@ TSL is the new shader authoring system for Three.js, designed to work with both 
 ```javascript
 import { MeshStandardNodeMaterial } from "three/addons/nodes/Nodes.js";
 import {
-  uv, sin, timerLocal, vec4, color, positionLocal, normalLocal,
-  float, mul, add
+  uv,
+  sin,
+  timerLocal,
+  vec4,
+  color,
+  positionLocal,
+  normalLocal,
+  float,
+  mul,
+  add,
 } from "three/addons/nodes/Nodes.js";
 
 const material = new MeshStandardNodeMaterial();
@@ -664,21 +671,21 @@ material.colorNode = color(sin(add(uv().x, time)), uv().y, 0.5);
 // Vertex displacement
 material.positionNode = add(
   positionLocal,
-  mul(normalLocal, sin(add(positionLocal.x, time)).mul(0.1))
+  mul(normalLocal, sin(add(positionLocal.x, time)).mul(0.1)),
 );
 ```
 
 ### Key Differences from GLSL
 
-| GLSL (WebGL only)       | TSL (WebGL + WebGPU)         |
-| ----------------------- | ---------------------------- |
-| `ShaderMaterial`        | `MeshStandardNodeMaterial`   |
-| String-based shaders    | JavaScript node graph        |
-| `onBeforeCompile`       | Node composition             |
-| Manual uniforms         | `uniform()` node             |
-| `texture2D()`           | `texture()` node             |
-| `gl_Position`           | `positionNode`               |
-| `gl_FragColor`          | `colorNode` / `outputNode`   |
+| GLSL (WebGL only)    | TSL (WebGL + WebGPU)       |
+| -------------------- | -------------------------- |
+| `ShaderMaterial`     | `MeshStandardNodeMaterial` |
+| String-based shaders | JavaScript node graph      |
+| `onBeforeCompile`    | Node composition           |
+| Manual uniforms      | `uniform()` node           |
+| `texture2D()`        | `texture()` node           |
+| `gl_Position`        | `positionNode`             |
+| `gl_FragColor`       | `colorNode` / `outputNode` |
 
 ### When to Use What
 
@@ -692,6 +699,7 @@ material.positionNode = add(
 - `threejs-textures` - Texture sampling in shaders
 
 ## Limitations
+
 - Use this skill only when the task clearly matches the scope described above.
 - Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
 - Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

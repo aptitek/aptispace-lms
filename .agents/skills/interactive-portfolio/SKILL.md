@@ -54,23 +54,27 @@ Structure that works for portfolios
 ## Portfolio Architecture
 
 ### The 30-Second Test
+
 In 30 seconds, visitors should know:
+
 1. Who you are
 2. What you do
 3. Your best work
 4. How to contact you
 
 ### Essential Sections
-| Section | Purpose | Priority |
-|---------|---------|----------|
-| Hero | Hook + identity | Critical |
-| Work/Projects | Prove skills | Critical |
-| About | Personality + story | Important |
-| Contact | Convert interest | Critical |
-| Testimonials | Social proof | Nice to have |
-| Blog/Writing | Thought leadership | Optional |
+
+| Section       | Purpose             | Priority     |
+| ------------- | ------------------- | ------------ |
+| Hero          | Hook + identity     | Critical     |
+| Work/Projects | Prove skills        | Critical     |
+| About         | Personality + story | Important    |
+| Contact       | Convert interest    | Critical     |
+| Testimonials  | Social proof        | Nice to have |
+| Blog/Writing  | Thought leadership  | Optional     |
 
 ### Navigation Patterns
+
 ```
 Option 1: Single page scroll
 - Best for: Designers, creatives
@@ -89,6 +93,7 @@ Option 3: Hybrid
 ```
 
 ### Hero Section Formula
+
 ```
 [Your name]
 [What you do in one line]
@@ -105,15 +110,17 @@ How to present work effectively
 ## Project Showcase
 
 ### Project Card Elements
-| Element | Purpose |
-|---------|---------|
-| Thumbnail | Visual hook |
-| Title | What it is |
-| One-liner | What you did |
-| Tech/tags | Quick scan |
-| Results | Proof of impact |
+
+| Element   | Purpose         |
+| --------- | --------------- |
+| Thumbnail | Visual hook     |
+| Title     | What it is      |
+| One-liner | What you did    |
+| Tech/tags | Quick scan      |
+| Results   | Proof of impact |
 
 ### Case Study Structure
+
 ```
 1. Hero image/video
 2. Project overview (2-3 sentences)
@@ -127,13 +134,15 @@ How to present work effectively
 ```
 
 ### Showing Impact
-| Instead of | Write |
-|------------|-------|
-| "Built a website" | "Increased conversions 40%" |
-| "Designed UI" | "Reduced user drop-off 25%" |
-| "Developed features" | "Shipped to 50K users" |
+
+| Instead of           | Write                       |
+| -------------------- | --------------------------- |
+| "Built a website"    | "Increased conversions 40%" |
+| "Designed UI"        | "Reduced user drop-off 25%" |
+| "Developed features" | "Shipped to 50K users"      |
 
 ### Visual Presentation
+
 - Device mockups for web/mobile
 - Before/after comparisons
 - Process artifacts (wireframes, etc.)
@@ -149,6 +158,7 @@ What works for dev portfolios
 ## Developer Portfolio
 
 ### What Hiring Managers Look For
+
 1. Code quality (GitHub link)
 2. Real projects (not just tutorials)
 3. Problem-solving ability
@@ -156,20 +166,23 @@ What works for dev portfolios
 5. Technical depth
 
 ### Must-Haves
+
 - GitHub profile link (cleaned up)
 - Live project links
 - Tech stack for each project
 - Your specific contribution (for team projects)
 
 ### Project Selection
-| Include | Avoid |
-|---------|-------|
-| Real problems solved | Tutorial clones |
-| Side projects with users | Incomplete projects |
-| Open source contributions | "Coming soon" |
-| Technical challenges | Basic CRUD apps |
+
+| Include                   | Avoid               |
+| ------------------------- | ------------------- |
+| Real problems solved      | Tutorial clones     |
+| Side projects with users  | Incomplete projects |
+| Open source contributions | "Coming soon"       |
+| Technical challenges      | Basic CRUD apps     |
 
 ### Technical Showcase
+
 ```javascript
 // Show code snippets that demonstrate:
 - Clean architecture decisions
@@ -179,6 +192,7 @@ What works for dev portfolios
 ```
 
 ### Blog/Writing
+
 - Technical deep dives
 - Problem-solving stories
 - Learning journeys
@@ -193,13 +207,15 @@ Adding memorable interactive elements
 ## Portfolio Interactivity
 
 ### Levels of Interactivity
-| Level | Example | Risk |
-|-------|---------|------|
-| Subtle | Hover effects, smooth scroll | Low |
+
+| Level  | Example                        | Risk   |
+| ------ | ------------------------------ | ------ |
+| Subtle | Hover effects, smooth scroll   | Low    |
 | Medium | Scroll animations, transitions | Medium |
-| High | 3D, games, custom cursors | High |
+| High   | 3D, games, custom cursors      | High   |
 
 ### High-Impact, Low-Risk
+
 - Custom cursor on desktop
 - Smooth page transitions
 - Project card hover effects
@@ -207,6 +223,7 @@ Adding memorable interactive elements
 - Dark/light mode toggle
 
 ### Creative Ideas
+
 ```
 - Terminal-style interface (for devs)
 - OS desktop metaphor
@@ -217,6 +234,7 @@ Adding memorable interactive elements
 ```
 
 ### The Balance
+
 - Creativity shows skill
 - But usability wins jobs
 - Mobile must work perfectly
@@ -232,6 +250,7 @@ Severity: MEDIUM
 Situation: Spent 6 months on portfolio, have 2 projects to show
 
 Symptoms:
+
 - Been "working on portfolio" for months
 - More excited about portfolio than projects
 - Portfolio tech more impressive than work
@@ -248,14 +267,16 @@ Recommended fix:
 ## Right-Sizing Your Portfolio
 
 ### The MVP Portfolio
-| Element | MVP Version |
-|---------|-------------|
-| Hero | Name + title + one line |
-| Projects | 3-4 best pieces |
-| About | 2-3 paragraphs |
-| Contact | Email + LinkedIn |
+
+| Element  | MVP Version             |
+| -------- | ----------------------- |
+| Hero     | Name + title + one line |
+| Projects | 3-4 best pieces         |
+| About    | 2-3 paragraphs          |
+| Contact  | Email + LinkedIn        |
 
 ### Time Budget
+
 ```
 Week 1: Design and structure
 Week 2: Build core pages
@@ -264,12 +285,14 @@ Week 4: Polish and launch
 ```
 
 ### The Truth
+
 - Your portfolio is not your best project
 - Shipping beats perfecting
 - You can always iterate
 - Better projects > better portfolio
 
 ### When to Stop
+
 - Core pages work on mobile
 - 3-4 solid projects showcased
 - Contact form works
@@ -283,6 +306,7 @@ Severity: HIGH
 Situation: Recruiters check on phone, everything breaks
 
 Symptoms:
+
 - Looks great in browser DevTools
 - Broken on actual phone
 - Text too small
@@ -300,11 +324,13 @@ Recommended fix:
 ## Mobile-First Portfolio
 
 ### Mobile Reality
+
 - 60%+ traffic is mobile
 - Recruiters browse on phones
 - First impression = mobile impression
 
 ### Mobile Must-Haves
+
 - Readable without zooming
 - Tappable links (min 44px)
 - Navigation works
@@ -312,6 +338,7 @@ Recommended fix:
 - Contact easy to find
 
 ### Testing Checklist
+
 ```
 [ ] iPhone Safari
 [ ] Android Chrome
@@ -321,6 +348,7 @@ Recommended fix:
 ```
 
 ### Graceful Degradation
+
 ```css
 /* Complex hover → simple tap */
 @media (hover: none) {
@@ -337,6 +365,7 @@ Severity: MEDIUM
 Situation: Great portfolio, zero contacts
 
 Symptoms:
+
 - Lots of views, no contacts
 - People don't know you're available
 - Contact page is afterthought
@@ -353,14 +382,16 @@ Recommended fix:
 ## Portfolio CTAs
 
 ### Primary CTAs
-| Goal | CTA |
-|------|-----|
-| Get hired | "Let's work together" |
-| Freelance | "Start a project" |
-| Network | "Say hello" |
-| Specific role | "Hire me for [X]" |
+
+| Goal          | CTA                   |
+| ------------- | --------------------- |
+| Get hired     | "Let's work together" |
+| Freelance     | "Start a project"     |
+| Network       | "Say hello"           |
+| Specific role | "Hire me for [X]"     |
 
 ### CTA Placement
+
 ```
 Hero section: Main CTA
 After projects: Secondary CTA
@@ -369,6 +400,7 @@ Floating: Optional persistent CTA
 ```
 
 ### Making Contact Easy
+
 - Email link (mailto:)
 - LinkedIn (opens new tab)
 - Calendar link (Calendly)
@@ -376,6 +408,7 @@ Floating: Optional persistent CTA
 - Copy email button
 
 ### What to Avoid
+
 - Contact form only (people hate forms)
 - Hidden contact info
 - Too many options
@@ -388,6 +421,7 @@ Severity: MEDIUM
 Situation: Best work is 3 years old, newer work not shown
 
 Symptoms:
+
 - jQuery projects in 2024
 - I did this in college
 - Tech stack doesn't match target jobs
@@ -404,27 +438,32 @@ Recommended fix:
 ## Portfolio Freshness
 
 ### Update Cadence
-| Action | Frequency |
-|--------|-----------|
-| Add new project | When completed |
-| Remove old project | Yearly review |
-| Update copy | Every 6 months |
-| Tech refresh | Every 1-2 years |
+
+| Action             | Frequency       |
+| ------------------ | --------------- |
+| Add new project    | When completed  |
+| Remove old project | Yearly review   |
+| Update copy        | Every 6 months  |
+| Tech refresh       | Every 1-2 years |
 
 ### Project Pruning
+
 Keep if:
+
 - Still proud of it
 - Relevant to target jobs
 - Shows important skills
 - Has good results/story
 
 Remove if:
+
 - Embarrassed by code/design
 - Tech is obsolete
 - Not relevant to goals
 - Better work exists
 
 ### Showing Growth
+
 - Latest work first
 - Date projects (or don't)
 - Show evolution if relevant
@@ -517,6 +556,7 @@ Workflow:
 Works well with: `scroll-experience`, `3d-web-experience`, `landing-page-design`, `personal-branding`
 
 ## When to Use
+
 - User mentions or implies: portfolio
 - User mentions or implies: personal website
 - User mentions or implies: showcase work
@@ -525,6 +565,7 @@ Works well with: `scroll-experience`, `3d-web-experience`, `landing-page-design`
 - User mentions or implies: creative portfolio
 
 ## Limitations
+
 - Use this skill only when the task clearly matches the scope described above.
 - Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
 - Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

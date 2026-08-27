@@ -11,6 +11,7 @@ date_added: "2026-02-27"
 Systematically create high-quality 3D scenes and interactive experiences using Three.js best practices.
 
 ## When to Use
+
 - Requests 3D visualizations or graphics ("create a 3D model", "show in 3D")
 - Wants interactive 3D experiences ("rotating cube", "explorable scene")
 - Needs WebGL or canvas-based rendering
@@ -26,16 +27,16 @@ Use ES module import maps for modern Three.js (r183+):
 
 ```html
 <script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.183.0/examples/jsm/"
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.183.0/examples/jsm/"
+    }
   }
-}
 </script>
 <script type="module">
-import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+  import * as THREE from "three";
+  import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 </script>
 ```
 
@@ -715,6 +716,7 @@ Three.js r183 + Vite
 ```
 
 ## Limitations
+
 - Use this skill only when the task clearly matches the scope described above.
 - Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
 - Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

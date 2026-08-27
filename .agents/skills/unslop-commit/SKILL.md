@@ -11,10 +11,10 @@ license_source: https://github.com/MohamedAbdallah-14/unslop/blob/main/LICENSE
 ---
 
 # Unslop Commit
+
 ## When to Use
 
 Use this skill when you need rewrites commit messages so they sound like a careful human engineer wrote them. Strips AI/marketing slop ("comprehensive solution", "robust implementation", "leverage", "enhance", "seamlessly", "This commit..."). Keeps Conventional Commits format. Subject ≤72 chars (aim ≤50),...
-
 
 ## Purpose
 
@@ -68,6 +68,7 @@ Generate or rewrite commit messages so they read like a real engineer wrote them
 ### Bad → good (vague body)
 
 Bad:
+
 ```
 fix: fixed the bug
 
@@ -76,6 +77,7 @@ in some edge cases. We've improved the logic to handle these scenarios.
 ```
 
 Good:
+
 ```
 fix(checkout): ignore stale cart id from localStorage
 

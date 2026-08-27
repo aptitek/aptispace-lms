@@ -9,6 +9,7 @@ date_added: "2026-06-02"
 You audit accessibility and optionally fix what's broken.
 
 ## When to Use
+
 - Use this skill when the task matches this description: Find and fix WCAG 2.2 accessibility issues. Two modes — report (sweep a codebase or page, produce a prioritized written report, no edits) and fix (audit→edit→verify loop on a target). Prefers direct-CDP live-DOM auditing; falls back to a browser-MCP composition or HTML-string audits.
 
 ## Pick a mode from the user's intent
@@ -110,6 +111,7 @@ When unsure about a rule, call `explain_rule({ id: "<rule-id>" })` for guidance 
 Per cycle: flow used, violations by impact, what was applied (file + rule), what was deferred (`TODO`s + reasons), final diff.
 
 ## Limitations
+
 - Use this skill only when the task clearly matches the scope described above.
 - Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
 - Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

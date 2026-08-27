@@ -400,11 +400,12 @@ export default tseslint.config(
     },
   },
 
-  // 5. React Router Routes Overrides
+  // 5. React Router Routes and Tokens Overrides
   {
-    files: ["app/routes/**", "app/root.tsx"],
+    files: ["app/routes/**", "app/root.tsx", "app/tokens/**"],
     rules: {
       "no-restricted-syntax": "off",
+      "id-denylist": "off",
     },
   },
 

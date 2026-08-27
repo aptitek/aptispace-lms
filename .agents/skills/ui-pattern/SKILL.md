@@ -11,10 +11,10 @@ license_source: https://github.com/bitjaru/styleseed/blob/main/LICENSE
 ---
 
 # UI Pattern Generator
+
 ## When to Use
 
 Use this skill when you need generate a composed UI pattern (card layout, list, form section, grid, etc.) using design system primitives.
-
 
 ## When NOT to use
 
@@ -29,6 +29,7 @@ Description: $ARGUMENTS
 ## Available Pattern Types
 
 ### Layout Patterns
+
 - **card-section**: Card with title + content inside page section (`mx-6`)
 - **grid-2col**: 2-column grid of cards (`grid grid-cols-2 gap-4 px-6`)
 - **scroll-horizontal**: Horizontal scrolling card list (`flex gap-3 overflow-x-auto scrollbar-hide`)
@@ -37,12 +38,14 @@ Description: $ARGUMENTS
 - **stat-grid**: Grid of StatCard components
 
 ### Data Display Patterns
+
 - **data-table**: Table with header and rows
 - **detail-card**: Key-value pair display
 - **chart-card**: Card wrapper for a Recharts chart
 - **ranking-list**: Numbered ranking with highlight
 
 ### Interactive Patterns
+
 - **action-sheet**: Bottom sheet with action buttons
 - **filter-bar**: Horizontal filter/tab bar
 - **search-header**: Search input in header area

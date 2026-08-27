@@ -11,9 +11,10 @@
 
 > [!CAUTION]
 > **Strict Policy:**
+>
 > - ✅ **USE:** `pnpm add <pkg>`, `pnpm install`, `pnpm run <script>`
 > - ❌ **NEVER USE:** `npm install`, `npm run`, `yarn`, `bun`
-> 
+>
 > Running `npm` or `yarn` creates conflicting lockfiles (`package-lock.json`, `yarn.lock`) and breaks the Wireit caching graph.
 
 ---
@@ -36,15 +37,15 @@ The project uses [Wireit](https://github.com/google/wireit) to manage task depen
 
 ### 2.1 Essential Scripts
 
-| Command | Action |
-| :--- | :--- |
-| `pnpm run dev` | Starts the React Router development server with HMR. |
-| `pnpm run storybook` | Launches Storybook 10 development server on port 6006. |
-| `pnpm run typecheck` | Executes `react-router typegen` followed by strict `tsc`. |
-| `pnpm run lint` | Runs ESLint 10 and Prettier across all app code and configs. |
-| `pnpm run test` | Runs all Vitest tests in Playwright Chromium headless mode. |
-| `pnpm run build-storybook`| Builds static Storybook documentation artifacts. |
-| `pnpm run build` | Runs full verification pipeline (`typecheck` $\rightarrow$ `lint` $\rightarrow$ `test` $\rightarrow$ bundle). |
+| Command                    | Action                                                                                                        |
+| :------------------------- | :------------------------------------------------------------------------------------------------------------ |
+| `pnpm run dev`             | Starts the React Router development server with HMR.                                                          |
+| `pnpm run storybook`       | Launches Storybook 10 development server on port 6006.                                                        |
+| `pnpm run typecheck`       | Executes `react-router typegen` followed by strict `tsc`.                                                     |
+| `pnpm run lint`            | Runs ESLint 10 and Prettier across all app code and configs.                                                  |
+| `pnpm run test`            | Runs all Vitest tests in Playwright Chromium headless mode.                                                   |
+| `pnpm run build-storybook` | Builds static Storybook documentation artifacts.                                                              |
+| `pnpm run build`           | Runs full verification pipeline (`typecheck` $\rightarrow$ `lint` $\rightarrow$ `test` $\rightarrow$ bundle). |
 
 ---
 
