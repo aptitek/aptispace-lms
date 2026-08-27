@@ -12,29 +12,34 @@ index e8475a50fd1b667cf2bbaea6ef9c41772e5235fe..b8d01b0d205c0e1b5f06c50089861dd1
  
  ## Quick Start
 diff --git a/dist/Card.d.ts b/dist/Card.d.ts
-index 8d3bf716e41293a1a402d90db5d278c8f2796227..7295c110330208b94b6c9d0c4dd3af3386c35659 100644
+index 8d3bf716e41293a1a402d90db5d278c8f2796227..5c5de6bb3502144dfa5c1e7ccd0ba75d3ca63fa5 100644
 --- a/dist/Card.d.ts
 +++ b/dist/Card.d.ts
-@@ -42,6 +42,9 @@ interface CardProps extends Omit<HTMLMotionProps<"div">, "children" | "onClick"
+@@ -42,6 +42,11 @@ interface CardProps extends Omit<HTMLMotionProps<"div">, "children" | "onClick"
      onSelect?: (cardId: string, event?: React.MouseEvent) => void;
      counters?: Counter[];
      renderCounter?: (counter: Counter) => React.ReactNode;
 +    holographic?: boolean | import('./Holographic').HolographicOptions;
 +    holographicOptions?: import('./Holographic').HolographicOptions;
++    holoStrength?: number;
++    holoStrengh?: number;
 +    layers?: import('./Holographic').CardLayer[];
      stackId?: string;
      stackOrder?: number;
      isStackTop?: boolean;
 diff --git a/dist/Holographic.d.ts b/dist/Holographic.d.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..e0b606ff8aef8510e92071292547c99d6bba4717
+index 0000000000000000000000000000000000000000..0353638a8dcd1cd217b49b9aff4655f01056d756
 --- /dev/null
 +++ b/dist/Holographic.d.ts
-@@ -0,0 +1,76 @@
+@@ -0,0 +1,90 @@
 +import React from 'react';
 +
 +export interface HolographicOptions {
 +    intensity?: number;
++    strength?: number;
++    holoStrength?: number;
++    holoStrengh?: number;
 +    patternUrl?: string;
 +    patternOpacity?: number;
 +    patternSize?: string;
@@ -44,6 +49,10 @@ index 0000000000000000000000000000000000000000..e0b606ff8aef8510e92071292547c99d
 +    blendMode?: 'hard-light' | 'overlay' | 'color-dodge' | 'multiply' | 'screen';
 +    variant?: 'default' | 'rainbow' | 'cosmic' | 'gold';
 +    colors?: string[];
++    maskUrl?: string;
++    maskSize?: string;
++    maskPosition?: string;
++    maskRepeat?: string;
 +}
 +
 +export interface CardLayer {
@@ -59,6 +68,8 @@ index 0000000000000000000000000000000000000000..e0b606ff8aef8510e92071292547c99d
 +    blendMode?: React.CSSProperties['mixBlendMode'];
 +    parallax?: boolean | number;
 +    holographic?: boolean | HolographicOptions;
++    holoStrength?: number;
++    holoStrengh?: number;
 +    maskUrl?: string;
 +    maskSize?: string;
 +    maskPosition?: string;
@@ -71,6 +82,8 @@ index 0000000000000000000000000000000000000000..e0b606ff8aef8510e92071292547c99d
 +export interface CardLayerProps extends CardLayer {
 +    pointerX?: number;
 +    pointerY?: number;
++    holoStrength?: number;
++    holoStrengh?: number;
 +}
 +
 +export declare const CardLayer: React.FC<CardLayerProps>;
@@ -78,6 +91,9 @@ index 0000000000000000000000000000000000000000..e0b606ff8aef8510e92071292547c99d
 +export interface HolographicLayerProps {
 +    className?: string;
 +    intensity?: number;
++    strength?: number;
++    holoStrength?: number;
++    holoStrengh?: number;
 +    patternUrl?: string;
 +    patternOpacity?: number;
 +    patternSize?: string;
@@ -108,7 +124,7 @@ index 0000000000000000000000000000000000000000..e0b606ff8aef8510e92071292547c99d
 +    ImageLayer: React.FC<{ src: string; alt?: string; className?: string; opacity?: number; objectFit?: 'contain' | 'cover' | 'fill'; scale?: number | string; parallax?: boolean }>;
 +};
 diff --git a/dist/deckfx.es.js b/dist/deckfx.es.js
-index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef7250220736e2ed18 100644
+index 973369ce27208f871bc6ee4e85b51bb2662cd75b..2a04c122c1257d3a2d0b4a9efd4a37fdaf1fc50c 100644
 --- a/dist/deckfx.es.js
 +++ b/dist/deckfx.es.js
 @@ -1,6 +1,8 @@
@@ -132,7 +148,7 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
  function $t(t) {
    var r, n, o = "";
    if (typeof t == "string" || typeof t == "number") o += t;
-@@ -2957,6 +2958,212 @@ const Xt = Dt(void 0), zt = () => Ft(Xt), Qt = Dt(void 0), $r = () => Ft(Qt), Lr
+@@ -2957,6 +2958,241 @@ const Xt = Dt(void 0), zt = () => Ft(Xt), Qt = Dt(void 0), $r = () => Ft(Qt), Lr
        )
      }
    );
@@ -140,6 +156,9 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
 +  className = "",
 +  style,
 +  intensity = 1,
++  strength,
++  holoStrength,
++  holoStrengh,
 +  patternUrl,
 +  patternOpacity = 0.4,
 +  patternSize = "24px",
@@ -156,16 +175,16 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
 +  maskRepeat = "no-repeat",
 +  colors
 +}) => {
++  const rawHoloStrength = holoStrength !== void 0 ? holoStrength : (holoStrengh !== void 0 ? holoStrengh : (strength !== void 0 ? strength : (intensity !== void 0 ? intensity : 1)));
++  const effectiveIntensity = typeof rawHoloStrength === "number" ? rawHoloStrength : 1;
 +  const px = typeof pointerX === "number" ? pointerX : 0,
 +    py = typeof pointerY === "number" ? pointerY : 0,
-+    scale1 = Math.min(1.2, Math.max(0.8, 1 + px * 0.2)),
-+    transX1 = Math.max(-15, Math.min(15, px * 15)),
-+    transY1 = Math.max(-15, Math.min(15, -py * 15)),
-+    scale2 = Math.min(1.2, Math.max(0.8, 1 - px * 0.2)),
-+    transX2 = Math.max(-15, Math.min(15, -px * 15)),
-+    transY2 = Math.max(-15, Math.min(15, -py * 15)),
-+    spotX = 50 + px * 40,
-+    spotY = 50 + py * 40;
++    angle = 120 + px * 50 + py * 30,
++    spotX = 50 + px * 35,
++    spotY = 50 + py * 35,
++    spot2X = 50 - px * 35,
++    spot2Y = 50 - py * 35,
++    sheenPos = 50 + (px + py) * 35;
 +  const maskStyle = maskUrl ? {
 +    WebkitMaskImage: `url(${maskUrl})`,
 +    maskImage: `url(${maskUrl})`,
@@ -174,81 +193,86 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
 +    WebkitMaskPosition: maskPosition,
 +    maskPosition: maskPosition,
 +    WebkitMaskRepeat: maskRepeat,
-+    maskRepeat: maskRepeat
++    maskRepeat: maskRepeat,
++    WebkitMaskMode: "alpha",
++    maskMode: "alpha"
 +  } : {};
++  let spectrumGradient = `linear-gradient(${angle}deg, rgba(255,107,157,0.7) 0%, rgba(255,184,77,0.7) 18%, rgba(87,235,160,0.7) 36%, rgba(77,208,255,0.7) 54%, rgba(168,107,255,0.7) 72%, rgba(255,107,184,0.7) 90%, rgba(255,107,157,0.7) 100%)`;
++  let focal1Gradient = `radial-gradient(circle at ${spotX}% ${spotY}%, rgba(255,255,255,${0.7 * effectiveIntensity}) 0%, rgba(120,220,255,${0.45 * effectiveIntensity}) 25%, rgba(255,120,200,${0.25 * effectiveIntensity}) 50%, transparent 70%)`;
++  let focal2Gradient = `radial-gradient(circle at ${spot2X}% ${spot2Y}%, rgba(255,240,160,${0.4 * effectiveIntensity}) 0%, rgba(140,255,200,${0.25 * effectiveIntensity}) 30%, transparent 65%)`;
++  if (variant === "cosmic") {
++    spectrumGradient = `linear-gradient(${angle}deg, rgba(40,100,255,0.8) 0%, rgba(160,50,255,0.8) 25%, rgba(255,50,160,0.75) 50%, rgba(0,230,255,0.8) 75%, rgba(40,100,255,0.8) 100%)`;
++    focal1Gradient = `radial-gradient(circle at ${spotX}% ${spotY}%, rgba(255,255,255,${0.8 * effectiveIntensity}) 0%, rgba(160,100,255,${0.5 * effectiveIntensity}) 25%, rgba(0,220,255,${0.3 * effectiveIntensity}) 50%, transparent 70%)`;
++    focal2Gradient = `radial-gradient(circle at ${spot2X}% ${spot2Y}%, rgba(255,80,200,${0.45 * effectiveIntensity}) 0%, rgba(70,120,255,${0.25 * effectiveIntensity}) 35%, transparent 65%)`;
++  } else if (variant === "gold") {
++    spectrumGradient = `linear-gradient(${angle}deg, rgba(255,215,0,0.85) 0%, rgba(255,170,40,0.75) 25%, rgba(255,245,180,0.9) 50%, rgba(218,165,32,0.8) 75%, rgba(255,215,0,0.85) 100%)`;
++    focal1Gradient = `radial-gradient(circle at ${spotX}% ${spotY}%, rgba(255,255,240,${0.85 * effectiveIntensity}) 0%, rgba(255,200,80,${0.5 * effectiveIntensity}) 25%, rgba(255,140,20,${0.25 * effectiveIntensity}) 50%, transparent 70%)`;
++    focal2Gradient = `radial-gradient(circle at ${spot2X}% ${spot2Y}%, rgba(255,230,150,${0.4 * effectiveIntensity}) 0%, rgba(200,150,30,${0.2 * effectiveIntensity}) 35%, transparent 65%)`;
++  }
++  const sheenMin = Math.max(0, sheenPos - 25),
++    sheenMid1 = Math.max(0, sheenPos - 12),
++    sheenMid2 = Math.min(100, sheenPos + 12),
++    sheenMax = Math.min(100, sheenPos + 25),
++    sheenGradient = `linear-gradient(${angle - 45}deg, transparent 0%, transparent ${sheenMin}%, rgba(255,255,255,0.04) ${sheenMid1}%, rgba(255,255,255,${0.7 * effectiveIntensity}) ${sheenPos}%, rgba(255,255,255,0.04) ${sheenMid2}%, transparent ${sheenMax}%, transparent 100%)`;
 +  return /* @__PURE__ */ u.jsxs("div", {
 +    className: ae(
-+      "absolute inset-0 pointer-events-none rounded-xl overflow-hidden z-15 transition-opacity duration-300",
++      "absolute inset-0 pointer-events-none rounded-[inherit] overflow-hidden z-15 transition-opacity duration-300",
 +      active ? "opacity-100" : "opacity-0",
 +      className
 +    ),
-+    style: { mixBlendMode: "screen", ...maskStyle, ...style },
++    style: { isolation: "isolate", mixBlendMode: "color-dodge", opacity: Math.min(1, Math.max(0, effectiveIntensity)), ...maskStyle, ...style },
 +    children: [
 +      /* @__PURE__ */ u.jsx("div", {
-+        className: "absolute pointer-events-none",
++        className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +        style: {
-+          width: "400%",
-+          height: "400%",
-+          bottom: 0,
-+          left: 0,
-+          transformOrigin: "0% 100%",
-+          background: "radial-gradient(circle at 0% 100%, transparent 5%, rgba(255,162,153,0.85) 15%, rgba(51,255,153,0.75) 30%, rgba(110,156,247,0.85) 45%, transparent 65%)",
-+          transform: `translate(${transX1}%, ${transY1}%) scale(${scale1})`,
-+          filter: `saturate(${intensity * 1.8}) ${variant === "cosmic" ? "hue-rotate(90deg)" : variant === "gold" ? "hue-rotate(45deg)" : ""}`,
-+          opacity: 0.75,
++          background: spectrumGradient,
++          opacity: 0.85,
 +          mixBlendMode: "color-dodge",
-+          transition: "transform 0.05s ease-out"
++          filter: `saturate(${effectiveIntensity * 1.5})`
 +        }
 +      }),
 +      /* @__PURE__ */ u.jsx("div", {
-+        className: "absolute pointer-events-none",
++        className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +        style: {
-+          width: "400%",
-+          height: "400%",
-+          top: 0,
-+          right: 0,
-+          transformOrigin: "100% 0%",
-+          background: "radial-gradient(circle at 100% 0%, transparent 5%, rgba(255,162,153,0.85) 15%, rgba(51,255,153,0.75) 30%, rgba(110,156,247,0.85) 45%, transparent 65%)",
-+          transform: `translate(${transX2}%, ${transY2}%) scale(${scale2})`,
-+          filter: `saturate(${intensity * 1.8}) ${variant === "cosmic" ? "hue-rotate(200deg)" : variant === "gold" ? "hue-rotate(50deg)" : ""}`,
-+          opacity: 0.75,
-+          mixBlendMode: "color-dodge",
-+          transition: "transform 0.05s ease-out"
++          background: focal1Gradient,
++          mixBlendMode: "screen",
++          opacity: 0.9
 +        }
 +      }),
 +      /* @__PURE__ */ u.jsx("div", {
-+        className: "absolute inset-0 pointer-events-none",
++        className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +        style: {
-+          background: `radial-gradient(circle at ${spotX}% ${spotY}%, rgba(255,255,255,${0.6 * intensity}) 0%, rgba(255,255,255,${0.2 * intensity}) 20%, transparent 60%)`,
-+          mixBlendMode: "overlay"
++          background: focal2Gradient,
++          mixBlendMode: "screen",
++          opacity: 0.75
 +        }
 +      }),
 +      patternUrl && /* @__PURE__ */ u.jsx("div", {
-+        className: "absolute inset-0 pointer-events-none",
++        className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +        style: {
 +          backgroundImage: `url(${patternUrl})`,
 +          backgroundSize: patternSize,
 +          backgroundRepeat: "repeat",
 +          opacity: patternOpacity,
-+          mixBlendMode: "hard-light"
++          mixBlendMode: "overlay"
 +        }
 +      }),
 +      watermarkUrl && /* @__PURE__ */ u.jsx("div", {
-+        className: "absolute inset-0 pointer-events-none",
++        className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +        style: {
 +          backgroundImage: `url(${watermarkUrl})`,
 +          backgroundSize: "contain",
 +          backgroundPosition: "center",
 +          backgroundRepeat: "no-repeat",
 +          opacity: watermarkOpacity,
-+          mixBlendMode: "hard-light"
++          mixBlendMode: "overlay"
 +        }
 +      }),
 +      showGlareSweep && /* @__PURE__ */ u.jsx("div", {
-+        className: "absolute inset-0 pointer-events-none opacity-40",
++        className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +        style: {
-+          background: "linear-gradient(-65deg, transparent 0 40%, rgba(255,255,255,0.7) 45% 55%, transparent 60% 100%)",
-+          mixBlendMode: "overlay"
++          background: sheenGradient,
++          mixBlendMode: "screen"
 +        }
 +      })
 +    ]
@@ -265,6 +289,8 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
 +  blendMode,
 +  parallax,
 +  holographic = !1,
++  holoStrength,
++  holoStrengh,
 +  maskUrl,
 +  maskSize = "contain",
 +  maskPosition = "center",
@@ -277,28 +303,43 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
 +}) => {
 +  const isHolo = !!holographic,
 +    holoConfig = typeof holographic === "object" ? holographic : {},
-+    holoIntensity = holoConfig.intensity || 1,
++    rawLayerStrength = holoStrength !== void 0 ? holoStrength : (holoStrengh !== void 0 ? holoStrengh : (holoConfig.holoStrength !== void 0 ? holoConfig.holoStrength : (holoConfig.holoStrengh !== void 0 ? holoConfig.holoStrengh : (holoConfig.strength !== void 0 ? holoConfig.strength : (holoConfig.intensity !== void 0 ? holoConfig.intensity : 1))))),
++    holoIntensity = typeof rawLayerStrength === "number" ? rawLayerStrength : 1,
++    effectiveMaskUrl = maskUrl || holoConfig.maskUrl,
++    effectiveMaskSize = maskSize || holoConfig.maskSize || "contain",
++    effectiveMaskPosition = maskPosition || holoConfig.maskPosition || "center",
++    effectiveMaskRepeat = maskRepeat || holoConfig.maskRepeat || "no-repeat",
 +    pX = typeof pointerX === "number" ? pointerX : 0,
 +    pY = typeof pointerY === "number" ? pointerY : 0;
 +  const parallaxDepth = typeof parallax === "number" ? parallax : parallax ? 15 : 0;
++  const absDepth = Math.abs(parallaxDepth);
++  const bleed = absDepth > 0 ? absDepth + 4 : 0;
 +  const transX = pX * parallaxDepth;
 +  const transY = pY * parallaxDepth;
-+  const maskStyle = maskUrl ? {
-+    WebkitMaskImage: `url(${maskUrl})`,
-+    maskImage: `url(${maskUrl})`,
-+    WebkitMaskSize: maskSize,
-+    maskSize: maskSize,
-+    WebkitMaskPosition: maskPosition,
-+    maskPosition: maskPosition,
-+    WebkitMaskRepeat: maskRepeat,
-+    maskRepeat: maskRepeat
++  const maskStyle = effectiveMaskUrl ? {
++    WebkitMaskImage: `url(${effectiveMaskUrl})`,
++    maskImage: `url(${effectiveMaskUrl})`,
++    WebkitMaskSize: effectiveMaskSize,
++    maskSize: effectiveMaskSize,
++    WebkitMaskPosition: effectiveMaskPosition,
++    maskPosition: effectiveMaskPosition,
++    WebkitMaskRepeat: effectiveMaskRepeat,
++    maskRepeat: effectiveMaskRepeat,
++    WebkitMaskMode: "alpha",
++    maskMode: "alpha"
 +  } : {};
 +  return /* @__PURE__ */ u.jsxs("div", {
-+    className: ae("absolute inset-0 pointer-events-none overflow-hidden", className),
++    className: ae("pointer-events-none rounded-[inherit] overflow-hidden", className),
 +    style: {
++      position: "absolute",
++      isolation: "isolate",
 +      zIndex,
 +      opacity,
 +      mixBlendMode: blendMode,
++      top: bleed ? `-${bleed}px` : 0,
++      left: bleed ? `-${bleed}px` : 0,
++      width: bleed ? `calc(100% + ${bleed * 2}px)` : "100%",
++      height: bleed ? `calc(100% + ${bleed * 2}px)` : "100%",
 +      transform: parallaxDepth ? `translate3d(${transX}px, ${transY}px, 0px)` : void 0,
 +      transition: "transform 0.05s ease-out",
 +      ...style
@@ -307,7 +348,7 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
 +      src && /* @__PURE__ */ u.jsx("img", {
 +        src,
 +        alt,
-+        className: "w-full h-full object-cover select-none pointer-events-none",
++        className: "w-full h-full object-cover select-none pointer-events-none rounded-[inherit]",
 +        draggable: !1
 +      }),
 +      content || children,
@@ -320,9 +361,13 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
 +        watermarkUrl: holoConfig.watermarkUrl,
 +        watermarkOpacity: holoConfig.watermarkOpacity,
 +        showGlareSweep: holoConfig.showGlareSweep,
++        maskUrl: effectiveMaskUrl,
++        maskSize: effectiveMaskSize,
++        maskPosition: effectiveMaskPosition,
++        maskRepeat: effectiveMaskRepeat,
 +        pointerX: pX,
 +        pointerY: pY,
-+        className: "absolute inset-0",
++        className: "absolute inset-0 rounded-[inherit]",
 +        style: maskStyle
 +      })
 +    ]
@@ -333,40 +378,65 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
 +  Card: F.forwardRef(({ children, className = "", width, aspectRatio, ...rest }, ref) => /* @__PURE__ */ u.jsx("article", { ref, className: `relative [transform-style:preserve-3d] ${className}`, style: { ...(width && { width: `${width}px` }), ...(aspectRatio && { aspectRatio: String(aspectRatio) }) }, ...rest, children })),
 +  Refraction: ({ className = "", intensity = 1, variant = "default" }) => /* @__PURE__ */ u.jsxs(F.Fragment, {
 +    children: [
-+      /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 pointer-events-none ${className}`, style: { background: "radial-gradient(circle at 25% 75%, transparent 10%, #ffa299, #3f9, #6e9cf7, transparent 60%)", filter: `saturate(${intensity * 2})`, mixBlendMode: "color-dodge", opacity: 0.75 } }),
-+      /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 pointer-events-none ${className}`, style: { background: "radial-gradient(circle at 75% 25%, transparent 10%, #ffa299, #3f9, #6e9cf7, transparent 60%)", filter: `saturate(${intensity * 2})`, mixBlendMode: "color-dodge", opacity: 0.75 } })
++      /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 pointer-events-none rounded-[inherit] ${className}`, style: { background: "linear-gradient(135deg, rgba(255,107,157,0.7) 0%, rgba(255,184,77,0.7) 25%, rgba(87,235,160,0.7) 50%, rgba(77,208,255,0.7) 75%, rgba(168,107,255,0.7) 100%)", filter: `saturate(${intensity * 1.5}) ${variant === "cosmic" ? "hue-rotate(90deg)" : variant === "gold" ? "hue-rotate(45deg)" : ""}`, mixBlendMode: "color-dodge", opacity: 0.8 } }),
++      /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 pointer-events-none rounded-[inherit] ${className}`, style: { background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.6) 0%, rgba(120,220,255,0.3) 30%, transparent 70%)", mixBlendMode: "screen", opacity: 0.85 } })
 +    ]
 +  }),
-+  Spotlight: ({ className = "", intensity = 1 }) => /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 pointer-events-none ${className}`, style: { background: `radial-gradient(circle at 50% 50%, rgba(255,255,255,${0.5 * intensity}) 0%, transparent 60%)`, mixBlendMode: "overlay" } }),
-+  Pattern: ({ children, className = "", maskUrl, maskSize = "contain", textureUrl, opacity = 0.4, mixBlendMode = "multiply", textureSize = "24px" }) => /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 pointer-events-none ${className}`, style: { backgroundImage: textureUrl ? `url(${textureUrl})` : void 0, backgroundSize: textureSize, opacity, mixBlendMode }, children }),
-+  Watermark: ({ children, className = "", imageUrl, opacity = 1 }) => /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 pointer-events-none ${className}`, style: { backgroundImage: imageUrl ? `url(${imageUrl})` : void 0, backgroundSize: "contain", backgroundPosition: "center", opacity, mixBlendMode: "hard-light" }, children }),
-+  Glare: ({ className = "" }) => /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 pointer-events-none overflow-hidden ${className}`, children: /* @__PURE__ */ u.jsx("div", { className: "absolute inset-0 opacity-50", style: { background: "linear-gradient(-65deg, transparent 0 40%, #fff 40% 50%, transparent 50% 55%, #fff 55% 60%, transparent 60% 100%)" } }) }),
-+  ImageLayer: ({ src, alt = "", className = "", opacity, objectFit = "cover", scale = 1, parallax = !1, style }) => /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 ${className}`, style: { ...style, ...(opacity !== void 0 && { opacity }) }, children: /* @__PURE__ */ u.jsx("img", { src, alt, style: { width: "100%", height: "100%", objectFit, scale } }) })
++  Spotlight: ({ className = "", intensity = 1 }) => /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 pointer-events-none rounded-[inherit] ${className}`, style: { background: `radial-gradient(circle at 50% 50%, rgba(255,255,255,${0.6 * intensity}) 0%, transparent 65%)`, mixBlendMode: "screen" } }),
++  Pattern: ({ children, className = "", maskUrl, maskSize = "contain", textureUrl, opacity = 0.4, mixBlendMode = "overlay", textureSize = "24px" }) => /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 pointer-events-none rounded-[inherit] ${className}`, style: { backgroundImage: textureUrl ? `url(${textureUrl})` : void 0, backgroundSize: textureSize, opacity, mixBlendMode }, children }),
++  Watermark: ({ children, className = "", imageUrl, opacity = 1 }) => /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 pointer-events-none rounded-[inherit] ${className}`, style: { backgroundImage: imageUrl ? `url(${imageUrl})` : void 0, backgroundSize: "contain", backgroundPosition: "center", opacity, mixBlendMode: "overlay" }, children }),
++  Glare: ({ className = "" }) => /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 pointer-events-none rounded-[inherit] overflow-hidden ${className}`, children: /* @__PURE__ */ u.jsx("div", { className: "absolute inset-0 opacity-60", style: { background: "linear-gradient(135deg, transparent 0%, transparent 40%, rgba(255,255,255,0.7) 50%, transparent 60%, transparent 100%)", mixBlendMode: "screen" } }) }),
++  ImageLayer: ({ src, alt = "", className = "", opacity, objectFit = "cover", scale = 1, parallax = !1, style }) => /* @__PURE__ */ u.jsx("div", { className: `absolute inset-0 rounded-[inherit] ${className}`, style: { ...style, ...(opacity !== void 0 && { opacity }) }, children: /* @__PURE__ */ u.jsx("img", { src, alt, style: { width: "100%", height: "100%", objectFit, scale } }) })
  }, Yr = {
    none: "shadow-none",
    sm: "shadow-sm",
-@@ -3000,9 +3207,20 @@ const Xt = Dt(void 0), zt = () => Ft(Xt), Qt = Dt(void 0), $r = () => Ft(Qt), Lr
+@@ -3000,9 +3236,45 @@ const Xt = Dt(void 0), zt = () => Ft(Xt), Qt = Dt(void 0), $r = () => Ft(Qt), Lr
    onSelect: ie,
    counters: Z = [],
    renderCounter: le,
 +  holographic: holoProp = !1,
 +  holographicOptions: holoOptionsProp = {},
++  holoStrength: holoStrengthProp,
++  holoStrengh: holoStrenghProp,
 +  layers = [],
    ...G
  }, q) => {
    const re = ut(null), Y = q || re, [be, xe] = J(!1), [je, pe] = J(!1), [oe, ge] = J(!1), [Se, Re] = J(""), [he, U] = J(p), [H, ke] = J(!1), ne = ut(null), se = zt(), we = M || (se == null ? void 0 : se.config.onValidateDragStart), Ce = A || (se == null ? void 0 : se.config.onValidateDragEnd), me = te || (se == null ? void 0 : se.config.onValidationError), ue = Q || G.layoutId || "card", ve = $r(), _e = W !== void 0 ? W : ve && ue ? ve.isSelected(ue) : !1, Te = Ot(0), Oe = Ot(0), Ne = dt(Te, { stiffness: 300, damping: 30 }), Qe = dt(Oe, { stiffness: 300, damping: 30 }), nt = T ? { stiffness: 1e3 / T, damping: 30 } : { stiffness: 200, damping: 20 }, Me = dt(he ? 0 : 180, nt), qe = dt(x, { stiffness: 200, damping: 20 });
 +  const isHolo = !!holoProp,
 +    holoConfig = typeof holoProp === "object" ? holoProp : holoOptionsProp || {},
-+    holoIntensity = holoConfig.intensity || 1,
-+    holoRefract1 = Kt`translate(${We(Ne, [-0.5, 0.5], [-12, 12])}%, ${We(Qe, [-0.5, 0.5], [12, -12])}%) scale(${We(Ne, [-0.5, 0.5], [0.9, 1.2])})`,
-+    holoRefract2 = Kt`translate(${We(Ne, [-0.5, 0.5], [12, -12])}%, ${We(Qe, [-0.5, 0.5], [12, -12])}%) scale(${We(Ne, [-0.5, 0.5], [1.2, 0.9])})`,
++    rawCardStrength = holoStrengthProp !== void 0 ? holoStrengthProp : (holoStrenghProp !== void 0 ? holoStrenghProp : (holoConfig.holoStrength !== void 0 ? holoConfig.holoStrength : (holoConfig.holoStrengh !== void 0 ? holoConfig.holoStrengh : (holoConfig.strength !== void 0 ? holoConfig.strength : (holoConfig.intensity !== void 0 ? holoConfig.intensity : 1))))),
++    holoIntensity = typeof rawCardStrength === "number" ? rawCardStrength : 1,
++    holoVariant = holoConfig.variant || "default",
++    holoCardMask = holoConfig.maskUrl,
++    holoCardMaskSize = holoConfig.maskSize || "contain",
++    holoCardMaskPosition = holoConfig.maskPosition || "center",
++    holoCardMaskRepeat = holoConfig.maskRepeat || "no-repeat",
++    holoCardMaskStyle = holoCardMask ? {
++      WebkitMaskImage: `url(${holoCardMask})`,
++      maskImage: `url(${holoCardMask})`,
++      WebkitMaskSize: holoCardMaskSize,
++      maskSize: holoCardMaskSize,
++      WebkitMaskPosition: holoCardMaskPosition,
++      maskPosition: holoCardMaskPosition,
++      WebkitMaskRepeat: holoCardMaskRepeat,
++      maskRepeat: holoCardMaskRepeat,
++      WebkitMaskMode: "alpha",
++      maskMode: "alpha"
++    } : {},
++    holoAngle = We(Ne, [-0.5, 0.5], [75, 165]),
 +    holoSpotX = We(Ne, [-0.5, 0.5], [15, 85]),
 +    holoSpotY = We(Qe, [-0.5, 0.5], [15, 85]),
-+    holoSpotlight = Kt`radial-gradient(circle at ${holoSpotX}% ${holoSpotY}%, rgba(255,255,255,${holoIntensity * 0.7}) 0%, rgba(255,255,255,${holoIntensity * 0.25}) 25%, transparent 60%)`;
++    holoSpot2X = We(Ne, [-0.5, 0.5], [85, 15]),
++    holoSpot2Y = We(Qe, [-0.5, 0.5], [85, 15]),
++    holoSheenPos = We(Ne, [-0.5, 0.5], [15, 85]),
++    holoSpectrum = Kt`linear-gradient(${holoAngle}deg, rgba(255,107,157,0.7) 0%, rgba(255,184,77,0.7) 18%, rgba(87,235,160,0.7) 36%, rgba(77,208,255,0.7) 54%, rgba(168,107,255,0.7) 72%, rgba(255,107,184,0.7) 90%, rgba(255,107,157,0.7) 100%)`,
++    holoFocal1 = Kt`radial-gradient(circle at ${holoSpotX}% ${holoSpotY}%, rgba(255,255,255,${holoIntensity * 0.7}) 0%, rgba(120,220,255,${holoIntensity * 0.45}) 25%, rgba(255,120,200,${holoIntensity * 0.2}) 50%, transparent 70%)`,
++    holoFocal2 = Kt`radial-gradient(circle at ${holoSpot2X}% ${holoSpot2Y}%, rgba(255,240,160,${holoIntensity * 0.4}) 0%, rgba(140,255,200,${holoIntensity * 0.2}) 30%, transparent 65%)`,
++    holoGlareSheen = Kt`linear-gradient(135deg, transparent 0%, transparent 35%, rgba(255,255,255,0.04) 42%, rgba(255,255,255,${holoIntensity * 0.65}) ${holoSheenPos}%, rgba(255,255,255,0.04) 58%, transparent 65%, transparent 100%)`;
    Ht(q, () => ({
      flipTo: (P) => {
        if (H) return;
-@@ -3130,16 +3348,208 @@ const Xt = Dt(void 0), zt = () => Ft(Xt), Qt = Dt(void 0), $r = () => Ft(Qt), Lr
+@@ -3130,16 +3402,205 @@ const Xt = Dt(void 0), zt = () => Ft(Xt), Qt = Dt(void 0), $r = () => Ft(Qt), Lr
                  className: "absolute inset-0 backface-hidden rounded-xl overflow-hidden bg-white dark:bg-slate-950",
                  style: { backfaceVisibility: "hidden" },
                  children: [
@@ -374,27 +444,41 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
 -                    "img",
 +                  layers && layers.length > 0 ? layers.map((layer, idx) => {
 +                    const pDepth = typeof layer.parallax === "number" ? layer.parallax : layer.parallax ? 15 : 0;
++                    const absDepth = Math.abs(pDepth);
++                    const bleed = absDepth > 0 ? absDepth + 4 : 0;
 +                    const lHolo = !!layer.holographic;
 +                    const lHoloConfig = typeof layer.holographic === "object" ? layer.holographic : {};
-+                    const lIntensity = lHoloConfig.intensity || 1;
-+                    const lMask = layer.maskUrl;
++                    const lRawStrength = layer.holoStrength !== void 0 ? layer.holoStrength : (layer.holoStrengh !== void 0 ? layer.holoStrengh : (lHoloConfig.holoStrength !== void 0 ? lHoloConfig.holoStrength : (lHoloConfig.holoStrengh !== void 0 ? lHoloConfig.holoStrengh : (lHoloConfig.strength !== void 0 ? lHoloConfig.strength : (lHoloConfig.intensity !== void 0 ? lHoloConfig.intensity : holoIntensity)))));
++                    const lIntensity = typeof lRawStrength === "number" ? lRawStrength : 1;
++                    const lVariant = lHoloConfig.variant || "default";
++                    const lMask = layer.maskUrl || lHoloConfig.maskUrl;
++                    const lMaskSize = layer.maskSize || lHoloConfig.maskSize || "contain";
++                    const lMaskPosition = layer.maskPosition || lHoloConfig.maskPosition || "center";
++                    const lMaskRepeat = layer.maskRepeat || lHoloConfig.maskRepeat || "no-repeat";
 +                    const lMaskStyle = lMask ? {
 +                      WebkitMaskImage: `url(${lMask})`,
 +                      maskImage: `url(${lMask})`,
-+                      WebkitMaskSize: layer.maskSize || "cover",
-+                      maskSize: layer.maskSize || "cover",
-+                      WebkitMaskPosition: layer.maskPosition || "center",
-+                      maskPosition: layer.maskPosition || "center",
-+                      WebkitMaskRepeat: layer.maskRepeat || "no-repeat",
-+                      maskRepeat: layer.maskRepeat || "no-repeat"
++                      WebkitMaskSize: lMaskSize,
++                      maskSize: lMaskSize,
++                      WebkitMaskPosition: lMaskPosition,
++                      maskPosition: lMaskPosition,
++                      WebkitMaskRepeat: lMaskRepeat,
++                      maskRepeat: lMaskRepeat,
++                      WebkitMaskMode: "alpha",
++                      maskMode: "alpha"
 +                    } : {};
 +                    return /* @__PURE__ */ u.jsxs(ee.div, {
-+                      key: layer.id || `layer-${idx}`,
-+                      className: ae("absolute inset-0 pointer-events-none overflow-hidden", layer.className),
++                      className: ae("pointer-events-none rounded-[inherit] overflow-hidden", layer.className),
 +                      style: {
++                        position: "absolute",
++                        isolation: "isolate",
 +                        zIndex: layer.zIndex !== void 0 ? layer.zIndex : idx,
 +                        opacity: layer.opacity,
 +                        mixBlendMode: layer.blendMode,
++                        top: bleed ? `-${bleed}px` : 0,
++                        left: bleed ? `-${bleed}px` : 0,
++                        width: bleed ? `calc(100% + ${bleed * 2}px)` : "100%",
++                        height: bleed ? `calc(100% + ${bleed * 2}px)` : "100%",
 +                        x: pDepth ? We(Ne, [-0.5, 0.5], [-pDepth, pDepth]) : void 0,
 +                        y: pDepth ? We(Qe, [-0.5, 0.5], [-pDepth, pDepth]) : void 0,
 +                        ...layer.style
@@ -403,95 +487,86 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
 +                        layer.src && /* @__PURE__ */ u.jsx("img", {
 +                          src: layer.src,
 +                          alt: layer.name || `Layer ${idx}`,
-+                          className: "w-full h-full object-cover select-none pointer-events-none",
++                          className: "w-full h-full object-cover select-none pointer-events-none rounded-[inherit]",
 +                          draggable: !1
 +                        }),
 +                        layer.content || layer.children,
 +                        lHolo && /* @__PURE__ */ u.jsxs(ee.div, {
-+                          className: "absolute inset-0 pointer-events-none rounded-xl overflow-hidden z-15",
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit] overflow-hidden z-15",
 +                          style: {
-+                            opacity: be ? 1 : 0.45,
++                            opacity: (be ? 1 : 0.45) * Math.min(1, Math.max(0, lIntensity)),
 +                            transition: "opacity 0.2s ease-out",
-+                            mixBlendMode: lHoloConfig.blendMode || "screen",
++                            isolation: "isolate",
++                            mixBlendMode: lHoloConfig.blendMode || "color-dodge",
 +                            ...lMaskStyle
 +                          },
 +                          children: [
 +                            /* @__PURE__ */ u.jsx(ee.div, {
-+                              className: "absolute pointer-events-none",
++                              className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +                              style: {
-+                                width: "400%",
-+                                height: "400%",
-+                                bottom: 0,
-+                                left: 0,
-+                                transformOrigin: "0% 100%",
-+                                background: "radial-gradient(circle at 0% 100%, transparent 5%, rgba(255,162,153,0.85) 15%, rgba(51,255,153,0.75) 30%, rgba(110,156,247,0.85) 45%, transparent 65%)",
-+                                transform: holoRefract1,
-+                                filter: `saturate(${lIntensity * 2}) ${lHoloConfig.variant === "cosmic" ? "hue-rotate(90deg)" : lHoloConfig.variant === "gold" ? "hue-rotate(45deg)" : ""}`,
-+                                opacity: 0.8,
++                                background: holoSpectrum,
++                                filter: `saturate(${lIntensity * 1.5}) ${lVariant === "cosmic" ? "hue-rotate(90deg)" : lVariant === "gold" ? "hue-rotate(45deg)" : ""}`,
++                                opacity: 0.85,
 +                                mixBlendMode: "color-dodge"
 +                              }
 +                            }),
 +                            /* @__PURE__ */ u.jsx(ee.div, {
-+                              className: "absolute pointer-events-none",
++                              className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +                              style: {
-+                                width: "400%",
-+                                height: "400%",
-+                                top: 0,
-+                                right: 0,
-+                                transformOrigin: "100% 0%",
-+                                background: "radial-gradient(circle at 100% 0%, transparent 5%, rgba(255,162,153,0.85) 15%, rgba(51,255,153,0.75) 30%, rgba(110,156,247,0.85) 45%, transparent 65%)",
-+                                transform: holoRefract2,
-+                                filter: `saturate(${lIntensity * 2}) ${lHoloConfig.variant === "cosmic" ? "hue-rotate(200deg)" : lHoloConfig.variant === "gold" ? "hue-rotate(50deg)" : ""}`,
-+                                opacity: 0.8,
-+                                mixBlendMode: "color-dodge"
++                                background: holoFocal1,
++                                filter: lVariant === "cosmic" ? "hue-rotate(90deg)" : lVariant === "gold" ? "hue-rotate(45deg)" : void 0,
++                                mixBlendMode: "screen",
++                                opacity: 0.9
 +                              }
 +                            }),
 +                            /* @__PURE__ */ u.jsx(ee.div, {
-+                              className: "absolute inset-0 pointer-events-none",
++                              className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +                              style: {
-+                                background: holoSpotlight,
-+                                mixBlendMode: "overlay"
++                                background: holoFocal2,
++                                filter: lVariant === "cosmic" ? "hue-rotate(90deg)" : lVariant === "gold" ? "hue-rotate(45deg)" : void 0,
++                                mixBlendMode: "screen",
++                                opacity: 0.75
 +                              }
 +                            }),
 +                            (layer.patternUrl || lHoloConfig.patternUrl) && /* @__PURE__ */ u.jsx("div", {
-+                              className: "absolute inset-0 pointer-events-none",
++                              className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +                              style: {
 +                                backgroundImage: `url(${layer.patternUrl || lHoloConfig.patternUrl})`,
 +                                backgroundSize: layer.patternSize || lHoloConfig.patternSize || "24px",
 +                                backgroundRepeat: "repeat",
 +                                opacity: layer.patternOpacity !== void 0 ? layer.patternOpacity : (lHoloConfig.patternOpacity !== void 0 ? lHoloConfig.patternOpacity : 0.4),
-+                                mixBlendMode: "hard-light"
++                                mixBlendMode: "overlay"
 +                              }
 +                            }),
 +                            lHoloConfig.watermarkUrl && /* @__PURE__ */ u.jsx("div", {
-+                              className: "absolute inset-0 pointer-events-none",
++                              className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +                              style: {
 +                                backgroundImage: `url(${lHoloConfig.watermarkUrl})`,
 +                                backgroundSize: "contain",
 +                                backgroundPosition: "center",
 +                                backgroundRepeat: "no-repeat",
 +                                opacity: lHoloConfig.watermarkOpacity !== void 0 ? lHoloConfig.watermarkOpacity : 0.5,
-+                                mixBlendMode: "hard-light"
++                                mixBlendMode: "overlay"
 +                              }
 +                            }),
-+                            lHoloConfig.showGlareSweep !== !1 && /* @__PURE__ */ u.jsx("div", {
-+                              className: "absolute inset-0 pointer-events-none opacity-40",
++                            lHoloConfig.showGlareSweep !== !1 && /* @__PURE__ */ u.jsx(ee.div, {
++                              className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +                              style: {
-+                                background: "linear-gradient(-65deg, transparent 0 40%, rgba(255,255,255,0.7) 45% 55%, transparent 60% 100%)",
-+                                mixBlendMode: "overlay"
++                                background: holoGlareSheen,
++                                mixBlendMode: "screen"
 +                              }
 +                            })
 +                          ]
 +                        })
 +                      ]
-+                    });
++                    }, layer.id || `layer-${idx}`);
 +                  }) : (
 +                    s ? /* @__PURE__ */ u.jsx(
 +                      "img",
 +                      {
 +                        src: s,
 +                        alt: "Card Art",
-+                        className: "w-full h-full object-cover pointer-events-none select-none",
++                        className: "w-full h-full object-cover pointer-events-none select-none rounded-[inherit]",
 +                        draggable: !1
 +                      }
 +                    ) : t
@@ -503,76 +578,68 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
 -                      alt: "Card Art",
 -                      className: "w-full h-full object-cover pointer-events-none select-none",
 -                      draggable: !1
-+                      className: "absolute inset-0 pointer-events-none rounded-xl overflow-hidden z-15",
++                      className: "absolute inset-0 pointer-events-none rounded-[inherit] overflow-hidden z-15",
 +                      style: {
-+                        opacity: be ? 1 : 0.45,
++                        opacity: (be ? 1 : 0.45) * Math.min(1, Math.max(0, holoIntensity)),
 +                        transition: "opacity 0.2s ease-out",
-+                        mixBlendMode: holoConfig.blendMode || "screen"
++                        isolation: "isolate",
++                        mixBlendMode: holoConfig.blendMode || "color-dodge",
++                        ...holoCardMaskStyle
 +                      },
 +                      children: [
 +                        /* @__PURE__ */ u.jsx(ee.div, {
-+                          className: "absolute pointer-events-none",
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +                          style: {
-+                            width: "400%",
-+                            height: "400%",
-+                            bottom: 0,
-+                            left: 0,
-+                            transformOrigin: "0% 100%",
-+                            background: "radial-gradient(circle at 0% 100%, transparent 5%, rgba(255,162,153,0.85) 15%, rgba(51,255,153,0.75) 30%, rgba(110,156,247,0.85) 45%, transparent 65%)",
-+                            transform: holoRefract1,
-+                            filter: `saturate(${holoIntensity * 2}) ${holoConfig.variant === "cosmic" ? "hue-rotate(90deg)" : holoConfig.variant === "gold" ? "hue-rotate(45deg)" : ""}`,
-+                            opacity: 0.8,
++                            background: holoSpectrum,
++                            filter: `saturate(${holoIntensity * 1.5}) ${holoVariant === "cosmic" ? "hue-rotate(90deg)" : holoVariant === "gold" ? "hue-rotate(45deg)" : ""}`,
++                            opacity: 0.85,
 +                            mixBlendMode: "color-dodge"
 +                          }
 +                        }),
 +                        /* @__PURE__ */ u.jsx(ee.div, {
-+                          className: "absolute pointer-events-none",
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +                          style: {
-+                            width: "400%",
-+                            height: "400%",
-+                            top: 0,
-+                            right: 0,
-+                            transformOrigin: "100% 0%",
-+                            background: "radial-gradient(circle at 100% 0%, transparent 5%, rgba(255,162,153,0.85) 15%, rgba(51,255,153,0.75) 30%, rgba(110,156,247,0.85) 45%, transparent 65%)",
-+                            transform: holoRefract2,
-+                            filter: `saturate(${holoIntensity * 2}) ${holoConfig.variant === "cosmic" ? "hue-rotate(200deg)" : holoConfig.variant === "gold" ? "hue-rotate(50deg)" : ""}`,
-+                            opacity: 0.8,
-+                            mixBlendMode: "color-dodge"
++                            background: holoFocal1,
++                            filter: holoVariant === "cosmic" ? "hue-rotate(90deg)" : holoVariant === "gold" ? "hue-rotate(45deg)" : void 0,
++                            mixBlendMode: "screen",
++                            opacity: 0.9
 +                          }
 +                        }),
 +                        /* @__PURE__ */ u.jsx(ee.div, {
-+                          className: "absolute inset-0 pointer-events-none",
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +                          style: {
-+                            background: holoSpotlight,
-+                            mixBlendMode: "overlay"
++                            background: holoFocal2,
++                            filter: holoVariant === "cosmic" ? "hue-rotate(90deg)" : holoVariant === "gold" ? "hue-rotate(45deg)" : void 0,
++                            mixBlendMode: "screen",
++                            opacity: 0.75
 +                          }
 +                        }),
 +                        holoConfig.patternUrl && /* @__PURE__ */ u.jsx("div", {
-+                          className: "absolute inset-0 pointer-events-none",
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +                          style: {
 +                            backgroundImage: `url(${holoConfig.patternUrl})`,
 +                            backgroundSize: holoConfig.patternSize || "24px",
 +                            backgroundRepeat: "repeat",
 +                            opacity: holoConfig.patternOpacity !== void 0 ? holoConfig.patternOpacity : 0.4,
-+                            mixBlendMode: "hard-light"
++                            mixBlendMode: "overlay"
 +                          }
 +                        }),
 +                        holoConfig.watermarkUrl && /* @__PURE__ */ u.jsx("div", {
-+                          className: "absolute inset-0 pointer-events-none",
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +                          style: {
 +                            backgroundImage: `url(${holoConfig.watermarkUrl})`,
 +                            backgroundSize: "contain",
 +                            backgroundPosition: "center",
 +                            backgroundRepeat: "no-repeat",
 +                            opacity: holoConfig.watermarkOpacity !== void 0 ? holoConfig.watermarkOpacity : 0.5,
-+                            mixBlendMode: "hard-light"
++                            mixBlendMode: "overlay"
 +                          }
 +                        }),
-+                        holoConfig.showGlareSweep !== !1 && /* @__PURE__ */ u.jsx("div", {
-+                          className: "absolute inset-0 pointer-events-none opacity-40",
++                        holoConfig.showGlareSweep !== !1 && /* @__PURE__ */ u.jsx(ee.div, {
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit]",
 +                          style: {
-+                            background: "linear-gradient(-65deg, transparent 0 40%, rgba(255,255,255,0.7) 45% 55%, transparent 60% 100%)",
-+                            mixBlendMode: "overlay"
++                            background: holoGlareSheen,
++                            mixBlendMode: "screen"
 +                          }
 +                        })
 +                      ]
@@ -582,7 +649,7 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
                    E.map((P, K) => /* @__PURE__ */ u.jsx("div", { className: "absolute inset-0 pointer-events-none z-20", style: { transform: "translateZ(30px)" }, children: P }, K)),
                    /* @__PURE__ */ u.jsx(ot, { children: Z.map((P) => /* @__PURE__ */ u.jsx(F.Fragment, { children: le ? /* @__PURE__ */ u.jsx("div", { className: "absolute z-30 pointer-events-none", style: {
                      ...P.position === "top-left" ? { top: 8, left: 8 } : P.position === "top-right" ? { top: 8, right: 8 } : P.position === "bottom-left" ? { bottom: 8, left: 8 } : { bottom: 8, right: 8 }
-@@ -3522,12 +3932,12 @@ function io({
+@@ -3522,12 +3983,12 @@ function io({
                {
                  onClick: r,
                  className: "p-2 hover:bg-white/10 rounded-full transition-colors text-white/70 hover:text-white",
@@ -597,7 +664,7 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
              /* @__PURE__ */ u.jsx(
                "input",
                {
-@@ -3553,7 +3963,7 @@ function io({
+@@ -3553,7 +4014,7 @@ function io({
              },
              g.id
            )) }) : /* @__PURE__ */ u.jsxs("div", { className: "h-full flex flex-col items-center justify-center text-white/30", children: [
@@ -606,7 +673,7 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..629439c9e19209a00fec0eef72502207
              /* @__PURE__ */ u.jsxs("p", { children: [
                'No cards found matching "',
                a,
-@@ -4228,5 +4638,8 @@ export {
+@@ -4228,5 +4689,8 @@ export {
    $r as useCardSelection,
    vo as useCardStack,
    zt as useValidation,

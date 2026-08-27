@@ -7,6 +7,13 @@ const meta: Meta<typeof Card> = {
   parameters: {
     layout: "centered",
   },
+  argTypes: {
+    holoStrength: {
+      control: { type: "range", min: 0, max: 2, step: 0.05 },
+      description:
+        "Controls the strength/intensity multiplier of the holographic foil effect",
+    },
+  },
   tags: ["autodocs"],
 };
 
@@ -63,6 +70,7 @@ export const FullSurfaceHolographic: Story = {
     width: 240,
     height: 336,
     holographic: true,
+    holoStrength: 0.65,
     shadow: "2xl",
     maxTilt: 20,
     scaleOnHover: 1.08,
@@ -136,23 +144,18 @@ export const MultiLayerSelectiveHolo: Story = {
           </div>
         ),
       },
-      // Layer 2: Foreground Prismatic Ring / Aura (Extra parallax + rainbow foil)
+      // Layer 2: Foreground Prismatic Ring / Aura (Extra parallax + luminous ring)
       {
         id: "magic-aura",
         parallax: 32,
         content: (
           <div className="w-full h-full flex items-center justify-center pointer-events-none">
             <div
-              className="w-32 h-32 rounded-full border border-cyan-400/40 animate-spin"
+              className="w-32 h-32 rounded-full border-2 border-cyan-400/60 shadow-[0_0_25px_rgba(34,211,238,0.5)] animate-spin"
               style={{ animationDuration: "20s" }}
             />
           </div>
         ),
-        holographic: {
-          intensity: 1.6,
-          variant: "rainbow",
-          showGlareSweep: true,
-        },
       },
       // Layer 3: Card Frame & Text UI
       {
