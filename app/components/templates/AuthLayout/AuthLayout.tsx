@@ -54,12 +54,12 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
     <LayoutRoot>
       <CanvasBackdrop>
         <Galaxy
-          density={1.2}
+          density={0.5}
           starSpeed={0.4}
-          glowIntensity={0.35}
+          glowIntensity={0.2}
           mouseInteraction
           mouseRepulsion
-          repulsionStrength={4}
+          repulsionStrength={2}
         />
       </CanvasBackdrop>
 
