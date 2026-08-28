@@ -10,8 +10,9 @@ export const MERIDIAN_SIZE_CONFIGS = {
     borderRadius: 13,
     puckSize: 20,
     flagSize: 15,
-    mapWidth: 20,
-    mapHeight: 18,
+    mapWidth: 18,
+    mapHeight: 16,
+    planeSize: 13,
     travelX: 20, // 46 - 20 - 3 - 3 = 20
     padX: 3,
     padY: 3,
@@ -23,8 +24,9 @@ export const MERIDIAN_SIZE_CONFIGS = {
     borderRadius: 16,
     puckSize: 24,
     flagSize: 18,
-    mapWidth: 24,
-    mapHeight: 22,
+    mapWidth: 22,
+    mapHeight: 20,
+    planeSize: 16,
     travelX: 24, // 56 - 24 - 4 - 4 = 24
     padX: 4,
     padY: 4,
@@ -36,8 +38,9 @@ export const MERIDIAN_SIZE_CONFIGS = {
     borderRadius: 20,
     puckSize: 30,
     flagSize: 23,
-    mapWidth: 30,
-    mapHeight: 27,
+    mapWidth: 28,
+    mapHeight: 25,
+    planeSize: 21,
     travelX: 32, // 72 - 30 - 5 - 5 = 32
     padX: 5,
     padY: 5,
@@ -117,7 +120,7 @@ export const CountryMapZone = styled("div")<{
 }>(({ $position, $cfg }) => ({
   position: "absolute",
   top: "50%",
-  [$position === "left" ? "left" : "right"]: $cfg.padX + 1,
+  [$position === "left" ? "left" : "right"]: 1,
   transform: "translateY(-50%)",
   width: $cfg.mapWidth,
   height: $cfg.mapHeight,
@@ -126,6 +129,29 @@ export const CountryMapZone = styled("div")<{
   justifyContent: "center",
   zIndex: 1,
   pointerEvents: "none",
+}));
+
+export const PeekingAirplane = styled(motion.div, {
+  shouldForwardProp: filterDollarProp,
+})<{
+  $cfg: (typeof MERIDIAN_SIZE_CONFIGS)[MeridianSize];
+}>(({ theme, $cfg }) => ({
+  position: "absolute",
+  top: "50%",
+  left: 0,
+  width: $cfg.planeSize,
+  height: $cfg.planeSize,
+  marginTop: -$cfg.planeSize / 2,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 3,
+  pointerEvents: "none",
+  color:
+    theme.palette.mode === "dark"
+      ? theme.palette.common.white
+      : theme.palette.primary.main,
+  filter: `drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 4px ${theme.palette.primary.main})`,
 }));
 
 export const FlightPuck = styled(motion.span, {

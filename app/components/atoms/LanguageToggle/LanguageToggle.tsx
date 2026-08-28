@@ -5,7 +5,13 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
-import { motion, AnimatePresence, type HTMLMotionProps } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  type HTMLMotionProps,
+  type TargetAndTransition,
+  type Transition,
+} from "framer-motion";
 import { useTranslation } from "react-i18next";
 import type { SupportedLanguage } from "~/i18n";
 import {
@@ -13,6 +19,7 @@ import {
   FrFlag,
   UkMapSilhouette,
   FranceMapSilhouette,
+  MdiAirplaneGlyph,
 } from "./MeridianGlyphs";
 import {
   type MeridianSize,
@@ -24,6 +31,7 @@ import {
   FlightPuck,
   StateRippleLayer,
   ToggleWrapper,
+  PeekingAirplane,
 } from "./LanguageToggle.styles";
 
 export type { MeridianSize };
@@ -98,6 +106,90 @@ function CountrySilhouettes({
   );
 }
 
+function FlightAirplane({
+  cfg,
+  isFrench,
+  isHovered,
+  flightState,
+}: {
+  cfg: (typeof MERIDIAN_SIZE_CONFIGS)[MeridianSize];
+  isFrench: boolean;
+  isHovered: boolean;
+  flightState: { isFlying: boolean; direction: "to-fr" | "to-en" };
+}) {
+  const leftCenterX = cfg.padX - 2 + cfg.puckSize / 2;
+  const rightCenterX = cfg.padX - 2 + cfg.travelX + cfg.puckSize / 2;
+  const halfPlane = cfg.planeSize / 2;
+  const peekOffset = cfg.puckSize * 0.72;
+
+  const leftTuckedX = leftCenterX - halfPlane;
+  const leftPeekX = leftTuckedX + peekOffset;
+
+  const rightTuckedX = rightCenterX - halfPlane;
+  const rightPeekX = rightTuckedX - peekOffset;
+
+  let animateProps: TargetAndTransition;
+  let transitionProps: Transition;
+
+  if (flightState.isFlying) {
+    const isToFr = flightState.direction === "to-fr";
+    const startX = isToFr ? leftPeekX : rightPeekX;
+    const endX = isToFr ? cfg.width - cfg.padX : 0;
+    const initialRot = isToFr ? 90 : -90;
+
+    animateProps = {
+      x: [startX, endX],
+      y: 0,
+      rotate: initialRot,
+      rotateX: 0,
+      scale: [1, 1, 0.6],
+      opacity: [1, 1, 0],
+    };
+    transitionProps = {
+      duration: 0.24,
+      ease: [0.2, 0, 0, 1],
+    };
+  } else if (isHovered) {
+    animateProps = {
+      x: isFrench ? rightPeekX : leftPeekX,
+      y: 0,
+      rotate: isFrench ? -90 : 90,
+      rotateX: 0,
+      scale: 1,
+      opacity: 0.95,
+    };
+    transitionProps = {
+      type: "spring",
+      stiffness: 380,
+      damping: 22,
+    };
+  } else {
+    animateProps = {
+      x: isFrench ? rightTuckedX : leftTuckedX,
+      y: 0,
+      rotate: isFrench ? -90 : 90,
+      rotateX: 0,
+      scale: 0.3,
+      opacity: 0,
+    };
+    transitionProps = {
+      duration: 0.2,
+      ease: "easeOut",
+    };
+  }
+
+  return (
+    <PeekingAirplane
+      $cfg={cfg}
+      initial={false}
+      animate={animateProps}
+      transition={transitionProps}
+    >
+      <MdiAirplaneGlyph size={cfg.planeSize} />
+    </PeekingAirplane>
+  );
+}
+
 function FlagGraphic({
   isFrench,
   flagSize,
@@ -167,15 +259,25 @@ interface ControllerConfig {
 
 function useMeridianController(config: ControllerConfig) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isFlying, setIsFlying] = useState(false);
+  const [flightState, setFlightState] = useState<{
+    isFlying: boolean;
+    direction: "to-fr" | "to-en";
+  }>({
+    isFlying: false,
+    direction: "to-fr",
+  });
 
   const handleFlight = useCallback(() => {
     if (config.disabled) return;
-    const nextLang: SupportedLanguage =
-      config.currentLang === "fr" ? "en" : "fr";
-    setIsFlying(true);
+    const isCurrentlyFrench = config.currentLang === "fr";
+    const nextLang: SupportedLanguage = isCurrentlyFrench ? "en" : "fr";
+    const direction: "to-fr" | "to-en" = isCurrentlyFrench ? "to-en" : "to-fr";
+
+    setFlightState({ isFlying: true, direction });
     config.onLanguageChange?.(nextLang);
-    setTimeout(() => setIsFlying(false), 380);
+    setTimeout(() => {
+      setFlightState((prev) => ({ ...prev, isFlying: false }));
+    }, 300);
   }, [config]);
 
   const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
@@ -198,13 +300,13 @@ function useMeridianController(config: ControllerConfig) {
 
   const handleMouseLeave = (e: MouseEvent<HTMLButtonElement>) => {
     setIsHovered(false);
-    setIsFlying(false);
     config.onMouseLeave?.(e);
   };
 
   return {
     isHovered,
-    isFlying,
+    isFlying: flightState.isFlying,
+    flightState,
     handleClick,
     handleKeyDown,
     handleMouseEnter,
@@ -304,6 +406,13 @@ export const MeridianToggle = forwardRef<
         cfg={cfg}
         isFrench={isFrench}
         isHovered={controller.isHovered}
+      />
+
+      <FlightAirplane
+        cfg={cfg}
+        isFrench={isFrench}
+        isHovered={controller.isHovered && !isSwitchDisabled}
+        flightState={controller.flightState}
       />
 
       <FlightPuckWithFlag
