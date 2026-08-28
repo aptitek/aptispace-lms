@@ -88,13 +88,22 @@ export interface Id1CardProps {
   children?: React.ReactNode;
 }
 
-// ISO/IEC 7810 ID-1 Standard Geometry Constants
+// ISO/IEC 7810 ID-1 Standard Dimensions (mm)
 export const ISO_7810_ID1 = {
   widthMm: 85.6,
   heightMm: 53.98,
   thicknessMm: 0.76,
-  aspectRatio: 85.6 / 53.98, // ~1.5857725
-  aspectRatioPortrait: 53.98 / 85.6, // ~0.630607
   nominalCornerRadiusMm: 3.18,
-  cornerRadiusRatio: 3.18 / 85.6, // ~3.714% of width
+  aspectRatio: 85.6 / 53.98, // ~1.5858 (Landscape)
+  aspectRatioPortrait: 53.98 / 85.6, // ~0.6306 (Portrait)
+} as const;
+
+// ISO/IEC 19794-5:2011 Biometric Facial Image Dimensions & Criteria
+export const ISO_19794_5_BIOMETRICS = {
+  standard: "ISO/IEC 19794-5:2011",
+  photoWidthMm: 35,
+  photoHeightMm: 45,
+  aspectRatio: 35 / 45, // 0.7778 (7:9 portrait format)
+  faceHeightMinRatio: 0.7, // 70% of frame height (chin to crown)
+  faceHeightMaxRatio: 0.8, // 80% of frame height
 } as const;

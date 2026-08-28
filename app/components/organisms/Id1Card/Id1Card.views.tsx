@@ -1,13 +1,13 @@
 import React from "react";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
+import BiometricAvatar from "../../atoms/BiometricAvatar/BiometricAvatar";
 import { type Id1CardSide, type Id1CardCredential } from "./Id1Card.types";
 import {
   FrontLayoutRoot,
+  FrontDetailsPanel,
   CardHeaderBar,
   CardBrandTag,
   ClearanceBadge,
-  FrontMainBody,
-  AvatarFrame,
   CadetDetailsColumn,
   CadetNameText,
   CadetCallSignText,
@@ -89,40 +89,45 @@ export function FrontCredentialView({ credential, isPortrait }: SideViewProps) {
 
   return (
     <FrontLayoutRoot isPortrait={isPortrait}>
-      <CardHeaderBar>
-        <CardBrandTag>
-          <span>✦</span>
-          <span>AptiSpace Academy</span>
-        </CardBrandTag>
-        <ClearanceBadge>{cred.clearanceLevel}</ClearanceBadge>
-      </CardHeaderBar>
+      {/* Big Full-Sized Biometric Portrait conforming to ISO/IEC 19794-5:2011 (35mm x 45mm, 7:9 ratio) */}
+      <BiometricAvatar
+        src={cred.avatarUrl}
+        alt={cred.name}
+        isPortrait={isPortrait}
+      />
 
-      <FrontMainBody isPortrait={isPortrait}>
-        <AvatarFrame size={isPortrait ? 60 : 54}>
-          <img src={cred.avatarUrl} alt={cred.name} />
-        </AvatarFrame>
+      <FrontDetailsPanel isPortrait={isPortrait}>
+        <CardHeaderBar>
+          <CardBrandTag>
+            <span>✦</span>
+            <span>AptiSpace Academy</span>
+          </CardBrandTag>
+          <ClearanceBadge>{cred.clearanceLevel}</ClearanceBadge>
+        </CardHeaderBar>
 
         <CadetDetailsColumn>
           <CadetNameText>{cred.name}</CadetNameText>
           <CadetCallSignText>CALLSIGN: {cred.callSign}</CadetCallSignText>
-          <CadetRoleText>{cred.role}</CadetRoleText>
+          <CadetRoleText>
+            {cred.role} • {cred.division}
+          </CadetRoleText>
         </CadetDetailsColumn>
-      </FrontMainBody>
 
-      <MetaGrid isPortrait={isPortrait}>
-        <MetaItem>
-          <MetaLabel>Cadet ID</MetaLabel>
-          <MetaValue>{cred.id}</MetaValue>
-        </MetaItem>
-        <MetaItem>
-          <MetaLabel>Division</MetaLabel>
-          <MetaValue>{cred.division}</MetaValue>
-        </MetaItem>
-        <MetaItem>
-          <MetaLabel>Expires</MetaLabel>
-          <MetaValue>{cred.expiryDate}</MetaValue>
-        </MetaItem>
-      </MetaGrid>
+        <MetaGrid isPortrait={isPortrait}>
+          <MetaItem>
+            <MetaLabel>Cadet ID</MetaLabel>
+            <MetaValue>{cred.id}</MetaValue>
+          </MetaItem>
+          <MetaItem>
+            <MetaLabel>Standard</MetaLabel>
+            <MetaValue>ISO 19794-5</MetaValue>
+          </MetaItem>
+          <MetaItem>
+            <MetaLabel>Expires</MetaLabel>
+            <MetaValue>{cred.expiryDate}</MetaValue>
+          </MetaItem>
+        </MetaGrid>
+      </FrontDetailsPanel>
     </FrontLayoutRoot>
   );
 }

@@ -117,16 +117,86 @@ export const ContentOverlay = styled("div")<{ isTransparent?: boolean }>(
   }),
 );
 
-// --- Front Face Layout Components ---
+// --- Front Face Layout Components (ISO/IEC 19794-5:2011 Biometric Standard) ---
 
 export const FrontLayoutRoot = styled("div")<{ isPortrait?: boolean }>(
   ({ theme, isPortrait }) => ({
     width: "100%",
     height: "100%",
     display: "flex",
+    flexDirection: isPortrait ? "column" : "row",
+    alignItems: isPortrait ? "center" : "stretch",
+    justifyContent: "space-between",
+    gap: isPortrait ? theme.spacing(1.25) : theme.spacing(1.75),
+    boxSizing: "border-box",
+  }),
+);
+
+export const BiometricAvatarFrame = styled("div")<{ isPortrait?: boolean }>(
+  ({ theme, isPortrait }) => ({
+    position: "relative",
+    height: isPortrait ? "140px" : "100%",
+    width: isPortrait ? "auto" : "auto",
+    aspectRatio: "35 / 45", // ISO/IEC 19794-5:2011 standard 35mm x 45mm (7:9)
+    borderRadius: "10px",
+    overflow: "hidden",
+    border: `1.5px solid ${alpha(theme.palette.primary.main, 0.65)}`,
+    boxShadow: `0 0 16px ${alpha(theme.palette.primary.main, 0.25)}, inset 0 0 12px ${alpha(theme.palette.common.black, 0.4)}`,
+    flexShrink: 0,
+    backgroundColor: alpha(theme.palette.background.default, 0.6),
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    "& img": {
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+      display: "block",
+    },
+  }),
+);
+
+// Backward compatibility alias for AvatarFrame
+export const AvatarFrame = BiometricAvatarFrame;
+
+export const BiometricReticle = styled("div")(({ theme }) => ({
+  position: "absolute",
+  inset: "3px",
+  pointerEvents: "none",
+  border: `1px dashed ${alpha(theme.palette.primary.light, 0.3)}`,
+  borderRadius: "7px",
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    top: -1,
+    left: -1,
+    width: "8px",
+    height: "8px",
+    borderTop: `2px solid ${theme.palette.primary.main}`,
+    borderLeft: `2px solid ${theme.palette.primary.main}`,
+  },
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    bottom: -1,
+    right: -1,
+    width: "8px",
+    height: "8px",
+    borderBottom: `2px solid ${theme.palette.primary.main}`,
+    borderRight: `2px solid ${theme.palette.primary.main}`,
+  },
+}));
+
+export const FrontDetailsPanel = styled("div")<{ isPortrait?: boolean }>(
+  ({ theme, isPortrait }) => ({
+    display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    gap: isPortrait ? theme.spacing(1.5) : theme.spacing(1),
+    flex: 1,
+    minWidth: 0,
+    height: isPortrait ? "auto" : "100%",
+    width: isPortrait ? "100%" : "auto",
+    gap: isPortrait ? theme.spacing(1) : theme.spacing(0.75),
   }),
 );
 
@@ -141,9 +211,9 @@ export const CardBrandTag = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: theme.spacing(0.75),
-  fontSize: "0.75rem",
+  fontSize: "0.72rem",
   fontWeight: 800,
-  letterSpacing: "1.2px",
+  letterSpacing: "1px",
   textTransform: "uppercase",
   color: theme.palette.text.primary,
 }));
@@ -152,11 +222,11 @@ export const ClearanceBadge = styled("div")<{ level?: string }>(
   ({ theme }) => ({
     display: "inline-flex",
     alignItems: "center",
-    padding: "2px 8px",
+    padding: "2px 7px",
     borderRadius: "4px",
-    fontSize: "0.65rem",
+    fontSize: "0.62rem",
     fontWeight: 800,
-    letterSpacing: "0.8px",
+    letterSpacing: "0.6px",
     textTransform: "uppercase",
     backgroundColor: alpha(theme.palette.primary.main, 0.15),
     color: theme.palette.primary.light,
@@ -169,35 +239,15 @@ export const FrontMainBody = styled("div")<{ isPortrait?: boolean }>(
     display: "flex",
     flexDirection: isPortrait ? "column" : "row",
     alignItems: isPortrait ? "center" : "flex-start",
-    gap: theme.spacing(2),
+    gap: theme.spacing(1.5),
     flex: 1,
-  }),
-);
-
-export const AvatarFrame = styled("div")<{ size?: number }>(
-  ({ theme, size = 64 }) => ({
-    position: "relative",
-    width: size,
-    height: size,
-    borderRadius: "10px",
-    overflow: "hidden",
-    border: `1.5px solid ${theme.palette.primary.main}`,
-    boxShadow: `0 0 12px ${alpha(theme.palette.primary.main, 0.35)}`,
-    flexShrink: 0,
-    backgroundColor: alpha(theme.palette.background.default, 0.5),
-    "& img": {
-      width: "100%",
-      height: "100%",
-      objectFit: "cover",
-      display: "block",
-    },
   }),
 );
 
 export const CadetDetailsColumn = styled("div")(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  gap: theme.spacing(0.5),
+  gap: theme.spacing(0.35),
   flex: 1,
   minWidth: 0,
 }));
@@ -207,34 +257,36 @@ export const CadetNameText = styled("div")(({ theme }) => ({
   fontWeight: 800,
   letterSpacing: "-0.01em",
   color: theme.palette.text.primary,
-  lineHeight: 1.2,
+  lineHeight: 1.15,
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
+  textTransform: "uppercase",
 }));
 
 export const CadetCallSignText = styled("div")(({ theme }) => ({
   fontFamily: "monospace",
-  fontSize: "0.75rem",
+  fontSize: "0.72rem",
   fontWeight: 700,
   color: theme.palette.secondary.light,
-  letterSpacing: "0.5px",
+  letterSpacing: "0.4px",
 }));
 
 export const CadetRoleText = styled("div")(({ theme }) => ({
-  fontSize: "0.75rem",
+  fontSize: "0.72rem",
   fontWeight: 600,
   color: theme.palette.text.secondary,
+  lineHeight: 1.2,
 }));
 
 export const MetaGrid = styled("div")<{ isPortrait?: boolean }>(
   ({ theme, isPortrait }) => ({
     display: "grid",
     gridTemplateColumns: isPortrait ? "1fr 1fr" : "repeat(3, 1fr)",
-    gap: theme.spacing(0.75),
+    gap: theme.spacing(0.6),
     marginTop: "auto",
-    paddingTop: theme.spacing(0.75),
-    borderTop: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+    paddingTop: theme.spacing(0.5),
+    borderTop: `1px solid ${alpha(theme.palette.divider, 0.4)}`,
   }),
 );
 
@@ -244,7 +296,7 @@ export const MetaItem = styled("div")({
 });
 
 export const MetaLabel = styled("span")(({ theme }) => ({
-  fontSize: "0.55rem",
+  fontSize: "0.52rem",
   fontWeight: 700,
   textTransform: "uppercase",
   letterSpacing: "0.5px",
@@ -252,7 +304,7 @@ export const MetaLabel = styled("span")(({ theme }) => ({
 }));
 
 export const MetaValue = styled("span")(({ theme }) => ({
-  fontSize: "0.7rem",
+  fontSize: "0.68rem",
   fontWeight: 700,
   fontFamily: "monospace",
   color: theme.palette.text.primary,
