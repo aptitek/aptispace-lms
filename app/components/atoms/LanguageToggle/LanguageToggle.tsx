@@ -13,10 +13,7 @@ import {
   type Transition,
 } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import {
-  LANGUAGE_STORAGE_KEY,
-  type SupportedLanguage,
-} from "../../../i18n";
+import { LANGUAGE_STORAGE_KEY, type SupportedLanguage } from "../../../i18n";
 import {
   UkFlag,
   FrFlag,
