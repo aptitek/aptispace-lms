@@ -22,7 +22,7 @@ if (!i18n.isInitialized) {
       fallbackLng: "en",
       supportedLngs: [...supportedLngs],
       defaultNS,
-      ns: ["common", "auth", "errors", "meta"],
+      ns: ["common", "auth", "errors", "meta", "onboarding"],
       detection: {
         order: ["localStorage", "navigator"],
         lookupLocalStorage: "aptispace_language",

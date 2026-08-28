@@ -1,0 +1,24 @@
+{
+  "title": "Intégration des Cadets de l'Académie AptiSpace",
+  "subtitle": "Initialisez votre badge d'identification de vol et configurez votre profil d'accréditation.",
+  "card": {
+    "agency": "CORPS D'EXPLORATION APTISPACE",
+    "badgeType": "BADGE D'IDENTIFICATION ISO/IEC 7810 ID-1",
+    "flipToBack": "Tourner le badge",
+    "flipToFront": "Face avant",
+    "emvChip": "Puce électronique ISO/IEC 7816",
+    "nfc": "Sans contact ISO/IEC 14443",
+    "magneticStripe": "Bande magnétique ISO/IEC 7811",
+    "authorizedSignature": "Signature autorisée du cadet",
+    "securityKey": "Clé de sécurité",
+    "mrz": "Zone de lecture automatique (MRZ)"
+  },
+  "form": {
+    "cadetName": "Nom complet du cadet",
+    "callSign": "Indicatif d'appel",
+    "division": "Spécialisation / Division",
+    "clearance": "Niveau d'habilitation",
+    "submit": "Délivrer le badge d'identification",
+    "preview": "Aperçu en direct ID-1"
+  }
+}

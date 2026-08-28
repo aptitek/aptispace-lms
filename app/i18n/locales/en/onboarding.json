@@ -1,0 +1,24 @@
+{
+  "title": "AptiSpace Academy Cadet Onboarding",
+  "subtitle": "Initialize your flight credential badge and configure your academy clearance profile.",
+  "card": {
+    "agency": "APTISPACE EXPLORATION CORPS",
+    "badgeType": "ISO/IEC 7810 ID-1 IDENTIFICATION BADGE",
+    "flipToBack": "Flip Badge",
+    "flipToFront": "Front Side",
+    "emvChip": "ISO/IEC 7816 Microchip",
+    "nfc": "ISO/IEC 14443 Contactless",
+    "magneticStripe": "ISO/IEC 7811 Magnetic Stripe",
+    "authorizedSignature": "Authorized Cadet Signature",
+    "securityKey": "Security Key",
+    "mrz": "Machine Readable Zone (MRZ)"
+  },
+  "form": {
+    "cadetName": "Cadet Full Name",
+    "callSign": "Call Sign",
+    "division": "Specialization / Division",
+    "clearance": "Security Clearance",
+    "submit": "Issue Identification Credential",
+    "preview": "Live ID-1 Preview"
+  }
+}
