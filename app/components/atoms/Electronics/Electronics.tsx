@@ -185,17 +185,53 @@ function ChipContactPads({
   );
 }
 
-export default function Electronics({
-  finish = "gold",
-  showNfcAntenna = true,
-  showChip = true,
-  showInnerCoil = true,
-  opacity = 0.85,
-  className,
-  testId = "electronics-layer",
-}: ElectronicsProps) {
+interface CoilConnectorsProps {
+  primaryColor: string;
+}
+
+function CoilConnectors({ primaryColor }: CoilConnectorsProps) {
+  return (
+    <g id="coil-feed-connectors">
+      {/* Upper direct conductive track joining outer coil lead to inner coupling coil */}
+      <path
+        d="M 51 45 V 148 A 16 16 0 0 0 67 164 H 86"
+        fill="none"
+        stroke={primaryColor}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.8}
+      />
+      {/* Lower direct conductive return track replicating upper track geometry symmetrically */}
+      <path
+        d="M 51 495 V 342 A 16 16 0 0 1 67 326 H 86"
+        fill="none"
+        stroke={primaryColor}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.8}
+      />
+    </g>
+  );
+}
+
+const defaultElectronics = {
+  finish: "gold" as const,
+  showNfcAntenna: true,
+  showChip: true,
+  showInnerCoil: true,
+  opacity: 0.85,
+  testId: "electronics-layer",
+};
+
+export default function Electronics(props: ElectronicsProps) {
+  const config = { ...defaultElectronics, ...props };
   const theme = useTheme();
-  const colors = useMemo(() => getFinishColors(finish, theme), [finish, theme]);
+  const colors = useMemo(
+    () => getFinishColors(config.finish, theme),
+    [config.finish, theme],
+  );
 
   const outerCoilPath = useMemo(() => {
     return generateSpiralPath({
@@ -230,9 +266,9 @@ export default function Electronics({
   return (
     <SvgLayer
       viewBox={`0 0 ${ISO_ELECTRONICS_CONSTANTS.viewWidth} ${ISO_ELECTRONICS_CONSTANTS.viewHeight}`}
-      customOpacity={opacity}
-      className={className}
-      data-testid={testId}
+      customOpacity={config.opacity}
+      className={config.className}
+      data-testid={config.testId}
       aria-hidden="true"
     >
       <defs>
@@ -254,30 +290,26 @@ export default function Electronics({
         </filter>
       </defs>
 
-      {showNfcAntenna && (
-        <g id="iso-14443-outer-antenna">
-          <path
-            d={outerCoilPath}
-            fill="none"
-            stroke={colors.primary}
-            strokeWidth={1.8}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity={0.7}
-          />
-          <line
-            x1={ISO_ELECTRONICS_CONSTANTS.outerCoilX + 16}
-            y1={ISO_ELECTRONICS_CONSTANTS.outerCoilY + 30}
-            x2={ISO_ELECTRONICS_CONSTANTS.chipCenterX - 80}
-            y2={ISO_ELECTRONICS_CONSTANTS.chipCenterY - 60}
-            stroke={colors.highlight}
-            strokeWidth={2}
-            strokeDasharray="4 2"
-          />
-        </g>
+      {/* ISO 14443 Outer NFC Antenna Perimeter Track */}
+      {config.showNfcAntenna && (
+        <path
+          d={outerCoilPath}
+          fill="none"
+          stroke={colors.primary}
+          strokeWidth={1.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity={0.7}
+        />
       )}
 
-      {showInnerCoil && (
+      {/* Solid Inter-Coil Feed Traces connecting outer antenna and inner coupling coil without round circles */}
+      {config.showNfcAntenna && config.showInnerCoil && (
+        <CoilConnectors primaryColor={colors.primary} />
+      )}
+
+      {/* Inner Inductive Coupling Coil */}
+      {config.showInnerCoil && (
         <path
           d={innerCoilPath}
           fill="none"
@@ -289,7 +321,8 @@ export default function Electronics({
         />
       )}
 
-      {showChip && (
+      {/* ISO 7816-2 Smart Contact Chip */}
+      {config.showChip && (
         <ChipContactPads
           cx={ISO_ELECTRONICS_CONSTANTS.chipCenterX}
           cy={ISO_ELECTRONICS_CONSTANTS.chipCenterY}

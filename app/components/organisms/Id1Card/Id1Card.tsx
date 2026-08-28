@@ -6,7 +6,10 @@ import AutorenewIcon from "@mui/icons-material/Autorenew";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import Electronics from "../../atoms/Electronics/Electronics";
+import Guilloche from "../../atoms/Guilloche/Guilloche";
+import MrzZone from "../../atoms/MrzZone/MrzZone";
 import type { ElectronicsFinish } from "../../atoms/Electronics/Electronics.types";
+import type { GuillocheVariant } from "../../atoms/Guilloche/Guilloche.types";
 import { type Id1CardProps, type Id1CardCredential } from "./Id1Card.types";
 import {
   CardWrapper,
@@ -44,7 +47,6 @@ import {
   BackNoticeRow,
   BackFinePrint,
   BackQrBox,
-  MrzZone,
   FlipBadge,
 } from "./Id1Card.styles";
 
@@ -68,18 +70,6 @@ const defaultCredential: Id1CardCredential = {
   barcodeValue: "APTI-7810-ID1-CADET-VALID",
 };
 
-const buildMrzLines = (card: Id1CardCredential) => {
-  const sanitizedName = (card.name || "CADET")
-    .toUpperCase()
-    .replace(/[^A-Z]/g, "<");
-  const sanitizedId = (card.id || "APTI7810").replace(/[^A-Z0-9]/g, "");
-  return {
-    line1: `IDAPT${sanitizedId.padEnd(9, "<")}<<<<<<<<<<<<<<<<<<`.slice(0, 30),
-    line2: `2608284M3008287APT<<<<<<<<<<<4`.slice(0, 30),
-    line3: `${sanitizedName}<<<<<<<<<<<<<<<<<<<<<<<<<<<<`.slice(0, 30),
-  };
-};
-
 interface CardSideProps {
   card: Id1CardCredential;
   isPortrait?: boolean;
@@ -87,6 +77,8 @@ interface CardSideProps {
   showElectronics?: boolean;
   showNfcAntenna?: boolean;
   electronicsFinish?: ElectronicsFinish;
+  showGuilloche?: boolean;
+  guillocheVariant?: GuillocheVariant;
 }
 
 function CardFrontContent({
@@ -96,11 +88,21 @@ function CardFrontContent({
   showElectronics = true,
   showNfcAntenna = true,
   electronicsFinish = "gold",
+  showGuilloche = true,
+  guillocheVariant = "holo-spectrum",
 }: CardSideProps) {
   const { t } = useTranslation("onboarding");
 
   return (
     <CardFace isBack={false}>
+      {showGuilloche && (
+        <Guilloche
+          seed={card.id || card.name}
+          variant={guillocheVariant}
+          opacity={0.3}
+        />
+      )}
+
       {showElectronics && (
         <Electronics
           finish={electronicsFinish}
@@ -181,8 +183,27 @@ function CardFrontContent({
   );
 }
 
+function buildMrzData(card: Id1CardCredential) {
+  const surname = (card.name || "MERCER").split(" ")[1] || "MERCER";
+  const givenNames = (card.name || "ALEX").split(" ")[0] || "ALEX";
+  const documentNumber = (card.id || "0942").replace(/[^0-9]/g, "").slice(0, 9);
+  const expiryDate =
+    (card.expiryDate || "3008").replace("-", "").slice(0, 4) + "01";
+
+  return {
+    documentNumber,
+    surname,
+    givenNames,
+    birthDate: "950412",
+    expiryDate,
+    sex: "M" as const,
+    issuingState: "APT",
+    nationality: "APT",
+  };
+}
+
 function CardBackContent({ card }: CardSideProps) {
-  const mrz = buildMrzLines(card);
+  const mrzData = buildMrzData(card);
 
   return (
     <CardFace isBack={true}>
@@ -199,7 +220,8 @@ function CardBackContent({ card }: CardSideProps) {
             <span>
               {card.name
                 ?.toLowerCase()
-                .replace(/\b\w/g, (c) => c.toUpperCase()) || "Alex Mercer"}
+                .replace(/\b\w/g, (char) => char.toUpperCase()) ||
+                "Alex Mercer"}
             </span>
             <FingerprintIcon />
           </SignatureStrip>
@@ -223,38 +245,33 @@ function CardBackContent({ card }: CardSideProps) {
         </BackQrBox>
       </BackNoticeRow>
 
-      <MrzZone>
-        <div>{mrz.line1}</div>
-        <div>{mrz.line2}</div>
-        <div>{mrz.line3}</div>
-      </MrzZone>
+      <MrzZone cardData={mrzData} compact showValidation />
     </CardFace>
   );
 }
 
-export const Id1Card = forwardRef<Id1CardHandle, Id1CardProps>((props, ref) => {
-  const {
-    credential,
-    orientation = "landscape",
-    size = "responsive",
-    isFlipped: controlledFlipped,
-    onFlipChange,
-    interactive = true,
-    showElectronics = true,
-    showNfcAntenna = true,
-    electronicsFinish = "gold",
-    className,
-    testId = "id1-card",
-  } = props;
+const defaultCardConfig = {
+  orientation: "landscape" as const,
+  size: "responsive" as const,
+  interactive: true,
+  showElectronics: true,
+  showNfcAntenna: true,
+  electronicsFinish: "gold" as const,
+  showGuilloche: true,
+  guillocheVariant: "holo-spectrum" as const,
+  testId: "id1-card",
+};
 
+export const Id1Card = forwardRef<Id1CardHandle, Id1CardProps>((props, ref) => {
+  const config = { ...defaultCardConfig, ...props };
   const [uncontrolledFlipped, setUncontrolledFlipped] = useState(false);
-  const isFlipped = controlledFlipped ?? uncontrolledFlipped;
+  const isFlipped = props.isFlipped ?? uncontrolledFlipped;
 
   const updateFlipped = (next: boolean) => {
-    if (controlledFlipped === undefined) {
+    if (props.isFlipped === undefined) {
       setUncontrolledFlipped(next);
     }
-    onFlipChange?.(next);
+    props.onFlipChange?.(next);
   };
 
   useImperativeHandle(ref, () => ({
@@ -262,16 +279,16 @@ export const Id1Card = forwardRef<Id1CardHandle, Id1CardProps>((props, ref) => {
     setFlipped: (next: boolean) => updateFlipped(next),
   }));
 
-  const card: Id1CardCredential = { ...defaultCredential, ...credential };
-  const isPortrait = orientation === "portrait";
+  const card: Id1CardCredential = { ...defaultCredential, ...props.credential };
+  const isPortrait = config.orientation === "portrait";
 
   return (
     <CardWrapper
-      cardOrientation={orientation}
-      cardSize={size}
-      className={className}
-      data-testid={testId}
-      onClick={interactive ? () => updateFlipped(!isFlipped) : undefined}
+      cardOrientation={config.orientation}
+      cardSize={config.size}
+      className={props.className}
+      data-testid={config.testId}
+      onClick={config.interactive ? () => updateFlipped(!isFlipped) : undefined}
       role="region"
       aria-label={`ISO/IEC 7810 ID-1 Space Identification Card for ${card.name}`}
     >
@@ -279,10 +296,12 @@ export const Id1Card = forwardRef<Id1CardHandle, Id1CardProps>((props, ref) => {
         <CardFrontContent
           card={card}
           isPortrait={isPortrait}
-          interactive={interactive}
-          showElectronics={showElectronics}
-          showNfcAntenna={showNfcAntenna}
-          electronicsFinish={electronicsFinish}
+          interactive={config.interactive}
+          showElectronics={config.showElectronics}
+          showNfcAntenna={config.showNfcAntenna}
+          electronicsFinish={config.electronicsFinish}
+          showGuilloche={config.showGuilloche}
+          guillocheVariant={config.guillocheVariant}
         />
         <CardBackContent card={card} />
       </CardInner>

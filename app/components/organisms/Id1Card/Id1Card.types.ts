@@ -1,4 +1,5 @@
-import type { ElectronicsFinish } from "~/components/atoms/Electronics/Electronics.types";
+import type { ElectronicsFinish } from "../../atoms/Electronics/Electronics.types";
+import type { GuillocheVariant } from "../../atoms/Guilloche/Guilloche.types";
 
 export type Id1CardOrientation = "landscape" | "portrait";
 export type Id1CardSize = "sm" | "md" | "lg" | "responsive";
@@ -32,6 +33,8 @@ export interface Id1CardProps {
   showElectronics?: boolean;
   showNfcAntenna?: boolean;
   electronicsFinish?: ElectronicsFinish;
+  showGuilloche?: boolean;
+  guillocheVariant?: GuillocheVariant;
   className?: string;
   testId?: string;
 }

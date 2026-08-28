@@ -214,23 +214,6 @@ export const BackQrBox = styled("div")(({ theme }) => ({
   },
 }));
 
-// Machine Readable Zone (MRZ - ICAO / ISO 7810 3-line format)
-export const MrzZone = styled("div")(({ theme }) => ({
-  fontFamily: '"Courier New", Courier, monospace',
-  fontSize: "clamp(8px, 2vw, 11px)",
-  letterSpacing: "1.5px",
-  lineHeight: 1.25,
-  color: theme.palette.text.primary,
-  textShadow: `0 0 2px ${theme.palette.primary.light}`,
-  marginTop: "auto",
-  paddingTop: "6px",
-  borderTop: `1px dashed ${theme.palette.divider}`,
-  userSelect: "all",
-  overflow: "hidden",
-  whiteSpace: "nowrap",
-  zIndex: 2,
-}));
-
 export const FlipBadge = styled("div")(({ theme }) => ({
   display: "inline-flex",
   alignItems: "center",
