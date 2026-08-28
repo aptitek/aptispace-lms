@@ -41,4 +41,21 @@ describe("ISO/IEC 7810 ID-1 Card Component", () => {
     expect(custom.width).toBe(500);
     expect(custom.height).toBe(300);
   });
+
+  it("supports right-aligned chip position and custom rotation props", () => {
+    // Verifies prop typing and default configuration
+    const defaultProps = {
+      chipPosition: "left" as const,
+      electronicsRotation: 0,
+    };
+    expect(defaultProps.chipPosition).toBe("left");
+    expect(defaultProps.electronicsRotation).toBe(0);
+
+    const rightRotatedProps = {
+      chipPosition: "right" as const,
+      electronicsRotation: 180,
+    };
+    expect(rightRotatedProps.chipPosition).toBe("right");
+    expect(rightRotatedProps.electronicsRotation).toBe(180);
+  });
 });

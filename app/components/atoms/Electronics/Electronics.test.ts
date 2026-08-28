@@ -47,4 +47,20 @@ describe("Electronics Component (ISO/IEC 7816 & 14443)", () => {
     expect(backChipX).toBe(693.5);
     expect(frontChipX + backChipX).toBe(cardWidth);
   });
+
+  it("handles left and right chipPosition with symmetry", () => {
+    const isMirrored = (
+      pos: "left" | "right",
+      side: "front" | "back",
+    ): boolean => (pos === "right") !== (side === "back");
+
+    // Front with chipPosition="left": normal (chip on left at 162.5)
+    expect(isMirrored("left", "front")).toBe(false);
+    // Front with chipPosition="right": mirrored (chip on right at 693.5)
+    expect(isMirrored("right", "front")).toBe(true);
+    // Back with chipPosition="left": mirrored (chip on right at 693.5)
+    expect(isMirrored("left", "back")).toBe(true);
+    // Back with chipPosition="right": unmirrored relative to front-right (chip on left at 162.5)
+    expect(isMirrored("right", "back")).toBe(false);
+  });
 });

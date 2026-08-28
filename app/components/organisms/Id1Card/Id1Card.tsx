@@ -147,6 +147,8 @@ const DEFAULT_CARD_PROPS = {
   holoStrength: 0.75,
   showElectronics: true,
   electronicsFinish: "gold" as ElectronicsFinish,
+  chipPosition: "left" as "left" | "right",
+  electronicsRotation: 0,
   showChip: true,
   showGuilloche: true,
   guillocheVariant: "holo-spectrum" as GuillocheVariant,
@@ -239,6 +241,8 @@ function Id1CardFace({ conf, props, faceSide, dims }: Id1CardFaceProps) {
           <Electronics
             side={faceSide}
             finish={conf.electronicsFinish}
+            chipPosition={conf.chipPosition}
+            rotation={conf.electronicsRotation}
             showNfcAntenna={showNfcAntenna}
             showChip={conf.showChip}
             chipView={chipView}

@@ -128,6 +128,18 @@ const meta: Meta<typeof Id1Card> = {
       description: "Metallic finish for conductive traces",
       table: { category: "Security Electronics" },
     },
+    chipPosition: {
+      control: "radio",
+      options: ["left", "right"],
+      description: "Horizontal alignment of the microchip module",
+      table: { category: "Security Electronics" },
+    },
+    electronicsRotation: {
+      control: { type: "range", min: 0, max: 360, step: 90 },
+      description:
+        "Angular rotation of electronics around card center (degrees)",
+      table: { category: "Security Electronics" },
+    },
     showChip: {
       control: "boolean",
       description: "Show ISO 7816 smart microchip module",
@@ -219,6 +231,8 @@ const meta: Meta<typeof Id1Card> = {
     shadow: "xl",
     showElectronics: true,
     electronicsFinish: "gold",
+    chipPosition: "left",
+    electronicsRotation: 0,
     showChip: true,
     showGuilloche: true,
     guillocheVariant: "holo-spectrum",
@@ -403,7 +417,18 @@ export const PortraitOrientationBadge: Story = {
 };
 
 /**
- * 9. Minimalist Blank Card
+ * 9. Right-Positioned Smart Chip Module (Rotated / Inverted Electronics Layout)
+ */
+export const RightPositionedSmartChip: Story = {
+  args: {
+    side: "front",
+    chipPosition: "right",
+    flipOnClick: true,
+  },
+};
+
+/**
+ * 10. Minimalist Blank Card
  */
 export const MinimalistBlankCard: Story = {
   args: {

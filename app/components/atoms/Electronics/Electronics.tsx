@@ -325,8 +325,24 @@ function resolveChipViewType(
   return "front";
 }
 
+function getElectronicsTransform(
+  isMirrored: boolean,
+  rotation?: number,
+): string | undefined {
+  const parts: string[] = [];
+  if (isMirrored) {
+    parts.push("translate(856, 0) scale(-1, 1)");
+  }
+  if (rotation && rotation % 360 !== 0) {
+    parts.push(`rotate(${rotation} 428 270)`);
+  }
+  return parts.length > 0 ? parts.join(" ") : undefined;
+}
+
 const defaultElectronics = {
   finish: "gold" as const,
+  chipPosition: "left" as const,
+  rotation: 0,
   showNfcAntenna: true,
   showChip: true,
   showInnerCoil: true,
@@ -343,12 +359,18 @@ export default function Electronics(props: ElectronicsProps) {
     [config.finish, theme],
   );
 
-  const isMirrored = config.mirrored || config.side === "back";
+  const isMirrored =
+    (config.chipPosition === "right") !==
+    (config.mirrored || config.side === "back");
   const chipViewType = resolveChipViewType(
     props.chipView,
     config.showChip,
     props.side,
     config.mirrored,
+  );
+  const transformAttr = useMemo(
+    () => getElectronicsTransform(isMirrored, config.rotation),
+    [isMirrored, config.rotation],
   );
 
   const outerCoilPath = useMemo(() => {
@@ -425,7 +447,7 @@ export default function Electronics(props: ElectronicsProps) {
         </filter>
       </defs>
 
-      <g transform={isMirrored ? "translate(856, 0) scale(-1, 1)" : undefined}>
+      <g transform={transformAttr}>
         {config.showNfcAntenna && (
           <path
             d={outerCoilPath}

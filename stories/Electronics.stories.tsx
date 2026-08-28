@@ -33,6 +33,15 @@ const meta: Meta<typeof Electronics> = {
       options: ["front", "back"],
       description: "Card side (Front contact pads or Back encapsulated die)",
     },
+    chipPosition: {
+      control: "radio",
+      options: ["left", "right"],
+      description: "Horizontal orientation of the smart card chip module",
+    },
+    rotation: {
+      control: { type: "range", min: 0, max: 360, step: 90 },
+      description: "Angular rotation around card center (degrees)",
+    },
     chipView: {
       control: "select",
       options: ["front", "back", "none"],
@@ -187,6 +196,23 @@ export const NfcAntennaOnly: Story = {
     showChip: false,
     showInnerCoil: true,
     opacity: 0.85,
+  },
+  render: (args) => (
+    <CardPreviewHolder>
+      <Electronics {...args} />
+    </CardPreviewHolder>
+  ),
+};
+
+export const RightAlignedChip: Story = {
+  args: {
+    finish: "gold",
+    side: "front",
+    chipPosition: "right",
+    showNfcAntenna: true,
+    showChip: true,
+    showInnerCoil: true,
+    opacity: 0.9,
   },
   render: (args) => (
     <CardPreviewHolder>

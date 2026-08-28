@@ -65,6 +65,8 @@ export interface Id1CardProps {
   // Electronics Security Layer
   showElectronics?: boolean;
   electronicsFinish?: ElectronicsFinish;
+  chipPosition?: "left" | "right";
+  electronicsRotation?: number;
   showNfcAntenna?: boolean;
   showChip?: boolean;
   chipView?: "front" | "back" | "none";

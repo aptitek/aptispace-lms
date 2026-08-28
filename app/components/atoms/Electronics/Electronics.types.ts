@@ -1,9 +1,12 @@
 export type ElectronicsFinish = "gold" | "silver" | "copper" | "cyan-laser";
 export type ElectronicsChipView = "front" | "back" | "none";
+export type ElectronicsChipPosition = "left" | "right";
 
 export interface ElectronicsProps {
   finish?: ElectronicsFinish;
   side?: "front" | "back";
+  chipPosition?: ElectronicsChipPosition;
+  rotation?: number;
   showNfcAntenna?: boolean;
   showChip?: boolean;
   chipView?: ElectronicsChipView;
