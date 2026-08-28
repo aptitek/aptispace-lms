@@ -13,6 +13,7 @@ import {
   type Id1CardSize,
   type Id1CardFlipDirection,
   type Id1CardCredential,
+  type Id1CredentialVariant,
 } from "./Id1Card.types";
 import {
   CardFaceContainer,
@@ -65,6 +66,7 @@ interface CardContentOverlayProps {
   children?: React.ReactNode;
   content?: React.ReactNode;
   credential?: Partial<Id1CardCredential>;
+  layout?: Id1CredentialVariant;
   side: Id1CardSide;
   isPortrait: boolean;
   transparent?: boolean;
@@ -74,6 +76,7 @@ function CardContentOverlay({
   children,
   content,
   credential,
+  layout,
   side,
   isPortrait,
   transparent,
@@ -84,6 +87,7 @@ function CardContentOverlay({
     inner = (
       <Id1CredentialLayout
         credential={credential}
+        layout={layout}
         side={side}
         isPortrait={isPortrait}
       />
@@ -97,6 +101,7 @@ interface ReverseGhostLayerProps {
   isTransparent?: boolean;
   faceSide: Id1CardSide;
   credential?: Partial<Id1CardCredential>;
+  layout?: Id1CredentialVariant;
   isPortrait: boolean;
   isVertical: boolean;
   opacity: number;
@@ -106,6 +111,7 @@ function ReverseGhostLayer({
   isTransparent,
   faceSide,
   credential,
+  layout,
   isPortrait,
   isVertical,
   opacity,
@@ -122,6 +128,7 @@ function ReverseGhostLayer({
     >
       <Id1CredentialLayout
         credential={credential}
+        layout={layout}
         side={reverseSide}
         isPortrait={isPortrait}
       />
@@ -136,6 +143,7 @@ const DEFAULT_CARD_PROPS = {
   flipDirection: "horizontal" as Id1CardFlipDirection,
   orientation: "landscape" as Id1CardOrientation,
   size: "responsive" as Id1CardSize,
+  layout: "aptispace" as Id1CredentialVariant,
   transparent: false,
   transparentGhostOpacity: 0.22,
   showGlare: true,
@@ -257,6 +265,7 @@ function Id1CardFace({ conf, props, faceSide, dims }: Id1CardFaceProps) {
           isTransparent={conf.transparent}
           faceSide={faceSide}
           credential={props.credential}
+          layout={conf.layout}
           isPortrait={isPortrait}
           isVertical={conf.flipDirection === "vertical"}
           opacity={
@@ -281,6 +290,7 @@ function Id1CardFace({ conf, props, faceSide, dims }: Id1CardFaceProps) {
           children={props.children}
           content={props.content}
           credential={props.credential}
+          layout={conf.layout}
           side={faceSide}
           isPortrait={isPortrait}
           transparent={conf.transparent}

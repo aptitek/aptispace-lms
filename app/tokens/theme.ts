@@ -20,6 +20,12 @@ export const SOLARIZED_BASE = {
   green: "#859900",
 } as const;
 
+// Official EU / French identity-card flag colours (EU Reg. 2019/1157)
+export const EU_FLAG_COLORS = {
+  blue: "#003399", // EU Reflex Blue field
+  gold: "#ffcc00", // EU Yellow 12-stars circle & country code
+} as const;
+
 export const darkThemeOptions: ThemeOptions = {
   palette: {
     mode: "dark",

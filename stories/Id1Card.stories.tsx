@@ -208,9 +208,16 @@ const meta: Meta<typeof Id1Card> = {
     },
 
     // Credential Data
+    layout: {
+      control: "select",
+      options: ["aptispace", "french-id"],
+      description:
+        "Credential layout variant — the French CNIe layout or the default cadet card",
+      table: { category: "Credential Data" },
+    },
     credential: {
       control: "object",
-      description: "Cadet identity data",
+      description: "Cadet / French CNIe identity data",
       table: { category: "Credential Data" },
     },
   },
@@ -255,6 +262,25 @@ const meta: Meta<typeof Id1Card> = {
 
 export default meta;
 type Story = StoryObj<typeof Id1Card>;
+
+/** Shared French CNIe holder data used by the French-ID stories below. */
+const FRENCH_CREDENTIAL = {
+  surname: "DUPONT",
+  givenNames: "JULIE MARIE",
+  sex: "F",
+  nationality: "FRA",
+  dateOfBirth: "15.03.1990",
+  placeOfBirth: "PARIS (75)",
+  documentNumber: "21AA12345",
+  expiryDate: "15.03.2030",
+  can: "123456",
+  height: "1,75 m",
+  address: "12 RUE DE LA PAIX\n75001 PARIS",
+  issueDate: "16.03.2020",
+  authority: "PRÉFECTURE DE POLICE",
+  avatarUrl:
+    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
+};
 
 /**
  * 1. Default Interactive ID-1 Card (All controls active with click-to-flip)
@@ -428,7 +454,93 @@ export const RightPositionedSmartChip: Story = {
 };
 
 /**
- * 10. Minimalist Blank Card
+ * 10. French National Identity Card (CNIe) — Front Face
+ */
+export const FrenchNationalIdentityCardFront: Story = {
+  args: {
+    layout: "french-id",
+    side: "front",
+    flipOnClick: true,
+    electronicsFinish: "silver",
+    guillocheVariant: "cyber-cyan",
+    credential: FRENCH_CREDENTIAL,
+  },
+};
+
+/**
+ * 11. French National Identity Card (CNIe) — Back Face
+ */
+export const FrenchNationalIdentityCardBack: Story = {
+  args: {
+    layout: "french-id",
+    side: "back",
+    flipOnClick: true,
+    electronicsFinish: "silver",
+    guillocheVariant: "cyber-cyan",
+    credential: FRENCH_CREDENTIAL,
+  },
+};
+
+/**
+ * 12. French National Identity Card (CNIe) — Side-by-Side Dual View
+ */
+export const FrenchNationalIdentityCardDualView: Story = {
+  args: {
+    layout: "french-id",
+    flipOnClick: false,
+    electronicsFinish: "silver",
+    guillocheVariant: "cyber-cyan",
+    credential: FRENCH_CREDENTIAL,
+  },
+  render: (args) => (
+    <Box
+      sx={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 4,
+        alignItems: "center",
+        justifyContent: "center",
+        p: 2,
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 800, color: "text.secondary" }}
+        >
+          FRONT (RECTO)
+        </Typography>
+        <Id1Card {...args} side="front" enableFlip={false} size="md" />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 800, color: "text.secondary" }}
+        >
+          BACK (VERSO)
+        </Typography>
+        <Id1Card {...args} side="back" enableFlip={false} size="md" />
+      </Box>
+    </Box>
+  ),
+};
+
+/**
+ * 13. Minimalist Blank Card
  */
 export const MinimalistBlankCard: Story = {
   args: {

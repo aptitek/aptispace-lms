@@ -3,8 +3,10 @@ import MrzZone from "../../atoms/MrzZone/MrzZone";
 import BiometricAvatar from "../../atoms/BiometricAvatar/BiometricAvatar";
 import {
   type Id1CardCredential,
+  type Id1CredentialVariant,
   type Id1CredentialLayoutProps,
 } from "./Id1Card.types";
+import { FrenchCredentialView } from "./Id1CredentialLayout.french";
 import {
   FrontLayoutRoot,
   FrontDetailsPanel,
@@ -40,6 +42,18 @@ export const DEFAULT_CREDENTIAL: Required<Id1CardCredential> = {
     "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
   securityCode: "781",
   barcodeValue: "APTI-7810-9402",
+  // French CNIe fields (unused by the default cadet layout)
+  surname: "MERCER",
+  givenNames: "ALEX",
+  sex: "X",
+  nationality: "APT",
+  dateOfBirth: "1990-01-08",
+  placeOfBirth: "",
+  documentNumber: "APTI-9402",
+  can: "000000",
+  address: "",
+  height: "",
+  authority: "",
 };
 
 export interface SideCredentialProps {
@@ -161,7 +175,19 @@ export function Id1CredentialLayout({
   isPortrait = false,
   className,
   testId,
+  layout = "aptispace" as Id1CredentialVariant,
 }: Id1CredentialLayoutProps) {
+  if (layout === "french-id") {
+    return (
+      <FrenchCredentialView
+        credential={credential}
+        side={side}
+        className={className}
+        testId={testId ? `${testId}-french` : undefined}
+      />
+    );
+  }
+
   if (side === "back") {
     return (
       <BackCredentialView

@@ -9,6 +9,7 @@ export type Id1CardSize = "sm" | "md" | "lg" | "responsive";
 export type Id1CardFlipDirection = "horizontal" | "vertical";
 
 export interface Id1CardCredential {
+  // --- Generic / AptiSpace cadet identity ---
   id?: string;
   name?: string;
   callSign?: string;
@@ -20,7 +21,23 @@ export interface Id1CardCredential {
   avatarUrl?: string;
   securityCode?: string;
   barcodeValue?: string;
+
+  // --- French CNIe fields (bilingual labels, see FrenchIdCard.layout.ts) ---
+  surname?: string; // Nom / Surname
+  givenNames?: string; // Prénoms / Given names
+  sex?: string; // Sexe / Sex — "M" | "F"
+  nationality?: string; // Nationalité / Nationality — "FRA"
+  dateOfBirth?: string; // Date de naissance — DD.MM.YYYY
+  placeOfBirth?: string; // Lieu de naissance — "PARIS (75)"
+  documentNumber?: string; // N° du document — 9 chars
+  can?: string; // CAN — 6-digit Card Access Number
+  address?: string; // Adresse / Address (multi-line)
+  height?: string; // Taille / Height — "1,75 m"
+  authority?: string; // Autorité de délivrance / Issuing authority
 }
+
+/** Selectable credential layout rendered inside the ID-1 card. */
+export type Id1CredentialVariant = "aptispace" | "french-id";
 
 export interface Id1CardProps {
   // Side Selection & 3D Flip Animation
@@ -84,6 +101,7 @@ export interface Id1CardProps {
 
   // Credential Data & Content
   credential?: Partial<Id1CardCredential>;
+  layout?: Id1CredentialVariant;
   content?: React.ReactNode;
   children?: React.ReactNode;
 }
@@ -94,6 +112,8 @@ export interface Id1CredentialLayoutProps {
   isPortrait?: boolean;
   className?: string;
   testId?: string;
+  /** Which credential layout to render ("aptispace" | "french-id"). */
+  layout?: Id1CredentialVariant;
 }
 
 // ISO/IEC 7810 ID-1 Standard Dimensions (mm)
