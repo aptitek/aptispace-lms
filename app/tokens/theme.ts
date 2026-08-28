@@ -1,7 +1,7 @@
 import { createTheme, type ThemeOptions } from "@mui/material/styles";
 
 // Solarized canonical color spectrum
-const SOLARIZED_BASE = {
+export const SOLARIZED_BASE = {
   base03: "#002b36",
   base02: "#073642",
   base01: "#586e75",

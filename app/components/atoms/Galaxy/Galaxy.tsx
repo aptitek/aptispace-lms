@@ -1,9 +1,10 @@
 import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
 import { useEffect, useRef, type HTMLAttributes } from "react";
-import { useTheme, type Theme } from "@mui/material/styles";
+import { useTheme, lighten, type Theme } from "@mui/material/styles";
 import "./Galaxy.css";
 
 import { vertexShader, fragmentShader } from "./galaxyShaders";
+import { SOLARIZED_BASE } from "~/tokens/theme";
 
 export interface GalaxyStarColors {
   red?: string;
@@ -151,29 +152,57 @@ function resolveBackgroundHex(theme: Theme, customBg?: string): string {
   return theme.palette.background.default || theme.palette.common.white;
 }
 
+// Stellar blackbody defaults: red → orange → yellow → white → blue-white.
+// Uses Solarized base colors with MUI lighten() for astrophysically accurate star hues.
+// Note: We avoid using palette.warning (which maps to amber/olive) and palette.info (violet)
+// to prevent the olive tint issue in star colors.
+function getStellarDarkColors(): ResolvedGalaxyColors {
+  return {
+    red: parseColorToRgb(SOLARIZED_BASE.red),
+    orange: parseColorToRgb(SOLARIZED_BASE.orange),
+    yellow: parseColorToRgb(lighten(SOLARIZED_BASE.yellow, 0.4)), // bright warm stellar yellow
+    white: parseColorToRgb(lighten(SOLARIZED_BASE.base2, 0.35)), // near-white for hot stars
+    blue: parseColorToRgb(lighten(SOLARIZED_BASE.blue, 0.45)), // blue-white for hottest stars
+    background: parseColorToRgb(SOLARIZED_BASE.base03),
+  };
+}
+
+function getStellarLightColors(): ResolvedGalaxyColors {
+  return {
+    red: parseColorToRgb(SOLARIZED_BASE.red),
+    orange: parseColorToRgb(SOLARIZED_BASE.orange),
+    yellow: parseColorToRgb(SOLARIZED_BASE.yellow), // reads as yellow on light bg
+    white: parseColorToRgb(SOLARIZED_BASE.base00), // body text (dark on light bg)
+    blue: parseColorToRgb(SOLARIZED_BASE.blue), // primary blue
+    background: parseColorToRgb(SOLARIZED_BASE.base3),
+  };
+}
+
 function getDarkStarPalette(
-  palette: Theme["palette"],
+  _palette: Theme["palette"],
   custom: GalaxyStarColors,
 ) {
+  const stellar = getStellarDarkColors();
   return {
-    red: parseColorToRgb(custom.red ?? palette.error.light),
-    orange: parseColorToRgb(custom.orange ?? palette.warning.main),
-    yellow: parseColorToRgb(custom.yellow ?? palette.warning.light),
-    white: parseColorToRgb(custom.white ?? palette.common.white),
-    blue: parseColorToRgb(custom.blue ?? palette.info.light),
+    red: custom.red ? parseColorToRgb(custom.red) : stellar.red,
+    orange: custom.orange ? parseColorToRgb(custom.orange) : stellar.orange,
+    yellow: custom.yellow ? parseColorToRgb(custom.yellow) : stellar.yellow,
+    white: custom.white ? parseColorToRgb(custom.white) : stellar.white,
+    blue: custom.blue ? parseColorToRgb(custom.blue) : stellar.blue,
   };
 }
 
 function getLightStarPalette(
-  palette: Theme["palette"],
+  _palette: Theme["palette"],
   custom: GalaxyStarColors,
 ) {
+  const stellar = getStellarLightColors();
   return {
-    red: parseColorToRgb(custom.red ?? palette.error.main),
-    orange: parseColorToRgb(custom.orange ?? palette.warning.dark),
-    yellow: parseColorToRgb(custom.yellow ?? palette.warning.main),
-    white: parseColorToRgb(custom.white ?? palette.text.primary),
-    blue: parseColorToRgb(custom.blue ?? palette.info.main),
+    red: custom.red ? parseColorToRgb(custom.red) : stellar.red,
+    orange: custom.orange ? parseColorToRgb(custom.orange) : stellar.orange,
+    yellow: custom.yellow ? parseColorToRgb(custom.yellow) : stellar.yellow,
+    white: custom.white ? parseColorToRgb(custom.white) : stellar.white,
+    blue: custom.blue ? parseColorToRgb(custom.blue) : stellar.blue,
   };
 }
 
