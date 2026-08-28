@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "aptispace-lms",
+  "compatibility_date": "2026-08-28",
+  "compatibility_flags": ["nodejs_compat"],
+  "pages_build_output_dir": "./build/client",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "aptispace-lms-db",
+      "database_id": "local-d1-aptispace-lms-db",
+      "migrations_dir": "./drizzle/migrations",
+    },
+  ],
+}

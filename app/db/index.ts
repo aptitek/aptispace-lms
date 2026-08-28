@@ -1,10 +1,29 @@
 import type { D1Database } from "@cloudflare/workers-types";
-import { drizzle } from "drizzle-orm/d1";
+import { drizzle, type DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "./schema";
 
-export function getDb(d1: D1Database) {
+export function getDb(d1: D1Database): DrizzleD1Database<typeof schema> {
   return drizzle(d1, { schema });
 }
 
-export type Database = ReturnType<typeof getDb>;
+export interface CloudflareEnv {
+  DB?: D1Database;
+  [key: string]: unknown;
+}
+
+export function getDatabaseFromContext(context: unknown): Database | null {
+  if (!context || typeof context !== "object") return null;
+
+  const ctx = context as {
+    cloudflare?: { env?: CloudflareEnv };
+    env?: CloudflareEnv;
+  };
+
+  const d1 = ctx.cloudflare?.env?.DB ?? ctx.env?.DB;
+  if (!d1) return null;
+
+  return getDb(d1);
+}
+
+export type Database = DrizzleD1Database<typeof schema>;
 export * from "./schema";

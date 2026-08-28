@@ -1,8 +1,6 @@
 import { styled } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import CraftedByBadge from "~/components/atoms/CraftedByBadge/CraftedByBadge";
-import LanguageToggle from "~/components/atoms/LanguageToggle/LanguageToggle";
-import ThemeToggle from "~/components/atoms/ThemeToggle/ThemeToggle";
 
 export interface FooterProps {
   className?: string;
@@ -76,8 +74,6 @@ export default function Footer({ className }: FooterProps) {
       <CopyrightText>{t("copyright", { year: currentYear })}</CopyrightText>
       <CraftedByBadge size="small" />
       <FooterRight>
-        <ThemeToggle size="small" />
-        <LanguageToggle size="small" />
         <SystemStatus>
           <StatusDot />
           <span>{t("systemStatus.gateway")}</span>

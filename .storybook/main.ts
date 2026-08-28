@@ -13,5 +13,8 @@ const config: StorybookConfig = {
     "@storybook/addon-mcp",
   ],
   framework: "@storybook/react-vite",
+  typescript: {
+    reactDocgen: "react-docgen-typescript",
+  },
 };
 export default config;

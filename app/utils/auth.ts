@@ -6,6 +6,8 @@ export interface AuthUser {
   email: string;
   role: UserRole;
   avatarUrl?: string;
+  impersonating?: boolean;
+  affiliations?: unknown[];
 }
 
 export interface PersonaDefinition {
@@ -44,41 +46,85 @@ export const DEV_PERSONAS: readonly PersonaDefinition[] = [
   },
 ] as const;
 
-export async function loginWithGitHub(): Promise<void> {
-  // Placeholder ready for OAuth backend integration
-  const redirectUri = window.location.origin;
-  const oauthUrl = `/api/auth/github?redirect_uri=${encodeURIComponent(redirectUri)}`;
-
-  // When backend is connected, this redirects or fetches the auth challenge
-  if (
-    typeof window !== "undefined" &&
-    window.location.pathname.startsWith("/api")
-  ) {
-    window.location.href = oauthUrl;
-    return;
-  }
-
-  // Fallback demo toast / simulation until OAuth endpoint is online
-  console.warn(
-    "GitHub login invoked. Backend OAuth will connect to:",
-    oauthUrl,
-  );
+export function loginWithGitHub(redirectTarget = "/"): void {
+  if (typeof window === "undefined") return;
+  const targetUrl = `/api/auth/github?redirect_uri=${encodeURIComponent(redirectTarget)}`;
+  window.location.href = targetUrl;
 }
 
 export async function loginAsPersona(personaRole: UserRole): Promise<AuthUser> {
   const matched =
     DEV_PERSONAS.find((p) => p.role === personaRole) ?? DEV_PERSONAS[0];
-  const user: AuthUser = {
+
+  let resolvedUser: AuthUser = {
     id: matched.id,
     name: matched.name,
     email: matched.email,
     role: matched.role,
   };
 
-  // Simulating token persistence / session storage for future backend sync
-  if (typeof window !== "undefined") {
-    sessionStorage.setItem("aptispace_auth_user", JSON.stringify(user));
+  if (typeof window !== "undefined" && typeof fetch !== "undefined") {
+    try {
+      const res = await fetch("/api/auth/impersonate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: personaRole,
+          personaId: matched.id,
+        }),
+      });
+
+      if (res.ok) {
+        const responseBody = (await res.json()) as { user?: AuthUser };
+        if (responseBody.user) {
+          resolvedUser = responseBody.user;
+        }
+      }
+    } catch {
+      // Fallback cleanly if running offline or in tests
+    }
+
+    sessionStorage.setItem("aptispace_auth_user", JSON.stringify(resolvedUser));
   }
 
-  return user;
+  return resolvedUser;
+}
+
+export async function logout(): Promise<void> {
+  if (typeof window !== "undefined") {
+    sessionStorage.removeItem("aptispace_auth_user");
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Offline fallback
+    }
+    window.location.href = "/";
+  }
+}
+
+export async function getStoredUser(): Promise<AuthUser | null> {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = sessionStorage.getItem("aptispace_auth_user");
+    if (raw) {
+      return JSON.parse(raw) as AuthUser;
+    }
+
+    // Try fetching from server session
+    const res = await fetch("/api/auth?action=me");
+    if (res.ok) {
+      const responseBody = (await res.json()) as { user?: AuthUser };
+      if (responseBody.user) {
+        sessionStorage.setItem(
+          "aptispace_auth_user",
+          JSON.stringify(responseBody.user),
+        );
+        return responseBody.user;
+      }
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }
