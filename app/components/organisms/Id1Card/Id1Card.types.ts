@@ -88,6 +88,14 @@ export interface Id1CardProps {
   children?: React.ReactNode;
 }
 
+export interface Id1CredentialLayoutProps {
+  credential?: Partial<Id1CardCredential>;
+  side?: Id1CardSide;
+  isPortrait?: boolean;
+  className?: string;
+  testId?: string;
+}
+
 // ISO/IEC 7810 ID-1 Standard Dimensions (mm)
 export const ISO_7810_ID1 = {
   widthMm: 85.6,

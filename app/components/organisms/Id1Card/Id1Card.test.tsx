@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import Id1Card from "./Id1Card";
+import Id1CredentialLayout, { DEFAULT_CREDENTIAL } from "./Id1CredentialLayout";
 import { ISO_7810_ID1, ISO_19794_5_BIOMETRICS } from "./Id1Card.types";
 import { getDimensions } from "./Id1Card.styles";
 
@@ -67,5 +68,13 @@ describe("ISO/IEC 7810 ID-1 Card Component", () => {
     };
     expect(rightRotatedProps.chipPosition).toBe("right");
     expect(rightRotatedProps.electronicsRotation).toBe(180);
+  });
+
+  it("exports Id1CredentialLayout and default credential template", () => {
+    expect(Id1CredentialLayout).toBeDefined();
+    expect(typeof Id1CredentialLayout).toBe("function");
+    expect(DEFAULT_CREDENTIAL).toBeDefined();
+    expect(DEFAULT_CREDENTIAL.id).toBe("APTI-7810-9402");
+    expect(DEFAULT_CREDENTIAL.clearanceLevel).toBe("LEVEL-4 OMNI");
   });
 });

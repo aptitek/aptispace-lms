@@ -23,7 +23,7 @@ import {
   CardFaceWrapper,
   getDimensions,
 } from "./Id1Card.styles";
-import { DefaultCredentialContent } from "./Id1Card.views";
+import Id1CredentialLayout from "./Id1CredentialLayout";
 
 function getGuillocheSeed(
   customSeed: string | undefined,
@@ -82,7 +82,7 @@ function CardContentOverlay({
   if (!inner) inner = content;
   if (!inner) {
     inner = (
-      <DefaultCredentialContent
+      <Id1CredentialLayout
         credential={credential}
         side={side}
         isPortrait={isPortrait}
@@ -120,7 +120,7 @@ function ReverseGhostLayer({
       isVertical={isVertical}
       opacity={opacity}
     >
-      <DefaultCredentialContent
+      <Id1CredentialLayout
         credential={credential}
         side={reverseSide}
         isPortrait={isPortrait}
