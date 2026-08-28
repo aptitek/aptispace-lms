@@ -411,6 +411,8 @@ export default function OnboardingPage() {
               orientation={orientation}
               size="lg"
               side={side}
+              flipOnClick={true}
+              onFlip={(newSide) => setSide(newSide)}
             />
           </CardCenterHolder>
         </PreviewPanel>

@@ -1,20 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { useState } from "react";
-import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import Switch from "@mui/material/Switch";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
+import TouchAppIcon from "@mui/icons-material/TouchApp";
 import { Id1Card } from "../app/components/organisms/Id1Card";
-import type { ElectronicsFinish } from "../app/components/atoms/Electronics/Electronics.types";
-import type { GuillocheVariant } from "../app/components/atoms/Guilloche/Guilloche.types";
-import type { Id1CardSide } from "../app/components/organisms/Id1Card/Id1Card.types";
 
 const meta: Meta<typeof Id1Card> = {
   title: "Organisms/Id1Card",
@@ -23,57 +11,148 @@ const meta: Meta<typeof Id1Card> = {
     layout: "centered",
     docs: {
       description: {
-        component: `
-**Clean Independent Deck-FX ID-1 Card Component** compliant with ISO/IEC 7810 ID-1 standard dimensions ($85.60\\text{ mm} \\times 53.98\\text{ mm}$).
-
-### Visual & Technical Architecture
-- **Targeted Holographic Masked Foil**: Dynamic iridescent foil reflection strictly masked to the procedural Guilloche security curves, reacting in 3D to cursor tilt and angle.
-- **Independent Single-Side Views**: Pure separation between \`front\` and \`back\` card configurations with zero legacy flip overhead.
-- **Deck-FX 3D Surface Physics**: Smooth gyroscope/cursor parallax tilt, dynamic specular glare, and customizable drop shadows.
-- **ISO 7816 Smart Microchip & NFC Geometry**: Authentic smart card contact pads, 4-turn antenna perimeter, and inductive coupling reverse coil.
-- **Procedural Guilloche Security Ribbons**: Mathematical spirograph rosettes with moiré interference shading and selective holographic highlights.
-- **ICAO 9303 TD-1 Machine Readable Zone**: Compliant machine-readable data block and security signature strip on the reverse face.
-- **Glassmorphic Frosted Translucency**: Translucent polycarbonate body with backdrop blur and beveled edge specular reflections.
-        `,
+        component:
+          "ISO/IEC 7810 ID-1 standard card ($85.60\\text{ mm} \\times 53.98\\text{ mm}$) with 3D flip animation, targeted holographic masked foil, and physical electronics.",
       },
     },
   },
   argTypes: {
+    // 3D Flip & Side
     side: {
       control: "radio",
       options: ["front", "back"],
-      description:
-        "Independent card face view (Front credential or Reverse security/MRZ)",
+      description: "Card face view",
+      table: { category: "3D Flip & Side" },
     },
+    isFlipped: {
+      control: "boolean",
+      description: "Controlled 3D flipped state (rotates 180°)",
+      table: { category: "3D Flip & Side" },
+    },
+    flipOnClick: {
+      control: "boolean",
+      description: "Click card directly to toggle side with 3D flip animation",
+      table: { category: "3D Flip & Side" },
+    },
+    flipDirection: {
+      control: "radio",
+      options: ["horizontal", "vertical"],
+      description:
+        "3D flip rotation axis (horizontal Y-axis or vertical X-axis)",
+      table: { category: "3D Flip & Side" },
+    },
+    flipDuration: {
+      control: { type: "range", min: 0.2, max: 2, step: 0.05 },
+      description: "Duration of flip animation in seconds",
+      table: { category: "3D Flip & Side" },
+    },
+    enableFlip: {
+      control: "boolean",
+      description: "Enable 3D animated flip transitions",
+      table: { category: "3D Flip & Side" },
+    },
+
+    // Layout & Appearance
     orientation: {
       control: "radio",
       options: ["landscape", "portrait"],
-      description:
-        "Card orientation (Standard ID-1 landscape or vertical personnel badge)",
+      description: "Card layout orientation",
+      table: { category: "Layout & Appearance" },
     },
     size: {
       control: "select",
       options: ["sm", "md", "lg", "responsive"],
-      description: "Predefined standard size tokens or fluid container sizing",
+      description: "Predefined standard size tokens",
+      table: { category: "Layout & Appearance" },
     },
     transparent: {
       control: "boolean",
-      description:
-        "Glassmorphic transparent acrylic / translucent plastic material",
+      description: "Glassmorphic transparent acrylic material",
+      table: { category: "Layout & Appearance" },
     },
+
+    // Holographic & Lighting
     holographic: {
       control: "boolean",
-      description:
-        "Enable dynamic holographic foil reflections targeted to procedural Guilloche curves",
+      description: "Dynamic holographic foil reflection on Guilloche curves",
+      table: { category: "Holographic & Lighting" },
     },
     holoStrength: {
       control: { type: "range", min: 0.1, max: 1.5, step: 0.05 },
-      description: "Intensity of the holographic iridescent reflection",
+      description: "Holographic reflection intensity",
+      table: { category: "Holographic & Lighting" },
+    },
+    showGlare: {
+      control: "boolean",
+      description: "Show specular surface glare highlight",
+      table: { category: "Holographic & Lighting" },
+    },
+    glareOpacity: {
+      control: { type: "range", min: 0, max: 1, step: 0.05 },
+      description: "Specular glare opacity",
+      table: { category: "Holographic & Lighting" },
+    },
+    maxTilt: {
+      control: { type: "range", min: 0, max: 40, step: 1 },
+      description: "Maximum 3D parallax tilt angle on hover",
+      table: { category: "Holographic & Lighting" },
+    },
+    scaleOnHover: {
+      control: { type: "range", min: 1, max: 1.2, step: 0.01 },
+      description: "Scale magnification factor on hover",
+      table: { category: "Holographic & Lighting" },
+    },
+    shadow: {
+      control: "select",
+      options: ["none", "sm", "md", "lg", "xl", "2xl"],
+      description: "3D drop shadow preset",
+      table: { category: "Holographic & Lighting" },
+    },
+
+    // Security Electronics
+    showElectronics: {
+      control: "boolean",
+      description: "Render embedded security electronics layer",
+      table: { category: "Security Electronics" },
     },
     electronicsFinish: {
       control: "select",
       options: ["gold", "cyan-laser", "copper", "silver"],
-      description: "Conductive metallic trace finish",
+      description: "Metallic finish for conductive traces",
+      table: { category: "Security Electronics" },
+    },
+    showChip: {
+      control: "boolean",
+      description: "Show ISO 7816 smart microchip module",
+      table: { category: "Security Electronics" },
+    },
+    chipView: {
+      control: "select",
+      options: ["front", "back", "none"],
+      description: "Chip module view override",
+      table: { category: "Security Electronics" },
+    },
+    showNfcAntenna: {
+      control: "boolean",
+      description: "Show outer ISO 14443 NFC 4-turn perimeter antenna",
+      table: { category: "Security Electronics" },
+    },
+    showInnerCoil: {
+      control: "boolean",
+      description: "Show inner inductive coupling coil",
+      table: { category: "Security Electronics" },
+    },
+    electronicsOpacity: {
+      control: { type: "range", min: 0.1, max: 1, step: 0.05 },
+      description: "Electronics layer opacity",
+      table: { category: "Security Electronics" },
+    },
+
+    // Guilloche Security
+    showGuilloche: {
+      control: "boolean",
+      description: "Render procedural Guilloche security rosettes",
+      table: { category: "Guilloche Security" },
     },
     guillocheVariant: {
       control: "select",
@@ -84,16 +163,70 @@ const meta: Meta<typeof Id1Card> = {
         "cosmic-crimson",
         "deep-space",
       ],
-      description:
-        "Procedural security guilloche color theme and iridescent shimmer gradient",
+      description: "Guilloche color theme and iridescent spectrum palette",
+      table: { category: "Guilloche Security" },
     },
-    showElectronics: {
-      control: "boolean",
-      description: "Render ISO smart chip and NFC antenna traces",
+    guillocheDensity: {
+      control: "select",
+      options: ["low", "medium", "high"],
+      description: "Density of spirograph curves",
+      table: { category: "Guilloche Security" },
     },
-    showGuilloche: {
-      control: "boolean",
-      description: "Render procedural security guilloche rosettes",
+    guillocheOpacity: {
+      control: { type: "range", min: 0.1, max: 1, step: 0.05 },
+      description: "Guilloche curve line opacity",
+      table: { category: "Guilloche Security" },
+    },
+    guillocheNoiseIntensity: {
+      control: { type: "range", min: 0, max: 1, step: 0.05 },
+      description: "Harmonic pseudo-noise perturbation amplitude",
+      table: { category: "Guilloche Security" },
+    },
+    guillocheSeed: {
+      control: "text",
+      description: "Cryptographic seed string for curve generation",
+      table: { category: "Guilloche Security" },
+    },
+
+    // Credential Data
+    credential: {
+      control: "object",
+      description: "Cadet identity data",
+      table: { category: "Credential Data" },
+    },
+  },
+  args: {
+    side: "front",
+    enableFlip: true,
+    flipOnClick: true,
+    flipDirection: "horizontal",
+    orientation: "landscape",
+    size: "lg",
+    transparent: false,
+    holographic: true,
+    holoStrength: 0.75,
+    showGlare: true,
+    glareOpacity: 0.45,
+    maxTilt: 16,
+    scaleOnHover: 1.04,
+    shadow: "xl",
+    showElectronics: true,
+    electronicsFinish: "gold",
+    showChip: true,
+    showGuilloche: true,
+    guillocheVariant: "holo-spectrum",
+    guillocheDensity: "medium",
+    guillocheOpacity: 0.42,
+    guillocheNoiseIntensity: 0.5,
+    credential: {
+      id: "APTI-7810-9402",
+      name: "Alex Mercer",
+      callSign: "AETH-9042",
+      role: "Mission Specialist",
+      division: "Orbital Flight Dynamics",
+      clearanceLevel: "LEVEL-4 OMNI",
+      expiryDate: "2030-08",
+      securityCode: "781",
     },
   },
   tags: ["autodocs"],
@@ -103,78 +236,78 @@ export default meta;
 type Story = StoryObj<typeof Id1Card>;
 
 /**
- * 1. Standard Front Face (Landscape with Microchip, NFC Antenna, & Cadet Credential)
+ * 1. Default Interactive ID-1 Card (All controls active with click-to-flip)
+ */
+export const Default: Story = {
+  render: (args) => (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          color: "primary.light",
+        }}
+      >
+        <TouchAppIcon fontSize="small" />
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 700, letterSpacing: "0.5px" }}
+        >
+          Click card to flip 3D • Adjust any control in the panel below
+        </Typography>
+      </Box>
+      <Id1Card {...args} />
+    </Box>
+  ),
+};
+
+/**
+ * 2. Standard Front Landscape Face
  */
 export const StandardFrontLandscape: Story = {
   args: {
     side: "front",
-    orientation: "landscape",
-    size: "lg",
-    holographic: true,
-    holoStrength: 0.75,
-    showGlare: true,
-    showElectronics: true,
-    electronicsFinish: "gold",
-    showGuilloche: true,
-    guillocheVariant: "holo-spectrum",
-    credential: {
-      id: "APTI-7810-9402",
-      name: "Alex Mercer",
-      callSign: "AETH-9042",
-      role: "Mission Specialist",
-      division: "Orbital Flight Dynamics",
-      clearanceLevel: "LEVEL-4 OMNI",
-      expiryDate: "2030-08",
-    },
+    flipOnClick: false,
   },
 };
 
 /**
- * 2. Standard Back Face (Landscape with Magnetic Stripe, Signature Strip, & ICAO 9303 MRZ Zone)
+ * 3. Standard Back Landscape Face
  */
 export const StandardBackLandscape: Story = {
   args: {
     side: "back",
-    orientation: "landscape",
-    size: "lg",
-    holographic: true,
-    holoStrength: 0.75,
-    showGlare: true,
-    showElectronics: true,
-    electronicsFinish: "gold",
-    showGuilloche: true,
-    guillocheVariant: "holo-spectrum",
-    credential: {
-      id: "APTI-7810-9402",
-      name: "Alex Mercer",
-      securityCode: "781",
-    },
+    flipOnClick: false,
   },
 };
 
 /**
- * 3. Targeted Holographic Masked Foil on Guilloche Security Curves
+ * 4. Targeted Holographic Masked Foil on Guilloche Security Curves
  */
 export const HolographicGuillocheFoil: Story = {
   args: {
     side: "front",
-    orientation: "landscape",
-    size: "lg",
     holographic: true,
-    holoStrength: 0.95,
-    showGlare: true,
-    showElectronics: true,
+    holoStrength: 1.1,
     electronicsFinish: "cyan-laser",
-    showGuilloche: true,
     guillocheVariant: "cyber-cyan",
+    flipOnClick: true,
   },
 };
 
 /**
- * 4. Side-by-Side Dual View (Simultaneous Front & Back Inspection)
+ * 5. Side-by-Side Dual View (Simultaneous Front & Back Inspection)
  */
 export const SideBySideDualView: Story = {
-  render: () => (
+  render: (args) => (
     <Box
       sx={{
         display: "flex",
@@ -195,33 +328,11 @@ export const SideBySideDualView: Story = {
       >
         <Typography
           variant="caption"
-          sx={{
-            fontWeight: 800,
-            color: "text.secondary",
-            letterSpacing: "1px",
-          }}
+          sx={{ fontWeight: 800, color: "text.secondary" }}
         >
           FRONT SIDE (CREDENTIAL &amp; CHIP)
         </Typography>
-        <Id1Card
-          side="front"
-          size="md"
-          holographic={true}
-          holoStrength={0.8}
-          showElectronics={true}
-          electronicsFinish="gold"
-          showGuilloche={true}
-          guillocheVariant="holo-spectrum"
-          credential={{
-            id: "APTI-7810-9402",
-            name: "Alex Mercer",
-            callSign: "AETH-9042",
-            role: "Mission Specialist",
-            division: "Orbital Flight Dynamics",
-            clearanceLevel: "LEVEL-4 OMNI",
-            expiryDate: "2030-08",
-          }}
-        />
+        <Id1Card {...args} side="front" enableFlip={false} size="md" />
       </Box>
 
       <Box
@@ -234,264 +345,66 @@ export const SideBySideDualView: Story = {
       >
         <Typography
           variant="caption"
-          sx={{
-            fontWeight: 800,
-            color: "text.secondary",
-            letterSpacing: "1px",
-          }}
+          sx={{ fontWeight: 800, color: "text.secondary" }}
         >
           BACK SIDE (MAGSTRIPE &amp; MRZ)
         </Typography>
-        <Id1Card
-          side="back"
-          size="md"
-          holographic={true}
-          holoStrength={0.8}
-          showElectronics={true}
-          electronicsFinish="gold"
-          showGuilloche={true}
-          guillocheVariant="holo-spectrum"
-          credential={{
-            id: "APTI-7810-9402",
-            name: "Alex Mercer",
-            securityCode: "781",
-          }}
-        />
+        <Id1Card {...args} side="back" enableFlip={false} size="md" />
       </Box>
     </Box>
   ),
 };
 
 /**
- * 5. Transparent Frosted Acrylic Glassmorphic ID-1 Card (Front View)
+ * 6. Transparent Frosted Acrylic Card (Front with Exposed Induction Coils)
  */
 export const TransparentAcrylicFront: Story = {
   args: {
     side: "front",
-    orientation: "landscape",
-    size: "lg",
     transparent: true,
     holographic: true,
-    holoStrength: 0.85,
-    showGlare: true,
-    showElectronics: true,
     electronicsFinish: "cyan-laser",
-    showGuilloche: true,
-    guillocheVariant: "holo-spectrum",
+    flipOnClick: true,
   },
 };
 
 /**
- * 6. Transparent Frosted Acrylic Glassmorphic ID-1 Card (Back View)
+ * 7. Transparent Frosted Acrylic Card (Back with Exposed Silicon Die)
  */
 export const TransparentAcrylicBack: Story = {
   args: {
     side: "back",
-    orientation: "landscape",
-    size: "lg",
     transparent: true,
     holographic: true,
-    holoStrength: 0.85,
-    showGlare: true,
-    showElectronics: true,
     electronicsFinish: "cyan-laser",
-    showGuilloche: true,
-    guillocheVariant: "holo-spectrum",
+    flipOnClick: true,
   },
 };
 
 /**
- * 7. Portrait Orientation Personnel Badge
+ * 8. Portrait Orientation Personnel Badge (Vertical Flip Animation)
  */
 export const PortraitOrientationBadge: Story = {
   args: {
     side: "front",
     orientation: "portrait",
+    flipDirection: "vertical",
+    flipOnClick: true,
     size: "md",
-    holographic: true,
-    holoStrength: 0.8,
-    showGlare: true,
-    showElectronics: true,
-    electronicsFinish: "gold",
-    showGuilloche: true,
     guillocheVariant: "solarized-gold",
   },
 };
 
 /**
- * 8. Minimalist Blank Card (No Electronics or Guilloche)
+ * 9. Minimalist Blank Card
  */
 export const MinimalistBlankCard: Story = {
   args: {
     side: "front",
-    orientation: "landscape",
-    size: "lg",
     showGlare: true,
     holographic: false,
     showElectronics: false,
     showGuilloche: false,
+    flipOnClick: false,
   },
-};
-
-const PlaygroundWrapper = styled("div")(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  gap: theme.spacing(4),
-  padding: theme.spacing(3),
-  width: "100%",
-  maxWidth: "900px",
-}));
-
-const ControlsGrid = styled("div")(({ theme }) => ({
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-  gap: theme.spacing(2),
-  width: "100%",
-  padding: theme.spacing(2.5),
-  backgroundColor:
-    theme.palette.mode === "dark"
-      ? "rgba(15, 23, 42, 0.7)"
-      : "rgba(241, 245, 249, 0.9)",
-  borderRadius: "16px",
-  border: `1px solid ${theme.palette.divider}`,
-}));
-
-function InteractiveCardPlayground() {
-  const [side, setSide] = useState<Id1CardSide>("front");
-  const [transparent, setTransparent] = useState(false);
-  const [holographic, setHolographic] = useState(true);
-  const [showElectronics, setShowElectronics] = useState(true);
-  const [showChip, setShowChip] = useState(true);
-  const [showGuilloche, setShowGuilloche] = useState(true);
-  const [electronicsFinish, setElectronicsFinish] =
-    useState<ElectronicsFinish>("gold");
-  const [guillocheVariant, setGuillocheVariant] =
-    useState<GuillocheVariant>("holo-spectrum");
-
-  return (
-    <PlaygroundWrapper>
-      <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          Independent ID-1 Card Playground ({side.toUpperCase()} VIEW)
-        </Typography>
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<AutorenewIcon />}
-          onClick={() =>
-            setSide((prev) => (prev === "front" ? "back" : "front"))
-          }
-        >
-          {side === "front" ? "Switch to Back Side" : "Switch to Front Side"}
-        </Button>
-      </Box>
-
-      <Id1Card
-        side={side}
-        size="lg"
-        transparent={transparent}
-        holographic={holographic}
-        holoStrength={0.85}
-        showGlare
-        showElectronics={showElectronics}
-        showChip={showChip}
-        electronicsFinish={electronicsFinish}
-        showGuilloche={showGuilloche}
-        guillocheVariant={guillocheVariant}
-      />
-
-      <ControlsGrid>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={transparent}
-              onChange={(e) => setTransparent(e.target.checked)}
-            />
-          }
-          label="Transparent Acrylic"
-        />
-
-        <FormControlLabel
-          control={
-            <Switch
-              checked={holographic}
-              onChange={(e) => setHolographic(e.target.checked)}
-            />
-          }
-          label="Holographic Guilloche Foil"
-        />
-
-        <FormControlLabel
-          control={
-            <Switch
-              checked={showElectronics}
-              onChange={(e) => setShowElectronics(e.target.checked)}
-            />
-          }
-          label="Show Electronics"
-        />
-
-        <FormControlLabel
-          control={
-            <Switch
-              checked={showChip}
-              disabled={!showElectronics}
-              onChange={(e) => setShowChip(e.target.checked)}
-            />
-          }
-          label="Show Microchip Module"
-        />
-
-        <FormControlLabel
-          control={
-            <Switch
-              checked={showGuilloche}
-              onChange={(e) => setShowGuilloche(e.target.checked)}
-            />
-          }
-          label="Show Guilloche"
-        />
-
-        <FormControl size="small" fullWidth>
-          <InputLabel id="finish-label">Electronics Finish</InputLabel>
-          <Select
-            labelId="finish-label"
-            value={electronicsFinish}
-            label="Electronics Finish"
-            onChange={(e) =>
-              setElectronicsFinish(e.target.value as ElectronicsFinish)
-            }
-          >
-            <MenuItem value="gold">Gold</MenuItem>
-            <MenuItem value="cyan-laser">Cyan Laser</MenuItem>
-            <MenuItem value="copper">Copper</MenuItem>
-            <MenuItem value="silver">Silver</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl size="small" fullWidth>
-          <InputLabel id="variant-label">Guilloche Theme</InputLabel>
-          <Select
-            labelId="variant-label"
-            value={guillocheVariant}
-            label="Guilloche Theme"
-            onChange={(e) =>
-              setGuillocheVariant(e.target.value as GuillocheVariant)
-            }
-          >
-            <MenuItem value="holo-spectrum">Holo Spectrum</MenuItem>
-            <MenuItem value="solarized-gold">Solarized Gold</MenuItem>
-            <MenuItem value="cyber-cyan">Cyber Cyan</MenuItem>
-            <MenuItem value="cosmic-crimson">Cosmic Crimson</MenuItem>
-            <MenuItem value="deep-space">Deep Space</MenuItem>
-          </Select>
-        </FormControl>
-      </ControlsGrid>
-    </PlaygroundWrapper>
-  );
-}
-
-export const InteractiveSideSwitcher: Story = {
-  render: () => <InteractiveCardPlayground />,
 };

@@ -1,3 +1,5 @@
+import { styled } from "@mui/material/styles";
+import { motion } from "framer-motion";
 import {
   ISO_7810_ID1,
   type Id1CardOrientation,
@@ -61,3 +63,46 @@ export const getDimensions = (
   const sizeEntry = DIMENSION_MAP[size] || DIMENSION_MAP.responsive;
   return orientation === "portrait" ? sizeEntry.portrait : sizeEntry.landscape;
 };
+
+export const FlipPerspectiveStage = styled("div")<{
+  stageWidth: number | string;
+  stageHeight: number | string;
+  isClickable?: boolean;
+}>(({ stageWidth, stageHeight, isClickable }) => ({
+  perspective: "1400px",
+  width: stageWidth,
+  height: stageHeight,
+  position: "relative",
+  display: "inline-block",
+  cursor: isClickable ? "pointer" : "default",
+  userSelect: "none",
+  WebkitUserSelect: "none",
+}));
+
+export const MotionFlipFlipper = styled(motion.div)({
+  width: "100%",
+  height: "100%",
+  position: "relative",
+  transformStyle: "preserve-3d",
+});
+
+export const CardFaceWrapper = styled("div")<{
+  isBack?: boolean;
+  isActive?: boolean;
+  isVertical?: boolean;
+}>(({ isBack, isActive, isVertical }) => ({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  backfaceVisibility: "hidden",
+  WebkitBackfaceVisibility: "hidden",
+  transformStyle: "preserve-3d",
+  transform: isBack
+    ? isVertical
+      ? "rotateX(180deg)"
+      : "rotateY(180deg)"
+    : "rotate(0deg)",
+  zIndex: isActive ? 2 : 0,
+  pointerEvents: isActive ? "auto" : "none",
+}));

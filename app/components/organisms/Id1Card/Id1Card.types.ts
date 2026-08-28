@@ -6,6 +6,7 @@ import type { GuillocheVariant } from "../../atoms/Guilloche/Guilloche.types";
 export type Id1CardSide = "front" | "back";
 export type Id1CardOrientation = "landscape" | "portrait";
 export type Id1CardSize = "sm" | "md" | "lg" | "responsive";
+export type Id1CardFlipDirection = "horizontal" | "vertical";
 
 export interface Id1CardCredential {
   id?: string;
@@ -22,8 +23,16 @@ export interface Id1CardCredential {
 }
 
 export interface Id1CardProps {
-  // Side Selection (Completely Independent Front or Back View)
+  // Side Selection & 3D Flip Animation
   side?: Id1CardSide;
+  isFlipped?: boolean;
+  enableFlip?: boolean;
+  flipOnClick?: boolean;
+  flipDirection?: Id1CardFlipDirection;
+  flipDuration?: number;
+  onFlip?: (side: Id1CardSide) => void;
+  onFlipChange?: (isFlipped: boolean) => void;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
 
   // Dimensions & Layout
   orientation?: Id1CardOrientation;
