@@ -45,6 +45,7 @@ export interface Id1CardProps {
 
   // Material & Transparency
   transparent?: boolean;
+  transparentGhostOpacity?: number;
 
   // Deck-FX 3D Physics & Visuals
   holographic?: boolean;

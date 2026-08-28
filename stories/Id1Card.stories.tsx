@@ -67,7 +67,14 @@ const meta: Meta<typeof Id1Card> = {
     },
     transparent: {
       control: "boolean",
-      description: "Glassmorphic transparent acrylic material",
+      description:
+        "Glassmorphic transparent acrylic material with double-sided see-through",
+      table: { category: "Layout & Appearance" },
+    },
+    transparentGhostOpacity: {
+      control: { type: "range", min: 0.05, max: 0.8, step: 0.02 },
+      description:
+        "Ghosting opacity of the reverse side print seen through clear acrylic",
       table: { category: "Layout & Appearance" },
     },
 

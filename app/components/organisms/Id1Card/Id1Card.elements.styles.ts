@@ -334,3 +334,23 @@ export const MrzHolder = styled("div")(({ theme }) => ({
   padding: theme.spacing(0.5),
   boxSizing: "border-box",
 }));
+
+export const TransparentGhostOverlay = styled("div")<{
+  isMirrored?: boolean;
+  isVertical?: boolean;
+  opacity?: number;
+}>(({ isMirrored = true, isVertical, opacity = 0.22 }) => ({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  padding: "16px",
+  boxSizing: "border-box",
+  pointerEvents: "none",
+  zIndex: 1,
+  opacity,
+  filter: "blur(0.35px) contrast(0.95)",
+  transform: isMirrored ? (isVertical ? "scaleY(-1)" : "scaleX(-1)") : "none",
+  transformOrigin: "center center",
+  userSelect: "none",
+}));
