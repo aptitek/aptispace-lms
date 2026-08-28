@@ -86,131 +86,97 @@ function ChipContactPads({
 }: ChipContactPadsProps) {
   const x = cx - width / 2;
   const y = cy - height / 2;
+  const colW = width / 2;
+  const rowH = height / 4;
+
+  const padCoords = [
+    { x, y, label: "C1" },
+    { x, y: y + rowH, label: "C2" },
+    { x, y: y + rowH * 2, label: "C3" },
+    { x, y: y + rowH * 3, label: "C4" },
+    { x: x + colW, y, label: "C5" },
+    { x: x + colW, y: y + rowH, label: "C6" },
+    { x: x + colW, y: y + rowH * 2, label: "C7" },
+    { x: x + colW, y: y + rowH * 3, label: "C8" },
+  ];
 
   return (
-    <g id="iso-7816-chip-module">
+    <g id="iso7816-chip" filter="url(#chipGlow)">
+      {/* Outer Chip Bevel Frame */}
+      <rect
+        x={x - 2}
+        y={y - 2}
+        width={width + 4}
+        height={height + 4}
+        rx={10}
+        fill={grooveColor}
+        opacity={0.8}
+      />
+
+      {/* Gold/Metal Base Carrier */}
       <rect
         x={x}
         y={y}
         width={width}
         height={height}
-        rx={10}
-        ry={10}
+        rx={8}
         fill="url(#metalGradient)"
         stroke={primaryColor}
-        strokeWidth={1.5}
-        filter="url(#chipGlow)"
+        strokeWidth={1}
       />
-      <path
-        d={`M ${cx} ${y + 2} V ${y + height - 2}`}
-        stroke={grooveColor}
-        strokeWidth={2.5}
-        strokeLinecap="round"
-      />
-      <path
-        d={`M ${x + 2} ${cy} H ${x + width - 2}`}
-        stroke={grooveColor}
-        strokeWidth={2.5}
-        strokeLinecap="round"
-      />
-      <path
-        d={`M ${x + 2} ${cy - 24} H ${cx - 2}`}
-        stroke={grooveColor}
-        strokeWidth={2}
-        strokeLinecap="round"
-      />
-      <path
-        d={`M ${x + 2} ${cy + 24} H ${cx - 2}`}
-        stroke={grooveColor}
-        strokeWidth={2}
-        strokeLinecap="round"
-      />
-      <path
-        d={`M ${cx + 2} ${cy - 24} H ${x + width - 2}`}
-        stroke={grooveColor}
-        strokeWidth={2}
-        strokeLinecap="round"
-      />
-      <path
-        d={`M ${cx + 2} ${cy + 24} H ${x + width - 2}`}
-        stroke={grooveColor}
-        strokeWidth={2}
-        strokeLinecap="round"
-      />
+
+      {/* Individual 8-Pin Contact Isolation Grooves */}
+      {padCoords.map((pad) => (
+        <rect
+          key={pad.label}
+          x={pad.x + 1.5}
+          y={pad.y + 1.5}
+          width={colW - 3}
+          height={rowH - 3}
+          rx={3}
+          fill="none"
+          stroke={grooveColor}
+          strokeWidth={1.2}
+          opacity={0.9}
+        />
+      ))}
+
+      {/* Center Microcontroller Silicon Die Outline */}
       <rect
-        x={cx - 24}
-        y={cy - 18}
-        width={48}
-        height={36}
+        x={cx - 18}
+        y={cy - 22}
+        width={36}
+        height={44}
         rx={4}
-        ry={4}
-        fill={grooveColor}
+        fill="none"
         stroke={highlightColor}
         strokeWidth={1}
-      />
-      <circle cx={cx} cy={cy} r={6} fill={highlightColor} opacity={0.8} />
-      <line
-        x1={cx - 16}
-        y1={cy - 10}
-        x2={cx - 36}
-        y2={cy - 24}
-        stroke={primaryColor}
-        strokeWidth={1}
-      />
-      <line
-        x1={cx - 16}
-        y1={cy + 10}
-        x2={cx - 36}
-        y2={cy + 24}
-        stroke={primaryColor}
-        strokeWidth={1}
-      />
-      <line
-        x1={cx + 16}
-        y1={cy - 10}
-        x2={cx + 36}
-        y2={cy - 24}
-        stroke={primaryColor}
-        strokeWidth={1}
-      />
-      <line
-        x1={cx + 16}
-        y1={cy + 10}
-        x2={cx + 36}
-        y2={cy + 24}
-        stroke={primaryColor}
-        strokeWidth={1}
+        strokeDasharray="2 2"
+        opacity={0.7}
       />
     </g>
   );
 }
 
-interface CoilConnectorsProps {
-  primaryColor: string;
-}
-
-function CoilConnectors({ primaryColor }: CoilConnectorsProps) {
+function CoilConnectors({ primaryColor }: { primaryColor: string }) {
   return (
-    <g id="coil-feed-connectors">
-      {/* Upper direct conductive track joining outer coil lead to inner coupling coil */}
+    <g
+      id="coil-feed-connectors"
+      stroke={primaryColor}
+      strokeWidth={1.5}
+      fill="none"
+    >
+      {/* Top track: smooth 90deg elbow directly meeting top edge of inner coil */}
       <path
         d="M 51 45 V 148 A 16 16 0 0 0 67 164 H 86"
-        fill="none"
-        stroke={primaryColor}
-        strokeWidth={1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
-        opacity={0.8}
       />
-      {/* Lower direct conductive return track replicating upper track geometry symmetrically */}
+      {/* Bottom track: smooth symmetrical elbow directly meeting bottom edge of inner coil */}
       <path
         d="M 51 495 V 342 A 16 16 0 0 1 67 326 H 86"
-        fill="none"
-        stroke={primaryColor}
-        strokeWidth={1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
-        opacity={0.8}
       />
     </g>
   );
@@ -222,7 +188,8 @@ const defaultElectronics = {
   showChip: true,
   showInnerCoil: true,
   opacity: 0.85,
-  testId: "electronics-layer",
+  mirrored: false,
+  testId: "smartcard-electronics",
 };
 
 export default function Electronics(props: ElectronicsProps) {
@@ -263,33 +230,10 @@ export default function Electronics(props: ElectronicsProps) {
     });
   }, []);
 
-  return (
-    <SvgLayer
-      viewBox={`0 0 ${ISO_ELECTRONICS_CONSTANTS.viewWidth} ${ISO_ELECTRONICS_CONSTANTS.viewHeight}`}
-      customOpacity={config.opacity}
-      className={config.className}
-      data-testid={config.testId}
-      aria-hidden="true"
+  const contentGroup = (
+    <g
+      transform={config.mirrored ? "translate(856, 0) scale(-1, 1)" : undefined}
     >
-      <defs>
-        <linearGradient id="metalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={colors.primary} />
-          <stop offset="45%" stopColor={colors.highlight} />
-          <stop offset="70%" stopColor={colors.primary} />
-          <stop offset="100%" stopColor={colors.glow} />
-        </linearGradient>
-
-        <filter id="chipGlow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow
-            dx="0"
-            dy="2"
-            stdDeviation="4"
-            floodColor={colors.glow}
-            floodOpacity={0.4}
-          />
-        </filter>
-      </defs>
-
       {/* ISO 14443 Outer NFC Antenna Perimeter Track */}
       {config.showNfcAntenna && (
         <path
@@ -333,6 +277,37 @@ export default function Electronics(props: ElectronicsProps) {
           grooveColor={colors.groove}
         />
       )}
+    </g>
+  );
+
+  return (
+    <SvgLayer
+      viewBox={`0 0 ${ISO_ELECTRONICS_CONSTANTS.viewWidth} ${ISO_ELECTRONICS_CONSTANTS.viewHeight}`}
+      customOpacity={config.opacity}
+      className={config.className}
+      data-testid={config.testId}
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id="metalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={colors.primary} />
+          <stop offset="45%" stopColor={colors.highlight} />
+          <stop offset="70%" stopColor={colors.primary} />
+          <stop offset="100%" stopColor={colors.glow} />
+        </linearGradient>
+
+        <filter id="chipGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow
+            dx="0"
+            dy="2"
+            stdDeviation="4"
+            floodColor={colors.glow}
+            floodOpacity={0.4}
+          />
+        </filter>
+      </defs>
+
+      {contentGroup}
     </SvgLayer>
   );
 }

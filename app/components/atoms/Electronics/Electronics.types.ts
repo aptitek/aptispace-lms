@@ -6,6 +6,7 @@ export interface ElectronicsProps {
   showChip?: boolean;
   showInnerCoil?: boolean;
   opacity?: number;
+  mirrored?: boolean;
   className?: string;
   testId?: string;
 }

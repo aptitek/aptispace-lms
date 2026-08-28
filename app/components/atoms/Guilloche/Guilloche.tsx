@@ -39,10 +39,9 @@ function calculateProceduralPaths({
   const rosettes: ProceduralRosetteItem[] = [];
 
   for (let index = 0; index < count; index += 1) {
-    // Generate randomized center spanning inside and overflowing outside viewbox bounds
     const cx = rng.nextRange(-60, GUILLOCHE_VIEWBOX.width + 60);
     const cy = rng.nextRange(-50, GUILLOCHE_VIEWBOX.height + 50);
-    const r1 = rng.nextRange(110, 320); // Large radius creates dramatic overlaps and overflows
+    const r1 = rng.nextRange(110, 320);
     const r2 = rng.nextRange(24, 72);
     const d = rng.nextRange(30, 85);
     const petals = rng.nextInt(4, 11);
@@ -72,7 +71,6 @@ function calculateProceduralPaths({
     });
   }
 
-  // Top Wave Bands with randomized offset & amplitude
   const topWaves = generateProceduralWaveBand({
     startX: -40,
     endX: GUILLOCHE_VIEWBOX.width + 40,
@@ -84,7 +82,6 @@ function calculateProceduralPaths({
     seed: seedNum + 303,
   });
 
-  // Bottom Wave Bands with randomized offset & amplitude
   const botWaves = generateProceduralWaveBand({
     startX: -40,
     endX: GUILLOCHE_VIEWBOX.width + 40,
@@ -198,6 +195,8 @@ const defaultGuilloche = {
   showConcentricRings: true,
   noiseIntensity: 0.5,
   opacity: 0.35,
+  holographic: true,
+  holoStrength: 0.7,
   testId: "guilloche-canvas",
 };
 

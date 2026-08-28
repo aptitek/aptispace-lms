@@ -1,8 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { styled } from "@mui/material/styles";
-import Id1Card from "../app/components/organisms/Id1Card/Id1Card";
-import type { Id1CardCredential } from "../app/components/organisms/Id1Card/Id1Card.types";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
+import { Id1Card } from "../app/components/organisms/Id1Card";
+import type { ElectronicsFinish } from "../app/components/atoms/Electronics/Electronics.types";
+import type { GuillocheVariant } from "../app/components/atoms/Guilloche/Guilloche.types";
 
 const meta: Meta<typeof Id1Card> = {
   title: "Organisms/Id1Card",
@@ -11,8 +22,17 @@ const meta: Meta<typeof Id1Card> = {
     layout: "centered",
     docs: {
       description: {
-        component:
-          "ISO/IEC 7810 ID-1 standard identification credential card (85.60 mm × 53.98 mm, aspect ratio ~1.586). Features EMV microchip contact pads (ISO 7816), contactless RF wave symbol (ISO 14443), holographic optical seal, magnetic stripe (ISO 7811), and 3-line Machine Readable Zone (MRZ).",
+        component: `
+**Clean Deck-FX ID-1 Card Component** compliant with ISO/IEC 7810 ID-1 standard dimensions ($85.60\\text{ mm} \\times 53.98\\text{ mm}$).
+
+### Visual Features
+- **Deck-FX 3D Card Engine**: Realistic gyroscope/mouse 3D parallax tilt, dynamic specular glare physics, and smooth spring-driven flip animations.
+- **Glassmorphic Transparent Option**: Frosted acrylic / translucent plastic body with backdrop blur and beveled edge specular reflections.
+- **Selective Holographic Foil**: Foil reflections strictly restricted to the procedural Guilloche security curves and user-specified masks (\`maskUrl\`).
+- **ISO 7816 & 14443 Electronics**: Microchip, 4-turn perimeter NFC antenna, inductive coupling coil, and seamless symmetrical interconnects.
+- **Procedural Guilloche Security Geometry**: Mathematical spirograph rosettes and wave ribbons with non-clamping overflow that create authentic moiré interference patterns.
+- **Dual-Side Independent Configuration**: Complete freedom to toggle and style electronics, guilloche, and user content separately for front and back faces.
+        `,
       },
     },
   },
@@ -21,21 +41,61 @@ const meta: Meta<typeof Id1Card> = {
       control: "radio",
       options: ["landscape", "portrait"],
       description:
-        "Orientation of the ID-1 card (Landscape credit card format vs Portrait security pass)",
+        "Card orientation (Standard ID-1 landscape or vertical ID badge)",
     },
     size: {
       control: "select",
       options: ["sm", "md", "lg", "responsive"],
-      description: "Size preset while maintaining exact ISO/IEC 7810 ratio",
+      description:
+        "Predefined responsive size tokens or fluid container sizing",
     },
-    isFlipped: {
+    transparent: {
       control: "boolean",
       description:
-        "Whether the card is flipped to show the reverse side (magnetic stripe & MRZ)",
+        "Glassmorphic transparent acrylic / translucent plastic material",
+    },
+    electronicsFinish: {
+      control: "select",
+      options: ["gold", "cyan-laser", "copper", "silver"],
+      description: "Conductive trace finish metallic appearance",
+    },
+    guillocheVariant: {
+      control: "select",
+      options: [
+        "holo-spectrum",
+        "solarized-gold",
+        "cyber-cyan",
+        "cosmic-crimson",
+        "deep-space",
+      ],
+      description:
+        "Security guilloche color theme and iridescent shimmer gradient",
+    },
+    showElectronics: {
+      control: "boolean",
+      description:
+        "Render ISO 7816 chip and ISO 14443 NFC antenna traces on front",
+    },
+    showGuilloche: {
+      control: "boolean",
+      description: "Render procedural security guilloche rosettes on front",
+    },
+    showBackElectronics: {
+      control: "boolean",
+      description: "Render reverse inductive electronics on card back",
+    },
+    showBackGuilloche: {
+      control: "boolean",
+      description: "Render security guilloche rosettes on card back",
+    },
+    holographic: {
+      control: "boolean",
+      description:
+        "Enable selective holographic foil lighting on guilloche curves",
     },
     interactive: {
       control: "boolean",
-      description: "Enable click-to-flip interaction",
+      description: "Enable click-to-flip interaction with 3D animation",
     },
   },
   tags: ["autodocs"],
@@ -44,198 +104,302 @@ const meta: Meta<typeof Id1Card> = {
 export default meta;
 type Story = StoryObj<typeof Id1Card>;
 
+/**
+ * 1. Clean Deck-FX ID-1 Card (Standard Landscape with Electronics & Guilloche)
+ */
 export const StandardLandscape: Story = {
   args: {
     orientation: "landscape",
     size: "lg",
     interactive: true,
+    holographic: true,
+    holoStrength: 0.65,
+    showGlare: true,
     showElectronics: true,
-    showNfcAntenna: true,
     electronicsFinish: "gold",
-    credential: {
-      id: "APTI-7810-0942",
-      name: "Commander Alex Mercer",
-      callSign: "AETH-9042",
-      role: "Lead Flight Commander",
-      division: "Orbital Flight Dynamics",
-      clearanceLevel: "LEVEL-5 COSMIC",
-      issueDate: "2026-08",
-      expiryDate: "2030-08",
-      avatarUrl:
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
-      securityCode: "781",
-    },
+    showGuilloche: true,
+    guillocheVariant: "holo-spectrum",
+    showBackElectronics: false,
+    showBackGuilloche: true,
   },
 };
 
+/**
+ * 2. Transparent Frosted Acrylic Glassmorphic ID-1 Card
+ */
+export const TransparentAcrylic: Story = {
+  args: {
+    orientation: "landscape",
+    size: "lg",
+    transparent: true,
+    interactive: true,
+    holographic: true,
+    holoStrength: 0.75,
+    showGlare: true,
+    showElectronics: true,
+    electronicsFinish: "cyan-laser",
+    showGuilloche: true,
+    guillocheVariant: "holo-spectrum",
+    showBackElectronics: false,
+    showBackGuilloche: true,
+  },
+};
+
+/**
+ * 3. Cyan Laser Electronics Finish with High-Density Cyber Guilloche
+ */
 export const DualInterfaceCyanLaser: Story = {
   args: {
     orientation: "landscape",
     size: "lg",
     interactive: true,
+    holographic: true,
+    holoStrength: 0.8,
+    showGlare: true,
     showElectronics: true,
-    showNfcAntenna: true,
     electronicsFinish: "cyan-laser",
-    credential: {
-      id: "APTI-7810-0942",
-      name: "Commander Alex Mercer",
-      callSign: "AETH-9042",
-      role: "Lead Flight Commander",
-      division: "Orbital Flight Dynamics",
-      clearanceLevel: "LEVEL-5 COSMIC",
-      issueDate: "2026-08",
-      expiryDate: "2030-08",
-      avatarUrl:
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
-      securityCode: "781",
-    },
+    showGuilloche: true,
+    guillocheVariant: "cyber-cyan",
+    showBackElectronics: true,
+    backElectronicsFinish: "cyan-laser",
+    showBackGuilloche: true,
+    backGuillocheVariant: "cyber-cyan",
   },
 };
 
-export const FlippedMagneticBack: Story = {
+/**
+ * 4. Flipped Reverse Side View (Inductive Coil & Reverse Guilloche)
+ */
+export const FlippedReverseSide: Story = {
   args: {
     orientation: "landscape",
     size: "lg",
     isFlipped: true,
     interactive: true,
-    credential: {
-      id: "APTI-7810-0942",
-      name: "Commander Alex Mercer",
-      callSign: "AETH-9042",
-      role: "Lead Flight Commander",
-      division: "Orbital Flight Dynamics",
-      clearanceLevel: "LEVEL-5 COSMIC",
-      issueDate: "2026-08",
-      expiryDate: "2030-08",
-      securityCode: "781",
-    },
+    holographic: true,
+    showGlare: true,
+    showElectronics: true,
+    electronicsFinish: "gold",
+    showGuilloche: true,
+    guillocheVariant: "holo-spectrum",
+    showBackElectronics: true,
+    backElectronicsFinish: "gold",
+    showBackGuilloche: true,
+    backGuillocheVariant: "holo-spectrum",
   },
 };
 
+/**
+ * 5. Portrait Orientation Space Agency Badge
+ */
 export const PortraitBadge: Story = {
   args: {
     orientation: "portrait",
     size: "md",
     interactive: true,
-    credential: {
-      id: "APTI-7810-1049",
-      name: "Dr. Elena Rostova",
-      callSign: "NOVA-9",
-      role: "Chief Xenobiologist",
-      division: "Astrobiology & Habitats",
-      clearanceLevel: "LEVEL-4 SCIENTIFIC",
-      issueDate: "2026-08",
-      expiryDate: "2030-08",
-      avatarUrl:
-        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop&q=80",
-      securityCode: "942",
-    },
+    holographic: true,
+    holoStrength: 0.7,
+    showGlare: true,
+    showElectronics: true,
+    electronicsFinish: "gold",
+    showGuilloche: true,
+    guillocheVariant: "solarized-gold",
+    showBackElectronics: true,
+    backElectronicsFinish: "gold",
+    showBackGuilloche: true,
+    backGuillocheVariant: "solarized-gold",
   },
 };
 
-const EditorContainer = styled("div")(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(3),
-  maxWidth: "600px",
-  width: "100%",
-}));
-
-const FormBox = styled("div")(({ theme }) => ({
-  backgroundColor: theme.palette.background.default,
-  padding: theme.spacing(2),
-  borderRadius: "12px",
-  border: `1px solid ${theme.palette.divider}`,
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: theme.spacing(1.5),
-  color: theme.palette.text.primary,
-  fontSize: "12px",
-}));
-
-const FormInput = styled("input")(({ theme }) => ({
-  width: "100%",
-  padding: "6px 10px",
-  borderRadius: "6px",
-  backgroundColor: theme.palette.background.paper,
-  border: `1px solid ${theme.palette.divider}`,
-  color: theme.palette.text.primary,
-}));
-
-const FormLabel = styled("label")({
-  display: "block",
-  marginBottom: "4px",
-  fontWeight: 700,
-});
-
-const InteractiveEditorComponent = () => {
-  const [profile, setProfile] = useState<Id1CardCredential>({
-    id: "APTI-7810-8821",
-    name: "Cadet Maya Lin",
-    callSign: "PHOENIX-7",
-    role: "Propulsion Specialist",
-    division: "Deep Space Propulsion",
-    clearanceLevel: "LEVEL-3 ACTIVE",
-    issueDate: "2026-08",
-    expiryDate: "2029-08",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&auto=format&fit=crop&q=80",
-    securityCode: "419",
-  });
-
-  const [flipped, setFlipped] = useState(false);
-
-  return (
-    <EditorContainer>
-      <Id1Card
-        size="lg"
-        credential={profile}
-        isFlipped={flipped}
-        onFlipChange={setFlipped}
-      />
-
-      <FormBox>
-        <div>
-          <FormLabel>Full Name</FormLabel>
-          <FormInput
-            type="text"
-            value={profile.name}
-            onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-          />
-        </div>
-        <div>
-          <FormLabel>Call Sign</FormLabel>
-          <FormInput
-            type="text"
-            value={profile.callSign}
-            onChange={(e) =>
-              setProfile({ ...profile, callSign: e.target.value })
-            }
-          />
-        </div>
-        <div>
-          <FormLabel>Role</FormLabel>
-          <FormInput
-            type="text"
-            value={profile.role}
-            onChange={(e) => setProfile({ ...profile, role: e.target.value })}
-          />
-        </div>
-        <div>
-          <FormLabel>Clearance Level</FormLabel>
-          <FormInput
-            type="text"
-            value={profile.clearanceLevel}
-            onChange={(e) =>
-              setProfile({ ...profile, clearanceLevel: e.target.value })
-            }
-          />
-        </div>
-      </FormBox>
-    </EditorContainer>
-  );
+/**
+ * 6. Minimalist Blank Card (No Electronics or Guilloche)
+ */
+export const MinimalistBlankCard: Story = {
+  args: {
+    orientation: "landscape",
+    size: "lg",
+    interactive: true,
+    holographic: false,
+    showGlare: true,
+    showElectronics: false,
+    showGuilloche: false,
+    showBackElectronics: false,
+    showBackGuilloche: false,
+  },
 };
 
+const PlaygroundWrapper = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: theme.spacing(4),
+  padding: theme.spacing(3),
+  width: "100%",
+  maxWidth: "900px",
+}));
+
+const ControlsGrid = styled("div")(({ theme }) => ({
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+  gap: theme.spacing(2),
+  width: "100%",
+  padding: theme.spacing(2.5),
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? "rgba(15, 23, 42, 0.7)"
+      : "rgba(241, 245, 249, 0.9)",
+  borderRadius: "16px",
+  border: `1px solid ${theme.palette.divider}`,
+}));
+
+function InteractiveDeckFxEditorStory() {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [transparent, setTransparent] = useState(false);
+  const [showElectronics, setShowElectronics] = useState(true);
+  const [showGuilloche, setShowGuilloche] = useState(true);
+  const [showBackElectronics, setShowBackElectronics] = useState(false);
+  const [showBackGuilloche, setShowBackGuilloche] = useState(true);
+  const [electronicsFinish, setElectronicsFinish] =
+    useState<ElectronicsFinish>("gold");
+  const [guillocheVariant, setGuillocheVariant] =
+    useState<GuillocheVariant>("holo-spectrum");
+  const [holographic, setHolographic] = useState(true);
+
+  return (
+    <PlaygroundWrapper>
+      <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          Deck-FX ID-1 Card Playground
+        </Typography>
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<AutorenewIcon />}
+          onClick={() => setIsFlipped((prev) => !prev)}
+        >
+          {isFlipped ? "Flip to Front" : "Flip to Back"}
+        </Button>
+      </Box>
+
+      <Id1Card
+        size="lg"
+        transparent={transparent}
+        isFlipped={isFlipped}
+        onFlipChange={setIsFlipped}
+        interactive
+        holographic={holographic}
+        holoStrength={0.7}
+        showGlare
+        showElectronics={showElectronics}
+        electronicsFinish={electronicsFinish}
+        showGuilloche={showGuilloche}
+        guillocheVariant={guillocheVariant}
+        showBackElectronics={showBackElectronics}
+        backElectronicsFinish={electronicsFinish}
+        showBackGuilloche={showBackGuilloche}
+        backGuillocheVariant={guillocheVariant}
+      />
+
+      <ControlsGrid>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={transparent}
+              onChange={(e) => setTransparent(e.target.checked)}
+            />
+          }
+          label="Transparent Acrylic"
+        />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={holographic}
+              onChange={(e) => setHolographic(e.target.checked)}
+            />
+          }
+          label="Holographic Foil"
+        />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showElectronics}
+              onChange={(e) => setShowElectronics(e.target.checked)}
+            />
+          }
+          label="Front Electronics"
+        />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showGuilloche}
+              onChange={(e) => setShowGuilloche(e.target.checked)}
+            />
+          }
+          label="Front Guilloche"
+        />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showBackElectronics}
+              onChange={(e) => setShowBackElectronics(e.target.checked)}
+            />
+          }
+          label="Back Electronics"
+        />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showBackGuilloche}
+              onChange={(e) => setShowBackGuilloche(e.target.checked)}
+            />
+          }
+          label="Back Guilloche"
+        />
+
+        <FormControl size="small" fullWidth>
+          <InputLabel id="finish-label">Electronics Finish</InputLabel>
+          <Select
+            labelId="finish-label"
+            value={electronicsFinish}
+            label="Electronics Finish"
+            onChange={(e) =>
+              setElectronicsFinish(e.target.value as ElectronicsFinish)
+            }
+          >
+            <MenuItem value="gold">Gold</MenuItem>
+            <MenuItem value="cyan-laser">Cyan Laser</MenuItem>
+            <MenuItem value="copper">Copper</MenuItem>
+            <MenuItem value="silver">Silver</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" fullWidth>
+          <InputLabel id="variant-label">Guilloche Theme</InputLabel>
+          <Select
+            labelId="variant-label"
+            value={guillocheVariant}
+            label="Guilloche Theme"
+            onChange={(e) =>
+              setGuillocheVariant(e.target.value as GuillocheVariant)
+            }
+          >
+            <MenuItem value="holo-spectrum">Holo Spectrum</MenuItem>
+            <MenuItem value="solarized-gold">Solarized Gold</MenuItem>
+            <MenuItem value="cyber-cyan">Cyber Cyan</MenuItem>
+            <MenuItem value="cosmic-crimson">Cosmic Crimson</MenuItem>
+            <MenuItem value="deep-space">Deep Space</MenuItem>
+          </Select>
+        </FormControl>
+      </ControlsGrid>
+    </PlaygroundWrapper>
+  );
+}
+
 export const LiveInteractiveEditor: Story = {
-  render: () => <InteractiveEditorComponent />,
+  render: () => <InteractiveDeckFxEditorStory />,
 };

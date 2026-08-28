@@ -14,6 +14,8 @@ export interface GuillocheProps {
   showConcentricRings?: boolean;
   noiseIntensity?: number; // 0 to 1
   opacity?: number;
+  holographic?: boolean;
+  holoStrength?: number;
   className?: string;
   testId?: string;
 }
