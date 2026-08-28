@@ -71,7 +71,11 @@ export default function Footer({ className }: FooterProps) {
 
   return (
     <FooterRoot className={className}>
-      <CopyrightText>{t("copyright", { year: currentYear })}</CopyrightText>
+      {/* suppressHydrationWarning: `new Date().getFullYear()` can straddle a year
+          boundary between the SSR host and the user's clock/timezone. */}
+      <CopyrightText suppressHydrationWarning>
+        {t("copyright", { year: currentYear })}
+      </CopyrightText>
       <CraftedByBadge size="small" />
       <FooterRight>
         <SystemStatus>

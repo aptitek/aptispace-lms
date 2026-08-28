@@ -13,7 +13,10 @@ import {
   type Transition,
 } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import type { SupportedLanguage } from "~/i18n";
+import {
+  LANGUAGE_STORAGE_KEY,
+  type SupportedLanguage,
+} from "../../../i18n";
 import {
   UkFlag,
   FrFlag,
@@ -442,6 +445,11 @@ export default function LanguageToggle({
     void i18n.changeLanguage(nextLang);
     if (typeof document !== "undefined") {
       document.documentElement.lang = nextLang;
+    }
+    try {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, nextLang);
+    } catch {
+      // Ignore storage access errors
     }
   };
 

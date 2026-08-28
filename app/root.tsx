@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import type { Route } from "./+types/root";
 import { getThemeByMode } from "./tokens/theme";
 import { ThemeModeProvider, useThemeMode } from "./utils/themeContext";
+import { LANGUAGE_STORAGE_KEY } from "./i18n";
 import "~/i18n";
 import "./app.css";
 
@@ -45,6 +46,26 @@ function AppThemeContainer({ children }: { children: React.ReactNode }) {
 export function Layout({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation();
   const currentLang = i18n.resolvedLanguage || i18n.language || "en";
+
+  // The first render must match the SSR'd snapshot, so i18n starts at "en" on both
+  // sides. Apply the saved / browser-detected language preference only after mount.
+  useEffect(() => {
+    let detected: string | null = null;
+    try {
+      const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+      if (stored === "en" || stored === "fr") detected = stored;
+    } catch {
+      // Ignore storage access errors
+    }
+    if (!detected && typeof navigator !== "undefined") {
+      const nav = navigator.language.toLowerCase();
+      if (nav.startsWith("fr")) detected = "fr";
+      else if (nav.startsWith("en")) detected = "en";
+    }
+    if (detected && detected !== i18n.language) {
+      void i18n.changeLanguage(detected);
+    }
+  }, [i18n]);
 
   return (
     <html lang={currentLang}>
