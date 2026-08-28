@@ -60,10 +60,12 @@ function buildMrz(credential: Id1CardCredential): string {
     documentNumber:
       credential.documentNumber ?? FRENCH_ID_SAMPLE_HOLDER.documentNumber,
     birthDate:
-      toYymmdd(credential.dateOfBirth) ?? FRENCH_ID_SAMPLE_HOLDER.birthDateYymmdd,
+      toYymmdd(credential.dateOfBirth) ??
+      FRENCH_ID_SAMPLE_HOLDER.birthDateYymmdd,
     sex: (credential.sex ?? FRENCH_ID_SAMPLE_HOLDER.sex) as "M" | "F",
     expiryDate:
-      toYymmdd(credential.expiryDate) ?? FRENCH_ID_SAMPLE_HOLDER.expiryDateYymmdd,
+      toYymmdd(credential.expiryDate) ??
+      FRENCH_ID_SAMPLE_HOLDER.expiryDateYymmdd,
     nationality: credential.nationality ?? FRENCH_ID_SAMPLE_HOLDER.nationality,
     surname: credential.surname ?? FRENCH_ID_SAMPLE_HOLDER.surname,
     givenNames: credential.givenNames ?? FRENCH_ID_SAMPLE_HOLDER.givenNames,
@@ -100,10 +102,10 @@ const BARCODE_CELLS = Array.from({ length: 64 }, (_, i) => ({
 
 /** Stylized person silhouette used when no photo URL is supplied. */
 const SILHOUETTE_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(
-  "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 260\">" +
-    "<rect width=\"200\" height=\"260\" fill=\"#c9c9ce\"/>" +
-    "<circle cx=\"100\" cy=\"82\" r=\"46\" fill=\"#7a7a82\"/>" +
-    "<path d=\"M28 250c12-72 64-96 144-96s92 24 104 96z\" fill=\"#7a7a82\"/>" +
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260">' +
+    '<rect width="200" height="260" fill="#c9c9ce"/>' +
+    '<circle cx="100" cy="82" r="46" fill="#7a7a82"/>' +
+    '<path d="M28 250c12-72 64-96 144-96s92 24 104 96z" fill="#7a7a82"/>' +
     "</svg>",
 )}`;
 
@@ -185,9 +187,7 @@ function renderSignature(): React.ReactNode {
 function render2dBarcode(): React.ReactNode {
   return (
     <French2dBarcode>
-      {BARCODE_CELLS.map((cell) =>
-        cell.on ? <span key={cell.id} /> : null,
-      )}
+      {BARCODE_CELLS.map((cell) => (cell.on ? <span key={cell.id} /> : null))}
     </French2dBarcode>
   );
 }
@@ -226,8 +226,22 @@ function renderChipSymbol(): React.ReactNode {
             />
           </g>
         ))}
-        <line x1="20" y1="12" x2="20" y2="28" stroke="currentColor" strokeWidth="1.2" />
-        <line x1="12" y1="20" x2="28" y2="20" stroke="currentColor" strokeWidth="1.2" />
+        <line
+          x1="20"
+          y1="12"
+          x2="20"
+          y2="28"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        />
+        <line
+          x1="12"
+          y1="20"
+          x2="28"
+          y2="20"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        />
       </svg>
     </FrenchChipSymbol>
   );

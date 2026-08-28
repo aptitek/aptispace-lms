@@ -10,7 +10,12 @@ const CARD_H = FRENCH_ID_CARD.heightMm; // 53.98 mm
  * card face, so every fragment scales proportionally no matter the rendered px
  * size (the card always keeps the ISO/IEC 7810 ID-1 aspect ratio).
  */
-export function mmToPct(x: number, y: number, w: number, h: number): {
+export function mmToPct(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): {
   left: string;
   top: string;
   width: string;
