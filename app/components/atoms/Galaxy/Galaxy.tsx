@@ -33,6 +33,7 @@ export interface GalaxyProps extends HTMLAttributes<HTMLDivElement> {
   transparent?: boolean;
   backgroundColor?: string;
   starColors?: GalaxyStarColors;
+  dpr?: number;
 }
 
 interface GalaxySettings {
@@ -55,6 +56,7 @@ interface GalaxySettings {
   isDark: boolean;
   backgroundColor?: string;
   starColors?: GalaxyStarColors;
+  dpr?: number;
 }
 
 interface ResolvedGalaxyColors {
@@ -105,6 +107,7 @@ const GALAXY_PROP_KEYS = new Set<string>([
   "transparent",
   "backgroundColor",
   "starColors",
+  "dpr",
 ]);
 
 function parseHex(hexStr: string): [number, number, number] {
@@ -333,7 +336,14 @@ export default function Galaxy(props: GalaxyProps) {
     const ctn = ctnDom.current;
     if (!ctn) return;
 
+    const resolvedDpr =
+      settings.dpr ??
+      (typeof window !== "undefined"
+        ? Math.min(window.devicePixelRatio || 1, 2)
+        : 1);
+
     const renderer = new Renderer({
+      dpr: resolvedDpr,
       alpha: settings.transparent,
       premultipliedAlpha: true,
     });

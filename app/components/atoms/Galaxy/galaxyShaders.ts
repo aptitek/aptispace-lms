@@ -42,6 +42,18 @@ uniform vec3 uBackgroundColor;
 
 varying vec2 vUv;
 
+// Simple hash function for dither noise
+float hash(vec2 p) {
+  p = fract(p * vec2(123.34, 456.21));
+  p += dot(p, p + 45.32);
+  return fract(p.x * p.y);
+}
+
+// Generate blue noise-like dither value in range [-0.5, 0.5] in [0,1] space
+float dither(vec2 uv) {
+  return hash(uv + uTime * 0.1) - 0.5;
+}
+
 #define NUM_LAYER 4.0
 #define MAT45 mat2(0.7071, -0.7071, 0.7071, 0.7071)
 #define PERIOD 3.0
@@ -165,21 +177,25 @@ void main() {
   if (uIsDark) {
     if (uTransparent) {
       // Dark mode transparent: additive starlight on DOM backdrop
-      gl_FragColor = vec4(col, 0.0);
+      vec3 dithered = col + dither(vUv) * (1.0 / 255.0);
+      gl_FragColor = vec4(dithered, 0.0);
     } else {
       // Dark mode opaque: starlight adds illumination and never darkens background
       vec3 finalColor = min(uBackgroundColor + col, vec3(1.0));
-      gl_FragColor = vec4(finalColor, 1.0);
+      vec3 dithered = finalColor + dither(vUv) * (1.0 / 255.0);
+      gl_FragColor = vec4(dithered, 1.0);
     }
   } else {
     if (uTransparent) {
       // Light mode transparent: multiply starlight onto light DOM backdrop
       float alpha = min(length(col), 1.0);
-      gl_FragColor = vec4(max(vec3(1.0) - col, vec3(0.0)), alpha);
+      vec3 dithered = max(vec3(1.0) - col, vec3(0.0)) + dither(vUv) * (1.0 / 255.0);
+      gl_FragColor = vec4(dithered, alpha);
     } else {
       // Light mode opaque: dark stars subtract from light background
       vec3 finalColor = max(uBackgroundColor - col, vec3(0.0));
-      gl_FragColor = vec4(finalColor, 1.0);
+      vec3 dithered = finalColor + dither(vUv) * (1.0 / 255.0);
+      gl_FragColor = vec4(dithered, 1.0);
     }
   }
 }

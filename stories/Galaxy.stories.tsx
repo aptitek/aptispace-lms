@@ -81,6 +81,11 @@ const meta = {
       control: "boolean",
       description: "Makes the black background transparent, showing only stars",
     },
+    dpr: {
+      control: { type: "range", min: 0.5, max: 3, step: 0.25 },
+      description:
+        "Device pixel ratio multiplier for rendering resolution. Defaults to Math.min(window.devicePixelRatio, 2)",
+    },
   },
 } satisfies Meta<typeof Galaxy>;
 
