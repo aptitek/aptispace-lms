@@ -2,7 +2,6 @@ import { styled } from "@mui/material/styles";
 import { useLoaderData, type LoaderFunctionArgs } from "react-router";
 import HeaderBar from "~/components/organisms/HeaderBar/HeaderBar";
 import Footer from "~/components/organisms/Footer/Footer";
-import OrbitalMissionCard from "~/components/organisms/OrbitalMissionCard/OrbitalMissionCard";
 import { authGuard, type SessionPayload } from "~/utils/session.server";
 import { logout, type AuthUser } from "~/utils/auth";
 import type { getUserWithAffiliations } from "~/services/userService";
@@ -104,9 +103,7 @@ export default function Home() {
         data-testid="main-headerbar"
       />
 
-      <MainWorkspace>
-        <OrbitalMissionCard data-testid="main-orbital-mission-card" />
-      </MainWorkspace>
+      <MainWorkspace />
 
       <Footer />
     </PageRoot>
