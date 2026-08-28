@@ -3,98 +3,10 @@ import { useTheme } from "@mui/material/styles";
 import { type GuillocheProps, GUILLOCHE_VIEWBOX } from "./Guilloche.types";
 import {
   hashString,
-  SeededRng,
-  generateProceduralRosette,
-  generateProceduralWaveBand,
+  calculateProceduralPaths,
+  type ProceduralRosetteItem,
 } from "./guillocheMath";
 import { GuillocheSvg, getGuillocheColors } from "./Guilloche.styles";
-
-interface ProceduralConfig {
-  seedNum: number;
-  noiseIntensity: number;
-  density: "low" | "medium" | "high";
-}
-
-interface ProceduralRosetteItem {
-  id: string;
-  path: string;
-  cx: number;
-  cy: number;
-  r1: number;
-  gradientId: string;
-  strokeWidth: number;
-  opacity: number;
-}
-
-function calculateProceduralPaths({
-  seedNum,
-  noiseIntensity,
-  density,
-}: ProceduralConfig) {
-  const rng = new SeededRng(seedNum);
-  const noiseAmp = noiseIntensity * 16;
-  const count = density === "high" ? 6 : density === "low" ? 3 : 4;
-  const steps = density === "high" ? 420 : 320;
-
-  const rosettes: ProceduralRosetteItem[] = [];
-
-  for (let index = 0; index < count; index += 1) {
-    const cx = rng.nextRange(-60, GUILLOCHE_VIEWBOX.width + 60);
-    const cy = rng.nextRange(-50, GUILLOCHE_VIEWBOX.height + 50);
-    const r1 = rng.nextRange(110, 320);
-    const r2 = rng.nextRange(24, 72);
-    const d = rng.nextRange(30, 85);
-    const petals = rng.nextInt(4, 11);
-    const seedOffset = seedNum + index * 107;
-
-    const path = generateProceduralRosette({
-      cx,
-      cy,
-      r1,
-      r2,
-      d,
-      petals,
-      noiseAmp: noiseAmp * rng.nextRange(0.6, 1.2),
-      seed: seedOffset,
-      steps,
-    });
-
-    rosettes.push({
-      id: `rosette-${index}-${seedOffset}`,
-      path,
-      cx,
-      cy,
-      r1,
-      gradientId: index % 2 === 0 ? "holoGradient1" : "holoGradient2",
-      strokeWidth: rng.nextRange(0.75, 1.25),
-      opacity: rng.nextRange(0.55, 0.85),
-    });
-  }
-
-  const topWaves = generateProceduralWaveBand({
-    startX: -40,
-    endX: GUILLOCHE_VIEWBOX.width + 40,
-    baseY: rng.nextRange(20, 60),
-    freq: rng.nextRange(0.2, 0.45),
-    amp: rng.nextRange(8, 16),
-    count: density === "high" ? 6 : 4,
-    spacing: rng.nextRange(4, 7),
-    seed: seedNum + 303,
-  });
-
-  const botWaves = generateProceduralWaveBand({
-    startX: -40,
-    endX: GUILLOCHE_VIEWBOX.width + 40,
-    baseY: GUILLOCHE_VIEWBOX.height - rng.nextRange(30, 70),
-    freq: rng.nextRange(0.25, 0.5),
-    amp: rng.nextRange(7, 15),
-    count: density === "high" ? 6 : 4,
-    spacing: rng.nextRange(4, 7),
-    seed: seedNum + 404,
-  });
-
-  return { rosettes, topWaves, botWaves };
-}
 
 interface WaveGroupProps {
   topWaves: string[];

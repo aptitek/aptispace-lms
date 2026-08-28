@@ -6,6 +6,8 @@ import {
   pseudoNoise,
   generateProceduralRosette,
   generateProceduralWaveBand,
+  calculateProceduralPaths,
+  generateGuillocheMaskDataUrl,
 } from "./guillocheMath";
 
 describe("Guilloche Math & Procedural Generator", () => {
@@ -76,5 +78,31 @@ describe("Guilloche Math & Procedural Generator", () => {
 
     expect(waves).toHaveLength(3);
     expect(waves[0].startsWith("M ")).toBe(true);
+  });
+
+  it("calculates complete procedural paths for card face", () => {
+    const paths = calculateProceduralPaths({
+      seedNum: hashString("TEST-SEED"),
+      noiseIntensity: 0.5,
+      density: "medium",
+    });
+
+    expect(paths.rosettes.length).toBeGreaterThanOrEqual(3);
+    expect(paths.topWaves.length).toBeGreaterThanOrEqual(4);
+    expect(paths.botWaves.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("generates valid SVG data URL for holographic foil masking", () => {
+    const dataUrl = generateGuillocheMaskDataUrl({
+      seed: "APTI-7810-HOLO",
+      density: "medium",
+      noiseIntensity: 0.5,
+    });
+
+    expect(dataUrl).toBeDefined();
+    expect(dataUrl.startsWith("data:image/svg+xml;utf8,")).toBe(true);
+    const decoded = decodeURIComponent(dataUrl);
+    expect(decoded).toContain("<svg");
+    expect(decoded).toContain("viewBox");
   });
 });

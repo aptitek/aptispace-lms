@@ -7,6 +7,7 @@ import Id1Card from "~/components/organisms/Id1Card/Id1Card";
 import type {
   Id1CardCredential,
   Id1CardOrientation,
+  Id1CardSide,
 } from "~/components/organisms/Id1Card/Id1Card.types";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import BadgeIcon from "@mui/icons-material/Badge";
@@ -252,7 +253,7 @@ export default function OnboardingPage() {
 
   const [orientation, setOrientation] =
     useState<Id1CardOrientation>("landscape");
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [side, setSide] = useState<Id1CardSide>("front");
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -264,8 +265,8 @@ export default function OnboardingPage() {
     setOrientation((prev) => (prev === "landscape" ? "portrait" : "landscape"));
   };
 
-  const handleToggleFlip = () => {
-    setIsFlipped((prev) => !prev);
+  const handleToggleSide = () => {
+    setSide((prev) => (prev === "front" ? "back" : "front"));
   };
 
   const handleSubmit = (e: FormEvent) => {
@@ -391,14 +392,14 @@ export default function OnboardingPage() {
 
               <ActionButton
                 type="button"
-                onClick={handleToggleFlip}
-                title="Flip ID-1 Badge"
+                onClick={handleToggleSide}
+                title="Switch Card Side"
               >
                 <AutorenewIcon style={{ fontSize: "14px" }} />
                 <span>
-                  {isFlipped
-                    ? t("card.flipToFront", "Front Side")
-                    : t("card.flipToBack", "Flip Badge")}
+                  {side === "front"
+                    ? t("card.flipToBack", "View Back Side")
+                    : t("card.flipToFront", "View Front Side")}
                 </span>
               </ActionButton>
             </ControlBar>
@@ -409,8 +410,7 @@ export default function OnboardingPage() {
               credential={profile}
               orientation={orientation}
               size="lg"
-              isFlipped={isFlipped}
-              onFlipChange={setIsFlipped}
+              side={side}
             />
           </CardCenterHolder>
         </PreviewPanel>

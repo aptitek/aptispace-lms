@@ -1,280 +1,360 @@
-import { useState, forwardRef, useImperativeHandle } from "react";
-import { Card, HolographicLayer } from "deckfx";
+import { forwardRef, useMemo } from "react";
+import { Card } from "deckfx";
 import Electronics from "../../atoms/Electronics/Electronics";
 import Guilloche from "../../atoms/Guilloche/Guilloche";
+import { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche/guillocheMath";
+import MrzZone from "../../atoms/MrzZone/MrzZone";
 import {
   type Id1CardProps,
-  type Id1CardHandle,
-  type Id1CardSideConfig,
+  type Id1CardSide,
+  type Id1CardCredential,
 } from "./Id1Card.types";
 import {
   CardFaceContainer,
   ContentOverlay,
-  TransparentCardWrapper,
+  FrontLayoutRoot,
+  CardHeaderBar,
+  CardBrandTag,
+  ClearanceBadge,
+  FrontMainBody,
+  AvatarFrame,
+  CadetDetailsColumn,
+  CadetNameText,
+  CadetCallSignText,
+  CadetRoleText,
+  MetaGrid,
+  MetaItem,
+  MetaLabel,
+  MetaValue,
+  BackLayoutRoot,
+  MagneticStripeBar,
+  BackMiddleSection,
+  SignaturePanel,
+  SecurityCodeTag,
+  MrzHolder,
   getDimensions,
 } from "./Id1Card.styles";
 
-interface GuillocheLayerProps {
-  config: Id1CardSideConfig;
-  fallbackSeed: string;
-}
-
-function CardGuillocheLayer({ config, fallbackSeed }: GuillocheLayerProps) {
-  if (config.showGuilloche === false) {
-    return null;
-  }
-
-  return (
-    <Guilloche
-      seed={config.guillocheSeed || fallbackSeed}
-      variant={config.guillocheVariant || "holo-spectrum"}
-      density={config.guillocheDensity || "medium"}
-      opacity={config.guillocheOpacity ?? 0.42}
-      noiseIntensity={config.guillocheNoiseIntensity ?? 0.5}
-      holographic={true}
-    />
-  );
-}
-
-interface ElectronicsLayerProps {
-  config: Id1CardSideConfig;
-  isBack: boolean;
-}
-
-function CardElectronicsLayer({ config, isBack }: ElectronicsLayerProps) {
-  if (!config.showElectronics) {
-    return null;
-  }
-
-  return (
-    <Electronics
-      finish={config.electronicsFinish || "gold"}
-      showNfcAntenna={config.showNfcAntenna !== false}
-      showChip={config.showChip ?? !isBack}
-      showInnerCoil={config.showInnerCoil !== false}
-      opacity={config.electronicsOpacity ?? (isBack ? 0.65 : 0.85)}
-      mirrored={config.electronicsMirrored ?? false}
-    />
-  );
-}
-
-interface MaskedFoilLayerProps {
-  config: Id1CardSideConfig;
-  holoStrength: number;
-}
-
-function CardMaskedFoilLayer({ config, holoStrength }: MaskedFoilLayerProps) {
-  if (!config.maskUrl) {
-    return null;
-  }
-
-  return (
-    <HolographicLayer
-      active={true}
-      holoStrength={holoStrength}
-      variant={
-        config.guillocheVariant === "solarized-gold" ? "gold" : "rainbow"
-      }
-      maskUrl={config.maskUrl}
-      maskSize={config.maskSize || "contain"}
-      maskPosition={config.maskPosition || "center"}
-      maskRepeat={config.maskRepeat || "no-repeat"}
-    />
-  );
-}
-
-interface SideProps {
-  sideConfig: Id1CardSideConfig;
-  isBack: boolean;
-  isTransparent?: boolean;
-  holoStrength: number;
-  userContent?: React.ReactNode;
-}
-
-function RenderCardSide({
-  sideConfig,
-  isBack,
-  isTransparent,
-  holoStrength,
-  userContent,
-}: SideProps) {
-  const fallbackSeed = isBack ? "APTI-ID1-BACK" : "APTI-ID1-FRONT";
-
-  return (
-    <CardFaceContainer isBack={isBack} isTransparent={isTransparent}>
-      <CardGuillocheLayer config={sideConfig} fallbackSeed={fallbackSeed} />
-      <CardElectronicsLayer config={sideConfig} isBack={isBack} />
-      <CardMaskedFoilLayer config={sideConfig} holoStrength={holoStrength} />
-      {userContent && (
-        <ContentOverlay isTransparent={isTransparent}>
-          {userContent}
-        </ContentOverlay>
-      )}
-    </CardFaceContainer>
-  );
-}
-
-const defaultFront: Id1CardSideConfig = {
-  showElectronics: true,
-  electronicsFinish: "gold",
-  showNfcAntenna: true,
-  showChip: true,
-  showInnerCoil: true,
-  showGuilloche: true,
-  guillocheVariant: "holo-spectrum",
-  guillocheSeed: "APTI-7810-FRONT",
+const DEFAULT_CREDENTIAL: Required<Id1CardCredential> = {
+  id: "APTI-7810-9402",
+  name: "Alex Mercer",
+  callSign: "AETH-9042",
+  role: "Mission Specialist",
+  division: "Orbital Flight Dynamics",
+  clearanceLevel: "LEVEL-4 OMNI",
+  issueDate: "2026-08",
+  expiryDate: "2030-08",
+  avatarUrl:
+    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
+  securityCode: "781",
+  barcodeValue: "APTI-7810-9402",
 };
 
-const defaultBack: Id1CardSideConfig = {
-  showElectronics: false,
-  electronicsFinish: "gold",
-  showNfcAntenna: true,
-  showChip: false,
-  showInnerCoil: true,
-  showGuilloche: true,
-  guillocheVariant: "holo-spectrum",
-  guillocheSeed: "APTI-7810-BACK",
-};
-
-function extractMaskConfig(props: Id1CardProps): Partial<Id1CardSideConfig> {
-  const maskObj: Partial<Id1CardSideConfig> = {};
-  if (props.maskUrl) maskObj.maskUrl = props.maskUrl;
-  if (props.maskSize) maskObj.maskSize = props.maskSize;
-  if (props.maskPosition) maskObj.maskPosition = props.maskPosition;
-  if (props.maskRepeat) maskObj.maskRepeat = props.maskRepeat;
-  return maskObj;
+interface SideViewProps {
+  credential?: Partial<Id1CardCredential>;
+  isPortrait?: boolean;
 }
 
-function resolveFrontSide(props: Id1CardProps): Id1CardSideConfig {
-  const frontSeed = props.guillocheSeed || props.credential?.id;
-  const overrides: Partial<Id1CardSideConfig> = {};
+function BackCredentialView({ credential, isPortrait }: SideViewProps) {
+  const cred = { ...DEFAULT_CREDENTIAL, ...credential };
+  const rawId = cred.id.replace(/[^A-Z0-9]/gi, "");
+  const parts = cred.name.trim().split(" ");
+  const surname = (parts[parts.length - 1] || "MERCER").toUpperCase();
+  const givenNames = (parts.slice(0, -1).join(" ") || "ALEX").toUpperCase();
 
-  if (props.showElectronics !== undefined)
-    overrides.showElectronics = props.showElectronics;
-  if (props.electronicsFinish)
-    overrides.electronicsFinish = props.electronicsFinish;
-  if (props.showGuilloche !== undefined)
-    overrides.showGuilloche = props.showGuilloche;
-  if (props.guillocheVariant)
-    overrides.guillocheVariant = props.guillocheVariant;
-  if (frontSeed) overrides.guillocheSeed = frontSeed;
+  return (
+    <BackLayoutRoot isPortrait={isPortrait}>
+      <MagneticStripeBar />
 
-  return Object.assign(
-    {},
-    defaultFront,
-    overrides,
-    extractMaskConfig(props),
-    props.front,
+      <BackMiddleSection>
+        <SignaturePanel>
+          <span>AUTH SIGNATURE</span>
+          <SecurityCodeTag>SEC: {cred.securityCode}</SecurityCodeTag>
+        </SignaturePanel>
+
+        <MetaItem>
+          <MetaLabel>STANDARD</MetaLabel>
+          <MetaValue>ISO 7810 ID-1</MetaValue>
+        </MetaItem>
+      </BackMiddleSection>
+
+      <MrzHolder>
+        <MrzZone
+          compact={true}
+          cardData={{
+            documentNumber: rawId.slice(0, 9),
+            surname,
+            givenNames,
+            issuingState: "APT",
+            nationality: "APT",
+            sex: "X",
+          }}
+        />
+      </MrzHolder>
+    </BackLayoutRoot>
   );
 }
 
-function resolveBackSide(props: Id1CardProps): Id1CardSideConfig {
-  const backSeed =
-    props.backGuillocheSeed ||
-    (props.credential?.id ? `${props.credential.id}-BACK` : undefined);
-  const overrides: Partial<Id1CardSideConfig> = {};
+function FrontCredentialView({ credential, isPortrait }: SideViewProps) {
+  const cred = { ...DEFAULT_CREDENTIAL, ...credential };
 
-  if (props.showBackElectronics !== undefined)
-    overrides.showElectronics = props.showBackElectronics;
-  if (props.backElectronicsFinish)
-    overrides.electronicsFinish = props.backElectronicsFinish;
-  if (props.showBackGuilloche !== undefined)
-    overrides.showGuilloche = props.showBackGuilloche;
-  if (props.backGuillocheVariant)
-    overrides.guillocheVariant = props.backGuillocheVariant;
-  if (backSeed) overrides.guillocheSeed = backSeed;
+  return (
+    <FrontLayoutRoot isPortrait={isPortrait}>
+      <CardHeaderBar>
+        <CardBrandTag>
+          <span>✦</span>
+          <span>AptiSpace Academy</span>
+        </CardBrandTag>
+        <ClearanceBadge>{cred.clearanceLevel}</ClearanceBadge>
+      </CardHeaderBar>
 
-  return Object.assign({}, defaultBack, overrides, props.back);
+      <FrontMainBody isPortrait={isPortrait}>
+        <AvatarFrame size={isPortrait ? 60 : 54}>
+          <img src={cred.avatarUrl} alt={cred.name} />
+        </AvatarFrame>
+
+        <CadetDetailsColumn>
+          <CadetNameText>{cred.name}</CadetNameText>
+          <CadetCallSignText>CALLSIGN: {cred.callSign}</CadetCallSignText>
+          <CadetRoleText>{cred.role}</CadetRoleText>
+        </CadetDetailsColumn>
+      </FrontMainBody>
+
+      <MetaGrid isPortrait={isPortrait}>
+        <MetaItem>
+          <MetaLabel>Cadet ID</MetaLabel>
+          <MetaValue>{cred.id}</MetaValue>
+        </MetaItem>
+        <MetaItem>
+          <MetaLabel>Division</MetaLabel>
+          <MetaValue>{cred.division}</MetaValue>
+        </MetaItem>
+        <MetaItem>
+          <MetaLabel>Expires</MetaLabel>
+          <MetaValue>{cred.expiryDate}</MetaValue>
+        </MetaItem>
+      </MetaGrid>
+    </FrontLayoutRoot>
+  );
 }
 
-const defaultCardProps = {
+interface CredentialContentProps {
+  credential?: Partial<Id1CardCredential>;
+  side: Id1CardSide;
+  isPortrait?: boolean;
+}
+
+function DefaultCredentialContent({
+  credential,
+  side,
+  isPortrait,
+}: CredentialContentProps) {
+  if (side === "back") {
+    return (
+      <BackCredentialView credential={credential} isPortrait={isPortrait} />
+    );
+  }
+  return (
+    <FrontCredentialView credential={credential} isPortrait={isPortrait} />
+  );
+}
+
+function getGuillocheSeed(
+  customSeed: string | undefined,
+  credId: string | undefined,
+  isBack: boolean,
+): string {
+  if (customSeed) return customSeed;
+  if (credId) return isBack ? `${credId}-BACK` : credId;
+  return isBack ? "APTI-ID1-BACK" : "APTI-ID1-FRONT";
+}
+
+function getHoloVariant(
+  variant: string | undefined,
+): "default" | "rainbow" | "cosmic" | "gold" {
+  if (variant === "solarized-gold") return "gold";
+  if (
+    variant === "cyber-cyan" ||
+    variant === "cosmic-crimson" ||
+    variant === "deep-space"
+  ) {
+    return "cosmic";
+  }
+  return "rainbow";
+}
+
+interface CardContentOverlayProps {
+  children?: React.ReactNode;
+  content?: React.ReactNode;
+  credential?: Partial<Id1CardCredential>;
+  side: Id1CardSide;
+  isPortrait: boolean;
+  transparent?: boolean;
+}
+
+function CardContentOverlay({
+  children,
+  content,
+  credential,
+  side,
+  isPortrait,
+  transparent,
+}: CardContentOverlayProps) {
+  let inner = children;
+  if (!inner) inner = content;
+  if (!inner) {
+    inner = (
+      <DefaultCredentialContent
+        credential={credential}
+        side={side}
+        isPortrait={isPortrait}
+      />
+    );
+  }
+
+  return <ContentOverlay isTransparent={transparent}>{inner}</ContentOverlay>;
+}
+
+const DEFAULT_CARD_PROPS = {
+  side: "front" as const,
   orientation: "landscape" as const,
   size: "responsive" as const,
   transparent: false,
-  interactive: true,
-  holographic: false,
-  holoStrength: 0.7,
   showGlare: true,
   glareOpacity: 0.45,
   maxTilt: 16,
   scaleOnHover: 1.04,
   shadow: "xl" as const,
-  testId: "id1-deckfx-card",
+  holographic: true,
+  holoStrength: 0.75,
+  showElectronics: true,
+  electronicsFinish: "gold" as const,
+  showNfcAntenna: true,
+  showInnerCoil: true,
+  showGuilloche: true,
+  guillocheVariant: "holo-spectrum" as const,
+  guillocheDensity: "medium" as const,
+  guillocheOpacity: 0.42,
+  guillocheNoiseIntensity: 0.5,
+  testId: "id1-card",
 };
 
-export const Id1Card = forwardRef<Id1CardHandle, Id1CardProps>((props, ref) => {
-  const config = { ...defaultCardProps, ...props };
-  const [uncontrolledFlipped, setUncontrolledFlipped] = useState(false);
-  const isFlipped = props.isFlipped ?? uncontrolledFlipped;
+export const Id1Card = forwardRef<HTMLDivElement, Id1CardProps>(
+  (props, ref) => {
+    const conf = { ...DEFAULT_CARD_PROPS, ...props };
+    const isBack = conf.side === "back";
+    const isPortrait = conf.orientation === "portrait";
 
-  const updateFlipped = (nextFlipped: boolean) => {
-    if (props.isFlipped === undefined) {
-      setUncontrolledFlipped(nextFlipped);
-    }
-    props.onFlipChange?.(nextFlipped);
-  };
+    const dims = getDimensions(
+      conf.size,
+      conf.orientation,
+      props.width,
+      props.height,
+    );
 
-  useImperativeHandle(ref, () => ({
-    flip: () => {
-      updateFlipped(!isFlipped);
-    },
-    setFlipped: (next: boolean) => {
-      updateFlipped(next);
-    },
-  }));
+    const showChip = props.showChip ?? !isBack;
+    const electronicsOpacity =
+      props.electronicsOpacity ?? (isBack ? 0.65 : 0.85);
+    const electronicsMirrored = props.electronicsMirrored ?? isBack;
+    const seed = getGuillocheSeed(
+      props.guillocheSeed,
+      props.credential?.id,
+      isBack,
+    );
 
-  const dims = getDimensions(
-    config.size,
-    config.orientation,
-    props.width,
-    props.height,
-  );
+    const effectiveMaskUrl = useMemo(() => {
+      if (props.maskUrl) return props.maskUrl;
+      if (conf.showGuilloche) {
+        return generateGuillocheMaskDataUrl({
+          seed,
+          density: conf.guillocheDensity,
+          noiseIntensity: conf.guillocheNoiseIntensity,
+        });
+      }
+      return undefined;
+    }, [
+      props.maskUrl,
+      conf.showGuilloche,
+      seed,
+      conf.guillocheDensity,
+      conf.guillocheNoiseIntensity,
+    ]);
 
-  const frontConfig = resolveFrontSide(props);
-  const backConfig = resolveBackSide(props);
+    const holoConfig = useMemo(() => {
+      if (!conf.holographic) return false;
+      return {
+        maskUrl: effectiveMaskUrl,
+        maskSize: props.maskSize || "100% 100%",
+        maskPosition: props.maskPosition || "center",
+        maskRepeat: props.maskRepeat || "no-repeat",
+        variant: getHoloVariant(conf.guillocheVariant),
+        holoStrength: conf.holoStrength,
+      };
+    }, [
+      conf.holographic,
+      effectiveMaskUrl,
+      props.maskSize,
+      props.maskPosition,
+      props.maskRepeat,
+      conf.guillocheVariant,
+      conf.holoStrength,
+    ]);
 
-  return (
-    <TransparentCardWrapper isTransparent={config.transparent}>
+    return (
       <Card
         width={dims.width}
         height={dims.height}
-        faceUp={!isFlipped}
-        onFlip={(faceUp) => updateFlipped(!faceUp)}
-        onClick={
-          config.interactive ? () => updateFlipped(!isFlipped) : undefined
-        }
-        showGlare={config.showGlare}
-        glareOpacity={config.glareOpacity}
-        maxTilt={config.maxTilt}
-        scaleOnHover={config.scaleOnHover}
-        shadow={config.shadow}
-        holographic={false}
-        flipDirection={props.flipDirection}
-        flipDuration={props.flipDuration}
+        showGlare={conf.showGlare}
+        glareOpacity={conf.glareOpacity}
+        maxTilt={conf.maxTilt}
+        scaleOnHover={conf.scaleOnHover}
+        shadow={conf.shadow}
+        holographic={holoConfig}
+        holoStrength={conf.holoStrength}
         className={props.className}
         containerClassName={props.containerClassName}
-        data-testid={config.testId}
-        backContent={
-          <RenderCardSide
-            sideConfig={backConfig}
-            isBack={true}
-            isTransparent={config.transparent}
-            holoStrength={config.holoStrength}
-            userContent={props.backContent || props.backChildren}
-          />
-        }
+        data-testid={conf.testId}
       >
-        <RenderCardSide
-          sideConfig={frontConfig}
-          isBack={false}
-          isTransparent={config.transparent}
-          holoStrength={config.holoStrength}
-          userContent={props.frontContent || props.children}
-        />
+        <CardFaceContainer
+          ref={ref}
+          isBack={isBack}
+          isTransparent={conf.transparent}
+        >
+          {conf.showGuilloche && (
+            <Guilloche
+              seed={seed}
+              variant={conf.guillocheVariant}
+              density={conf.guillocheDensity}
+              opacity={conf.guillocheOpacity}
+              noiseIntensity={conf.guillocheNoiseIntensity}
+              holographic={false}
+            />
+          )}
+
+          {conf.showElectronics && (
+            <Electronics
+              finish={conf.electronicsFinish}
+              showNfcAntenna={conf.showNfcAntenna}
+              showChip={showChip}
+              showInnerCoil={conf.showInnerCoil}
+              opacity={electronicsOpacity}
+              mirrored={electronicsMirrored}
+            />
+          )}
+
+          <CardContentOverlay
+            children={props.children}
+            content={props.content}
+            credential={props.credential}
+            side={conf.side}
+            isPortrait={isPortrait}
+            transparent={conf.transparent}
+          />
+        </CardFaceContainer>
       </Card>
-    </TransparentCardWrapper>
-  );
-});
+    );
+  },
+);
 
 Id1Card.displayName = "Id1Card";
 

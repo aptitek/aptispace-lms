@@ -36,5 +36,9 @@ describe("ISO/IEC 7810 ID-1 Card Component", () => {
     const portrait = getDimensions("md", "portrait");
     expect(portrait.width).toBe(280);
     expect(portrait.height).toBe(Math.round(280 / (53.98 / 85.6)));
+
+    const custom = getDimensions("md", "landscape", 500, 300);
+    expect(custom.width).toBe(500);
+    expect(custom.height).toBe(300);
   });
 });
