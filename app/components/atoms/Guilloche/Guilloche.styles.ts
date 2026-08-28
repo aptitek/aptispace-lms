@@ -51,7 +51,7 @@ export const GuillocheSvg = styled("svg")<{ customOpacity: number }>(
     pointerEvents: "none",
     opacity: customOpacity,
     overflow: "visible",
-    zIndex: 1,
+    zIndex: 2,
 
     "@keyframes holoIridescence": {
       "0%": { filter: "hue-rotate(0deg)" },

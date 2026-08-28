@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { styled } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import Electronics from "../app/components/atoms/Electronics/Electronics";
 
 const meta: Meta<typeof Electronics> = {
@@ -9,8 +11,14 @@ const meta: Meta<typeof Electronics> = {
     layout: "centered",
     docs: {
       description: {
-        component:
-          "ISO/IEC 7816 contact smart chip and ISO/IEC 14443 contactless NFC antenna coil layer with exact geometric offsets and perimeter spiral tracks.",
+        component: `
+**ISO/IEC 7816 Smart Card Chip & ISO/IEC 14443 NFC Antenna Coil Layer**
+
+- **Front Contact View**: Standard ISO 7816 8-pin contact pads (C1-C8) with isolation grooves.
+- **Back Encapsulated Die View**: Reverse silicon die encapsulation module (milled cavity pocket, black epoxy globe, central silicon microcontroller die, and gold wire bonding leads).
+- **Physical Symmetry**: Symmetrical horizontal flip between front (left-aligned) and back (right-aligned), matching the exact spatial volume inside the plastic substrate.
+- **Optional Toggles**: Toggle individual antenna coils, inner coupling inductors, or chip modules.
+        `,
       },
     },
   },
@@ -18,7 +26,17 @@ const meta: Meta<typeof Electronics> = {
     finish: {
       control: "select",
       options: ["gold", "silver", "copper", "cyan-laser"],
-      description: "Conductive metal finish mapped to Solarized theme palette",
+      description: "Conductive metal finish mapped to theme palette",
+    },
+    side: {
+      control: "radio",
+      options: ["front", "back"],
+      description: "Card side (Front contact pads or Back encapsulated die)",
+    },
+    chipView: {
+      control: "select",
+      options: ["front", "back", "none"],
+      description: "Explicit chip view override",
     },
     showNfcAntenna: {
       control: "boolean",
@@ -26,7 +44,7 @@ const meta: Meta<typeof Electronics> = {
     },
     showChip: {
       control: "boolean",
-      description: "Show ISO 7816-2 contact microchip pad at X=162.5, Y=244.9",
+      description: "Show smart microchip module",
     },
     showInnerCoil: {
       control: "boolean",
@@ -53,9 +71,10 @@ const CardPreviewHolder = styled("div")(({ theme }) => ({
   overflow: "hidden",
 }));
 
-export const DualInterfaceGold: Story = {
+export const FrontContactPads: Story = {
   args: {
     finish: "gold",
+    side: "front",
     showNfcAntenna: true,
     showChip: true,
     showInnerCoil: true,
@@ -68,9 +87,70 @@ export const DualInterfaceGold: Story = {
   ),
 };
 
+export const BackEncapsulatedDie: Story = {
+  args: {
+    finish: "gold",
+    side: "back",
+    showNfcAntenna: true,
+    showChip: true,
+    showInnerCoil: true,
+    opacity: 0.9,
+  },
+  render: (args) => (
+    <CardPreviewHolder>
+      <Electronics {...args} />
+    </CardPreviewHolder>
+  ),
+};
+
+export const SideBySideElectronicsSymmetry: Story = {
+  render: () => (
+    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3, p: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 700, color: "text.secondary" }}
+        >
+          FRONT ELECTRONICS (CONTACT PADS ON LEFT)
+        </Typography>
+        <CardPreviewHolder sx={{ width: "420px" }}>
+          <Electronics side="front" finish="gold" opacity={0.9} />
+        </CardPreviewHolder>
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 700, color: "text.secondary" }}
+        >
+          BACK ELECTRONICS (ENCAPSULATED DIE ON RIGHT)
+        </Typography>
+        <CardPreviewHolder sx={{ width: "420px" }}>
+          <Electronics side="back" finish="gold" opacity={0.9} />
+        </CardPreviewHolder>
+      </Box>
+    </Box>
+  ),
+};
+
 export const CyanLaserFinish: Story = {
   args: {
     finish: "cyan-laser",
+    side: "front",
     showNfcAntenna: true,
     showChip: true,
     showInnerCoil: true,
@@ -86,6 +166,7 @@ export const CyanLaserFinish: Story = {
 export const CopperFinish: Story = {
   args: {
     finish: "copper",
+    side: "front",
     showNfcAntenna: true,
     showChip: true,
     showInnerCoil: true,
@@ -101,6 +182,7 @@ export const CopperFinish: Story = {
 export const NfcAntennaOnly: Story = {
   args: {
     finish: "gold",
+    side: "front",
     showNfcAntenna: true,
     showChip: false,
     showInnerCoil: true,

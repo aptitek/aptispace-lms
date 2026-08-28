@@ -183,6 +183,18 @@ function getHoloVariant(
   return "rainbow";
 }
 
+function resolveChipView(
+  propsChipView: "front" | "back" | "none" | undefined,
+  isBack: boolean,
+  isTransparent: boolean,
+): "front" | "back" | "none" {
+  if (propsChipView) return propsChipView;
+  if (isBack) {
+    return isTransparent ? "back" : "none";
+  }
+  return "front";
+}
+
 interface CardContentOverlayProps {
   children?: React.ReactNode;
   content?: React.ReactNode;
@@ -229,8 +241,7 @@ const DEFAULT_CARD_PROPS = {
   holoStrength: 0.75,
   showElectronics: true,
   electronicsFinish: "gold" as const,
-  showNfcAntenna: true,
-  showInnerCoil: true,
+  showChip: true,
   showGuilloche: true,
   guillocheVariant: "holo-spectrum" as const,
   guillocheDensity: "medium" as const,
@@ -244,6 +255,7 @@ export const Id1Card = forwardRef<HTMLDivElement, Id1CardProps>(
     const conf = { ...DEFAULT_CARD_PROPS, ...props };
     const isBack = conf.side === "back";
     const isPortrait = conf.orientation === "portrait";
+    const isTransparent = conf.transparent;
 
     const dims = getDimensions(
       conf.size,
@@ -252,7 +264,10 @@ export const Id1Card = forwardRef<HTMLDivElement, Id1CardProps>(
       props.height,
     );
 
-    const showChip = props.showChip ?? !isBack;
+    const showNfcAntenna = props.showNfcAntenna ?? isTransparent;
+    const showInnerCoil = props.showInnerCoil ?? isTransparent;
+    const chipView = resolveChipView(props.chipView, isBack, isTransparent);
+
     const electronicsOpacity =
       props.electronicsOpacity ?? (isBack ? 0.65 : 0.85);
     const electronicsMirrored = props.electronicsMirrored ?? isBack;
@@ -320,6 +335,21 @@ export const Id1Card = forwardRef<HTMLDivElement, Id1CardProps>(
           isBack={isBack}
           isTransparent={conf.transparent}
         >
+          {/* Layer 1 (Lowest): Embedded Plastic Electronics (Antenna, Coil & Chip Module) */}
+          {conf.showElectronics && (
+            <Electronics
+              side={conf.side}
+              finish={conf.electronicsFinish}
+              showNfcAntenna={showNfcAntenna}
+              showChip={conf.showChip}
+              chipView={chipView}
+              showInnerCoil={showInnerCoil}
+              opacity={electronicsOpacity}
+              mirrored={electronicsMirrored}
+            />
+          )}
+
+          {/* Layer 2 (Middle): Security Guilloche Ribbons & Moiré Interference */}
           {conf.showGuilloche && (
             <Guilloche
               seed={seed}
@@ -331,17 +361,7 @@ export const Id1Card = forwardRef<HTMLDivElement, Id1CardProps>(
             />
           )}
 
-          {conf.showElectronics && (
-            <Electronics
-              finish={conf.electronicsFinish}
-              showNfcAntenna={conf.showNfcAntenna}
-              showChip={showChip}
-              showInnerCoil={conf.showInnerCoil}
-              opacity={electronicsOpacity}
-              mirrored={electronicsMirrored}
-            />
-          )}
-
+          {/* Layer 3 (Top): Surface Printing, Cadet Credential, Photo, MRZ, & Magstripe */}
           <CardContentOverlay
             children={props.children}
             content={props.content}

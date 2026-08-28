@@ -37,4 +37,14 @@ describe("Electronics Component (ISO/IEC 7816 & 14443)", () => {
     expect(spiral).toContain("H 806.00");
     expect(spiral).toContain("A 26 26");
   });
+
+  it("calculates symmetrical mirroring in horizontal flip", () => {
+    const frontChipX = ISO_ELECTRONICS_CONSTANTS.chipCenterX;
+    const cardWidth = ISO_ELECTRONICS_CONSTANTS.viewWidth;
+    const backChipX = cardWidth - frontChipX;
+
+    // Symmetrical X coordinate: 162.5 mm -> 693.5 mm
+    expect(backChipX).toBe(693.5);
+    expect(frontChipX + backChipX).toBe(cardWidth);
+  });
 });

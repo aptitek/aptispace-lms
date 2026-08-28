@@ -362,6 +362,7 @@ function InteractiveCardPlayground() {
   const [transparent, setTransparent] = useState(false);
   const [holographic, setHolographic] = useState(true);
   const [showElectronics, setShowElectronics] = useState(true);
+  const [showChip, setShowChip] = useState(true);
   const [showGuilloche, setShowGuilloche] = useState(true);
   const [electronicsFinish, setElectronicsFinish] =
     useState<ElectronicsFinish>("gold");
@@ -394,6 +395,7 @@ function InteractiveCardPlayground() {
         holoStrength={0.85}
         showGlare
         showElectronics={showElectronics}
+        showChip={showChip}
         electronicsFinish={electronicsFinish}
         showGuilloche={showGuilloche}
         guillocheVariant={guillocheVariant}
@@ -428,6 +430,17 @@ function InteractiveCardPlayground() {
             />
           }
           label="Show Electronics"
+        />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showChip}
+              disabled={!showElectronics}
+              onChange={(e) => setShowChip(e.target.checked)}
+            />
+          }
+          label="Show Microchip Module"
         />
 
         <FormControlLabel

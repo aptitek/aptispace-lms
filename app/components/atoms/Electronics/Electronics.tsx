@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useTheme } from "@mui/material/styles";
 import {
   type ElectronicsProps,
+  type ElectronicsChipView,
   ISO_ELECTRONICS_CONSTANTS,
 } from "./Electronics.types";
 import { SvgLayer, getFinishColors } from "./Electronics.styles";
@@ -65,7 +66,7 @@ export function generateSpiralPath({
   return commands.join(" ");
 }
 
-interface ChipContactPadsProps {
+interface ChipPadsProps {
   cx: number;
   cy: number;
   width: number;
@@ -83,7 +84,7 @@ function ChipContactPads({
   primaryColor,
   highlightColor,
   grooveColor,
-}: ChipContactPadsProps) {
+}: ChipPadsProps) {
   const x = cx - width / 2;
   const y = cy - height / 2;
   const colW = width / 2;
@@ -101,7 +102,7 @@ function ChipContactPads({
   ];
 
   return (
-    <g id="iso7816-chip" filter="url(#chipGlow)">
+    <g id="iso7816-chip-front" filter="url(#chipGlow)">
       {/* Outer Chip Bevel Frame */}
       <rect
         x={x - 2}
@@ -158,6 +159,138 @@ function ChipContactPads({
   );
 }
 
+function ChipBackView({
+  cx,
+  cy,
+  width,
+  height,
+  primaryColor,
+  highlightColor,
+  grooveColor,
+}: ChipPadsProps) {
+  const x = cx - width / 2;
+  const y = cy - height / 2;
+
+  const wireBonds = [
+    `M ${cx - 10} ${cy - 12} L ${x + 12} ${y + 16}`,
+    `M ${cx - 10} ${cy} L ${x + 10} ${cy}`,
+    `M ${cx - 10} ${cy + 12} L ${x + 12} ${y + height - 16}`,
+    `M ${cx + 10} ${cy - 12} L ${x + width - 12} ${y + 16}`,
+    `M ${cx + 10} ${cy} L ${x + width - 10} ${cy}`,
+    `M ${cx + 10} ${cy + 12} L ${x + width - 12} ${y + height - 16}`,
+  ];
+
+  return (
+    <g id="iso7816-chip-backview" filter="url(#chipGlow)">
+      {/* Milled Substrate Cavity Pocket */}
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        rx={8}
+        fill={grooveColor}
+        stroke={primaryColor}
+        strokeWidth={1.2}
+        strokeDasharray="4 2"
+        opacity={0.7}
+      />
+
+      {/* Internal Lead Frame Terminal Blocks */}
+      <rect
+        x={x + 6}
+        y={y + 6}
+        width={24}
+        height={height - 12}
+        rx={4}
+        fill="url(#metalGradient)"
+        opacity={0.35}
+      />
+      <rect
+        x={x + width - 30}
+        y={y + 6}
+        width={24}
+        height={height - 12}
+        rx={4}
+        fill="url(#metalGradient)"
+        opacity={0.35}
+      />
+
+      {/* Black Epoxy Resin Encapsulation Dome */}
+      <circle
+        cx={cx}
+        cy={cy}
+        r={32}
+        fill={grooveColor}
+        stroke={primaryColor}
+        strokeWidth={1}
+        opacity={0.95}
+      />
+      <circle
+        cx={cx - 6}
+        cy={cy - 6}
+        r={28}
+        fill="none"
+        stroke={highlightColor}
+        strokeWidth={0.5}
+        opacity={0.3}
+      />
+
+      {/* Silicon Microcontroller Die */}
+      <rect
+        x={cx - 11}
+        y={cy - 13}
+        width={22}
+        height={26}
+        rx={2}
+        fill={grooveColor}
+        stroke={highlightColor}
+        strokeWidth={1}
+      />
+      <line
+        x1={cx - 7}
+        y1={cy - 7}
+        x2={cx + 7}
+        y2={cy - 7}
+        stroke={primaryColor}
+        strokeWidth={0.6}
+        opacity={0.8}
+      />
+      <line
+        x1={cx - 7}
+        y1={cy}
+        x2={cx + 7}
+        y2={cy}
+        stroke={primaryColor}
+        strokeWidth={0.6}
+        opacity={0.8}
+      />
+      <line
+        x1={cx - 7}
+        y1={cy + 7}
+        x2={cx + 7}
+        y2={cy + 7}
+        stroke={primaryColor}
+        strokeWidth={0.6}
+        opacity={0.8}
+      />
+
+      {/* Micro Bonding Wire Paths */}
+      {wireBonds.map((d) => (
+        <path
+          key={`wire-${d.slice(0, 16)}`}
+          d={d}
+          fill="none"
+          stroke={highlightColor}
+          strokeWidth={0.9}
+          strokeLinecap="round"
+          opacity={0.85}
+        />
+      ))}
+    </g>
+  );
+}
+
 function CoilConnectors({ primaryColor }: { primaryColor: string }) {
   return (
     <g
@@ -166,13 +299,11 @@ function CoilConnectors({ primaryColor }: { primaryColor: string }) {
       strokeWidth={1.5}
       fill="none"
     >
-      {/* Top track: smooth 90deg elbow directly meeting top edge of inner coil */}
       <path
         d="M 51 45 V 148 A 16 16 0 0 0 67 164 H 86"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Bottom track: smooth symmetrical elbow directly meeting bottom edge of inner coil */}
       <path
         d="M 51 495 V 342 A 16 16 0 0 1 67 326 H 86"
         strokeLinecap="round"
@@ -180,6 +311,18 @@ function CoilConnectors({ primaryColor }: { primaryColor: string }) {
       />
     </g>
   );
+}
+
+function resolveChipViewType(
+  chipView: ElectronicsChipView | undefined,
+  showChip: boolean | undefined,
+  side: "front" | "back" | undefined,
+  mirrored: boolean | undefined,
+): "front" | "back" | "none" {
+  if (showChip === false || chipView === "none") return "none";
+  if (chipView === "back" || chipView === "front") return chipView;
+  if (side === "back" || mirrored === true) return "back";
+  return "front";
 }
 
 const defaultElectronics = {
@@ -198,6 +341,14 @@ export default function Electronics(props: ElectronicsProps) {
   const colors = useMemo(
     () => getFinishColors(config.finish, theme),
     [config.finish, theme],
+  );
+
+  const isMirrored = config.mirrored || config.side === "back";
+  const chipViewType = resolveChipViewType(
+    props.chipView,
+    config.showChip,
+    props.side,
+    config.mirrored,
   );
 
   const outerCoilPath = useMemo(() => {
@@ -230,55 +381,22 @@ export default function Electronics(props: ElectronicsProps) {
     });
   }, []);
 
-  const contentGroup = (
-    <g
-      transform={config.mirrored ? "translate(856, 0) scale(-1, 1)" : undefined}
-    >
-      {/* ISO 14443 Outer NFC Antenna Perimeter Track */}
-      {config.showNfcAntenna && (
-        <path
-          d={outerCoilPath}
-          fill="none"
-          stroke={colors.primary}
-          strokeWidth={1.8}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity={0.7}
-        />
-      )}
-
-      {/* Solid Inter-Coil Feed Traces connecting outer antenna and inner coupling coil without round circles */}
-      {config.showNfcAntenna && config.showInnerCoil && (
-        <CoilConnectors primaryColor={colors.primary} />
-      )}
-
-      {/* Inner Inductive Coupling Coil */}
-      {config.showInnerCoil && (
-        <path
-          d={innerCoilPath}
-          fill="none"
-          stroke={colors.primary}
-          strokeWidth={1.4}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity={0.55}
-        />
-      )}
-
-      {/* ISO 7816-2 Smart Contact Chip */}
-      {config.showChip && (
-        <ChipContactPads
-          cx={ISO_ELECTRONICS_CONSTANTS.chipCenterX}
-          cy={ISO_ELECTRONICS_CONSTANTS.chipCenterY}
-          width={ISO_ELECTRONICS_CONSTANTS.chipWidth}
-          height={ISO_ELECTRONICS_CONSTANTS.chipHeight}
-          primaryColor={colors.primary}
-          highlightColor={colors.highlight}
-          grooveColor={colors.groove}
-        />
-      )}
-    </g>
-  );
+  const chipElement = useMemo(() => {
+    if (chipViewType === "none") return null;
+    const padProps: ChipPadsProps = {
+      cx: ISO_ELECTRONICS_CONSTANTS.chipCenterX,
+      cy: ISO_ELECTRONICS_CONSTANTS.chipCenterY,
+      width: ISO_ELECTRONICS_CONSTANTS.chipWidth,
+      height: ISO_ELECTRONICS_CONSTANTS.chipHeight,
+      primaryColor: colors.primary,
+      highlightColor: colors.highlight,
+      grooveColor: colors.groove,
+    };
+    if (chipViewType === "back") {
+      return <ChipBackView {...padProps} />;
+    }
+    return <ChipContactPads {...padProps} />;
+  }, [chipViewType, colors]);
 
   return (
     <SvgLayer
@@ -307,7 +425,37 @@ export default function Electronics(props: ElectronicsProps) {
         </filter>
       </defs>
 
-      {contentGroup}
+      <g transform={isMirrored ? "translate(856, 0) scale(-1, 1)" : undefined}>
+        {config.showNfcAntenna && (
+          <path
+            d={outerCoilPath}
+            fill="none"
+            stroke={colors.primary}
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={0.7}
+          />
+        )}
+
+        {config.showNfcAntenna && config.showInnerCoil && (
+          <CoilConnectors primaryColor={colors.primary} />
+        )}
+
+        {config.showInnerCoil && (
+          <path
+            d={innerCoilPath}
+            fill="none"
+            stroke={colors.primary}
+            strokeWidth={1.4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={0.55}
+          />
+        )}
+
+        {chipElement}
+      </g>
     </SvgLayer>
   );
 }

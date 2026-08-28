@@ -57,6 +57,7 @@ export interface Id1CardProps {
   electronicsFinish?: ElectronicsFinish;
   showNfcAntenna?: boolean;
   showChip?: boolean;
+  chipView?: "front" | "back" | "none";
   showInnerCoil?: boolean;
   electronicsOpacity?: number;
   electronicsMirrored?: boolean;
