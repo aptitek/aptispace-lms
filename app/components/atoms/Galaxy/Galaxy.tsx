@@ -314,6 +314,34 @@ function setupGlBlending(
   }
 }
 
+// A single WebGL context per page lifetime. Reusing one canvas + context means
+// route/HMR remounts no longer create fresh contexts and evict older ones (the
+// browser logs "WebGL context was lost." once Chrome's per-domain context budget
+// is exceeded). The slot lives on `window` so it survives module re-evaluation
+// during Vite HMR; a full page reload starts a fresh page and context, and the
+// previous one is released silently at unload.
+const SHARED_CANVAS_KEY = "__aptispace_galaxy_shared_canvas__";
+const contextLostHandledCanvases = new WeakSet<HTMLCanvasElement>();
+
+function getSharedGalaxyCanvas(): HTMLCanvasElement {
+  const w = window as Window & { [SHARED_CANVAS_KEY]?: HTMLCanvasElement };
+  let canvas = w[SHARED_CANVAS_KEY];
+  if (!canvas) {
+    canvas = document.createElement("canvas");
+    w[SHARED_CANVAS_KEY] = canvas;
+  }
+  if (!contextLostHandledCanvases.has(canvas)) {
+    contextLostHandledCanvases.add(canvas);
+    // Mark any genuine GPU context loss as recoverable: without preventDefault
+    // the browser treats the loss as permanent (and logs it), so we could never
+    // restore — with it, the browser fires webglcontextrestored and we recompile.
+    canvas.addEventListener("webglcontextlost", (event) => {
+      event.preventDefault();
+    });
+  }
+  return canvas;
+}
+
 export default function Galaxy(props: GalaxyProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -336,6 +364,7 @@ export default function Galaxy(props: GalaxyProps) {
     const ctn = ctnDom.current;
     if (!ctn) return;
 
+    const canvas = getSharedGalaxyCanvas();
     const resolvedDpr =
       settings.dpr ??
       (typeof window !== "undefined"
@@ -343,6 +372,7 @@ export default function Galaxy(props: GalaxyProps) {
         : 1);
 
     const renderer = new Renderer({
+      canvas,
       dpr: resolvedDpr,
       alpha: settings.transparent,
       premultipliedAlpha: true,
@@ -350,7 +380,7 @@ export default function Galaxy(props: GalaxyProps) {
     const gl = renderer.gl;
     setupGlBlending(gl, settings.transparent, colors.background);
 
-    const program = createGalaxyProgram(
+    let program = createGalaxyProgram(
       gl,
       settings,
       colors,
@@ -371,6 +401,27 @@ export default function Galaxy(props: GalaxyProps) {
     const geometry = new Triangle(gl);
     const mesh = new Mesh(gl, { geometry, program });
     let animateId: number;
+
+    // GPU shader state is reset when the (rare) genuine context loss is restored
+    // by the browser, so recompile the program on the same shared gl and refresh
+    // dimensions. Lost-handling itself lives on the shared canvas (see
+    // getSharedGalaxyCanvas) so it fires even while no Galaxy is mounted.
+    const handleContextRestored = () => {
+      setupGlBlending(gl, settings.transparent, colors.background);
+      program = createGalaxyProgram(
+        gl,
+        settings,
+        colors,
+        smoothMousePos.current,
+      );
+      mesh.program = program;
+      resize();
+    };
+    canvas.addEventListener(
+      "webglcontextrestored",
+      handleContextRestored,
+      false,
+    );
 
     const update = (timestampMs: number) => {
       animateId = requestAnimationFrame(update);
@@ -463,6 +514,11 @@ export default function Galaxy(props: GalaxyProps) {
     return () => {
       cancelAnimationFrame(animateId);
       window.removeEventListener("resize", resize);
+      canvas.removeEventListener(
+        "webglcontextrestored",
+        handleContextRestored,
+        false,
+      );
       if (settings.mouseInteraction) {
         window.removeEventListener("mousemove", handleMouseMove);
         window.removeEventListener("mouseout", handleMouseOut);
@@ -476,7 +532,9 @@ export default function Galaxy(props: GalaxyProps) {
       if (gl.canvas.parentNode === ctn) {
         ctn.removeChild(gl.canvas);
       }
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
+      // Deliberately do NOT lose the WebGL context here: the canvas is shared
+      // page-wide (see getSharedGalaxyCanvas) and the next mount reuses it. The
+      // context is released by the browser when the page unloads.
     };
   }, [settings, colors]);
 
