@@ -10,4 +10,5 @@ export default [
   route("api/auth/impersonate", "routes/api.auth.impersonate.ts"),
   route("api/auth/logout", "routes/api.auth.logout.ts"),
   route("api/courses", "routes/api.courses.ts"),
+  route("api/avatar/upload", "routes/api.avatar.upload.ts"),
 ] satisfies RouteConfig;

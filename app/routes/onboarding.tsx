@@ -1,15 +1,21 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { styled } from "@mui/material/styles";
+import { styled, type Theme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import AuthLayout from "~/components/templates/AuthLayout/AuthLayout";
 import Id1Card from "~/components/molecules/Id1Card/Id1Card";
+import EditableAvatar from "~/components/molecules/EditableAvatar/EditableAvatar";
 import type {
   Id1CardOrientation,
   Id1CardSide,
 } from "~/components/molecules/Id1Card/Id1Card.types";
+import {
+  type CadetProfile,
+  CardFrontContent,
+  CardBackContent,
+} from "./onboarding.card";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import BadgeIcon from "@mui/icons-material/Badge";
 import ScreenRotationIcon from "@mui/icons-material/ScreenRotation";
@@ -38,13 +44,9 @@ const OnboardingContainer = styled("div")(({ theme }) => ({
   backdropFilter: "blur(20px)",
   borderRadius: "20px",
   border: `1px solid ${theme.palette.divider}`,
-  boxShadow:
-    theme.palette.mode === "dark"
-      ? `0 30px 60px ${theme.palette.action.disabledBackground}, 0 0 35px ${theme.palette.action.focus}`
-      : `0 30px 60px rgba(0, 0, 0, 0.3), 0 0 35px ${theme.palette.action.focus}`,
+  boxShadow: `0 30px 60px rgba(0, 0, 0, 0.3), 0 0 35px ${theme.palette.action.focus}`,
   boxSizing: "border-box",
   zIndex: 2,
-
   [theme.breakpoints.down("md")]: {
     gridTemplateColumns: "1fr",
     maxWidth: "600px",
@@ -99,7 +101,7 @@ const Label = styled("label")(({ theme }) => ({
   letterSpacing: "0.5px",
 }));
 
-const Input = styled("input")(({ theme }) => ({
+const formControlBase = (theme: Theme) => ({
   padding: "10px 14px",
   borderRadius: "8px",
   backgroundColor: theme.palette.background.default,
@@ -112,22 +114,12 @@ const Input = styled("input")(({ theme }) => ({
     borderColor: theme.palette.primary.light,
     boxShadow: `0 0 0 2px ${theme.palette.action.focus}`,
   },
-}));
+});
 
+const Input = styled("input")(({ theme }) => formControlBase(theme));
 const Select = styled("select")(({ theme }) => ({
-  padding: "10px 14px",
-  borderRadius: "8px",
-  backgroundColor: theme.palette.background.default,
-  border: `1px solid ${theme.palette.divider}`,
-  color: theme.palette.text.primary,
-  fontSize: "0.95rem",
-  outline: "none",
+  ...formControlBase(theme),
   cursor: "pointer",
-  transition: "all 0.2s ease",
-  "&:focus": {
-    borderColor: theme.palette.primary.light,
-    boxShadow: `0 0 0 2px ${theme.palette.action.focus}`,
-  },
 }));
 
 const PreviewPanel = styled("div")(({ theme }) => ({
@@ -188,14 +180,23 @@ const SubmitButton = styled("button")(({ theme }) => ({
   },
 }));
 
-interface CadetProfile {
-  id: string;
-  name: string;
-  callSign: string;
-  division: string;
-  clearanceLevel: string;
-  securityCode: string;
-}
+const DEFAULT_AVATAR_URL =
+  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80";
+
+const CLEARANCES = [
+  "LEVEL-1 TRAINEE",
+  "LEVEL-2 CADET",
+  "LEVEL-3 PILOT",
+  "LEVEL-4 OMNI",
+  "LEVEL-5 COSMIC",
+];
+
+const DIVISIONS = [
+  "Orbital Flight Dynamics",
+  "Astrobiology & Habitats",
+  "Deep Space Propulsion",
+  "Quantum Navigation & Comms",
+];
 
 export default function OnboardingPage() {
   const { t } = useTranslation("onboarding");
@@ -208,6 +209,7 @@ export default function OnboardingPage() {
     division: "Orbital Flight Dynamics",
     clearanceLevel: "LEVEL-4 OMNI",
     securityCode: "781",
+    avatarUrl: DEFAULT_AVATAR_URL,
   });
 
   const [orientation, setOrientation] =
@@ -219,14 +221,6 @@ export default function OnboardingPage() {
       document.title = "AptiSpace LMS • Cadet Onboarding";
     }
   }, []);
-
-  const handleToggleOrientation = () => {
-    setOrientation((prev) => (prev === "landscape" ? "portrait" : "landscape"));
-  };
-
-  const handleToggleSide = () => {
-    setSide((prev) => (prev === "front" ? "back" : "front"));
-  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -251,6 +245,23 @@ export default function OnboardingPage() {
           </div>
 
           <FormRoot onSubmit={handleSubmit}>
+            <FormGroup>
+              <EditableAvatar
+                value={profile.avatarUrl}
+                defaultValue={DEFAULT_AVATAR_URL}
+                onChange={(newAvatarUrl) =>
+                  setProfile((prev) => ({ ...prev, avatarUrl: newAvatarUrl }))
+                }
+                label={t("form.avatarLabel", "Biometric Facial Portrait")}
+                helperText={t(
+                  "form.avatarHelp",
+                  "Drag & drop image, paste, enter URL, or click upload to R2.",
+                )}
+                shape="biometric"
+                size="sm"
+              />
+            </FormGroup>
+
             <FormGroup>
               <Label>{t("form.cadetName", "Cadet Full Name")}</Label>
               <Input
@@ -283,11 +294,11 @@ export default function OnboardingPage() {
                     setProfile({ ...profile, clearanceLevel: e.target.value })
                   }
                 >
-                  <option value="LEVEL-1 TRAINEE">LEVEL-1 TRAINEE</option>
-                  <option value="LEVEL-2 CADET">LEVEL-2 CADET</option>
-                  <option value="LEVEL-3 PILOT">LEVEL-3 PILOT</option>
-                  <option value="LEVEL-4 OMNI">LEVEL-4 OMNI</option>
-                  <option value="LEVEL-5 COSMIC">LEVEL-5 COSMIC</option>
+                  {CLEARANCES.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
                 </Select>
               </FormGroup>
             </TwoColGrid>
@@ -300,18 +311,11 @@ export default function OnboardingPage() {
                   setProfile({ ...profile, division: e.target.value })
                 }
               >
-                <option value="Orbital Flight Dynamics">
-                  Orbital Flight Dynamics
-                </option>
-                <option value="Astrobiology & Habitats">
-                  Astrobiology & Habitats
-                </option>
-                <option value="Deep Space Propulsion">
-                  Deep Space Propulsion
-                </option>
-                <option value="Quantum Navigation & Comms">
-                  Quantum Navigation & Comms
-                </option>
+                {DIVISIONS.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
               </Select>
             </FormGroup>
 
@@ -360,10 +364,14 @@ export default function OnboardingPage() {
             <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
               <ActionButton
                 type="button"
-                onClick={handleToggleOrientation}
+                onClick={() =>
+                  setOrientation((prev) =>
+                    prev === "landscape" ? "portrait" : "landscape",
+                  )
+                }
                 title="Toggle Orientation"
               >
-                <ScreenRotationIcon style={{ fontSize: "14px" }} />
+                <ScreenRotationIcon sx={{ fontSize: "14px" }} />
                 <span>
                   {orientation === "landscape" ? "Portrait" : "Landscape"}
                 </span>
@@ -371,10 +379,12 @@ export default function OnboardingPage() {
 
               <ActionButton
                 type="button"
-                onClick={handleToggleSide}
+                onClick={() =>
+                  setSide((prev) => (prev === "front" ? "back" : "front"))
+                }
                 title="Switch Card Side"
               >
-                <AutorenewIcon style={{ fontSize: "14px" }} />
+                <AutorenewIcon sx={{ fontSize: "14px" }} />
                 <span>
                   {side === "front"
                     ? t("card.flipToBack", "View Back Side")
@@ -399,113 +409,9 @@ export default function OnboardingPage() {
               flipOnClick={true}
               onFlip={(newSide) => setSide(newSide)}
               frontContent={
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <Box>
-                      <Typography
-                        variant="overline"
-                        sx={{
-                          fontWeight: 800,
-                          color: "primary.light",
-                          letterSpacing: 1.5,
-                        }}
-                      >
-                        APTISPACE ACADEMY
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 800, color: "text.primary" }}
-                      >
-                        {profile.name || "CADET"}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {profile.callSign
-                          ? `CALLSIGN: ${profile.callSign}`
-                          : "ACTIVE CADET"}
-                      </Typography>
-                    </Box>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        px: 1,
-                        py: 0.5,
-                        borderRadius: 1,
-                        bgcolor: "action.selected",
-                        color: "primary.light",
-                        fontWeight: 800,
-                        border: 1,
-                        borderColor: "divider",
-                      }}
-                    >
-                      {profile.clearanceLevel}
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-end",
-                    }}
-                  >
-                    <Typography variant="caption" color="text.secondary">
-                      {profile.division}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{ fontWeight: 700, letterSpacing: 1 }}
-                    >
-                      {profile.id}
-                    </Typography>
-                  </Box>
-                </Box>
+                <CardFrontContent profile={profile} orientation={orientation} />
               }
-              backContent={
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: 1,
-                    textAlign: "center",
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      fontWeight: 800,
-                      letterSpacing: 2,
-                      color: "primary.light",
-                    }}
-                  >
-                    ISO/IEC 7810 ID-1 STANDARD
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    SEC: {profile.securityCode} • CLEARANCE{" "}
-                    {profile.clearanceLevel}
-                  </Typography>
-                  <Typography
-                    variant="overline"
-                    sx={{ letterSpacing: 1, color: "text.disabled" }}
-                  >
-                    APTISPACE INTERSTELLAR LOGISTICS
-                  </Typography>
-                </Box>
-              }
+              backContent={<CardBackContent profile={profile} />}
             />
           </Box>
         </PreviewPanel>
