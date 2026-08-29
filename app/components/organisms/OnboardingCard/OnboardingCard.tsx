@@ -3,10 +3,9 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Id1Card from "../../molecules/Id1Card/Id1Card";
 import EditableAvatar from "../../molecules/EditableAvatar/EditableAvatar";
+import TextField from "../../atoms/TextField/TextField";
 import FixedDomainEmailField from "../../molecules/FixedDomainEmailField/FixedDomainEmailField";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
-import "@material/web/textfield/filled-text-field.js";
-import "@material/web/textfield/outlined-text-field.js";
 import "@material/web/chips/assist-chip.js";
 import type { GuillocheVariant } from "../../atoms/Guilloche/Guilloche.types";
 import type {
@@ -29,7 +28,6 @@ import {
   CardMainBody,
   AvatarCol,
   FieldsCol,
-  FixedDomainEmailHolder,
   CardBackContainer,
   BackMainArea,
   BackLeftContactCol,
@@ -232,55 +230,43 @@ function CardFrontFace({
         </AvatarCol>
 
         <FieldsCol>
-          <md-filled-text-field
+          <TextField
             id="card-field-firstname"
             label="First Name"
             value={profile.firstName}
             disabled={readOnly}
             placeholder="First name"
-            onInput={(e: React.FormEvent<HTMLElement>) => {
-              const target = e.target as HTMLInputElement;
-              onFirstNameChange(target.value ?? "");
-            }}
-            onChange={(e: React.FormEvent<HTMLElement>) => {
-              const target = e.target as HTMLInputElement;
-              onFirstNameChange(target.value ?? "");
-            }}
-            data-testid="input-firstname"
+            size="small"
+            variant="filled"
+            onValueChange={onFirstNameChange}
+            testId="input-firstname"
           />
 
-          <md-filled-text-field
+          <TextField
             id="card-field-familyname"
             label="Family Name"
             value={profile.familyName}
             disabled={readOnly}
             placeholder="Family name"
-            onInput={(e: React.FormEvent<HTMLElement>) => {
-              const target = e.target as HTMLInputElement;
-              onFamilyNameChange(target.value ?? "");
-            }}
-            onChange={(e: React.FormEvent<HTMLElement>) => {
-              const target = e.target as HTMLInputElement;
-              onFamilyNameChange(target.value ?? "");
-            }}
-            data-testid="input-familyname"
+            size="small"
+            variant="filled"
+            onValueChange={onFamilyNameChange}
+            testId="input-familyname"
           />
 
-          <FixedDomainEmailHolder>
-            <FixedDomainEmailField
-              id="card-field-email"
-              label="Institutional Email"
-              domain={schoolDomain}
-              value={profile.email}
-              disabled={readOnly}
-              size="small"
-              variant="filled"
-              showDomainLock={true}
-              placeholder="username"
-              onEmailChange={onEmailChange}
-              testId="input-email"
-            />
-          </FixedDomainEmailHolder>
+          <FixedDomainEmailField
+            id="card-field-email"
+            label="Institutional Email"
+            domain={schoolDomain}
+            value={profile.email}
+            disabled={readOnly}
+            size="small"
+            variant="filled"
+            showDomainLock={true}
+            placeholder="username"
+            onEmailChange={onEmailChange}
+            testId="input-email"
+          />
         </FieldsCol>
       </CardMainBody>
     </CardFrontContainer>
