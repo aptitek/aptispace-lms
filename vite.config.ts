@@ -35,6 +35,11 @@ export default defineConfig({
       "@mui/icons-material/Language",
       "@emotion/react",
       "@emotion/styled",
+      "@material/web/textfield/filled-text-field.js",
+      "@material/web/textfield/outlined-text-field.js",
+      "@material/web/icon/icon.js",
+      "@material/web/chips/assist-chip.js",
+      "@material/web/chips/filter-chip.js",
     ],
   },
   test: {

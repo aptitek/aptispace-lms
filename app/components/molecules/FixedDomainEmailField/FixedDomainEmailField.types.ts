@@ -86,6 +86,16 @@ export interface FixedDomainEmailFieldProps extends Omit<
   showDomainLock?: boolean;
 
   /**
+   * Optional custom error message string for M3 error text.
+   */
+  errorText?: string;
+
+  /**
+   * Optional M3 supporting text string.
+   */
+  supportingText?: string;
+
+  /**
    * Optional custom test ID.
    * @default "fixed-domain-email-field"
    */

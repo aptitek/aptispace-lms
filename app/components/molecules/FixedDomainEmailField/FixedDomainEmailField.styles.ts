@@ -3,403 +3,225 @@ import type {
   FixedDomainFieldSize,
   FixedDomainFieldVariant,
 } from "./FixedDomainEmailField.types";
+import { SOLARIZED_BASE } from "../../../tokens/theme";
 
 interface RootProps {
   fullWidth?: boolean;
   isDisabled?: boolean;
+  sizePreset?: FixedDomainFieldSize;
+  variantStyle?: FixedDomainFieldVariant;
 }
 
-interface ContainerProps {
-  variantStyle: FixedDomainFieldVariant;
-  sizePreset: FixedDomainFieldSize;
-  isFocused?: boolean;
-  hasError?: boolean;
-  isDisabled?: boolean;
+interface Metrics {
+  shape: string;
+  inputSize: string;
+  labelSize: string;
+  iconSize: string;
+  clearBtnSize: string;
+  lockIconSize: string;
+  topSpace: string;
+  bottomSpace: string;
+  sideSpace: string;
 }
 
-interface DomainCompartmentProps {
-  sizePreset: FixedDomainFieldSize;
-  hasError?: boolean;
-  isFocused?: boolean;
-  isDisabled?: boolean;
-}
-
-function getSizeMeasurements(sizePreset: FixedDomainFieldSize = "medium") {
-  if (sizePreset === "small") {
-    return {
-      height: "36px",
-      minHeight: "36px",
-      paddingX: "10px",
-      fontSize: "0.85rem",
-      iconSize: "16px",
-      domainPaddingX: "7px",
-      domainPaddingY: "3px",
-      domainFontSize: "0.775rem",
-      borderRadius: "8px",
-    };
+function getFieldMetrics(sizePreset: FixedDomainFieldSize = "medium"): Metrics {
+  switch (sizePreset) {
+    case "small":
+      return {
+        shape: "6px",
+        inputSize: "0.825rem",
+        labelSize: "0.75rem",
+        iconSize: "16px",
+        clearBtnSize: "15px",
+        lockIconSize: "14px",
+        topSpace: "4px",
+        bottomSpace: "4px",
+        sideSpace: "8px",
+      };
+    case "large":
+      return {
+        shape: "12px",
+        inputSize: "1rem",
+        labelSize: "0.95rem",
+        iconSize: "22px",
+        clearBtnSize: "20px",
+        lockIconSize: "18px",
+        topSpace: "12px",
+        bottomSpace: "12px",
+        sideSpace: "16px",
+      };
+    default:
+      return {
+        shape: "8px",
+        inputSize: "0.9rem",
+        labelSize: "0.85rem",
+        iconSize: "18px",
+        clearBtnSize: "17px",
+        lockIconSize: "16px",
+        topSpace: "8px",
+        bottomSpace: "8px",
+        sideSpace: "12px",
+      };
   }
-  if (sizePreset === "large") {
-    return {
-      height: "48px",
-      minHeight: "48px",
-      paddingX: "14px",
-      fontSize: "0.95rem",
-      iconSize: "20px",
-      domainPaddingX: "10px",
-      domainPaddingY: "5px",
-      domainFontSize: "0.875rem",
-      borderRadius: "12px",
-    };
-  }
+}
+
+function buildFieldTokens(theme: Theme, m: Metrics) {
   return {
-    height: "42px",
-    minHeight: "42px",
-    paddingX: "12px",
-    fontSize: "0.9rem",
-    iconSize: "18px",
-    domainPaddingX: "9px",
-    domainPaddingY: "4px",
-    domainFontSize: "0.825rem",
-    borderRadius: "10px",
+    width: "100%",
+    fontFamily: theme.typography.fontFamily,
+    backdropFilter: "blur(8px)",
+
+    /* Filled Tokens */
+    "--md-filled-text-field-container-color": alpha(
+      SOLARIZED_BASE.base03,
+      0.35,
+    ),
+    "--md-filled-text-field-input-text-color": theme.palette.text.primary,
+    "--md-filled-text-field-label-text-color": alpha(
+      theme.palette.text.secondary,
+      0.9,
+    ),
+    "--md-filled-text-field-focus-label-text-color":
+      theme.palette.primary.light,
+    "--md-filled-text-field-focus-active-indicator-color":
+      theme.palette.primary.light,
+    "--md-filled-text-field-active-indicator-color": alpha(
+      SOLARIZED_BASE.base3,
+      0.25,
+    ),
+    "--md-filled-text-field-hover-active-indicator-color":
+      theme.palette.primary.light,
+    "--md-filled-text-field-caret-color": theme.palette.primary.light,
+    "--md-filled-text-field-container-shape": m.shape,
+    "--md-filled-text-field-input-text-size": m.inputSize,
+    "--md-filled-text-field-label-text-size": m.labelSize,
+    "--md-filled-text-field-input-text-font": theme.typography.fontFamily,
+    "--md-filled-text-field-label-text-font": theme.typography.fontFamily,
+    "--md-filled-text-field-supporting-text-font": theme.typography.fontFamily,
+    "--md-filled-text-field-input-text-suffix-color": alpha(
+      theme.palette.text.secondary,
+      0.85,
+    ),
+    "--md-filled-text-field-leading-icon-color": alpha(
+      theme.palette.text.secondary,
+      0.8,
+    ),
+    "--md-filled-text-field-focus-leading-icon-color":
+      theme.palette.primary.light,
+    "--md-filled-text-field-trailing-icon-color": alpha(
+      theme.palette.text.secondary,
+      0.8,
+    ),
+    "--md-filled-text-field-focus-trailing-icon-color":
+      theme.palette.primary.light,
+    "--md-filled-text-field-top-space": m.topSpace,
+    "--md-filled-text-field-bottom-space": m.bottomSpace,
+    "--md-filled-text-field-leading-space": m.sideSpace,
+    "--md-filled-text-field-trailing-space": m.sideSpace,
+
+    /* Outlined Tokens */
+    "--md-outlined-text-field-outline-color": alpha(SOLARIZED_BASE.base3, 0.2),
+    "--md-outlined-text-field-focus-outline-color": theme.palette.primary.light,
+    "--md-outlined-text-field-hover-outline-color": alpha(
+      theme.palette.primary.light,
+      0.5,
+    ),
+    "--md-outlined-text-field-input-text-color": theme.palette.text.primary,
+    "--md-outlined-text-field-label-text-color": alpha(
+      theme.palette.text.secondary,
+      0.9,
+    ),
+    "--md-outlined-text-field-focus-label-text-color":
+      theme.palette.primary.light,
+    "--md-outlined-text-field-caret-color": theme.palette.primary.light,
+    "--md-outlined-text-field-container-shape": m.shape,
+    "--md-outlined-text-field-input-text-size": m.inputSize,
+    "--md-outlined-text-field-label-text-size": m.labelSize,
+    "--md-outlined-text-field-input-text-font": theme.typography.fontFamily,
+    "--md-outlined-text-field-label-text-font": theme.typography.fontFamily,
+    "--md-outlined-text-field-supporting-text-font":
+      theme.typography.fontFamily,
+    "--md-outlined-text-field-input-text-suffix-color": alpha(
+      theme.palette.text.secondary,
+      0.85,
+    ),
+    "--md-outlined-text-field-leading-icon-color": alpha(
+      theme.palette.text.secondary,
+      0.8,
+    ),
+    "--md-outlined-text-field-focus-leading-icon-color":
+      theme.palette.primary.light,
+    "--md-outlined-text-field-trailing-icon-color": alpha(
+      theme.palette.text.secondary,
+      0.8,
+    ),
+    "--md-outlined-text-field-focus-trailing-icon-color":
+      theme.palette.primary.light,
+    "--md-outlined-text-field-top-space": m.topSpace,
+    "--md-outlined-text-field-bottom-space": m.bottomSpace,
+    "--md-outlined-text-field-leading-space": m.sideSpace,
+    "--md-outlined-text-field-trailing-space": m.sideSpace,
   };
 }
 
-function resolveBorderColor(
-  theme: Theme,
-  hasError?: boolean,
-  isFocused?: boolean,
-  isFilled?: boolean,
-): string {
-  if (hasError) return theme.palette.error.main;
-  if (isFocused) return theme.palette.primary.main;
-  if (isFilled) return "transparent";
-  return alpha(theme.palette.divider, 0.85);
-}
+export const FieldRoot = styled("div")<RootProps>(({
+  theme,
+  fullWidth,
+  isDisabled,
+  sizePreset = "medium",
+}) => {
+  const metrics = getFieldMetrics(sizePreset);
 
-function resolveBackgroundColor(
-  theme: Theme,
-  isFilled?: boolean,
-  isFocused?: boolean,
-): string {
-  if (!isFilled) return theme.palette.background.default;
-  if (isFocused) return alpha(theme.palette.primary.main, 0.06);
-  return alpha(theme.palette.action.hover, 0.3);
-}
-
-function resolveFocusGlow(theme: Theme, hasError?: boolean): string {
-  const color = hasError
-    ? theme.palette.error.main
-    : theme.palette.primary.main;
-  return `0 0 0 3px ${alpha(color, 0.2)}`;
-}
-
-function resolveHoverBorderColor(
-  theme: Theme,
-  hasError?: boolean,
-  isFocused?: boolean,
-): string {
-  if (hasError) return theme.palette.error.light;
-  if (isFocused) return theme.palette.primary.main;
-  return alpha(theme.palette.primary.main, 0.4);
-}
-
-export const FieldRoot = styled("div")<RootProps>(
-  ({ theme, fullWidth, isDisabled }) => ({
+  return {
     display: "inline-flex",
     flexDirection: "column",
     width: fullWidth ? "100%" : "auto",
     position: "relative",
     boxSizing: "border-box",
     opacity: isDisabled ? 0.6 : 1,
-    cursor: isDisabled ? "not-allowed" : "default",
-    gap: theme.spacing(0.5),
-  }),
-);
 
-export const LabelText = styled("label")(({ theme }) => ({
-  fontSize: "0.8rem",
-  fontWeight: 700,
-  color: theme.palette.text.secondary,
-  letterSpacing: "0.02em",
-  display: "flex",
-  alignItems: "center",
-  marginBottom: theme.spacing(0.25),
-}));
-
-export const MD3FieldContainer = styled("div")<ContainerProps>(({
-  theme,
-  variantStyle,
-  sizePreset,
-  isFocused,
-  hasError,
-  isDisabled,
-}) => {
-  const metrics = getSizeMeasurements(sizePreset);
-  const isFilled = variantStyle === "filled";
-  const borderColor = resolveBorderColor(theme, hasError, isFocused, isFilled);
-  const backgroundColor = resolveBackgroundColor(theme, isFilled, isFocused);
-  const focusGlow = resolveFocusGlow(theme, hasError);
-  const hoverBorder = resolveHoverBorderColor(theme, hasError, isFocused);
-
-  return {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    width: "100%",
-    minHeight: metrics.minHeight,
-    height: metrics.height,
-    boxSizing: "border-box",
-    borderRadius: metrics.borderRadius,
-    backgroundColor,
-    border: `1px solid ${borderColor}`,
-    boxShadow: isFocused ? focusGlow : "none",
-    padding: `0 ${metrics.paddingX}`,
-    gap: theme.spacing(1),
-    transition: theme.transitions.create(
-      ["background-color", "border-color", "box-shadow"],
-      {
-        duration: theme.transitions.duration.shorter,
-        easing: "cubic-bezier(0.2, 0, 0, 1)",
-      },
+    "& md-filled-text-field, & md-outlined-text-field": buildFieldTokens(
+      theme,
+      metrics,
     ),
 
-    "&:hover": isDisabled
-      ? {}
-      : {
-          borderColor: hoverBorder,
-          boxShadow: isFocused
-            ? focusGlow
-            : `0 0 0 1px ${alpha(theme.palette.primary.main, 0.15)}`,
-        },
-  };
-});
-
-export const LeadingIconContainer = styled("span")<{
-  sizePreset: FixedDomainFieldSize;
-  isFocused?: boolean;
-  hasError?: boolean;
-}>(({ theme, sizePreset, isFocused, hasError }) => {
-  const metrics = getSizeMeasurements(sizePreset);
-  const iconColor = hasError
-    ? theme.palette.error.main
-    : isFocused
-      ? theme.palette.primary.main
-      : theme.palette.text.secondary;
-
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: iconColor,
-    flexShrink: 0,
-    lineHeight: 1,
-    transition: theme.transitions.create(["color"], {
-      duration: theme.transitions.duration.shorter,
-    }),
-
-    "& .MuiSvgIcon-root": {
-      fontSize: metrics.iconSize,
-    },
-  };
-});
-
-export const InputWrapper = styled("div")({
-  display: "flex",
-  alignItems: "center",
-  flex: 1,
-  minWidth: 0,
-  height: "100%",
-  position: "relative",
-});
-
-export const UsernameInput = styled("input")<{
-  sizePreset: FixedDomainFieldSize;
-}>(({ theme, sizePreset }) => {
-  const metrics = getSizeMeasurements(sizePreset);
-  return {
-    width: "100%",
-    height: "100%",
-    border: "none",
-    outline: "none",
-    backgroundColor: "transparent",
-    color: theme.palette.text.primary,
-    fontFamily: theme.typography.fontFamily,
-    fontSize: metrics.fontSize,
-    fontWeight: 500,
-    letterSpacing: "0.01em",
-    padding: 0,
-    margin: 0,
-    lineHeight: "normal",
-    boxSizing: "border-box",
-    display: "flex",
-    alignItems: "center",
-
-    "&::placeholder": {
-      color: theme.palette.text.secondary,
-      opacity: 0.65,
-      fontWeight: 400,
-    },
-
-    "&:disabled": {
-      cursor: "not-allowed",
-    },
-
-    // Clean browser / password extension autofill styling
-    "&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus, &:-webkit-autofill:active":
-      {
-        WebkitTextFillColor: `${theme.palette.text.primary} !important`,
-        WebkitBoxShadow: "0 0 0 1000px transparent inset !important",
-        transition: "background-color 5000s ease-in-out 0s",
-        backgroundColor: "transparent !important",
-      },
-  };
-});
-
-function resolveCompartmentBg(
-  theme: Theme,
-  hasError?: boolean,
-  isFocused?: boolean,
-): string {
-  if (hasError) return alpha(theme.palette.error.main, 0.1);
-  if (isFocused) return alpha(theme.palette.primary.main, 0.12);
-  return alpha(theme.palette.action.selected, 0.6);
-}
-
-function resolveCompartmentBorder(
-  theme: Theme,
-  hasError?: boolean,
-  isFocused?: boolean,
-): string {
-  if (hasError) return alpha(theme.palette.error.main, 0.3);
-  if (isFocused) return alpha(theme.palette.primary.main, 0.35);
-  return alpha(theme.palette.divider, 0.6);
-}
-
-export const DomainCompartment = styled("div")<DomainCompartmentProps>(({
-  theme,
-  sizePreset,
-  hasError,
-  isFocused,
-  isDisabled,
-}) => {
-  const metrics = getSizeMeasurements(sizePreset);
-  const compartmentBg = resolveCompartmentBg(theme, hasError, isFocused);
-  const compartmentBorder = resolveCompartmentBorder(
-    theme,
-    hasError,
-    isFocused,
-  );
-  const atAccentColor = hasError
-    ? theme.palette.error.main
-    : theme.palette.primary.light;
-
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "3px",
-    padding: `${metrics.domainPaddingY} ${metrics.domainPaddingX}`,
-    borderRadius: "6px",
-    backgroundColor: compartmentBg,
-    border: `1px solid ${compartmentBorder}`,
-    color: theme.palette.text.primary,
-    fontFamily: theme.typography.fontFamily,
-    fontSize: metrics.domainFontSize,
-    fontWeight: 600,
-    lineHeight: 1.2,
-    userSelect: "none",
-    pointerEvents: isDisabled ? "none" : "auto",
-    whiteSpace: "nowrap",
-    flexShrink: 0,
-    boxSizing: "border-box",
-    transition: theme.transitions.create(
-      ["background-color", "border-color", "color"],
-      {
-        duration: theme.transitions.duration.shorter,
-      },
-    ),
-
-    "& .domain-at": {
-      color: atAccentColor,
-      fontWeight: 700,
-      fontSize: "1em",
-    },
-
-    "& .domain-text": {
-      color: theme.palette.text.primary,
-      letterSpacing: "0.01em",
-    },
-
-    "& .domain-lock": {
-      color: theme.palette.text.secondary,
+    "& .md3-field-icon-slot": {
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
-      marginLeft: "2px",
-      opacity: 0.75,
+      color: "inherit",
       "& .MuiSvgIcon-root": {
-        fontSize: "12px",
+        fontSize: metrics.iconSize,
+      },
+    },
+
+    "& .md3-clear-btn": {
+      background: "none",
+      border: "none",
+      padding: 0,
+      margin: 0,
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      cursor: "pointer",
+      color: alpha(theme.palette.text.secondary, 0.75),
+      transition: "color 0.15s ease",
+      "&:hover": {
+        color: theme.palette.text.primary,
+      },
+      "& .MuiSvgIcon-root": {
+        fontSize: metrics.clearBtnSize,
+      },
+    },
+
+    "& .md3-lock-icon": {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      color: alpha(theme.palette.text.secondary, 0.6),
+      "& .MuiSvgIcon-root": {
+        fontSize: metrics.lockIconSize,
       },
     },
   };
 });
-
-export const ClearIconButton = styled("button")(({ theme }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  background: "none",
-  border: "none",
-  borderRadius: "50%",
-  padding: "2px",
-  color: theme.palette.text.secondary,
-  cursor: "pointer",
-  flexShrink: 0,
-  lineHeight: 1,
-  transition: theme.transitions.create(
-    ["background-color", "color", "transform"],
-    {
-      duration: theme.transitions.duration.shorter,
-    },
-  ),
-
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.action.active, 0.1),
-    color: theme.palette.text.primary,
-    transform: "scale(1.1)",
-  },
-
-  "&:active": {
-    transform: "scale(0.92)",
-  },
-
-  "& .MuiSvgIcon-root": {
-    fontSize: "15px",
-  },
-}));
-
-export const CompartmentDivider = styled("div")(({ theme }) => ({
-  width: "1px",
-  height: "50%",
-  backgroundColor: alpha(theme.palette.divider, 0.6),
-  margin: theme.spacing(0, 0.25),
-  flexShrink: 0,
-}));
-
-export const HelperTextRoot = styled("div")<{
-  hasError?: boolean;
-}>(({ theme, hasError }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(0.5),
-  fontSize: theme.typography.caption.fontSize ?? "0.75rem",
-  fontWeight: 500,
-  lineHeight: 1.3,
-  color: hasError ? theme.palette.error.main : theme.palette.text.secondary,
-  paddingLeft: theme.spacing(0.5),
-  minHeight: "16px",
-
-  "& .MuiSvgIcon-root": {
-    fontSize: "13px",
-  },
-}));

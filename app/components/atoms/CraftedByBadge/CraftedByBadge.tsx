@@ -1,72 +1,65 @@
-import { type AnchorHTMLAttributes } from "react";
-import { styled } from "@mui/material/styles";
+import { styled, alpha } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
+import "@material/web/chips/assist-chip.js";
 
-export interface CraftedByBadgeProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
+export interface CraftedByBadgeProps {
   size?: "small" | "medium";
+  href?: string;
+  target?: string;
+  rel?: string;
+  className?: string;
+  id?: string;
+  "data-testid"?: string;
 }
 
-const BadgeLink = styled("a")<{ badgeSize: "small" | "medium" }>(({
+const BadgeContainer = styled("div")<{ badgeSize: "small" | "medium" }>(({
   theme,
   badgeSize,
 }) => {
-  const radius = Number(theme.shape.borderRadius) || 8;
+  const isSmall = badgeSize === "small";
+
   return {
     display: "inline-flex",
     alignItems: "center",
-    gap: theme.spacing(1),
-    padding:
-      badgeSize === "small" ? theme.spacing(0.5, 1) : theme.spacing(0.75, 1.5),
-    borderRadius: radius * 1.5,
-    border: `1px solid ${theme.palette.divider}`,
-    backgroundColor: theme.palette.action.hover,
-    color: theme.palette.text.secondary,
-    textDecoration: "none",
-    fontSize:
-      badgeSize === "small"
-        ? (theme.typography.caption.fontSize ?? "0.75rem")
-        : "0.825rem",
-    fontWeight: 500,
-    lineHeight: 1,
-    transition: theme.transitions.create(
-      ["background-color", "border-color", "box-shadow", "transform"],
-      {
-        duration: theme.transitions.duration.shorter,
+
+    "& md-assist-chip": {
+      fontFamily: theme.typography.fontFamily,
+      cursor: "pointer",
+      transition: "transform 0.18s ease, box-shadow 0.18s ease",
+
+      /* MD3 Assist Chip Tokens */
+      "--md-assist-chip-container-shape": "14px",
+      "--md-assist-chip-container-color": alpha(
+        theme.palette.action.hover,
+        0.45,
+      ),
+      "--md-assist-chip-outline-color": alpha(theme.palette.divider, 0.8),
+      "--md-assist-chip-label-text-color": theme.palette.text.secondary,
+      "--md-assist-chip-hover-label-text-color": theme.palette.text.primary,
+      "--md-assist-chip-hover-outline-color": theme.palette.primary.main,
+      "--md-assist-chip-hover-state-layer-color": theme.palette.primary.main,
+      "--md-assist-chip-focus-outline-color": theme.palette.primary.main,
+      "--md-assist-chip-icon-size": isSmall ? "14px" : "18px",
+      "--md-assist-chip-label-text-size": isSmall ? "0.75rem" : "0.825rem",
+      "--md-assist-chip-label-text-weight": "500",
+      "--md-assist-chip-label-text-font": theme.typography.fontFamily,
+      "--md-assist-chip-container-height": isSmall ? "28px" : "32px",
+      "--md-assist-chip-leading-space": isSmall ? "8px" : "10px",
+      "--md-assist-chip-trailing-space": isSmall ? "8px" : "10px",
+      "--md-assist-chip-icon-label-space": "6px",
+
+      "&:hover": {
+        transform: "translateY(-1px)",
+        boxShadow: `0 4px 12px ${alpha(theme.palette.action.focus, 0.3)}`,
       },
-    ),
-    outline: "none",
-
-    "&:hover": {
-      backgroundColor: theme.palette.action.selected,
-      borderColor: theme.palette.primary.main,
-      transform: "translateY(-1px)",
-      boxShadow: `0 4px 12px ${theme.palette.action.focus}`,
     },
 
-    "&:focus-visible": {
-      borderColor: theme.palette.primary.main,
-      boxShadow: `0 0 0 2px ${theme.palette.action.focus}`,
+    "& .badge-logo": {
+      height: isSmall ? "14px" : "18px",
+      width: "auto",
+      objectFit: "contain",
+      display: "block",
     },
-  };
-});
-
-const LabelText = styled("span")(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  fontSize: "inherit",
-  fontWeight: 500,
-  letterSpacing: "0.02em",
-}));
-
-const LogoImg = styled("img")<{ badgeSize: "small" | "medium" }>(({
-  badgeSize,
-}) => {
-  const height = badgeSize === "small" ? 14 : 18;
-  return {
-    height,
-    width: "auto",
-    display: "block",
-    objectFit: "contain",
-    flexShrink: 0,
   };
 });
 
@@ -75,21 +68,33 @@ export default function CraftedByBadge({
   href = "https://aptitek.io",
   target = "_blank",
   rel = "noopener noreferrer",
-  ...rest
+  className,
+  id,
+  "data-testid": testId = "crafted-by-badge",
 }: CraftedByBadgeProps) {
   const { t } = useTranslation("common");
 
   return (
-    <BadgeLink
-      href={href}
-      target={target}
-      rel={rel}
+    <BadgeContainer
       badgeSize={size}
-      aria-label={t("craftedByAria")}
-      {...rest}
+      className={className}
+      id={id}
+      data-testid={testId}
     >
-      <LabelText>{t("craftedBy")}</LabelText>
-      <LogoImg src="/aptitek-logo.svg" alt="Aptitek" badgeSize={size} />
-    </BadgeLink>
+      <md-assist-chip
+        href={href}
+        target={target}
+        rel={rel}
+        aria-label={t("craftedByAria")}
+        label={t("craftedBy")}
+      >
+        <img
+          slot="icon"
+          src="/aptitek-logo.svg"
+          alt="Aptitek"
+          className="badge-logo"
+        />
+      </md-assist-chip>
+    </BadgeContainer>
   );
 }

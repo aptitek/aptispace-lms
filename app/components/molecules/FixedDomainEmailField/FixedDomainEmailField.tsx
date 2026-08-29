@@ -4,34 +4,27 @@ import {
   useRef,
   useImperativeHandle,
   forwardRef,
-  type ReactNode,
-  type ChangeEvent,
-  type FormEvent,
-  type AnimationEvent,
+  useEffect,
   type MouseEvent,
-  type RefObject,
+  type ForwardedRef,
 } from "react";
 import EmailIcon from "@mui/icons-material/Email";
 import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import Tooltip from "@mui/material/Tooltip";
+import "@material/web/textfield/filled-text-field.js";
+import "@material/web/textfield/outlined-text-field.js";
+import "@material/web/icon/icon.js";
+import type {
+  MdFilledTextField,
+  MdOutlinedTextField,
+} from "../../../types/material-web";
 import type {
   FixedDomainEmailFieldProps,
   FixedDomainFieldSize,
+  FixedDomainFieldVariant,
 } from "./FixedDomainEmailField.types";
-import {
-  FieldRoot,
-  LabelText,
-  MD3FieldContainer,
-  LeadingIconContainer,
-  InputWrapper,
-  UsernameInput,
-  DomainCompartment,
-  ClearIconButton,
-  CompartmentDivider,
-  HelperTextRoot,
-} from "./FixedDomainEmailField.styles";
+import { FieldRoot } from "./FixedDomainEmailField.styles";
 
 function cleanDomainString(domain?: string): string {
   if (!domain) return "aptispace.com";
@@ -46,117 +39,9 @@ function sanitizeLocalPart(rawInput: string): string {
   return cleaned;
 }
 
-interface DomainBadgeProps {
-  size: FixedDomainFieldSize;
-  domain: string;
-  error?: boolean;
-  isFocused?: boolean;
-  disabled?: boolean;
-  showDomainLock?: boolean;
-}
-
-function DomainBadge({
-  size,
-  domain,
-  error,
-  isFocused,
-  disabled,
-  showDomainLock,
-}: DomainBadgeProps) {
-  return (
-    <DomainCompartment
-      sizePreset={size}
-      hasError={error}
-      isFocused={isFocused}
-      isDisabled={disabled}
-      title={`Fixed domain: @${domain}`}
-      role="region"
-      aria-label={`Fixed domain suffix @${domain}`}
-    >
-      <span className="domain-at" aria-hidden="true">
-        @
-      </span>
-      <span className="domain-text">{domain}</span>
-      {showDomainLock ? (
-        <span className="domain-lock" aria-label="Fixed domain">
-          <LockOutlinedIcon />
-        </span>
-      ) : null}
-    </DomainCompartment>
-  );
-}
-
-interface FieldHelperProps {
-  helperId: string;
-  error?: boolean;
-  helperText?: ReactNode;
-}
-
-function FieldHelper({ helperId, error, helperText }: FieldHelperProps) {
-  if (!helperText) return null;
-  return (
-    <HelperTextRoot
-      id={helperId}
-      hasError={error}
-      role={error ? "alert" : undefined}
-    >
-      {error ? <ErrorOutlineRoundedIcon /> : null}
-      <span>{helperText}</span>
-    </HelperTextRoot>
-  );
-}
-
-interface ClearButtonProps {
-  visible: boolean;
-  onClear: (e: MouseEvent<HTMLButtonElement>) => void;
-}
-
-function ClearButton({ visible, onClear }: ClearButtonProps) {
-  if (!visible) return null;
-  return (
-    <Tooltip title="Clear prefix">
-      <ClearIconButton
-        type="button"
-        onClick={onClear}
-        aria-label="Clear prefix"
-        tabIndex={-1}
-      >
-        <CancelRoundedIcon />
-      </ClearIconButton>
-    </Tooltip>
-  );
-}
-
-interface LeadingIconViewProps {
-  icon?: ReactNode | null;
-  size: FixedDomainFieldSize;
-  isFocused?: boolean;
-  hasError?: boolean;
-}
-
-function LeadingIconView({
-  icon,
-  size,
-  isFocused,
-  hasError,
-}: LeadingIconViewProps) {
-  if (icon === null) return null;
-  const resolvedIcon = icon || <EmailIcon />;
-  return (
-    <LeadingIconContainer
-      sizePreset={size}
-      isFocused={isFocused}
-      hasError={hasError}
-      aria-hidden="true"
-    >
-      {resolvedIcon}
-    </LeadingIconContainer>
-  );
-}
-
 function useEmailFieldState(
   props: FixedDomainEmailFieldProps,
-  inputRef: RefObject<HTMLInputElement | null>,
+  fieldRef: React.RefObject<MdFilledTextField | MdOutlinedTextField | null>,
 ) {
   const isControlled = props.value !== undefined;
   const normalizedDomain = cleanDomainString(props.domain);
@@ -167,7 +52,6 @@ function useEmailFieldState(
 
   const [uncontrolledLocal, setUncontrolledLocal] =
     useState<string>(initialLocal);
-  const [isFocused, setIsFocused] = useState<boolean>(false);
 
   const currentLocal = isControlled
     ? sanitizeLocalPart(props.value ?? "")
@@ -186,31 +70,13 @@ function useEmailFieldState(
     props.onChange?.(compositeEmail);
   };
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    handleSyncValue(event.target.value);
-  };
-
-  const handleFormInput = (event: FormEvent<HTMLInputElement>) => {
-    const target = event.target as HTMLInputElement;
-    if (target.value && target.value.includes("@")) {
-      handleSyncValue(target.value);
-    }
-  };
-
-  const handleAnimationStart = (event: AnimationEvent<HTMLInputElement>) => {
-    // Detect webkit autofill events from browser & password extensions
-    if (event.animationName.includes("autofill") && inputRef.current) {
-      handleSyncValue(inputRef.current.value);
-    }
-  };
-
   const handleClear = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
     if (!isControlled) setUncontrolledLocal("");
     props.onEmailChange?.("", "");
     props.onChange?.("");
-    inputRef.current?.focus();
+    fieldRef.current?.focus();
   };
 
   return {
@@ -218,152 +84,232 @@ function useEmailFieldState(
     currentLocal,
     fullEmail,
     hasValue,
-    isFocused,
-    setIsFocused,
-    handleInputChange,
-    handleFormInput,
-    handleAnimationStart,
+    handleSyncValue,
     handleClear,
   };
 }
 
-interface FieldContainerContentProps {
-  props: FixedDomainEmailFieldProps;
-  inputId: string;
-  helperId: string;
-  inputRef: RefObject<HTMLInputElement | null>;
-  state: ReturnType<typeof useEmailFieldState>;
+function useFieldRefs(
+  variant: FixedDomainFieldVariant,
+  forwardedRef: ForwardedRef<
+    MdFilledTextField | MdOutlinedTextField | HTMLElement
+  >,
+) {
+  const filledRef = useRef<MdFilledTextField | null>(null);
+  const outlinedRef = useRef<MdOutlinedTextField | null>(null);
+  const activeRef =
+    variant === "filled"
+      ? (filledRef as React.RefObject<
+          MdFilledTextField | MdOutlinedTextField | null
+        >)
+      : (outlinedRef as React.RefObject<
+          MdFilledTextField | MdOutlinedTextField | null
+        >);
+
+  useImperativeHandle(forwardedRef, () => activeRef.current as HTMLElement);
+
+  return { filledRef, outlinedRef, activeRef };
 }
 
-function FieldContainerContent({
-  props,
-  inputId,
-  helperId,
-  inputRef,
-  state,
-}: FieldContainerContentProps) {
-  const size = props.size || "medium";
-  const showClear = props.showClearButton !== false;
-  const showLock = props.showDomainLock !== false;
-  const placeholderText = props.placeholder ?? "username";
-  const ariaLabelText =
-    props.label || `Email username prefix for @${state.normalizedDomain}`;
-  const canClear =
-    showClear && state.hasValue && !props.disabled && !props.readOnly;
-  const autoCompleteType = props.autoComplete || "email";
+function resolveMessages(props: FixedDomainEmailFieldProps) {
+  const supporting =
+    typeof props.helperText === "string"
+      ? props.helperText
+      : props.supportingText;
+  const err =
+    props.error && typeof props.helperText === "string"
+      ? props.helperText
+      : props.errorText || supporting;
+  return { supportingTextString: supporting, errorTextString: err };
+}
 
+interface TrailingIconProps {
+  canClear: boolean;
+  showLock: boolean;
+  suffixDomain: string;
+  onClear: (event: MouseEvent<HTMLButtonElement>) => void;
+}
+
+function TrailingIconSlot({
+  canClear,
+  showLock,
+  suffixDomain,
+  onClear,
+}: TrailingIconProps) {
+  if (canClear) {
+    return (
+      <span slot="trailing-icon" className="md3-field-icon-slot">
+        <Tooltip title="Clear prefix">
+          <button
+            type="button"
+            className="md3-clear-btn"
+            onClick={onClear}
+            aria-label="Clear prefix"
+            tabIndex={-1}
+          >
+            <CancelRoundedIcon />
+          </button>
+        </Tooltip>
+      </span>
+    );
+  }
+  if (showLock) {
+    return (
+      <span
+        slot="trailing-icon"
+        className="md3-field-icon-slot md3-lock-icon"
+        title={`Fixed institutional domain: ${suffixDomain}`}
+        aria-label={`Fixed domain ${suffixDomain}`}
+      >
+        <LockOutlinedIcon />
+      </span>
+    );
+  }
+  return null;
+}
+
+function LeadingIconSlot({
+  icon,
+}: {
+  icon: FixedDomainEmailFieldProps["leadingIcon"];
+}) {
+  const resolved = icon === undefined ? <EmailIcon /> : icon;
+  if (!resolved) return null;
   return (
-    <>
-      <LeadingIconView
-        icon={props.leadingIcon}
-        size={size}
-        isFocused={state.isFocused}
-        hasError={props.error}
-      />
-
-      <InputWrapper>
-        <UsernameInput
-          ref={inputRef}
-          id={inputId}
-          name={props.name}
-          type="text"
-          inputMode="email"
-          autoComplete={autoCompleteType}
-          autoCapitalize="none"
-          autoCorrect="off"
-          spellCheck="false"
-          value={state.currentLocal}
-          disabled={props.disabled}
-          readOnly={props.readOnly}
-          required={props.required}
-          autoFocus={props.autoFocus}
-          tabIndex={props.tabIndex}
-          sizePreset={size}
-          placeholder={placeholderText}
-          onChange={state.handleInputChange}
-          onInput={state.handleFormInput}
-          onAnimationStart={state.handleAnimationStart}
-          onFocus={(e) => {
-            state.setIsFocused(true);
-            props.onFocus?.(e);
-          }}
-          onBlur={(e) => {
-            state.setIsFocused(false);
-            props.onBlur?.(e);
-          }}
-          aria-invalid={props.error}
-          aria-describedby={props.helperText ? helperId : undefined}
-          aria-label={ariaLabelText}
-        />
-      </InputWrapper>
-
-      <ClearButton visible={canClear} onClear={state.handleClear} />
-
-      <CompartmentDivider aria-hidden="true" />
-
-      <DomainBadge
-        size={size}
-        domain={state.normalizedDomain}
-        error={props.error}
-        isFocused={state.isFocused}
-        disabled={props.disabled}
-        showDomainLock={showLock}
-      />
-    </>
+    <span
+      slot="leading-icon"
+      className="md3-field-icon-slot"
+      aria-hidden="true"
+    >
+      {resolved}
+    </span>
   );
 }
 
+interface BuildFieldOptions {
+  props: FixedDomainEmailFieldProps;
+  inputId: string;
+  testId: string;
+  currentLocal: string;
+  suffixDomain: string;
+  errorTextString?: string;
+  supportingTextString?: string;
+  onSync?: (nextValue: string) => void;
+}
+
+function buildFieldProps(options: BuildFieldOptions) {
+  const {
+    props,
+    inputId,
+    testId,
+    currentLocal,
+    suffixDomain,
+    errorTextString,
+    supportingTextString,
+    onSync,
+  } = options;
+
+  return {
+    id: inputId,
+    name: props.name,
+    label: props.label,
+    value: currentLocal,
+    placeholder: props.placeholder ?? "username",
+    disabled: props.disabled,
+    readOnly: props.readOnly,
+    required: props.required,
+    error: props.error,
+    errorText: errorTextString,
+    supportingText: supportingTextString,
+    suffixText: suffixDomain,
+    type: "text",
+    inputMode: "email" as const,
+    autocomplete: props.autoComplete || "email",
+    autoFocus: props.autoFocus,
+    tabIndex: props.tabIndex,
+    "data-testid": testId,
+    onInput: (e: React.FormEvent<HTMLElement>) => {
+      const target = e.target as HTMLInputElement;
+      onSync?.(target.value ?? "");
+    },
+    onChange: (e: React.FormEvent<HTMLElement>) => {
+      const target = e.target as HTMLInputElement;
+      onSync?.(target.value ?? "");
+    },
+    onFocus: props.onFocus,
+    onBlur: props.onBlur,
+  };
+}
+
 export const FixedDomainEmailField = forwardRef<
-  HTMLInputElement,
+  MdFilledTextField | MdOutlinedTextField | HTMLElement,
   FixedDomainEmailFieldProps
 >(function FixedDomainEmailField(props, ref) {
   const generatedId = useId();
   const inputId = props.id || `fixed-email-${generatedId}`;
-  const helperId = `fixed-email-helper-${generatedId}`;
-
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  useImperativeHandle(ref, () => inputRef.current as HTMLInputElement);
-
-  const size = props.size || "medium";
-  const variant = props.variant || "outlined";
+  const size: FixedDomainFieldSize = props.size || "medium";
+  const variant: FixedDomainFieldVariant = props.variant || "outlined";
   const fullWidth = props.fullWidth !== false;
   const testId = props.testId || "fixed-domain-email-field";
 
-  const state = useEmailFieldState(props, inputRef);
+  const { filledRef, outlinedRef, activeRef } = useFieldRefs(variant, ref);
+  const state = useEmailFieldState(props, activeRef);
+  const { supportingTextString, errorTextString } = resolveMessages(props);
+
+  const canClear =
+    props.showClearButton !== false &&
+    state.hasValue &&
+    !props.disabled &&
+    !props.readOnly;
+  const suffixDomain = `@${state.normalizedDomain}`;
+
+  useEffect(() => {
+    if (activeRef.current && "value" in activeRef.current) {
+      (activeRef.current as unknown as { value: string }).value =
+        state.currentLocal;
+    }
+  }, [state.currentLocal, activeRef]);
+
+  const sharedProps = buildFieldProps({
+    props,
+    inputId,
+    testId,
+    currentLocal: state.currentLocal,
+    suffixDomain,
+    errorTextString,
+    supportingTextString,
+    onSync: state.handleSyncValue,
+  });
 
   return (
     <FieldRoot
       fullWidth={fullWidth}
       isDisabled={props.disabled}
-      data-testid={testId}
+      sizePreset={size}
+      variantStyle={variant}
       className={props.className}
     >
-      {props.label ? (
-        <LabelText htmlFor={inputId}>{props.label}</LabelText>
-      ) : null}
-
-      <MD3FieldContainer
-        variantStyle={variant}
-        sizePreset={size}
-        isFocused={state.isFocused}
-        hasError={props.error}
-        isDisabled={props.disabled}
-        onClick={() => !props.disabled && inputRef.current?.focus()}
-      >
-        <FieldContainerContent
-          props={props}
-          inputId={inputId}
-          helperId={helperId}
-          inputRef={inputRef}
-          state={state}
-        />
-      </MD3FieldContainer>
-
-      <FieldHelper
-        helperId={helperId}
-        error={props.error}
-        helperText={props.helperText}
-      />
+      {variant === "filled" ? (
+        <md-filled-text-field ref={filledRef} {...sharedProps}>
+          <LeadingIconSlot icon={props.leadingIcon} />
+          <TrailingIconSlot
+            canClear={canClear}
+            showLock={props.showDomainLock !== false}
+            suffixDomain={suffixDomain}
+            onClear={state.handleClear}
+          />
+        </md-filled-text-field>
+      ) : (
+        <md-outlined-text-field ref={outlinedRef} {...sharedProps}>
+          <LeadingIconSlot icon={props.leadingIcon} />
+          <TrailingIconSlot
+            canClear={canClear}
+            showLock={props.showDomainLock !== false}
+            suffixDomain={suffixDomain}
+            onClear={state.handleClear}
+          />
+        </md-outlined-text-field>
+      )}
     </FieldRoot>
   );
 });

@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import AuthLayout from "~/components/templates/AuthLayout/AuthLayout";
 import OnboardingCard from "~/components/organisms/OnboardingCard/OnboardingCard";
+import FixedDomainEmailField from "~/components/molecules/FixedDomainEmailField/FixedDomainEmailField";
 import type {
   SchoolConfig,
   CohortConfig,
@@ -256,21 +257,20 @@ export default function OnboardingPage() {
             </TwoColGrid>
 
             <FormGroup>
-              <Label>
-                {t("form.cadetEmail", "Institutional Academy Email")}
-              </Label>
-              <Input
+              <FixedDomainEmailField
                 name="email"
-                type="email"
+                label={t("form.cadetEmail", "Institutional Academy Email")}
+                domain={selectedSchool.emailDomain}
                 value={profile.email}
-                onChange={(e) =>
-                  setProfile((prev) => ({ ...prev, email: e.target.value }))
+                onEmailChange={(composite) =>
+                  setProfile((prev) => ({ ...prev, email: composite }))
                 }
+                variant="outlined"
+                size="medium"
                 required
+                showDomainLock={true}
+                helperText={`Auto-computed according to ${selectedSchool.name} format.`}
               />
-              <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                Auto-computed according to {selectedSchool.name} format.
-              </Typography>
             </FormGroup>
 
             <TwoColGrid>

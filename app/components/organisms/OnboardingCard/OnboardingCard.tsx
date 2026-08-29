@@ -1,16 +1,13 @@
-import {
-  useState,
-  useMemo,
-  useEffect,
-  forwardRef,
-  type ChangeEvent,
-} from "react";
+import { useState, useMemo, useEffect, forwardRef } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Id1Card from "../../molecules/Id1Card/Id1Card";
 import EditableAvatar from "../../molecules/EditableAvatar/EditableAvatar";
 import FixedDomainEmailField from "../../molecules/FixedDomainEmailField/FixedDomainEmailField";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
+import "@material/web/textfield/filled-text-field.js";
+import "@material/web/textfield/outlined-text-field.js";
+import "@material/web/chips/assist-chip.js";
 import type { GuillocheVariant } from "../../atoms/Guilloche/Guilloche.types";
 import type {
   OnboardingCardProps,
@@ -32,9 +29,6 @@ import {
   CardMainBody,
   AvatarCol,
   FieldsCol,
-  FieldRow,
-  CardFieldLabel,
-  CardInput,
   FixedDomainEmailHolder,
   CardBackContainer,
   BackMainArea,
@@ -217,7 +211,9 @@ function CardFrontFace({
           )}
         </SchoolBrandingHolder>
 
-        <CohortBadge data-testid="cohort-badge">{cohortName}</CohortBadge>
+        <CohortBadge data-testid="cohort-badge">
+          <md-assist-chip label={cohortName} />
+        </CohortBadge>
       </SchoolHeaderRow>
 
       <CardMainBody>
@@ -236,59 +232,55 @@ function CardFrontFace({
         </AvatarCol>
 
         <FieldsCol>
-          <FieldRow>
-            <CardFieldLabel htmlFor="card-field-firstname">
-              First Name
-            </CardFieldLabel>
-            <CardInput
-              id="card-field-firstname"
-              type="text"
-              value={profile.firstName}
-              disabled={readOnly}
-              placeholder="First name"
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                onFirstNameChange(e.target.value)
-              }
-              data-testid="input-firstname"
-            />
-          </FieldRow>
+          <md-filled-text-field
+            id="card-field-firstname"
+            label="First Name"
+            value={profile.firstName}
+            disabled={readOnly}
+            placeholder="First name"
+            onInput={(e: React.FormEvent<HTMLElement>) => {
+              const target = e.target as HTMLInputElement;
+              onFirstNameChange(target.value ?? "");
+            }}
+            onChange={(e: React.FormEvent<HTMLElement>) => {
+              const target = e.target as HTMLInputElement;
+              onFirstNameChange(target.value ?? "");
+            }}
+            data-testid="input-firstname"
+          />
 
-          <FieldRow>
-            <CardFieldLabel htmlFor="card-field-familyname">
-              Family Name
-            </CardFieldLabel>
-            <CardInput
-              id="card-field-familyname"
-              type="text"
-              value={profile.familyName}
-              disabled={readOnly}
-              placeholder="Family name"
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                onFamilyNameChange(e.target.value)
-              }
-              data-testid="input-familyname"
-            />
-          </FieldRow>
+          <md-filled-text-field
+            id="card-field-familyname"
+            label="Family Name"
+            value={profile.familyName}
+            disabled={readOnly}
+            placeholder="Family name"
+            onInput={(e: React.FormEvent<HTMLElement>) => {
+              const target = e.target as HTMLInputElement;
+              onFamilyNameChange(target.value ?? "");
+            }}
+            onChange={(e: React.FormEvent<HTMLElement>) => {
+              const target = e.target as HTMLInputElement;
+              onFamilyNameChange(target.value ?? "");
+            }}
+            data-testid="input-familyname"
+          />
 
-          <FieldRow>
-            <CardFieldLabel htmlFor="card-field-email">
-              Institutional Email
-            </CardFieldLabel>
-            <FixedDomainEmailHolder>
-              <FixedDomainEmailField
-                id="card-field-email"
-                domain={schoolDomain}
-                value={profile.email}
-                disabled={readOnly}
-                size="small"
-                variant="filled"
-                showDomainLock={true}
-                placeholder="username"
-                onEmailChange={onEmailChange}
-                testId="input-email"
-              />
-            </FixedDomainEmailHolder>
-          </FieldRow>
+          <FixedDomainEmailHolder>
+            <FixedDomainEmailField
+              id="card-field-email"
+              label="Institutional Email"
+              domain={schoolDomain}
+              value={profile.email}
+              disabled={readOnly}
+              size="small"
+              variant="filled"
+              showDomainLock={true}
+              placeholder="username"
+              onEmailChange={onEmailChange}
+              testId="input-email"
+            />
+          </FixedDomainEmailHolder>
         </FieldsCol>
       </CardMainBody>
     </CardFrontContainer>
