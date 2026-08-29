@@ -2,6 +2,7 @@ import type {
   IdCardOrientation,
   IdCardSide,
   IdCardSize,
+  IdHoloLayer,
 } from "../../molecules/IdCard/IdCard.types";
 
 export type OnboardingHoloVariant = "default" | "rainbow" | "cosmic" | "gold";
@@ -19,6 +20,18 @@ export interface CohortConfig {
   id?: string;
   name: string;
   description?: string;
+  startDate?: string;
+  endDate?: string;
+  validFrom?: string;
+  validUntil?: string;
+}
+
+export interface CohortValidity {
+  validFrom: string;
+  validUntil: string;
+  formatted: string;
+  startYear: number;
+  endYear: number;
 }
 
 export interface OnboardingProfile {
@@ -94,6 +107,19 @@ export interface OnboardingCardProps {
    * @default "rainbow"
    */
   holoVariant?: OnboardingHoloVariant;
+  /**
+   * Holographic strength multiplier
+   */
+  holoStrength?: number;
+  /**
+   * Custom or additional holographic layers
+   */
+  holoLayers?: (string | IdHoloLayer)[];
+  /**
+   * Whether procedural Guilloche curves are displayed
+   * @default true
+   */
+  showGuilloche?: boolean;
   /**
    * Whether card is transparent glassmorphic acrylic
    * @default true

@@ -1,4 +1,9 @@
-import type { SchoolConfig, OnboardingProfile } from "./OnboardingCard.types";
+import type {
+  SchoolConfig,
+  OnboardingProfile,
+  CohortConfig,
+  CohortValidity,
+} from "./OnboardingCard.types";
 import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
 
 function sanitizeEmailPart(name: string, fallback: string): string {
@@ -37,6 +42,28 @@ export function formatInstitutionalEmail(
   }
 
   return result;
+}
+
+function extractStartYear(cohort?: CohortConfig): number {
+  const targetStr = cohort?.validFrom || cohort?.startDate || cohort?.name;
+  if (!targetStr) return 2026;
+  const match = targetStr.match(/\b(20\d{2})\b/);
+  return match ? parseInt(match[1], 10) : 2026;
+}
+
+export function calculateCohortValidity(cohort?: CohortConfig): CohortValidity {
+  const startYear = extractStartYear(cohort);
+  const endYear = startYear + 1;
+  const validFrom = cohort?.validFrom || `01/09/${startYear}`;
+  const validUntil = cohort?.validUntil || `31/08/${endYear}`;
+
+  return {
+    startYear,
+    endYear,
+    validFrom,
+    validUntil,
+    formatted: `${validFrom} – ${validUntil}`,
+  };
 }
 
 function sanitizeMrzString(text: string | undefined, fallback: string): string {

@@ -39,7 +39,7 @@ import {
   getHoloVariant,
   normalizeHoloLayers,
   HoloLayersLayer,
-  resolveHoloMasks,
+  resolveHoloMasksAsync,
 } from "./IdCard.holo";
 
 export { normalizeHoloLayers } from "./IdCard.holo";
@@ -233,7 +233,13 @@ function IdCardFace({ conf, props, faceSide, dims }: IdCardFaceProps) {
     ],
   );
 
-  const effectiveMaskUrl = useMemo(() => {
+  const [effectiveMaskUrl, setEffectiveMaskUrl] = useState<string | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    let active = true;
+
     const guillocheMaskUrl = conf.showGuilloche
       ? generateGuillocheMaskDataUrl({
           seed,
@@ -242,12 +248,22 @@ function IdCardFace({ conf, props, faceSide, dims }: IdCardFaceProps) {
         })
       : undefined;
 
-    return resolveHoloMasks({
+    resolveHoloMasksAsync({
       customMaskUrl: props.maskUrl,
       guillocheMaskUrl,
       holoLayers: normalizedHoloLayers,
       faceSide,
-    });
+    })
+      .then((maskUrl) => {
+        if (active) setEffectiveMaskUrl(maskUrl);
+      })
+      .catch((err) => {
+        console.warn("Failed to resolve async holo masks:", err);
+      });
+
+    return () => {
+      active = false;
+    };
   }, [
     props.maskUrl,
     conf.showGuilloche,

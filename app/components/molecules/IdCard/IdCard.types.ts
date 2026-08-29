@@ -47,6 +47,15 @@ export interface IdHoloLayer {
   maskSize?: string;
   maskPosition?: string;
   maskRepeat?: string;
+  x?: number | string;
+  y?: number | string;
+  left?: number | string;
+  top?: number | string;
+  right?: number | string;
+  bottom?: number | string;
+  width?: number | string;
+  height?: number | string;
+  preserveAspectRatio?: string;
 }
 
 export type Id1HoloLayer = IdHoloLayer;

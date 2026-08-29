@@ -1,15 +1,14 @@
 import { useState, useMemo, useEffect, forwardRef } from "react";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Chip from "@mui/material/Chip";
-import { alpha } from "@mui/material/styles";
-import { SOLARIZED_BASE } from "../../../tokens/theme";
+
 import IdCard from "../../molecules/IdCard/IdCard";
 import EditableAvatar from "../../molecules/EditableAvatar/EditableAvatar";
 import EmailField from "../../molecules/EmailField/EmailField";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
+import aptispaceLogoRaw from "../../../../public/aptispace-logo.svg?raw";
 import type { GuillocheVariant } from "../../atoms/Guilloche/Guilloche.types";
+import type { IdHoloLayer } from "../../molecules/IdCard/IdCard.types";
 import type {
   OnboardingCardProps,
   OnboardingProfile,
@@ -19,17 +18,18 @@ import type {
 import {
   formatInstitutionalEmail,
   buildTd1MrzData,
+  calculateCohortValidity,
 } from "./OnboardingCard.utils";
 import {
   CardFrontContainer,
   SchoolHeaderRow,
   SchoolBrandingHolder,
-  SchoolLogoImg,
   SchoolFallbackText,
-  CohortBadge,
+  CohortValidityContainer,
   CardMainBody,
   AvatarCol,
-  FieldsCol,
+  FieldsList,
+  FieldListItem,
   CardBackContainer,
   BackMainArea,
   BackLeftContactCol,
@@ -193,40 +193,39 @@ function CardFrontFace({
   const schoolName = school.name || "AptiSpace Academy";
   const cohortName = cohort?.name || "Cadet Cohort 2026";
   const schoolDomain = school.emailDomain || "cadet.aptispace.io";
+  const validity = useMemo(() => calculateCohortValidity(cohort), [cohort]);
 
   return (
     <CardFrontContainer data-testid="onboarding-card-front">
       <SchoolHeaderRow>
         <SchoolBrandingHolder>
-          {school.logoUrl ? (
-            <SchoolLogoImg
-              src={school.logoUrl}
-              alt={`${schoolName} Logo`}
-              data-testid="school-logo-img"
-            />
-          ) : (
+          {!school.logoUrl && (
             <SchoolFallbackText data-testid="school-logo-fallback">
               {schoolName}
             </SchoolFallbackText>
           )}
         </SchoolBrandingHolder>
 
-        <CohortBadge data-testid="cohort-badge">
+        <CohortValidityContainer data-testid="cohort-badge">
           <Chip
             label={cohortName}
             size="small"
-            sx={{
-              height: 20,
-              fontSize: "0.68rem",
-              fontWeight: 700,
-              borderRadius: "6px",
-              bgcolor: alpha(SOLARIZED_BASE.base03, 0.4),
-              border: `1px solid ${alpha(SOLARIZED_BASE.base3, 0.2)}`,
-              color: "text.primary",
-              "& .MuiChip-label": { px: 0.75 },
-            }}
+            color="primary"
+            variant="outlined"
+            data-testid="cohort-chip"
           />
-        </CohortBadge>
+          <Chip
+            label={validity.formatted}
+            size="small"
+            variant="outlined"
+            sx={{
+              color: "text.secondary",
+              borderColor: "divider",
+              fontSize: "0.7rem",
+            }}
+            data-testid="validity-badge"
+          />
+        </CohortValidityContainer>
       </SchoolHeaderRow>
 
       <CardMainBody>
@@ -237,54 +236,60 @@ function CardFrontFace({
             name={`${profile.firstName} ${profile.familyName}`}
             onChange={onAvatarChange}
             shape="biometric"
-            size="lg"
+            size="xl"
             editable={!readOnly}
             mode="image-only"
             testId="card-editable-avatar"
           />
         </AvatarCol>
 
-        <FieldsCol>
-          <TextField
-            id="card-field-firstname"
-            label="First Name"
-            value={profile.firstName}
-            disabled={readOnly}
-            placeholder="First name"
-            size="small"
-            variant="filled"
-            onChange={(e) => onFirstNameChange(e.target.value)}
-            slotProps={{ htmlInput: { "data-testid": "input-firstname" } }}
-            fullWidth
-          />
+        <FieldsList disablePadding>
+          <FieldListItem disableGutters disablePadding>
+            <TextField
+              id="card-field-firstname"
+              label="First Name"
+              value={profile.firstName}
+              disabled={readOnly}
+              placeholder="First name"
+              size="small"
+              variant="outlined"
+              onChange={(e) => onFirstNameChange(e.target.value)}
+              slotProps={{ htmlInput: { "data-testid": "input-firstname" } }}
+              fullWidth
+            />
+          </FieldListItem>
 
-          <TextField
-            id="card-field-familyname"
-            label="Family Name"
-            value={profile.familyName}
-            disabled={readOnly}
-            placeholder="Family name"
-            size="small"
-            variant="filled"
-            onChange={(e) => onFamilyNameChange(e.target.value)}
-            slotProps={{ htmlInput: { "data-testid": "input-familyname" } }}
-            fullWidth
-          />
+          <FieldListItem disableGutters disablePadding>
+            <TextField
+              id="card-field-familyname"
+              label="Family Name"
+              value={profile.familyName}
+              disabled={readOnly}
+              placeholder="Family name"
+              size="small"
+              variant="outlined"
+              onChange={(e) => onFamilyNameChange(e.target.value)}
+              slotProps={{ htmlInput: { "data-testid": "input-familyname" } }}
+              fullWidth
+            />
+          </FieldListItem>
 
-          <EmailField
-            id="card-field-email"
-            label="Institutional Email"
-            domain={schoolDomain}
-            value={profile.email}
-            disabled={readOnly}
-            size="small"
-            variant="filled"
-            showDomainLock={true}
-            placeholder="username"
-            onEmailChange={onEmailChange}
-            testId="input-email"
-          />
-        </FieldsCol>
+          <FieldListItem disableGutters disablePadding>
+            <EmailField
+              id="card-field-email"
+              label="Institutional Email"
+              domain={schoolDomain}
+              value={profile.email}
+              disabled={readOnly}
+              size="small"
+              variant="outlined"
+              showDomainLock={true}
+              placeholder="username"
+              onEmailChange={onEmailChange}
+              testId="input-email"
+            />
+          </FieldListItem>
+        </FieldsList>
       </CardMainBody>
     </CardFrontContainer>
   );
@@ -304,48 +309,7 @@ function CardBackFace({ school, profile }: BackFaceProps) {
     <CardBackContainer data-testid="onboarding-card-back">
       <BackMainArea>
         <BackLeftContactCol aria-hidden="true" />
-
-        <BackRightContentCol>
-          <Box
-            component="img"
-            src="/aptispace-logo.svg"
-            alt="AptiSpace Logo"
-            sx={{
-              height: "30px",
-              maxWidth: "140px",
-              objectFit: "contain",
-              display: "block",
-              filter: "drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5))",
-            }}
-            data-testid="holo-aptispace-logo"
-          />
-
-          <Typography
-            variant="caption"
-            sx={{
-              fontSize: "0.58rem",
-              fontWeight: 800,
-              letterSpacing: "1.2px",
-              color: "primary.light",
-              textTransform: "uppercase",
-              textShadow: "0 1px 3px rgba(0, 0, 0, 0.6)",
-            }}
-          >
-            ISO/IEC 7810 ID-1 • EMV COMPLIANT
-          </Typography>
-
-          <Typography
-            variant="caption"
-            sx={{
-              fontSize: "0.52rem",
-              color: "text.secondary",
-              letterSpacing: "0.5px",
-            }}
-          >
-            AUTH SEC CODE: {profile.documentNumber || "0942"} • CLEARANCE
-            CERTIFIED
-          </Typography>
-        </BackRightContentCol>
+        <BackRightContentCol />
       </BackMainArea>
 
       <FullWidthMrzHolder>
@@ -361,27 +325,97 @@ function CardBackFace({ school, profile }: BackFaceProps) {
   );
 }
 
+function buildHoloLayers(
+  schoolLogoUrl?: string | null,
+  customHoloLayers?: (string | IdHoloLayer)[],
+): IdHoloLayer[] {
+  const layers: IdHoloLayer[] = [];
+
+  if (schoolLogoUrl) {
+    layers.push({
+      id: "school-holo-logo",
+      src: schoolLogoUrl,
+      side: "front",
+      left: "3%",
+      top: "2.8%",
+      width: "28%",
+      height: "9%",
+      objectFit: "contain",
+      blendMode: "screen",
+      opacity: 0.95,
+      holographic: true,
+    });
+  }
+
+  layers.push({
+    id: "aptispace-holo-logo",
+    src: aptispaceLogoRaw,
+    side: "back",
+    left: "28%",
+    top: "12%",
+    width: "52%",
+    height: "22%",
+    objectFit: "contain",
+    blendMode: "screen",
+    opacity: 0.95,
+    holographic: true,
+  });
+
+  if (customHoloLayers && Array.isArray(customHoloLayers)) {
+    customHoloLayers.forEach((layerItem, idx) => {
+      if (typeof layerItem === "string") {
+        layers.push({
+          id: `custom-holo-${idx}`,
+          src: layerItem,
+          holographic: true,
+        });
+      } else {
+        layers.push(layerItem);
+      }
+    });
+  }
+
+  return layers;
+}
+
+const DEFAULT_ONBOARDING_PROPS = {
+  side: "front" as const,
+  flipOnClick: false,
+  orientation: "landscape" as const,
+  size: "responsive" as const,
+  holoVariant: "rainbow" as const,
+  holoStrength: 0.85,
+  showGuilloche: true,
+  transparent: true,
+  readOnly: false,
+  testId: "onboarding-card",
+};
+
 export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
   (props, ref) => {
+    const conf = { ...DEFAULT_ONBOARDING_PROPS, ...props };
     const {
       school,
       cohort,
       profile: controlledProfile,
       defaultProfile,
       onProfileChange,
-      side = "front",
+      side,
       isFlipped: controlledFlipped,
       onFlip,
       onFlipChange,
-      flipOnClick = false,
-      orientation = "landscape",
-      size = "responsive",
-      holoVariant = "rainbow",
-      transparent = true,
-      readOnly = false,
+      flipOnClick,
+      orientation,
+      size,
+      holoVariant,
+      holoStrength,
+      holoLayers: customHoloLayers,
+      showGuilloche,
+      transparent,
+      readOnly,
       className,
-      testId = "onboarding-card",
-    } = props;
+      testId,
+    } = conf;
 
     const {
       activeProfile,
@@ -399,6 +433,11 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
     const guillocheSeed = resolveGuillocheSeed(school);
     const guillocheVariant = resolveGuillocheVariant(holoVariant);
 
+    const mergedHoloLayers = useMemo(
+      () => buildHoloLayers(school.logoUrl, customHoloLayers),
+      [school.logoUrl, customHoloLayers],
+    );
+
     return (
       <IdCard
         ref={ref}
@@ -412,8 +451,10 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
         transparent={transparent}
         guillocheSeed={guillocheSeed}
         guillocheVariant={guillocheVariant}
+        showGuilloche={showGuilloche}
         holographic={true}
-        holoStrength={0.85}
+        holoStrength={holoStrength}
+        holoLayers={mergedHoloLayers}
         showElectronics={true}
         chipPosition="left"
         electronicsFinish="gold"

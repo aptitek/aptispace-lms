@@ -53,7 +53,7 @@ const meta: Meta<typeof OnboardingCard> = {
     docs: {
       description: {
         component:
-          "ISO/IEC 7810 ID-1 Interactive Transparent Onboarding Physical Credential. Features big editable avatar on the left, fields for firstname, familyname, institutional email (defaulted to school domain), school holographic logo with text fallback, cohort badge, procedural Guilloche seeded by school ID, transparent substrate with exposed contact chip on the back left, holographic AptiSpace logo, and full-width ICAO 9303 TD-1 MRZ zone.",
+          "ISO/IEC 7810 ID-1 Interactive Transparent Onboarding Physical Credential. Features large biometric avatar, fields for firstname, familyname, institutional email, holographic school logo, MUI Cohort Chip with academic validity period (Sept 1st to Aug 31st), procedural Guilloche, transparent substrate with exposed contact chip on back left, enlarged holographic AptiSpace logo, and full-width ICAO 9303 TD-1 MRZ zone.",
       },
     },
   },
@@ -158,7 +158,7 @@ export const SchoolTextFallback: Story = {
     >
       <Typography variant="caption" sx={{ color: "text.secondary" }}>
         When no school logo is provided, falls back to the school name styled
-        with holographic foil.
+        with clean Material typography.
       </Typography>
       <OnboardingCard {...args} />
     </Box>
@@ -182,8 +182,37 @@ export const BackFaceReverse: Story = {
       }}
     >
       <Typography variant="caption" sx={{ color: "text.secondary" }}>
-        Back side: Exposed contact pads on left, holographic AptiSpace logo, and
-        full-width MRZ zone.
+        Back side: Exposed contact pads on left, enlarged holographic AptiSpace
+        logo with foil reflection, and full-width MRZ zone.
+      </Typography>
+      <OnboardingCard {...args} />
+    </Box>
+  ),
+};
+
+export const CustomValidityDates: Story = {
+  args: {
+    school: mockSchoolLogo,
+    cohort: {
+      name: "Astronavigation 2027",
+      validFrom: "01/09/2027",
+      validUntil: "31/08/2028",
+    },
+    profile: mockProfile,
+    size: "lg",
+  },
+  render: (args) => (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+      }}
+    >
+      <Typography variant="caption" sx={{ color: "text.secondary" }}>
+        Displays non-editable academic school-year validity date (01/09/2027 –
+        31/08/2028) next to the MUI Cohort Chip.
       </Typography>
       <OnboardingCard {...args} />
     </Box>

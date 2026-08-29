@@ -4,8 +4,10 @@ export type {
   OnboardingProfile,
   SchoolConfig,
   CohortConfig,
+  CohortValidity,
 } from "./OnboardingCard.types";
 export {
   formatInstitutionalEmail,
   buildTd1MrzData,
+  calculateCohortValidity,
 } from "./OnboardingCard.utils";

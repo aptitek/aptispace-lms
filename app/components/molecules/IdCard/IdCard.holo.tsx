@@ -90,6 +90,29 @@ export interface HoloLayersLayerProps {
   faceSide: IdCardSide;
 }
 
+function resolveLayerBoundsStyle(
+  layer: IdHoloLayer,
+): React.CSSProperties | undefined {
+  const left = layer.left ?? layer.x;
+  const top = layer.top ?? layer.y;
+  if (
+    left === undefined &&
+    top === undefined &&
+    layer.width === undefined &&
+    layer.height === undefined
+  ) {
+    return undefined;
+  }
+  return {
+    left,
+    top,
+    right: layer.right ?? "auto",
+    bottom: layer.bottom ?? "auto",
+    width: layer.width,
+    height: layer.height,
+  };
+}
+
 export function HoloLayersLayer({ layers, faceSide }: HoloLayersLayerProps) {
   const activeLayers = layers.filter(
     (layer) => layer.src && (layer.side === "both" || layer.side === faceSide),
@@ -98,24 +121,36 @@ export function HoloLayersLayer({ layers, faceSide }: HoloLayersLayerProps) {
 
   return (
     <>
-      {activeLayers.map((layer, idx) => (
-        <HoloLayerContainer
-          key={layer.id || `holo-layer-${idx}`}
-          layerOpacity={layer.opacity}
-          blendMode={layer.blendMode}
-          layerZIndex={layer.zIndex ?? 1}
-          className={layer.className}
-          style={layer.style}
-        >
-          {layer.src && (
-            <HoloLayerImage
-              src={layer.src}
-              alt={layer.alt || `Holographic Layer ${idx + 1}`}
-              objectFitStyle={layer.objectFit}
-            />
-          )}
-        </HoloLayerContainer>
-      ))}
+      {activeLayers.map((layer, idx) => {
+        const boundsStyle = resolveLayerBoundsStyle(layer);
+        const containerStyle: React.CSSProperties = {
+          ...layer.style,
+          ...boundsStyle,
+        };
+
+        return (
+          <HoloLayerContainer
+            key={layer.id || `holo-layer-${idx}`}
+            layerOpacity={layer.opacity}
+            blendMode={layer.blendMode}
+            layerZIndex={layer.zIndex ?? 1}
+            className={layer.className}
+            style={containerStyle}
+          >
+            {layer.src && (
+              <HoloLayerImage
+                src={
+                  isRawSvgString(layer.src)
+                    ? toSvgDataUrl(layer.src)
+                    : layer.src
+                }
+                alt={layer.alt || `Holographic Layer ${idx + 1}`}
+                objectFitStyle={layer.objectFit}
+              />
+            )}
+          </HoloLayerContainer>
+        );
+      })}
     </>
   );
 }
@@ -149,6 +184,28 @@ export interface ResolveHoloMasksOptions {
   faceSide: IdCardSide;
 }
 
+export function isRawSvgString(str: string): boolean {
+  const trimmed = str.trim();
+  return trimmed.startsWith("<svg") || trimmed.startsWith("<?xml");
+}
+
+function resolveLayerAspectRatio(layer: IdHoloLayer): string {
+  if (layer.preserveAspectRatio) return layer.preserveAspectRatio;
+  if (layer.objectFit === "cover") return "xMidYMid slice";
+  if (layer.objectFit === "fill") return "none";
+  return "xMidYMid meet";
+}
+
+function buildLayerImageTag(layer: IdHoloLayer, mask: string): string {
+  const href = isRawSvgString(mask) ? toSvgDataUrl(mask) : mask;
+  const fit = resolveLayerAspectRatio(layer);
+  const x = layer.x ?? layer.left ?? "0";
+  const y = layer.y ?? layer.top ?? "0";
+  const width = layer.width ?? "100%";
+  const height = layer.height ?? "100%";
+  return `<image href="${href}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${fit}"/>`;
+}
+
 function buildLayerImageElements(
   holoLayers: IdHoloLayer[],
   faceSide: IdCardSide,
@@ -156,17 +213,9 @@ function buildLayerImageElements(
   const elements: string[] = [];
   for (const layer of holoLayers) {
     const mask = extractLayerMask(layer, faceSide);
-    if (!mask) continue;
-    const href = mask.startsWith("<svg") ? toSvgDataUrl(mask) : mask;
-    const fit =
-      layer.objectFit === "cover"
-        ? "xMidYMid slice"
-        : layer.objectFit === "fill"
-          ? "none"
-          : "xMidYMid meet";
-    elements.push(
-      `<image href="${href}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="${fit}"/>`,
-    );
+    if (mask) {
+      elements.push(buildLayerImageTag(layer, mask));
+    }
   }
   return elements;
 }
@@ -176,13 +225,81 @@ function compositeMaskSvg(
   layerElements: string[],
 ): string {
   const svgElements: string[] = [];
+
+  svgElements.push(`
+    <defs>
+      <filter id="white-mask" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="
+          0 0 0 0 1
+          0 0 0 0 1
+          0 0 0 0 1
+          0 0 0 1 0" />
+      </filter>
+    </defs>
+  `);
+
   if (guillocheMaskUrl) {
     svgElements.push(
       `<image href="${guillocheMaskUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>`,
     );
   }
-  svgElements.push(...layerElements);
+
+  if (layerElements.length > 0) {
+    svgElements.push(
+      `<g filter="url(#white-mask)">${layerElements.join("")}</g>`,
+    );
+  }
+
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 856 540" width="100%" height="100%">${svgElements.join("")}</svg>`;
+}
+
+async function urlToBase64(url: string): Promise<string> {
+  if (url.startsWith("data:") || isRawSvgString(url)) return url;
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (err) {
+    console.warn("Failed to fetch image to base64 for holo mask", err);
+    return url; // fallback to original (might fail in SVG mask)
+  }
+}
+
+export async function resolveHoloMasksAsync({
+  customMaskUrl,
+  guillocheMaskUrl,
+  holoLayers,
+  faceSide,
+}: ResolveHoloMasksOptions): Promise<string | undefined> {
+  if (customMaskUrl) return customMaskUrl;
+
+  const activeLayerMasks = holoLayers
+    .map((layer) => extractLayerMask(layer, faceSide))
+    .filter((mask): mask is string => Boolean(mask));
+
+  if (!guillocheMaskUrl && activeLayerMasks.length === 0) return undefined;
+  if (guillocheMaskUrl && activeLayerMasks.length === 0)
+    return guillocheMaskUrl;
+
+  const resolvedLayers = await Promise.all(
+    holoLayers.map(async (layer) => {
+      const mask = extractLayerMask(layer, faceSide);
+      if (mask) {
+        const b64 = await urlToBase64(mask);
+        return { ...layer, maskUrl: b64, src: layer.maskUrl ? layer.src : b64 };
+      }
+      return layer;
+    }),
+  );
+
+  const layerElements = buildLayerImageElements(resolvedLayers, faceSide);
+  const combined = compositeMaskSvg(guillocheMaskUrl, layerElements);
+  return toSvgDataUrl(combined);
 }
 
 export function resolveHoloMasks({
@@ -200,10 +317,6 @@ export function resolveHoloMasks({
   if (!guillocheMaskUrl && activeLayerMasks.length === 0) return undefined;
   if (guillocheMaskUrl && activeLayerMasks.length === 0)
     return guillocheMaskUrl;
-  if (!guillocheMaskUrl && activeLayerMasks.length === 1) {
-    const single = activeLayerMasks[0];
-    return single.startsWith("<svg") ? toSvgDataUrl(single) : single;
-  }
 
   const layerElements = buildLayerImageElements(holoLayers, faceSide);
   const combined = compositeMaskSvg(guillocheMaskUrl, layerElements);

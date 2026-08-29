@@ -1,26 +1,27 @@
-import { styled, alpha } from "@mui/material/styles";
-import { SOLARIZED_BASE } from "../../../tokens/theme";
+import { styled } from "@mui/material/styles";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
 
-export const CardFrontContainer = styled("div")({
+export const CardFrontContainer = styled("div")(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
   height: "100%",
   width: "100%",
-  padding: "10px 14px",
+  padding: theme.spacing(1.25, 1.75),
   boxSizing: "border-box",
   position: "relative",
   zIndex: 10,
   userSelect: "none",
-});
+}));
 
 export const SchoolHeaderRow = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   width: "100%",
-  paddingBottom: "6px",
-  borderBottom: `1px solid ${alpha(SOLARIZED_BASE.base3, 0.14)}`,
+  paddingBottom: theme.spacing(0.75),
+  borderBottom: `1px solid ${theme.palette.divider}`,
   gap: theme.spacing(1),
 }));
 
@@ -28,43 +29,37 @@ export const SchoolBrandingHolder = styled("div")(({ theme }) => ({
   display: "inline-flex",
   alignItems: "center",
   gap: theme.spacing(1),
-  maxWidth: "65%",
+  maxWidth: "55%",
+  height: "40px",
   overflow: "hidden",
 }));
 
-export const SchoolLogoImg = styled("img")({
-  height: "24px",
-  maxWidth: "110px",
-  objectFit: "contain",
-  display: "block",
-  filter: `drop-shadow(0 1px 3px ${alpha(SOLARIZED_BASE.base03, 0.4)})`,
-});
-
 export const SchoolFallbackText = styled("span")(({ theme }) => ({
-  fontSize: "0.85rem",
-  fontWeight: 900,
-  letterSpacing: "0.8px",
+  fontSize: "1rem",
+  fontWeight: 800,
+  letterSpacing: "0.04em",
   textTransform: "uppercase",
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
   color: theme.palette.text.primary,
-  textShadow: `0 1px 4px ${alpha(SOLARIZED_BASE.base03, 0.6)}`,
 }));
 
-export const CohortBadge = styled("div")({
+export const CohortValidityContainer = styled("div")(({ theme }) => ({
   display: "inline-flex",
   alignItems: "center",
-});
+  gap: theme.spacing(0.75),
+  flexShrink: 0,
+}));
 
 export const CardMainBody = styled("div")(({ theme }) => ({
   display: "grid",
-  gridTemplateColumns: "100px 1fr",
+  gridTemplateColumns: "130px 1fr",
   gap: theme.spacing(1.5),
   alignItems: "center",
   flex: 1,
-  paddingTop: "6px",
-  paddingBottom: "4px",
+  paddingTop: theme.spacing(0.75),
+  paddingBottom: theme.spacing(0.5),
 }));
 
 export const AvatarCol = styled("div")({
@@ -74,8 +69,8 @@ export const AvatarCol = styled("div")({
   justifyContent: "center",
   position: "relative",
   flexShrink: 0,
-  width: "96px",
-  height: "112px",
+  width: "128px",
+  height: "156px",
   overflow: "hidden",
   "& .MuiAvatar-root, & .biometric-avatar-container": {
     width: "100%",
@@ -83,13 +78,23 @@ export const AvatarCol = styled("div")({
   },
 });
 
-export const FieldsCol = styled("div")({
+export const FieldsList = styled(List)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  gap: "6px",
+  gap: theme.spacing(0.75),
   width: "100%",
   minWidth: 0,
+  padding: 0,
+  margin: 0,
+}));
+
+export const FieldListItem = styled(ListItem)({
+  padding: 0,
+  margin: 0,
+  width: "100%",
 });
+
+export const FieldsCol = FieldsList;
 
 export const CardBackContainer = styled("div")({
   display: "flex",
@@ -108,7 +113,7 @@ export const BackMainArea = styled("div")(({ theme }) => ({
   gridTemplateColumns: "140px 1fr",
   gap: theme.spacing(1),
   alignItems: "center",
-  padding: "12px 14px 4px 14px",
+  padding: theme.spacing(1.5, 1.75, 0.5, 1.75),
   flex: 1,
 }));
 
@@ -123,19 +128,19 @@ export const BackLeftContactCol = styled("div")({
 
 export const BackRightContentCol = styled("div")({
   display: "flex",
-  flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  gap: "6px",
-  textAlign: "center",
+  height: "70px",
+  width: "100%",
+  position: "relative",
 });
 
-export const FullWidthMrzHolder = styled("div")({
+export const FullWidthMrzHolder = styled("div")(({ theme }) => ({
   width: "100%",
-  padding: "0 10px 8px 10px",
+  padding: theme.spacing(0, 1.25, 1, 1.25),
   boxSizing: "border-box",
   "& pre": {
     margin: 0,
     width: "100%",
   },
-});
+}));
