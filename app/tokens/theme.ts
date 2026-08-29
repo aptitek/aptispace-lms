@@ -1,4 +1,24 @@
 import { createTheme, type ThemeOptions } from "@mui/material/styles";
+import {
+  M3_EXPRESSIVE_CATALOG,
+  M3_SCALE_RADIUS_MAP,
+  resolveM3ShapeStyle,
+} from "../components/atoms/Avatar/m3Shapes";
+
+declare module "@mui/material/styles" {
+  interface Shape {
+    borderRadius: number | string;
+    m3: typeof M3_EXPRESSIVE_CATALOG;
+    scale: typeof M3_SCALE_RADIUS_MAP;
+    resolve: typeof resolveM3ShapeStyle;
+  }
+  interface ShapeOptions {
+    borderRadius?: number | string;
+    m3?: typeof M3_EXPRESSIVE_CATALOG;
+    scale?: typeof M3_SCALE_RADIUS_MAP;
+    resolve?: typeof resolveM3ShapeStyle;
+  }
+}
 
 // Solarized canonical color spectrum
 export const SOLARIZED_BASE = {
@@ -25,6 +45,54 @@ export const EU_FLAG_COLORS = {
   blue: "#003399", // EU Reflex Blue field
   gold: "#ffcc00", // EU Yellow 12-stars circle & country code
 } as const;
+
+export const M3_SHAPE_SCALE = {
+  none: 0,
+  extraSmall: 4,
+  small: 8,
+  medium: 12,
+  large: 16,
+  extraLarge: 28,
+  full: 9999,
+} as const;
+
+export type M3ShapeToken = keyof typeof M3_SHAPE_SCALE;
+
+const m3TooltipDarkOverrides = {
+  tooltip: {
+    backgroundColor: SOLARIZED_BASE.base2,
+    color: SOLARIZED_BASE.base03,
+    fontSize: "0.75rem",
+    fontWeight: 500,
+    lineHeight: "1rem",
+    borderRadius: 8,
+    padding: "6px 10px",
+    boxShadow: "0 4px 14px rgba(0, 0, 0, 0.35)",
+    border: `1px solid rgba(88, 110, 117, 0.3)`,
+    backdropFilter: "blur(8px)",
+  },
+  arrow: {
+    color: SOLARIZED_BASE.base2,
+  },
+};
+
+const m3TooltipLightOverrides = {
+  tooltip: {
+    backgroundColor: SOLARIZED_BASE.base02,
+    color: SOLARIZED_BASE.base3,
+    fontSize: "0.75rem",
+    fontWeight: 500,
+    lineHeight: "1rem",
+    borderRadius: 8,
+    padding: "6px 10px",
+    boxShadow: "0 4px 14px rgba(0, 0, 0, 0.2)",
+    border: `1px solid rgba(88, 110, 117, 0.2)`,
+    backdropFilter: "blur(8px)",
+  },
+  arrow: {
+    color: SOLARIZED_BASE.base02,
+  },
+};
 
 export const darkThemeOptions: ThemeOptions = {
   palette: {
@@ -103,6 +171,32 @@ export const darkThemeOptions: ThemeOptions = {
     borderRadius: 12,
   },
   components: {
+    MuiTooltip: {
+      defaultProps: {
+        arrow: true,
+      },
+      styleOverrides: m3TooltipDarkOverrides,
+    },
+    MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          textTransform: "none",
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          fontWeight: 600,
+        },
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: {
         body: {
@@ -153,20 +247,20 @@ export const lightThemeOptions: ThemeOptions = {
     warning: {
       main: SOLARIZED_BASE.yellow,
       light: "#d4a400",
-      dark: "#8f6c00",
+      dark: "#8f6b00",
       contrastText: SOLARIZED_BASE.base03,
     },
     info: {
-      main: SOLARIZED_BASE.violet,
-      light: "#8a8ed4",
-      dark: "#53579c",
+      main: SOLARIZED_BASE.cyan,
+      light: "#4fb3ab",
+      dark: "#1f756f",
       contrastText: SOLARIZED_BASE.base3,
     },
     success: {
       main: SOLARIZED_BASE.green,
-      light: "#a1b700",
-      dark: "#687a00",
-      contrastText: SOLARIZED_BASE.base03,
+      light: "#9cb01f",
+      dark: "#687500",
+      contrastText: SOLARIZED_BASE.base3,
     },
     background: {
       default: SOLARIZED_BASE.base3,
@@ -175,21 +269,19 @@ export const lightThemeOptions: ThemeOptions = {
     text: {
       primary: SOLARIZED_BASE.base00,
       secondary: SOLARIZED_BASE.base01,
-      disabled: SOLARIZED_BASE.base1,
+      disabled: "#a0b0b5",
     },
     divider: "rgba(88, 110, 117, 0.2)",
     action: {
-      active: SOLARIZED_BASE.base01,
-      hover: "rgba(88, 110, 117, 0.08)",
-      selected: "rgba(88, 110, 117, 0.16)",
-      disabled: "rgba(88, 110, 117, 0.38)",
-      disabledBackground: "rgba(238, 232, 213, 0.5)",
-      focus: "rgba(38, 139, 210, 0.25)",
+      hover: "rgba(0, 43, 54, 0.04)",
+      selected: "rgba(0, 43, 54, 0.08)",
+      disabled: "rgba(0, 43, 54, 0.26)",
+      disabledBackground: "rgba(0, 43, 54, 0.12)",
     },
   },
   typography: {
     fontFamily:
-      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     h1: { fontWeight: 700, letterSpacing: "-0.02em" },
     h2: { fontWeight: 700, letterSpacing: "-0.015em" },
     h3: { fontWeight: 600, letterSpacing: "-0.01em" },
@@ -204,8 +296,37 @@ export const lightThemeOptions: ThemeOptions = {
   },
   shape: {
     borderRadius: 12,
+    m3: M3_EXPRESSIVE_CATALOG,
+    scale: M3_SCALE_RADIUS_MAP,
+    resolve: resolveM3ShapeStyle,
   },
   components: {
+    MuiTooltip: {
+      defaultProps: {
+        arrow: true,
+      },
+      styleOverrides: m3TooltipLightOverrides,
+    },
+    MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          textTransform: "none",
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          fontWeight: 600,
+        },
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: {
         body: {

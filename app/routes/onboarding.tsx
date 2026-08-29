@@ -3,6 +3,11 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, type ActionFunctionArgs } from "react-router";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
 import AuthLayout from "~/components/templates/AuthLayout/AuthLayout";
 import OnboardingCard from "~/components/organisms/OnboardingCard/OnboardingCard";
 import EmailField from "~/components/molecules/EmailField/EmailField";
@@ -28,11 +33,7 @@ import {
   FormPanel,
   Title,
   FormRoot,
-  FormGroup,
   TwoColGrid,
-  Label,
-  Input,
-  Select,
   PreviewPanel,
   ActionButton,
   SubmitButton,
@@ -193,12 +194,12 @@ export default function OnboardingPage() {
 
   return (
     <AuthLayout>
-      <OnboardingContainer>
+      <OnboardingContainer elevation={0}>
         <FormPanel>
-          <div>
+          <Box>
             <Title>
               <BadgeIcon className="badge-icon" />
-              {t("title", "Cadet Onboarding")}
+              <span>{t("title", "Cadet Onboarding")}</span>
             </Title>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               {t(
@@ -206,12 +207,13 @@ export default function OnboardingPage() {
                 "Configure your official ISO/IEC 7810 ID-1 identification card and start your academy journey.",
               )}
             </Typography>
-          </div>
+          </Box>
 
           <FormRoot onSubmit={handleSubmit}>
-            <FormGroup>
-              <Label>
+            <FormControl fullWidth size="small">
+              <InputLabel id="school-select-label">
                 <Box
+                  component="span"
                   sx={{
                     display: "inline-flex",
                     alignItems: "center",
@@ -221,108 +223,116 @@ export default function OnboardingPage() {
                   <SchoolIcon sx={{ fontSize: 16 }} />
                   <span>Enrolled Academy / School</span>
                 </Box>
-              </Label>
+              </InputLabel>
               <Select
+                labelId="school-select-label"
                 value={selectedSchool.id}
-                onChange={(e) => handleSchoolChange(e.target.value)}
+                label="Enrolled Academy / School"
+                onChange={(e) => handleSchoolChange(e.target.value as string)}
               >
                 {AVAILABLE_SCHOOLS.map((sch) => (
-                  <option key={sch.id} value={sch.id}>
+                  <MenuItem key={sch.id} value={sch.id}>
                     {sch.name} (@{sch.emailDomain})
-                  </option>
+                  </MenuItem>
                 ))}
               </Select>
-            </FormGroup>
+            </FormControl>
 
             <TwoColGrid>
-              <FormGroup>
-                <Label>First Name</Label>
-                <Input
-                  type="text"
-                  value={profile.firstName}
-                  onChange={(e) => handleFirstNameChange(e.target.value)}
-                  required
-                />
-              </FormGroup>
+              <TextField
+                label="First Name"
+                value={profile.firstName}
+                onChange={(e) => handleFirstNameChange(e.target.value)}
+                size="small"
+                required
+                fullWidth
+              />
 
-              <FormGroup>
-                <Label>Family Name</Label>
-                <Input
-                  type="text"
-                  value={profile.familyName}
-                  onChange={(e) => handleFamilyNameChange(e.target.value)}
-                  required
-                />
-              </FormGroup>
+              <TextField
+                label="Family Name"
+                value={profile.familyName}
+                onChange={(e) => handleFamilyNameChange(e.target.value)}
+                size="small"
+                required
+                fullWidth
+              />
             </TwoColGrid>
 
-            <FormGroup>
-              <EmailField
-                name="email"
-                label={t("form.cadetEmail", "Institutional Academy Email")}
-                domain={selectedSchool.emailDomain}
-                value={profile.email}
-                onEmailChange={(composite) =>
-                  setProfile((prev) => ({ ...prev, email: composite }))
-                }
-                variant="outlined"
-                size="medium"
-                required
-                showDomainLock={true}
-                helperText={`Auto-computed according to ${selectedSchool.name} format.`}
-              />
-            </FormGroup>
+            <EmailField
+              name="email"
+              label={t("form.cadetEmail", "Institutional Academy Email")}
+              domain={selectedSchool.emailDomain}
+              value={profile.email}
+              onEmailChange={(composite) =>
+                setProfile((prev) => ({ ...prev, email: composite }))
+              }
+              variant="outlined"
+              size="medium"
+              required
+              showDomainLock={true}
+              helperText={`Auto-computed according to ${selectedSchool.name} format.`}
+            />
 
             <TwoColGrid>
-              <FormGroup>
-                <Label>{t("form.callSign", "Call Sign")}</Label>
-                <Input
-                  type="text"
-                  value={profile.callSign}
-                  onChange={(e) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      callSign: e.target.value,
-                    }))
-                  }
-                />
-              </FormGroup>
+              <TextField
+                label={t("form.callSign", "Call Sign")}
+                value={profile.callSign}
+                onChange={(e) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    callSign: e.target.value,
+                  }))
+                }
+                size="small"
+                fullWidth
+              />
 
-              <FormGroup>
-                <Label>{t("form.clearance", "Clearance Level")}</Label>
+              <FormControl fullWidth size="small">
+                <InputLabel id="clearance-label">
+                  {t("form.clearance", "Clearance Level")}
+                </InputLabel>
                 <Select
+                  labelId="clearance-label"
+                  label={t("form.clearance", "Clearance Level")}
                   value={profile.clearanceLevel}
                   onChange={(e) =>
                     setProfile((prev) => ({
                       ...prev,
-                      clearanceLevel: e.target.value,
+                      clearanceLevel: e.target.value as string,
                     }))
                   }
                 >
                   {CLEARANCES.map((opt) => (
-                    <option key={opt} value={opt}>
+                    <MenuItem key={opt} value={opt}>
                       {opt}
-                    </option>
+                    </MenuItem>
                   ))}
                 </Select>
-              </FormGroup>
+              </FormControl>
             </TwoColGrid>
 
-            <FormGroup>
-              <Label>{t("form.division", "Specialization / Division")}</Label>
+            <FormControl fullWidth size="small">
+              <InputLabel id="division-label">
+                {t("form.division", "Specialization / Division")}
+              </InputLabel>
               <Select
+                labelId="division-label"
+                label={t("form.division", "Specialization / Division")}
                 value={profile.division}
                 onChange={(e) =>
-                  setProfile((prev) => ({ ...prev, division: e.target.value }))
+                  setProfile((prev) => ({
+                    ...prev,
+                    division: e.target.value as string,
+                  }))
                 }
               >
                 {DIVISIONS.map((opt) => (
-                  <option key={opt} value={opt}>
+                  <MenuItem key={opt} value={opt}>
                     {opt}
-                  </option>
+                  </MenuItem>
                 ))}
               </Select>
-            </FormGroup>
+            </FormControl>
 
             <Box
               sx={{
@@ -340,14 +350,17 @@ export default function OnboardingPage() {
               </span>
             </Box>
 
-            <SubmitButton type="submit">
-              <CheckCircleIcon />
+            <SubmitButton
+              type="submit"
+              variant="contained"
+              startIcon={<CheckCircleIcon />}
+            >
               {t("form.submit", "Issue Identification Credential")}
             </SubmitButton>
           </FormRoot>
         </FormPanel>
 
-        <PreviewPanel>
+        <PreviewPanel elevation={0}>
           <Box
             sx={{
               width: "100%",
@@ -370,6 +383,8 @@ export default function OnboardingPage() {
             <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
               <ActionButton
                 type="button"
+                variant="outlined"
+                size="small"
                 onClick={() =>
                   setOrientation((prev) =>
                     prev === "landscape" ? "portrait" : "landscape",

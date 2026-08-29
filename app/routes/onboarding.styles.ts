@@ -1,6 +1,10 @@
-import { styled, type Theme } from "@mui/material/styles";
+import { styled, alpha } from "@mui/material/styles";
+import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 
-export const OnboardingContainer = styled("div")(({ theme }) => ({
+export const OnboardingContainer = styled(Paper)(({ theme }) => ({
   display: "grid",
   gridTemplateColumns: "1fr 1.25fr",
   gap: theme.spacing(4),
@@ -21,13 +25,13 @@ export const OnboardingContainer = styled("div")(({ theme }) => ({
   },
 }));
 
-export const FormPanel = styled("div")(({ theme }) => ({
+export const FormPanel = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   gap: theme.spacing(2.5),
 }));
 
-export const Title = styled("h1")(({ theme }) => ({
+export const Title = styled(Typography)(({ theme }) => ({
   margin: 0,
   fontSize: "1.65rem",
   fontWeight: 800,
@@ -48,72 +52,42 @@ export const FormRoot = styled("form")(({ theme }) => ({
   gap: theme.spacing(2),
 }));
 
-export const FormGroup = styled("div")(({ theme }) => ({
+export const FormGroup = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   gap: theme.spacing(0.75),
 }));
 
-export const TwoColGrid = styled("div")(({ theme }) => ({
+export const TwoColGrid = styled(Box)(({ theme }) => ({
   display: "grid",
   gridTemplateColumns: "1fr 1fr",
   gap: theme.spacing(1.5),
 }));
 
-export const Label = styled("label")(({ theme }) => ({
-  fontSize: "0.8rem",
-  fontWeight: 700,
-  color: theme.palette.text.secondary,
-  textTransform: "uppercase",
-  letterSpacing: "0.5px",
-}));
-
-const formControlBase = (theme: Theme) => ({
-  padding: "10px 14px",
-  borderRadius: "8px",
-  backgroundColor: theme.palette.background.default,
-  border: `1px solid ${theme.palette.divider}`,
-  color: theme.palette.text.primary,
-  fontSize: "0.95rem",
-  outline: "none",
-  transition: "all 0.2s ease",
-  "&:focus": {
-    borderColor: theme.palette.primary.light,
-    boxShadow: `0 0 0 2px ${theme.palette.action.focus}`,
-  },
-});
-
-export const Input = styled("input")(({ theme }) => formControlBase(theme));
-
-export const Select = styled("select")(({ theme }) => ({
-  ...formControlBase(theme),
-  cursor: "pointer",
-}));
-
-export const PreviewPanel = styled("div")(({ theme }) => ({
+export const PreviewPanel = styled(Paper)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
   gap: theme.spacing(2.5),
   padding: theme.spacing(3),
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: alpha(theme.palette.background.default, 0.6),
   borderRadius: "16px",
   border: `1px dashed ${theme.palette.divider}`,
 }));
 
-export const ActionButton = styled("button")(({ theme }) => ({
+export const ActionButton = styled(Button)(({ theme }) => ({
   display: "inline-flex",
   alignItems: "center",
   gap: theme.spacing(0.75),
-  padding: "8px 16px",
+  padding: "6px 14px",
   borderRadius: "8px",
   border: `1px solid ${theme.palette.divider}`,
   backgroundColor: theme.palette.action.hover,
   color: theme.palette.primary.light,
   fontWeight: 700,
   fontSize: "0.825rem",
-  cursor: "pointer",
+  textTransform: "none",
   transition: "all 0.2s ease",
   "&:hover": {
     backgroundColor: theme.palette.action.selected,
@@ -122,7 +96,7 @@ export const ActionButton = styled("button")(({ theme }) => ({
   },
 }));
 
-export const SubmitButton = styled("button")(({ theme }) => ({
+export const SubmitButton = styled(Button)(({ theme }) => ({
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
@@ -130,13 +104,12 @@ export const SubmitButton = styled("button")(({ theme }) => ({
   width: "100%",
   padding: "12px 20px",
   borderRadius: "10px",
-  border: "none",
   backgroundColor: theme.palette.primary.light,
   color: theme.palette.background.default,
   fontWeight: 800,
   fontSize: "0.95rem",
   letterSpacing: "0.5px",
-  cursor: "pointer",
+  textTransform: "none",
   marginTop: theme.spacing(1),
   boxShadow: `0 4px 14px ${theme.palette.action.focus}`,
   transition: "all 0.2s ease",

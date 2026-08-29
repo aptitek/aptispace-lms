@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import TextField from "~/components/atoms/TextField/TextField";
+import TextField from "@mui/material/TextField";
 
 const meta = {
   title: "Atoms/TextField",
@@ -8,18 +8,17 @@ const meta = {
   argTypes: {
     variant: {
       control: "radio",
-      options: ["filled", "outlined"],
+      options: ["filled", "outlined", "standard"],
     },
     size: {
       control: "select",
-      options: ["small", "medium", "large"],
+      options: ["small", "medium"],
     },
     label: { control: "text" },
     placeholder: { control: "text" },
     disabled: { control: "boolean" },
     error: { control: "boolean" },
-    errorText: { control: "text" },
-    supportingText: { control: "text" },
+    helperText: { control: "text" },
   },
 } satisfies Meta<typeof TextField>;
 
@@ -49,7 +48,7 @@ export const WithError: Story = {
     label: "Access Code",
     variant: "outlined",
     error: true,
-    errorText: "Invalid security clearance token",
+    helperText: "Invalid security clearance token",
     defaultValue: "000-XX",
   },
 };

@@ -4,6 +4,8 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import EditableAvatar from "../app/components/molecules/EditableAvatar/EditableAvatar";
 
+import { ALL_35_M3_SHAPES } from "../app/components/atoms/Avatar";
+
 const meta: Meta<typeof EditableAvatar> = {
   title: "Molecules/EditableAvatar",
   component: EditableAvatar,
@@ -12,7 +14,7 @@ const meta: Meta<typeof EditableAvatar> = {
     docs: {
       description: {
         component:
-          "Material Design 3 Avatar with Image-Only Click-to-Edit Modal mode, on-avatar instant reset badge, drag-and-drop, clipboard paste, URL input, and read-only normal avatar support.",
+          "Material Design 3 Avatar with Image-Only Click-to-Edit Modal mode, on-avatar instant reset badge, drag-and-drop, clipboard paste, URL input, full 35 Expressive Shapes catalog support, and read-only normal avatar support.",
       },
     },
   },
@@ -26,7 +28,19 @@ const meta: Meta<typeof EditableAvatar> = {
     },
     shape: {
       control: "select",
-      options: ["circular", "rounded", "square", "biometric"],
+      options: [
+        ...ALL_35_M3_SHAPES,
+        "none",
+        "extra-small",
+        "small",
+        "medium",
+        "large",
+        "extra-large",
+        "full",
+        "cut",
+        "asymmetric",
+        "biometric",
+      ],
       description: "MD3 Avatar shape preset",
     },
     size: {

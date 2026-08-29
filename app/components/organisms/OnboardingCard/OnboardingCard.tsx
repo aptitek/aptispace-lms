@@ -1,12 +1,14 @@
 import { useState, useMemo, useEffect, forwardRef } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import Chip from "@mui/material/Chip";
+import { alpha } from "@mui/material/styles";
+import { SOLARIZED_BASE } from "../../../tokens/theme";
 import IdCard from "../../molecules/IdCard/IdCard";
 import EditableAvatar from "../../molecules/EditableAvatar/EditableAvatar";
-import TextField from "../../atoms/TextField/TextField";
 import EmailField from "../../molecules/EmailField/EmailField";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
-import "@material/web/chips/assist-chip.js";
 import type { GuillocheVariant } from "../../atoms/Guilloche/Guilloche.types";
 import type {
   OnboardingCardProps,
@@ -210,7 +212,20 @@ function CardFrontFace({
         </SchoolBrandingHolder>
 
         <CohortBadge data-testid="cohort-badge">
-          <md-assist-chip label={cohortName} />
+          <Chip
+            label={cohortName}
+            size="small"
+            sx={{
+              height: 20,
+              fontSize: "0.68rem",
+              fontWeight: 700,
+              borderRadius: "6px",
+              bgcolor: alpha(SOLARIZED_BASE.base03, 0.4),
+              border: `1px solid ${alpha(SOLARIZED_BASE.base3, 0.2)}`,
+              color: "text.primary",
+              "& .MuiChip-label": { px: 0.75 },
+            }}
+          />
         </CohortBadge>
       </SchoolHeaderRow>
 
@@ -238,8 +253,9 @@ function CardFrontFace({
             placeholder="First name"
             size="small"
             variant="filled"
-            onValueChange={onFirstNameChange}
-            testId="input-firstname"
+            onChange={(e) => onFirstNameChange(e.target.value)}
+            slotProps={{ htmlInput: { "data-testid": "input-firstname" } }}
+            fullWidth
           />
 
           <TextField
@@ -250,8 +266,9 @@ function CardFrontFace({
             placeholder="Family name"
             size="small"
             variant="filled"
-            onValueChange={onFamilyNameChange}
-            testId="input-familyname"
+            onChange={(e) => onFamilyNameChange(e.target.value)}
+            slotProps={{ htmlInput: { "data-testid": "input-familyname" } }}
+            fullWidth
           />
 
           <EmailField

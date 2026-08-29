@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import BiometricAvatar from "~/components/atoms/BiometricAvatar/BiometricAvatar";
+import Avatar from "~/components/atoms/Avatar/Avatar";
 import type { IdCardOrientation } from "~/components/molecules/IdCard/IdCard.types";
 import { OnboardingCard } from "~/components/organisms/OnboardingCard/OnboardingCard";
 import type {
@@ -50,7 +50,7 @@ export function CardFrontContent({ profile, orientation }: CardFrontProps) {
         }}
       >
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
-          <BiometricAvatar
+          <Avatar
             src={profile.avatarUrl}
             alt={profile.name}
             showReticle={true}

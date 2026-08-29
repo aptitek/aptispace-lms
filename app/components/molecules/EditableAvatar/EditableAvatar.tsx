@@ -7,8 +7,11 @@ import {
   type ChangeEvent,
   type KeyboardEvent,
 } from "react";
-import Avatar from "@mui/material/Avatar";
-import Typography from "@mui/material/Typography";
+import MuiAvatar from "@mui/material/Avatar";
+import IconButton from "@mui/material/IconButton";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
 import PersonIcon from "@mui/icons-material/Person";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
@@ -17,7 +20,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import LinkIcon from "@mui/icons-material/Link";
 import CircularProgress from "@mui/material/CircularProgress";
 import Tooltip from "@mui/material/Tooltip";
-import BiometricAvatar from "../../atoms/BiometricAvatar/BiometricAvatar";
+import Avatar from "../../atoms/Avatar";
 import type {
   EditableAvatarProps,
   EditableAvatarShape,
@@ -39,9 +42,6 @@ import {
   HiddenFileInput,
   DragBadgeHint,
   HelperMessage,
-  ModalBackdrop,
-  ModalCard,
-  ModalHeader,
 } from "./EditableAvatar.styles";
 
 function getInitials(fullName?: string): string {
@@ -60,10 +60,11 @@ interface AvatarContentProps {
 function AvatarInner({ url, name, shape }: AvatarContentProps) {
   if (shape === "biometric") {
     return (
-      <BiometricAvatar
+      <Avatar
         src={url}
         alt={name || "Biometric Avatar"}
         showReticle={true}
+        shape="biometric"
         height="100%"
         width="100%"
       />
@@ -72,9 +73,9 @@ function AvatarInner({ url, name, shape }: AvatarContentProps) {
 
   const initials = getInitials(name);
   return (
-    <Avatar src={url} alt={name || "Avatar"}>
+    <MuiAvatar src={url} alt={name || "Avatar"}>
       {!url ? initials ? initials : <PersonIcon /> : null}
-    </Avatar>
+    </MuiAvatar>
   );
 }
 
@@ -232,26 +233,51 @@ interface SimpleModalProps {
 }
 
 function SimpleEditModal({ isOpen, onClose, children }: SimpleModalProps) {
-  if (!isOpen) return null;
-
   return (
-    <ModalBackdrop onClick={onClose} role="dialog" aria-modal="true">
-      <ModalCard onClick={(e) => e.stopPropagation()}>
-        <ModalHeader>
-          <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-            Edit Profile Avatar
-          </Typography>
-          <ActionIconButton
-            type="button"
-            onClick={onClose}
-            aria-label="Close edit avatar dialog"
-          >
-            <CloseIcon sx={{ fontSize: "18px" }} />
-          </ActionIconButton>
-        </ModalHeader>
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      maxWidth="xs"
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: "16px",
+            p: 1.5,
+            bgcolor: "background.paper",
+            backgroundImage: "none",
+            border: 1,
+            borderColor: "divider",
+          },
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          p: 1.5,
+          fontWeight: 800,
+          fontSize: "1rem",
+        }}
+      >
+        <span>Edit Profile Avatar</span>
+        <IconButton
+          onClick={onClose}
+          size="small"
+          aria-label="Close edit avatar dialog"
+          sx={{ color: "text.secondary" }}
+        >
+          <CloseIcon sx={{ fontSize: "18px" }} />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent
+        sx={{ p: 1.5, display: "flex", flexDirection: "column", gap: 1.5 }}
+      >
         {children}
-      </ModalCard>
-    </ModalBackdrop>
+      </DialogContent>
+    </Dialog>
   );
 }
 

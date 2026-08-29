@@ -76,14 +76,10 @@ export const AvatarCol = styled("div")({
   flexShrink: 0,
   width: "96px",
   height: "112px",
-  borderRadius: "10px",
   overflow: "hidden",
-  border: `1.5px solid ${alpha(SOLARIZED_BASE.base3, 0.35)}`,
-  boxShadow: `0 4px 12px ${alpha(SOLARIZED_BASE.base03, 0.35)}`,
   "& .MuiAvatar-root, & .biometric-avatar-container": {
     width: "100%",
     height: "100%",
-    borderRadius: "8px",
   },
 });
 

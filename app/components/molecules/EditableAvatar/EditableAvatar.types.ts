@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
+import type { AvatarShape } from "../../atoms/Avatar";
 
-export type EditableAvatarShape =
-  "circular" | "rounded" | "square" | "biometric";
+export type EditableAvatarShape = AvatarShape;
 
 export type EditableAvatarSize = "sm" | "md" | "lg" | "xl";
 

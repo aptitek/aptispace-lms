@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { styled } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useTranslation } from "react-i18next";
 import Logo from "../../atoms/Logo/Logo";
@@ -57,13 +59,13 @@ const HeaderRoot = styled("header", {
   };
 });
 
-const LeftSlot = styled("div")({
+const LeftSlot = styled(Box)({
   display: "flex",
   alignItems: "center",
   gap: "1rem",
 });
 
-const RightSlot = styled("div")(({ theme }) => ({
+const RightSlot = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: theme.spacing(1.5),
@@ -73,7 +75,7 @@ const RightSlot = styled("div")(({ theme }) => ({
   },
 }));
 
-const UserBadge = styled("div")(({ theme }) => ({
+const UserBadge = styled(Box)(({ theme }) => ({
   display: "inline-flex",
   alignItems: "center",
   gap: theme.spacing(1),
@@ -84,37 +86,6 @@ const UserBadge = styled("div")(({ theme }) => ({
   fontSize: "0.85rem",
   fontWeight: 500,
   color: theme.palette.text.primary,
-}));
-
-const LogoutButton = styled("button")(({ theme }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: theme.spacing(0.75),
-  padding: theme.spacing(0.75, 1.25),
-  border: `1px solid ${theme.palette.divider}`,
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: "transparent",
-  color: theme.palette.text.secondary,
-  cursor: "pointer",
-  fontSize: "0.825rem",
-  fontWeight: 600,
-  transition: theme.transitions.create(
-    ["background-color", "border-color", "color", "transform"],
-    { duration: theme.transitions.duration.shorter },
-  ),
-
-  "&:hover": {
-    backgroundColor: theme.palette.error.main,
-    borderColor: theme.palette.error.dark,
-    color: theme.palette.error.contrastText,
-    transform: "translateY(-1px)",
-  },
-
-  "&:focus-visible": {
-    outline: `2px solid ${theme.palette.primary.main}`,
-    outlineOffset: 2,
-  },
 }));
 
 export default function Header({
@@ -163,15 +134,17 @@ export default function Header({
         <LanguageToggle size="small" />
 
         {user && (
-          <LogoutButton
-            type="button"
+          <Button
+            variant="outlined"
+            color="inherit"
+            size="small"
             onClick={handleLogoutClick}
             aria-label={t("loginCard.logoutAria")}
             data-testid="header-logout-button"
+            startIcon={<LogoutIcon sx={{ fontSize: "1rem" }} />}
           >
-            <LogoutIcon sx={{ fontSize: "1rem" }} />
-            <span>{t("loginCard.logout")}</span>
-          </LogoutButton>
+            {t("loginCard.logout")}
+          </Button>
         )}
       </RightSlot>
     </HeaderRoot>

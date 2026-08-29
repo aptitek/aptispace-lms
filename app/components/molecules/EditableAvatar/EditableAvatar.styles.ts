@@ -1,4 +1,8 @@
 import { styled, alpha } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import { resolveM3ShapeStyle } from "../../atoms/Avatar";
 import type {
   EditableAvatarShape,
   EditableAvatarSize,
@@ -7,7 +11,13 @@ import type {
 function calculateAvatarDimensions(
   sizePreset: EditableAvatarSize = "md",
   shapePreset: EditableAvatarShape = "circular",
-): { dimension: string; radius: string; ratio: string; fontSize: string } {
+): {
+  dimension: string;
+  radius: string;
+  ratio: string;
+  fontSize: string;
+  clipPath?: string;
+} {
   const isBiometric = shapePreset === "biometric";
 
   const sizeMap: Record<
@@ -24,27 +34,21 @@ function calculateAvatarDimensions(
     ? sizeMap[sizePreset].biometric
     : sizeMap[sizePreset].standard;
 
-  let selectedRadius = "50%";
-  let selectedRatio = "1 / 1";
-
-  if (shapePreset === "rounded") {
-    selectedRadius = sizePreset === "sm" ? "10px" : "16px";
-  } else if (shapePreset === "square") {
-    selectedRadius = "4px";
-  } else if (isBiometric) {
-    selectedRadius = "10px";
-    selectedRatio = "35 / 45";
-  }
+  const shapeStyle = resolveM3ShapeStyle(shapePreset);
+  const selectedRatio = isBiometric ? "35 / 45" : "1 / 1";
 
   return {
     dimension: selectedDimension,
-    radius: selectedRadius,
+    radius: shapeStyle.borderRadius,
+    clipPath: shapeStyle.clipPath,
     ratio: selectedRatio,
     fontSize: sizeMap[sizePreset].fontSize,
   };
 }
 
-export const EditableAvatarRoot = styled("div")<{
+export const EditableAvatarRoot = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "isDisabled",
+})<{
   isDisabled?: boolean;
 }>(({ theme, isDisabled }) => ({
   display: "inline-flex",
@@ -66,7 +70,9 @@ export const LabelText = styled("label")(({ theme }) => ({
   justifyContent: "space-between",
 }));
 
-export const MainContainer = styled("div")<{
+export const MainContainer = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "hasPreview",
+})<{
   hasPreview?: boolean;
 }>(({ theme, hasPreview }) => ({
   display: "grid",
@@ -79,16 +85,20 @@ export const MainContainer = styled("div")<{
   },
 }));
 
-export const MD3AvatarContainer = styled("div")<{
+export const MD3AvatarContainer = styled(Box, {
+  shouldForwardProp: (prop) =>
+    prop !== "avatarShape" &&
+    prop !== "avatarSize" &&
+    prop !== "isInteractive" &&
+    prop !== "isDragging",
+})<{
   avatarShape?: EditableAvatarShape;
   avatarSize?: EditableAvatarSize;
   isInteractive?: boolean;
   isDragging?: boolean;
 }>(({ theme, avatarShape, avatarSize, isInteractive, isDragging }) => {
-  const { dimension, radius, ratio, fontSize } = calculateAvatarDimensions(
-    avatarSize,
-    avatarShape,
-  );
+  const { dimension, radius, clipPath, ratio, fontSize } =
+    calculateAvatarDimensions(avatarSize, avatarShape);
 
   return {
     position: "relative",
@@ -96,29 +106,23 @@ export const MD3AvatarContainer = styled("div")<{
     width: avatarShape === "biometric" ? "auto" : dimension,
     aspectRatio: ratio,
     borderRadius: radius,
+    clipPath,
+    WebkitClipPath: clipPath,
     flexShrink: 0,
     boxSizing: "border-box",
     cursor: isInteractive ? "pointer" : "default",
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    border: `1.5px ${isDragging ? "dashed" : "solid"} ${
-      isDragging
-        ? theme.palette.primary.light
-        : isInteractive
-          ? alpha(theme.palette.primary.main, 0.4)
-          : alpha(theme.palette.divider, 0.6)
-    }`,
-    boxShadow: isDragging
-      ? `0 0 16px ${alpha(theme.palette.primary.light, 0.4)}`
-      : isInteractive
-        ? `0 0 8px ${alpha(theme.palette.common.black, 0.2)}`
-        : "none",
-    transition: "all 0.2s ease-in-out",
+    border: clipPath
+      ? "none"
+      : `1px ${isDragging ? "dashed" : "solid"} ${
+          isDragging ? theme.palette.primary.main : theme.palette.divider
+        }`,
+    transition: theme.transitions.create(["border-color", "opacity"]),
     "&:hover": isInteractive
       ? {
-          borderColor: theme.palette.primary.light,
-          boxShadow: `0 0 14px ${alpha(theme.palette.primary.light, 0.3)}`,
+          borderColor: theme.palette.primary.main,
           "& .avatar-hover-overlay": {
             opacity: 1,
           },
@@ -128,33 +132,41 @@ export const MD3AvatarContainer = styled("div")<{
       width: "100%",
       height: "100%",
       borderRadius: radius,
+      clipPath,
+      WebkitClipPath: clipPath,
       fontSize,
       fontWeight: 700,
-      backgroundColor: alpha(theme.palette.primary.main, 0.2),
-      color: theme.palette.primary.light,
+      backgroundColor: theme.palette.action.selected,
+      color: theme.palette.primary.main,
     },
   };
 });
 
-export const AvatarHoverOverlay = styled("div")<{
+export const AvatarHoverOverlay = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "avatarShape" && prop !== "avatarSize",
+})<{
   avatarShape?: EditableAvatarShape;
   avatarSize?: EditableAvatarSize;
 }>(({ theme, avatarShape, avatarSize }) => {
-  const { radius } = calculateAvatarDimensions(avatarSize, avatarShape);
+  const { radius, clipPath } = calculateAvatarDimensions(
+    avatarSize,
+    avatarShape,
+  );
   return {
     position: "absolute",
     inset: 0,
     borderRadius: radius,
-    backgroundColor: alpha(theme.palette.background.default, 0.75),
-    backdropFilter: "blur(2px)",
+    clipPath,
+    WebkitClipPath: clipPath,
+    backgroundColor: alpha(theme.palette.background.paper, 0.85),
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     opacity: 0,
     transition: "opacity 0.2s ease",
-    color: theme.palette.primary.light,
-    fontSize: "0.65rem",
+    color: theme.palette.primary.main,
+    fontSize: "0.7rem",
     fontWeight: 700,
     textAlign: "center",
     padding: theme.spacing(0.5),
@@ -163,35 +175,26 @@ export const AvatarHoverOverlay = styled("div")<{
   };
 });
 
-export const AvatarResetBadge = styled("button")(({ theme }) => ({
+export const AvatarResetBadge = styled(IconButton)(({ theme }) => ({
   position: "absolute",
-  top: "-6px",
-  right: "-6px",
-  width: "22px",
-  height: "22px",
-  borderRadius: "50%",
+  top: -4,
+  right: -4,
+  width: 20,
+  height: 20,
   backgroundColor: theme.palette.background.paper,
-  border: `1.5px solid ${theme.palette.primary.light}`,
-  color: theme.palette.primary.light,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  cursor: "pointer",
-  boxShadow: `0 2px 6px ${alpha(theme.palette.common.black, 0.4)}`,
-  zIndex: 4,
+  border: `1px solid ${theme.palette.divider}`,
+  color: theme.palette.text.secondary,
   padding: 0,
-  transition: "all 0.15s ease",
+  zIndex: 4,
   "&:hover": {
-    backgroundColor: theme.palette.primary.light,
-    color: theme.palette.background.paper,
-    transform: "scale(1.15)",
-  },
-  "&:active": {
-    transform: "scale(0.95)",
+    backgroundColor: theme.palette.error.main,
+    color: theme.palette.error.contrastText,
   },
 }));
 
-export const UnifiedDropInputArea = styled("div")<{
+export const UnifiedDropInputArea = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "isDragging" && prop !== "hasError",
+})<{
   isDragging?: boolean;
   hasError?: boolean;
 }>(({ theme, isDragging, hasError }) => ({
@@ -199,35 +202,26 @@ export const UnifiedDropInputArea = styled("div")<{
   display: "flex",
   alignItems: "center",
   width: "100%",
-  borderRadius: "10px",
-  backgroundColor: isDragging
-    ? alpha(theme.palette.primary.main, 0.15)
-    : theme.palette.background.default,
-  border: `1.5px ${isDragging ? "dashed" : "solid"} ${
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: theme.palette.background.paper,
+  border: `1px ${isDragging ? "dashed" : "solid"} ${
     hasError
       ? theme.palette.error.main
       : isDragging
-        ? theme.palette.primary.light
+        ? theme.palette.primary.main
         : theme.palette.divider
   }`,
-  boxShadow: isDragging
-    ? `0 0 14px ${alpha(theme.palette.primary.light, 0.35)}`
-    : "none",
-  transition: "all 0.2s ease-in-out",
+  transition: theme.transitions.create(["border-color", "background-color"]),
   padding: theme.spacing(0.5, 0.75),
   boxSizing: "border-box",
   "&:focus-within": {
     borderColor: hasError
       ? theme.palette.error.main
-      : theme.palette.primary.light,
-    boxShadow: `0 0 0 2px ${alpha(
-      hasError ? theme.palette.error.main : theme.palette.primary.light,
-      0.2,
-    )}`,
+      : theme.palette.primary.main,
   },
 }));
 
-export const InputPrefixIconHolder = styled("div")(({ theme }) => ({
+export const InputPrefixIconHolder = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -253,14 +247,16 @@ export const TextInput = styled("input")(({ theme }) => ({
   },
 }));
 
-export const ActionsContainer = styled("div")(({ theme }) => ({
+export const ActionsContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: theme.spacing(0.5),
   flexShrink: 0,
 }));
 
-export const ActionIconButton = styled("button")<{
+export const ActionIconButton = styled(IconButton, {
+  shouldForwardProp: (prop) => prop !== "variantType",
+})<{
   variantType?: "primary" | "secondary" | "danger";
 }>(({ theme, variantType }) => {
   const getActionColor = () => {
@@ -301,7 +297,7 @@ export const HiddenFileInput = styled("input")({
   display: "none",
 });
 
-export const DragBadgeHint = styled("div")(({ theme }) => ({
+export const DragBadgeHint = styled(Box)(({ theme }) => ({
   position: "absolute",
   inset: 0,
   borderRadius: "8px",
@@ -318,7 +314,9 @@ export const DragBadgeHint = styled("div")(({ theme }) => ({
   zIndex: 3,
 }));
 
-export const HelperMessage = styled("div")<{
+export const HelperMessage = styled(Typography, {
+  shouldForwardProp: (prop) => prop !== "isError",
+})<{
   isError?: boolean;
 }>(({ theme, isError }) => ({
   fontSize: "0.75rem",
@@ -329,7 +327,7 @@ export const HelperMessage = styled("div")<{
   gap: theme.spacing(0.5),
 }));
 
-export const ModalBackdrop = styled("div")(({ theme }) => ({
+export const ModalBackdrop = styled(Box)(({ theme }) => ({
   position: "fixed",
   inset: 0,
   backgroundColor: alpha(theme.palette.common.black, 0.65),
@@ -341,20 +339,20 @@ export const ModalBackdrop = styled("div")(({ theme }) => ({
   padding: theme.spacing(2),
 }));
 
-export const ModalCard = styled("div")(({ theme }) => ({
+export const ModalCard = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   border: `1px solid ${theme.palette.divider}`,
-  borderRadius: "16px",
+  borderRadius: theme.shape.borderRadius,
   padding: theme.spacing(2.5),
   width: "100%",
   maxWidth: "460px",
-  boxShadow: `0 20px 40px ${alpha(theme.palette.common.black, 0.5)}, 0 0 24px ${alpha(theme.palette.action.focus, 0.4)}`,
+  boxShadow: theme.shadows[8],
   display: "flex",
   flexDirection: "column",
   gap: theme.spacing(2),
 }));
 
-export const ModalHeader = styled("div")(({ theme }) => ({
+export const ModalHeader = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",

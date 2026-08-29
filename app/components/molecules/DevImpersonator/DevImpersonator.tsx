@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { styled } from "@mui/material/styles";
+import { styled, alpha } from "@mui/material/styles";
+import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import ButtonBase from "@mui/material/ButtonBase";
+import Chip from "@mui/material/Chip";
 import { useTranslation } from "react-i18next";
 import RoleChip from "~/components/atoms/RoleChip/RoleChip";
 import {
@@ -15,25 +20,25 @@ export interface DevImpersonatorProps {
   loading?: boolean;
 }
 
-const DevContainer = styled("div")(({ theme }) => ({
+const DevContainer = styled(Paper)(({ theme }) => ({
   marginTop: theme.spacing(3),
   padding: theme.spacing(2),
   borderRadius: theme.shape.borderRadius,
   border: `1px dashed ${theme.palette.warning.main}`,
-  backgroundColor: theme.palette.action.hover,
+  backgroundColor: alpha(theme.palette.warning.main, 0.04),
   display: "flex",
   flexDirection: "column",
   gap: theme.spacing(1.5),
 }));
 
-const ToolHeader = styled("div")(({ theme }) => ({
+const ToolHeader = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   gap: theme.spacing(1),
 }));
 
-const HeaderTitle = styled("div")(({ theme }) => ({
+const HeaderTitle = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: theme.spacing(0.75),
@@ -48,31 +53,32 @@ const HeaderTitle = styled("div")(({ theme }) => ({
   },
 }));
 
-const ModeBadge = styled("span")(({ theme }) => {
-  const radius = Number(theme.shape.borderRadius) || 8;
-  return {
-    fontSize: "0.7rem",
-    padding: theme.spacing(0.2, 0.6),
-    borderRadius: radius * 0.5,
-    backgroundColor: theme.palette.warning.dark,
-    color: theme.palette.warning.contrastText,
-    fontWeight: 700,
-    fontFamily: "monospace",
-  };
-});
+const ModeBadge = styled(Chip)(({ theme }) => ({
+  height: 20,
+  fontSize: "0.7rem",
+  borderRadius: 4,
+  backgroundColor: theme.palette.warning.dark,
+  color: theme.palette.warning.contrastText,
+  fontWeight: 700,
+  fontFamily: "monospace",
+  "& .MuiChip-label": {
+    paddingLeft: 6,
+    paddingRight: 6,
+  },
+}));
 
-const PersonaList = styled("div")(({ theme }) => ({
+const PersonaList = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   gap: theme.spacing(1),
 }));
 
-const PersonaItem = styled("button")<{ isSelected?: boolean }>(({
-  theme,
-  isSelected,
-}) => {
+const PersonaItem = styled(ButtonBase, {
+  shouldForwardProp: (prop) => prop !== "isSelected",
+})<{ isSelected?: boolean }>(({ theme, isSelected }) => {
   const radius = Number(theme.shape.borderRadius) || 8;
   return {
+    width: "100%",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -91,7 +97,6 @@ const PersonaItem = styled("button")<{ isSelected?: boolean }>(({
         duration: theme.transitions.duration.shorter,
       },
     ),
-    outline: "none",
 
     "&:hover": {
       backgroundColor: theme.palette.action.hover,
@@ -106,13 +111,13 @@ const PersonaItem = styled("button")<{ isSelected?: boolean }>(({
   };
 });
 
-const PersonaDetails = styled("div")(({ theme }) => ({
+const PersonaDetails = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   gap: theme.spacing(0.25),
 }));
 
-const PersonaName = styled("div")(({ theme }) => ({
+const PersonaName = styled(Box)(({ theme }) => ({
   fontSize: "0.875rem",
   fontWeight: 600,
   color: theme.palette.text.primary,
@@ -121,12 +126,12 @@ const PersonaName = styled("div")(({ theme }) => ({
   gap: theme.spacing(1),
 }));
 
-const PersonaEmail = styled("div")(({ theme }) => ({
+const PersonaEmail = styled(Typography)(({ theme }) => ({
   fontSize: "0.75rem",
   color: theme.palette.text.secondary,
 }));
 
-const ActionIcon = styled("div")(({ theme }) => ({
+const ActionIcon = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   color: theme.palette.text.secondary,
@@ -148,13 +153,13 @@ export default function DevImpersonator({
   };
 
   return (
-    <DevContainer aria-label={t("devTool.ariaLabel")}>
+    <DevContainer elevation={0} aria-label={t("devTool.ariaLabel")}>
       <ToolHeader>
         <HeaderTitle>
           <BugReportIcon />
           <span>{t("devTool.title")}</span>
         </HeaderTitle>
-        <ModeBadge>{t("devTool.modeBadge")}</ModeBadge>
+        <ModeBadge size="small" label={t("devTool.modeBadge")} />
       </ToolHeader>
 
       <PersonaList role="group" aria-label={t("devTool.groupAriaLabel")}>
@@ -171,7 +176,6 @@ export default function DevImpersonator({
           return (
             <PersonaItem
               key={persona.id}
-              type="button"
               isSelected={isSelected}
               disabled={loading}
               onClick={() => handleSelect(persona)}
@@ -179,10 +183,10 @@ export default function DevImpersonator({
             >
               <PersonaDetails>
                 <PersonaName>
-                  {translatedName}
+                  <span>{translatedName}</span>
                   <RoleChip role={persona.role} label={translatedBadge} />
                 </PersonaName>
-                <PersonaEmail>{persona.email}</PersonaEmail>
+                <PersonaEmail variant="caption">{persona.email}</PersonaEmail>
               </PersonaDetails>
               <ActionIcon>
                 <ArrowForwardIcon />
