@@ -6,6 +6,7 @@ import type { Id1CardOrientation } from "~/components/molecules/Id1Card/Id1Card.
 export interface CadetProfile {
   id: string;
   name: string;
+  email?: string;
   callSign: string;
   division: string;
   clearanceLevel: string;
@@ -128,6 +129,23 @@ export function CardBackContent({ profile }: { profile: CadetProfile }) {
       >
         ISO/IEC 7810 ID-1 STANDARD
       </Typography>
+      {profile.email ? (
+        <Typography
+          variant="caption"
+          sx={{
+            fontFamily: "monospace",
+            color: "text.primary",
+            px: 1,
+            py: 0.25,
+            borderRadius: 1,
+            bgcolor: "action.hover",
+            border: 1,
+            borderColor: "divider",
+          }}
+        >
+          {profile.email}
+        </Typography>
+      ) : null}
       <Typography variant="caption" color="text.secondary">
         SEC: {profile.securityCode} • CLEARANCE {profile.clearanceLevel}
       </Typography>

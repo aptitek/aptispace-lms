@@ -40,6 +40,7 @@ export default defineConfig({
   test: {
     projects: [
       {
+        extends: true,
         test: {
           name: "unit",
           include: ["app/**/*.{test,spec}.{ts,tsx}"],

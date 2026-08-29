@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { useNavigate, type ActionFunctionArgs } from "react-router";
 import { styled, type Theme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -16,11 +16,36 @@ import {
   CardFrontContent,
   CardBackContent,
 } from "./onboarding.card";
+import FixedDomainEmailField from "~/components/molecules/FixedDomainEmailField/FixedDomainEmailField";
+import { validateFixedDomainEmail } from "~/utils/emailSecurity";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import BadgeIcon from "@mui/icons-material/Badge";
 import ScreenRotationIcon from "@mui/icons-material/ScreenRotation";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SecurityIcon from "@mui/icons-material/Security";
+
+export const CADET_FIXED_DOMAIN = "cadet.aptispace.io";
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData().catch(() => new FormData());
+  const rawEmail = String(formData.get("email") || "");
+  const validation = validateFixedDomainEmail(rawEmail, CADET_FIXED_DOMAIN);
+
+  if (!validation.isValid) {
+    return Response.json(
+      {
+        error: validation.error,
+        code: "UNAUTHORIZED_EMAIL_DOMAIN",
+      },
+      { status: 400 },
+    );
+  }
+
+  return Response.json({
+    success: true,
+    email: validation.fullEmail,
+  });
+}
 
 export function meta() {
   return [
@@ -205,6 +230,7 @@ export default function OnboardingPage() {
   const [profile, setProfile] = useState<CadetProfile>({
     id: "APTI-7810-9402",
     name: "Alex Mercer",
+    email: "alex.mercer@cadet.aptispace.io",
     callSign: "AETH-9042",
     division: "Orbital Flight Dynamics",
     clearanceLevel: "LEVEL-4 OMNI",
@@ -269,6 +295,24 @@ export default function OnboardingPage() {
                 value={profile.name}
                 onChange={(e) =>
                   setProfile({ ...profile, name: e.target.value })
+                }
+                required
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label>{t("form.cadetEmail", "Official Academy Email")}</Label>
+              <FixedDomainEmailField
+                name="email"
+                domain={CADET_FIXED_DOMAIN}
+                value={profile.email}
+                placeholder="cadet.username"
+                helperText={t(
+                  "form.emailHelp",
+                  `Domain is locked to @${CADET_FIXED_DOMAIN} for security.`,
+                )}
+                onEmailChange={(composite) =>
+                  setProfile((prev) => ({ ...prev, email: composite }))
                 }
                 required
               />
