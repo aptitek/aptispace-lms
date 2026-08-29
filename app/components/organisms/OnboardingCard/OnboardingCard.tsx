@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect, forwardRef } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Id1Card from "../../molecules/Id1Card/Id1Card";
+import IdCard from "../../molecules/IdCard/IdCard";
 import EditableAvatar from "../../molecules/EditableAvatar/EditableAvatar";
 import TextField from "../../atoms/TextField/TextField";
-import FixedDomainEmailField from "../../molecules/FixedDomainEmailField/FixedDomainEmailField";
+import EmailField from "../../molecules/EmailField/EmailField";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
 import "@material/web/chips/assist-chip.js";
 import type { GuillocheVariant } from "../../atoms/Guilloche/Guilloche.types";
@@ -254,7 +254,7 @@ function CardFrontFace({
             testId="input-familyname"
           />
 
-          <FixedDomainEmailField
+          <EmailField
             id="card-field-email"
             label="Institutional Email"
             domain={schoolDomain}
@@ -383,7 +383,7 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
     const guillocheVariant = resolveGuillocheVariant(holoVariant);
 
     return (
-      <Id1Card
+      <IdCard
         ref={ref}
         side={side}
         isFlipped={controlledFlipped}

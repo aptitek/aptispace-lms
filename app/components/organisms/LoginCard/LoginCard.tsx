@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { styled } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
-import BrandLogo from "~/components/atoms/BrandLogo/BrandLogo";
+import Logo from "~/components/atoms/Logo/Logo";
 import GitHubButton from "~/components/atoms/GitHubButton/GitHubButton";
-import DevImpersonationSelector from "~/components/molecules/DevImpersonationSelector/DevImpersonationSelector";
+import DevImpersonator from "~/components/molecules/DevImpersonator/DevImpersonator";
 import {
   loginWithGitHub,
   loginAsPersona,
@@ -123,7 +123,7 @@ export default function LoginCard({
   return (
     <CardContainer>
       <HeaderSection>
-        <BrandLogo size="medium" />
+        <Logo size="medium" />
         <DescriptionText>{t("loginCard.description")}</DescriptionText>
       </HeaderSection>
 
@@ -150,7 +150,7 @@ export default function LoginCard({
       </ActionSection>
 
       {showDevTool && (
-        <DevImpersonationSelector
+        <DevImpersonator
           onSelectPersona={handlePersonaSelect}
           loading={loading}
         />

@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import BiometricAvatar from "~/components/atoms/BiometricAvatar/BiometricAvatar";
-import type { Id1CardOrientation } from "~/components/molecules/Id1Card/Id1Card.types";
+import type { IdCardOrientation } from "~/components/molecules/IdCard/IdCard.types";
 import { OnboardingCard } from "~/components/organisms/OnboardingCard/OnboardingCard";
 import type {
   SchoolConfig,
@@ -27,7 +27,7 @@ export interface CadetProfile {
 
 interface CardFrontProps {
   profile: CadetProfile;
-  orientation: Id1CardOrientation;
+  orientation: IdCardOrientation;
 }
 
 export function CardFrontContent({ profile, orientation }: CardFrontProps) {

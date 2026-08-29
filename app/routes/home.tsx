@@ -1,6 +1,6 @@
 import { styled } from "@mui/material/styles";
 import { useLoaderData, type LoaderFunctionArgs } from "react-router";
-import HeaderBar from "~/components/organisms/HeaderBar/HeaderBar";
+import Header from "~/components/organisms/Header/Header";
 import Footer from "~/components/organisms/Footer/Footer";
 import { authGuard, type SessionPayload } from "~/utils/session.server";
 import { logout, type AuthUser } from "~/utils/auth";
@@ -96,11 +96,11 @@ export default function Home() {
 
   return (
     <PageRoot>
-      <HeaderBar
+      <Header
         mode="full"
         user={loaderData.user}
         onLogout={handleLogout}
-        data-testid="main-headerbar"
+        data-testid="main-header"
       />
 
       <MainWorkspace />

@@ -1,8 +1,8 @@
 import type {
-  Id1CardOrientation,
-  Id1CardSide,
-  Id1CardSize,
-} from "../../molecules/Id1Card/Id1Card.types";
+  IdCardOrientation,
+  IdCardSide,
+  IdCardSize,
+} from "../../molecules/IdCard/IdCard.types";
 
 export type OnboardingHoloVariant = "default" | "rainbow" | "cosmic" | "gold";
 
@@ -61,7 +61,7 @@ export interface OnboardingCardProps {
    * Active card side ("front" | "back")
    * @default "front"
    */
-  side?: Id1CardSide;
+  side?: IdCardSide;
   /**
    * Controlled 3D flipped state
    */
@@ -69,7 +69,7 @@ export interface OnboardingCardProps {
   /**
    * Callback fired when card side flips
    */
-  onFlip?: (side: Id1CardSide) => void;
+  onFlip?: (side: IdCardSide) => void;
   /**
    * Callback fired with boolean flipped state
    */
@@ -83,12 +83,12 @@ export interface OnboardingCardProps {
    * Card orientation
    * @default "landscape"
    */
-  orientation?: Id1CardOrientation;
+  orientation?: IdCardOrientation;
   /**
    * Card size preset
    * @default "responsive"
    */
-  size?: Id1CardSize;
+  size?: IdCardSize;
   /**
    * Holographic theme variant
    * @default "rainbow"

@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { styled } from "@mui/material/styles";
 import Galaxy from "~/components/atoms/Galaxy/Galaxy";
-import HeaderBar from "~/components/organisms/HeaderBar/HeaderBar";
+import Header from "~/components/organisms/Header/Header";
 import Footer from "~/components/organisms/Footer/Footer";
 
 export interface AuthLayoutProps {
@@ -64,7 +64,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         />
       </CanvasBackdrop>
 
-      <HeaderBar mode="subtle" />
+      <Header mode="subtle" />
 
       <ContentWrapper>{children}</ContentWrapper>
 

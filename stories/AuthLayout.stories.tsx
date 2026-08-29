@@ -12,7 +12,7 @@ const meta: Meta<typeof AuthLayout> = {
     docs: {
       description: {
         component:
-          "Full-viewport authentication template featuring dynamic Galaxy WebGL backdrop, subtle HeaderBar, centered content stage, and Footer.",
+          "Full-viewport authentication template featuring dynamic Galaxy WebGL backdrop, subtle Header, centered content stage, and Footer.",
       },
     },
   },
@@ -48,7 +48,7 @@ export const CustomContent: Story = {
           AptiSpace Portal
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Full screen template with Galaxy canvas background, HeaderBar, and
+          Full screen template with Galaxy canvas background, Header, and
           Footer.
         </Typography>
       </Box>

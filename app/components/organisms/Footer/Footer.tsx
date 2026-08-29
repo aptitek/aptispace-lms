@@ -1,6 +1,6 @@
 import { styled } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
-import CraftedByBadge from "~/components/atoms/CraftedByBadge/CraftedByBadge";
+import CraftedBy from "~/components/atoms/CraftedBy/CraftedBy";
 
 export interface FooterProps {
   className?: string;
@@ -76,7 +76,7 @@ export default function Footer({ className }: FooterProps) {
       <CopyrightText suppressHydrationWarning>
         {t("copyright", { year: currentYear })}
       </CopyrightText>
-      <CraftedByBadge size="small" />
+      <CraftedBy size="small" />
       <FooterRight>
         <SystemStatus>
           <StatusDot />

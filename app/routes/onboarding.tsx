@@ -5,16 +5,16 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import AuthLayout from "~/components/templates/AuthLayout/AuthLayout";
 import OnboardingCard from "~/components/organisms/OnboardingCard/OnboardingCard";
-import FixedDomainEmailField from "~/components/molecules/FixedDomainEmailField/FixedDomainEmailField";
+import EmailField from "~/components/molecules/EmailField/EmailField";
 import type {
   SchoolConfig,
   CohortConfig,
   OnboardingProfile,
 } from "~/components/organisms/OnboardingCard/OnboardingCard.types";
 import type {
-  Id1CardOrientation,
-  Id1CardSide,
-} from "~/components/molecules/Id1Card/Id1Card.types";
+  IdCardOrientation,
+  IdCardSide,
+} from "~/components/molecules/IdCard/IdCard.types";
 import { validateFixedDomainEmail } from "~/utils/emailSecurity";
 import { formatInstitutionalEmail } from "~/components/organisms/OnboardingCard/OnboardingCard.utils";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
@@ -143,8 +143,8 @@ export default function OnboardingPage() {
   });
 
   const [orientation, setOrientation] =
-    useState<Id1CardOrientation>("landscape");
-  const [side, setSide] = useState<Id1CardSide>("front");
+    useState<IdCardOrientation>("landscape");
+  const [side, setSide] = useState<IdCardSide>("front");
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -257,7 +257,7 @@ export default function OnboardingPage() {
             </TwoColGrid>
 
             <FormGroup>
-              <FixedDomainEmailField
+              <EmailField
                 name="email"
                 label={t("form.cadetEmail", "Institutional Academy Email")}
                 domain={selectedSchool.emailDomain}
