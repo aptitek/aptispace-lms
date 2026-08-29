@@ -1,10 +1,9 @@
 import { describe, it, expect } from "vitest";
 import Id1Card from "./Id1Card";
-import Id1CredentialLayout, { DEFAULT_CREDENTIAL } from "./Id1CredentialLayout";
-import { ISO_7810_ID1, ISO_19794_5_BIOMETRICS } from "./Id1Card.types";
+import { ISO_7810_ID1 } from "./Id1Card.types";
 import { getDimensions } from "./Id1Card.styles";
 
-describe("ISO/IEC 7810 ID-1 Card Component", () => {
+describe("ISO/IEC 7810 ID-1 Card Molecule", () => {
   it("exports Id1Card component and forwards ref properly", () => {
     expect(Id1Card).toBeDefined();
     expect(typeof Id1Card).toBe("object"); // forwardRef creates object
@@ -19,16 +18,6 @@ describe("ISO/IEC 7810 ID-1 Card Component", () => {
     expect(ISO_7810_ID1.aspectRatio).toBeCloseTo(1.5858, 3);
     expect(ISO_7810_ID1.aspectRatioPortrait).toBeCloseTo(0.6306, 3);
     expect(ISO_7810_ID1.nominalCornerRadiusMm).toBe(3.18);
-  });
-
-  it("conforms to ISO/IEC 19794-5:2011 Biometric Facial Image standards", () => {
-    expect(ISO_19794_5_BIOMETRICS.standard).toBe("ISO/IEC 19794-5:2011");
-    // Standard 35 mm x 45 mm biometric portrait dimensions
-    expect(ISO_19794_5_BIOMETRICS.photoWidthMm).toBe(35);
-    expect(ISO_19794_5_BIOMETRICS.photoHeightMm).toBe(45);
-    expect(ISO_19794_5_BIOMETRICS.aspectRatio).toBeCloseTo(35 / 45, 4);
-    expect(ISO_19794_5_BIOMETRICS.faceHeightMinRatio).toBe(0.7);
-    expect(ISO_19794_5_BIOMETRICS.faceHeightMaxRatio).toBe(0.8);
   });
 
   it("calculates accurate pixel dimensions for standard size presets", () => {
@@ -54,7 +43,6 @@ describe("ISO/IEC 7810 ID-1 Card Component", () => {
   });
 
   it("supports right-aligned chip position and custom rotation props", () => {
-    // Verifies prop typing and default configuration
     const defaultProps = {
       chipPosition: "left" as const,
       electronicsRotation: 0,
@@ -68,13 +56,5 @@ describe("ISO/IEC 7810 ID-1 Card Component", () => {
     };
     expect(rightRotatedProps.chipPosition).toBe("right");
     expect(rightRotatedProps.electronicsRotation).toBe(180);
-  });
-
-  it("exports Id1CredentialLayout and default credential template", () => {
-    expect(Id1CredentialLayout).toBeDefined();
-    expect(typeof Id1CredentialLayout).toBe("function");
-    expect(DEFAULT_CREDENTIAL).toBeDefined();
-    expect(DEFAULT_CREDENTIAL.id).toBe("APTI-7810-9402");
-    expect(DEFAULT_CREDENTIAL.clearanceLevel).toBe("LEVEL-4 OMNI");
   });
 });

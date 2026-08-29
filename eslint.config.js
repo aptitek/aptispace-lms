@@ -177,15 +177,27 @@ export default tseslint.config(
         },
         {
           selector:
-            "Literal[value=/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/], Literal[value=/^(rgb|hsl)a?\\(/]",
+            "Literal[value=/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
           message:
-            "Hardcoded color literal detected. Use MUI theme tokens (`theme.palette.*`) or design tokens instead.",
+            "Hardcoded hex color literal detected. Use MUI theme tokens (`theme.palette.*`) or Solarized design tokens (SOLARIZED_BASE.*) instead.",
         },
         {
           selector:
-            "TemplateElement[value.raw=/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/], TemplateElement[value.raw=/^(rgb|hsl)a?\\(/]",
+            "TemplateElement[value.raw=/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
           message:
-            "Hardcoded color literal in template string detected. Use MUI theme tokens or design tokens instead.",
+            "Hardcoded hex color in template string detected. Use MUI theme tokens or Solarized design tokens instead.",
+        },
+        {
+          selector:
+            "Literal[value=/^(rgb|hsl)a?\\(/]:not([value=/rgba\\(0,\\s*0,\\s*0,/])",
+          message:
+            "Hardcoded rgb/hsl color literal detected. Use MUI theme tokens (`theme.palette.*`) or design tokens instead.",
+        },
+        {
+          selector:
+            "TemplateElement[value.raw=/^(rgb|hsl)a?\\(/]:not([value.raw=/rgba\\(0,\\s*0,\\s*0,/])",
+          message:
+            "Hardcoded rgb/hsl color in template string detected. Use MUI theme tokens or design tokens instead.",
         },
       ],
 

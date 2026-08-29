@@ -13,12 +13,12 @@ import type {
   GuillocheDensity,
 } from "../../atoms/Guilloche/Guilloche.types";
 import type {
-  Id1BaseCardProps,
+  Id1CardProps,
   Id1CardSide,
   Id1CardOrientation,
   Id1CardSize,
   Id1CardFlipDirection,
-} from "./Id1BaseCard.types";
+} from "./Id1Card.types";
 import {
   CardFaceContainer,
   ContentOverlay,
@@ -61,20 +61,6 @@ function resolveChipView(
     return isTransparent ? "back" : "none";
   }
   return "front";
-}
-
-interface CardContentOverlayProps {
-  children?: React.ReactNode;
-  transparent?: boolean;
-}
-
-function CardContentOverlay({
-  children,
-  transparent,
-}: CardContentOverlayProps) {
-  return (
-    <ContentOverlay isTransparent={transparent}>{children}</ContentOverlay>
-  );
 }
 
 interface ReverseGhostLayerProps {
@@ -133,12 +119,12 @@ const DEFAULT_CARD_PROPS = {
   guillocheDensity: "medium" as GuillocheDensity,
   guillocheOpacity: 0.42,
   guillocheNoiseIntensity: 0.5,
-  testId: "id1-base-card",
+  testId: "id1-card",
 };
 
 interface ElectronicsLayerProps {
   conf: typeof DEFAULT_CARD_PROPS;
-  props: Id1BaseCardProps;
+  props: Id1CardProps;
   faceSide: Id1CardSide;
   isBack: boolean;
   isTransparent: boolean;
@@ -195,22 +181,17 @@ function GuillocheLayer({ conf, seed }: GuillocheLayerProps) {
   );
 }
 
-interface Id1BaseCardFaceProps {
+interface Id1CardFaceProps {
   conf: typeof DEFAULT_CARD_PROPS;
-  props: Id1BaseCardProps;
+  props: Id1CardProps;
   faceSide: Id1CardSide;
   dims: { width: number | string; height: number | string };
 }
 
-function Id1BaseCardFace({
-  conf,
-  props,
-  faceSide,
-  dims,
-}: Id1BaseCardFaceProps) {
+function Id1CardFace({ conf, props, faceSide, dims }: Id1CardFaceProps) {
   const isBack = faceSide === "back";
-
   const seed = getGuillocheSeed(props.guillocheSeed, isBack);
+
   const effectiveMaskUrl = useMemo(() => {
     if (props.maskUrl) return props.maskUrl;
     if (conf.showGuilloche) {
@@ -289,9 +270,11 @@ function Id1BaseCardFace({
 
         <GuillocheLayer conf={conf} seed={seed} />
 
-        <CardContentOverlay transparent={conf.transparent}>
-          {content}
-        </CardContentOverlay>
+        {content && (
+          <ContentOverlay isTransparent={conf.transparent}>
+            {content}
+          </ContentOverlay>
+        )}
       </CardFaceContainer>
     </Card>
   );
@@ -318,19 +301,17 @@ function getFlipTransitionConfig(flipDuration?: number): Transition {
 }
 
 /**
- * Id1BaseCard - Base physical ID-1 card component
+ * Id1Card - ISO/IEC 7810 ID-1 Physical Card Molecule
  *
- * Handles the physical card substrate with security features:
- * - ISO/IEC 7810 ID-1 dimensions (85.6mm × 53.98mm)
- * - Holographic effects and glare
- * - Embedded electronics (NFC antenna, chip)
- * - Guilloche security patterns
- * - 3D flip animation
- * - Transparent card variants with ghost layers
- *
- * This is the base layer; content is provided via frontContent/backContent props.
+ * Provides the physical credential substrate with security features:
+ * - ISO/IEC 7810 ID-1 standard dimensions (85.60 mm × 53.98 mm)
+ * - Procedural Guilloche security rosettes & mask reflection
+ * - Embedded Electronics (Microchip + NFC Antenna)
+ * - Dynamic Holographic foil & Glare effects
+ * - 3D Flip physics (Horizontal & Vertical axes)
+ * - Transparent acrylic glassmorphic substrate with ghosting layer
  */
-export const Id1BaseCard = forwardRef<HTMLDivElement, Id1BaseCardProps>(
+export const Id1Card = forwardRef<HTMLDivElement, Id1CardProps>(
   (props, ref) => {
     const conf = { ...DEFAULT_CARD_PROPS, ...props };
     const [internalFlipped, setInternalFlipped] = useState(
@@ -373,7 +354,7 @@ export const Id1BaseCard = forwardRef<HTMLDivElement, Id1BaseCardProps>(
 
     if (!conf.enableFlip) {
       return (
-        <Id1BaseCardFace
+        <Id1CardFace
           conf={conf}
           props={props}
           faceSide={isFlipped ? "back" : "front"}
@@ -397,7 +378,7 @@ export const Id1BaseCard = forwardRef<HTMLDivElement, Id1BaseCardProps>(
           transition={getFlipTransitionConfig(conf.flipDuration)}
         >
           <CardFaceWrapper isActive={!isFlipped} isBack={false}>
-            <Id1BaseCardFace
+            <Id1CardFace
               conf={conf}
               props={props}
               faceSide="front"
@@ -410,7 +391,7 @@ export const Id1BaseCard = forwardRef<HTMLDivElement, Id1BaseCardProps>(
             isBack={true}
             isVertical={conf.flipDirection === "vertical"}
           >
-            <Id1BaseCardFace
+            <Id1CardFace
               conf={conf}
               props={props}
               faceSide="back"
@@ -423,6 +404,6 @@ export const Id1BaseCard = forwardRef<HTMLDivElement, Id1BaseCardProps>(
   },
 );
 
-Id1BaseCard.displayName = "Id1BaseCard";
+Id1Card.displayName = "Id1Card";
 
-export default Id1BaseCard;
+export default Id1Card;

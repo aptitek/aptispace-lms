@@ -2,17 +2,17 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
-import { Id1Card } from "../app/components/organisms/Id1Card";
+import { Id1Card } from "../app/components/molecules/Id1Card";
 
 const meta: Meta<typeof Id1Card> = {
-  title: "Organisms/Id1Card",
+  title: "Molecules/Id1Card",
   component: Id1Card,
   parameters: {
     layout: "centered",
     docs: {
       description: {
         component:
-          "ISO/IEC 7810 ID-1 standard credential card ($85.60\\text{ mm} \\times 53.98\\text{ mm}$) featuring 3D flip physics, procedural Guilloche security curves, targeted holographic foil, and embedded electronics.",
+          "ISO/IEC 7810 ID-1 standard physical card molecule ($85.60\\text{ mm} \\times 53.98\\text{ mm}$) featuring 3D flip physics, procedural Guilloche security rosettes, dynamic holographic foil reflection, embedded microchip/NFC electronics, and transparent acrylic options.",
       },
     },
   },
@@ -42,19 +42,20 @@ const meta: Meta<typeof Id1Card> = {
     orientation: {
       control: "radio",
       options: ["landscape", "portrait"],
-      description: "Card layout orientation",
-      table: { category: "Geometry & Material" },
+      description: "Card orientation (Landscape or Portrait)",
+      table: { category: "Geometry & Substrate" },
     },
     size: {
       control: "select",
       options: ["sm", "md", "lg", "responsive"],
       description: "Predefined standard dimension preset",
-      table: { category: "Geometry & Material" },
+      table: { category: "Geometry & Substrate" },
     },
     transparent: {
       control: "boolean",
-      description: "Glassmorphic transparent acrylic substrate with reverse ghosting",
-      table: { category: "Geometry & Material" },
+      description:
+        "Glassmorphic transparent acrylic substrate with reverse ghosting",
+      table: { category: "Geometry & Substrate" },
     },
     holographic: {
       control: "boolean",
@@ -73,7 +74,8 @@ const meta: Meta<typeof Id1Card> = {
     },
     showElectronics: {
       control: "boolean",
-      description: "Render embedded security electronics layer (chip + NFC coil)",
+      description:
+        "Render embedded security electronics layer (chip + NFC coil)",
       table: { category: "Security Layers" },
     },
     electronicsFinish: {
@@ -105,17 +107,6 @@ const meta: Meta<typeof Id1Card> = {
       description: "Guilloche color theme and iridescent spectrum palette",
       table: { category: "Security Layers" },
     },
-    layout: {
-      control: "select",
-      options: ["aptispace", "french-id"],
-      description: "Credential template format (AptiSpace Cadet or French CNIe)",
-      table: { category: "Credential Content" },
-    },
-    credential: {
-      control: "object",
-      description: "Credential identity payload",
-      table: { category: "Credential Content" },
-    },
   },
   args: {
     side: "front",
@@ -141,16 +132,6 @@ const meta: Meta<typeof Id1Card> = {
     guillocheDensity: "medium",
     guillocheOpacity: 0.42,
     guillocheNoiseIntensity: 0.5,
-    credential: {
-      id: "APTI-7810-9402",
-      name: "Alex Mercer",
-      callSign: "AETH-9042",
-      role: "Mission Specialist",
-      division: "Orbital Flight Dynamics",
-      clearanceLevel: "LEVEL-4 OMNI",
-      expiryDate: "2030-08",
-      securityCode: "781",
-    },
   },
   tags: ["autodocs"],
 };
@@ -158,27 +139,9 @@ const meta: Meta<typeof Id1Card> = {
 export default meta;
 type Story = StoryObj<typeof Id1Card>;
 
-const FRENCH_CREDENTIAL = {
-  surname: "DUPONT",
-  givenNames: "JULIE MARIE",
-  sex: "F",
-  nationality: "FRA",
-  dateOfBirth: "15.03.1990",
-  placeOfBirth: "PARIS (75)",
-  documentNumber: "21AA12345",
-  expiryDate: "15.03.2030",
-  can: "123456",
-  height: "1,75 m",
-  address: "12 RUE DE LA PAIX\n75001 PARIS",
-  issueDate: "16.03.2020",
-  authority: "PRÉFECTURE DE POLICE",
-  avatarUrl:
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
-};
-
 /**
- * 1. Interactive 3D Card (Default)
- * Click to flip between front credential and reverse magnetic stripe / MRZ zone.
+ * 1. Default Interactive Physical Substrate
+ * Standard ID-1 card with 3D flip physics, procedural guilloche, holographic foil, and gold electronics.
  */
 export const Default: Story = {
   render: (args) => (
@@ -212,39 +175,7 @@ export const Default: Story = {
 };
 
 /**
- * 2. Side-by-Side Dual View
- * Simultaneous inspection of front identity face and reverse security face.
- */
-export const SideBySide: Story = {
-  render: (args) => (
-    <Box
-      sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 4,
-        alignItems: "center",
-        justifyContent: "center",
-        p: 2,
-      }}
-    >
-      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-        <Typography variant="caption" sx={{ fontWeight: 800, color: "text.secondary" }}>
-          FRONT (CREDENTIAL &amp; CHIP)
-        </Typography>
-        <Id1Card {...args} side="front" enableFlip={false} size="md" />
-      </Box>
-      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-        <Typography variant="caption" sx={{ fontWeight: 800, color: "text.secondary" }}>
-          BACK (MAGSTRIPE &amp; MRZ)
-        </Typography>
-        <Id1Card {...args} side="back" enableFlip={false} size="md" />
-      </Box>
-    </Box>
-  ),
-};
-
-/**
- * 3. Transparent Acrylic Substrate
+ * 2. Transparent Acrylic Substrate
  * Glassmorphic acrylic material exposing internal induction coils and mirrored reverse ghost print.
  */
 export const TransparentAcrylic: Story = {
@@ -257,10 +188,10 @@ export const TransparentAcrylic: Story = {
 };
 
 /**
- * 4. Portrait Personnel Badge
- * Vertical ID format with vertical (X-axis) 3D flip physics.
+ * 3. Portrait Orientation
+ * Vertical format with vertical (X-axis) 3D flip physics.
  */
-export const PortraitBadge: Story = {
+export const PortraitOrientation: Story = {
   args: {
     orientation: "portrait",
     flipDirection: "vertical",
@@ -271,31 +202,265 @@ export const PortraitBadge: Story = {
 };
 
 /**
- * 5. French National Identity Card (CNIe)
- * Official French national identity format complying with ICAO 9303 and ISO/IEC 7810.
+ * 4. Electronics Finishes
+ * Comparison of metallic conductive finishes (Gold, Silver, Cyan Laser, Copper).
  */
-export const FrenchNationalId: Story = {
-  args: {
-    layout: "french-id",
-    side: "front",
-    flipOnClick: true,
-    electronicsFinish: "silver",
-    guillocheVariant: "cyber-cyan",
-    credential: FRENCH_CREDENTIAL,
-  },
+export const ElectronicsFinishes: Story = {
+  render: (args) => (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+        gap: 3,
+        p: 2,
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 800, color: "text.secondary" }}
+        >
+          GOLD FINISH
+        </Typography>
+        <Id1Card {...args} size="md" electronicsFinish="gold" />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 800, color: "text.secondary" }}
+        >
+          SILVER FINISH
+        </Typography>
+        <Id1Card {...args} size="md" electronicsFinish="silver" />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 800, color: "text.secondary" }}
+        >
+          CYAN LASER FINISH
+        </Typography>
+        <Id1Card {...args} size="md" electronicsFinish="cyan-laser" />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 800, color: "text.secondary" }}
+        >
+          COPPER FINISH
+        </Typography>
+        <Id1Card {...args} size="md" electronicsFinish="copper" />
+      </Box>
+    </Box>
+  ),
 };
 
 /**
- * 6. Physical Security Substrate (Blank)
- * Security substrate without credential data, showing pure holographic foil, guilloche rosettes, and smart chip.
+ * 5. Holographic Spectrum Variants
+ * Procedural Guilloche curves combined with dynamic holographic reflection themes.
  */
-export const PhysicalSubstrate: Story = {
-  args: {
-    showGlare: true,
-    holographic: true,
-    showElectronics: true,
-    showGuilloche: true,
-    flipOnClick: true,
-    content: null,
-  },
+export const HolographicVariants: Story = {
+  render: (args) => (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+        gap: 3,
+        p: 2,
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 800, color: "text.secondary" }}
+        >
+          HOLO SPECTRUM
+        </Typography>
+        <Id1Card {...args} size="md" guillocheVariant="holo-spectrum" />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 800, color: "text.secondary" }}
+        >
+          CYBER CYAN
+        </Typography>
+        <Id1Card {...args} size="md" guillocheVariant="cyber-cyan" />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 800, color: "text.secondary" }}
+        >
+          SOLARIZED GOLD
+        </Typography>
+        <Id1Card {...args} size="md" guillocheVariant="solarized-gold" />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 800, color: "text.secondary" }}
+        >
+          COSMIC CRIMSON
+        </Typography>
+        <Id1Card {...args} size="md" guillocheVariant="cosmic-crimson" />
+      </Box>
+    </Box>
+  ),
+};
+
+/**
+ * 6. With Custom Content Slots
+ * Demonstrates composing custom front and back content inside the card molecule slots.
+ */
+export const WithCustomContent: Story = {
+  render: (args) => (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+      }}
+    >
+      <Typography
+        variant="caption"
+        sx={{ fontWeight: 700, color: "text.secondary" }}
+      >
+        Click card to flip and inspect front and back content slots
+      </Typography>
+      <Id1Card
+        {...args}
+        frontContent={
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              width: "100%",
+              p: 1,
+            }}
+          >
+            <Box>
+              <Typography
+                variant="overline"
+                sx={{
+                  letterSpacing: 2,
+                  fontWeight: 900,
+                  color: "primary.light",
+                }}
+              >
+                APTISPACE
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 800, lineHeight: 1.2 }}
+              >
+                SECURE ACCESS PASS
+              </Typography>
+            </Box>
+            <Typography
+              variant="caption"
+              sx={{
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                bgcolor: "primary.main",
+                color: "#fff",
+                fontWeight: 800,
+              }}
+            >
+              ACTIVE
+            </Typography>
+          </Box>
+        }
+        backContent={
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+              gap: 1,
+              p: 2,
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{
+                letterSpacing: 1.5,
+                fontWeight: 700,
+                color: "text.secondary",
+              }}
+            >
+              AUTHORIZED PERSONNEL ONLY
+            </Typography>
+            <Typography
+              variant="overline"
+              sx={{ letterSpacing: 3, fontWeight: 800, color: "primary.light" }}
+            >
+              ISO/IEC 7810 ID-1
+            </Typography>
+          </Box>
+        }
+      />
+    </Box>
+  ),
 };

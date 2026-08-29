@@ -4,7 +4,7 @@ import {
   ISO_7810_ID1,
   type Id1CardOrientation,
   type Id1CardSize,
-} from "./Id1BaseCard.types";
+} from "./Id1Card.types";
 
 const DIMENSION_MAP: Record<
   Id1CardSize,
@@ -215,7 +215,6 @@ export const ContentOverlay = styled("div")<{ isTransparent?: boolean }>(
     height: "100%",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "space-between",
     padding: theme.spacing(2),
     boxSizing: "border-box",
     pointerEvents: "auto",

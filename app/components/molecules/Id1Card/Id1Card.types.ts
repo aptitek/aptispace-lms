@@ -9,10 +9,10 @@ export type Id1CardSize = "sm" | "md" | "lg" | "responsive";
 export type Id1CardFlipDirection = "horizontal" | "vertical";
 
 /**
- * Base card props for physical ID-1 card features.
- * This component handles the card substrate, security features, and 3D effects.
+ * Props for the Id1Card molecule.
+ * Handles the physical ID-1 substrate, security features, 3D effects, and content slots.
  */
-export interface Id1BaseCardProps {
+export interface Id1CardProps {
   // Side Selection & 3D Flip Animation
   side?: Id1CardSide;
   isFlipped?: boolean;
@@ -46,7 +46,7 @@ export interface Id1BaseCardProps {
   scaleOnHover?: number;
   shadow?: CardShadow;
 
-  // Masking Properties (Only Guilloche / User Mask reflects Holo)
+  // Masking Properties (Guilloche / Custom Mask reflects Holo)
   maskUrl?: string;
   maskSize?: string;
   maskPosition?: string;
@@ -72,7 +72,7 @@ export interface Id1BaseCardProps {
   guillocheOpacity?: number;
   guillocheNoiseIntensity?: number;
 
-  // Content (render prop or children for each face)
+  // Content slots
   frontContent?: React.ReactNode;
   backContent?: React.ReactNode;
   children?: React.ReactNode;
@@ -92,15 +92,3 @@ export const ISO_7810_ID1 = {
 } as const;
 
 export type ISO_7810_ID1_Type = typeof ISO_7810_ID1;
-
-// ISO/IEC 19794-5:2011 Biometric Facial Image Dimensions & Criteria
-export const ISO_19794_5_BIOMETRICS = {
-  standard: "ISO/IEC 19794-5:2011",
-  photoWidthMm: 35,
-  photoHeightMm: 45,
-  aspectRatio: 35 / 45, // 0.7778 (7:9 portrait format)
-  faceHeightMinRatio: 0.7, // 70% of frame height (chin to crown)
-  faceHeightMaxRatio: 0.8, // 80% of frame height
-} as const;
-
-export type ISO_19794_5_BIOMETRICS_Type = typeof ISO_19794_5_BIOMETRICS;

@@ -81,7 +81,10 @@ export const MeridianTrack = styled(motion.button, {
     border: `2px solid ${theme.palette.divider}`,
     backgroundColor: bgDefault,
     backgroundImage: `linear-gradient(180deg, ${bgPaper} 0%, ${bgDefault} 100%)`,
-    boxShadow: `inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 8px ${theme.palette.action.hover}`,
+    boxShadow:
+      theme.palette.mode === "dark"
+        ? `inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 8px ${theme.palette.action.hover}`
+        : `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 8px ${theme.palette.action.hover}`,
     overflow: "hidden",
     outline: "none",
     userSelect: "none",
@@ -93,7 +96,10 @@ export const MeridianTrack = styled(motion.button, {
 
     "&:hover": {
       borderColor: primaryMain,
-      boxShadow: `inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 12px ${primaryMain}`,
+      boxShadow:
+        theme.palette.mode === "dark"
+          ? `inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 12px ${primaryMain}`
+          : `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 12px ${primaryMain}`,
     },
 
     "&:focus-visible": {
@@ -151,7 +157,10 @@ export const PeekingAirplane = styled(motion.div, {
     theme.palette.mode === "dark"
       ? theme.palette.common.white
       : theme.palette.primary.main,
-  filter: `drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 4px ${theme.palette.primary.main})`,
+  filter:
+    theme.palette.mode === "dark"
+      ? `drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 4px ${theme.palette.primary.main})`
+      : `drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2)) drop-shadow(0 0 4px ${theme.palette.primary.main})`,
 }));
 
 export const FlightPuck = styled(motion.span, {
@@ -171,7 +180,10 @@ export const FlightPuck = styled(motion.span, {
   zIndex: 4,
   cursor: "inherit",
   background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-  boxShadow: `0 0 10px ${theme.palette.primary.main}, 0 2px 6px rgba(0, 0, 0, 0.4)`,
+  boxShadow:
+    theme.palette.mode === "dark"
+      ? `0 0 10px ${theme.palette.primary.main}, 0 2px 6px rgba(0, 0, 0, 0.4)`
+      : `0 0 10px ${theme.palette.primary.main}, 0 2px 6px rgba(0, 0, 0, 0.2)`,
 }));
 
 export const StateRippleLayer = styled(motion.div, {

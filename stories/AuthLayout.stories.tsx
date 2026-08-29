@@ -25,7 +25,7 @@ type Story = StoryObj<typeof AuthLayout>;
 export const Default: Story = {
   render: () => (
     <AuthLayout>
-      <LoginCard onGitHubClick={() => {}} />
+      <LoginCard />
     </AuthLayout>
   ),
 };
@@ -48,7 +48,8 @@ export const CustomContent: Story = {
           AptiSpace Portal
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Full screen template with Galaxy canvas background, HeaderBar, and Footer.
+          Full screen template with Galaxy canvas background, HeaderBar, and
+          Footer.
         </Typography>
       </Box>
     </AuthLayout>

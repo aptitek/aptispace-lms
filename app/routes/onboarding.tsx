@@ -2,13 +2,14 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { styled } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import AuthLayout from "~/components/templates/AuthLayout/AuthLayout";
-import Id1Card from "~/components/organisms/Id1Card/Id1Card";
+import Id1Card from "~/components/molecules/Id1Card/Id1Card";
 import type {
-  Id1CardCredential,
   Id1CardOrientation,
   Id1CardSide,
-} from "~/components/organisms/Id1Card/Id1Card.types";
+} from "~/components/molecules/Id1Card/Id1Card.types";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import BadgeIcon from "@mui/icons-material/Badge";
 import ScreenRotationIcon from "@mui/icons-material/ScreenRotation";
@@ -37,7 +38,10 @@ const OnboardingContainer = styled("div")(({ theme }) => ({
   backdropFilter: "blur(20px)",
   borderRadius: "20px",
   border: `1px solid ${theme.palette.divider}`,
-  boxShadow: `0 30px 60px rgba(0, 0, 0, 0.6), 0 0 35px ${theme.palette.action.focus}`,
+  boxShadow:
+    theme.palette.mode === "dark"
+      ? `0 30px 60px ${theme.palette.action.disabledBackground}, 0 0 35px ${theme.palette.action.focus}`
+      : `0 30px 60px rgba(0, 0, 0, 0.3), 0 0 35px ${theme.palette.action.focus}`,
   boxSizing: "border-box",
   zIndex: 2,
 
@@ -67,13 +71,6 @@ const Title = styled("h1")(({ theme }) => ({
     color: theme.palette.primary.light,
     fontSize: "1.8rem",
   },
-}));
-
-const Subtitle = styled("p")(({ theme }) => ({
-  margin: 0,
-  fontSize: "0.875rem",
-  color: theme.palette.text.secondary,
-  lineHeight: 1.5,
 }));
 
 const FormRoot = styled("form")(({ theme }) => ({
@@ -133,18 +130,6 @@ const Select = styled("select")(({ theme }) => ({
   },
 }));
 
-const SecurityNoteBox = styled("div")(({ theme }) => ({
-  fontSize: "11px",
-  color: theme.palette.text.secondary,
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(0.75),
-  "& .security-icon": {
-    fontSize: "14px",
-    color: theme.palette.success.main,
-  },
-}));
-
 const PreviewPanel = styled("div")(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -155,29 +140,6 @@ const PreviewPanel = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
   borderRadius: "16px",
   border: `1px dashed ${theme.palette.divider}`,
-}));
-
-const PreviewHeader = styled("div")({
-  width: "100%",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-});
-
-const PreviewTitle = styled("span")(({ theme }) => ({
-  fontSize: "11px",
-  fontWeight: 800,
-  color: theme.palette.primary.light,
-  letterSpacing: "1px",
-  textTransform: "uppercase",
-}));
-
-const ControlBar = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: theme.spacing(1.5),
-  flexWrap: "wrap",
 }));
 
 const ActionButton = styled("button")(({ theme }) => ({
@@ -226,28 +188,25 @@ const SubmitButton = styled("button")(({ theme }) => ({
   },
 }));
 
-const CardCenterHolder = styled("div")(({ theme }) => ({
-  width: "100%",
-  display: "flex",
-  justifyContent: "center",
-  padding: theme.spacing(1.5, 0),
-}));
+interface CadetProfile {
+  id: string;
+  name: string;
+  callSign: string;
+  division: string;
+  clearanceLevel: string;
+  securityCode: string;
+}
 
 export default function OnboardingPage() {
   const { t } = useTranslation("onboarding");
   const navigate = useNavigate();
 
-  const [profile, setProfile] = useState<Id1CardCredential>({
+  const [profile, setProfile] = useState<CadetProfile>({
     id: "APTI-7810-9402",
     name: "Alex Mercer",
     callSign: "AETH-9042",
-    role: "Mission Specialist",
     division: "Orbital Flight Dynamics",
     clearanceLevel: "LEVEL-4 OMNI",
-    issueDate: "2026-08",
-    expiryDate: "2030-08",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
     securityCode: "781",
   });
 
@@ -277,19 +236,18 @@ export default function OnboardingPage() {
   return (
     <AuthLayout>
       <OnboardingContainer>
-        {/* Left column: Form configuration */}
         <FormPanel>
           <div>
             <Title>
               <BadgeIcon className="badge-icon" />
               {t("title", "Cadet Onboarding")}
             </Title>
-            <Subtitle>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               {t(
                 "subtitle",
                 "Initialize your flight credential badge and configure your academy clearance profile.",
               )}
-            </Subtitle>
+            </Typography>
           </div>
 
           <FormRoot onSubmit={handleSubmit}>
@@ -357,12 +315,20 @@ export default function OnboardingPage() {
               </Select>
             </FormGroup>
 
-            <SecurityNoteBox>
-              <SecurityIcon className="security-icon" />
+            <Box
+              sx={{
+                fontSize: 11,
+                color: "text.secondary",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              <SecurityIcon sx={{ fontSize: 14, color: "success.main" }} />
               <span>
                 Standard ISO/IEC 7810 ID-1 • EMV ISO/IEC 7816 Smart Credential
               </span>
-            </SecurityNoteBox>
+            </Box>
 
             <SubmitButton type="submit">
               <CheckCircleIcon />
@@ -371,14 +337,27 @@ export default function OnboardingPage() {
           </FormRoot>
         </FormPanel>
 
-        {/* Right column: ID-1 Live Card Preview */}
         <PreviewPanel>
-          <PreviewHeader>
-            <PreviewTitle>
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Typography
+              variant="overline"
+              sx={{
+                fontWeight: 800,
+                color: "primary.light",
+                letterSpacing: "1px",
+              }}
+            >
               {t("form.preview", "Live ID-1 Preview")} (85.60 mm × 53.98 mm)
-            </PreviewTitle>
+            </Typography>
 
-            <ControlBar>
+            <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
               <ActionButton
                 type="button"
                 onClick={handleToggleOrientation}
@@ -402,19 +381,133 @@ export default function OnboardingPage() {
                     : t("card.flipToFront", "View Front Side")}
                 </span>
               </ActionButton>
-            </ControlBar>
-          </PreviewHeader>
+            </Box>
+          </Box>
 
-          <CardCenterHolder>
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              py: 1.5,
+            }}
+          >
             <Id1Card
-              credential={profile}
               orientation={orientation}
               size="lg"
               side={side}
               flipOnClick={true}
               onFlip={(newSide) => setSide(newSide)}
+              frontContent={
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <Box>
+                      <Typography
+                        variant="overline"
+                        sx={{
+                          fontWeight: 800,
+                          color: "primary.light",
+                          letterSpacing: 1.5,
+                        }}
+                      >
+                        APTISPACE ACADEMY
+                      </Typography>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: 800, color: "text.primary" }}
+                      >
+                        {profile.name || "CADET"}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {profile.callSign
+                          ? `CALLSIGN: ${profile.callSign}`
+                          : "ACTIVE CADET"}
+                      </Typography>
+                    </Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1,
+                        bgcolor: "action.selected",
+                        color: "primary.light",
+                        fontWeight: 800,
+                        border: 1,
+                        borderColor: "divider",
+                      }}
+                    >
+                      {profile.clearanceLevel}
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-end",
+                    }}
+                  >
+                    <Typography variant="caption" color="text.secondary">
+                      {profile.division}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{ fontWeight: 700, letterSpacing: 1 }}
+                    >
+                      {profile.id}
+                    </Typography>
+                  </Box>
+                </Box>
+              }
+              backContent={
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 1,
+                    textAlign: "center",
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: 800,
+                      letterSpacing: 2,
+                      color: "primary.light",
+                    }}
+                  >
+                    ISO/IEC 7810 ID-1 STANDARD
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    SEC: {profile.securityCode} • CLEARANCE{" "}
+                    {profile.clearanceLevel}
+                  </Typography>
+                  <Typography
+                    variant="overline"
+                    sx={{ letterSpacing: 1, color: "text.disabled" }}
+                  >
+                    APTISPACE INTERSTELLAR LOGISTICS
+                  </Typography>
+                </Box>
+              }
             />
-          </CardCenterHolder>
+          </Box>
         </PreviewPanel>
       </OnboardingContainer>
     </AuthLayout>

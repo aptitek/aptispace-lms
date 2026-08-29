@@ -9,7 +9,10 @@ export const MrzContainer = styled("div")<{ compact?: boolean }>(
     borderRadius: "6px",
     padding: compact ? theme.spacing(0.75) : theme.spacing(1.25),
     color: theme.palette.text.primary,
-    boxShadow: `inset 0 1px 3px rgba(0,0,0,0.5)`,
+    boxShadow:
+      theme.palette.mode === "dark"
+        ? `inset 0 1px 3px rgba(0, 0, 0, 0.5)`
+        : `inset 0 1px 3px rgba(0, 0, 0, 0.2)`,
     userSelect: "all",
     overflow: "hidden",
     zIndex: 2,
