@@ -12,166 +12,86 @@ const meta: Meta<typeof Id1Card> = {
     docs: {
       description: {
         component:
-          "ISO/IEC 7810 ID-1 standard card ($85.60\\text{ mm} \\times 53.98\\text{ mm}$) with 3D flip animation, targeted holographic masked foil, and physical electronics.",
+          "ISO/IEC 7810 ID-1 standard credential card ($85.60\\text{ mm} \\times 53.98\\text{ mm}$) featuring 3D flip physics, procedural Guilloche security curves, targeted holographic foil, and embedded electronics.",
       },
     },
   },
   argTypes: {
-    // 3D Flip & Side
     side: {
       control: "radio",
       options: ["front", "back"],
-      description: "Card face view",
-      table: { category: "3D Flip & Side" },
+      description: "Active card face view",
+      table: { category: "3D Flip & State" },
     },
     isFlipped: {
       control: "boolean",
       description: "Controlled 3D flipped state (rotates 180°)",
-      table: { category: "3D Flip & Side" },
+      table: { category: "3D Flip & State" },
     },
     flipOnClick: {
       control: "boolean",
       description: "Click card directly to toggle side with 3D flip animation",
-      table: { category: "3D Flip & Side" },
+      table: { category: "3D Flip & State" },
     },
     flipDirection: {
       control: "radio",
       options: ["horizontal", "vertical"],
-      description:
-        "3D flip rotation axis (horizontal Y-axis or vertical X-axis)",
-      table: { category: "3D Flip & Side" },
+      description: "3D flip rotation axis",
+      table: { category: "3D Flip & State" },
     },
-    flipDuration: {
-      control: { type: "range", min: 0.2, max: 2, step: 0.05 },
-      description: "Duration of flip animation in seconds",
-      table: { category: "3D Flip & Side" },
-    },
-    enableFlip: {
-      control: "boolean",
-      description: "Enable 3D animated flip transitions",
-      table: { category: "3D Flip & Side" },
-    },
-
-    // Layout & Appearance
     orientation: {
       control: "radio",
       options: ["landscape", "portrait"],
       description: "Card layout orientation",
-      table: { category: "Layout & Appearance" },
+      table: { category: "Geometry & Material" },
     },
     size: {
       control: "select",
       options: ["sm", "md", "lg", "responsive"],
-      description: "Predefined standard size tokens",
-      table: { category: "Layout & Appearance" },
+      description: "Predefined standard dimension preset",
+      table: { category: "Geometry & Material" },
     },
     transparent: {
       control: "boolean",
-      description:
-        "Glassmorphic transparent acrylic material with double-sided see-through",
-      table: { category: "Layout & Appearance" },
+      description: "Glassmorphic transparent acrylic substrate with reverse ghosting",
+      table: { category: "Geometry & Material" },
     },
-    transparentGhostOpacity: {
-      control: { type: "range", min: 0.05, max: 0.8, step: 0.02 },
-      description:
-        "Ghosting opacity of the reverse side print seen through clear acrylic",
-      table: { category: "Layout & Appearance" },
-    },
-
-    // Holographic & Lighting
     holographic: {
       control: "boolean",
       description: "Dynamic holographic foil reflection on Guilloche curves",
-      table: { category: "Holographic & Lighting" },
+      table: { category: "Visual Effects" },
     },
     holoStrength: {
       control: { type: "range", min: 0.1, max: 1.5, step: 0.05 },
       description: "Holographic reflection intensity",
-      table: { category: "Holographic & Lighting" },
+      table: { category: "Visual Effects" },
     },
     showGlare: {
       control: "boolean",
       description: "Show specular surface glare highlight",
-      table: { category: "Holographic & Lighting" },
+      table: { category: "Visual Effects" },
     },
-    glareOpacity: {
-      control: { type: "range", min: 0, max: 1, step: 0.05 },
-      description: "Specular glare opacity",
-      table: { category: "Holographic & Lighting" },
-    },
-    maxTilt: {
-      control: { type: "range", min: 0, max: 40, step: 1 },
-      description: "Maximum 3D parallax tilt angle on hover",
-      table: { category: "Holographic & Lighting" },
-    },
-    scaleOnHover: {
-      control: { type: "range", min: 1, max: 1.2, step: 0.01 },
-      description: "Scale magnification factor on hover",
-      table: { category: "Holographic & Lighting" },
-    },
-    shadow: {
-      control: "select",
-      options: ["none", "sm", "md", "lg", "xl", "2xl"],
-      description: "3D drop shadow preset",
-      table: { category: "Holographic & Lighting" },
-    },
-
-    // Security Electronics
     showElectronics: {
       control: "boolean",
-      description: "Render embedded security electronics layer",
-      table: { category: "Security Electronics" },
+      description: "Render embedded security electronics layer (chip + NFC coil)",
+      table: { category: "Security Layers" },
     },
     electronicsFinish: {
       control: "select",
       options: ["gold", "cyan-laser", "copper", "silver"],
-      description: "Metallic finish for conductive traces",
-      table: { category: "Security Electronics" },
+      description: "Metallic conductive finish",
+      table: { category: "Security Layers" },
     },
     chipPosition: {
       control: "radio",
       options: ["left", "right"],
-      description: "Horizontal alignment of the microchip module",
-      table: { category: "Security Electronics" },
+      description: "Position of the contact microchip module",
+      table: { category: "Security Layers" },
     },
-    electronicsRotation: {
-      control: { type: "range", min: 0, max: 360, step: 90 },
-      description:
-        "Angular rotation of electronics around card center (degrees)",
-      table: { category: "Security Electronics" },
-    },
-    showChip: {
-      control: "boolean",
-      description: "Show ISO 7816 smart microchip module",
-      table: { category: "Security Electronics" },
-    },
-    chipView: {
-      control: "select",
-      options: ["front", "back", "none"],
-      description: "Chip module view override",
-      table: { category: "Security Electronics" },
-    },
-    showNfcAntenna: {
-      control: "boolean",
-      description: "Show outer ISO 14443 NFC 4-turn perimeter antenna",
-      table: { category: "Security Electronics" },
-    },
-    showInnerCoil: {
-      control: "boolean",
-      description: "Show inner inductive coupling coil",
-      table: { category: "Security Electronics" },
-    },
-    electronicsOpacity: {
-      control: { type: "range", min: 0.1, max: 1, step: 0.05 },
-      description: "Electronics layer opacity",
-      table: { category: "Security Electronics" },
-    },
-
-    // Guilloche Security
     showGuilloche: {
       control: "boolean",
       description: "Render procedural Guilloche security rosettes",
-      table: { category: "Guilloche Security" },
+      table: { category: "Security Layers" },
     },
     guillocheVariant: {
       control: "select",
@@ -183,42 +103,18 @@ const meta: Meta<typeof Id1Card> = {
         "deep-space",
       ],
       description: "Guilloche color theme and iridescent spectrum palette",
-      table: { category: "Guilloche Security" },
+      table: { category: "Security Layers" },
     },
-    guillocheDensity: {
-      control: "select",
-      options: ["low", "medium", "high"],
-      description: "Density of spirograph curves",
-      table: { category: "Guilloche Security" },
-    },
-    guillocheOpacity: {
-      control: { type: "range", min: 0.1, max: 1, step: 0.05 },
-      description: "Guilloche curve line opacity",
-      table: { category: "Guilloche Security" },
-    },
-    guillocheNoiseIntensity: {
-      control: { type: "range", min: 0, max: 1, step: 0.05 },
-      description: "Harmonic pseudo-noise perturbation amplitude",
-      table: { category: "Guilloche Security" },
-    },
-    guillocheSeed: {
-      control: "text",
-      description: "Cryptographic seed string for curve generation",
-      table: { category: "Guilloche Security" },
-    },
-
-    // Credential Data
     layout: {
       control: "select",
       options: ["aptispace", "french-id"],
-      description:
-        "Credential layout variant — the French CNIe layout or the default cadet card",
-      table: { category: "Credential Data" },
+      description: "Credential template format (AptiSpace Cadet or French CNIe)",
+      table: { category: "Credential Content" },
     },
     credential: {
       control: "object",
-      description: "Cadet / French CNIe identity data",
-      table: { category: "Credential Data" },
+      description: "Credential identity payload",
+      table: { category: "Credential Content" },
     },
   },
   args: {
@@ -239,7 +135,6 @@ const meta: Meta<typeof Id1Card> = {
     showElectronics: true,
     electronicsFinish: "gold",
     chipPosition: "left",
-    electronicsRotation: 0,
     showChip: true,
     showGuilloche: true,
     guillocheVariant: "holo-spectrum",
@@ -263,7 +158,6 @@ const meta: Meta<typeof Id1Card> = {
 export default meta;
 type Story = StoryObj<typeof Id1Card>;
 
-/** Shared French CNIe holder data used by the French-ID stories below. */
 const FRENCH_CREDENTIAL = {
   surname: "DUPONT",
   givenNames: "JULIE MARIE",
@@ -283,7 +177,8 @@ const FRENCH_CREDENTIAL = {
 };
 
 /**
- * 1. Default Interactive ID-1 Card (All controls active with click-to-flip)
+ * 1. Interactive 3D Card (Default)
+ * Click to flip between front credential and reverse magnetic stripe / MRZ zone.
  */
 export const Default: Story = {
   render: (args) => (
@@ -308,7 +203,7 @@ export const Default: Story = {
           variant="caption"
           sx={{ fontWeight: 700, letterSpacing: "0.5px" }}
         >
-          Click card to flip 3D • Adjust any control in the panel below
+          Click card to flip 3D • Adjust properties in Controls below
         </Typography>
       </Box>
       <Id1Card {...args} />
@@ -317,43 +212,10 @@ export const Default: Story = {
 };
 
 /**
- * 2. Standard Front Landscape Face
+ * 2. Side-by-Side Dual View
+ * Simultaneous inspection of front identity face and reverse security face.
  */
-export const StandardFrontLandscape: Story = {
-  args: {
-    side: "front",
-    flipOnClick: false,
-  },
-};
-
-/**
- * 3. Standard Back Landscape Face
- */
-export const StandardBackLandscape: Story = {
-  args: {
-    side: "back",
-    flipOnClick: false,
-  },
-};
-
-/**
- * 4. Targeted Holographic Masked Foil on Guilloche Security Curves
- */
-export const HolographicGuillocheFoil: Story = {
-  args: {
-    side: "front",
-    holographic: true,
-    holoStrength: 1.1,
-    electronicsFinish: "cyan-laser",
-    guillocheVariant: "cyber-cyan",
-    flipOnClick: true,
-  },
-};
-
-/**
- * 5. Side-by-Side Dual View (Simultaneous Front & Back Inspection)
- */
-export const SideBySideDualView: Story = {
+export const SideBySide: Story = {
   render: (args) => (
     <Box
       sx={{
@@ -365,36 +227,15 @@ export const SideBySideDualView: Story = {
         p: 2,
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 1,
-        }}
-      >
-        <Typography
-          variant="caption"
-          sx={{ fontWeight: 800, color: "text.secondary" }}
-        >
-          FRONT SIDE (CREDENTIAL &amp; CHIP)
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+        <Typography variant="caption" sx={{ fontWeight: 800, color: "text.secondary" }}>
+          FRONT (CREDENTIAL &amp; CHIP)
         </Typography>
         <Id1Card {...args} side="front" enableFlip={false} size="md" />
       </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 1,
-        }}
-      >
-        <Typography
-          variant="caption"
-          sx={{ fontWeight: 800, color: "text.secondary" }}
-        >
-          BACK SIDE (MAGSTRIPE &amp; MRZ)
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+        <Typography variant="caption" sx={{ fontWeight: 800, color: "text.secondary" }}>
+          BACK (MAGSTRIPE &amp; MRZ)
         </Typography>
         <Id1Card {...args} side="back" enableFlip={false} size="md" />
       </Box>
@@ -403,11 +244,11 @@ export const SideBySideDualView: Story = {
 };
 
 /**
- * 6. Transparent Frosted Acrylic Card (Front with Exposed Induction Coils)
+ * 3. Transparent Acrylic Substrate
+ * Glassmorphic acrylic material exposing internal induction coils and mirrored reverse ghost print.
  */
-export const TransparentAcrylicFront: Story = {
+export const TransparentAcrylic: Story = {
   args: {
-    side: "front",
     transparent: true,
     holographic: true,
     electronicsFinish: "cyan-laser",
@@ -416,24 +257,11 @@ export const TransparentAcrylicFront: Story = {
 };
 
 /**
- * 7. Transparent Frosted Acrylic Card (Back with Exposed Silicon Die)
+ * 4. Portrait Personnel Badge
+ * Vertical ID format with vertical (X-axis) 3D flip physics.
  */
-export const TransparentAcrylicBack: Story = {
+export const PortraitBadge: Story = {
   args: {
-    side: "back",
-    transparent: true,
-    holographic: true,
-    electronicsFinish: "cyan-laser",
-    flipOnClick: true,
-  },
-};
-
-/**
- * 8. Portrait Orientation Personnel Badge (Vertical Flip Animation)
- */
-export const PortraitOrientationBadge: Story = {
-  args: {
-    side: "front",
     orientation: "portrait",
     flipDirection: "vertical",
     flipOnClick: true,
@@ -443,20 +271,10 @@ export const PortraitOrientationBadge: Story = {
 };
 
 /**
- * 9. Right-Positioned Smart Chip Module (Rotated / Inverted Electronics Layout)
+ * 5. French National Identity Card (CNIe)
+ * Official French national identity format complying with ICAO 9303 and ISO/IEC 7810.
  */
-export const RightPositionedSmartChip: Story = {
-  args: {
-    side: "front",
-    chipPosition: "right",
-    flipOnClick: true,
-  },
-};
-
-/**
- * 10. French National Identity Card (CNIe) — Front Face
- */
-export const FrenchNationalIdentityCardFront: Story = {
+export const FrenchNationalId: Story = {
   args: {
     layout: "french-id",
     side: "front",
@@ -468,87 +286,16 @@ export const FrenchNationalIdentityCardFront: Story = {
 };
 
 /**
- * 11. French National Identity Card (CNIe) — Back Face
+ * 6. Physical Security Substrate (Blank)
+ * Security substrate without credential data, showing pure holographic foil, guilloche rosettes, and smart chip.
  */
-export const FrenchNationalIdentityCardBack: Story = {
+export const PhysicalSubstrate: Story = {
   args: {
-    layout: "french-id",
-    side: "back",
-    flipOnClick: true,
-    electronicsFinish: "silver",
-    guillocheVariant: "cyber-cyan",
-    credential: FRENCH_CREDENTIAL,
-  },
-};
-
-/**
- * 12. French National Identity Card (CNIe) — Side-by-Side Dual View
- */
-export const FrenchNationalIdentityCardDualView: Story = {
-  args: {
-    layout: "french-id",
-    flipOnClick: false,
-    electronicsFinish: "silver",
-    guillocheVariant: "cyber-cyan",
-    credential: FRENCH_CREDENTIAL,
-  },
-  render: (args) => (
-    <Box
-      sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 4,
-        alignItems: "center",
-        justifyContent: "center",
-        p: 2,
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 1,
-        }}
-      >
-        <Typography
-          variant="caption"
-          sx={{ fontWeight: 800, color: "text.secondary" }}
-        >
-          FRONT (RECTO)
-        </Typography>
-        <Id1Card {...args} side="front" enableFlip={false} size="md" />
-      </Box>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 1,
-        }}
-      >
-        <Typography
-          variant="caption"
-          sx={{ fontWeight: 800, color: "text.secondary" }}
-        >
-          BACK (VERSO)
-        </Typography>
-        <Id1Card {...args} side="back" enableFlip={false} size="md" />
-      </Box>
-    </Box>
-  ),
-};
-
-/**
- * 13. Minimalist Blank Card
- */
-export const MinimalistBlankCard: Story = {
-  args: {
-    side: "front",
     showGlare: true,
-    holographic: false,
-    showElectronics: false,
-    showGuilloche: false,
-    flipOnClick: false,
+    holographic: true,
+    showElectronics: true,
+    showGuilloche: true,
+    flipOnClick: true,
+    content: null,
   },
 };

@@ -7,6 +7,7 @@ import {
   BackCredentialView,
   DEFAULT_CREDENTIAL,
 } from "../app/components/organisms/Id1Card";
+import { FRENCH_ID_SAMPLE_HOLDER } from "../app/components/organisms/Id1Card/FrenchIdCard.layout";
 
 const meta: Meta<typeof Id1CredentialLayout> = {
   title: "Organisms/Id1Card/Id1CredentialLayout",
@@ -15,14 +16,8 @@ const meta: Meta<typeof Id1CredentialLayout> = {
     layout: "centered",
     docs: {
       description: {
-        component: `
-**ID-1 Credential Visual Template (Identity Layout)**
-
-Dedicated template component rendering the front and back face identity layouts:
-- **Front Layout**: Full-sized ISO/IEC 19794-5:2011 biometric portrait avatar (35mm x 45mm, 7:9 ratio), Academy insignia header, clearance badge, cadet name, callsign, and metadata grid.
-- **Back Layout**: ISO 7810 magnetic stripe bar, authorization signature panel with security code, and ICAO 9303 TD1 3-line MRZ machine readable zone.
-- Designed to plug directly into \`Id1Card\` or function as a standalone credential layout preview.
-        `,
+        component:
+          "Visual identity layout renderer for ID-1 cards. Supports the standard AptiSpace Cadet layout and the ICAO 9303 compliant French CNIe layout.",
       },
     },
   },
@@ -30,11 +25,16 @@ Dedicated template component rendering the front and back face identity layouts:
     side: {
       control: "radio",
       options: ["front", "back"],
-      description: "Card face side to render",
+      description: "Active layout side to render",
+    },
+    layout: {
+      control: "radio",
+      options: ["aptispace", "french-id"],
+      description: "Credential layout format",
     },
     isPortrait: {
       control: "boolean",
-      description: "Render for portrait orientation",
+      description: "Render in vertical portrait layout",
     },
   },
   tags: ["autodocs"],
@@ -58,46 +58,10 @@ const CardSurfacePreview = styled("div")<{ isPortrait?: boolean }>(
   }),
 );
 
-export const FrontLandscape: Story = {
-  args: {
-    side: "front",
-    isPortrait: false,
-    credential: DEFAULT_CREDENTIAL,
-  },
-  render: (args) => (
-    <CardSurfacePreview isPortrait={false}>
-      <FrontCredentialView {...args} />
-    </CardSurfacePreview>
-  ),
-};
-
-export const BackLandscape: Story = {
-  args: {
-    side: "back",
-    isPortrait: false,
-    credential: DEFAULT_CREDENTIAL,
-  },
-  render: (args) => (
-    <CardSurfacePreview isPortrait={false}>
-      <BackCredentialView {...args} />
-    </CardSurfacePreview>
-  ),
-};
-
-export const FrontPortrait: Story = {
-  args: {
-    side: "front",
-    isPortrait: true,
-    credential: DEFAULT_CREDENTIAL,
-  },
-  render: (args) => (
-    <CardSurfacePreview isPortrait={true}>
-      <FrontCredentialView {...args} />
-    </CardSurfacePreview>
-  ),
-};
-
-export const SideBySideComparison: Story = {
+/**
+ * 1. AptiSpace Academy Cadet Layout (Front & Back)
+ */
+export const AptiSpaceCadet: Story = {
   render: () => (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3, p: 2 }}>
       <CardSurfacePreview isPortrait={false}>
@@ -107,5 +71,40 @@ export const SideBySideComparison: Story = {
         <BackCredentialView credential={DEFAULT_CREDENTIAL} />
       </CardSurfacePreview>
     </Box>
+  ),
+};
+
+/**
+ * 2. French National Identity Card (CNIe Front & Back)
+ */
+export const FrenchNationalId: Story = {
+  render: () => (
+    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3, p: 2 }}>
+      <CardSurfacePreview isPortrait={false}>
+        <Id1CredentialLayout
+          side="front"
+          layout="french-id"
+          credential={FRENCH_ID_SAMPLE_HOLDER}
+        />
+      </CardSurfacePreview>
+      <CardSurfacePreview isPortrait={false}>
+        <Id1CredentialLayout
+          side="back"
+          layout="french-id"
+          credential={FRENCH_ID_SAMPLE_HOLDER}
+        />
+      </CardSurfacePreview>
+    </Box>
+  ),
+};
+
+/**
+ * 3. Portrait Personnel Badge Layout
+ */
+export const PortraitLayout: Story = {
+  render: () => (
+    <CardSurfacePreview isPortrait={true}>
+      <FrontCredentialView credential={DEFAULT_CREDENTIAL} isPortrait={true} />
+    </CardSurfacePreview>
   ),
 };

@@ -5,10 +5,12 @@ export type GuillocheVariant =
   | "deep-space"
   | "cosmic-crimson";
 
+export type GuillocheDensity = "low" | "medium" | "high";
+
 export interface GuillocheProps {
   seed?: string;
   variant?: GuillocheVariant;
-  density?: "low" | "medium" | "high";
+  density?: GuillocheDensity;
   showWaves?: boolean;
   showRosettes?: boolean;
   showConcentricRings?: boolean;
