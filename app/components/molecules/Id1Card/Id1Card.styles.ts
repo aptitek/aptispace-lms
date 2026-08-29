@@ -240,3 +240,32 @@ export const TransparentGhostOverlay = styled("div")<{
   transformOrigin: "center center",
   userSelect: "none",
 }));
+
+export const HoloLayerContainer = styled("div")<{
+  layerOpacity?: number;
+  blendMode?: string;
+  layerZIndex?: number;
+}>(({ layerOpacity = 1, blendMode = "normal", layerZIndex = 1 }) => ({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  opacity: layerOpacity,
+  mixBlendMode: blendMode as React.CSSProperties["mixBlendMode"],
+  pointerEvents: "none",
+  userSelect: "none",
+  zIndex: layerZIndex,
+  overflow: "hidden",
+  borderRadius: "inherit",
+}));
+
+export const HoloLayerImage = styled("img")<{
+  objectFitStyle?: string;
+}>(({ objectFitStyle = "contain" }) => ({
+  width: "100%",
+  height: "100%",
+  objectFit: objectFitStyle as React.CSSProperties["objectFit"],
+  pointerEvents: "none",
+  userSelect: "none",
+  display: "block",
+}));

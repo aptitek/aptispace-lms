@@ -28,6 +28,14 @@ import {
   CardFaceWrapper,
   getDimensions,
 } from "./Id1Card.styles";
+import {
+  getHoloVariant,
+  normalizeHoloLayers,
+  HoloLayersLayer,
+  resolveHoloMasks,
+} from "./Id1Card.holo";
+
+export { normalizeHoloLayers } from "./Id1Card.holo";
 
 function getGuillocheSeed(
   customSeed: string | undefined,
@@ -35,20 +43,6 @@ function getGuillocheSeed(
 ): string {
   if (customSeed) return customSeed;
   return isBack ? "APTI-ID1-BACK" : "APTI-ID1-FRONT";
-}
-
-function getHoloVariant(
-  variant: string | undefined,
-): "default" | "rainbow" | "cosmic" | "gold" {
-  if (variant === "solarized-gold") return "gold";
-  if (
-    variant === "cyber-cyan" ||
-    variant === "cosmic-crimson" ||
-    variant === "deep-space"
-  ) {
-    return "cosmic";
-  }
-  return "rainbow";
 }
 
 function resolveChipView(
@@ -210,41 +204,72 @@ function Id1CardFace({ conf, props, faceSide, dims }: Id1CardFaceProps) {
   const isBack = faceSide === "back";
   const seed = getGuillocheSeed(props.guillocheSeed, isBack);
 
+  const normalizedHoloLayers = useMemo(
+    () =>
+      normalizeHoloLayers({
+        holoLayers: props.holoLayers,
+        holoImage: props.holoImage,
+        holoImageMask: props.holoImageMask,
+        holoImageOpacity: props.holoImageOpacity,
+        holoImageBlendMode: props.holoImageBlendMode,
+        holoImageObjectFit: props.holoImageObjectFit,
+        holoImageSide: props.holoImageSide,
+      }),
+    [
+      props.holoLayers,
+      props.holoImage,
+      props.holoImageMask,
+      props.holoImageOpacity,
+      props.holoImageBlendMode,
+      props.holoImageObjectFit,
+      props.holoImageSide,
+    ],
+  );
+
   const effectiveMaskUrl = useMemo(() => {
-    if (props.maskUrl) return props.maskUrl;
-    if (conf.showGuilloche) {
-      return generateGuillocheMaskDataUrl({
-        seed,
-        density: conf.guillocheDensity,
-        noiseIntensity: conf.guillocheNoiseIntensity,
-      });
-    }
-    return undefined;
+    const guillocheMaskUrl = conf.showGuilloche
+      ? generateGuillocheMaskDataUrl({
+          seed,
+          density: conf.guillocheDensity,
+          noiseIntensity: conf.guillocheNoiseIntensity,
+        })
+      : undefined;
+
+    return resolveHoloMasks({
+      customMaskUrl: props.maskUrl,
+      guillocheMaskUrl,
+      holoLayers: normalizedHoloLayers,
+      faceSide,
+    });
   }, [
     props.maskUrl,
     conf.showGuilloche,
     seed,
     conf.guillocheDensity,
     conf.guillocheNoiseIntensity,
+    normalizedHoloLayers,
+    faceSide,
   ]);
 
   const holoConfig = useMemo(() => {
     if (!conf.holographic) return false;
+    const variantKey = props.holoVariant || conf.guillocheVariant;
     return {
       maskUrl: effectiveMaskUrl,
       maskSize: props.maskSize || "100% 100%",
       maskPosition: props.maskPosition || "center",
       maskRepeat: props.maskRepeat || "no-repeat",
-      variant: getHoloVariant(conf.guillocheVariant),
+      variant: getHoloVariant(variantKey),
       holoStrength: conf.holoStrength,
     };
   }, [
     conf.holographic,
+    props.holoVariant,
+    conf.guillocheVariant,
     effectiveMaskUrl,
     props.maskSize,
     props.maskPosition,
     props.maskRepeat,
-    conf.guillocheVariant,
     conf.holoStrength,
   ]);
 
@@ -288,6 +313,8 @@ function Id1CardFace({ conf, props, faceSide, dims }: Id1CardFaceProps) {
         />
 
         <GuillocheLayer conf={conf} seed={seed} />
+
+        <HoloLayersLayer layers={normalizedHoloLayers} faceSide={faceSide} />
 
         {content && (
           <ContentOverlay isTransparent={conf.transparent}>

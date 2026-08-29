@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import Id1Card from "./Id1Card";
+import Id1Card, { normalizeHoloLayers } from "./Id1Card";
 import { ISO_7810_ID1 } from "./Id1Card.types";
 import { getDimensions } from "./Id1Card.styles";
 
@@ -56,5 +56,114 @@ describe("ISO/IEC 7810 ID-1 Card Molecule", () => {
     };
     expect(rightRotatedProps.chipPosition).toBe("right");
     expect(rightRotatedProps.electronicsRotation).toBe(180);
+  });
+});
+
+describe("Id1Card Holo Layers Feature", () => {
+  it("normalizes convenience holoImage prop with alpha mask by default", () => {
+    const layers = normalizeHoloLayers({
+      holoImage: "/assets/security-seal.png",
+      holoImageOpacity: 0.85,
+      holoImageBlendMode: "overlay",
+      holoImageObjectFit: "contain",
+      holoImageSide: "front",
+    });
+
+    expect(layers).toHaveLength(1);
+    expect(layers[0]).toMatchObject({
+      id: "holo-layer-primary",
+      src: "/assets/security-seal.png",
+      maskUrl: "/assets/security-seal.png", // alpha mask by default
+      opacity: 0.85,
+      blendMode: "overlay",
+      objectFit: "contain",
+      side: "front",
+      holographic: true,
+    });
+  });
+
+  it("supports custom holoImageMask when specified", () => {
+    const layers = normalizeHoloLayers({
+      holoImage: "/assets/badge.png",
+      holoImageMask: "/assets/badge-mask.png",
+    });
+
+    expect(layers).toHaveLength(1);
+    expect(layers[0].src).toBe("/assets/badge.png");
+    expect(layers[0].maskUrl).toBe("/assets/badge-mask.png");
+  });
+
+  it("normalizes string array into Id1HoloLayer array using image alpha as mask", () => {
+    const layers = normalizeHoloLayers({
+      holoLayers: ["/assets/crest.png", "/assets/signature.png"],
+    });
+
+    expect(layers).toHaveLength(2);
+    expect(layers[0]).toMatchObject({
+      src: "/assets/crest.png",
+      maskUrl: "/assets/crest.png",
+      side: "both",
+      holographic: true,
+    });
+    expect(layers[1]).toMatchObject({
+      src: "/assets/signature.png",
+      maskUrl: "/assets/signature.png",
+      side: "both",
+      holographic: true,
+    });
+  });
+
+  it("normalizes mixed layer objects and strings with explicit side and opacity", () => {
+    const layers = normalizeHoloLayers({
+      holoLayers: [
+        "/assets/crest.png",
+        {
+          id: "back-seal",
+          src: "/assets/seal.png",
+          maskUrl: "/assets/seal-holo-mask.png",
+          opacity: 0.7,
+          blendMode: "screen",
+          side: "back",
+          holographic: true,
+        },
+      ],
+    });
+
+    expect(layers).toHaveLength(2);
+    expect(layers[0].side).toBe("both");
+    expect(layers[0].maskUrl).toBe("/assets/crest.png");
+    expect(layers[1]).toMatchObject({
+      id: "back-seal",
+      src: "/assets/seal.png",
+      maskUrl: "/assets/seal-holo-mask.png",
+      opacity: 0.7,
+      blendMode: "screen",
+      side: "back",
+    });
+  });
+
+  it("correctly filters layers by active card face", () => {
+    const layers = normalizeHoloLayers({
+      holoLayers: [
+        { src: "/front-badge.png", side: "front" },
+        { src: "/back-qr.png", side: "back" },
+        { src: "/watermark.png", side: "both" },
+      ],
+    });
+
+    const isFront = (l: { side?: string }) =>
+      l.side === "both" || l.side === "front";
+    const isBack = (l: { side?: string }) =>
+      l.side === "both" || l.side === "back";
+    const getSrc = (l: { src?: string }) => l.src;
+
+    const frontActive = layers.filter(isFront);
+    const backActive = layers.filter(isBack);
+
+    expect(frontActive.map(getSrc)).toEqual([
+      "/front-badge.png",
+      "/watermark.png",
+    ]);
+    expect(backActive.map(getSrc)).toEqual(["/back-qr.png", "/watermark.png"]);
   });
 });

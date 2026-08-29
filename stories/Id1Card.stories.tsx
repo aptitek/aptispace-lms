@@ -107,6 +107,44 @@ const meta: Meta<typeof Id1Card> = {
       description: "Guilloche color theme and iridescent spectrum palette",
       table: { category: "Security Layers" },
     },
+    holoVariant: {
+      control: "select",
+      options: [
+        "holo-spectrum",
+        "cyber-cyan",
+        "solarized-gold",
+        "cosmic-crimson",
+        "rainbow",
+        "cosmic",
+        "gold",
+      ],
+      description: "Holographic foil color variant",
+      table: { category: "Visual Effects" },
+    },
+    holoImage: {
+      control: "text",
+      description:
+        "Image URL for primary Holo Layer (alpha channel masks the holo foil)",
+      table: { category: "Holo Layers" },
+    },
+    holoImageOpacity: {
+      control: { type: "range", min: 0, max: 1, step: 0.05 },
+      description: "Visual opacity of the holo image layer",
+      table: { category: "Holo Layers" },
+    },
+    holoImageBlendMode: {
+      control: "select",
+      options: [
+        "normal",
+        "overlay",
+        "screen",
+        "multiply",
+        "color-dodge",
+        "luminosity",
+      ],
+      description: "CSS mix-blend-mode for the holo image layer",
+      table: { category: "Holo Layers" },
+    },
   },
   args: {
     side: "front",

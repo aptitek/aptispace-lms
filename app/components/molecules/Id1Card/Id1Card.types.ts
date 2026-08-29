@@ -8,6 +8,40 @@ export type Id1CardOrientation = "landscape" | "portrait";
 export type Id1CardSize = "sm" | "md" | "lg" | "responsive";
 export type Id1CardFlipDirection = "horizontal" | "vertical";
 
+export type Id1HoloVariant =
+  | "holo-spectrum"
+  | "cyber-cyan"
+  | "solarized-gold"
+  | "cosmic-crimson"
+  | "default"
+  | "rainbow"
+  | "cosmic"
+  | "gold";
+
+/**
+ * Configuration for an image-based Holographic Layer on the ID-1 card.
+ * An image is rendered visually and its alpha transparency (or a custom mask) masks the holo foil reflection.
+ */
+export interface Id1HoloLayer {
+  id?: string;
+  src?: string;
+  maskUrl?: string; // If omitted, defaults to src (alpha mask)
+  alt?: string;
+  opacity?: number;
+  blendMode?: React.CSSProperties["mixBlendMode"];
+  objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
+  position?: string;
+  className?: string;
+  style?: React.CSSProperties;
+  side?: Id1CardSide | "both";
+  zIndex?: number;
+  holographic?: boolean;
+  holoStrength?: number;
+  maskSize?: string;
+  maskPosition?: string;
+  maskRepeat?: string;
+}
+
 /**
  * Props for the Id1Card molecule.
  * Handles the physical ID-1 substrate, security features, 3D effects, and content slots.
@@ -40,12 +74,22 @@ export interface Id1CardProps {
   // Deck-FX 3D Physics & Visuals
   holographic?: boolean;
   holoStrength?: number;
+  holoVariant?: Id1HoloVariant;
   showGlare?: boolean;
   glareOpacity?: number;
   maxTilt?: number;
   scaleOnHover?: number;
   shadow?: CardShadow;
   layers?: CardLayer[];
+
+  // Holo Layers (Image layer whose alpha masks holo reflection)
+  holoLayers?: (string | Id1HoloLayer)[];
+  holoImage?: string;
+  holoImageMask?: string;
+  holoImageOpacity?: number;
+  holoImageBlendMode?: React.CSSProperties["mixBlendMode"];
+  holoImageObjectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
+  holoImageSide?: Id1CardSide | "both";
 
   // Masking Properties (Guilloche / Custom Mask reflects Holo)
   maskUrl?: string;
