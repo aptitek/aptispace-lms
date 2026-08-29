@@ -478,7 +478,6 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
         showChip={true}
         frontChipView="none"
         backChipView="front"
-        backElectronicsRotation={180}
         showNfcAntenna={true}
         showInnerCoil={true}
         className={className}

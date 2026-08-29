@@ -25,6 +25,7 @@ import type {
   IdCardOrientation,
   IdCardSize,
   IdCardFlipDirection,
+  IdHoloLayer,
 } from "./IdCard.types";
 import {
   CardFaceContainer,
@@ -83,6 +84,7 @@ interface ReverseGhostLayerProps {
   isVertical: boolean;
   opacity: number;
   renderGhostContent?: (side: IdCardSide) => ReactNode;
+  holoLayers?: IdHoloLayer[];
 }
 
 function ReverseGhostLayer({
@@ -91,10 +93,14 @@ function ReverseGhostLayer({
   isVertical,
   opacity,
   renderGhostContent,
+  holoLayers,
 }: ReverseGhostLayerProps) {
-  if (!isTransparent || !renderGhostContent) return null;
+  if (!isTransparent) return null;
 
   const reverseSide = faceSide === "front" ? "back" : "front";
+
+  if (!renderGhostContent && (!holoLayers || holoLayers.length === 0))
+    return null;
 
   return (
     <TransparentGhostOverlay
@@ -102,7 +108,10 @@ function ReverseGhostLayer({
       isVertical={isVertical}
       opacity={opacity}
     >
-      {renderGhostContent(reverseSide)}
+      {holoLayers && (
+        <HoloLayersLayer layers={holoLayers} faceSide={reverseSide} />
+      )}
+      {renderGhostContent?.(reverseSide)}
     </TransparentGhostOverlay>
   );
 }
@@ -333,6 +342,7 @@ function IdCardFace({ conf, props, faceSide, dims }: IdCardFaceProps) {
             props.transparentGhostOpacity ?? conf.transparentGhostOpacity
           }
           renderGhostContent={props.renderGhostContent}
+          holoLayers={normalizedHoloLayers}
         />
 
         <GuillocheLayer conf={conf} seed={seed} />
