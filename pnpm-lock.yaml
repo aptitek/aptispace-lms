@@ -73,6 +73,9 @@ importers:
       react-i18next:
         specifier: ^17.0.12
         version: 17.0.12(i18next@26.4.0(typescript@5.9.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.9.3)
+      react-material-expressive:
+        specifier: ^1.1.2
+        version: 1.1.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-router:
         specifier: ^8
         version: 8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -7494,6 +7497,16 @@ packages:
         integrity: sha512-s5un28nYxKJw5gvUHyW5PCC28CvBqLu9r3cWgzHT4Vo/5fqqkFcdRYsGcKf50WMPpjjFZS5d76fn3YCo2njKwQ==,
       }
 
+  react-material-expressive@1.1.2:
+    resolution:
+      {
+        integrity: sha512-op8vlOnQ95nhSK8uAkKDoapeNsNTL1k55+LFBErgngBICifQy+33tpOCDv9rLTw/7Ltk2kVDLfX+xAOU/VUvWw==,
+      }
+    engines: { node: ">=20" }
+    peerDependencies:
+      react: ">=19.0.0"
+      react-dom: ">=19.0.0"
+
   react-refresh@0.18.0:
     resolution:
       {
@@ -8072,6 +8085,12 @@ packages:
     resolution:
       {
         integrity: sha512-Oo6tHdpZsGpkKG88HJ8RR1rg/RdnEkQEfMoEk2x1XRI3F1AxeU+ijRXpiVUF4UbLfcxxRGw6TbUINKYdWVsQTQ==,
+      }
+
+  tailwind-merge@3.6.0:
+    resolution:
+      {
+        integrity: sha512-uxL7qAVQriqRQPAyK3pj66VqskWqoZ37PW94jwOTwNfq/z9oyu1V+eqrZqtR2+fCiXdYOZe/Modt8GtvqNzu+w==,
       }
 
   tailwindcss@4.3.3:
@@ -13138,6 +13157,13 @@ snapshots:
 
   react-is@19.2.8: {}
 
+  react-material-expressive@1.1.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+    dependencies:
+      clsx: 2.1.1
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      tailwind-merge: 3.6.0
+
   react-refresh@0.18.0: {}
 
   react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
@@ -13580,6 +13606,8 @@ snapshots:
       react: 19.2.8
 
   tailwind-merge@2.6.1: {}
+
+  tailwind-merge@3.6.0: {}
 
   tailwindcss@4.3.3: {}
 

@@ -2,12 +2,12 @@ import type { ReactNode } from "react";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useTranslation } from "react-i18next";
 import Logo from "../../atoms/Logo/Logo";
 import LanguageToggle from "../../atoms/LanguageToggle/LanguageToggle";
 import ThemeToggle from "../../atoms/ThemeToggle/ThemeToggle";
-import RoleChip from "../../atoms/RoleChip/RoleChip";
 import { logout, type AuthUser } from "../../../utils/auth";
 
 export type HeaderMode = "subtle" | "full";
@@ -126,7 +126,20 @@ export default function Header({
         {user && (
           <UserBadge data-testid="header-user-badge">
             <span>{user.name}</span>
-            <RoleChip role={user.role} size="small" />
+            <Chip
+              color={
+                user.role === "admin"
+                  ? "warning"
+                  : user.role === "instructor"
+                    ? "info"
+                    : "success"
+              }
+              variant="outlined"
+              label={user.role}
+              size="small"
+              sx={{ fontWeight: 700 }}
+              data-testid={`role-chip-${user.role}`}
+            />
           </UserBadge>
         )}
 

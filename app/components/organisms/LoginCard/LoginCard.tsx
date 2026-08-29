@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { styled } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
+import Button from "@mui/material/Button";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import { LoadingIndicator } from "react-material-expressive";
 import Logo from "~/components/atoms/Logo/Logo";
-import GitHubButton from "~/components/atoms/GitHubButton/GitHubButton";
 import DevImpersonator from "~/components/molecules/DevImpersonator/DevImpersonator";
 import {
   loginWithGitHub,
@@ -141,7 +143,25 @@ export default function LoginCard({
       )}
 
       <ActionSection>
-        <GitHubButton onClick={handleGitHubLogin} loading={loading} fullWidth />
+        <Button
+          type="button"
+          variant="outlined"
+          fullWidth
+          disabled={loading}
+          aria-busy={loading}
+          onClick={handleGitHubLogin}
+          startIcon={
+            loading ? (
+              <LoadingIndicator className="!size-5 [&>svg]:!size-5" />
+            ) : (
+              <GitHubIcon />
+            )
+          }
+        >
+          {loading
+            ? t("loginCard.authenticating")
+            : t("loginCard.continueWithGitHub")}
+        </Button>
 
         <SecurityNote>
           <LockOutlinedIcon />

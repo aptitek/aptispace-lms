@@ -6,7 +6,6 @@ import Typography from "@mui/material/Typography";
 import ButtonBase from "@mui/material/ButtonBase";
 import Chip from "@mui/material/Chip";
 import { useTranslation } from "react-i18next";
-import RoleChip from "~/components/atoms/RoleChip/RoleChip";
 import {
   DEV_PERSONAS,
   type PersonaDefinition,
@@ -184,7 +183,19 @@ export default function DevImpersonator({
               <PersonaDetails>
                 <PersonaName>
                   <span>{translatedName}</span>
-                  <RoleChip role={persona.role} label={translatedBadge} />
+                  <Chip
+                    color={
+                      persona.role === "admin"
+                        ? "warning"
+                        : persona.role === "instructor"
+                          ? "info"
+                          : "success"
+                    }
+                    variant="outlined"
+                    label={translatedBadge}
+                    size="small"
+                    sx={{ fontWeight: 700 }}
+                  />
                 </PersonaName>
                 <PersonaEmail variant="caption">{persona.email}</PersonaEmail>
               </PersonaDetails>

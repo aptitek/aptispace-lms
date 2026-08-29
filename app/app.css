@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./tokens/tokens.css";
+@import "react-material-expressive/styles.css";
 
 @font-face {
   font-family: "Milkshake";

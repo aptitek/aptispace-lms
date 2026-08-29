@@ -16,7 +16,7 @@ import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import LinkIcon from "@mui/icons-material/Link";
-import CircularProgress from "@mui/material/CircularProgress";
+import { LoadingIndicator } from "react-material-expressive";
 import Tooltip from "@mui/material/Tooltip";
 import Avatar from "../../atoms/Avatar";
 import type {
@@ -151,7 +151,7 @@ function AvatarInputBar(props: AvatarInputBarProps) {
 
       <InputPrefixIconHolder>
         {props.isUploading ? (
-          <CircularProgress size={16} color="primary" />
+          <LoadingIndicator className="!size-4 [&>svg]:!size-4" />
         ) : (
           <LinkIcon sx={{ fontSize: "18px" }} />
         )}
