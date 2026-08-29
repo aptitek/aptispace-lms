@@ -315,7 +315,7 @@ function CardBackFace({ school, profile }: BackFaceProps) {
       <FullWidthMrzHolder>
         <MrzZone
           cardData={mrzData}
-          compact={true}
+          compact={false}
           darkOnLight={true}
           fullWidth={true}
           testId="full-width-mrz-zone"
@@ -337,7 +337,7 @@ function buildHoloLayers(
       src: schoolLogoUrl,
       side: "front",
       left: "3%",
-      top: "2.8%",
+      top: "8%",
       width: "28%",
       height: "9%",
       objectFit: "contain",
@@ -351,10 +351,10 @@ function buildHoloLayers(
     id: "aptispace-holo-logo",
     src: aptispaceLogoRaw,
     side: "back",
-    left: "28%",
-    top: "12%",
-    width: "52%",
-    height: "22%",
+    left: "15%",
+    top: "10%",
+    width: "70%",
+    height: "28%",
     objectFit: "contain",
     blendMode: "normal",
     opacity: 0.7,
