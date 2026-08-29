@@ -6,8 +6,77 @@ import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
 import boundariesPlugin from "eslint-plugin-boundaries";
 import vitestPlugin from "@vitest/eslint-plugin";
 import storybookPlugin from "eslint-plugin-storybook";
+import cssPlugin from "@eslint/css";
 import prettierConfig from "eslint-config-prettier";
 import globals from "globals";
+
+const HEX_COLOR_PATTERN = /#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/;
+const RAW_COLOR_FN_PATTERN = /\b(rgba?|hsla?|hwb|lab|lch|oklab|oklch)\s*\(/i;
+
+const cssTokensPlugin = {
+  meta: {
+    name: "eslint-plugin-css-tokens",
+  },
+  rules: {
+    "no-raw-colors": {
+      meta: {
+        type: "problem",
+        docs: {
+          description:
+            "Disallow raw #hex or rgba()/rgb() colors in CSS files that are not base tokens.",
+          recommended: true,
+        },
+        messages: {
+          noRawHex:
+            "Hardcoded hex color '{{value}}' detected in CSS. Use design tokens (e.g. var(--color-*)) instead.",
+          noRawColorFn:
+            "Hardcoded '{{func}}()' color detected in CSS. Use design tokens (e.g. var(--color-*)) instead.",
+        },
+      },
+      create(context) {
+        return {
+          Hash(node) {
+            context.report({
+              loc: node.loc,
+              messageId: "noRawHex",
+              data: { value: `#${node.value}` },
+            });
+          },
+          Function(node) {
+            if (/^(rgba?|hsla?|hwb|lab|lch|oklab|oklch)$/i.test(node.name)) {
+              context.report({
+                loc: node.loc,
+                messageId: "noRawColorFn",
+                data: { func: node.name },
+              });
+            }
+          },
+          Declaration(node) {
+            if (node.value && node.value.type === "Raw") {
+              const rawVal = node.value.value || "";
+              const hexMatch = HEX_COLOR_PATTERN.exec(rawVal);
+              if (hexMatch) {
+                context.report({
+                  loc: node.loc,
+                  messageId: "noRawHex",
+                  data: { value: hexMatch[0] },
+                });
+              }
+              const fnMatch = RAW_COLOR_FN_PATTERN.exec(rawVal);
+              if (fnMatch) {
+                context.report({
+                  loc: node.loc,
+                  messageId: "noRawColorFn",
+                  data: { func: fnMatch[1] },
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+  },
+};
 
 export default tseslint.config(
   // 1. Global Ignores
@@ -26,9 +95,15 @@ export default tseslint.config(
     ],
   },
 
-  // 2. Base JS & TS Recommended Configuration
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
+  // 2. Base JS & TS Recommended Configuration (scoped to JS/TS files)
+  {
+    ...js.configs.recommended,
+    files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+  },
+  ...tseslint.configs.recommended.map((cfg) => ({
+    ...cfg,
+    files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+  })),
 
   // 3. Global Language Options & Settings
   {
@@ -470,9 +545,37 @@ export default tseslint.config(
     rules: {
       "no-restricted-syntax": "off",
       complexity: "off",
+      "id-denylist": "off",
+      "max-lines": "off",
     },
   },
 
-  // 9. Prettier configuration
+  // 9. CSS Linting & Design Token Enforcement
+  {
+    files: ["**/*.css"],
+    language: "css/css",
+    plugins: {
+      css: cssPlugin,
+      "css-tokens": cssTokensPlugin,
+    },
+    rules: {
+      "css-tokens/no-raw-colors": "error",
+    },
+  },
+
+  // 10. CSS Base Tokens Overrides (allowed in token/theme definition files)
+  {
+    files: [
+      "app/tokens/**",
+      "**/tokens/**",
+      "**/*token*.css",
+      "**/*theme*.css",
+    ],
+    rules: {
+      "css-tokens/no-raw-colors": "off",
+    },
+  },
+
+  // 11. Prettier configuration
   prettierConfig,
 );
