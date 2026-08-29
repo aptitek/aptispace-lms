@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
-  deckfx: cd5ab824414beb98987c8b8e97068dba1a044fe2aa58f0f083c62afb466ae1c2
+  deckfx@1.0.1: cd5ab824414beb98987c8b8e97068dba1a044fe2aa58f0f083c62afb466ae1c2
 
 importers:
   .:

@@ -1,0 +1,443 @@
+diff --git a/dist/Card.d.ts b/dist/Card.d.ts
+index 8d3bf716e41293a1a402d90db5d278c8f2796227..57c53ca10b4474e0e1f23d4448c66b02f7ff3130 100644
+--- a/dist/Card.d.ts
++++ b/dist/Card.d.ts
+@@ -7,6 +7,47 @@ export type FlipDirection = "horizontal" | "vertical";
+ export interface CardRef {
+     flipTo: (faceUp: boolean) => void;
+ }
++export interface HolographicOptions {
++    variant?: "default" | "gold" | "rainbow" | "cosmic";
++    holoStrength?: number;
++    holoStrengh?: number;
++    strength?: number;
++    intensity?: number;
++    maskUrl?: string;
++    maskSize?: string;
++    maskPosition?: string;
++    maskRepeat?: string;
++    patternUrl?: string;
++    patternSize?: string;
++    patternOpacity?: number;
++    watermarkUrl?: string;
++    watermarkOpacity?: number;
++    showGlareSweep?: boolean;
++    blendMode?: React.CSSProperties['mixBlendMode'];
++}
++export interface CardLayer {
++    id?: string;
++    name?: string;
++    src?: string;
++    content?: React.ReactNode;
++    children?: React.ReactNode;
++    className?: string;
++    style?: React.CSSProperties;
++    zIndex?: number;
++    opacity?: number;
++    blendMode?: React.CSSProperties['mixBlendMode'];
++    parallax?: boolean | number;
++    holographic?: boolean | HolographicOptions;
++    holoStrength?: number;
++    holoStrengh?: number;
++    maskUrl?: string;
++    maskSize?: string;
++    maskPosition?: string;
++    maskRepeat?: string;
++    patternUrl?: string;
++    patternSize?: string;
++    patternOpacity?: number;
++}
+ interface CardProps extends Omit<HTMLMotionProps<"div">, "children" | "onClick" | "onSelect"> {
+     children?: React.ReactNode;
+     className?: string;
+@@ -45,6 +86,11 @@ interface CardProps extends Omit<HTMLMotionProps<"div">, "children" | "onClick"
+     stackId?: string;
+     stackOrder?: number;
+     isStackTop?: boolean;
++    holographic?: boolean | HolographicOptions;
++    holographicOptions?: HolographicOptions;
++    holoStrength?: number;
++    holoStrengh?: number;
++    layers?: CardLayer[];
+ }
+ export declare const Card: React.ForwardRefExoticComponent<Omit<CardProps, "ref"> & React.RefAttributes<CardRef>>;
+ export {};
+diff --git a/dist/deckfx.es.js b/dist/deckfx.es.js
+index 973369ce27208f871bc6ee4e85b51bb2662cd75b..4e512ccaff76802bd918ba9c65fd541f5d9acd84 100644
+--- a/dist/deckfx.es.js
++++ b/dist/deckfx.es.js
+@@ -1,4 +1,5 @@
+ import F, { createContext as Dt, useContext as Ft, useRef as ut, useState as J, useImperativeHandle as Ht, useEffect as ft, useMemo as Be, useCallback as de } from "react";
++import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+ import { motion as ee, useMotionValue as Ot, useSpring as dt, useTransform as We, useMotionTemplate as Kt, AnimatePresence as ot } from "framer-motion";
+ import { X as Jt, Search as Pt } from "lucide-react";
+ import { Canvas as Zt, useFrame as er } from "@react-three/fiber";
+@@ -18,7 +19,7 @@ var It;
+ function sr() {
+   if (It) return Ze;
+   It = 1;
+-  var t = F, r = Symbol.for("react.element"), n = Symbol.for("react.fragment"), o = Object.prototype.hasOwnProperty, i = t.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner, s = { key: !0, ref: !0, __self: !0, __source: !0 };
++  var t = F, r = Symbol.for("react.element"), n = Symbol.for("react.fragment"), o = Object.prototype.hasOwnProperty, i = (t.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED || t.__CLIENT_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED || {}).ReactCurrentOwner || {}, s = { key: !0, ref: !0, __self: !0, __source: !0 };
+   function p(f, a, l) {
+     var c, g = {}, m = null, v = null;
+     l !== void 0 && (m = "" + l), a.key !== void 0 && (m = "" + a.key), a.ref !== void 0 && (v = a.ref);
+@@ -48,7 +49,7 @@ function ar() {
+       var d = y && e[y] || e[h];
+       return typeof d == "function" ? d : null;
+     }
+-    var E = t.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
++    var E = t.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED || t.__CLIENT_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED || {};
+     function w(e) {
+       {
+         for (var d = arguments.length, b = new Array(d > 1 ? d - 1 : 0), j = 1; j < d; j++)
+@@ -58,7 +59,7 @@ function ar() {
+     }
+     function V(e, d, b) {
+       {
+-        var j = E.ReactDebugCurrentFrame, z = j.getStackAddendum();
++        var j = (E && E.ReactDebugCurrentFrame) || { getStackAddendum: () => "" }, z = (j && typeof j.getStackAddendum === "function") ? j.getStackAddendum() : "";
+         z !== "" && (d += "%s", b = b.concat([z]));
+         var I = b.map(function(_) {
+           return String(_);
+@@ -192,7 +193,7 @@ function ar() {
+         ie < 0 && w("disabledDepth fell below zero. This is a bug in React. Please file an issue.");
+       }
+     }
+-    var oe = E.ReactCurrentDispatcher, ge;
++    var oe = (E && (E.ReactCurrentDispatcher || E.H)) || { current: null }, ge;
+     function Se(e, d, b) {
+       {
+         if (ge === void 0)
+@@ -369,7 +370,7 @@ function ar() {
+       if (Ne(e))
+         return w("The provided key is an unsupported type %s. This value must be coerced to a string before before using it here.", Oe(e)), Qe(e);
+     }
+-    var Me = E.ReactCurrentOwner, qe = {
++    var Me = (E && (E.ReactCurrentOwner || E.A)) || { current: null }, qe = {
+       key: !0,
+       ref: !0,
+       __self: !0,
+@@ -392,7 +393,10 @@ function ar() {
+       return e.key !== void 0;
+     }
+     function mt(e, d) {
+-      typeof e.ref == "string" && Me.current;
++      if (typeof e.ref == "string" && Me.current && d && Me.current.stateNode !== d) {
++        var b = T(Me.current.type);
++        He[b] || (w('Component "%s" contains the string ref "%s". Support for string refs will be removed in a future major release. This case cannot be automatically converted to an arrow function. We ask you to manually fix this case by using useRef() or createRef() instead. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-string-ref', T(Me.current.type), e.ref), He[b] = !0);
++      }
+     }
+     function bt(e, d) {
+       {
+@@ -408,7 +412,7 @@ function ar() {
+     function ht(e, d) {
+       {
+         var b = function() {
+-          He || (He = !0, w("%s: `ref` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://reactjs.org/link/special-props)", d));
++          Je || (Je = !0, w("%s: `ref` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://reactjs.org/link/special-props)", d));
+         };
+         b.isReactWarning = !0, Object.defineProperty(e, "ref", {
+           get: b,
+@@ -460,10 +464,10 @@ function ar() {
+           var X = typeof e == "function" ? e.displayName || e.name || "Unknown" : e;
+           C && bt(_, X), ce && ht(_, X);
+         }
+-        return vt(e, C, ce, z, j, Me.current, _);
++        return vt(e, C, ce, z, j, (Me && Me.current) || null, _);
+       }
+     }
+-    var Ke = E.ReactCurrentOwner, st = E.ReactDebugCurrentFrame;
++    var Ke = (E && (E.ReactCurrentOwner || E.A)) || { current: null }, st = (E && E.ReactDebugCurrentFrame) || { setExtraStackFrame: () => {} };
+     function Pe(e) {
+       if (e) {
+         var d = e._owner, b = se(e.type, e._source, d ? d.type : null);
+@@ -628,8 +632,7 @@ React keys must be passed directly to JSX without using spread:
+     et.Fragment = o, et.jsx = Ee, et.jsxs = Le;
+   }()), et;
+ }
+-process.env.NODE_ENV === "production" ? Ct.exports = sr() : Ct.exports = ar();
+-var u = Ct.exports;
++var u = { jsx: _jsx, jsxs: _jsxs, Fragment: _Fragment };
+ function $t(t) {
+   var r, n, o = "";
+   if (typeof t == "string" || typeof t == "number") o += t;
+@@ -3000,9 +3003,45 @@ const Xt = Dt(void 0), zt = () => Ft(Xt), Qt = Dt(void 0), $r = () => Ft(Qt), Lr
+   onSelect: ie,
+   counters: Z = [],
+   renderCounter: le,
++  holographic: holoProp = !1,
++  holographicOptions: holoOptionsProp = {},
++  holoStrength: holoStrengthProp,
++  holoStrengh: holoStrenghProp,
++  layers = [],
+   ...G
+ }, q) => {
+   const re = ut(null), Y = q || re, [be, xe] = J(!1), [je, pe] = J(!1), [oe, ge] = J(!1), [Se, Re] = J(""), [he, U] = J(p), [H, ke] = J(!1), ne = ut(null), se = zt(), we = M || (se == null ? void 0 : se.config.onValidateDragStart), Ce = A || (se == null ? void 0 : se.config.onValidateDragEnd), me = te || (se == null ? void 0 : se.config.onValidationError), ue = Q || G.layoutId || "card", ve = $r(), _e = W !== void 0 ? W : ve && ue ? ve.isSelected(ue) : !1, Te = Ot(0), Oe = Ot(0), Ne = dt(Te, { stiffness: 300, damping: 30 }), Qe = dt(Oe, { stiffness: 300, damping: 30 }), nt = T ? { stiffness: 1e3 / T, damping: 30 } : { stiffness: 200, damping: 20 }, Me = dt(he ? 0 : 180, nt), qe = dt(x, { stiffness: 200, damping: 20 });
++  const isHolo = !!holoProp,
++    holoConfig = typeof holoProp === "object" ? holoProp : holoOptionsProp || {},
++    rawCardStrength = holoStrengthProp !== void 0 ? holoStrengthProp : (holoStrenghProp !== void 0 ? holoStrenghProp : (holoConfig.holoStrength !== void 0 ? holoConfig.holoStrength : (holoConfig.holoStrengh !== void 0 ? holoConfig.holoStrengh : (holoConfig.strength !== void 0 ? holoConfig.strength : (holoConfig.intensity !== void 0 ? holoConfig.intensity : 1))))),
++    holoIntensity = typeof rawCardStrength === "number" ? rawCardStrength : 1,
++    holoVariant = holoConfig.variant || "default",
++    holoCardMask = holoConfig.maskUrl,
++    holoCardMaskSize = holoConfig.maskSize || "contain",
++    holoCardMaskPosition = holoConfig.maskPosition || "center",
++    holoCardMaskRepeat = holoConfig.maskRepeat || "no-repeat",
++    holoCardMaskStyle = holoCardMask ? {
++      WebkitMaskImage: `url(${holoCardMask})`,
++      maskImage: `url(${holoCardMask})`,
++      WebkitMaskSize: holoCardMaskSize,
++      maskSize: holoCardMaskSize,
++      WebkitMaskPosition: holoCardMaskPosition,
++      maskPosition: holoCardMaskPosition,
++      WebkitMaskRepeat: holoCardMaskRepeat,
++      maskRepeat: holoCardMaskRepeat,
++      WebkitMaskMode: "alpha",
++      maskMode: "alpha"
++    } : {},
++    holoAngle = We(Ne, [-0.5, 0.5], [75, 165]),
++    holoSpotX = We(Ne, [-0.5, 0.5], [15, 85]),
++    holoSpotY = We(Qe, [-0.5, 0.5], [15, 85]),
++    holoSpot2X = We(Ne, [-0.5, 0.5], [85, 15]),
++    holoSpot2Y = We(Qe, [-0.5, 0.5], [85, 15]),
++    holoSheenPos = We(Ne, [-0.5, 0.5], [15, 85]),
++    holoSpectrum = Kt`linear-gradient(${holoAngle}deg, rgba(255,107,157,0.7) 0%, rgba(255,184,77,0.7) 18%, rgba(87,235,160,0.7) 36%, rgba(77,208,255,0.7) 54%, rgba(168,107,255,0.7) 72%, rgba(255,107,184,0.7) 90%, rgba(255,107,157,0.7) 100%)`,
++    holoFocal1 = Kt`radial-gradient(circle at ${holoSpotX}% ${holoSpotY}%, rgba(255,255,255,${holoIntensity * 0.7}) 0%, rgba(120,220,255,${holoIntensity * 0.45}) 25%, rgba(255,120,200,${holoIntensity * 0.2}) 50%, transparent 70%)`,
++    holoFocal2 = Kt`radial-gradient(circle at ${holoSpot2X}% ${holoSpot2Y}%, rgba(255,240,160,${holoIntensity * 0.4}) 0%, rgba(140,255,200,${holoIntensity * 0.2}) 30%, transparent 65%)`,
++    holoGlareSheen = Kt`linear-gradient(135deg, transparent 0%, transparent 35%, rgba(255,255,255,0.04) 42%, rgba(255,255,255,${holoIntensity * 0.65}) ${holoSheenPos}%, rgba(255,255,255,0.04) 58%, transparent 65%, transparent 100%)`;
+   Ht(q, () => ({
+     flipTo: (P) => {
+       if (H) return;
+@@ -3110,7 +3149,7 @@ const Xt = Dt(void 0), zt = () => Ft(Xt), Qt = Dt(void 0), $r = () => Ft(Qt), Lr
+         {
+           ref: re,
+           className: ae(
+-            "w-full h-full rounded-xl bg-card border border-border/50 bg-white dark:bg-slate-950",
++            "w-full h-full rounded-xl bg-transparent border border-border/50",
+             Yr[c] || c,
+             "transform-style-3d transition-shadow duration-200",
+             (a || _e) && "ring-4 ring-blue-500 ring-offset-2 ring-offset-slate-900 dark:ring-offset-slate-950",
+@@ -3127,7 +3166,7 @@ const Xt = Dt(void 0), zt = () => Ft(Xt), Qt = Dt(void 0), $r = () => Ft(Qt), Lr
+             /* @__PURE__ */ u.jsxs(
+               "div",
+               {
+-                className: "absolute inset-0 backface-hidden rounded-xl overflow-hidden bg-white dark:bg-slate-950",
++                className: "absolute inset-0 backface-hidden rounded-xl overflow-hidden bg-transparent",
+                 style: { backfaceVisibility: "hidden" },
+                 children: [
+                   s && /* @__PURE__ */ u.jsx(
+@@ -3135,11 +3174,200 @@ const Xt = Dt(void 0), zt = () => Ft(Xt), Qt = Dt(void 0), $r = () => Ft(Qt), Lr
+                     {
+                       src: s,
+                       alt: "Card Art",
+-                      className: "w-full h-full object-cover pointer-events-none select-none",
++                      className: "w-full h-full object-cover pointer-events-none select-none rounded-[inherit]",
+                       draggable: !1
+                     }
+                   ),
+-                  s ? t : /* @__PURE__ */ u.jsx("div", { className: "w-full h-full p-4 flex flex-col", children: t }),
++                  t,
++                  layers && layers.length > 0 && layers.map((layer, idx) => {
++                    const pDepth = typeof layer.parallax === "number" ? layer.parallax : layer.parallax ? 15 : 0;
++                    const absDepth = Math.abs(pDepth);
++                    const bleed = absDepth > 0 ? absDepth + 4 : 0;
++                    const lHolo = !!layer.holographic;
++                    const lHoloConfig = typeof layer.holographic === "object" ? layer.holographic : {};
++                    const lRawStrength = layer.holoStrength !== void 0 ? layer.holoStrength : (layer.holoStrengh !== void 0 ? layer.holoStrengh : (lHoloConfig.holoStrength !== void 0 ? lHoloConfig.holoStrength : (lHoloConfig.holoStrengh !== void 0 ? lHoloConfig.holoStrengh : (lHoloConfig.strength !== void 0 ? lHoloConfig.strength : (lHoloConfig.intensity !== void 0 ? lHoloConfig.intensity : holoIntensity)))));
++                    const lIntensity = typeof lRawStrength === "number" ? lRawStrength : 1;
++                    const lVariant = lHoloConfig.variant || "default";
++                    const lMask = layer.maskUrl || lHoloConfig.maskUrl;
++                    const lMaskSize = layer.maskSize || lHoloConfig.maskSize || "contain";
++                    const lMaskPosition = layer.maskPosition || lHoloConfig.maskPosition || "center";
++                    const lMaskRepeat = layer.maskRepeat || lHoloConfig.maskRepeat || "no-repeat";
++                    const lMaskStyle = lMask ? {
++                      WebkitMaskImage: `url(${lMask})`,
++                      maskImage: `url(${lMask})`,
++                      WebkitMaskSize: lMaskSize,
++                      maskSize: lMaskSize,
++                      WebkitMaskPosition: lMaskPosition,
++                      maskPosition: lMaskPosition,
++                      WebkitMaskRepeat: lMaskRepeat,
++                      maskRepeat: lMaskRepeat,
++                      WebkitMaskMode: "alpha",
++                      maskMode: "alpha"
++                    } : {};
++                    return /* @__PURE__ */ u.jsxs(ee.div, {
++                      className: ae("pointer-events-none rounded-[inherit] overflow-hidden", layer.className),
++                      style: {
++                        position: "absolute",
++                        isolation: "isolate",
++                        zIndex: layer.zIndex !== void 0 ? layer.zIndex : idx + 12,
++                        opacity: layer.opacity,
++                        mixBlendMode: layer.blendMode,
++                        top: bleed ? `-${bleed}px` : 0,
++                        left: bleed ? `-${bleed}px` : 0,
++                        width: bleed ? `calc(100% + ${bleed * 2}px)` : "100%",
++                        height: bleed ? `calc(100% + ${bleed * 2}px)` : "100%",
++                        x: pDepth ? We(Ne, [-0.5, 0.5], [-pDepth, pDepth]) : void 0,
++                        y: pDepth ? We(Qe, [-0.5, 0.5], [-pDepth, pDepth]) : void 0,
++                        ...layer.style
++                      },
++                      children: [
++                        layer.src && /* @__PURE__ */ u.jsx("img", {
++                          src: layer.src,
++                          alt: layer.name || `Layer ${idx}`,
++                          className: "w-full h-full object-cover select-none pointer-events-none rounded-[inherit]",
++                          draggable: !1
++                        }),
++                        layer.content || layer.children,
++                        lHolo && /* @__PURE__ */ u.jsxs(ee.div, {
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit] overflow-hidden z-15",
++                          style: {
++                            opacity: (be ? 1 : 0.45) * Math.min(1, Math.max(0, lIntensity)),
++                            transition: "opacity 0.2s ease-out",
++                            isolation: "isolate",
++                            mixBlendMode: lHoloConfig.blendMode || "color-dodge",
++                            ...lMaskStyle
++                          },
++                          children: [
++                            /* @__PURE__ */ u.jsx(ee.div, {
++                              className: "absolute inset-0 pointer-events-none rounded-[inherit]",
++                              style: {
++                                background: holoSpectrum,
++                                filter: `saturate(${lIntensity * 1.5}) ${lVariant === "cosmic" ? "hue-rotate(90deg)" : lVariant === "gold" ? "hue-rotate(45deg)" : ""}`,
++                                opacity: 0.85,
++                                mixBlendMode: "color-dodge"
++                              }
++                            }),
++                            /* @__PURE__ */ u.jsx(ee.div, {
++                              className: "absolute inset-0 pointer-events-none rounded-[inherit]",
++                              style: {
++                                background: holoFocal1,
++                                filter: lVariant === "cosmic" ? "hue-rotate(90deg)" : lVariant === "gold" ? "hue-rotate(45deg)" : void 0,
++                                mixBlendMode: "screen",
++                                opacity: 0.9
++                              }
++                            }),
++                            /* @__PURE__ */ u.jsx(ee.div, {
++                              className: "absolute inset-0 pointer-events-none rounded-[inherit]",
++                              style: {
++                                background: holoFocal2,
++                                filter: lVariant === "cosmic" ? "hue-rotate(90deg)" : lVariant === "gold" ? "hue-rotate(45deg)" : void 0,
++                                mixBlendMode: "screen",
++                                opacity: 0.75
++                              }
++                            }),
++                            (layer.patternUrl || lHoloConfig.patternUrl) && /* @__PURE__ */ u.jsx("div", {
++                              className: "absolute inset-0 pointer-events-none rounded-[inherit]",
++                              style: {
++                                backgroundImage: `url(${layer.patternUrl || lHoloConfig.patternUrl})`,
++                                backgroundSize: layer.patternSize || lHoloConfig.patternSize || "24px",
++                                backgroundRepeat: "repeat",
++                                opacity: layer.patternOpacity !== void 0 ? layer.patternOpacity : (lHoloConfig.patternOpacity !== void 0 ? lHoloConfig.patternOpacity : 0.4),
++                                mixBlendMode: "overlay"
++                              }
++                            }),
++                            lHoloConfig.watermarkUrl && /* @__PURE__ */ u.jsx("div", {
++                              className: "absolute inset-0 pointer-events-none rounded-[inherit]",
++                              style: {
++                                backgroundImage: `url(${lHoloConfig.watermarkUrl})`,
++                                backgroundSize: "contain",
++                                backgroundPosition: "center",
++                                backgroundRepeat: "no-repeat",
++                                opacity: lHoloConfig.watermarkOpacity !== void 0 ? lHoloConfig.watermarkOpacity : 0.5,
++                                mixBlendMode: "overlay"
++                              }
++                            }),
++                            lHoloConfig.showGlareSweep !== !1 && /* @__PURE__ */ u.jsx(ee.div, {
++                              className: "absolute inset-0 pointer-events-none rounded-[inherit]",
++                              style: {
++                                background: holoGlareSheen,
++                                mixBlendMode: "screen"
++                              }
++                            })
++                          ]
++                        })
++                      ]
++                    }, layer.id || `layer-${idx}`);
++                  }),
++                  isHolo && /* @__PURE__ */ u.jsxs(
++                    ee.div,
++                    {
++                      className: "absolute inset-0 pointer-events-none rounded-[inherit] overflow-hidden z-15",
++                      style: {
++                        opacity: (be ? 1 : 0.45) * Math.min(1, Math.max(0, holoIntensity)),
++                        transition: "opacity 0.2s ease-out",
++                        isolation: "isolate",
++                        mixBlendMode: holoConfig.blendMode || "color-dodge",
++                        ...holoCardMaskStyle
++                      },
++                      children: [
++                        /* @__PURE__ */ u.jsx(ee.div, {
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit]",
++                          style: {
++                            background: holoSpectrum,
++                            filter: `saturate(${holoIntensity * 1.5}) ${holoVariant === "cosmic" ? "hue-rotate(90deg)" : holoVariant === "gold" ? "hue-rotate(45deg)" : ""}`,
++                            opacity: 0.85,
++                            mixBlendMode: "color-dodge"
++                          }
++                        }),
++                        /* @__PURE__ */ u.jsx(ee.div, {
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit]",
++                          style: {
++                            background: holoFocal1,
++                            filter: holoVariant === "cosmic" ? "hue-rotate(90deg)" : holoVariant === "gold" ? "hue-rotate(45deg)" : void 0,
++                            mixBlendMode: "screen",
++                            opacity: 0.9
++                          }
++                        }),
++                        /* @__PURE__ */ u.jsx(ee.div, {
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit]",
++                          style: {
++                            background: holoFocal2,
++                            filter: holoVariant === "cosmic" ? "hue-rotate(90deg)" : holoVariant === "gold" ? "hue-rotate(45deg)" : void 0,
++                            mixBlendMode: "screen",
++                            opacity: 0.75
++                          }
++                        }),
++                        holoConfig.patternUrl && /* @__PURE__ */ u.jsx("div", {
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit]",
++                          style: {
++                            backgroundImage: `url(${holoConfig.patternUrl})`,
++                            backgroundSize: holoConfig.patternSize || "24px",
++                            backgroundRepeat: "repeat",
++                            opacity: holoConfig.patternOpacity !== void 0 ? holoConfig.patternOpacity : 0.4,
++                            mixBlendMode: "overlay"
++                          }
++                        }),
++                        holoConfig.watermarkUrl && /* @__PURE__ */ u.jsx("div", {
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit]",
++                          style: {
++                            backgroundImage: `url(${holoConfig.watermarkUrl})`,
++                            backgroundSize: "contain",
++                            backgroundPosition: "center",
++                            backgroundRepeat: "no-repeat",
++                            opacity: holoConfig.watermarkOpacity !== void 0 ? holoConfig.watermarkOpacity : 0.5,
++                            mixBlendMode: "overlay"
++                          }
++                        }),
++                        holoConfig.showGlareSweep !== !1 && /* @__PURE__ */ u.jsx(ee.div, {
++                          className: "absolute inset-0 pointer-events-none rounded-[inherit]",
++                          style: {
++                            background: holoGlareSheen,
++                            mixBlendMode: "screen"
++                          }
++                        })
++                      ]
++                    }
++                  ),
+                   E.map((P, K) => /* @__PURE__ */ u.jsx("div", { className: "absolute inset-0 pointer-events-none z-20", style: { transform: "translateZ(30px)" }, children: P }, K)),
+                   /* @__PURE__ */ u.jsx(ot, { children: Z.map((P) => /* @__PURE__ */ u.jsx(F.Fragment, { children: le ? /* @__PURE__ */ u.jsx("div", { className: "absolute z-30 pointer-events-none", style: {
+                     ...P.position === "top-left" ? { top: 8, left: 8 } : P.position === "top-right" ? { top: 8, right: 8 } : P.position === "bottom-left" ? { bottom: 8, left: 8 } : { bottom: 8, right: 8 }
+diff --git a/dist/deckfx.umd.cjs b/dist/deckfx.umd.cjs
+index 44bc5577571149434ef6bdc4f1f85e2b6dc6a0bf..f6e70e6e16f8fced01f596ec87fe64de59263f2d 100644
+--- a/dist/deckfx.umd.cjs
++++ b/dist/deckfx.umd.cjs
+@@ -14,7 +14,7 @@
+  *
+  * This source code is licensed under the MIT license found in the
+  * LICENSE file in the root directory of this source tree.
+- */var Tt;function qt(){return Tt||(Tt=1,process.env.NODE_ENV!=="production"&&function(){var t=m,r=Symbol.for("react.element"),o=Symbol.for("react.portal"),n=Symbol.for("react.fragment"),i=Symbol.for("react.strict_mode"),s=Symbol.for("react.profiler"),p=Symbol.for("react.provider"),f=Symbol.for("react.context"),a=Symbol.for("react.forward_ref"),l=Symbol.for("react.suspense"),c=Symbol.for("react.suspense_list"),g=Symbol.for("react.memo"),b=Symbol.for("react.lazy"),v=Symbol.for("react.offscreen"),x=Symbol.iterator,y="@@iterator";function w(e){if(e===null||typeof e!="object")return null;var d=x&&e[x]||e[y];return typeof d=="function"?d:null}var E=t.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;function k(e){{for(var d=arguments.length,h=new Array(d>1?d-1:0),S=1;S<d;S++)h[S-1]=arguments[S];D("error",e,h)}}function D(e,d,h){{var S=E.ReactDebugCurrentFrame,V=S.getStackAddendum();V!==""&&(d+="%s",h=h.concat([V]));var R=h.map(function(O){return String(O)});R.unshift("Warning: "+d),Function.prototype.apply.call(console[e],console,R)}}var $=!1,M=!1,te=!1,H=!1,G=!1,W;W=Symbol.for("react.module.reference");function A(e){return!!(typeof e=="string"||typeof e=="function"||e===n||e===s||G||e===i||e===l||e===c||H||e===v||$||M||te||typeof e=="object"&&e!==null&&(e.$$typeof===b||e.$$typeof===g||e.$$typeof===p||e.$$typeof===f||e.$$typeof===a||e.$$typeof===W||e.getModuleId!==void 0))}function P(e,d,h){var S=e.displayName;if(S)return S;var V=d.displayName||d.name||"";return V!==""?h+"("+V+")":h}function j(e){return e.displayName||"Context"}function L(e){if(e==null)return null;if(typeof e.tag=="number"&&k("Received an unexpected object in getComponentNameFromType(). This is likely a bug in React. Please file an issue."),typeof e=="function")return e.displayName||e.name||null;if(typeof e=="string")return e;switch(e){case n:return"Fragment";case o:return"Portal";case s:return"Profiler";case i:return"StrictMode";case l:return"Suspense";case c:return"SuspenseList"}if(typeof e=="object")switch(e.$$typeof){case f:var d=e;return j(d)+".Consumer";case p:var h=e;return j(h._context)+".Provider";case a:return P(e,e.render,"ForwardRef");case g:var S=e.displayName||null;return S!==null?S:L(e.type)||"Memo";case b:{var V=e,R=V._payload,O=V._init;try{return L(O(R))}catch{return null}}}return null}var B=Object.assign,ie=0,ee,le,Y,U,ne,X,be;function ve(){}ve.__reactDisabledLog=!0;function we(){{if(ie===0){ee=console.log,le=console.info,Y=console.warn,U=console.error,ne=console.group,X=console.groupCollapsed,be=console.groupEnd;var e={configurable:!0,enumerable:!0,value:ve,writable:!0};Object.defineProperties(console,{info:e,log:e,warn:e,error:e,group:e,groupCollapsed:e,groupEnd:e})}ie++}}function fe(){{if(ie--,ie===0){var e={configurable:!0,enumerable:!0,writable:!0};Object.defineProperties(console,{log:B({},e,{value:ee}),info:B({},e,{value:le}),warn:B({},e,{value:Y}),error:B({},e,{value:U}),group:B({},e,{value:ne}),groupCollapsed:B({},e,{value:X}),groupEnd:B({},e,{value:be})})}ie<0&&k("disabledDepth fell below zero. This is a bug in React. Please file an issue.")}}var oe=E.ReactCurrentDispatcher,pe;function Ee(e,d,h){{if(pe===void 0)try{throw Error()}catch(V){var S=V.stack.trim().match(/\n( *(at )?)/);pe=S&&S[1]||""}return`
++ */var Tt;function qt(){return Tt||(Tt=1,process.env.NODE_ENV!=="production"&&function(){var t=m,r=Symbol.for("react.element"),o=Symbol.for("react.portal"),n=Symbol.for("react.fragment"),i=Symbol.for("react.strict_mode"),s=Symbol.for("react.profiler"),p=Symbol.for("react.provider"),f=Symbol.for("react.context"),a=Symbol.for("react.forward_ref"),l=Symbol.for("react.suspense"),c=Symbol.for("react.suspense_list"),g=Symbol.for("react.memo"),b=Symbol.for("react.lazy"),v=Symbol.for("react.offscreen"),x=Symbol.iterator,y="@@iterator";function w(e){if(e===null||typeof e!="object")return null;var d=x&&e[x]||e[y];return typeof d=="function"?d:null}var E=t.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED||t.__CLIENT_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED||{};function k(e){{for(var d=arguments.length,h=new Array(d>1?d-1:0),S=1;S<d;S++)h[S-1]=arguments[S];D("error",e,h)}}function D(e,d,h){{var S=E.ReactDebugCurrentFrame,V=S.getStackAddendum();V!==""&&(d+="%s",h=h.concat([V]));var R=h.map(function(O){return String(O)});R.unshift("Warning: "+d),Function.prototype.apply.call(console[e],console,R)}}var $=!1,M=!1,te=!1,H=!1,G=!1,W;W=Symbol.for("react.module.reference");function A(e){return!!(typeof e=="string"||typeof e=="function"||e===n||e===s||G||e===i||e===l||e===c||H||e===v||$||M||te||typeof e=="object"&&e!==null&&(e.$$typeof===b||e.$$typeof===g||e.$$typeof===p||e.$$typeof===f||e.$$typeof===a||e.$$typeof===W||e.getModuleId!==void 0))}function P(e,d,h){var S=e.displayName;if(S)return S;var V=d.displayName||d.name||"";return V!==""?h+"("+V+")":h}function j(e){return e.displayName||"Context"}function L(e){if(e==null)return null;if(typeof e.tag=="number"&&k("Received an unexpected object in getComponentNameFromType(). This is likely a bug in React. Please file an issue."),typeof e=="function")return e.displayName||e.name||null;if(typeof e=="string")return e;switch(e){case n:return"Fragment";case o:return"Portal";case s:return"Profiler";case i:return"StrictMode";case l:return"Suspense";case c:return"SuspenseList"}if(typeof e=="object")switch(e.$$typeof){case f:var d=e;return j(d)+".Consumer";case p:var h=e;return j(h._context)+".Provider";case a:return P(e,e.render,"ForwardRef");case g:var S=e.displayName||null;return S!==null?S:L(e.type)||"Memo";case b:{var V=e,R=V._payload,O=V._init;try{return L(O(R))}catch{return null}}}return null}var B=Object.assign,ie=0,ee,le,Y,U,ne,X,be;function ve(){}ve.__reactDisabledLog=!0;function we(){{if(ie===0){ee=console.log,le=console.info,Y=console.warn,U=console.error,ne=console.group,X=console.groupCollapsed,be=console.groupEnd;var e={configurable:!0,enumerable:!0,value:ve,writable:!0};Object.defineProperties(console,{info:e,log:e,warn:e,error:e,group:e,groupCollapsed:e,groupEnd:e})}ie++}}function fe(){{if(ie--,ie===0){var e={configurable:!0,enumerable:!0,writable:!0};Object.defineProperties(console,{log:B({},e,{value:ee}),info:B({},e,{value:le}),warn:B({},e,{value:Y}),error:B({},e,{value:U}),group:B({},e,{value:ne}),groupCollapsed:B({},e,{value:X}),groupEnd:B({},e,{value:be})})}ie<0&&k("disabledDepth fell below zero. This is a bug in React. Please file an issue.")}}var oe=(E&&(E.ReactCurrentDispatcher||E.H))||{current:null},pe;function Ee(e,d,h){{if(pe===void 0)try{throw Error()}catch(V){var S=V.stack.trim().match(/\n( *(at )?)/);pe=S&&S[1]||""}return`
+ `+pe+e}}var Ce=!1,me;{var K=typeof WeakMap=="function"?WeakMap:Map;me=new K}function Z(e,d){if(!e||Ce)return"";{var h=me.get(e);if(h!==void 0)return h}var S;Ce=!0;var V=Error.prepareStackTrace;Error.prepareStackTrace=void 0;var R;R=oe.current,oe.current=null,we();try{if(d){var O=function(){throw Error()};if(Object.defineProperty(O.prototype,"props",{set:function(){throw Error()}}),typeof Reflect=="object"&&Reflect.construct){try{Reflect.construct(O,[])}catch(ue){S=ue}Reflect.construct(e,[],O)}else{try{O.call()}catch(ue){S=ue}e.call(O.prototype)}}else{try{throw Error()}catch(ue){S=ue}e()}}catch(ue){if(ue&&S&&typeof ue.stack=="string"){for(var z=ue.stack.split(`
+ `),ce=S.stack.split(`
+ `),q=z.length-1,Q=ce.length-1;q>=1&&Q>=0&&z[q]!==ce[Q];)Q--;for(;q>=1&&Q>=0;q--,Q--)if(z[q]!==ce[Q]){if(q!==1||Q!==1)do if(q--,Q--,Q<0||z[q]!==ce[Q]){var ye=`

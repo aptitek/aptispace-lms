@@ -1,5 +1,5 @@
 import type React from "react";
-import type { CardShadow } from "deckfx";
+import type { CardShadow, CardLayer } from "deckfx";
 import type { ElectronicsFinish } from "../../atoms/Electronics/Electronics.types";
 import type { GuillocheVariant } from "../../atoms/Guilloche/Guilloche.types";
 
@@ -45,6 +45,7 @@ export interface Id1CardProps {
   maxTilt?: number;
   scaleOnHover?: number;
   shadow?: CardShadow;
+  layers?: CardLayer[];
 
   // Masking Properties (Guilloche / Custom Mask reflects Holo)
   maskUrl?: string;
@@ -57,9 +58,13 @@ export interface Id1CardProps {
   electronicsFinish?: ElectronicsFinish;
   chipPosition?: "left" | "right";
   electronicsRotation?: number;
+  frontElectronicsRotation?: number;
+  backElectronicsRotation?: number;
   showNfcAntenna?: boolean;
   showChip?: boolean;
   chipView?: "front" | "back" | "none";
+  frontChipView?: "front" | "back" | "none";
+  backChipView?: "front" | "back" | "none";
   showInnerCoil?: boolean;
   electronicsOpacity?: number;
   electronicsMirrored?: boolean;

@@ -52,15 +52,28 @@ function getHoloVariant(
 }
 
 function resolveChipView(
-  propsChipView: "front" | "back" | "none" | undefined,
+  props: Id1CardProps,
   isBack: boolean,
   isTransparent: boolean,
 ): "front" | "back" | "none" {
-  if (propsChipView) return propsChipView;
-  if (isBack) {
-    return isTransparent ? "back" : "none";
+  if (isBack && props.backChipView) return props.backChipView;
+  if (!isBack && props.frontChipView) return props.frontChipView;
+  if (props.chipView) return props.chipView;
+  return isBack ? (isTransparent ? "back" : "none") : "front";
+}
+
+function resolveElectronicsRotation(
+  props: Id1CardProps,
+  isBack: boolean,
+  defaultRotation: number,
+): number {
+  if (isBack && props.backElectronicsRotation !== undefined) {
+    return props.backElectronicsRotation;
   }
-  return "front";
+  if (!isBack && props.frontElectronicsRotation !== undefined) {
+    return props.frontElectronicsRotation;
+  }
+  return defaultRotation;
 }
 
 interface ReverseGhostLayerProps {
@@ -141,7 +154,12 @@ function ElectronicsLayer({
 
   const showNfcAntenna = props.showNfcAntenna ?? isTransparent;
   const showInnerCoil = props.showInnerCoil ?? isTransparent;
-  const chipView = resolveChipView(props.chipView, isBack, isTransparent);
+  const chipView = resolveChipView(props, isBack, isTransparent);
+  const rotation = resolveElectronicsRotation(
+    props,
+    isBack,
+    conf.electronicsRotation,
+  );
   const electronicsOpacity = props.electronicsOpacity ?? (isBack ? 0.65 : 0.85);
   const electronicsMirrored = props.electronicsMirrored ?? isBack;
 
@@ -150,7 +168,7 @@ function ElectronicsLayer({
       side={faceSide}
       finish={conf.electronicsFinish}
       chipPosition={conf.chipPosition}
-      rotation={conf.electronicsRotation}
+      rotation={rotation}
       showNfcAntenna={showNfcAntenna}
       showChip={conf.showChip}
       chipView={chipView}
@@ -245,6 +263,7 @@ function Id1CardFace({ conf, props, faceSide, dims }: Id1CardFaceProps) {
       shadow={conf.shadow}
       holographic={holoConfig}
       holoStrength={conf.holoStrength}
+      layers={props.layers}
       className={props.className}
       containerClassName={props.containerClassName}
       data-testid={conf.testId}

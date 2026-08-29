@@ -1,30 +1,70 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, type ActionFunctionArgs } from "react-router";
-import { styled, type Theme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import AuthLayout from "~/components/templates/AuthLayout/AuthLayout";
-import Id1Card from "~/components/molecules/Id1Card/Id1Card";
-import EditableAvatar from "~/components/molecules/EditableAvatar/EditableAvatar";
+import OnboardingCard from "~/components/organisms/OnboardingCard/OnboardingCard";
+import type {
+  SchoolConfig,
+  CohortConfig,
+  OnboardingProfile,
+} from "~/components/organisms/OnboardingCard/OnboardingCard.types";
 import type {
   Id1CardOrientation,
   Id1CardSide,
 } from "~/components/molecules/Id1Card/Id1Card.types";
-import {
-  type CadetProfile,
-  CardFrontContent,
-  CardBackContent,
-} from "./onboarding.card";
-import FixedDomainEmailField from "~/components/molecules/FixedDomainEmailField/FixedDomainEmailField";
 import { validateFixedDomainEmail } from "~/utils/emailSecurity";
+import { formatInstitutionalEmail } from "~/components/organisms/OnboardingCard/OnboardingCard.utils";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import BadgeIcon from "@mui/icons-material/Badge";
 import ScreenRotationIcon from "@mui/icons-material/ScreenRotation";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SecurityIcon from "@mui/icons-material/Security";
+import SchoolIcon from "@mui/icons-material/School";
+import {
+  OnboardingContainer,
+  FormPanel,
+  Title,
+  FormRoot,
+  FormGroup,
+  TwoColGrid,
+  Label,
+  Input,
+  Select,
+  PreviewPanel,
+  ActionButton,
+  SubmitButton,
+} from "./onboarding.styles";
 
 export const CADET_FIXED_DOMAIN = "cadet.aptispace.io";
+
+export const AVAILABLE_SCHOOLS: SchoolConfig[] = [
+  {
+    id: "school-aptispace-orbital",
+    name: "AptiSpace Orbital Academy",
+    slug: "aptispace-orbital-academy",
+    logoUrl: "/favicon.svg",
+    emailDomain: "cadet.aptispace.io",
+    emailPattern: "{first}.{last}@{domain}",
+  },
+  {
+    id: "school-quantum-aerospace",
+    name: "Quantum Aerospace Institute",
+    slug: "quantum-aerospace",
+    logoUrl: null,
+    emailDomain: "quantum.aptispace.io",
+    emailPattern: "{first}.{last}@{domain}",
+  },
+  {
+    id: "school-polytechnique-spatiale",
+    name: "École Polytechnique Spatiale",
+    slug: "polytechnique-spatiale",
+    logoUrl: null,
+    emailDomain: "polytechnique.aptispace.io",
+    emailPattern: "{f}{last}@{domain}",
+  },
+];
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData().catch(() => new FormData());
@@ -58,153 +98,6 @@ export function meta() {
   ];
 }
 
-const OnboardingContainer = styled("div")(({ theme }) => ({
-  display: "grid",
-  gridTemplateColumns: "1fr 1.25fr",
-  gap: theme.spacing(4),
-  maxWidth: "1180px",
-  width: "100%",
-  padding: theme.spacing(3),
-  backgroundColor: theme.palette.background.paper,
-  backdropFilter: "blur(20px)",
-  borderRadius: "20px",
-  border: `1px solid ${theme.palette.divider}`,
-  boxShadow: `0 30px 60px rgba(0, 0, 0, 0.3), 0 0 35px ${theme.palette.action.focus}`,
-  boxSizing: "border-box",
-  zIndex: 2,
-  [theme.breakpoints.down("md")]: {
-    gridTemplateColumns: "1fr",
-    maxWidth: "600px",
-    padding: theme.spacing(2.5),
-  },
-}));
-
-const FormPanel = styled("div")(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(2.5),
-}));
-
-const Title = styled("h1")(({ theme }) => ({
-  margin: 0,
-  fontSize: "1.65rem",
-  fontWeight: 800,
-  color: theme.palette.text.primary,
-  letterSpacing: "-0.01em",
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  "& .badge-icon": {
-    color: theme.palette.primary.light,
-    fontSize: "1.8rem",
-  },
-}));
-
-const FormRoot = styled("form")(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(2),
-}));
-
-const FormGroup = styled("div")(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(0.75),
-}));
-
-const TwoColGrid = styled("div")(({ theme }) => ({
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: theme.spacing(1.5),
-}));
-
-const Label = styled("label")(({ theme }) => ({
-  fontSize: "0.8rem",
-  fontWeight: 700,
-  color: theme.palette.text.secondary,
-  textTransform: "uppercase",
-  letterSpacing: "0.5px",
-}));
-
-const formControlBase = (theme: Theme) => ({
-  padding: "10px 14px",
-  borderRadius: "8px",
-  backgroundColor: theme.palette.background.default,
-  border: `1px solid ${theme.palette.divider}`,
-  color: theme.palette.text.primary,
-  fontSize: "0.95rem",
-  outline: "none",
-  transition: "all 0.2s ease",
-  "&:focus": {
-    borderColor: theme.palette.primary.light,
-    boxShadow: `0 0 0 2px ${theme.palette.action.focus}`,
-  },
-});
-
-const Input = styled("input")(({ theme }) => formControlBase(theme));
-const Select = styled("select")(({ theme }) => ({
-  ...formControlBase(theme),
-  cursor: "pointer",
-}));
-
-const PreviewPanel = styled("div")(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: theme.spacing(2.5),
-  padding: theme.spacing(3),
-  backgroundColor: theme.palette.background.default,
-  borderRadius: "16px",
-  border: `1px dashed ${theme.palette.divider}`,
-}));
-
-const ActionButton = styled("button")(({ theme }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: theme.spacing(0.75),
-  padding: "8px 16px",
-  borderRadius: "8px",
-  border: `1px solid ${theme.palette.divider}`,
-  backgroundColor: theme.palette.action.hover,
-  color: theme.palette.primary.light,
-  fontWeight: 700,
-  fontSize: "0.825rem",
-  cursor: "pointer",
-  transition: "all 0.2s ease",
-  "&:hover": {
-    backgroundColor: theme.palette.action.selected,
-    borderColor: theme.palette.primary.main,
-    transform: "translateY(-1px)",
-  },
-}));
-
-const SubmitButton = styled("button")(({ theme }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: theme.spacing(1),
-  width: "100%",
-  padding: "12px 20px",
-  borderRadius: "10px",
-  border: "none",
-  backgroundColor: theme.palette.primary.light,
-  color: theme.palette.background.default,
-  fontWeight: 800,
-  fontSize: "0.95rem",
-  letterSpacing: "0.5px",
-  cursor: "pointer",
-  marginTop: theme.spacing(1),
-  boxShadow: `0 4px 14px ${theme.palette.action.focus}`,
-  transition: "all 0.2s ease",
-  "&:hover": {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.text.primary,
-    boxShadow: `0 6px 20px ${theme.palette.action.focus}`,
-    transform: "translateY(-1px)",
-  },
-}));
-
 const DEFAULT_AVATAR_URL =
   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80";
 
@@ -227,15 +120,25 @@ export default function OnboardingPage() {
   const { t } = useTranslation("onboarding");
   const navigate = useNavigate();
 
-  const [profile, setProfile] = useState<CadetProfile>({
-    id: "APTI-7810-9402",
-    name: "Alex Mercer",
+  const [selectedSchool, setSelectedSchool] = useState<SchoolConfig>(
+    AVAILABLE_SCHOOLS[0],
+  );
+
+  const [selectedCohort] = useState<CohortConfig>({
+    id: "cohort-2026",
+    name: "Cadet Cohort 2026",
+    description: "Avionics and orbital navigation flight cohort.",
+  });
+
+  const [profile, setProfile] = useState<OnboardingProfile>({
+    firstName: "Alex",
+    familyName: "Mercer",
     email: "alex.mercer@cadet.aptispace.io",
+    avatarUrl: DEFAULT_AVATAR_URL,
+    documentNumber: "0942",
     callSign: "AETH-9042",
     division: "Orbital Flight Dynamics",
     clearanceLevel: "LEVEL-4 OMNI",
-    securityCode: "781",
-    avatarUrl: DEFAULT_AVATAR_URL,
   });
 
   const [orientation, setOrientation] =
@@ -247,6 +150,40 @@ export default function OnboardingPage() {
       document.title = "AptiSpace LMS • Cadet Onboarding";
     }
   }, []);
+
+  const handleSchoolChange = (schoolId: string) => {
+    const found =
+      AVAILABLE_SCHOOLS.find((s) => s.id === schoolId) || AVAILABLE_SCHOOLS[0];
+    setSelectedSchool(found);
+    setProfile((prev) => ({
+      ...prev,
+      email: formatInstitutionalEmail(prev.firstName, prev.familyName, found),
+    }));
+  };
+
+  const handleFirstNameChange = (firstName: string) => {
+    setProfile((prev) => ({
+      ...prev,
+      firstName,
+      email: formatInstitutionalEmail(
+        firstName,
+        prev.familyName,
+        selectedSchool,
+      ),
+    }));
+  };
+
+  const handleFamilyNameChange = (familyName: string) => {
+    setProfile((prev) => ({
+      ...prev,
+      familyName,
+      email: formatInstitutionalEmail(
+        prev.firstName,
+        familyName,
+        selectedSchool,
+      ),
+    }));
+  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -265,57 +202,75 @@ export default function OnboardingPage() {
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               {t(
                 "subtitle",
-                "Initialize your flight credential badge and configure your academy clearance profile.",
+                "Configure your official ISO/IEC 7810 ID-1 identification card and start your academy journey.",
               )}
             </Typography>
           </div>
 
           <FormRoot onSubmit={handleSubmit}>
             <FormGroup>
-              <EditableAvatar
-                value={profile.avatarUrl}
-                defaultValue={DEFAULT_AVATAR_URL}
-                onChange={(newAvatarUrl) =>
-                  setProfile((prev) => ({ ...prev, avatarUrl: newAvatarUrl }))
-                }
-                label={t("form.avatarLabel", "Biometric Facial Portrait")}
-                helperText={t(
-                  "form.avatarHelp",
-                  "Drag & drop image, paste, enter URL, or click upload to R2.",
-                )}
-                shape="biometric"
-                size="sm"
-              />
+              <Label>
+                <Box
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                  }}
+                >
+                  <SchoolIcon sx={{ fontSize: 16 }} />
+                  <span>Enrolled Academy / School</span>
+                </Box>
+              </Label>
+              <Select
+                value={selectedSchool.id}
+                onChange={(e) => handleSchoolChange(e.target.value)}
+              >
+                {AVAILABLE_SCHOOLS.map((sch) => (
+                  <option key={sch.id} value={sch.id}>
+                    {sch.name} (@{sch.emailDomain})
+                  </option>
+                ))}
+              </Select>
             </FormGroup>
 
+            <TwoColGrid>
+              <FormGroup>
+                <Label>First Name</Label>
+                <Input
+                  type="text"
+                  value={profile.firstName}
+                  onChange={(e) => handleFirstNameChange(e.target.value)}
+                  required
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <Label>Family Name</Label>
+                <Input
+                  type="text"
+                  value={profile.familyName}
+                  onChange={(e) => handleFamilyNameChange(e.target.value)}
+                  required
+                />
+              </FormGroup>
+            </TwoColGrid>
+
             <FormGroup>
-              <Label>{t("form.cadetName", "Cadet Full Name")}</Label>
+              <Label>
+                {t("form.cadetEmail", "Institutional Academy Email")}
+              </Label>
               <Input
-                type="text"
-                value={profile.name}
-                onChange={(e) =>
-                  setProfile({ ...profile, name: e.target.value })
-                }
-                required
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <Label>{t("form.cadetEmail", "Official Academy Email")}</Label>
-              <FixedDomainEmailField
                 name="email"
-                domain={CADET_FIXED_DOMAIN}
+                type="email"
                 value={profile.email}
-                placeholder="cadet.username"
-                helperText={t(
-                  "form.emailHelp",
-                  `Domain is locked to @${CADET_FIXED_DOMAIN} for security.`,
-                )}
-                onEmailChange={(composite) =>
-                  setProfile((prev) => ({ ...prev, email: composite }))
+                onChange={(e) =>
+                  setProfile((prev) => ({ ...prev, email: e.target.value }))
                 }
                 required
               />
+              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                Auto-computed according to {selectedSchool.name} format.
+              </Typography>
             </FormGroup>
 
             <TwoColGrid>
@@ -325,7 +280,10 @@ export default function OnboardingPage() {
                   type="text"
                   value={profile.callSign}
                   onChange={(e) =>
-                    setProfile({ ...profile, callSign: e.target.value })
+                    setProfile((prev) => ({
+                      ...prev,
+                      callSign: e.target.value,
+                    }))
                   }
                 />
               </FormGroup>
@@ -335,7 +293,10 @@ export default function OnboardingPage() {
                 <Select
                   value={profile.clearanceLevel}
                   onChange={(e) =>
-                    setProfile({ ...profile, clearanceLevel: e.target.value })
+                    setProfile((prev) => ({
+                      ...prev,
+                      clearanceLevel: e.target.value,
+                    }))
                   }
                 >
                   {CLEARANCES.map((opt) => (
@@ -352,7 +313,7 @@ export default function OnboardingPage() {
               <Select
                 value={profile.division}
                 onChange={(e) =>
-                  setProfile({ ...profile, division: e.target.value })
+                  setProfile((prev) => ({ ...prev, division: e.target.value }))
                 }
               >
                 {DIVISIONS.map((opt) => (
@@ -374,7 +335,8 @@ export default function OnboardingPage() {
             >
               <SecurityIcon sx={{ fontSize: 14, color: "success.main" }} />
               <span>
-                Standard ISO/IEC 7810 ID-1 • EMV ISO/IEC 7816 Smart Credential
+                ISO/IEC 7810 ID-1 • Holographic Foil • Guilloche Security
+                Rosette
               </span>
             </Box>
 
@@ -446,16 +408,18 @@ export default function OnboardingPage() {
               py: 1.5,
             }}
           >
-            <Id1Card
+            <OnboardingCard
+              school={selectedSchool}
+              cohort={selectedCohort}
+              profile={profile}
+              onProfileChange={setProfile}
               orientation={orientation}
               size="lg"
               side={side}
               flipOnClick={true}
               onFlip={(newSide) => setSide(newSide)}
-              frontContent={
-                <CardFrontContent profile={profile} orientation={orientation} />
-              }
-              backContent={<CardBackContent profile={profile} />}
+              transparent={true}
+              holoVariant="rainbow"
             />
           </Box>
         </PreviewPanel>

@@ -15,6 +15,8 @@ export default function MrzZone({
   lines: customLines,
   showValidation = false,
   compact = false,
+  darkOnLight = false,
+  fullWidth = false,
   className,
   testId = "mrz-zone",
 }: MrzZoneProps) {
@@ -39,10 +41,12 @@ export default function MrzZone({
       role="region"
       aria-label={t("card.mrzZone", "ICAO 9303 Machine Readable Zone")}
       compact={compact}
+      darkOnLight={darkOnLight}
+      fullWidth={fullWidth}
       className={className}
       data-testid={testId}
     >
-      <MrzPre compact={compact}>
+      <MrzPre compact={compact} darkOnLight={darkOnLight} fullWidth={fullWidth}>
         <code>{computedLines.join("\n")}</code>
       </MrzPre>
 

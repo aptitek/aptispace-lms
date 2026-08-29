@@ -3,4 +3,4 @@ allowBuilds:
   unrs-resolver: true
   workerd: true
 patchedDependencies:
-  deckfx: patches/deckfx.patch
+  deckfx@1.0.1: patches/deckfx.patch

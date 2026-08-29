@@ -2,10 +2,21 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import BiometricAvatar from "~/components/atoms/BiometricAvatar/BiometricAvatar";
 import type { Id1CardOrientation } from "~/components/molecules/Id1Card/Id1Card.types";
+import { OnboardingCard } from "~/components/organisms/OnboardingCard/OnboardingCard";
+import type {
+  SchoolConfig,
+  CohortConfig,
+  OnboardingProfile,
+} from "~/components/organisms/OnboardingCard/OnboardingCard.types";
+
+export type { SchoolConfig, CohortConfig, OnboardingProfile };
+export { OnboardingCard };
 
 export interface CadetProfile {
   id: string;
   name: string;
+  firstName?: string;
+  familyName?: string;
   email?: string;
   callSign: string;
   division: string;

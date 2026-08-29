@@ -22,6 +22,8 @@ export interface MrzZoneProps {
   lines?: [string, string, string];
   showValidation?: boolean;
   compact?: boolean;
+  darkOnLight?: boolean;
+  fullWidth?: boolean;
   className?: string;
   testId?: string;
 }
