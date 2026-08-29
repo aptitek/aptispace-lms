@@ -26,7 +26,7 @@ const StyledMoonIcon = styled(DarkModeIcon, {
 })<{ $iconSize: number }>(({ theme, $iconSize }) => ({
   fontSize: $iconSize,
   color: theme.palette.common.white,
-  filter: `drop-shadow(0 0 4px ${theme.palette.primary.light})`,
+  filter: `drop-shadow(0 0 4px ${theme.palette.primary.main})`,
   display: "block",
 }));
 
@@ -43,7 +43,7 @@ const StyledPeekingMoon = styled(NightlightRoundIcon, {
   shouldForwardProp: filterIconProp,
 })<{ $iconSize: number }>(({ theme, $iconSize }) => ({
   fontSize: $iconSize,
-  color: theme.palette.primary.light,
+  color: theme.palette.primary.main,
   filter: `drop-shadow(0 0 3px ${theme.palette.primary.main})`,
   display: "block",
 }));
