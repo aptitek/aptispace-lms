@@ -7,12 +7,10 @@ import {
   type ChangeEvent,
   type KeyboardEvent,
 } from "react";
-import MuiAvatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
-import PersonIcon from "@mui/icons-material/Person";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CloseIcon from "@mui/icons-material/Close";
@@ -44,13 +42,6 @@ import {
   HelperMessage,
 } from "./EditableAvatar.styles";
 
-function getInitials(fullName?: string): string {
-  if (!fullName) return "";
-  const parts = fullName.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
 interface AvatarContentProps {
   url: string;
   name?: string;
@@ -58,24 +49,16 @@ interface AvatarContentProps {
 }
 
 function AvatarInner({ url, name, shape }: AvatarContentProps) {
-  if (shape === "biometric") {
-    return (
-      <Avatar
-        src={url}
-        alt={name || "Biometric Avatar"}
-        showReticle={true}
-        shape="biometric"
-        height="100%"
-        width="100%"
-      />
-    );
-  }
-
-  const initials = getInitials(name);
   return (
-    <MuiAvatar src={url} alt={name || "Avatar"}>
-      {!url ? initials ? initials : <PersonIcon /> : null}
-    </MuiAvatar>
+    <Avatar
+      src={url}
+      alt={name || "Avatar"}
+      name={name}
+      showReticle={shape === "biometric"}
+      shape={shape}
+      height="100%"
+      width="100%"
+    />
   );
 }
 

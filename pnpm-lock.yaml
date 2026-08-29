@@ -52,6 +52,9 @@ importers:
       isbot:
         specifier: ^5.1.36
         version: 5.2.1
+      material-shapes-ts:
+        specifier: ^0.3.0
+        version: 0.3.0
       octokit:
         specifier: ^5.0.5
         version: 5.0.5
@@ -6821,6 +6824,17 @@ packages:
       }
     engines: { node: ">=10" }
 
+  material-shapes-ts@0.3.0:
+    resolution:
+      {
+        integrity: sha512-YVmrPL/TP9AtXtcQabGccSi0lrNBTCCAOpRySwEhkJYuxr6Hyh4ejIWx3xKxTDS4CrsdItYCS1OAapk5HhOTVQ==,
+      }
+    peerDependencies:
+      vue: ^3.3.0
+    peerDependenciesMeta:
+      vue:
+        optional: true
+
   math-intrinsics@1.1.0:
     resolution:
       {
@@ -12713,6 +12727,8 @@ snapshots:
   make-dir@4.0.0:
     dependencies:
       semver: 7.8.5
+
+  material-shapes-ts@0.3.0: {}
 
   math-intrinsics@1.1.0: {}
 

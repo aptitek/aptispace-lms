@@ -5,6 +5,7 @@ import {
   BiometricReticle,
   FallbackAvatarHolder,
 } from "./Avatar.styles";
+import M3ShapeDefs from "./M3ShapeDefs";
 
 function getAvatarInitials(name?: string, alt?: string): string {
   if (name) {
@@ -56,26 +57,29 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
     const content = renderAvatarContent(src, alt, children, initials);
 
     return (
-      <AvatarRoot
-        ref={ref}
-        isPortrait={isPortrait}
-        customHeight={height}
-        customWidth={width}
-        customRatio={aspectRatio}
-        customRadius={borderRadius}
-        shapePreset={shape}
-        className={className}
-        data-testid={testId ?? dataTestId ?? "avatar"}
-        data-shape={shape}
-      >
-        {content}
-        {showReticle && <BiometricReticle />}
-      </AvatarRoot>
+      <>
+        <M3ShapeDefs />
+        <AvatarRoot
+          ref={ref}
+          isPortrait={isPortrait}
+          customHeight={height}
+          customWidth={width}
+          customRatio={aspectRatio}
+          customRadius={borderRadius}
+          shapePreset={shape}
+          className={className}
+          data-testid={testId ?? dataTestId ?? "avatar"}
+          data-shape={shape}
+        >
+          {content}
+          {showReticle && <BiometricReticle />}
+        </AvatarRoot>
+      </>
     );
   },
 );
 
 Avatar.displayName = "Avatar";
 
-export const BiometricAvatar = Avatar;
+export { M3ShapeDefs };
 export default Avatar;

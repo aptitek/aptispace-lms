@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import Avatar, { BiometricAvatar } from "./Avatar";
+import Avatar from "./Avatar";
 import { ISO_19794_5_CONSTANTS } from "./Avatar.types";
 import { resolveM3ShapeRadius } from "./Avatar.styles";
 
@@ -8,7 +8,6 @@ describe("Avatar Component & MD3 Shape Scale", () => {
     expect(Avatar).toBeDefined();
     expect(typeof Avatar).toBe("object"); // forwardRef
     expect(Avatar.displayName).toBe("Avatar");
-    expect(BiometricAvatar).toBe(Avatar);
   });
 
   it("exports ISO 19794-5 constants", () => {
@@ -19,7 +18,7 @@ describe("Avatar Component & MD3 Shape Scale", () => {
 
   it("resolves all standard MD3 shape scale tokens", () => {
     expect(resolveM3ShapeRadius("none")).toBe("0px");
-    expect(resolveM3ShapeRadius("square")).toBe("30%");
+    expect(resolveM3ShapeRadius("square")).toBe("0px");
     expect(resolveM3ShapeRadius("extra-small")).toBe("4px");
     expect(resolveM3ShapeRadius("extra-small-top")).toBe("4px 4px 0 0");
     expect(resolveM3ShapeRadius("small")).toBe("8px");

@@ -58,6 +58,29 @@ export const M3_SHAPE_SCALE = {
 
 export type M3ShapeToken = keyof typeof M3_SHAPE_SCALE;
 
+export const M3_MOTION = {
+  easing: {
+    emphasized: "cubic-bezier(0.2, 0, 0, 1)",
+    emphasizedDecelerate: "cubic-bezier(0.05, 0.7, 0.1, 1)",
+    emphasizedAccelerate: "cubic-bezier(0.3, 0, 0.8, 0.15)",
+    standard: "cubic-bezier(0.2, 0, 0, 1)",
+    standardDecelerate: "cubic-bezier(0, 0, 0.2, 1)",
+    standardAccelerate: "cubic-bezier(0.3, 0, 1, 1)",
+  },
+  duration: {
+    short1: 50,
+    short2: 100,
+    short3: 150,
+    short4: 200,
+    medium1: 250,
+    medium2: 300,
+    medium3: 350,
+    medium4: 400,
+    long1: 450,
+    long2: 500,
+  },
+} as const;
+
 const m3TooltipDarkOverrides = {
   tooltip: {
     backgroundColor: SOLARIZED_BASE.base2,
@@ -169,6 +192,26 @@ export const darkThemeOptions: ThemeOptions = {
   },
   shape: {
     borderRadius: 12,
+    m3: M3_EXPRESSIVE_CATALOG,
+    scale: M3_SCALE_RADIUS_MAP,
+    resolve: resolveM3ShapeStyle,
+  },
+  transitions: {
+    easing: {
+      easeInOut: M3_MOTION.easing.standard,
+      easeOut: M3_MOTION.easing.emphasizedDecelerate,
+      easeIn: M3_MOTION.easing.emphasizedAccelerate,
+      sharp: M3_MOTION.easing.standard,
+    },
+    duration: {
+      shortest: M3_MOTION.duration.short3,
+      shorter: M3_MOTION.duration.short4,
+      short: M3_MOTION.duration.medium1,
+      standard: M3_MOTION.duration.medium2,
+      complex: M3_MOTION.duration.medium4,
+      enteringScreen: M3_MOTION.duration.medium2,
+      leavingScreen: M3_MOTION.duration.short4,
+    },
   },
   components: {
     MuiTooltip: {
@@ -186,6 +229,20 @@ export const darkThemeOptions: ThemeOptions = {
           borderRadius: 8,
           textTransform: "none",
           fontWeight: 600,
+          minHeight: 40,
+          "@media (pointer: coarse)": {
+            minHeight: 48,
+          },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          "@media (pointer: coarse)": {
+            minWidth: 48,
+            minHeight: 48,
+          },
         },
       },
     },
@@ -300,6 +357,23 @@ export const lightThemeOptions: ThemeOptions = {
     scale: M3_SCALE_RADIUS_MAP,
     resolve: resolveM3ShapeStyle,
   },
+  transitions: {
+    easing: {
+      easeInOut: M3_MOTION.easing.standard,
+      easeOut: M3_MOTION.easing.emphasizedDecelerate,
+      easeIn: M3_MOTION.easing.emphasizedAccelerate,
+      sharp: M3_MOTION.easing.standard,
+    },
+    duration: {
+      shortest: M3_MOTION.duration.short3,
+      shorter: M3_MOTION.duration.short4,
+      short: M3_MOTION.duration.medium1,
+      standard: M3_MOTION.duration.medium2,
+      complex: M3_MOTION.duration.medium4,
+      enteringScreen: M3_MOTION.duration.medium2,
+      leavingScreen: M3_MOTION.duration.short4,
+    },
+  },
   components: {
     MuiTooltip: {
       defaultProps: {
@@ -316,6 +390,20 @@ export const lightThemeOptions: ThemeOptions = {
           borderRadius: 8,
           textTransform: "none",
           fontWeight: 600,
+          minHeight: 40,
+          "@media (pointer: coarse)": {
+            minHeight: 48,
+          },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          "@media (pointer: coarse)": {
+            minWidth: 48,
+            minHeight: 48,
+          },
         },
       },
     },

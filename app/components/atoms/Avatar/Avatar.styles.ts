@@ -72,8 +72,6 @@ export const AvatarRoot = styled(Box, {
   };
 });
 
-export const BiometricAvatarRoot = AvatarRoot;
-
 export const BiometricReticle = styled(Box)(({ theme }) => ({
   position: "absolute",
   inset: "2px",

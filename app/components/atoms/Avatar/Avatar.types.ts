@@ -33,8 +33,6 @@ export type M3ScaleShape =
 export type AvatarShape =
   M3ScaleShape | M3ExpressiveShapeName | (string & {}) | number;
 
-export type M3AvatarShape = AvatarShape;
-
 export interface AvatarProps {
   src?: string;
   alt?: string;
@@ -51,5 +49,3 @@ export interface AvatarProps {
   "data-testid"?: string;
   children?: ReactNode;
 }
-
-export type BiometricAvatarProps = AvatarProps;
