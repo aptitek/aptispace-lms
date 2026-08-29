@@ -53,15 +53,45 @@ export const ScaleVariants: Story = {
           </Typography>
         </Box>
         <Box sx={{ textAlign: "center" }}>
-          <LoadingIndicator className="!size-12 [&>svg]:!size-12" />
-          <Typography variant="caption" sx={{ display: "block" }}>
-            Standard (48px)
-          </Typography>
-        </Box>
-        <Box sx={{ textAlign: "center" }}>
           <LoadingIndicator className="!size-16 [&>svg]:!size-16" />
           <Typography variant="caption" sx={{ display: "block" }}>
             Large (64px)
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  ),
+};
+
+export const ThemedVariants: Story = {
+  render: () => (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Typography variant="subtitle2">
+        Solarized Palette Morphing Loaders
+      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <Box sx={{ textAlign: "center" }}>
+          <LoadingIndicator className="!size-10 [&>svg]:!size-10" />
+          <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
+            Primary (Solarized Blue)
+          </Typography>
+        </Box>
+        <Box sx={{ textAlign: "center" }}>
+          <LoadingIndicator contained className="!size-12 [&>svg]:!size-10" />
+          <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
+            Contained (Base02 / Blue)
+          </Typography>
+        </Box>
+        <Box sx={{ textAlign: "center" }}>
+          <LoadingIndicator className="!size-10 [&>svg]:!size-10 [&>svg]:!text-[var(--color-solarized-cyan)]" />
+          <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
+            Secondary (Cyan)
+          </Typography>
+        </Box>
+        <Box sx={{ textAlign: "center" }}>
+          <LoadingIndicator className="!size-10 [&>svg]:!size-10 [&>svg]:!text-[var(--color-solarized-magenta)]" />
+          <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
+            Tertiary (Magenta)
           </Typography>
         </Box>
       </Box>

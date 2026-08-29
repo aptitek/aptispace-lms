@@ -1,4 +1,6 @@
-:root {
+:root,
+.dark,
+[data-theme="dark"] {
   /* Solarized Canonical Base Palette */
   --color-solarized-base03: #002b36;
   --color-solarized-base02: #073642;
@@ -20,6 +22,54 @@
   /* Official EU / French identity-card flag colours (EU Reg. 2019/1157) */
   --color-eu-blue: #003399;
   --color-eu-gold: #ffcc00;
+
+  /* Material 3 Expressive System Colors - Dark Mode (Solarized Dark) */
+  --md-sys-color-primary: var(--color-solarized-blue); /* #268bd2 */
+  --md-sys-color-surface-tint: var(--color-solarized-blue);
+  --md-sys-color-on-primary: var(--color-solarized-base03); /* #002b36 */
+  --md-sys-color-primary-container: var(--color-solarized-base02); /* #073642 */
+  --md-sys-color-on-primary-container: var(
+    --color-solarized-base0
+  ); /* #839496 */
+
+  --md-sys-color-secondary: var(--color-solarized-cyan); /* #2aa198 */
+  --md-sys-color-on-secondary: var(--color-solarized-base03);
+  --md-sys-color-secondary-container: var(--color-solarized-base02);
+  --md-sys-color-on-secondary-container: var(--color-solarized-base1);
+
+  --md-sys-color-tertiary: var(--color-solarized-magenta); /* #d33682 */
+  --md-sys-color-on-tertiary: var(--color-solarized-base3);
+  --md-sys-color-tertiary-container: var(--color-solarized-base02);
+  --md-sys-color-on-tertiary-container: var(--color-solarized-magenta);
+
+  --md-sys-color-error: var(--color-solarized-red); /* #dc322f */
+  --md-sys-color-on-error: var(--color-solarized-base3);
+  --md-sys-color-error-container: var(--color-solarized-base02);
+  --md-sys-color-on-error-container: var(--color-solarized-red);
+
+  --md-sys-color-background: var(--color-solarized-base03); /* #002b36 */
+  --md-sys-color-on-background: var(--color-solarized-base0); /* #839496 */
+  --md-sys-color-surface: var(--color-solarized-base03);
+  --md-sys-color-on-surface: var(--color-solarized-base0);
+  --md-sys-color-surface-variant: var(--color-solarized-base02);
+  --md-sys-color-on-surface-variant: var(--color-solarized-base1);
+
+  --md-sys-color-outline: var(--color-solarized-base01); /* #586e75 */
+  --md-sys-color-outline-variant: rgba(88, 110, 117, 0.3);
+  --md-sys-color-shadow: #000000;
+  --md-sys-color-scrim: #000000;
+
+  --md-sys-color-inverse-surface: var(--color-solarized-base2);
+  --md-sys-color-inverse-on-surface: var(--color-solarized-base03);
+  --md-sys-color-inverse-primary: #1e6fa8;
+
+  --md-sys-color-surface-dim: #002129;
+  --md-sys-color-surface-bright: #073642;
+  --md-sys-color-surface-container-lowest: #001f27;
+  --md-sys-color-surface-container-low: #002b36;
+  --md-sys-color-surface-container: #073642;
+  --md-sys-color-surface-container-high: #0a4351;
+  --md-sys-color-surface-container-highest: #0d5162;
 
   /* Material 3 Expressive Motion Tokens */
   --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
@@ -45,4 +95,55 @@
   --md-sys-state-focus-opacity: 0.12;
   --md-sys-state-pressed-opacity: 0.12;
   --md-sys-state-dragged-opacity: 0.16;
+}
+
+.light,
+[data-theme="light"] {
+  /* Material 3 Expressive System Colors - Light Mode (Solarized Light) */
+  --md-sys-color-primary: var(--color-solarized-blue); /* #268bd2 */
+  --md-sys-color-surface-tint: var(--color-solarized-blue);
+  --md-sys-color-on-primary: var(--color-solarized-base3); /* #fdf6e3 */
+  --md-sys-color-primary-container: var(--color-solarized-base2); /* #eee8d5 */
+  --md-sys-color-on-primary-container: var(
+    --color-solarized-base03
+  ); /* #002b36 */
+
+  --md-sys-color-secondary: var(--color-solarized-magenta); /* #d33682 */
+  --md-sys-color-on-secondary: var(--color-solarized-base3);
+  --md-sys-color-secondary-container: var(--color-solarized-base2);
+  --md-sys-color-on-secondary-container: var(--color-solarized-base02);
+
+  --md-sys-color-tertiary: var(--color-solarized-cyan); /* #2aa198 */
+  --md-sys-color-on-tertiary: var(--color-solarized-base3);
+  --md-sys-color-tertiary-container: var(--color-solarized-base2);
+  --md-sys-color-on-tertiary-container: var(--color-solarized-base02);
+
+  --md-sys-color-error: var(--color-solarized-red); /* #dc322f */
+  --md-sys-color-on-error: var(--color-solarized-base3);
+  --md-sys-color-error-container: var(--color-solarized-base2);
+  --md-sys-color-on-error-container: var(--color-solarized-red);
+
+  --md-sys-color-background: var(--color-solarized-base3); /* #fdf6e3 */
+  --md-sys-color-on-background: var(--color-solarized-base00); /* #657b83 */
+  --md-sys-color-surface: var(--color-solarized-base3);
+  --md-sys-color-on-surface: var(--color-solarized-base00);
+  --md-sys-color-surface-variant: var(--color-solarized-base2);
+  --md-sys-color-on-surface-variant: var(--color-solarized-base01);
+
+  --md-sys-color-outline: var(--color-solarized-base1); /* #93a1a1 */
+  --md-sys-color-outline-variant: rgba(88, 110, 117, 0.2);
+  --md-sys-color-shadow: #000000;
+  --md-sys-color-scrim: #000000;
+
+  --md-sys-color-inverse-surface: var(--color-solarized-base02);
+  --md-sys-color-inverse-on-surface: var(--color-solarized-base3);
+  --md-sys-color-inverse-primary: #85c8ff;
+
+  --md-sys-color-surface-dim: #dfd8c4;
+  --md-sys-color-surface-bright: #fffdf6;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #fdf6e3;
+  --md-sys-color-surface-container: #eee8d5;
+  --md-sys-color-surface-container-high: #e3ddca;
+  --md-sys-color-surface-container-highest: #d8d1bc;
 }
