@@ -438,6 +438,23 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
       [school.logoUrl, customHoloLayers],
     );
 
+    const frontContentNode = (
+      <CardFrontFace
+        school={school}
+        cohort={cohort}
+        profile={activeProfile}
+        readOnly={readOnly}
+        onFirstNameChange={handleFirstNameChange}
+        onFamilyNameChange={handleFamilyNameChange}
+        onEmailChange={handleEmailChange}
+        onAvatarChange={handleAvatarChange}
+      />
+    );
+
+    const backContentNode = (
+      <CardBackFace school={school} profile={activeProfile} />
+    );
+
     return (
       <IdCard
         ref={ref}
@@ -466,19 +483,11 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
         showInnerCoil={true}
         className={className}
         testId={testId}
-        frontContent={
-          <CardFrontFace
-            school={school}
-            cohort={cohort}
-            profile={activeProfile}
-            readOnly={readOnly}
-            onFirstNameChange={handleFirstNameChange}
-            onFamilyNameChange={handleFamilyNameChange}
-            onEmailChange={handleEmailChange}
-            onAvatarChange={handleAvatarChange}
-          />
+        frontContent={frontContentNode}
+        backContent={backContentNode}
+        renderGhostContent={(ghostSide) =>
+          ghostSide === "front" ? frontContentNode : backContentNode
         }
-        backContent={<CardBackFace school={school} profile={activeProfile} />}
       />
     );
   },
