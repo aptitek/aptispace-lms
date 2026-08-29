@@ -341,8 +341,8 @@ function buildHoloLayers(
       width: "28%",
       height: "9%",
       objectFit: "contain",
-      blendMode: "screen",
-      opacity: 0.95,
+      blendMode: "normal",
+      opacity: 0.7,
       holographic: true,
     });
   }
@@ -356,8 +356,8 @@ function buildHoloLayers(
     width: "52%",
     height: "22%",
     objectFit: "contain",
-    blendMode: "screen",
-    opacity: 0.95,
+    blendMode: "normal",
+    opacity: 0.7,
     holographic: true,
   });
 
