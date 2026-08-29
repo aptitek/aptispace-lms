@@ -1,18 +1,16 @@
 import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
 import { useEffect, useRef, type HTMLAttributes } from "react";
-import { useTheme, lighten, type Theme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import "./Galaxy.css";
 
 import { vertexShader, fragmentShader } from "./galaxyShaders";
-import { SOLARIZED_BASE } from "~/tokens/theme";
+import {
+  type GalaxyStarColors,
+  type ResolvedGalaxyColors,
+  resolveThemeColors,
+} from "./galaxyColors";
 
-export interface GalaxyStarColors {
-  red?: string;
-  orange?: string;
-  yellow?: string;
-  white?: string;
-  blue?: string;
-}
+export type { GalaxyStarColors } from "./galaxyColors";
 
 export interface GalaxyProps extends HTMLAttributes<HTMLDivElement> {
   focal?: [number, number];
@@ -59,15 +57,6 @@ interface GalaxySettings {
   dpr?: number;
 }
 
-interface ResolvedGalaxyColors {
-  red: [number, number, number];
-  orange: [number, number, number];
-  yellow: [number, number, number];
-  white: [number, number, number];
-  blue: [number, number, number];
-  background: [number, number, number];
-}
-
 const DEFAULT_SETTINGS: GalaxySettings = {
   focal: [0.5, 0.5],
   rotation: [1.0, 0.0],
@@ -109,123 +98,6 @@ const GALAXY_PROP_KEYS = new Set<string>([
   "starColors",
   "dpr",
 ]);
-
-function parseHex(hexStr: string): [number, number, number] {
-  const cleanHex = hexStr.replace(/^#/, "");
-  if (cleanHex.length === 3 || cleanHex.length === 4) {
-    return [
-      parseInt(cleanHex[0] + cleanHex[0], 16) / 255,
-      parseInt(cleanHex[1] + cleanHex[1], 16) / 255,
-      parseInt(cleanHex[2] + cleanHex[2], 16) / 255,
-    ];
-  }
-  return [
-    parseInt(cleanHex.slice(0, 2), 16) / 255,
-    parseInt(cleanHex.slice(2, 4), 16) / 255,
-    parseInt(cleanHex.slice(4, 6), 16) / 255,
-  ];
-}
-
-function parseColorToRgb(color: string): [number, number, number] {
-  if (!color) return [1, 1, 1];
-  const trimmed = color.trim().toLowerCase();
-  if (trimmed.startsWith("#")) {
-    return parseHex(trimmed);
-  }
-  if (trimmed.startsWith("rgb")) {
-    const match = trimmed.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-    if (match) {
-      return [
-        parseInt(match[1], 10) / 255,
-        parseInt(match[2], 10) / 255,
-        parseInt(match[3], 10) / 255,
-      ];
-    }
-  }
-  return [1, 1, 1];
-}
-
-function resolveBackgroundHex(theme: Theme, customBg?: string): string {
-  if (customBg) {
-    return customBg;
-  }
-  if (theme.palette.mode === "dark") {
-    return theme.palette.background.default || theme.palette.common.black;
-  }
-  return theme.palette.background.default || theme.palette.common.white;
-}
-
-// Stellar blackbody defaults: red → orange → yellow → white → blue-white.
-// Uses Solarized base colors with MUI lighten() for astrophysically accurate star hues.
-// Note: We avoid using palette.warning (which maps to amber/olive) and palette.info (violet)
-// to prevent the olive tint issue in star colors.
-function getStellarDarkColors(): ResolvedGalaxyColors {
-  return {
-    red: parseColorToRgb(SOLARIZED_BASE.red),
-    orange: parseColorToRgb(SOLARIZED_BASE.orange),
-    yellow: parseColorToRgb(lighten(SOLARIZED_BASE.yellow, 0.4)), // bright warm stellar yellow
-    white: parseColorToRgb(lighten(SOLARIZED_BASE.base2, 0.35)), // near-white for hot stars
-    blue: parseColorToRgb(lighten(SOLARIZED_BASE.blue, 0.45)), // blue-white for hottest stars
-    background: parseColorToRgb(SOLARIZED_BASE.base03),
-  };
-}
-
-function getStellarLightColors(): ResolvedGalaxyColors {
-  return {
-    red: parseColorToRgb(SOLARIZED_BASE.red),
-    orange: parseColorToRgb(SOLARIZED_BASE.orange),
-    yellow: parseColorToRgb(SOLARIZED_BASE.yellow), // reads as yellow on light bg
-    white: parseColorToRgb(SOLARIZED_BASE.base00), // body text (dark on light bg)
-    blue: parseColorToRgb(SOLARIZED_BASE.blue), // primary blue
-    background: parseColorToRgb(SOLARIZED_BASE.base3),
-  };
-}
-
-function getDarkStarPalette(
-  _palette: Theme["palette"],
-  custom: GalaxyStarColors,
-) {
-  const stellar = getStellarDarkColors();
-  return {
-    red: custom.red ? parseColorToRgb(custom.red) : stellar.red,
-    orange: custom.orange ? parseColorToRgb(custom.orange) : stellar.orange,
-    yellow: custom.yellow ? parseColorToRgb(custom.yellow) : stellar.yellow,
-    white: custom.white ? parseColorToRgb(custom.white) : stellar.white,
-    blue: custom.blue ? parseColorToRgb(custom.blue) : stellar.blue,
-  };
-}
-
-function getLightStarPalette(
-  _palette: Theme["palette"],
-  custom: GalaxyStarColors,
-) {
-  const stellar = getStellarLightColors();
-  return {
-    red: custom.red ? parseColorToRgb(custom.red) : stellar.red,
-    orange: custom.orange ? parseColorToRgb(custom.orange) : stellar.orange,
-    yellow: custom.yellow ? parseColorToRgb(custom.yellow) : stellar.yellow,
-    white: custom.white ? parseColorToRgb(custom.white) : stellar.white,
-    blue: custom.blue ? parseColorToRgb(custom.blue) : stellar.blue,
-  };
-}
-
-function resolveThemeColors(
-  theme: Theme,
-  starColors?: GalaxyStarColors,
-  customBg?: string,
-): ResolvedGalaxyColors {
-  const custom = starColors ?? {};
-  const bgHex = resolveBackgroundHex(theme, customBg);
-  const stars =
-    theme.palette.mode === "dark"
-      ? getDarkStarPalette(theme.palette, custom)
-      : getLightStarPalette(theme.palette, custom);
-
-  return {
-    ...stars,
-    background: parseColorToRgb(bgHex),
-  };
-}
 
 function extractProps(
   props: GalaxyProps,
@@ -368,7 +240,7 @@ export default function Galaxy(props: GalaxyProps) {
     const resolvedDpr =
       settings.dpr ??
       (typeof window !== "undefined"
-        ? Math.min(window.devicePixelRatio || 1, 2)
+        ? Math.min(window.devicePixelRatio || 1, 1.25)
         : 1);
 
     const renderer = new Renderer({
@@ -400,7 +272,15 @@ export default function Galaxy(props: GalaxyProps) {
 
     const geometry = new Triangle(gl);
     const mesh = new Mesh(gl, { geometry, program });
-    let animateId: number;
+
+    const TARGET_FPS = 60;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS;
+    let lastRenderTime = 0;
+    let animateId: number | null = null;
+    let isRunning = false;
+    let isPageVisible =
+      typeof document !== "undefined" ? !document.hidden : true;
+    let isIntersecting = true;
 
     // GPU shader state is reset when the (rare) genuine context loss is restored
     // by the browser, so recompile the program on the same shared gl and refresh
@@ -424,7 +304,15 @@ export default function Galaxy(props: GalaxyProps) {
     );
 
     const update = (timestampMs: number) => {
+      if (!isRunning) return;
       animateId = requestAnimationFrame(update);
+
+      const elapsed = timestampMs - lastRenderTime;
+      if (elapsed < FRAME_INTERVAL - 1.0) {
+        return;
+      }
+      lastRenderTime = timestampMs;
+
       if (!settings.disableAnimation) {
         program.uniforms.uTime.value = timestampMs * 0.001;
         program.uniforms.uStarSpeed.value =
@@ -453,7 +341,22 @@ export default function Galaxy(props: GalaxyProps) {
       renderer.render({ scene: mesh });
     };
 
-    animateId = requestAnimationFrame(update);
+    const startLoop = () => {
+      if (!isRunning && isPageVisible && isIntersecting) {
+        isRunning = true;
+        animateId = requestAnimationFrame(update);
+      }
+    };
+
+    const stopLoop = () => {
+      isRunning = false;
+      if (animateId !== null) {
+        cancelAnimationFrame(animateId);
+        animateId = null;
+      }
+    };
+
+    startLoop();
     ctn.appendChild(gl.canvas);
 
     const handleMouseMove = (event: MouseEvent) => {
@@ -498,10 +401,31 @@ export default function Galaxy(props: GalaxyProps) {
     };
 
     const handleVisibilityChange = () => {
-      if (document.hidden) {
+      isPageVisible = typeof document !== "undefined" ? !document.hidden : true;
+      if (!isPageVisible) {
         targetMouseActive.current = 0.0;
+        stopLoop();
+      } else {
+        startLoop();
       }
     };
+
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== "undefined") {
+      observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          isIntersecting = entry?.isIntersecting ?? true;
+          if (!isIntersecting) {
+            stopLoop();
+          } else {
+            startLoop();
+          }
+        },
+        { threshold: 0 },
+      );
+      observer.observe(ctn);
+    }
 
     if (settings.mouseInteraction) {
       window.addEventListener("mousemove", handleMouseMove, { passive: true });
@@ -509,25 +433,27 @@ export default function Galaxy(props: GalaxyProps) {
       window.addEventListener("blur", handleBlur);
       document.addEventListener("mouseleave", handleMouseLeave);
       document.addEventListener("visibilitychange", handleVisibilityChange);
+    } else {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
     }
 
     return () => {
-      cancelAnimationFrame(animateId);
+      stopLoop();
+      if (observer) {
+        observer.disconnect();
+      }
       window.removeEventListener("resize", resize);
       canvas.removeEventListener(
         "webglcontextrestored",
         handleContextRestored,
         false,
       );
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       if (settings.mouseInteraction) {
         window.removeEventListener("mousemove", handleMouseMove);
         window.removeEventListener("mouseout", handleMouseOut);
         window.removeEventListener("blur", handleBlur);
         document.removeEventListener("mouseleave", handleMouseLeave);
-        document.removeEventListener(
-          "visibilitychange",
-          handleVisibilityChange,
-        );
       }
       if (gl.canvas.parentNode === ctn) {
         ctn.removeChild(gl.canvas);

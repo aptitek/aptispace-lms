@@ -93,41 +93,52 @@ vec3 getRealisticStarColor(float tempRand) {
   }
 }
 
-float Star(vec2 uv, float flare) {
-  float d = length(uv);
-  float m = (0.05 * uGlowIntensity) / d;
-  float rays = smoothstep(0.0, 1.0, 1.0 - abs(uv.x * uv.y * 1000.0));
-  m += rays * flare * uGlowIntensity;
-  uv *= MAT45;
-  rays = smoothstep(0.0, 1.0, 1.0 - abs(uv.x * uv.y * 1000.0));
-  m += rays * 0.3 * flare * uGlowIntensity;
-  m *= smoothstep(1.0, 0.2, d);
-  return m;
-}
-
 vec3 StarLayer(vec2 uv) {
   vec3 col = vec3(0.0);
 
   vec2 gv = fract(uv) - 0.5; 
   vec2 id = floor(uv);
+  float timeSpeed = uTime * uSpeed;
 
   for (int y = -1; y <= 1; y++) {
     for (int x = -1; x <= 1; x++) {
       vec2 offset = vec2(float(x), float(y));
-      vec2 si = id + vec2(float(x), float(y));
+      vec2 si = id + offset;
       float seed = Hash21(si);
+      
+      vec2 pad = vec2(
+        tris(seed * 34.0 + timeSpeed * 0.1),
+        tris(seed * 38.0 + timeSpeed * 0.0333333)
+      ) - 0.5;
+
+      vec2 delta = gv - offset - pad;
+      float distSq = dot(delta, delta);
+
+      // Early culling: outside radius of 1.0 (smoothstep(1.0, 0.2, d) is 0.0)
+      if (distSq >= 1.0) continue;
+
+      float d = sqrt(distSq);
       float size = fract(seed * 345.32);
-      float glossLocal = tri(uStarSpeed / (PERIOD * seed + 1.0));
-      float flareSize = smoothstep(0.9, 1.0, size) * glossLocal;
+      float star = (0.05 * uGlowIntensity) / max(d, 0.001);
+
+      // Only compute expensive flare rays for top 10% brightest stars
+      if (size > 0.9) {
+        float glossLocal = tri(uStarSpeed / (PERIOD * seed + 1.0));
+        float flareSize = (size - 0.9) * 10.0 * glossLocal;
+        if (flareSize > 0.001) {
+          float ray1 = max(0.0, 1.0 - abs(delta.x * delta.y * 1000.0));
+          vec2 rotDelta = MAT45 * delta;
+          float ray2 = max(0.0, 1.0 - abs(rotDelta.x * rotDelta.y * 1000.0));
+          star += (ray1 + ray2 * 0.3) * flareSize * uGlowIntensity;
+        }
+      }
+
+      star *= smoothstep(1.0, 0.2, d);
 
       float tempRand = fract(seed * 789.123);
       vec3 starBaseColor = getRealisticStarColor(tempRand);
 
-      vec2 pad = vec2(tris(seed * 34.0 + uTime * uSpeed / 10.0), tris(seed * 38.0 + uTime * uSpeed / 30.0)) - 0.5;
-
-      float star = Star(gv - offset - pad, flareSize);
-
-      float twinkle = trisn(uTime * uSpeed + seed * 6.2831) * 0.5 + 1.0;
+      float twinkle = trisn(timeSpeed + seed * 6.2831) * 0.5 + 1.0;
       twinkle = mix(1.0, twinkle, uTwinkleIntensity);
       star *= twinkle;
       
