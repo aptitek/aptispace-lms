@@ -215,7 +215,8 @@ export const AptiSpaceBrandLogo: Story = {
       }}
     >
       <Typography variant="caption" sx={{ color: "text.secondary" }}>
-        School logo (favicon) on front badge and AptiSpace branding on back face.
+        School logo (favicon) on front badge and AptiSpace branding on back
+        face.
       </Typography>
       <OnboardingCard {...args} />
     </Box>
