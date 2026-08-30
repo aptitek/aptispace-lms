@@ -1,3 +1,5 @@
+import { styled } from "@mui/material/styles";
+import { motion } from "framer-motion";
 import type { EmailFieldSize } from "./EmailField.types";
 
 export interface Metrics {
@@ -6,6 +8,12 @@ export interface Metrics {
   lockIconSize: number;
   suffixSize: string;
 }
+
+export const MotionDomainSpan = styled(motion.span)({
+  display: "inline-block",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+});
 
 export function getFieldMetrics(
   sizePreset: EmailFieldSize = "medium",

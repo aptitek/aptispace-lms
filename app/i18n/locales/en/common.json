@@ -20,5 +20,15 @@
     "light": "Light",
     "switchToDark": "Switch to Dark Mode",
     "switchToLight": "Switch to Light Mode"
+  },
+  "emailField": {
+    "clearPrefix": "Clear prefix",
+    "fixedDomain": "Fixed institutional domain: @{{domain}}",
+    "fixedDomainAria": "Fixed domain @{{domain}}",
+    "usernamePlaceholder": "username",
+    "errors": {
+      "noAtAllowed": "Do not enter '@'. Domain @{{domain}} is added automatically.",
+      "autofillAdjusted": "Autofilled domain @{{enteredDomain}} was adjusted to institutional domain @{{domain}}."
+    }
   }
 }

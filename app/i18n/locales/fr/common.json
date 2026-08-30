@@ -20,5 +20,15 @@
     "light": "Clair",
     "switchToDark": "Passer en mode sombre",
     "switchToLight": "Passer en mode clair"
+  },
+  "emailField": {
+    "clearPrefix": "Effacer le préfixe",
+    "fixedDomain": "Domaine institutionnel fixe : @{{domain}}",
+    "fixedDomainAria": "Domaine fixe @{{domain}}",
+    "usernamePlaceholder": "identifiant",
+    "errors": {
+      "noAtAllowed": "Ne saisissez pas '@'. Le domaine @{{domain}} est ajouté automatiquement.",
+      "autofillAdjusted": "Le domaine autofourni @{{enteredDomain}} a été ajusté au domaine institutionnel @{{domain}}."
+    }
   }
 }

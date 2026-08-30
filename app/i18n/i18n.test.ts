@@ -54,4 +54,40 @@ describe("i18n Internationalization", () => {
     expect(i18n.t("auth:devTool.modeBadge")).toBe("DEV ONLY");
     expect(i18n.t("auth:devTool.roles.student")).toBe("Student");
   });
+
+  it("translates emailField strings and error interpolation in English and French", async () => {
+    await i18n.changeLanguage("en");
+    expect(
+      i18n.t("common:emailField.errors.noAtAllowed", {
+        domain: "cadet.aptispace.io",
+      }),
+    ).toBe(
+      "Do not enter '@'. Domain @cadet.aptispace.io is added automatically.",
+    );
+    expect(
+      i18n.t("common:emailField.errors.autofillAdjusted", {
+        enteredDomain: "gmail.com",
+        domain: "cadet.aptispace.io",
+      }),
+    ).toBe(
+      "Autofilled domain @gmail.com was adjusted to institutional domain @cadet.aptispace.io.",
+    );
+
+    await i18n.changeLanguage("fr");
+    expect(
+      i18n.t("common:emailField.errors.noAtAllowed", {
+        domain: "cadet.aptispace.io",
+      }),
+    ).toBe(
+      "Ne saisissez pas '@'. Le domaine @cadet.aptispace.io est ajouté automatiquement.",
+    );
+    expect(
+      i18n.t("common:emailField.errors.autofillAdjusted", {
+        enteredDomain: "gmail.com",
+        domain: "cadet.aptispace.io",
+      }),
+    ).toBe(
+      "Le domaine autofourni @gmail.com a été ajusté au domaine institutionnel @cadet.aptispace.io.",
+    );
+  });
 });

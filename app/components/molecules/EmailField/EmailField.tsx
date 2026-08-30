@@ -3,8 +3,12 @@ import {
   useId,
   forwardRef,
   type MouseEvent,
+  type FocusEvent,
   type ReactNode,
 } from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
+import { AnimatePresence } from "framer-motion";
 import InputAdornment from "@mui/material/InputAdornment";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
@@ -16,7 +20,11 @@ import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import TextField from "@mui/material/TextField";
 import type { EmailFieldProps } from "./EmailField.types";
-import { getFieldMetrics, type Metrics } from "./EmailField.styles";
+import {
+  getFieldMetrics,
+  MotionDomainSpan,
+  type Metrics,
+} from "./EmailField.styles";
 
 function cleanDomainString(domain?: string): string {
   if (!domain) return "aptispace.com";
@@ -31,7 +39,7 @@ function sanitizeLocalPart(rawInput: string): string {
   return cleaned;
 }
 
-function useEmailFieldState(props: EmailFieldProps) {
+function useEmailFieldState(props: EmailFieldProps, t: TFunction) {
   const isControlled = props.value !== undefined;
   const normalizedDomain = cleanDomainString(props.domain);
   const initialValue = isControlled
@@ -41,6 +49,7 @@ function useEmailFieldState(props: EmailFieldProps) {
 
   const [uncontrolledLocal, setUncontrolledLocal] =
     useState<string>(initialLocal);
+  const [autoFillError, setAutoFillError] = useState<string | null>(null);
 
   const currentLocal = isControlled
     ? sanitizeLocalPart(props.value ?? "")
@@ -50,7 +59,31 @@ function useEmailFieldState(props: EmailFieldProps) {
   const hasValue = currentLocal.length > 0;
 
   const handleSyncValue = (rawValue: string) => {
-    const cleanLocal = sanitizeLocalPart(rawValue);
+    let cleanLocal = rawValue.trim();
+    let errorMsg: string | null = null;
+
+    if (rawValue.includes("@")) {
+      const parts = rawValue.split("@");
+      cleanLocal = parts[0].trim();
+      const enteredDomain = parts.slice(1).join("@").trim();
+
+      if (enteredDomain.length > 0) {
+        const cleanedEntered = cleanDomainString(enteredDomain);
+        if (cleanedEntered !== normalizedDomain) {
+          errorMsg = t("emailField.errors.autofillAdjusted", {
+            enteredDomain: cleanedEntered,
+            domain: normalizedDomain,
+          });
+        }
+      } else {
+        errorMsg = t("emailField.errors.noAtAllowed", {
+          domain: normalizedDomain,
+        });
+      }
+    }
+
+    setAutoFillError(errorMsg);
+
     if (!isControlled) setUncontrolledLocal(cleanLocal);
     const compositeEmail = cleanLocal
       ? `${cleanLocal}@${normalizedDomain}`
@@ -62,6 +95,7 @@ function useEmailFieldState(props: EmailFieldProps) {
   const handleClear = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
+    setAutoFillError(null);
     if (!isControlled) setUncontrolledLocal("");
     props.onEmailChange?.("", "");
     props.onChange?.("");
@@ -72,6 +106,7 @@ function useEmailFieldState(props: EmailFieldProps) {
     currentLocal,
     fullEmail,
     hasValue,
+    autoFillError,
     handleSyncValue,
     handleClear,
   };
@@ -79,19 +114,25 @@ function useEmailFieldState(props: EmailFieldProps) {
 
 interface EndAdornmentProps {
   metrics: Metrics;
-  suffixDomain: string;
+  domainText: string;
   canClear: boolean;
   showDomainLock: boolean;
   onClear: (event: MouseEvent<HTMLButtonElement>) => void;
+  isFocused: boolean;
 }
 
 function EmailEndAdornment({
   metrics,
-  suffixDomain,
+  domainText,
   canClear,
   showDomainLock,
   onClear,
+  isFocused,
 }: EndAdornmentProps) {
+  const { t } = useTranslation("common");
+  const [isHovered, setIsHovered] = useState(false);
+  const shouldCollapse = isFocused && !isHovered;
+
   return (
     <InputAdornment
       position="end"
@@ -110,24 +151,51 @@ function EmailEndAdornment({
 
       <Typography
         variant="body2"
-        component="span"
+        component="div"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         sx={{
           color: "text.secondary",
           fontSize: metrics.suffixSize,
           fontWeight: 600,
           userSelect: "none",
           letterSpacing: "0.02em",
+          display: "flex",
+          alignItems: "center",
+          overflow: "hidden",
+          cursor: isFocused ? "pointer" : "default",
+          py: 0.25,
+          px: 0.25,
+          borderRadius: 0.5,
+          "&:hover": {
+            color: "text.primary",
+          },
         }}
       >
-        {suffixDomain}
+        <span>@</span>
+        <AnimatePresence initial={false}>
+          {!shouldCollapse && (
+            <MotionDomainSpan
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: "auto", opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{
+                duration: 0.3,
+                ease: [0.2, 0, 0, 1],
+              }}
+            >
+              {domainText}
+            </MotionDomainSpan>
+          )}
+        </AnimatePresence>
       </Typography>
 
       {canClear ? (
-        <Tooltip title="Clear prefix" arrow>
+        <Tooltip title={t("emailField.clearPrefix")} arrow>
           <IconButton
             size="small"
             onClick={onClear}
-            aria-label="Clear prefix"
+            aria-label={t("emailField.clearPrefix")}
             tabIndex={-1}
             sx={{
               p: 0.25,
@@ -141,7 +209,10 @@ function EmailEndAdornment({
       ) : null}
 
       {showDomainLock && !canClear ? (
-        <Tooltip title={`Fixed institutional domain: ${suffixDomain}`} arrow>
+        <Tooltip
+          title={t("emailField.fixedDomain", { domain: domainText })}
+          arrow
+        >
           <Box
             component="span"
             sx={{
@@ -150,7 +221,7 @@ function EmailEndAdornment({
               color: "text.secondary",
               opacity: 0.7,
             }}
-            aria-label={`Fixed domain ${suffixDomain}`}
+            aria-label={t("emailField.fixedDomainAria", { domain: domainText })}
           >
             <LockOutlinedIcon sx={{ fontSize: metrics.lockIconSize }} />
           </Box>
@@ -174,14 +245,18 @@ function renderStartAdornment(
   );
 }
 
-function resolveHelperText(
-  error?: boolean,
-  errorText?: string,
-  supportingText?: string,
-  helperText?: ReactNode,
-): ReactNode {
-  if (error && errorText) return errorText;
-  return supportingText ?? helperText;
+interface ResolveHelperTextOptions {
+  error?: boolean;
+  errorText?: string;
+  supportingText?: string;
+  helperText?: ReactNode;
+  autoFillError?: string | null;
+}
+
+function resolveHelperText(options: ResolveHelperTextOptions): ReactNode {
+  if (options.autoFillError) return options.autoFillError;
+  if (options.error && options.errorText) return options.errorText;
+  return options.supportingText ?? options.helperText;
 }
 
 function isClearable(props: EmailFieldProps, hasValue: boolean): boolean {
@@ -189,7 +264,8 @@ function isClearable(props: EmailFieldProps, hasValue: boolean): boolean {
     props.showClearButton !== false &&
     hasValue &&
     !props.disabled &&
-    !props.readOnly
+    !props.readOnly &&
+    !props.showDomainLock
   );
 }
 
@@ -210,21 +286,25 @@ function buildMergedSlotProps(
 
 export const EmailField = forwardRef<HTMLDivElement, EmailFieldProps>(
   function EmailField(props, ref) {
+    const { t } = useTranslation("common");
     const generatedId = useId();
     const inputId = props.id ?? `email-field-${generatedId}`;
     const size = props.size ?? "medium";
     const variant = props.variant ?? "outlined";
     const metrics = getFieldMetrics(size);
-    const state = useEmailFieldState(props);
+    const state = useEmailFieldState(props, t);
 
-    const suffixDomain = `@${state.normalizedDomain}`;
+    const [isFocused, setIsFocused] = useState(false);
+
+    const isError = Boolean(props.error || state.autoFillError);
     const canClear = isClearable(props, state.hasValue);
-    const resolvedHelperText = resolveHelperText(
-      props.error,
-      props.errorText,
-      props.supportingText,
-      props.helperText,
-    );
+    const resolvedHelperText = resolveHelperText({
+      error: props.error,
+      errorText: props.errorText,
+      supportingText: props.supportingText,
+      helperText: props.helperText,
+      autoFillError: state.autoFillError,
+    });
 
     const startAdornment = renderStartAdornment(
       props.leadingIcon,
@@ -233,10 +313,11 @@ export const EmailField = forwardRef<HTMLDivElement, EmailFieldProps>(
     const endAdornment = (
       <EmailEndAdornment
         metrics={metrics}
-        suffixDomain={suffixDomain}
+        domainText={state.normalizedDomain}
         canClear={canClear}
         showDomainLock={props.showDomainLock !== false}
         onClear={state.handleClear}
+        isFocused={isFocused}
       />
     );
 
@@ -255,11 +336,19 @@ export const EmailField = forwardRef<HTMLDivElement, EmailFieldProps>(
         size={size === "small" ? "small" : "medium"}
         fullWidth={props.fullWidth !== false}
         disabled={props.disabled}
-        error={props.error}
+        error={isError}
         helperText={resolvedHelperText}
-        placeholder={props.placeholder ?? "username"}
+        placeholder={props.placeholder ?? t("emailField.usernamePlaceholder")}
         slotProps={mergedSlotProps}
         onChange={(e) => state.handleSyncValue(e.target.value)}
+        onFocus={(e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+          setIsFocused(true);
+          props.onFocus?.(e);
+        }}
+        onBlur={(e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+          setIsFocused(false);
+          props.onBlur?.(e);
+        }}
         data-testid={props.testId ?? props["data-testid"] ?? "email-field"}
       />
     );
