@@ -6,7 +6,6 @@ import IdCard from "../../molecules/IdCard/IdCard";
 import EditableAvatar from "../../molecules/EditableAvatar/EditableAvatar";
 import EmailField from "../../molecules/EmailField/EmailField";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
-import aptispaceLogoRaw from "../../../../public/aptispace-logo.svg?raw";
 import type { GuillocheVariant } from "../../atoms/Guilloche/Guilloche.types";
 import type { IdHoloLayer } from "../../molecules/IdCard/IdCard.types";
 import type {
@@ -34,6 +33,7 @@ import {
   BackMainArea,
   BackLeftContactCol,
   BackRightContentCol,
+  BackAptispaceLogo,
   FullWidthMrzHolder,
 } from "./OnboardingCard.styles";
 
@@ -309,7 +309,13 @@ function CardBackFace({ school, profile }: BackFaceProps) {
     <CardBackContainer data-testid="onboarding-card-back">
       <BackMainArea>
         <BackLeftContactCol aria-hidden="true" />
-        <BackRightContentCol />
+        <BackRightContentCol data-testid="card-back-branding">
+          <BackAptispaceLogo
+            src="/aptispace-logo.svg"
+            alt="AptiSpace"
+            data-testid="card-back-logo"
+          />
+        </BackRightContentCol>
       </BackMainArea>
 
       <FullWidthMrzHolder>
@@ -347,26 +353,13 @@ function buildHoloLayers(
     });
   }
 
-  layers.push({
-    id: "aptispace-holo-logo",
-    src: aptispaceLogoRaw,
-    side: "back",
-    left: "15%",
-    top: "10%",
-    width: "70%",
-    height: "28%",
-    objectFit: "contain",
-    blendMode: "normal",
-    opacity: 0.7,
-    holographic: true,
-  });
-
   if (customHoloLayers && Array.isArray(customHoloLayers)) {
     customHoloLayers.forEach((layerItem, idx) => {
       if (typeof layerItem === "string") {
         layers.push({
           id: `custom-holo-${idx}`,
           src: layerItem,
+          side: "front",
           holographic: true,
         });
       } else {

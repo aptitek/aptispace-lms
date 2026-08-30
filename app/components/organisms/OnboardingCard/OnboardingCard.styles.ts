@@ -135,6 +135,16 @@ export const BackRightContentCol = styled("div")({
   position: "relative",
 });
 
+export const BackAptispaceLogo = styled("img")({
+  maxHeight: "46px",
+  maxWidth: "85%",
+  width: "auto",
+  height: "auto",
+  objectFit: "contain",
+  userSelect: "none",
+  pointerEvents: "none",
+});
+
 export const FullWidthMrzHolder = styled("div")(({ theme }) => ({
   width: "100%",
   padding: theme.spacing(0, 1.25, 1, 1.25),

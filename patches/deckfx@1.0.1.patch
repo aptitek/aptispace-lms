@@ -132,7 +132,7 @@ index 0000000000000000000000000000000000000000..3978d0b54dc6151bf6d8ed1478c9759e
 +    ImageLayer: React.FC<{ src: string; alt?: string; className?: string; opacity?: number; objectFit?: 'contain' | 'cover' | 'fill'; scale?: number | string; parallax?: boolean }>;
 +};
 diff --git a/dist/deckfx.es.js b/dist/deckfx.es.js
-index 973369ce27208f871bc6ee4e85b51bb2662cd75b..7d51154a614eec208b1bfd69eecb10ee92366283 100644
+index 973369ce27208f871bc6ee4e85b51bb2662cd75b..8595d02e3f6978d3c72272ff3865e7112fd36d76 100644
 --- a/dist/deckfx.es.js
 +++ b/dist/deckfx.es.js
 @@ -1,6 +1,8 @@
@@ -761,7 +761,7 @@ index 973369ce27208f871bc6ee4e85b51bb2662cd75b..7d51154a614eec208b1bfd69eecb10ee
 +                      const pDepth = typeof layer.parallax === "number" ? layer.parallax : layer.parallax ? 15 : 0;
 +                      const absDepth = Math.abs(pDepth);
 +                      const bleed = absDepth > 0 ? absDepth + 4 : 0;
-+                      const lHolo = !!layer.holographic;
++                      const lHolo = false;
 +                      const lHoloConfig = typeof layer.holographic === "object" ? layer.holographic : {};
 +                      const lRawStrength = layer.holoStrength !== void 0 ? layer.holoStrength : (layer.holoStrengh !== void 0 ? layer.holoStrengh : (lHoloConfig.holoStrength !== void 0 ? lHoloConfig.holoStrength : (lHoloConfig.holoStrengh !== void 0 ? lHoloConfig.holoStrengh : (lHoloConfig.strength !== void 0 ? lHoloConfig.strength : (lHoloConfig.intensity !== void 0 ? lHoloConfig.intensity : holoIntensity)))));
 +                      const lIntensity = typeof lRawStrength === "number" ? lRawStrength : 1;

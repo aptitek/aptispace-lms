@@ -182,8 +182,40 @@ export const BackFaceReverse: Story = {
       }}
     >
       <Typography variant="caption" sx={{ color: "text.secondary" }}>
-        Back side: Exposed contact pads on left, enlarged holographic AptiSpace
-        logo with foil reflection, and full-width MRZ zone.
+        Back side: Exposed contact pads on left, school logo, and full-width MRZ
+        zone.
+      </Typography>
+      <OnboardingCard {...args} />
+    </Box>
+  ),
+};
+
+export const AptiSpaceBrandLogo: Story = {
+  args: {
+    school: {
+      id: "school-aptispace-academy",
+      name: "AptiSpace Academy",
+      slug: "aptispace-academy",
+      logoUrl: "/aptispace-logo.svg",
+      emailDomain: "cadet.aptispace.io",
+      emailPattern: "{first}.{last}@{domain}",
+    },
+    cohort: mockCohort,
+    profile: mockProfile,
+    holoVariant: "rainbow",
+    size: "lg",
+  },
+  render: (args) => (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+      }}
+    >
+      <Typography variant="caption" sx={{ color: "text.secondary" }}>
+        Full AptiSpace brand logo on both front badge and back branding area.
       </Typography>
       <OnboardingCard {...args} />
     </Box>
