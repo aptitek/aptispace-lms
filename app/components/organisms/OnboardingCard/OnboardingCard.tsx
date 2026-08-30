@@ -39,9 +39,9 @@ import {
 } from "./OnboardingCard.styles";
 
 const DEFAULT_PROFILE_TEMPLATE: OnboardingProfile = {
-  firstName: "Alex",
-  familyName: "Mercer",
-  email: "alex.mercer@cadet.aptispace.io",
+  firstName: "",
+  familyName: "",
+  email: "",
   avatarUrl:
     "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
   documentNumber: "0942",

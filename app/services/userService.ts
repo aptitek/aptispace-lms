@@ -48,6 +48,20 @@ export async function getUserWithAffiliations(db: Database, id: string) {
   return user ?? null;
 }
 
+export async function getAllUsersWithAffiliations(db: Database) {
+  return db.query.users.findMany({
+    with: {
+      affiliations: {
+        with: {
+          institution: true,
+          cohort: true,
+        },
+      },
+    },
+    orderBy: (users, { desc }) => [desc(users.createdAt)],
+  });
+}
+
 export async function createUser(
   db: Database,
   userFields: Omit<NewUser, "createdAt" | "updatedAt">,
@@ -150,9 +164,5 @@ export function isUserProfileComplete(
     user.firstName && user.firstName.trim().length > 0,
   );
   const hasLastName = Boolean(user.lastName && user.lastName.trim().length > 0);
-  const primaryAffiliation = user.affiliations?.[0];
-  const hasEmail = Boolean(
-    primaryAffiliation?.email && primaryAffiliation.email.trim().length > 0,
-  );
-  return hasFirstName && hasLastName && hasEmail;
+  return hasFirstName && hasLastName;
 }

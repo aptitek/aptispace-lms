@@ -1,13 +1,29 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, type LoaderFunctionArgs } from "react-router";
+import type { LoaderFunctionArgs } from "react-router";
 import AuthLayout from "~/components/templates/AuthLayout/AuthLayout";
 import LoginCard from "~/components/organisms/LoginCard/LoginCard";
 import { getSession } from "~/utils/session.server";
+import { getDatabaseFromContext } from "~/db";
+import {
+  getUserWithAffiliations,
+  isUserProfileComplete,
+} from "~/services/userService";
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   const session = await getSession(request);
   if (session) {
+    const db = getDatabaseFromContext(context);
+    const user =
+      db && session.userId
+        ? await getUserWithAffiliations(db, session.userId)
+        : null;
+    if (!user || !isUserProfileComplete(user)) {
+      return new Response(null, {
+        status: 302,
+        headers: { Location: "/onboarding" },
+      });
+    }
     return new Response(null, {
       status: 302,
       headers: { Location: "/" },
@@ -29,7 +45,6 @@ export function meta() {
 
 export default function LoginPage() {
   const { t } = useTranslation("meta");
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -38,7 +53,7 @@ export default function LoginPage() {
   }, [t]);
 
   const handleLoginSuccess = () => {
-    navigate("/");
+    window.location.href = "/";
   };
 
   return (

@@ -6,7 +6,7 @@ import type {
 } from "./OnboardingCard.types";
 import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
 
-function sanitizeEmailPart(name: string, fallback: string): string {
+function sanitizeEmailPart(name: string, fallback = ""): string {
   const sanitized = (name || "")
     .trim()
     .toLowerCase()
@@ -16,32 +16,48 @@ function sanitizeEmailPart(name: string, fallback: string): string {
   return sanitized || fallback;
 }
 
+function generateLocalPart(
+  pattern: string,
+  cleanFirst: string,
+  cleanLast: string,
+): string {
+  if (cleanFirst && cleanLast) {
+    return pattern
+      .replace("{first}", cleanFirst)
+      .replace("{last}", cleanLast)
+      .replace("{f}", cleanFirst.charAt(0))
+      .replace("{l}", cleanLast.charAt(0))
+      .replace(/@.*$/, "");
+  }
+  return cleanFirst || cleanLast;
+}
+
 export function formatInstitutionalEmail(
   firstName: string,
   familyName: string,
   school: SchoolConfig,
 ): string {
+  const cleanFirst = sanitizeEmailPart(firstName, "");
+  const cleanLast = sanitizeEmailPart(familyName, "");
+
+  if (!cleanFirst && !cleanLast) {
+    return "";
+  }
+
   const cleanDomain = (school.emailDomain || "cadet.aptispace.io")
     .replace(/^@+/, "")
     .trim()
     .toLowerCase();
 
   const pattern = school.emailPattern || "{first}.{last}@{domain}";
-  const cleanFirst = sanitizeEmailPart(firstName, "cadet");
-  const cleanLast = sanitizeEmailPart(familyName, "user");
+  const local = generateLocalPart(pattern, cleanFirst, cleanLast);
+  const normalizedLocal = local.replace(/\.+/g, ".").replace(/^\.|\.$/g, "");
 
-  let result = pattern
-    .replace("{first}", cleanFirst)
-    .replace("{last}", cleanLast)
-    .replace("{f}", cleanFirst.charAt(0) || "c")
-    .replace("{l}", cleanLast.charAt(0) || "u")
-    .replace("{domain}", cleanDomain);
-
-  if (!result.includes("@")) {
-    result = `${cleanFirst}.${cleanLast}@${cleanDomain}`;
+  if (!normalizedLocal) {
+    return "";
   }
 
-  return result;
+  return `${normalizedLocal}@${cleanDomain}`;
 }
 
 function extractStartYear(cohort?: CohortConfig): number {

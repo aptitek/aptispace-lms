@@ -8,6 +8,7 @@ export interface AuthUser {
   avatarUrl?: string;
   impersonating?: boolean;
   affiliations?: unknown[];
+  isProfileComplete?: boolean;
 }
 
 export interface PersonaDefinition {
@@ -17,6 +18,21 @@ export interface PersonaDefinition {
   title: string;
   email: string;
   badge: string;
+}
+
+export interface AccountDefinition {
+  id: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  role: UserRole;
+  badge: string;
+  title: string;
+  isProfileComplete?: boolean;
+  createdAt?: string | Date;
+  institutionId?: string;
+  cohortId?: string | null;
 }
 
 export const DEV_PERSONAS: readonly PersonaDefinition[] = [
@@ -46,21 +62,108 @@ export const DEV_PERSONAS: readonly PersonaDefinition[] = [
   },
 ] as const;
 
+let inMemoryAccounts: AccountDefinition[] = DEV_PERSONAS.map((p) => ({
+  id: p.id,
+  name: p.name,
+  firstName: p.name.split(" ")[0] || "",
+  lastName: p.name.split(" ").slice(1).join(" ") || "",
+  email: p.email,
+  role: p.role,
+  badge: p.badge,
+  title: p.title,
+  isProfileComplete: true,
+}));
+
+export function getInitialFallbackAccounts(): AccountDefinition[] {
+  return [...inMemoryAccounts];
+}
+
+export async function fetchAccountsFromDb(): Promise<AccountDefinition[]> {
+  if (typeof window !== "undefined" && typeof fetch !== "undefined") {
+    try {
+      const res = await fetch("/api/auth?action=accounts");
+      if (res.ok) {
+        const accountsResponse = (await res.json()) as {
+          accounts?: AccountDefinition[];
+        };
+        if (
+          accountsResponse.accounts &&
+          Array.isArray(accountsResponse.accounts) &&
+          accountsResponse.accounts.length > 0
+        ) {
+          inMemoryAccounts = accountsResponse.accounts;
+          return accountsResponse.accounts;
+        }
+      }
+    } catch {
+      // Fallback cleanly to in-memory store
+    }
+  }
+  return inMemoryAccounts;
+}
+
+export async function createAccountInDb(
+  role: UserRole,
+): Promise<AccountDefinition> {
+  if (typeof window !== "undefined" && typeof fetch !== "undefined") {
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "createAccount", role }),
+      });
+      if (res.ok) {
+        const createResponse = (await res.json()) as {
+          account?: AccountDefinition;
+        };
+        if (createResponse.account) {
+          inMemoryAccounts = [createResponse.account, ...inMemoryAccounts];
+          return createResponse.account;
+        }
+      }
+    } catch {
+      // Fallback
+    }
+  }
+
+  // In-memory fallback (e.g. Storybook / offline)
+  const roleLabel =
+    role === "admin"
+      ? "Admin"
+      : role === "instructor"
+        ? "Instructor"
+        : "Student";
+  const newMockAccount: AccountDefinition = {
+    id: `mock-${role}-${Date.now().toString(36)}`,
+    name: `New ${roleLabel} (Pending Onboarding)`,
+    firstName: "",
+    lastName: "",
+    email: "",
+    role,
+    badge: roleLabel,
+    title: "Onboarding Pending • Unconfigured Profile",
+    isProfileComplete: false,
+    createdAt: new Date(),
+  };
+
+  inMemoryAccounts = [newMockAccount, ...inMemoryAccounts];
+  return newMockAccount;
+}
+
 export function loginWithGitHub(redirectTarget = "/"): void {
   if (typeof window === "undefined") return;
   const targetUrl = `/api/auth/github?redirect_uri=${encodeURIComponent(redirectTarget)}`;
   window.location.href = targetUrl;
 }
 
-export async function loginAsPersona(personaRole: UserRole): Promise<AuthUser> {
-  const matched =
-    DEV_PERSONAS.find((p) => p.role === personaRole) ?? DEV_PERSONAS[0];
-
+export async function loginAsAccount(
+  account: Pick<AccountDefinition, "id" | "role" | "name" | "email">,
+): Promise<AuthUser> {
   let resolvedUser: AuthUser = {
-    id: matched.id,
-    name: matched.name,
-    email: matched.email,
-    role: matched.role,
+    id: account.id,
+    name: account.name,
+    email: account.email,
+    role: account.role,
   };
 
   if (typeof window !== "undefined" && typeof fetch !== "undefined") {
@@ -69,8 +172,8 @@ export async function loginAsPersona(personaRole: UserRole): Promise<AuthUser> {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          role: personaRole,
-          personaId: matched.id,
+          userId: account.id,
+          role: account.role,
         }),
       });
 
@@ -88,6 +191,18 @@ export async function loginAsPersona(personaRole: UserRole): Promise<AuthUser> {
   }
 
   return resolvedUser;
+}
+
+export async function loginAsPersona(personaRole: UserRole): Promise<AuthUser> {
+  const matched =
+    DEV_PERSONAS.find((p) => p.role === personaRole) ?? DEV_PERSONAS[0];
+
+  return loginAsAccount({
+    id: matched.id,
+    role: matched.role,
+    name: matched.name,
+    email: matched.email,
+  });
 }
 
 export async function logout(): Promise<void> {

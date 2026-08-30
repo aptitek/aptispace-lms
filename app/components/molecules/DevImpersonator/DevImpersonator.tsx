@@ -1,211 +1,502 @@
-import { useState } from "react";
-import { styled, alpha } from "@mui/material/styles";
-import Paper from "@mui/material/Paper";
+import { useState, useEffect, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import ButtonBase from "@mui/material/ButtonBase";
 import Chip from "@mui/material/Chip";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 import { useTranslation } from "react-i18next";
-import {
-  DEV_PERSONAS,
-  type PersonaDefinition,
-  type UserRole,
-} from "~/utils/auth";
+import { LoadingIndicator } from "react-material-expressive";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import SearchIcon from "@mui/icons-material/Search";
+import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
+import SchoolIcon from "@mui/icons-material/School";
+import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import Avatar from "~/components/atoms/Avatar/Avatar";
+import type { M3ExpressiveShapeName } from "~/components/atoms/Avatar/m3Shapes";
+import {
+  type AccountDefinition,
+  type UserRole,
+  fetchAccountsFromDb,
+  createAccountInDb,
+  getInitialFallbackAccounts,
+} from "~/utils/auth";
+import type {
+  DevImpersonatorProps,
+  RoleFilterOption,
+} from "./DevImpersonator.types";
+import {
+  DevContainer,
+  ToolHeader,
+  HeaderTitle,
+  HeaderActions,
+  ModeBadge,
+  QuickCreateSection,
+  QuickCreateHeader,
+  QuickCreateButtonGroup,
+  RoleCreateButton,
+  FilterBar,
+  SearchField,
+  SegmentedFilter,
+  FilterPill,
+  AccountsList,
+  AccountCard,
+  AccountCardLeft,
+  AccountAvatarWrapper,
+  AccountDetails,
+  AccountNameRow,
+  AccountName,
+  AccountMeta,
+  AccountAction,
+  EmptyState,
+  StatusPill,
+} from "./DevImpersonator.styles";
 
-export interface DevImpersonatorProps {
-  onSelectPersona?: (personaRole: UserRole) => void;
-  loading?: boolean;
+function resolveAvatarShape(role: UserRole): M3ExpressiveShapeName {
+  switch (role) {
+    case "admin":
+      return "sunny";
+    case "instructor":
+      return "flower";
+    case "student":
+    default:
+      return "circle";
+  }
 }
 
-const DevContainer = styled(Paper)(({ theme }) => ({
-  marginTop: theme.spacing(3),
-  padding: theme.spacing(2),
-  borderRadius: theme.shape.borderRadius,
-  border: `1px dashed ${theme.palette.warning.main}`,
-  backgroundColor: alpha(theme.palette.warning.main, 0.04),
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(1.5),
-}));
+function resolveRoleChipColor(
+  role: UserRole,
+): "warning" | "info" | "success" | "default" {
+  switch (role) {
+    case "admin":
+      return "warning";
+    case "instructor":
+      return "info";
+    case "student":
+      return "success";
+    default:
+      return "default";
+  }
+}
 
-const ToolHeader = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: theme.spacing(1),
-}));
-
-const HeaderTitle = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(0.75),
-  fontSize: theme.typography.caption.fontSize ?? "0.75rem",
-  fontWeight: 700,
-  textTransform: "uppercase",
-  letterSpacing: "0.08em",
-  color: theme.palette.warning.main,
-
-  "& .MuiSvgIcon-root": {
-    fontSize: "1rem",
-  },
-}));
-
-const ModeBadge = styled(Chip)(({ theme }) => ({
-  height: 20,
-  fontSize: "0.7rem",
-  borderRadius: 4,
-  backgroundColor: theme.palette.warning.dark,
-  color: theme.palette.warning.contrastText,
-  fontWeight: 700,
-  fontFamily: "monospace",
-  "& .MuiChip-label": {
-    paddingLeft: 6,
-    paddingRight: 6,
-  },
-}));
-
-const PersonaList = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(1),
-}));
-
-const PersonaItem = styled(ButtonBase, {
-  shouldForwardProp: (prop) => prop !== "isSelected",
-})<{ isSelected?: boolean }>(({ theme, isSelected }) => {
-  const radius = Number(theme.shape.borderRadius) || 8;
-  return {
-    width: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: theme.spacing(1, 1.5),
-    borderRadius: radius * 0.75,
-    border: `1px solid ${isSelected ? theme.palette.primary.main : theme.palette.divider}`,
-    backgroundColor: isSelected
-      ? theme.palette.action.selected
-      : theme.palette.background.paper,
-    color: theme.palette.text.primary,
-    cursor: "pointer",
-    textAlign: "left",
-    transition: theme.transitions.create(
-      ["background-color", "border-color", "transform"],
-      {
-        duration: theme.transitions.duration.shorter,
-      },
-    ),
-
-    "&:hover": {
-      backgroundColor: theme.palette.action.hover,
-      borderColor: theme.palette.primary.light,
-      transform: "translateX(2px)",
-    },
-
-    "&:focus-visible": {
-      borderColor: theme.palette.primary.main,
-      boxShadow: `0 0 0 2px ${theme.palette.action.focus}`,
-    },
-  };
-});
-
-const PersonaDetails = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(0.25),
-}));
-
-const PersonaName = styled(Box)(({ theme }) => ({
-  fontSize: "0.875rem",
-  fontWeight: 600,
-  color: theme.palette.text.primary,
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-}));
-
-const PersonaEmail = styled(Typography)(({ theme }) => ({
-  fontSize: "0.75rem",
-  color: theme.palette.text.secondary,
-}));
-
-const ActionIcon = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  color: theme.palette.text.secondary,
-  "& .MuiSvgIcon-root": {
-    fontSize: "1.1rem",
-  },
-}));
-
-export default function DevImpersonator({
-  onSelectPersona,
-  loading = false,
-}: DevImpersonatorProps) {
-  const { t } = useTranslation("auth");
-  const [selectedRole, setSelectedRole] = useState<UserRole>("admin");
-
-  const handleSelect = (persona: PersonaDefinition) => {
-    setSelectedRole(persona.role);
-    onSelectPersona?.(persona.role);
-  };
+function matchesFilter(
+  account: AccountDefinition,
+  filterRole: RoleFilterOption,
+  searchQuery: string,
+): boolean {
+  if (filterRole !== "all" && account.role !== filterRole) {
+    return false;
+  }
+  const query = searchQuery.toLowerCase().trim();
+  if (query.length === 0) return true;
 
   return (
-    <DevContainer elevation={0} aria-label={t("devTool.ariaLabel")}>
+    account.name.toLowerCase().includes(query) ||
+    account.email.toLowerCase().includes(query) ||
+    account.role.toLowerCase().includes(query)
+  );
+}
+
+interface DevAccountItemProps {
+  account: AccountDefinition;
+  isSelected: boolean;
+  isCurrent: boolean;
+  disabled: boolean;
+  onSelect: (account: AccountDefinition) => void;
+}
+
+function DevAccountItem({
+  account,
+  isSelected,
+  isCurrent,
+  disabled,
+  onSelect,
+}: DevAccountItemProps) {
+  const { t } = useTranslation("auth");
+  const roleLabel = t(`devTool.roles.${account.role}` as const, {
+    defaultValue: account.badge || account.role,
+  });
+  const avatarShape = resolveAvatarShape(account.role);
+  const chipColor = resolveRoleChipColor(account.role);
+
+  return (
+    <AccountCard
+      isSelected={isSelected}
+      isCurrent={isCurrent}
+      disabled={disabled}
+      onClick={() => onSelect(account)}
+      role="option"
+      aria-selected={isSelected}
+      data-testid={`account-card-${account.id}`}
+    >
+      <AccountCardLeft>
+        <AccountAvatarWrapper>
+          <Avatar
+            name={account.name}
+            shape={avatarShape}
+            width={34}
+            height={34}
+            isPortrait={false}
+          />
+        </AccountAvatarWrapper>
+
+        <AccountDetails>
+          <AccountNameRow>
+            <AccountName variant="body2">{account.name}</AccountName>
+
+            <Chip
+              color={chipColor}
+              variant={isSelected ? "filled" : "outlined"}
+              label={roleLabel}
+              size="small"
+              sx={{
+                height: 18,
+                fontSize: "0.625rem",
+                fontWeight: 800,
+                "& .MuiChip-label": { px: 0.6 },
+              }}
+            />
+
+            {account.isProfileComplete === false && (
+              <StatusPill
+                label={t("devTool.pendingOnboarding", "Onboarding Pending")}
+                color="warning"
+                size="small"
+              />
+            )}
+          </AccountNameRow>
+
+          <AccountMeta>
+            <span>{account.email || account.title || "No email assigned"}</span>
+          </AccountMeta>
+        </AccountDetails>
+      </AccountCardLeft>
+
+      <AccountAction>
+        {isCurrent ? (
+          <Tooltip title={t("devTool.currentSession", "Current Session")}>
+            <CheckCircleIcon color="success" sx={{ fontSize: "1.1rem" }} />
+          </Tooltip>
+        ) : (
+          <ArrowForwardIcon />
+        )}
+      </AccountAction>
+    </AccountCard>
+  );
+}
+
+interface DevQuickCreateSectionProps {
+  isLoading: boolean;
+  isCreatingRole: UserRole | null;
+  onQuickCreate: (role: UserRole) => void;
+}
+
+function DevQuickCreateSection({
+  isLoading,
+  isCreatingRole,
+  onQuickCreate,
+}: DevQuickCreateSectionProps) {
+  const { t } = useTranslation("auth");
+  const isActionDisabled = isLoading || Boolean(isCreatingRole);
+
+  return (
+    <QuickCreateSection>
+      <QuickCreateHeader>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <PersonAddAlt1Icon sx={{ fontSize: 14 }} />
+          <span>{t("devTool.newAccount", "New Account")}</span>
+        </Box>
+        {isCreatingRole && (
+          <Chip
+            size="small"
+            icon={<LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />}
+            label={t("devTool.creatingAccount", "Creating account...")}
+            variant="outlined"
+            color="warning"
+            sx={{ height: 18, fontSize: "0.65rem", fontWeight: 700 }}
+          />
+        )}
+      </QuickCreateHeader>
+
+      <QuickCreateButtonGroup>
+        <RoleCreateButton
+          roleType="student"
+          disabled={isActionDisabled}
+          onClick={() => onQuickCreate("student")}
+          title="Create a new Student account (Triggers Onboarding)"
+          data-testid="create-student-btn"
+        >
+          {isCreatingRole === "student" ? (
+            <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
+          ) : (
+            <SchoolIcon />
+          )}
+          <span>{t("devTool.newStudent", "+ Student")}</span>
+        </RoleCreateButton>
+
+        <RoleCreateButton
+          roleType="instructor"
+          disabled={isActionDisabled}
+          onClick={() => onQuickCreate("instructor")}
+          title="Create a new Instructor account (Triggers Onboarding)"
+          data-testid="create-instructor-btn"
+        >
+          {isCreatingRole === "instructor" ? (
+            <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
+          ) : (
+            <SupervisorAccountIcon />
+          )}
+          <span>{t("devTool.newInstructor", "+ Instructor")}</span>
+        </RoleCreateButton>
+
+        <RoleCreateButton
+          roleType="admin"
+          disabled={isActionDisabled}
+          onClick={() => onQuickCreate("admin")}
+          title="Create a new Administrator account (Triggers Onboarding)"
+          data-testid="create-admin-btn"
+        >
+          {isCreatingRole === "admin" ? (
+            <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
+          ) : (
+            <AdminPanelSettingsIcon />
+          )}
+          <span>{t("devTool.newAdmin", "+ Admin")}</span>
+        </RoleCreateButton>
+      </QuickCreateButtonGroup>
+    </QuickCreateSection>
+  );
+}
+
+interface DevFilterSectionProps {
+  filterRole: RoleFilterOption;
+  roleCounts: Record<RoleFilterOption, number>;
+  searchQuery: string;
+  onFilterChange: (role: RoleFilterOption) => void;
+  onSearchChange: (query: string) => void;
+}
+
+function DevFilterSection({
+  filterRole,
+  roleCounts,
+  searchQuery,
+  onFilterChange,
+  onSearchChange,
+}: DevFilterSectionProps) {
+  const { t } = useTranslation("auth");
+
+  return (
+    <FilterBar>
+      <SegmentedFilter role="tablist" aria-label="Filter accounts by role">
+        {(["all", "student", "instructor", "admin"] as const).map((role) => {
+          const isActive = filterRole === role;
+          const label =
+            role === "all"
+              ? t("devTool.filterAll", "All")
+              : t(`devTool.roles.${role}` as const, { defaultValue: role });
+          const count = roleCounts[role];
+
+          return (
+            <FilterPill
+              key={role}
+              isActive={isActive}
+              onClick={() => onFilterChange(role)}
+              role="tab"
+              aria-selected={isActive}
+              data-testid={`filter-${role}`}
+            >
+              <span>
+                {label} ({count})
+              </span>
+            </FilterPill>
+          );
+        })}
+      </SegmentedFilter>
+
+      <SearchField
+        size="small"
+        placeholder={t("devTool.searchPlaceholder")}
+        value={searchQuery}
+        onChange={(e) => onSearchChange(e.target.value)}
+        slotProps={{
+          htmlInput: {
+            "aria-label": t("devTool.searchPlaceholder"),
+            "data-testid": "accounts-search-input",
+          },
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+              </InputAdornment>
+            ),
+          },
+        }}
+      />
+    </FilterBar>
+  );
+}
+
+export default function DevImpersonator({
+  onSelectAccount,
+  onSelectPersona,
+  onAccountCreated,
+  currentUserId,
+  loading: externalLoading = false,
+  initialAccounts,
+  className,
+  "data-testid": dataTestId = "dev-impersonator",
+}: DevImpersonatorProps) {
+  const { t } = useTranslation("auth");
+
+  const [accounts, setAccounts] = useState<AccountDefinition[]>(
+    () => initialAccounts || getInitialFallbackAccounts(),
+  );
+  const [selectedId, setSelectedId] = useState<string>(() => {
+    return currentUserId || (initialAccounts?.[0]?.id ?? accounts[0]?.id ?? "");
+  });
+  const [filterRole, setFilterRole] = useState<RoleFilterOption>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isCreatingRole, setIsCreatingRole] = useState<UserRole | null>(null);
+
+  const loadAccounts = async () => {
+    setIsFetching(true);
+    try {
+      const fetched = await fetchAccountsFromDb();
+      if (fetched && fetched.length > 0) {
+        setAccounts(fetched);
+      }
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!initialAccounts) {
+      void loadAccounts();
+    }
+  }, [initialAccounts]);
+
+  const handleSelect = (account: AccountDefinition) => {
+    setSelectedId(account.id);
+    onSelectAccount?.(account);
+    onSelectPersona?.(account.role);
+  };
+
+  const handleQuickCreate = async (role: UserRole) => {
+    setIsCreatingRole(role);
+    try {
+      const newAccount = await createAccountInDb(role);
+      setAccounts((prev) => [
+        newAccount,
+        ...prev.filter((a) => a.id !== newAccount.id),
+      ]);
+      setSelectedId(newAccount.id);
+      onAccountCreated?.(newAccount);
+      onSelectAccount?.(newAccount);
+      onSelectPersona?.(newAccount.role);
+    } finally {
+      setIsCreatingRole(null);
+    }
+  };
+
+  const roleCounts = useMemo(() => {
+    const counts = {
+      all: accounts.length,
+      admin: 0,
+      instructor: 0,
+      student: 0,
+    };
+    for (const acc of accounts) {
+      if (acc.role in counts) {
+        counts[acc.role as UserRole]++;
+      }
+    }
+    return counts;
+  }, [accounts]);
+
+  const filteredAccounts = useMemo(() => {
+    return accounts.filter((acc) =>
+      matchesFilter(acc, filterRole, searchQuery),
+    );
+  }, [accounts, filterRole, searchQuery]);
+
+  const isLoading = externalLoading || isFetching;
+
+  return (
+    <DevContainer
+      elevation={0}
+      aria-label={t("devTool.ariaLabel")}
+      className={className}
+      data-testid={dataTestId}
+    >
       <ToolHeader>
         <HeaderTitle>
           <BugReportIcon />
           <span>{t("devTool.title")}</span>
         </HeaderTitle>
-        <ModeBadge size="small" label={t("devTool.modeBadge")} />
+
+        <HeaderActions>
+          <Tooltip title={t("devTool.refresh", "Refresh accounts")} arrow>
+            <span>
+              <IconButton
+                size="small"
+                onClick={loadAccounts}
+                disabled={isLoading}
+                aria-label={t("devTool.refresh", "Refresh accounts")}
+                sx={{ color: "text.secondary" }}
+              >
+                {isFetching ? (
+                  <LoadingIndicator className="!size-4 [&>svg]:!size-4" />
+                ) : (
+                  <RefreshIcon fontSize="small" />
+                )}
+              </IconButton>
+            </span>
+          </Tooltip>
+          <ModeBadge size="small" label={t("devTool.modeBadge")} />
+        </HeaderActions>
       </ToolHeader>
 
-      <PersonaList role="group" aria-label={t("devTool.groupAriaLabel")}>
-        {DEV_PERSONAS.map((persona) => {
-          const isSelected = selectedRole === persona.role;
-          const translatedName = t(
-            `devTool.personas.${persona.role}.name` as const,
-            { defaultValue: persona.name },
-          );
-          const translatedBadge = t(`devTool.roles.${persona.role}` as const, {
-            defaultValue: persona.badge,
-          });
+      <DevQuickCreateSection
+        isLoading={isLoading}
+        isCreatingRole={isCreatingRole}
+        onQuickCreate={handleQuickCreate}
+      />
 
-          return (
-            <PersonaItem
-              key={persona.id}
-              isSelected={isSelected}
-              disabled={loading}
-              onClick={() => handleSelect(persona)}
-              aria-pressed={isSelected}
-            >
-              <PersonaDetails>
-                <PersonaName>
-                  <span>{translatedName}</span>
-                  <Chip
-                    color={
-                      persona.role === "admin"
-                        ? "warning"
-                        : persona.role === "instructor"
-                          ? "info"
-                          : "success"
-                    }
-                    variant="outlined"
-                    label={translatedBadge}
-                    size="small"
-                    sx={{ fontWeight: 700 }}
-                  />
-                </PersonaName>
-                <PersonaEmail variant="caption">{persona.email}</PersonaEmail>
-              </PersonaDetails>
-              <ActionIcon>
-                <ArrowForwardIcon />
-              </ActionIcon>
-            </PersonaItem>
-          );
-        })}
-      </PersonaList>
+      <DevFilterSection
+        filterRole={filterRole}
+        roleCounts={roleCounts}
+        searchQuery={searchQuery}
+        onFilterChange={setFilterRole}
+        onSearchChange={setSearchQuery}
+      />
+
+      {/* Accounts List */}
+      <AccountsList role="listbox" aria-label={t("devTool.groupAriaLabel")}>
+        {filteredAccounts.length === 0 ? (
+          <EmptyState>
+            <Typography variant="body2">
+              {t("devTool.emptyState", "No accounts found in database")}
+            </Typography>
+          </EmptyState>
+        ) : (
+          filteredAccounts.map((account) => (
+            <DevAccountItem
+              key={account.id}
+              account={account}
+              isSelected={selectedId === account.id}
+              isCurrent={currentUserId === account.id}
+              disabled={isLoading}
+              onSelect={handleSelect}
+            />
+          ))
+        )}
+      </AccountsList>
     </DevContainer>
   );
 }

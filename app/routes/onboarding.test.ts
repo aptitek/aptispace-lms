@@ -110,4 +110,22 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
     expect(body.success).toBe(true);
     expect(body.draftSaved).toBe(true);
   });
+
+  it("rejects validate_credential submission when first or family name is missing", async () => {
+    const formData = new FormData();
+    formData.set("actionType", "validate_credential");
+    formData.set("firstName", "");
+    formData.set("familyName", "");
+    formData.set("email", "alex.mercer@cadet.aptispace.io");
+
+    const request = new Request("http://localhost:3000/onboarding", {
+      method: "POST",
+      body: formData,
+    });
+
+    const response = await action(createActionArgs(request));
+    expect(response.status).toBe(400);
+    const body = (await response.json()) as { code: string; error: string };
+    expect(body.code).toBe("MISSING_REQUIRED_FIELDS");
+  });
 });

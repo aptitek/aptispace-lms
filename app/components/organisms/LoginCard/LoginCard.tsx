@@ -8,9 +8,11 @@ import Logo from "~/components/atoms/Logo/Logo";
 import DevImpersonator from "~/components/molecules/DevImpersonator/DevImpersonator";
 import {
   loginWithGitHub,
+  loginAsAccount,
   loginAsPersona,
   type UserRole,
   type AuthUser,
+  type AccountDefinition,
 } from "~/utils/auth";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -111,6 +113,17 @@ export default function LoginCard({
     }
   };
 
+  const handleAccountSelect = async (account: AccountDefinition) => {
+    setLoading(true);
+    try {
+      const user = await loginAsAccount(account);
+      setActiveUser(user);
+      onSuccess?.(user);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePersonaSelect = async (role: UserRole) => {
     setLoading(true);
     try {
@@ -171,7 +184,9 @@ export default function LoginCard({
 
       {showDevTool && (
         <DevImpersonator
+          onSelectAccount={handleAccountSelect}
           onSelectPersona={handlePersonaSelect}
+          currentUserId={activeUser?.id}
           loading={loading}
         />
       )}

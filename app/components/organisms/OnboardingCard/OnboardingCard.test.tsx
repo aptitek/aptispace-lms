@@ -63,6 +63,27 @@ describe("OnboardingCard Component & Utilities", () => {
     expect(email).toBe("erostova@quantum.edu");
   });
 
+  it("returns empty string when both first and family names are empty", () => {
+    const email = formatInstitutionalEmail("", "", mockSchoolWithLogo);
+    expect(email).toBe("");
+  });
+
+  it("handles single name when only first or family name is provided", () => {
+    const emailFirstOnly = formatInstitutionalEmail(
+      "Jane",
+      "",
+      mockSchoolWithLogo,
+    );
+    expect(emailFirstOnly).toBe("jane@cadet.orbital-academy.edu");
+
+    const emailFamilyOnly = formatInstitutionalEmail(
+      "",
+      "Doe",
+      mockSchoolWithLogo,
+    );
+    expect(emailFamilyOnly).toBe("doe@cadet.orbital-academy.edu");
+  });
+
   it("handles accent marks and spaces in cadet names for email generation", () => {
     const email = formatInstitutionalEmail(
       "Éléonore",

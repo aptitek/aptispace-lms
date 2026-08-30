@@ -63,20 +63,30 @@ export function buildInitialProfile(
   };
 }
 
+function resolveProfileEmail(
+  first: string,
+  family: string,
+  providedEmail?: string,
+): string {
+  if (providedEmail) return providedEmail;
+  if (first || family) {
+    return formatInstitutionalEmail(first, family, AVAILABLE_SCHOOLS[0]);
+  }
+  return "";
+}
+
 export function resolveDefaultProfile(
   loaderProfile?: OnboardingProfile,
 ): OnboardingProfile {
-  const first = loaderProfile?.firstName || "Alex";
-  const family = loaderProfile?.familyName || "Mercer";
-  const email =
-    loaderProfile?.email ||
-    formatInstitutionalEmail(first, family, AVAILABLE_SCHOOLS[0]);
+  const first = loaderProfile?.firstName ?? "";
+  const family = loaderProfile?.familyName ?? "";
+  const email = resolveProfileEmail(first, family, loaderProfile?.email);
 
   return {
     firstName: first,
     familyName: family,
     email,
-    avatarUrl: loaderProfile?.avatarUrl || DEFAULT_AVATAR_URL,
+    avatarUrl: loaderProfile?.avatarUrl ?? DEFAULT_AVATAR_URL,
     documentNumber: "0942",
     callSign: "AETH-9042",
     division: "Orbital Flight Dynamics",

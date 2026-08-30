@@ -2,8 +2,16 @@ import type { Database } from "~/db";
 import type { SchoolConfig } from "~/components/organisms/OnboardingCard/OnboardingCard.types";
 import { validateFixedDomainEmail } from "~/utils/emailSecurity";
 import { authGuard } from "~/utils/session.server";
-import { updateUser, updateUserAffiliation } from "~/services/userService";
-import { CADET_FIXED_DOMAIN, resolveSchool } from "./onboarding.helpers";
+import {
+  updateUser,
+  updateUserAffiliation,
+  isUserProfileComplete,
+} from "~/services/userService";
+import {
+  CADET_FIXED_DOMAIN,
+  resolveSchool,
+  buildInitialProfile,
+} from "./onboarding.helpers";
 
 export interface ValidateActionParams {
   actionType: string;
@@ -50,23 +58,35 @@ export interface SaveUserEditsParams {
   familyName: string;
   fullEmail?: string;
   schoolId: string;
+  hasNameFields?: boolean;
 }
 
 export async function saveUserEdits(params: SaveUserEditsParams) {
-  const { db, userId, firstName, familyName, fullEmail, schoolId } = params;
+  const {
+    db,
+    userId,
+    firstName,
+    familyName,
+    fullEmail,
+    schoolId,
+    hasNameFields,
+  } = params;
   if (!db || !userId) return;
 
   const typedDb = db as Database;
 
-  if (firstName || familyName) {
+  if (hasNameFields || firstName || familyName) {
+    const trimmedFirst = firstName.trim();
+    const trimmedFamily = familyName.trim();
+    const displayName = `${trimmedFirst} ${trimmedFamily}`.trim();
     await updateUser(typedDb, userId, {
-      firstName: firstName || "Cadet",
-      lastName: familyName || "Cadet",
-      displayName: `${firstName} ${familyName}`.trim() || undefined,
+      firstName: trimmedFirst,
+      lastName: trimmedFamily,
+      displayName: displayName || null,
     });
   }
 
-  if (fullEmail) {
+  if (fullEmail !== undefined) {
     await updateUserAffiliation(typedDb, userId, {
       email: fullEmail,
       institutionId: schoolId,
@@ -113,6 +133,25 @@ function createActionResponse(
   });
 }
 
+async function saveUserEditsIfPresent(
+  auth: Awaited<ReturnType<typeof authGuard>>,
+  userId: string | undefined | null,
+  data: ActionFormData,
+  validation: ReturnType<typeof validateFixedDomainEmail>,
+) {
+  if (userId) {
+    await saveUserEdits({
+      db: auth?.db,
+      userId,
+      firstName: data.firstName,
+      familyName: data.familyName,
+      fullEmail: validation.fullEmail || data.rawEmail,
+      schoolId: data.school.id,
+      hasNameFields: data.hasNameFields,
+    });
+  }
+}
+
 export async function handleOnboardingAction(
   request: Request,
   context: unknown,
@@ -137,16 +176,40 @@ export async function handleOnboardingAction(
     return validationError;
   }
 
-  if (userId) {
-    await saveUserEdits({
-      db: auth?.db,
-      userId,
-      firstName: data.firstName,
-      familyName: data.familyName,
-      fullEmail: validation.fullEmail,
-      schoolId: data.school.id,
-    });
-  }
+  await saveUserEditsIfPresent(auth, userId, data, validation);
 
   return createActionResponse(data.actionType, validation.fullEmail);
+}
+
+function resolveAuthUserId(
+  auth: Awaited<ReturnType<typeof authGuard>>,
+): string | null {
+  if (auth?.session?.userId) return auth.session.userId;
+  if (auth?.user?.id) return auth.user.id;
+  return null;
+}
+
+function resolveUserSchool(
+  user: { affiliations?: Array<{ institutionId?: string }> } | null | undefined,
+) {
+  const primaryAffil = user?.affiliations?.[0];
+  return resolveSchool(primaryAffil?.institutionId);
+}
+
+function extractLoaderData(auth: Awaited<ReturnType<typeof authGuard>>) {
+  const user = auth?.user ?? null;
+  return {
+    userId: resolveAuthUserId(auth),
+    profile: buildInitialProfile(user ?? undefined),
+    isComplete: isUserProfileComplete(user),
+    school: resolveUserSchool(user),
+  };
+}
+
+export async function handleOnboardingLoader(
+  request: Request,
+  context: unknown,
+) {
+  const auth = await authGuard(request, context, { allowAnonymous: true });
+  return extractLoaderData(auth);
 }

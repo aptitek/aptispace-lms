@@ -18,42 +18,63 @@ function isImpersonationPermitted(
   return Boolean(session && session.role === "admin");
 }
 
-async function resolveTargetUser(
-  db: Database | null,
+function formatDbUserResult(
+  user: NonNullable<Awaited<ReturnType<typeof getUserWithAffiliations>>>,
+  fallbackRole?: UserRole,
+) {
+  const primaryAffiliation = user.affiliations[0];
+  const fullName = `${user.firstName || ""} ${user.lastName || ""}`.trim();
+  return {
+    targetUserId: user.id,
+    targetDisplayName: user.displayName || fullName || "Cadet User",
+    targetUserEmail: primaryAffiliation?.email ?? "user@cadet.aptispace.io",
+    targetUserRole:
+      (primaryAffiliation?.role as UserRole) ?? fallbackRole ?? "student",
+  };
+}
+
+function resolvePersonaFallback(
+  userId?: string,
   personaId?: string,
   role?: UserRole,
 ) {
-  const targetPersona =
-    DEV_PERSONAS.find((p) => p.id === personaId || p.role === role) ??
-    DEV_PERSONAS[0];
-
-  if (!db) {
-    return {
-      targetUserId: targetPersona.id,
-      targetUserRole: targetPersona.role,
-      targetUserEmail: targetPersona.email,
-      targetDisplayName: targetPersona.name,
-    };
-  }
-
-  const userFromDb = await getUserWithAffiliations(db, targetPersona.id);
-  if (userFromDb) {
-    return {
-      targetUserId: userFromDb.id,
-      targetDisplayName:
-        userFromDb.displayName ??
-        `${userFromDb.firstName} ${userFromDb.lastName}`,
-      targetUserEmail: userFromDb.affiliations[0]?.email ?? targetPersona.email,
-      targetUserRole: userFromDb.affiliations[0]?.role ?? targetPersona.role,
-    };
-  }
+  const matched =
+    DEV_PERSONAS.find(
+      (p) => p.id === (userId || personaId) || p.role === role,
+    ) ?? DEV_PERSONAS[0];
 
   return {
-    targetUserId: targetPersona.id,
-    targetUserRole: targetPersona.role,
-    targetUserEmail: targetPersona.email,
-    targetDisplayName: targetPersona.name,
+    targetUserId: matched.id,
+    targetUserRole: matched.role,
+    targetUserEmail: matched.email,
+    targetDisplayName: matched.name,
   };
+}
+
+async function resolveTargetUser(
+  db: Database | null,
+  userId?: string,
+  personaId?: string,
+  role?: UserRole,
+) {
+  if (db && userId) {
+    const userFromDb = await getUserWithAffiliations(db, userId);
+    if (userFromDb) {
+      return formatDbUserResult(userFromDb, role);
+    }
+  }
+
+  const fallback = resolvePersonaFallback(userId, personaId, role);
+  if (!db) {
+    return fallback;
+  }
+
+  const userFromDb = await getUserWithAffiliations(db, fallback.targetUserId);
+  if (userFromDb) {
+    return formatDbUserResult(userFromDb, fallback.targetUserRole);
+  }
+
+  return fallback;
 }
 
 async function auditImpersonation(
@@ -87,6 +108,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   const payload = (await request.json().catch(() => ({}))) as {
+    userId?: string;
     personaId?: string;
     role?: UserRole;
   };
@@ -110,7 +132,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   const { targetUserId, targetUserRole, targetUserEmail, targetDisplayName } =
-    await resolveTargetUser(db, payload.personaId, payload.role);
+    await resolveTargetUser(
+      db,
+      payload.userId,
+      payload.personaId,
+      payload.role,
+    );
 
   await auditImpersonation(db, currentSession, targetUserId, targetUserRole);
 

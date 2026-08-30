@@ -51,13 +51,13 @@ function resolveActiveUser(
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const auth = await authGuard(request, context);
-  if (auth?.user && !isUserProfileComplete(auth.user)) {
+  if (!auth || !auth.user || !isUserProfileComplete(auth.user)) {
     throw new Response(null, {
       status: 302,
       headers: { Location: "/onboarding" },
     });
   }
-  const activeUser = resolveActiveUser(auth?.user, auth?.session);
+  const activeUser = resolveActiveUser(auth.user, auth.session);
   return { user: activeUser };
 }
 
