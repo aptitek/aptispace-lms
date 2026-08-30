@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useLoaderData,
   useFetcher,
@@ -19,6 +20,7 @@ import { validateFixedDomainEmail } from "~/utils/emailSecurity";
 import { logout } from "~/utils/auth";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import SyncIcon from "@mui/icons-material/Sync";
 import {
   CardWorkspaceContainer,
@@ -80,6 +82,8 @@ function RequirementsDock({
   fabTooltipText,
   onValidate,
 }: RequirementsDockProps) {
+  const { t } = useTranslation("onboarding");
+
   return (
     <FabDockPanel>
       <Box sx={{ width: "100%" }}>
@@ -93,16 +97,19 @@ function RequirementsDock({
             mb: 0.5,
           }}
         >
-          Credential Readiness
+          {t("requirements.title", "Complete to Continue")}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Fill out your name directly on the ID card to validate.
+          {t(
+            "requirements.subtitle",
+            "Fill in your name on the card to continue to the academy.",
+          )}
         </Typography>
       </Box>
 
       <RequirementsList>
         <RequirementPill isComplete={isFirstNameFilled}>
-          <span>First Name</span>
+          <span>{t("requirements.firstName", "First Name")}</span>
           {isFirstNameFilled ? (
             <CheckCircleIcon sx={{ fontSize: 16 }} />
           ) : (
@@ -111,7 +118,7 @@ function RequirementsDock({
         </RequirementPill>
 
         <RequirementPill isComplete={isFamilyNameFilled}>
-          <span>Family Name</span>
+          <span>{t("requirements.familyName", "Family Name")}</span>
           {isFamilyNameFilled ? (
             <CheckCircleIcon sx={{ fontSize: 16 }} />
           ) : (
@@ -120,7 +127,7 @@ function RequirementsDock({
         </RequirementPill>
 
         <RequirementPill isComplete={isEmailFilled}>
-          <span>Institutional Email</span>
+          <span>{t("requirements.email", "Institutional Email")}</span>
           {isEmailFilled ? (
             <CheckCircleIcon sx={{ fontSize: 16 }} />
           ) : (
@@ -141,8 +148,10 @@ function RequirementsDock({
         <Chip
           label={
             isFormComplete
-              ? "✓ Ready to Validate"
-              : `${3 - missingFieldsCount} / 3 Completed`
+              ? t("requirements.readyChip", "✓ Ready to Continue")
+              : t("requirements.progressChip", "{{completed}} / 3 Completed", {
+                  completed: 3 - missingFieldsCount,
+                })
           }
           size="small"
           color={isFormComplete ? "success" : "default"}
@@ -157,7 +166,7 @@ function RequirementsDock({
                 sx={{ fontSize: 14, animation: "spin 1s linear infinite" }}
               />
             }
-            label="Saving..."
+            label={t("requirements.saving", "Saving...")}
             size="small"
             variant="outlined"
             sx={{ fontSize: "0.7rem" }}
@@ -174,8 +183,17 @@ function RequirementsDock({
             data-testid="m3-validation-fab"
             fullWidth
           >
-            <CheckCircleIcon sx={{ fontSize: 22 }} />
-            <span>Issue Identification Credential</span>
+            <span>{t("form.submit", "Complete & Continue")}</span>
+            <ArrowForwardRoundedIcon
+              sx={{
+                fontSize: 26,
+                ml: 0.5,
+                transition: "transform 0.25s cubic-bezier(0.2, 0, 0, 1)",
+                "button:hover &": {
+                  transform: "translateX(4px)",
+                },
+              }}
+            />
           </M3ExtendedFab>
         </Box>
       </Tooltip>
@@ -184,16 +202,23 @@ function RequirementsDock({
 }
 
 export default function OnboardingPage() {
+  const { t } = useTranslation(["onboarding", "meta"]);
   const loaderData = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
 
   const selectedSchool = loaderData?.school ?? AVAILABLE_SCHOOLS[0];
 
-  const [selectedCohort] = useState<CohortConfig>({
-    id: "cohort-2026",
-    name: "Cadet Cohort 2026",
-    description: "Avionics and orbital navigation flight cohort.",
-  });
+  const selectedCohort = useMemo<CohortConfig>(
+    () => ({
+      id: "cohort-2026",
+      name: t("card.defaultCohort", "Cadet Cohort 2026", { year: 2026 }),
+      description: t(
+        "card.defaultCohortDescription",
+        "Avionics and orbital navigation flight cohort.",
+      ),
+    }),
+    [t],
+  );
 
   const [profile, setProfile] = useState<OnboardingProfile>(() =>
     resolveDefaultProfile(loaderData?.profile),
@@ -201,9 +226,12 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     if (typeof document !== "undefined") {
-      document.title = "AptiSpace LMS • Cadet Onboarding";
+      document.title = t(
+        "meta:onboarding.title",
+        "AptiSpace LMS • Cadet Onboarding",
+      );
     }
-  }, []);
+  }, [t]);
 
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -260,10 +288,20 @@ export default function OnboardingPage() {
 
   const fabTooltipText = useMemo(() => {
     if (isFormComplete) {
-      return "All required fields valid! Click to issue your official ID-1 credential.";
+      return t(
+        "onboarding:requirements.tooltipReady",
+        "All required fields valid! Click to issue your official ID-1 credential.",
+      );
     }
-    return `Please fill in ${missingFieldsList.join(", ")} directly on the card to enable validation.`;
-  }, [isFormComplete, missingFieldsList]);
+    const missingNames = missingFieldsList
+      .map((key) => t(`onboarding:requirements.${key}`))
+      .join(", ");
+    return t(
+      "onboarding:requirements.tooltipIncomplete",
+      "Please fill in {{missing}} directly on the card to enable validation.",
+      { missing: missingNames },
+    );
+  }, [isFormComplete, missingFieldsList, t]);
 
   useEffect(() => {
     const data = fetcher.data as

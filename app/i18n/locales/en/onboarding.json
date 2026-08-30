@@ -11,14 +11,39 @@
     "magneticStripe": "ISO/IEC 7811 Magnetic Stripe",
     "authorizedSignature": "Authorized Cadet Signature",
     "securityKey": "Security Key",
-    "mrz": "Machine Readable Zone (MRZ)"
+    "mrz": "Machine Readable Zone (MRZ)",
+    "mrzZone": "ICAO 9303 Machine Readable Zone",
+    "mrzValid": "ICAO OK",
+    "mrzInvalid": "CHECK ERR",
+    "logoAlt": "AptiSpace",
+    "defaultCohort": "Cadet Cohort {{year}}",
+    "defaultCohortDescription": "Avionics and orbital navigation flight cohort.",
+    "defaultDivision": "Orbital Flight Dynamics",
+    "defaultClearance": "LEVEL-4 OMNI"
   },
   "form": {
     "cadetName": "Cadet Full Name",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "First name",
+    "familyName": "Family Name",
+    "familyNamePlaceholder": "Family name",
+    "email": "Institutional Email",
     "callSign": "Call Sign",
     "division": "Specialization / Division",
     "clearance": "Security Clearance",
-    "submit": "Issue Identification Credential",
+    "submit": "Complete & Continue",
     "preview": "Live ID-1 Preview"
+  },
+  "requirements": {
+    "title": "Complete to Continue",
+    "subtitle": "Fill in your name on the card to continue to the academy.",
+    "firstName": "First Name",
+    "familyName": "Family Name",
+    "email": "Institutional Email",
+    "readyChip": "✓ Ready to Continue",
+    "progressChip": "{{completed}} / 3 Completed",
+    "saving": "Saving...",
+    "tooltipReady": "All required fields filled! Click to continue to the academy.",
+    "tooltipIncomplete": "Please fill in {{missing}} on the card to continue."
   }
 }

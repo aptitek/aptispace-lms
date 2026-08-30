@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, forwardRef } from "react";
+import { useTranslation } from "react-i18next";
 import TextField from "@mui/material/TextField";
 import Chip from "@mui/material/Chip";
 
@@ -191,8 +192,11 @@ function CardFrontFace({
   onEmailChange,
   onAvatarChange,
 }: FrontFaceProps) {
+  const { t } = useTranslation(["onboarding", "common"]);
   const schoolName = school.name || "AptiSpace Academy";
-  const cohortName = cohort?.name || "Cadet Cohort 2026";
+  const cohortName =
+    cohort?.name ||
+    t("card.defaultCohort", "Cadet Cohort 2026", { year: 2026 });
   const schoolDomain = school.emailDomain || "cadet.aptispace.io";
   const validity = useMemo(() => calculateCohortValidity(cohort), [cohort]);
 
@@ -254,10 +258,10 @@ function CardFrontFace({
           <FieldListItem disableGutters disablePadding>
             <TextField
               id="card-field-firstname"
-              label="First Name"
+              label={t("form.firstName", "First Name")}
               value={profile.firstName}
               disabled={readOnly}
-              placeholder="First name"
+              placeholder={t("form.firstNamePlaceholder", "First name")}
               size="small"
               variant="outlined"
               onChange={(e) => onFirstNameChange(e.target.value)}
@@ -269,10 +273,10 @@ function CardFrontFace({
           <FieldListItem disableGutters disablePadding>
             <TextField
               id="card-field-familyname"
-              label="Family Name"
+              label={t("form.familyName", "Family Name")}
               value={profile.familyName}
               disabled={readOnly}
-              placeholder="Family name"
+              placeholder={t("form.familyNamePlaceholder", "Family name")}
               size="small"
               variant="outlined"
               onChange={(e) => onFamilyNameChange(e.target.value)}
@@ -284,14 +288,17 @@ function CardFrontFace({
           <FieldListItem disableGutters disablePadding>
             <EmailField
               id="card-field-email"
-              label="Institutional Email"
+              label={t("form.email", "Institutional Email")}
               domain={schoolDomain}
               value={profile.email}
               disabled={readOnly}
               size="small"
               variant="outlined"
               showDomainLock={true}
-              placeholder="username"
+              placeholder={t(
+                "common:emailField.usernamePlaceholder",
+                "username",
+              )}
               onEmailChange={onEmailChange}
               testId="input-email"
             />
@@ -308,6 +315,7 @@ interface BackFaceProps {
 }
 
 function CardBackFace({ school, profile }: BackFaceProps) {
+  const { t } = useTranslation("onboarding");
   const mrzData = useMemo(() => {
     return buildTd1MrzData(profile, school);
   }, [profile, school]);
@@ -319,7 +327,7 @@ function CardBackFace({ school, profile }: BackFaceProps) {
         <BackRightContentCol data-testid="card-back-branding">
           <BackAptispaceLogo
             src="/aptispace-logo.svg"
-            alt="AptiSpace"
+            alt={t("card.logoAlt", "AptiSpace")}
             data-testid="card-back-logo"
           />
         </BackRightContentCol>

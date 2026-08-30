@@ -135,7 +135,7 @@ export default function Header({
                     : "success"
               }
               variant="outlined"
-              label={user.role}
+              label={t(`devTool.roles.${user.role}`, user.role)}
               size="small"
               sx={{ fontWeight: 700 }}
               data-testid={`role-chip-${user.role}`}

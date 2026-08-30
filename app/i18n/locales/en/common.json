@@ -30,5 +30,22 @@
       "noAtAllowed": "Do not enter '@'. Domain @{{domain}} is added automatically.",
       "autofillAdjusted": "Autofilled domain @{{enteredDomain}} was adjusted to institutional domain @{{domain}}."
     }
+  },
+  "avatar": {
+    "edit": "EDIT",
+    "clickToEdit": "Click to edit avatar",
+    "resetToDefault": "Reset avatar to default",
+    "dropImageHint": "Drop image to set or upload avatar",
+    "urlPlaceholder": "Drop image, paste, or enter URL...",
+    "inputAriaLabel": "Avatar image URL or drop area",
+    "uploadFile": "Upload avatar file",
+    "uploadFileTooltip": "Upload image file",
+    "modalTitle": "Edit Profile Avatar",
+    "closeModal": "Close edit avatar dialog",
+    "errors": {
+      "invalidFileType": "Please select a valid image file (PNG, JPG, WebP, SVG)",
+      "uploadFailed": "Failed to upload avatar image",
+      "invalidPayload": "Invalid upload response payload from server"
+    }
   }
 }

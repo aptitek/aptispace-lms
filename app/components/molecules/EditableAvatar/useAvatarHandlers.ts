@@ -4,6 +4,7 @@ import {
   type DragEvent,
   type ClipboardEvent,
 } from "react";
+import { useTranslation } from "react-i18next";
 import type { UploadResponsePayload } from "./EditableAvatar.types";
 
 async function defaultR2Uploader(
@@ -58,6 +59,7 @@ export interface UseAvatarHandlersOptions {
 }
 
 export function useAvatarHandlers(options: UseAvatarHandlersOptions) {
+  const { t } = useTranslation("common");
   const {
     value,
     defaultValue = "",
@@ -93,7 +95,10 @@ export function useAvatarHandlers(options: UseAvatarHandlersOptions) {
       if (!editable) return;
       if (!pickedFile.type.startsWith("image/")) {
         setErrorMessage(
-          "Please select a valid image file (PNG, JPG, WebP, SVG)",
+          t(
+            "avatar.errors.invalidFileType",
+            "Please select a valid image file (PNG, JPG, WebP, SVG)",
+          ),
         );
         return;
       }
@@ -108,13 +113,13 @@ export function useAvatarHandlers(options: UseAvatarHandlersOptions) {
         const messageText =
           uploadError instanceof Error
             ? uploadError.message
-            : "Failed to upload avatar image";
+            : t("avatar.errors.uploadFailed", "Failed to upload avatar image");
         setErrorMessage(messageText);
       } finally {
         setIsUploading(false);
       }
     },
-    [editable, onUpload, uploadEndpoint, updateAvatarUrl],
+    [editable, onUpload, uploadEndpoint, updateAvatarUrl, t],
   );
 
   const handleDragOver = useCallback(

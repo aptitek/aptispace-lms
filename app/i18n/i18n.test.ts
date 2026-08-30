@@ -90,4 +90,80 @@ describe("i18n Internationalization", () => {
       "Le domaine autofourni @gmail.com a été ajusté au domaine institutionnel @cadet.aptispace.io.",
     );
   });
+
+  it("translates avatar strings and upload errors in English and French", async () => {
+    await i18n.changeLanguage("en");
+    expect(i18n.t("common:avatar.edit")).toBe("EDIT");
+    expect(i18n.t("common:avatar.clickToEdit")).toBe("Click to edit avatar");
+    expect(i18n.t("common:avatar.modalTitle")).toBe("Edit Profile Avatar");
+    expect(i18n.t("common:avatar.errors.invalidFileType")).toBe(
+      "Please select a valid image file (PNG, JPG, WebP, SVG)",
+    );
+
+    await i18n.changeLanguage("fr");
+    expect(i18n.t("common:avatar.edit")).toBe("MODIFIER");
+    expect(i18n.t("common:avatar.clickToEdit")).toBe(
+      "Cliquer pour modifier l'avatar",
+    );
+    expect(i18n.t("common:avatar.modalTitle")).toBe(
+      "Modifier l'avatar du profil",
+    );
+    expect(i18n.t("common:avatar.errors.invalidFileType")).toBe(
+      "Veuillez sélectionner un fichier image valide (PNG, JPG, WebP, SVG)",
+    );
+  });
+
+  it("translates onboarding card, form, and requirements strings in English and French", async () => {
+    await i18n.changeLanguage("en");
+    expect(i18n.t("onboarding:title")).toBe(
+      "AptiSpace Academy Cadet Onboarding",
+    );
+    expect(i18n.t("onboarding:form.firstName")).toBe("First Name");
+    expect(i18n.t("onboarding:form.familyName")).toBe("Family Name");
+    expect(i18n.t("onboarding:form.email")).toBe("Institutional Email");
+    expect(i18n.t("onboarding:form.submit")).toBe("Complete & Continue");
+    expect(i18n.t("onboarding:requirements.title")).toBe(
+      "Complete to Continue",
+    );
+    expect(i18n.t("onboarding:requirements.readyChip")).toBe(
+      "✓ Ready to Continue",
+    );
+    expect(
+      i18n.t("onboarding:requirements.progressChip", { completed: 2 }),
+    ).toBe("2 / 3 Completed");
+    expect(i18n.t("onboarding:card.mrzValid")).toBe("ICAO OK");
+
+    await i18n.changeLanguage("fr");
+    expect(i18n.t("onboarding:title")).toBe(
+      "Intégration des Cadets de l'Académie AptiSpace",
+    );
+    expect(i18n.t("onboarding:form.firstName")).toBe("Prénom");
+    expect(i18n.t("onboarding:form.familyName")).toBe("Nom de famille");
+    expect(i18n.t("onboarding:form.email")).toBe("Email institutionnel");
+    expect(i18n.t("onboarding:form.submit")).toBe("Valider et continuer");
+    expect(i18n.t("onboarding:requirements.title")).toBe(
+      "Complétez pour continuer",
+    );
+    expect(i18n.t("onboarding:requirements.readyChip")).toBe(
+      "✓ Prêt à continuer",
+    );
+    expect(
+      i18n.t("onboarding:requirements.progressChip", { completed: 2 }),
+    ).toBe("2 / 3 Complétés");
+    expect(i18n.t("onboarding:card.mrzValid")).toBe("ICAO OK");
+    expect(i18n.t("onboarding:card.mrzInvalid")).toBe("ERR VÉRIF");
+  });
+
+  it("translates onboarding metadata in English and French", async () => {
+    await i18n.changeLanguage("en");
+    expect(i18n.t("meta:onboarding.title")).toBe(
+      "AptiSpace LMS • Cadet Onboarding",
+    );
+
+    await i18n.changeLanguage("fr");
+    expect(i18n.t("meta:onboarding.title")).toBe(
+      "AptiSpace LMS • Intégration des Cadets",
+    );
+  });
 });
+

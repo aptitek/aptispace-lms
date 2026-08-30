@@ -94,14 +94,17 @@ export function resolveDefaultProfile(
   };
 }
 
+export type RequiredFieldKey = "firstName" | "familyName" | "email";
+
 export function computeMissingFields(
   isFirst: boolean,
   isFamily: boolean,
   isEmail: boolean,
-): string[] {
-  const missing: string[] = [];
-  if (!isFirst) missing.push("First Name");
-  if (!isFamily) missing.push("Family Name");
-  if (!isEmail) missing.push("Institutional Email");
+): RequiredFieldKey[] {
+  const missing: RequiredFieldKey[] = [];
+  if (!isFirst) missing.push("firstName");
+  if (!isFamily) missing.push("familyName");
+  if (!isEmail) missing.push("email");
   return missing;
 }
+

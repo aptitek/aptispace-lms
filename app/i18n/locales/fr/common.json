@@ -30,5 +30,22 @@
       "noAtAllowed": "Ne saisissez pas '@'. Le domaine @{{domain}} est ajouté automatiquement.",
       "autofillAdjusted": "Le domaine autofourni @{{enteredDomain}} a été ajusté au domaine institutionnel @{{domain}}."
     }
+  },
+  "avatar": {
+    "edit": "MODIFIER",
+    "clickToEdit": "Cliquer pour modifier l'avatar",
+    "resetToDefault": "Réinitialiser l'avatar par défaut",
+    "dropImageHint": "Glissez une image pour définir ou téléverser l'avatar",
+    "urlPlaceholder": "Glissez une image, collez ou entrez une URL...",
+    "inputAriaLabel": "URL de l'image de l'avatar ou zone de dépôt",
+    "uploadFile": "Téléverser un fichier avatar",
+    "uploadFileTooltip": "Téléverser un fichier image",
+    "modalTitle": "Modifier l'avatar du profil",
+    "closeModal": "Fermer la boîte de dialogue d'avatar",
+    "errors": {
+      "invalidFileType": "Veuillez sélectionner un fichier image valide (PNG, JPG, WebP, SVG)",
+      "uploadFailed": "Échec du téléversement de l'avatar",
+      "invalidPayload": "Réponse de téléversement invalide du serveur"
+    }
   }
 }

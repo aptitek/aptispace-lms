@@ -2,5 +2,9 @@
   "home": {
     "title": "AptiSpace LMS • Orbital Gateway Login",
     "description": "Welcome to AptiSpace LMS. Secure single sign-on via GitHub to access courses and simulations."
+  },
+  "onboarding": {
+    "title": "AptiSpace LMS • Cadet Onboarding",
+    "description": "Configure your ISO/IEC 7810 ID-1 official identification card and begin your AptiSpace interstellar journey."
   }
 }

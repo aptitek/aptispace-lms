@@ -7,6 +7,7 @@ import {
   type ChangeEvent,
   type KeyboardEvent,
 } from "react";
+import { useTranslation } from "react-i18next";
 import IconButton from "@mui/material/IconButton";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -75,6 +76,7 @@ interface MD3AvatarProps {
 }
 
 function MD3AvatarDisplay(props: MD3AvatarProps) {
+  const { t } = useTranslation("common");
   const isInteractive = props.editable !== false;
 
   return (
@@ -86,7 +88,11 @@ function MD3AvatarDisplay(props: MD3AvatarProps) {
       onClick={isInteractive ? props.onAvatarClick : undefined}
       role={isInteractive ? "button" : undefined}
       tabIndex={isInteractive ? 0 : undefined}
-      title={isInteractive ? "Click to edit avatar" : props.name || "Avatar"}
+      title={
+        isInteractive
+          ? t("avatar.clickToEdit", "Click to edit avatar")
+          : props.name || "Avatar"
+      }
       onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
         if (isInteractive && (event.key === "Enter" || event.key === " ")) {
           props.onAvatarClick();
@@ -102,16 +108,16 @@ function MD3AvatarDisplay(props: MD3AvatarProps) {
           avatarSize={props.size}
         >
           <EditIcon sx={{ fontSize: "1.1rem" }} />
-          <span>EDIT</span>
+          <span>{t("avatar.edit", "EDIT")}</span>
         </AvatarHoverOverlay>
       ) : null}
 
       {isInteractive && props.isModified ? (
-        <Tooltip title="Reset avatar to default">
+        <Tooltip title={t("avatar.resetToDefault", "Reset avatar to default")}>
           <AvatarResetBadge
             type="button"
             onClick={props.onResetClick}
-            aria-label="Reset avatar to default"
+            aria-label={t("avatar.resetToDefault", "Reset avatar to default")}
           >
             <RestartAltIcon sx={{ fontSize: "14px" }} />
           </AvatarResetBadge>
@@ -137,6 +143,8 @@ interface AvatarInputBarProps {
 }
 
 function AvatarInputBar(props: AvatarInputBarProps) {
+  const { t } = useTranslation("common");
+
   return (
     <UnifiedDropInputArea
       isDragging={props.isDragging}
@@ -145,7 +153,12 @@ function AvatarInputBar(props: AvatarInputBarProps) {
       {props.isDragging ? (
         <DragBadgeHint>
           <CloudUploadIcon />
-          <span>Drop image to set or upload avatar</span>
+          <span>
+            {t(
+              "avatar.dropImageHint",
+              "Drop image to set or upload avatar",
+            )}
+          </span>
         </DragBadgeHint>
       ) : null}
 
@@ -161,7 +174,10 @@ function AvatarInputBar(props: AvatarInputBarProps) {
         id={props.inputId}
         type="text"
         value={props.value}
-        placeholder={props.placeholder || "Drop image, paste, or enter URL..."}
+        placeholder={
+          props.placeholder ||
+          t("avatar.urlPlaceholder", "Drop image, paste, or enter URL...")
+        }
         disabled={props.isUploading}
         onChange={(event: ChangeEvent<HTMLInputElement>) =>
           props.onChange(event.target.value)
@@ -169,18 +185,21 @@ function AvatarInputBar(props: AvatarInputBarProps) {
         onKeyDown={(keyEvent: KeyboardEvent<HTMLInputElement>) => {
           if (keyEvent.key === "Escape" && props.isModified) props.onReset();
         }}
-        aria-label={props.label || "Avatar image URL or drop area"}
+        aria-label={
+          props.label ||
+          t("avatar.inputAriaLabel", "Avatar image URL or drop area")
+        }
       />
 
       <ActionsContainer>
-        <Tooltip title="Upload image file to R2">
+        <Tooltip title={t("avatar.uploadFileTooltip", "Upload image file")}>
           <span>
             <ActionIconButton
               type="button"
               variantType="primary"
               onClick={props.onBrowse}
               disabled={props.isUploading}
-              aria-label="Upload avatar file"
+              aria-label={t("avatar.uploadFile", "Upload avatar file")}
             >
               <CloudUploadIcon sx={{ fontSize: "18px" }} />
             </ActionIconButton>
@@ -188,14 +207,19 @@ function AvatarInputBar(props: AvatarInputBarProps) {
         </Tooltip>
 
         {props.isModified ? (
-          <Tooltip title="Reset to default avatar">
+          <Tooltip
+            title={t("avatar.resetToDefault", "Reset to default avatar")}
+          >
             <span>
               <ActionIconButton
                 type="button"
                 variantType="secondary"
                 onClick={props.onReset}
                 disabled={props.isUploading}
-                aria-label="Reset avatar to default"
+                aria-label={t(
+                  "avatar.resetToDefault",
+                  "Reset avatar to default",
+                )}
               >
                 <RestartAltIcon sx={{ fontSize: "18px" }} />
               </ActionIconButton>
@@ -216,6 +240,8 @@ interface SimpleModalProps {
 }
 
 function SimpleEditModal({ isOpen, onClose, children }: SimpleModalProps) {
+  const { t } = useTranslation("common");
+
   return (
     <Dialog
       open={isOpen}
@@ -245,11 +271,11 @@ function SimpleEditModal({ isOpen, onClose, children }: SimpleModalProps) {
           fontSize: "1rem",
         }}
       >
-        <span>Edit Profile Avatar</span>
+        <span>{t("avatar.modalTitle", "Edit Profile Avatar")}</span>
         <IconButton
           onClick={onClose}
           size="small"
-          aria-label="Close edit avatar dialog"
+          aria-label={t("avatar.closeModal", "Close edit avatar dialog")}
           sx={{ color: "text.secondary" }}
         >
           <CloseIcon sx={{ fontSize: "18px" }} />
