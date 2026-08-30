@@ -82,6 +82,9 @@ export const M3_MOTION = {
 } as const;
 
 const m3TooltipDarkOverrides = {
+  popper: {
+    zIndex: 1500,
+  },
   tooltip: {
     backgroundColor: SOLARIZED_BASE.base2,
     color: SOLARIZED_BASE.base03,
@@ -100,6 +103,9 @@ const m3TooltipDarkOverrides = {
 };
 
 const m3TooltipLightOverrides = {
+  popper: {
+    zIndex: 1500,
+  },
   tooltip: {
     backgroundColor: SOLARIZED_BASE.base02,
     color: SOLARIZED_BASE.base3,

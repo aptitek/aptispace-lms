@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import Logo from "../../atoms/Logo/Logo";
 import LanguageToggle from "../../atoms/LanguageToggle/LanguageToggle";
 import ThemeToggle from "../../atoms/ThemeToggle/ThemeToggle";
+import Tooltip from "../../atoms/Tooltip/Tooltip";
 import { logout, type AuthUser } from "../../../utils/auth";
 
 export type HeaderMode = "subtle" | "full";
@@ -147,17 +148,19 @@ export default function Header({
         <LanguageToggle size="small" />
 
         {user && (
-          <Button
-            variant="outlined"
-            color="inherit"
-            size="small"
-            onClick={handleLogoutClick}
-            aria-label={t("loginCard.logoutAria")}
-            data-testid="header-logout-button"
-            startIcon={<LogoutIcon sx={{ fontSize: "1rem" }} />}
-          >
-            {t("loginCard.logout")}
-          </Button>
+          <Tooltip title={t("loginCard.logoutAria")} arrow placement="bottom">
+            <Button
+              variant="outlined"
+              color="inherit"
+              size="small"
+              onClick={handleLogoutClick}
+              aria-label={t("loginCard.logoutAria")}
+              data-testid="header-logout-button"
+              startIcon={<LogoutIcon sx={{ fontSize: "1rem" }} />}
+            >
+              {t("loginCard.logout")}
+            </Button>
+          </Tooltip>
         )}
       </RightSlot>
     </HeaderRoot>

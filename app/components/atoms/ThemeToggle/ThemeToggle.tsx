@@ -7,6 +7,7 @@ import {
 } from "react";
 import { motion, AnimatePresence, type HTMLMotionProps } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import Tooltip from "../Tooltip/Tooltip";
 import { useThemeMode } from "../../../utils/themeContext";
 import type { ThemeMode } from "../../../tokens/theme";
 import {
@@ -280,15 +281,6 @@ function SwitchActiveThumb({
   );
 }
 
-function getSwitchLabel(
-  isDark: boolean,
-  t: (key: string, def: string) => string,
-) {
-  return isDark
-    ? t("theme.switchToLight", "Switch to Light Mode")
-    : t("theme.switchToDark", "Switch to Dark Mode");
-}
-
 /**
  * Material Design 3 Celestial Zenith Switch
  */
@@ -327,59 +319,62 @@ export const ZenithSwitch = forwardRef<HTMLButtonElement, ZenithSwitchProps>(
       onMouseLeave,
     });
 
-    const labelText = getSwitchLabel(isDark, t);
+    const labelText = isDark
+      ? t("theme.switchToLight", "Switch to Light Mode")
+      : t("theme.switchToDark", "Switch to Dark Mode");
 
     return (
-      <SwitchTrack
-        ref={ref}
-        type="button"
-        role="switch"
-        aria-checked={isDark}
-        aria-label={labelText}
-        title={labelText}
-        disabled={isSwitchDisabled}
-        $cfg={cfg}
-        $isDark={isDark}
-        $disabled={isSwitchDisabled}
-        className={className ?? ""}
-        data-testid={dataTestId ?? "zenith-theme-switch"}
-        data-mode={isDark ? "dark" : "light"}
-        onClick={controller.handleClick}
-        onKeyDown={controller.handleKeyDown}
-        onMouseEnter={controller.handleMouseEnter}
-        onMouseLeave={controller.handleMouseLeave}
-        onMouseDown={controller.handleMouseDown}
-        onMouseUp={controller.handleMouseUp}
-        whileTap={isSwitchDisabled ? undefined : { scale: 0.96 }}
-        {...restProps}
-      >
-        <AnimatePresence>
-          <SwitchRippleIndicator
-            isHovered={controller.isHovered}
-            disabled={isSwitchDisabled}
+      <Tooltip title={labelText} placement="bottom">
+        <SwitchTrack
+          ref={ref}
+          type="button"
+          role="switch"
+          aria-checked={isDark}
+          aria-label={labelText}
+          disabled={isSwitchDisabled}
+          $cfg={cfg}
+          $isDark={isDark}
+          $disabled={isSwitchDisabled}
+          className={className ?? ""}
+          data-testid={dataTestId ?? "zenith-theme-switch"}
+          data-mode={isDark ? "dark" : "light"}
+          onClick={controller.handleClick}
+          onKeyDown={controller.handleKeyDown}
+          onMouseEnter={controller.handleMouseEnter}
+          onMouseLeave={controller.handleMouseLeave}
+          onMouseDown={controller.handleMouseDown}
+          onMouseUp={controller.handleMouseUp}
+          whileTap={isSwitchDisabled ? undefined : { scale: 0.96 }}
+          {...restProps}
+        >
+          <AnimatePresence>
+            <SwitchRippleIndicator
+              isHovered={controller.isHovered}
+              disabled={isSwitchDisabled}
+              cfg={cfg}
+              isDark={isDark}
+            />
+          </AnimatePresence>
+
+          <CelestialArcLine cfg={cfg} />
+
+          <AnimatePresence>
+            {!isSwitchDisabled && (
+              <HorizonPeekPreview
+                isHovered={controller.isHovered}
+                isDark={isDark}
+                cfg={cfg}
+              />
+            )}
+          </AnimatePresence>
+
+          <SwitchActiveThumb
             cfg={cfg}
             isDark={isDark}
+            isPressed={controller.isPressed}
           />
-        </AnimatePresence>
-
-        <CelestialArcLine cfg={cfg} />
-
-        <AnimatePresence>
-          {!isSwitchDisabled && (
-            <HorizonPeekPreview
-              isHovered={controller.isHovered}
-              isDark={isDark}
-              cfg={cfg}
-            />
-          )}
-        </AnimatePresence>
-
-        <SwitchActiveThumb
-          cfg={cfg}
-          isDark={isDark}
-          isPressed={controller.isPressed}
-        />
-      </SwitchTrack>
+        </SwitchTrack>
+      </Tooltip>
     );
   },
 );

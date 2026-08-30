@@ -223,50 +223,80 @@ function DevQuickCreateSection({
       </QuickCreateHeader>
 
       <QuickCreateButtonGroup>
-        <RoleCreateButton
-          roleType="student"
-          disabled={isActionDisabled}
-          onClick={() => onQuickCreate("student")}
-          title="Create a new Student account (Triggers Onboarding)"
-          data-testid="create-student-btn"
-        >
-          {isCreatingRole === "student" ? (
-            <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
-          ) : (
-            <SchoolIcon />
+        <Tooltip
+          title={t(
+            "devTool.createStudentTooltip",
+            "Create a new Student account (Triggers Onboarding)",
           )}
-          <span>{t("devTool.newStudent", "+ Student")}</span>
-        </RoleCreateButton>
+          arrow
+          placement="top"
+        >
+          <Box component="span" sx={{ display: "inline-flex", width: "100%" }}>
+            <RoleCreateButton
+              roleType="student"
+              disabled={isActionDisabled}
+              onClick={() => onQuickCreate("student")}
+              data-testid="create-student-btn"
+            >
+              {isCreatingRole === "student" ? (
+                <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
+              ) : (
+                <SchoolIcon />
+              )}
+              <span>{t("devTool.newStudent", "+ Student")}</span>
+            </RoleCreateButton>
+          </Box>
+        </Tooltip>
 
-        <RoleCreateButton
-          roleType="instructor"
-          disabled={isActionDisabled}
-          onClick={() => onQuickCreate("instructor")}
-          title="Create a new Instructor account (Triggers Onboarding)"
-          data-testid="create-instructor-btn"
-        >
-          {isCreatingRole === "instructor" ? (
-            <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
-          ) : (
-            <SupervisorAccountIcon />
+        <Tooltip
+          title={t(
+            "devTool.createInstructorTooltip",
+            "Create a new Instructor account (Triggers Onboarding)",
           )}
-          <span>{t("devTool.newInstructor", "+ Instructor")}</span>
-        </RoleCreateButton>
+          arrow
+          placement="top"
+        >
+          <Box component="span" sx={{ display: "inline-flex", width: "100%" }}>
+            <RoleCreateButton
+              roleType="instructor"
+              disabled={isActionDisabled}
+              onClick={() => onQuickCreate("instructor")}
+              data-testid="create-instructor-btn"
+            >
+              {isCreatingRole === "instructor" ? (
+                <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
+              ) : (
+                <SupervisorAccountIcon />
+              )}
+              <span>{t("devTool.newInstructor", "+ Instructor")}</span>
+            </RoleCreateButton>
+          </Box>
+        </Tooltip>
 
-        <RoleCreateButton
-          roleType="admin"
-          disabled={isActionDisabled}
-          onClick={() => onQuickCreate("admin")}
-          title="Create a new Administrator account (Triggers Onboarding)"
-          data-testid="create-admin-btn"
-        >
-          {isCreatingRole === "admin" ? (
-            <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
-          ) : (
-            <AdminPanelSettingsIcon />
+        <Tooltip
+          title={t(
+            "devTool.createAdminTooltip",
+            "Create a new Administrator account (Triggers Onboarding)",
           )}
-          <span>{t("devTool.newAdmin", "+ Admin")}</span>
-        </RoleCreateButton>
+          arrow
+          placement="top"
+        >
+          <Box component="span" sx={{ display: "inline-flex", width: "100%" }}>
+            <RoleCreateButton
+              roleType="admin"
+              disabled={isActionDisabled}
+              onClick={() => onQuickCreate("admin")}
+              data-testid="create-admin-btn"
+            >
+              {isCreatingRole === "admin" ? (
+                <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
+              ) : (
+                <AdminPanelSettingsIcon />
+              )}
+              <span>{t("devTool.newAdmin", "+ Admin")}</span>
+            </RoleCreateButton>
+          </Box>
+        </Tooltip>
       </QuickCreateButtonGroup>
     </QuickCreateSection>
   );

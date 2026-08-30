@@ -78,52 +78,60 @@ interface MD3AvatarProps {
 function MD3AvatarDisplay(props: MD3AvatarProps) {
   const { t } = useTranslation("common");
   const isInteractive = props.editable !== false;
+  const tooltipText = isInteractive
+    ? t("avatar.clickToEdit", "Click to edit avatar")
+    : props.name || "";
 
   return (
-    <MD3AvatarContainer
-      avatarShape={props.shape}
-      avatarSize={props.size}
-      isInteractive={isInteractive}
-      isDragging={props.isDragging}
-      onClick={isInteractive ? props.onAvatarClick : undefined}
-      role={isInteractive ? "button" : undefined}
-      tabIndex={isInteractive ? 0 : undefined}
-      title={
-        isInteractive
-          ? t("avatar.clickToEdit", "Click to edit avatar")
-          : props.name || "Avatar"
-      }
-      onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-        if (isInteractive && (event.key === "Enter" || event.key === " ")) {
-          props.onAvatarClick();
-        }
-      }}
+    <Tooltip
+      title={tooltipText}
+      arrow
+      placement="top"
+      disableHoverListener={!tooltipText}
     >
-      <AvatarInner url={props.url} name={props.name} shape={props.shape} />
+      <MD3AvatarContainer
+        avatarShape={props.shape}
+        avatarSize={props.size}
+        isInteractive={isInteractive}
+        isDragging={props.isDragging}
+        onClick={isInteractive ? props.onAvatarClick : undefined}
+        role={isInteractive ? "button" : undefined}
+        tabIndex={isInteractive ? 0 : undefined}
+        aria-label={tooltipText || undefined}
+        onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+          if (isInteractive && (event.key === "Enter" || event.key === " ")) {
+            props.onAvatarClick();
+          }
+        }}
+      >
+        <AvatarInner url={props.url} name={props.name} shape={props.shape} />
 
-      {isInteractive ? (
-        <AvatarHoverOverlay
-          className="avatar-hover-overlay"
-          avatarShape={props.shape}
-          avatarSize={props.size}
-        >
-          <EditIcon sx={{ fontSize: "1.1rem" }} />
-          <span>{t("avatar.edit", "EDIT")}</span>
-        </AvatarHoverOverlay>
-      ) : null}
-
-      {isInteractive && props.isModified ? (
-        <Tooltip title={t("avatar.resetToDefault", "Reset avatar to default")}>
-          <AvatarResetBadge
-            type="button"
-            onClick={props.onResetClick}
-            aria-label={t("avatar.resetToDefault", "Reset avatar to default")}
+        {isInteractive ? (
+          <AvatarHoverOverlay
+            className="avatar-hover-overlay"
+            avatarShape={props.shape}
+            avatarSize={props.size}
           >
-            <RestartAltIcon sx={{ fontSize: "14px" }} />
-          </AvatarResetBadge>
-        </Tooltip>
-      ) : null}
-    </MD3AvatarContainer>
+            <EditIcon sx={{ fontSize: "1.1rem" }} />
+            <span>{t("avatar.edit", "EDIT")}</span>
+          </AvatarHoverOverlay>
+        ) : null}
+
+        {isInteractive && props.isModified ? (
+          <Tooltip
+            title={t("avatar.resetToDefault", "Reset avatar to default")}
+          >
+            <AvatarResetBadge
+              type="button"
+              onClick={props.onResetClick}
+              aria-label={t("avatar.resetToDefault", "Reset avatar to default")}
+            >
+              <RestartAltIcon sx={{ fontSize: "14px" }} />
+            </AvatarResetBadge>
+          </Tooltip>
+        ) : null}
+      </MD3AvatarContainer>
+    </Tooltip>
   );
 }
 
@@ -154,10 +162,7 @@ function AvatarInputBar(props: AvatarInputBarProps) {
         <DragBadgeHint>
           <CloudUploadIcon />
           <span>
-            {t(
-              "avatar.dropImageHint",
-              "Drop image to set or upload avatar",
-            )}
+            {t("avatar.dropImageHint", "Drop image to set or upload avatar")}
           </span>
         </DragBadgeHint>
       ) : null}
