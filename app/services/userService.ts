@@ -86,3 +86,73 @@ export async function getAffiliationsForUser(
 ): Promise<Affiliation[]> {
   return db.select().from(affiliations).where(eq(affiliations.userId, userId));
 }
+
+export async function updateUser(
+  db: Database,
+  id: string,
+  userFields: Partial<Omit<NewUser, "id" | "createdAt" | "updatedAt">>,
+): Promise<User | null> {
+  const [updated] = await db
+    .update(users)
+    .set({
+      ...userFields,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, id))
+    .returning();
+  return updated ?? null;
+}
+
+export async function updateUserAffiliation(
+  db: Database,
+  userId: string,
+  affiliationFields: Partial<
+    Omit<NewAffiliation, "id" | "userId" | "createdAt" | "updatedAt">
+  >,
+): Promise<Affiliation | null> {
+  const existing = await db
+    .select()
+    .from(affiliations)
+    .where(eq(affiliations.userId, userId))
+    .limit(1);
+
+  if (existing.length > 0) {
+    const [updated] = await db
+      .update(affiliations)
+      .set({
+        ...affiliationFields,
+        updatedAt: new Date(),
+      })
+      .where(eq(affiliations.id, existing[0].id))
+      .returning();
+    return updated ?? null;
+  }
+
+  if (affiliationFields.email && affiliationFields.institutionId) {
+    return createAffiliation(db, {
+      userId,
+      email: affiliationFields.email,
+      institutionId: affiliationFields.institutionId,
+      cohortId: affiliationFields.cohortId ?? null,
+      role: affiliationFields.role ?? "student",
+      isActive: affiliationFields.isActive ?? true,
+    });
+  }
+
+  return null;
+}
+
+export function isUserProfileComplete(
+  user: Awaited<ReturnType<typeof getUserWithAffiliations>> | null,
+): boolean {
+  if (!user) return false;
+  const hasFirstName = Boolean(
+    user.firstName && user.firstName.trim().length > 0,
+  );
+  const hasLastName = Boolean(user.lastName && user.lastName.trim().length > 0);
+  const primaryAffiliation = user.affiliations?.[0];
+  const hasEmail = Boolean(
+    primaryAffiliation?.email && primaryAffiliation.email.trim().length > 0,
+  );
+  return hasFirstName && hasLastName && hasEmail;
+}

@@ -166,6 +166,89 @@ describe("Backend Database & Service Architecture", () => {
     expect(Array.isArray(affiliationsList)).toBe(true);
   });
 
+  it("updates existing user and affiliation records and evaluates completeness", async () => {
+    const mockDb = {
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            limit: () =>
+              Promise.resolve([
+                {
+                  id: "affil-1",
+                  userId: "user-1",
+                  institutionId: "inst-1",
+                  email: "old@aptispace.io",
+                },
+              ]),
+          }),
+        }),
+      }),
+      update: () => ({
+        set: (updateValues: Record<string, unknown>) => ({
+          where: () => ({
+            returning: () =>
+              Promise.resolve([{ id: "user-1", ...updateValues }]),
+          }),
+        }),
+      }),
+    } as unknown as ReturnType<typeof getDb>;
+
+    const { updateUser, updateUserAffiliation, isUserProfileComplete } =
+      await import("./userService");
+
+    const updatedUser = await updateUser(mockDb, "user-1", {
+      firstName: "Alex",
+      lastName: "Mercer",
+      displayName: "Alex Mercer",
+    });
+    expect(updatedUser?.firstName).toBe("Alex");
+
+    const updatedAffiliation = await updateUserAffiliation(mockDb, "user-1", {
+      email: "alex.mercer@cadet.aptispace.io",
+    });
+    expect(updatedAffiliation?.email).toBe("alex.mercer@cadet.aptispace.io");
+
+    expect(
+      isUserProfileComplete({
+        id: "user-1",
+        firstName: "Alex",
+        lastName: "Mercer",
+        displayName: "Alex Mercer",
+        githubId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        affiliations: [
+          {
+            id: "affil-1",
+            userId: "user-1",
+            institutionId: "inst-1",
+            cohortId: null,
+            email: "alex.mercer@cadet.aptispace.io",
+            role: "student",
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            institution: {} as never,
+            cohort: null,
+          },
+        ],
+      }),
+    ).toBe(true);
+
+    expect(
+      isUserProfileComplete({
+        id: "user-1",
+        firstName: "",
+        lastName: "Mercer",
+        displayName: "Alex Mercer",
+        githubId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        affiliations: [],
+      }),
+    ).toBe(false);
+  });
+
   it("executes course and module domain operations", async () => {
     const mockDb = {
       select: () => ({

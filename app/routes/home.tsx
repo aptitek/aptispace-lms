@@ -4,7 +4,10 @@ import Header from "~/components/organisms/Header/Header";
 import Footer from "~/components/organisms/Footer/Footer";
 import { authGuard, type SessionPayload } from "~/utils/session.server";
 import { logout, type AuthUser } from "~/utils/auth";
-import type { getUserWithAffiliations } from "~/services/userService";
+import {
+  isUserProfileComplete,
+  type getUserWithAffiliations,
+} from "~/services/userService";
 import type { Route } from "./+types/home";
 
 type DbUser =
@@ -48,6 +51,12 @@ function resolveActiveUser(
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const auth = await authGuard(request, context);
+  if (auth?.user && !isUserProfileComplete(auth.user)) {
+    throw new Response(null, {
+      status: 302,
+      headers: { Location: "/onboarding" },
+    });
+  }
   const activeUser = resolveActiveUser(auth?.user, auth?.session);
   return { user: activeUser };
 }

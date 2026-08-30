@@ -1,16 +1,22 @@
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, type ActionFunctionArgs } from "react-router";
+import {
+  useNavigate,
+  useLoaderData,
+  useFetcher,
+  type ActionFunctionArgs,
+  type LoaderFunctionArgs,
+} from "react-router";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import Tooltip from "@mui/material/Tooltip";
+import Chip from "@mui/material/Chip";
 import AuthLayout from "~/components/templates/AuthLayout/AuthLayout";
 import OnboardingCard from "~/components/organisms/OnboardingCard/OnboardingCard";
-import EmailField from "~/components/molecules/EmailField/EmailField";
 import type {
   SchoolConfig,
   CohortConfig,
@@ -22,71 +28,52 @@ import type {
 } from "~/components/molecules/IdCard/IdCard.types";
 import { validateFixedDomainEmail } from "~/utils/emailSecurity";
 import { formatInstitutionalEmail } from "~/components/organisms/OnboardingCard/OnboardingCard.utils";
+import { authGuard } from "~/utils/session.server";
+import { isUserProfileComplete } from "~/services/userService";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import BadgeIcon from "@mui/icons-material/Badge";
 import ScreenRotationIcon from "@mui/icons-material/ScreenRotation";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import SecurityIcon from "@mui/icons-material/Security";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import SchoolIcon from "@mui/icons-material/School";
+import SyncIcon from "@mui/icons-material/Sync";
 import {
   OnboardingContainer,
-  FormPanel,
   Title,
-  FormRoot,
-  TwoColGrid,
-  PreviewPanel,
   ActionButton,
-  SubmitButton,
+  CardWorkspaceContainer,
+  FabDockPanel,
+  RequirementsList,
+  RequirementPill,
+  M3ExtendedFab,
 } from "./onboarding.styles";
+import {
+  CADET_FIXED_DOMAIN,
+  AVAILABLE_SCHOOLS,
+  resolveSchool,
+  buildInitialProfile,
+  resolveDefaultProfile,
+  handleOnboardingAction,
+  computeMissingFields,
+} from "./onboarding.helpers";
 
-export const CADET_FIXED_DOMAIN = "cadet.aptispace.io";
+export { CADET_FIXED_DOMAIN, AVAILABLE_SCHOOLS };
 
-export const AVAILABLE_SCHOOLS: SchoolConfig[] = [
-  {
-    id: "school-aptispace-orbital",
-    name: "AptiSpace Orbital Academy",
-    slug: "aptispace-orbital-academy",
-    logoUrl: "/favicon.svg",
-    emailDomain: "cadet.aptispace.io",
-    emailPattern: "{first}.{last}@{domain}",
-  },
-  {
-    id: "school-quantum-aerospace",
-    name: "Quantum Aerospace Institute",
-    slug: "quantum-aerospace",
-    logoUrl: null,
-    emailDomain: "quantum.aptispace.io",
-    emailPattern: "{first}.{last}@{domain}",
-  },
-  {
-    id: "school-polytechnique-spatiale",
-    name: "École Polytechnique Spatiale",
-    slug: "polytechnique-spatiale",
-    logoUrl: null,
-    emailDomain: "polytechnique.aptispace.io",
-    emailPattern: "{f}{last}@{domain}",
-  },
-];
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  const auth = await authGuard(request, context, { allowAnonymous: true });
+  const dbUser = auth?.user;
+  const initialProfile = buildInitialProfile(dbUser ?? undefined);
+  const isComplete = isUserProfileComplete(dbUser ?? null);
 
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData().catch(() => new FormData());
-  const rawEmail = String(formData.get("email") || "");
-  const validation = validateFixedDomainEmail(rawEmail, CADET_FIXED_DOMAIN);
+  return {
+    userId: auth?.session?.userId ?? dbUser?.id ?? null,
+    profile: initialProfile,
+    isComplete,
+  };
+}
 
-  if (!validation.isValid) {
-    return Response.json(
-      {
-        error: validation.error,
-        code: "UNAUTHORIZED_EMAIL_DOMAIN",
-      },
-      { status: 400 },
-    );
-  }
-
-  return Response.json({
-    success: true,
-    email: validation.fullEmail,
-  });
+export async function action({ request, context }: ActionFunctionArgs) {
+  return handleOnboardingAction(request, context);
 }
 
 export function meta() {
@@ -100,27 +87,135 @@ export function meta() {
   ];
 }
 
-const DEFAULT_AVATAR_URL =
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80";
+interface RequirementsDockProps {
+  isFirstNameFilled: boolean;
+  isFamilyNameFilled: boolean;
+  isEmailFilled: boolean;
+  isFormComplete: boolean;
+  missingFieldsCount: number;
+  isSaving: boolean;
+  fabTooltipText: string;
+  onValidate: () => void;
+}
 
-const CLEARANCES = [
-  "LEVEL-1 TRAINEE",
-  "LEVEL-2 CADET",
-  "LEVEL-3 PILOT",
-  "LEVEL-4 OMNI",
-  "LEVEL-5 COSMIC",
-];
+function RequirementsDock({
+  isFirstNameFilled,
+  isFamilyNameFilled,
+  isEmailFilled,
+  isFormComplete,
+  missingFieldsCount,
+  isSaving,
+  fabTooltipText,
+  onValidate,
+}: RequirementsDockProps) {
+  return (
+    <FabDockPanel>
+      <Box sx={{ width: "100%" }}>
+        <Typography
+          variant="overline"
+          sx={{
+            fontWeight: 800,
+            letterSpacing: "0.08em",
+            color: "primary.light",
+            display: "block",
+            mb: 0.5,
+          }}
+        >
+          Credential Readiness
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+          Fill out the required card fields to unlock validation.
+        </Typography>
+      </Box>
 
-const DIVISIONS = [
-  "Orbital Flight Dynamics",
-  "Astrobiology & Habitats",
-  "Deep Space Propulsion",
-  "Quantum Navigation & Comms",
-];
+      <RequirementsList>
+        <RequirementPill isComplete={isFirstNameFilled}>
+          <span>First Name</span>
+          {isFirstNameFilled ? (
+            <CheckCircleIcon sx={{ fontSize: 16 }} />
+          ) : (
+            <RadioButtonUncheckedIcon sx={{ fontSize: 16 }} />
+          )}
+        </RequirementPill>
+
+        <RequirementPill isComplete={isFamilyNameFilled}>
+          <span>Family Name</span>
+          {isFamilyNameFilled ? (
+            <CheckCircleIcon sx={{ fontSize: 16 }} />
+          ) : (
+            <RadioButtonUncheckedIcon sx={{ fontSize: 16 }} />
+          )}
+        </RequirementPill>
+
+        <RequirementPill isComplete={isEmailFilled}>
+          <span>Institutional Email</span>
+          {isEmailFilled ? (
+            <CheckCircleIcon sx={{ fontSize: 16 }} />
+          ) : (
+            <RadioButtonUncheckedIcon sx={{ fontSize: 16 }} />
+          )}
+        </RequirementPill>
+      </RequirementsList>
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          mt: 0.5,
+        }}
+      >
+        <Chip
+          label={
+            isFormComplete
+              ? "✓ Ready to Validate"
+              : `${3 - missingFieldsCount} / 3 Completed`
+          }
+          size="small"
+          color={isFormComplete ? "success" : "default"}
+          variant={isFormComplete ? "filled" : "outlined"}
+          sx={{ fontWeight: 700, fontSize: "0.75rem" }}
+        />
+
+        {isSaving ? (
+          <Chip
+            icon={
+              <SyncIcon
+                sx={{ fontSize: 14, animation: "spin 1s linear infinite" }}
+              />
+            }
+            label="Saving..."
+            size="small"
+            variant="outlined"
+            sx={{ fontSize: "0.7rem" }}
+          />
+        ) : null}
+      </Box>
+
+      <Tooltip title={fabTooltipText} arrow placement="top">
+        <Box sx={{ width: "100%", mt: 1 }}>
+          <M3ExtendedFab
+            isReady={isFormComplete}
+            disabled={!isFormComplete}
+            onClick={onValidate}
+            data-testid="m3-validation-fab"
+            fullWidth
+          >
+            <CheckCircleIcon sx={{ fontSize: 22 }} />
+            <span>Issue Identification Credential</span>
+          </M3ExtendedFab>
+        </Box>
+      </Tooltip>
+    </FabDockPanel>
+  );
+}
 
 export default function OnboardingPage() {
   const { t } = useTranslation("onboarding");
   const navigate = useNavigate();
+  const loaderData = useLoaderData<typeof loader>();
+  const fetcher = useFetcher();
 
   const [selectedSchool, setSelectedSchool] = useState<SchoolConfig>(
     AVAILABLE_SCHOOLS[0],
@@ -132,16 +227,9 @@ export default function OnboardingPage() {
     description: "Avionics and orbital navigation flight cohort.",
   });
 
-  const [profile, setProfile] = useState<OnboardingProfile>({
-    firstName: "Alex",
-    familyName: "Mercer",
-    email: "alex.mercer@cadet.aptispace.io",
-    avatarUrl: DEFAULT_AVATAR_URL,
-    documentNumber: "0942",
-    callSign: "AETH-9042",
-    division: "Orbital Flight Dynamics",
-    clearanceLevel: "LEVEL-4 OMNI",
-  });
+  const [profile, setProfile] = useState<OnboardingProfile>(() =>
+    resolveDefaultProfile(loaderData?.profile),
+  );
 
   const [orientation, setOrientation] =
     useState<IdCardOrientation>("landscape");
@@ -153,64 +241,126 @@ export default function OnboardingPage() {
     }
   }, []);
 
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const syncProfileToDb = useCallback(
+    (nextProfile: OnboardingProfile, school: SchoolConfig) => {
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
+      syncTimeoutRef.current = setTimeout(() => {
+        const formData = new FormData();
+        formData.set("actionType", "update_draft");
+        formData.set("firstName", nextProfile.firstName);
+        formData.set("familyName", nextProfile.familyName);
+        formData.set("email", nextProfile.email);
+        formData.set("schoolId", school.id);
+        formData.set("avatarUrl", nextProfile.avatarUrl || "");
+        fetcher.submit(formData, { method: "post" });
+      }, 500);
+    },
+    [fetcher],
+  );
+
+  const handleProfileChange = useCallback(
+    (nextProfile: OnboardingProfile) => {
+      setProfile(nextProfile);
+      syncProfileToDb(nextProfile, selectedSchool);
+    },
+    [syncProfileToDb, selectedSchool],
+  );
+
   const handleSchoolChange = (schoolId: string) => {
-    const found =
-      AVAILABLE_SCHOOLS.find((s) => s.id === schoolId) || AVAILABLE_SCHOOLS[0];
+    const found = resolveSchool(schoolId);
     setSelectedSchool(found);
-    setProfile((prev) => ({
-      ...prev,
-      email: formatInstitutionalEmail(prev.firstName, prev.familyName, found),
-    }));
-  };
-
-  const handleFirstNameChange = (firstName: string) => {
-    setProfile((prev) => ({
-      ...prev,
-      firstName,
+    const updated = {
+      ...profile,
       email: formatInstitutionalEmail(
-        firstName,
-        prev.familyName,
-        selectedSchool,
+        profile.firstName,
+        profile.familyName,
+        found,
       ),
-    }));
+    };
+    setProfile(updated);
+    syncProfileToDb(updated, found);
   };
 
-  const handleFamilyNameChange = (familyName: string) => {
-    setProfile((prev) => ({
-      ...prev,
-      familyName,
-      email: formatInstitutionalEmail(
-        prev.firstName,
-        familyName,
-        selectedSchool,
+  const isFirstNameFilled = profile.firstName.trim().length > 0;
+  const isFamilyNameFilled = profile.familyName.trim().length > 0;
+  const emailValidation = useMemo(
+    () =>
+      validateFixedDomainEmail(
+        profile.email,
+        selectedSchool.emailDomain || CADET_FIXED_DOMAIN,
       ),
-    }));
-  };
+    [profile.email, selectedSchool.emailDomain],
+  );
+  const isEmailFilled = emailValidation.isValid;
+  const isFormComplete =
+    isFirstNameFilled && isFamilyNameFilled && isEmailFilled;
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
+  const missingFieldsList = useMemo(
+    () =>
+      computeMissingFields(
+        isFirstNameFilled,
+        isFamilyNameFilled,
+        isEmailFilled,
+      ),
+    [isFirstNameFilled, isFamilyNameFilled, isEmailFilled],
+  );
+
+  const fabTooltipText = useMemo(() => {
+    if (isFormComplete) {
+      return "All required fields valid! Click to issue your official ID-1 credential.";
+    }
+    return `Please fill in ${missingFieldsList.join(", ")} directly on the card to enable validation.`;
+  }, [isFormComplete, missingFieldsList]);
+
+  const handleValidateAndSubmit = () => {
+    if (!isFormComplete) return;
+
+    const formData = new FormData();
+    formData.set("actionType", "validate_credential");
+    formData.set("firstName", profile.firstName);
+    formData.set("familyName", profile.familyName);
+    formData.set("email", profile.email);
+    formData.set("schoolId", selectedSchool.id);
+    formData.set("avatarUrl", profile.avatarUrl || "");
+
+    fetcher.submit(formData, { method: "post" });
     navigate("/");
   };
 
   return (
     <AuthLayout>
-      <OnboardingContainer elevation={0}>
-        <FormPanel>
+      <OnboardingContainer elevation={0} sx={{ gridTemplateColumns: "1fr" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 2,
+            pb: 2,
+            borderBottom: 1,
+            borderColor: "divider",
+          }}
+        >
           <Box>
             <Title>
               <BadgeIcon className="badge-icon" />
-              <span>{t("title", "Cadet Onboarding")}</span>
+              <span>{t("title", "Cadet Credential Onboarding")}</span>
             </Title>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               {t(
                 "subtitle",
-                "Configure your official ISO/IEC 7810 ID-1 identification card and start your academy journey.",
+                "Fill in your name and credentials directly on your official ISO/IEC 7810 ID-1 card below.",
               )}
             </Typography>
           </Box>
 
-          <FormRoot onSubmit={handleSubmit}>
-            <FormControl fullWidth size="small">
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <FormControl size="small" sx={{ minWidth: 260 }}>
               <InputLabel id="school-select-label">
                 <Box
                   component="span"
@@ -237,150 +387,19 @@ export default function OnboardingPage() {
                 ))}
               </Select>
             </FormControl>
+          </Box>
+        </Box>
 
-            <TwoColGrid>
-              <TextField
-                label="First Name"
-                value={profile.firstName}
-                onChange={(e) => handleFirstNameChange(e.target.value)}
-                size="small"
-                required
-                fullWidth
-              />
-
-              <TextField
-                label="Family Name"
-                value={profile.familyName}
-                onChange={(e) => handleFamilyNameChange(e.target.value)}
-                size="small"
-                required
-                fullWidth
-              />
-            </TwoColGrid>
-
-            <EmailField
-              name="email"
-              label={t("form.cadetEmail", "Institutional Academy Email")}
-              domain={selectedSchool.emailDomain}
-              value={profile.email}
-              onEmailChange={(composite) =>
-                setProfile((prev) => ({ ...prev, email: composite }))
-              }
-              variant="outlined"
-              size="medium"
-              required
-              showDomainLock={true}
-              helperText={`Auto-computed according to ${selectedSchool.name} format.`}
-            />
-
-            <TwoColGrid>
-              <TextField
-                label={t("form.callSign", "Call Sign")}
-                value={profile.callSign}
-                onChange={(e) =>
-                  setProfile((prev) => ({
-                    ...prev,
-                    callSign: e.target.value,
-                  }))
-                }
-                size="small"
-                fullWidth
-              />
-
-              <FormControl fullWidth size="small">
-                <InputLabel id="clearance-label">
-                  {t("form.clearance", "Clearance Level")}
-                </InputLabel>
-                <Select
-                  labelId="clearance-label"
-                  label={t("form.clearance", "Clearance Level")}
-                  value={profile.clearanceLevel}
-                  onChange={(e) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      clearanceLevel: e.target.value as string,
-                    }))
-                  }
-                >
-                  {CLEARANCES.map((opt) => (
-                    <MenuItem key={opt} value={opt}>
-                      {opt}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </TwoColGrid>
-
-            <FormControl fullWidth size="small">
-              <InputLabel id="division-label">
-                {t("form.division", "Specialization / Division")}
-              </InputLabel>
-              <Select
-                labelId="division-label"
-                label={t("form.division", "Specialization / Division")}
-                value={profile.division}
-                onChange={(e) =>
-                  setProfile((prev) => ({
-                    ...prev,
-                    division: e.target.value as string,
-                  }))
-                }
-              >
-                {DIVISIONS.map((opt) => (
-                  <MenuItem key={opt} value={opt}>
-                    {opt}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Box
-              sx={{
-                fontSize: 11,
-                color: "text.secondary",
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
-              <SecurityIcon sx={{ fontSize: 14, color: "success.main" }} />
-              <span>
-                ISO/IEC 7810 ID-1 • Holographic Foil • Guilloche Security
-                Rosette
-              </span>
-            </Box>
-
-            <SubmitButton
-              type="submit"
-              variant="contained"
-              startIcon={<CheckCircleIcon />}
-            >
-              {t("form.submit", "Issue Identification Credential")}
-            </SubmitButton>
-          </FormRoot>
-        </FormPanel>
-
-        <PreviewPanel elevation={0}>
+        <CardWorkspaceContainer>
           <Box
             sx={{
-              width: "100%",
               display: "flex",
-              justifyContent: "space-between",
+              flexDirection: "column",
               alignItems: "center",
+              gap: 2,
             }}
           >
-            <Typography
-              variant="overline"
-              sx={{
-                fontWeight: 800,
-                color: "primary.light",
-                letterSpacing: "1px",
-              }}
-            >
-              {t("form.preview", "Live ID-1 Preview")} (85.60 mm × 53.98 mm)
-            </Typography>
-
-            <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+            <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", mb: 0.5 }}>
               <ActionButton
                 type="button"
                 variant="outlined"
@@ -413,21 +432,12 @@ export default function OnboardingPage() {
                 </span>
               </ActionButton>
             </Box>
-          </Box>
 
-          <Box
-            sx={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "center",
-              py: 1.5,
-            }}
-          >
             <OnboardingCard
               school={selectedSchool}
               cohort={selectedCohort}
               profile={profile}
-              onProfileChange={setProfile}
+              onProfileChange={handleProfileChange}
               orientation={orientation}
               size="lg"
               side={side}
@@ -437,7 +447,18 @@ export default function OnboardingPage() {
               holoVariant="rainbow"
             />
           </Box>
-        </PreviewPanel>
+
+          <RequirementsDock
+            isFirstNameFilled={isFirstNameFilled}
+            isFamilyNameFilled={isFamilyNameFilled}
+            isEmailFilled={isEmailFilled}
+            isFormComplete={isFormComplete}
+            missingFieldsCount={missingFieldsList.length}
+            isSaving={fetcher.state !== "idle"}
+            fabTooltipText={fabTooltipText}
+            onValidate={handleValidateAndSubmit}
+          />
+        </CardWorkspaceContainer>
       </OnboardingContainer>
     </AuthLayout>
   );

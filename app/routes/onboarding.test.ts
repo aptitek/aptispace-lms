@@ -88,4 +88,26 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
     expect(body.success).toBe(true);
     expect(body.email).toBe("pilot.vance@cadet.aptispace.io");
   });
+
+  it("handles real-time draft updates through action with update_draft type", async () => {
+    const formData = new FormData();
+    formData.set("actionType", "update_draft");
+    formData.set("firstName", "Alex");
+    formData.set("familyName", "Mercer");
+    formData.set("email", "alex.mercer@cadet.aptispace.io");
+
+    const request = new Request("http://localhost:3000/onboarding", {
+      method: "POST",
+      body: formData,
+    });
+
+    const response = await action(createActionArgs(request));
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      success: boolean;
+      draftSaved: boolean;
+    };
+    expect(body.success).toBe(true);
+    expect(body.draftSaved).toBe(true);
+  });
 });
