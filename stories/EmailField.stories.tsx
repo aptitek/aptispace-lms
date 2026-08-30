@@ -42,8 +42,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    placeholder: "cadet.username",
-    domain: "aptispace.com",
+    placeholder: "username",
+    domain: "aptitek.io",
     variant: "outlined",
     size: "medium",
     fullWidth: true,
@@ -52,10 +52,10 @@ export const Default: Story = {
 
 export const WithLabelAndHelper: Story = {
   args: {
-    label: "Academy Cadet Identifier",
-    placeholder: "cadet.name",
-    domain: "cadet.aptispace.io",
-    helperText: "Enter your official cadet identifier.",
+    label: "Institutional Email Identifier",
+    placeholder: "john.doe",
+    domain: "aptitek.io",
+    helperText: "Enter your institutional email prefix.",
     variant: "outlined",
     size: "medium",
     fullWidth: true,
@@ -158,9 +158,9 @@ export const SizeVariations: Story = {
 export const InteractivePlayground: Story = {
   render: () => {
     function PlaygroundComponent() {
-      const [email, setEmail] = useState("cadet.mercer");
-      const [domain] = useState("aptispace.com");
-      const [fullEmail, setFullEmail] = useState("cadet.mercer@aptispace.com");
+      const [email, setEmail] = useState("alex.mercer");
+      const [domain] = useState("aptitek.io");
+      const [fullEmail, setFullEmail] = useState("alex.mercer@aptitek.io");
 
       return (
         <Paper

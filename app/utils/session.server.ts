@@ -1,6 +1,6 @@
 import { getDatabaseFromContext, type Database } from "../db/index";
 import { getUserWithAffiliations } from "../services/userService";
-import type { UserRole } from "./auth";
+import { findInMemoryAccount, type UserRole } from "./auth";
 
 export interface SessionPayload {
   userId: string;
@@ -165,6 +165,84 @@ export interface AuthenticatedContext {
   user: Awaited<ReturnType<typeof getUserWithAffiliations>>;
 }
 
+function throwUnauthenticated(request: Request): never {
+  const isApiRequest = new URL(request.url).pathname.startsWith("/api");
+  if (isApiRequest) {
+    throw new Response(
+      JSON.stringify({
+        error: "Authentication required",
+        code: "UNAUTHORIZED",
+      }),
+      {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  }
+  const url = new URL(request.url);
+  const destination =
+    url.pathname === "/"
+      ? "/login"
+      : `/login?redirect=${encodeURIComponent(url.pathname + url.search)}`;
+
+  throw new Response(null, {
+    status: 302,
+    headers: { Location: destination },
+  });
+}
+
+function throwForbiddenRole(requiredRole: UserRole): never {
+  throw new Response(
+    JSON.stringify({
+      error: `Forbidden: requires ${requiredRole} privileges`,
+      code: "FORBIDDEN",
+    }),
+    {
+      status: 403,
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+}
+
+function mapInMemoryUser(
+  inMem: NonNullable<ReturnType<typeof findInMemoryAccount>>,
+) {
+  return {
+    id: inMem.id,
+    firstName: inMem.firstName || "",
+    lastName: inMem.lastName || "",
+    displayName: inMem.name,
+    githubId: null,
+    createdAt: inMem.createdAt ? new Date(inMem.createdAt) : new Date(),
+    updatedAt: new Date(),
+    affiliations: [
+      {
+        id: `affil-${inMem.id}`,
+        userId: inMem.id,
+        institutionId: inMem.institutionId ?? "school-aptitek",
+        cohortId: inMem.cohortId ?? null,
+        email: inMem.email,
+        role: inMem.role,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        institution: {} as never,
+        cohort: null,
+      },
+    ],
+  } as unknown as NonNullable<
+    Awaited<ReturnType<typeof getUserWithAffiliations>>
+  >;
+}
+
+async function resolveSessionUser(db: Database | null, userId: string) {
+  if (db) {
+    return getUserWithAffiliations(db, userId);
+  }
+  const inMem = findInMemoryAccount(userId);
+  return inMem ? mapInMemoryUser(inMem) : null;
+}
+
 export async function authGuard(
   request: Request,
   context: unknown,
@@ -177,48 +255,16 @@ export async function authGuard(
     if (options.allowAnonymous) {
       return null;
     }
-    const isApiRequest = new URL(request.url).pathname.startsWith("/api");
-    if (isApiRequest) {
-      throw new Response(
-        JSON.stringify({
-          error: "Authentication required",
-          code: "UNAUTHORIZED",
-        }),
-        {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    }
-    const url = new URL(request.url);
-    const destination =
-      url.pathname === "/"
-        ? "/login"
-        : `/login?redirect=${encodeURIComponent(url.pathname + url.search)}`;
-
-    throw new Response(null, {
-      status: 302,
-      headers: { Location: destination },
-    });
+    throwUnauthenticated(request);
   }
 
   if (options.requiredRole && session.role !== options.requiredRole) {
-    throw new Response(
-      JSON.stringify({
-        error: `Forbidden: requires ${options.requiredRole} privileges`,
-        code: "FORBIDDEN",
-      }),
-      {
-        status: 403,
-        headers: { "Content-Type": "application/json" },
-      },
-    );
+    throwForbiddenRole(options.requiredRole);
   }
 
-  let user = null;
-  if (db && session.userId) {
-    user = await getUserWithAffiliations(db, session.userId);
-  }
+  const user = session.userId
+    ? await resolveSessionUser(db, session.userId)
+    : null;
 
   return { session, db, user };
 }

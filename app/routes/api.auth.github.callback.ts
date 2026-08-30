@@ -66,9 +66,9 @@ async function resolveUserProfile(code: string | null) {
 
   if (isDev && code === "mock_dev_oauth_code") {
     return {
-      githubUserId: "alex-mercer-cadet",
-      userName: "Alex Mercer",
-      userEmail: "alex.mercer@cadet.aptispace.io",
+      githubUserId: "mock_dev_user_1",
+      userName: "Dev User",
+      userEmail: "dev@aptitek.io",
       accessToken: undefined,
     };
   }
@@ -88,8 +88,8 @@ async function resolveUserProfile(code: string | null) {
 
   return {
     githubUserId: "mock_github_user_1",
-    userName: "Cadet Developer",
-    userEmail: "developer@cadet.aptispace.io",
+    userName: "Developer",
+    userEmail: "developer@aptitek.io",
     accessToken: undefined,
   };
 }
@@ -106,15 +106,18 @@ async function syncUserWithDatabase(
   if (!existingUser) {
     const [firstName, ...restName] = profile.userName.split(" ");
     existingUser = await createUser(db, {
-      firstName: firstName || "Cadet",
-      lastName: restName.join(" ") || "Pilot",
+      firstName: firstName || "Student",
+      lastName: restName.join(" ") || "User",
       displayName: profile.userName,
       githubId: profile.githubUserId,
     });
 
+    const inst = await db.query.institutions.findFirst();
+    const instId = inst?.id ?? "school-aptitek";
+
     await createAffiliation(db, {
       userId: existingUser.id,
-      institutionId: "aptispace-orbital-academy",
+      institutionId: instId,
       email: profile.userEmail,
       role: "student",
     });

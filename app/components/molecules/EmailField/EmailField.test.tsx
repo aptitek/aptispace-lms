@@ -9,18 +9,18 @@ describe("EmailField Component Molecule", () => {
 
   it("handles default domain and normalizes prefix/domain props", () => {
     const props = {
-      defaultValue: "cadet.shepard",
-      domain: "@aptispace.org",
-      placeholder: "cadet.username",
+      defaultValue: "john.doe",
+      domain: "@aptitek.io",
+      placeholder: "username",
       variant: "outlined" as const,
       size: "medium" as const,
       name: "email",
       autoComplete: "email",
     };
 
-    expect(props.defaultValue).toBe("cadet.shepard");
-    expect(props.domain).toBe("@aptispace.org");
-    expect(props.placeholder).toBe("cadet.username");
+    expect(props.defaultValue).toBe("john.doe");
+    expect(props.domain).toBe("@aptitek.io");
+    expect(props.placeholder).toBe("username");
     expect(props.variant).toBe("outlined");
     expect(props.size).toBe("medium");
     expect(props.name).toBe("email");
@@ -30,22 +30,22 @@ describe("EmailField Component Molecule", () => {
   it("supports filled variant and error states", () => {
     const errorProps = {
       value: "invalid space",
-      domain: "aptispace.com",
+      domain: "aptitek.io",
       variant: "filled" as const,
       size: "large" as const,
       error: true,
-      helperText: "Invalid cadet username identifier",
+      helperText: "Invalid username identifier",
     };
 
     expect(errorProps.error).toBe(true);
     expect(errorProps.variant).toBe("filled");
     expect(errorProps.size).toBe("large");
-    expect(errorProps.helperText).toContain("Invalid cadet username");
+    expect(errorProps.helperText).toContain("Invalid username");
   });
 
   it("supports disabled and read-only configurations", () => {
     const disabledProps = {
-      value: "instructor.vance",
+      value: "instructor.smith",
       domain: "aptispace.com",
       disabled: true,
       showClearButton: false,

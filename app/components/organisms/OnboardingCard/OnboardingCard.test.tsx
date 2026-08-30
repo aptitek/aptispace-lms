@@ -12,18 +12,18 @@ import type {
 } from "./OnboardingCard.types";
 
 const mockSchoolWithLogo: SchoolConfig = {
-  id: "school-orbital-academy",
-  name: "Orbital Space Academy",
-  slug: "orbital-academy",
-  logoUrl: "/assets/images/brand-logo.svg",
-  emailDomain: "cadet.orbital-academy.edu",
+  id: "school-aptitek",
+  name: "Aptitek",
+  slug: "aptitek",
+  logoUrl: "/aptitek-logo.svg",
+  emailDomain: "aptitek.io",
   emailPattern: "{first}.{last}@{domain}",
 };
 
 const mockSchoolWithoutLogo: SchoolConfig = {
   id: "school-quantum-institute",
-  name: "Quantum Aerospace Institute",
-  slug: "quantum-aerospace",
+  name: "Quantum Institute",
+  slug: "quantum-institute",
   logoUrl: null,
   emailDomain: "quantum.edu",
   emailPattern: "{f}{last}@{domain}",
@@ -32,10 +32,9 @@ const mockSchoolWithoutLogo: SchoolConfig = {
 const mockProfile: OnboardingProfile = {
   firstName: "Elena",
   familyName: "Rostova",
-  email: "elena.rostova@cadet.orbital-academy.edu",
+  email: "elena.rostova@aptitek.io",
   avatarUrl: "https://example.com/avatar.jpg",
   documentNumber: "7810",
-  clearanceLevel: "LEVEL-3 PILOT",
 };
 
 describe("OnboardingCard Component & Utilities", () => {
@@ -51,7 +50,7 @@ describe("OnboardingCard Component & Utilities", () => {
       "Rostova",
       mockSchoolWithLogo,
     );
-    expect(email).toBe("elena.rostova@cadet.orbital-academy.edu");
+    expect(email).toBe("elena.rostova@aptitek.io");
   });
 
   it("formats institutional email with initial pattern {f}{last}@{domain}", () => {
@@ -74,23 +73,23 @@ describe("OnboardingCard Component & Utilities", () => {
       "",
       mockSchoolWithLogo,
     );
-    expect(emailFirstOnly).toBe("jane@cadet.orbital-academy.edu");
+    expect(emailFirstOnly).toBe("jane@aptitek.io");
 
     const emailFamilyOnly = formatInstitutionalEmail(
       "",
       "Doe",
       mockSchoolWithLogo,
     );
-    expect(emailFamilyOnly).toBe("doe@cadet.orbital-academy.edu");
+    expect(emailFamilyOnly).toBe("doe@aptitek.io");
   });
 
-  it("handles accent marks and spaces in cadet names for email generation", () => {
+  it("handles accent marks and spaces in names for email generation", () => {
     const email = formatInstitutionalEmail(
       "Éléonore",
       "St-Exupéry",
       mockSchoolWithLogo,
     );
-    expect(email).toBe("eleonore.st.exupery@cadet.orbital-academy.edu");
+    expect(email).toBe("eleonore.st.exupery@aptitek.io");
   });
 
   it("builds valid TD-1 MRZ dataset from profile and school info", () => {
@@ -98,12 +97,12 @@ describe("OnboardingCard Component & Utilities", () => {
     expect(mrz.documentNumber).toBe("7810");
     expect(mrz.surname).toBe("ROSTOVA");
     expect(mrz.givenNames).toBe("ELENA");
-    expect(mrz.issuingState).toBe("ORB");
+    expect(mrz.issuingState).toBe("APT");
   });
 
   it("derives Guilloche seed from school ID, name, or slug", () => {
     const seedWithId = mockSchoolWithLogo.id;
-    expect(seedWithId).toBe("school-orbital-academy");
+    expect(seedWithId).toBe("school-aptitek");
 
     const fallbackSeed = mockSchoolWithoutLogo.id;
     expect(fallbackSeed).toBe("school-quantum-institute");
@@ -111,7 +110,7 @@ describe("OnboardingCard Component & Utilities", () => {
 
   describe("calculateCohortValidity", () => {
     it("calculates school year validity starting 1st of September with 1 year duration", () => {
-      const cohort: CohortConfig = { name: "Cadet Cohort 2026" };
+      const cohort: CohortConfig = { name: "Cohort 2026" };
       const validity = calculateCohortValidity(cohort);
       expect(validity.startYear).toBe(2026);
       expect(validity.endYear).toBe(2027);
@@ -121,13 +120,13 @@ describe("OnboardingCard Component & Utilities", () => {
     });
 
     it("extracts year from various cohort name formats", () => {
-      const cohort1: CohortConfig = { name: "Promotion X-2027" };
+      const cohort1: CohortConfig = { name: "Promotion 2027" };
       const validity1 = calculateCohortValidity(cohort1);
       expect(validity1.startYear).toBe(2027);
       expect(validity1.validFrom).toBe("01/09/2027");
       expect(validity1.validUntil).toBe("31/08/2028");
 
-      const cohort2: CohortConfig = { name: "Class of 2025 Flight Division" };
+      const cohort2: CohortConfig = { name: "Class of 2025 Engineering" };
       const validity2 = calculateCohortValidity(cohort2);
       expect(validity2.startYear).toBe(2025);
       expect(validity2.validFrom).toBe("01/09/2025");

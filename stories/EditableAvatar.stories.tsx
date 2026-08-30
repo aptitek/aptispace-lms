@@ -183,8 +183,8 @@ export const InlineUnifiedMode: Story = {
     mode: "inline",
     shape: "rounded",
     size: "md",
-    name: "Cadet Alex",
-    label: "Cadet Profile Photo",
+    name: "Alex Mercer",
+    label: "Profile Photo",
     helperText: "Drag & drop image, paste, enter URL, or click upload to R2.",
   },
   render: (args) => (

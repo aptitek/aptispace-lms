@@ -2,7 +2,7 @@ import type { Database } from "~/db";
 import type { SchoolConfig } from "~/components/organisms/OnboardingCard/OnboardingCard.types";
 import { validateFixedDomainEmail } from "~/utils/emailSecurity";
 import { authGuard } from "~/utils/session.server";
-import { resolveActiveUser } from "~/utils/auth";
+import { resolveActiveUser, updateInMemoryAccount } from "~/utils/auth";
 import {
   updateUser,
   updateUserAffiliation,
@@ -72,25 +72,38 @@ export async function saveUserEdits(params: SaveUserEditsParams) {
     schoolId,
     hasNameFields,
   } = params;
-  if (!db || !userId) return;
+  if (!userId) return;
 
-  const typedDb = db as Database;
+  const trimmedFirst = firstName.trim();
+  const trimmedFamily = familyName.trim();
+  const displayName = `${trimmedFirst} ${trimmedFamily}`.trim();
+  const isComplete = Boolean(trimmedFirst && trimmedFamily);
 
-  if (hasNameFields || firstName || familyName) {
-    const trimmedFirst = firstName.trim();
-    const trimmedFamily = familyName.trim();
-    const displayName = `${trimmedFirst} ${trimmedFamily}`.trim();
-    await updateUser(typedDb, userId, {
+  if (db) {
+    const typedDb = db as Database;
+
+    if (hasNameFields || firstName || familyName) {
+      await updateUser(typedDb, userId, {
+        firstName: trimmedFirst,
+        lastName: trimmedFamily,
+        displayName: displayName || null,
+      });
+    }
+
+    if (fullEmail !== undefined) {
+      await updateUserAffiliation(typedDb, userId, {
+        email: fullEmail,
+        institutionId: schoolId,
+      });
+    }
+  } else {
+    updateInMemoryAccount(userId, {
       firstName: trimmedFirst,
       lastName: trimmedFamily,
-      displayName: displayName || null,
-    });
-  }
-
-  if (fullEmail !== undefined) {
-    await updateUserAffiliation(typedDb, userId, {
+      name: displayName || undefined,
       email: fullEmail,
       institutionId: schoolId,
+      isProfileComplete: isComplete,
     });
   }
 }

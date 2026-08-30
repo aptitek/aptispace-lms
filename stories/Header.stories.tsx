@@ -64,7 +64,7 @@ export const FullWithUserActions: Story = {
     user: {
       id: "persona-student",
       name: "Alex Mercer",
-      email: "alex.mercer@cadet.aptispace.io",
+      email: "alex.mercer@aptitek.io",
       role: "student",
     },
     children: (

@@ -43,12 +43,7 @@ const DEFAULT_PROFILE_TEMPLATE: OnboardingProfile = {
   firstName: "",
   familyName: "",
   email: "",
-  avatarUrl:
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
-  documentNumber: "0942",
-  callSign: "AETH-9042",
-  clearanceLevel: "LEVEL-4 OMNI",
-  division: "Orbital Flight Dynamics",
+  avatarUrl: "",
 };
 
 function resolveGuillocheVariant(
@@ -193,11 +188,10 @@ function CardFrontFace({
   onAvatarChange,
 }: FrontFaceProps) {
   const { t } = useTranslation(["onboarding", "common"]);
-  const schoolName = school.name || "AptiSpace Academy";
+  const schoolName = school.name || "Aptitek";
   const cohortName =
-    cohort?.name ||
-    t("card.defaultCohort", "Cadet Cohort 2026", { year: 2026 });
-  const schoolDomain = school.emailDomain || "cadet.aptispace.io";
+    cohort?.name || t("card.defaultCohort", "Cohort 2026", { year: 2026 });
+  const schoolDomain = school.emailDomain || "aptitek.io";
   const validity = useMemo(() => calculateCohortValidity(cohort), [cohort]);
 
   return (

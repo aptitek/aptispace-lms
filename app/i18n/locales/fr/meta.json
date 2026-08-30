@@ -1,10 +1,14 @@
 {
   "home": {
-    "title": "AptiSpace LMS • Connexion Passerelle Orbitale",
-    "description": "Bienvenue sur AptiSpace LMS. Authentification unique sécurisée via GitHub pour accéder aux cours et simulations."
+    "title": "AptiSpace LMS • Tableau de bord",
+    "description": "Bienvenue sur AptiSpace LMS. Accédez à vos cours et modules d'apprentissage."
+  },
+  "login": {
+    "title": "AptiSpace LMS • Connexion",
+    "description": "Authentifiez-vous sur AptiSpace LMS pour accéder à vos cours et modules."
   },
   "onboarding": {
-    "title": "AptiSpace LMS • Intégration des Cadets",
-    "description": "Configurez votre carte d'identification officielle ISO/IEC 7810 ID-1 et commencez votre voyage interstellaire AptiSpace."
+    "title": "AptiSpace LMS • Intégration Étudiant",
+    "description": "Configurez votre carte d'identification officielle ISO/IEC 7810 ID-1 et commencez votre formation."
   }
 }

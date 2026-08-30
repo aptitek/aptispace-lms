@@ -18,7 +18,7 @@ const meta: Meta<typeof Guilloche> = {
     seed: {
       control: "text",
       description:
-        "Deterministic seed string (e.g. Cadet ID, cryptographic key)",
+        "Deterministic seed string (e.g. Student ID, cryptographic key)",
     },
     variant: {
       control: "select",

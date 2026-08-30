@@ -204,9 +204,9 @@ describe("Backend Database & Service Architecture", () => {
     expect(updatedUser?.firstName).toBe("Alex");
 
     const updatedAffiliation = await updateUserAffiliation(mockDb, "user-1", {
-      email: "alex.mercer@cadet.aptispace.io",
+      email: "alex.mercer@aptitek.io",
     });
-    expect(updatedAffiliation?.email).toBe("alex.mercer@cadet.aptispace.io");
+    expect(updatedAffiliation?.email).toBe("alex.mercer@aptitek.io");
 
     expect(
       isUserProfileComplete({
@@ -223,7 +223,7 @@ describe("Backend Database & Service Architecture", () => {
             userId: "user-1",
             institutionId: "inst-1",
             cohortId: null,
-            email: "alex.mercer@cadet.aptispace.io",
+            email: "alex.mercer@aptitek.io",
             role: "student",
             isActive: true,
             createdAt: new Date(),

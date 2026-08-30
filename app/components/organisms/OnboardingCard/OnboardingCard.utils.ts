@@ -44,7 +44,7 @@ export function formatInstitutionalEmail(
     return "";
   }
 
-  const cleanDomain = (school.emailDomain || "cadet.aptispace.io")
+  const cleanDomain = (school.emailDomain || "aptitek.io")
     .replace(/^@+/, "")
     .trim()
     .toLowerCase();
@@ -111,7 +111,7 @@ export function buildTd1MrzData(
     documentCode: "ID",
     issuingState,
     documentNumber: docNum,
-    surname: sanitizeMrzString(profile.familyName, "CADET"),
+    surname: sanitizeMrzString(profile.familyName, "STUDENT"),
     givenNames: sanitizeMrzString(profile.firstName, "UNKNOWN"),
     nationality: profile.nationality || "APT",
     birthDate: profile.birthDate || "980412",

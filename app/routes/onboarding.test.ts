@@ -24,13 +24,13 @@ function createActionArgs(request: Request) {
 }
 
 describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
-  it("defines the secure CADET_FIXED_DOMAIN constant", () => {
-    expect(CADET_FIXED_DOMAIN).toBe("cadet.aptispace.io");
+  it("defines the secure institutional domain constant", () => {
+    expect(CADET_FIXED_DOMAIN).toBe("aptitek.io");
   });
 
-  it("successfully accepts cadet emails matching the authorized fixed domain", async () => {
+  it("successfully accepts student emails matching the authorized fixed domain", async () => {
     const formData = new FormData();
-    formData.set("email", "cadet.mercer@cadet.aptispace.io");
+    formData.set("email", "john.doe@aptitek.io");
 
     const request = new Request("http://localhost:3000/onboarding", {
       method: "POST",
@@ -42,16 +42,16 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
     expect(response.status).toBe(200);
     const body = (await response.json()) as { success: boolean; email: string };
     expect(body.success).toBe(true);
-    expect(body.email).toBe("cadet.mercer@cadet.aptispace.io");
+    expect(body.email).toBe("john.doe@aptitek.io");
   });
 
   it("strictly REJECTS submissions with unauthorized or tampered domains", async () => {
     const maliciousDomains = [
-      "cadet.mercer@evil.com",
+      "user@evil.com",
       "hacker@attacker.org",
-      "cadet@gmail.com",
-      "cadet@aptispace.com", // even main domain is rejected if not the cadet fixed subdomain
-      "spoof@sub.cadet.aptispace.io",
+      "user@gmail.com",
+      "user@aptispace.com",
+      "spoof@sub.aptitek.io",
     ];
 
     for (const email of maliciousDomains) {
@@ -74,7 +74,7 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
 
   it("accepts bare username prefix and formats it with the authorized domain", async () => {
     const formData = new FormData();
-    formData.set("email", "pilot.vance");
+    formData.set("email", "john.doe");
 
     const request = new Request("http://localhost:3000/onboarding", {
       method: "POST",
@@ -86,15 +86,15 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
     expect(response.status).toBe(200);
     const body = (await response.json()) as { success: boolean; email: string };
     expect(body.success).toBe(true);
-    expect(body.email).toBe("pilot.vance@cadet.aptispace.io");
+    expect(body.email).toBe("john.doe@aptitek.io");
   });
 
   it("handles real-time draft updates through action with update_draft type", async () => {
     const formData = new FormData();
     formData.set("actionType", "update_draft");
-    formData.set("firstName", "Alex");
-    formData.set("familyName", "Mercer");
-    formData.set("email", "alex.mercer@cadet.aptispace.io");
+    formData.set("firstName", "John");
+    formData.set("familyName", "Doe");
+    formData.set("email", "john.doe@aptitek.io");
 
     const request = new Request("http://localhost:3000/onboarding", {
       method: "POST",
@@ -116,7 +116,7 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
     formData.set("actionType", "validate_credential");
     formData.set("firstName", "");
     formData.set("familyName", "");
-    formData.set("email", "alex.mercer@cadet.aptispace.io");
+    formData.set("email", "john.doe@aptitek.io");
 
     const request = new Request("http://localhost:3000/onboarding", {
       method: "POST",

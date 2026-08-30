@@ -65,35 +65,33 @@ describe("i18n Internationalization", () => {
     await i18n.changeLanguage("en");
     expect(
       i18n.t("common:emailField.errors.noAtAllowed", {
-        domain: "cadet.aptispace.io",
+        domain: "aptitek.io",
       }),
-    ).toBe(
-      "Do not enter '@'. Domain @cadet.aptispace.io is added automatically.",
-    );
+    ).toBe("Do not enter '@'. Domain @aptitek.io is added automatically.");
     expect(
       i18n.t("common:emailField.errors.autofillAdjusted", {
         enteredDomain: "gmail.com",
-        domain: "cadet.aptispace.io",
+        domain: "aptitek.io",
       }),
     ).toBe(
-      "Autofilled domain @gmail.com was adjusted to institutional domain @cadet.aptispace.io.",
+      "Autofilled domain @gmail.com was adjusted to institutional domain @aptitek.io.",
     );
 
     await i18n.changeLanguage("fr");
     expect(
       i18n.t("common:emailField.errors.noAtAllowed", {
-        domain: "cadet.aptispace.io",
+        domain: "aptitek.io",
       }),
     ).toBe(
-      "Ne saisissez pas '@'. Le domaine @cadet.aptispace.io est ajouté automatiquement.",
+      "Ne saisissez pas '@'. Le domaine @aptitek.io est ajouté automatiquement.",
     );
     expect(
       i18n.t("common:emailField.errors.autofillAdjusted", {
         enteredDomain: "gmail.com",
-        domain: "cadet.aptispace.io",
+        domain: "aptitek.io",
       }),
     ).toBe(
-      "Le domaine autofourni @gmail.com a été ajusté au domaine institutionnel @cadet.aptispace.io.",
+      "Le domaine autofourni @gmail.com a été ajusté au domaine institutionnel @aptitek.io.",
     );
   });
 
@@ -121,9 +119,7 @@ describe("i18n Internationalization", () => {
 
   it("translates onboarding card, form, and requirements strings in English and French", async () => {
     await i18n.changeLanguage("en");
-    expect(i18n.t("onboarding:title")).toBe(
-      "AptiSpace Academy Cadet Onboarding",
-    );
+    expect(i18n.t("onboarding:title")).toBe("AptiSpace Student Onboarding");
     expect(i18n.t("onboarding:form.firstName")).toBe("First Name");
     expect(i18n.t("onboarding:form.familyName")).toBe("Family Name");
     expect(i18n.t("onboarding:form.email")).toBe("Institutional Email");
@@ -141,7 +137,7 @@ describe("i18n Internationalization", () => {
 
     await i18n.changeLanguage("fr");
     expect(i18n.t("onboarding:title")).toBe(
-      "Intégration des Cadets de l'Académie AptiSpace",
+      "Intégration des étudiants AptiSpace",
     );
     expect(i18n.t("onboarding:form.firstName")).toBe("Prénom");
     expect(i18n.t("onboarding:form.familyName")).toBe("Nom de famille");
@@ -163,12 +159,12 @@ describe("i18n Internationalization", () => {
   it("translates onboarding metadata in English and French", async () => {
     await i18n.changeLanguage("en");
     expect(i18n.t("meta:onboarding.title")).toBe(
-      "AptiSpace LMS • Cadet Onboarding",
+      "AptiSpace LMS • Student Onboarding",
     );
 
     await i18n.changeLanguage("fr");
     expect(i18n.t("meta:onboarding.title")).toBe(
-      "AptiSpace LMS • Intégration des Cadets",
+      "AptiSpace LMS • Intégration Étudiant",
     );
   });
 });

@@ -1,49 +1,36 @@
 {
-  "title": "Intégration des Cadets de l'Académie AptiSpace",
-  "subtitle": "Initialisez votre badge d'identification de vol et configurez votre profil d'accréditation.",
+  "title": "Intégration des étudiants AptiSpace",
+  "subtitle": "Initialisez votre badge d'identification étudiant et configurez votre profil.",
   "card": {
-    "agency": "CORPS D'EXPLORATION APTISPACE",
+    "agency": "APTISPACE LMS",
     "badgeType": "BADGE D'IDENTIFICATION ISO/IEC 7810 ID-1",
-    "flipToBack": "Tourner le badge",
-    "flipToFront": "Face avant",
-    "emvChip": "Puce électronique ISO/IEC 7816",
-    "nfc": "Sans contact ISO/IEC 14443",
-    "magneticStripe": "Bande magnétique ISO/IEC 7811",
-    "authorizedSignature": "Signature autorisée du cadet",
-    "securityKey": "Clé de sécurité",
+    "authorizedSignature": "Signature autorisée",
     "mrz": "Zone de lecture automatique (MRZ)",
     "mrzZone": "Zone de lecture automatique ICAO 9303",
     "mrzValid": "ICAO OK",
     "mrzInvalid": "ERR VÉRIF",
     "logoAlt": "AptiSpace",
-    "defaultCohort": "Promotion Cadet {{year}}",
-    "defaultCohortDescription": "Cohorte de vol en avionique et navigation orbitale.",
-    "defaultDivision": "Dynamique de vol orbital",
-    "defaultClearance": "NIVEAU-4 OMNI"
+    "defaultCohort": "Promotion {{year}}",
+    "defaultCohortDescription": "Cohorte académique et de formation."
   },
   "form": {
-    "cadetName": "Nom complet du cadet",
     "firstName": "Prénom",
     "firstNamePlaceholder": "Prénom",
     "familyName": "Nom de famille",
     "familyNamePlaceholder": "Nom de famille",
     "email": "Email institutionnel",
-    "callSign": "Indicatif d'appel",
-    "division": "Spécialisation / Division",
-    "clearance": "Niveau d'habilitation",
-    "submit": "Valider et continuer",
-    "preview": "Aperçu en direct ID-1"
+    "submit": "Valider et continuer"
   },
   "requirements": {
     "title": "Complétez pour continuer",
-    "subtitle": "Renseignez votre nom sur la carte pour accéder à la plateforme.",
+    "subtitle": "Renseignez votre nom sur la carte pour continuer.",
     "firstName": "Prénom",
     "familyName": "Nom de famille",
     "email": "Email institutionnel",
     "readyChip": "✓ Prêt à continuer",
     "progressChip": "{{completed}} / 3 Complétés",
     "saving": "Enregistrement...",
-    "tooltipReady": "Tous les champs requis sont remplis ! Cliquez pour continuer vers l'académie.",
+    "tooltipReady": "Tous les champs requis sont remplis ! Cliquez pour continuer.",
     "tooltipIncomplete": "Veuillez renseigner {{missing}} sur la carte pour continuer."
   }
 }

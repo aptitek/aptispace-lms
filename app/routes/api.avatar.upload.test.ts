@@ -59,7 +59,7 @@ describe("API Avatar Upload Route", () => {
 
   it("processes valid image file upload in local fallback mode", async () => {
     const formData = new FormData();
-    const validImageFile = new File(["fake-image-bytes"], "cadet-avatar.png", {
+    const validImageFile = new File(["fake-image-bytes"], "user-avatar.png", {
       type: "image/png",
     });
     formData.append("file", validImageFile);
@@ -81,7 +81,7 @@ describe("API Avatar Upload Route", () => {
 
     expect(payload.success).toBe(true);
     expect(payload.url.startsWith("data:image/png;base64,")).toBe(true);
-    expect(payload.fileName).toBe("cadet-avatar.png");
+    expect(payload.fileName).toBe("user-avatar.png");
     expect(payload.fallbackMode).toBe(true);
   });
 

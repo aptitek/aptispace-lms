@@ -10,39 +10,35 @@ import type {
 } from "../app/components/organisms/OnboardingCard/OnboardingCard.types";
 
 const mockSchoolLogo: SchoolConfig = {
-  id: "school-aptispace-orbital",
-  name: "AptiSpace Orbital Academy",
-  slug: "aptispace-orbital-academy",
-  logoUrl: "/favicon.svg",
-  emailDomain: "cadet.aptispace.io",
+  id: "school-aptitek",
+  name: "Aptitek",
+  slug: "aptitek",
+  logoUrl: "/aptitek-logo.svg",
+  emailDomain: "aptitek.io",
   emailPattern: "{first}.{last}@{domain}",
 };
 
 const mockSchoolNoLogo: SchoolConfig = {
-  id: "school-quantum-aerospace",
-  name: "Quantum Aerospace Institute",
-  slug: "quantum-aerospace",
+  id: "school-quantum-institute",
+  name: "Quantum Institute",
+  slug: "quantum-institute",
   logoUrl: null,
-  emailDomain: "quantum-aerospace.edu",
+  emailDomain: "quantum.edu",
   emailPattern: "{first}.{last}@{domain}",
 };
 
 const mockCohort: CohortConfig = {
   id: "cohort-2026",
-  name: "Cadet Cohort 2026",
-  description: "Avionics and orbital navigation flight cohort.",
+  name: "Cohort 2026",
+  description: "Academic software engineering cohort.",
 };
 
 const mockProfile: OnboardingProfile = {
   firstName: "Alex",
   familyName: "Mercer",
-  email: "alex.mercer@cadet.aptispace.io",
-  avatarUrl:
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+  email: "alex.mercer@aptitek.io",
+  avatarUrl: "",
   documentNumber: "0942",
-  callSign: "AETH-9042",
-  clearanceLevel: "LEVEL-4 OMNI",
-  division: "Orbital Flight Dynamics",
 };
 
 const meta: Meta<typeof OnboardingCard> = {
@@ -197,7 +193,7 @@ export const AptiSpaceBrandLogo: Story = {
       name: "AptiSpace Academy",
       slug: "aptispace-academy",
       logoUrl: "/favicon.svg",
-      emailDomain: "cadet.aptispace.io",
+      emailDomain: "aptitek.io",
       emailPattern: "{first}.{last}@{domain}",
     },
     cohort: mockCohort,
@@ -270,7 +266,6 @@ export const GoldThemeSchool: Story = {
       avatarUrl:
         "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80",
       documentNumber: "7816",
-      clearanceLevel: "LEVEL-5 COSMIC",
     },
     holoVariant: "gold",
     size: "lg",

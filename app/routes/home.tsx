@@ -21,11 +21,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
 export function meta(_args: Route.MetaArgs) {
   return [
-    { title: "AptiSpace LMS • Orbital Command Bridge" },
+    { title: "AptiSpace LMS • Dashboard" },
     {
       name: "description",
       content:
-        "AptiSpace LMS Main Command Bridge. Access active course modules, telemetry simulations, and assessments.",
+        "AptiSpace LMS Dashboard. Access active course modules and assessments.",
     },
   ];
 }

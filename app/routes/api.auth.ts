@@ -7,12 +7,17 @@ import {
   createAffiliation,
   isUserProfileComplete,
 } from "~/services/userService";
-import { seedDatabase } from "~/db/seed";
+import { seedDatabase, resetDatabase } from "~/db/seed";
 import { institutions, cohorts } from "~/db/schema";
 import {
   DEV_PERSONAS,
   type PersonaDefinition,
+  type AccountDefinition,
   type UserRole,
+  resetInMemoryAccounts,
+  getInitialFallbackAccounts,
+  findInMemoryAccount,
+  updateInMemoryAccount,
 } from "~/utils/auth";
 import { getSession, type SessionPayload } from "~/utils/session.server";
 
@@ -55,10 +60,10 @@ function resolveRoleTitle(role: UserRole, isComplete: boolean): string {
     case "admin":
       return "System Administrator";
     case "instructor":
-      return "Faculty Instructor";
+      return "Instructor";
     case "student":
     default:
-      return "Enrolled Cadet";
+      return "Student";
   }
 }
 
@@ -113,16 +118,16 @@ function formatPersona(
 }
 
 function getFallbackAccounts(): FormattedAccount[] {
-  return DEV_PERSONAS.map((p) => ({
-    id: p.id,
-    name: p.name,
-    firstName: p.name.split(" ")[0] || "",
-    lastName: p.name.split(" ").slice(1).join(" ") || "",
-    email: p.email,
-    role: p.role,
-    isProfileComplete: true,
-    badge: p.badge,
-    title: p.title,
+  return getInitialFallbackAccounts().map((a) => ({
+    id: a.id,
+    name: a.name,
+    firstName: a.firstName ?? "",
+    lastName: a.lastName ?? "",
+    email: a.email,
+    role: a.role,
+    isProfileComplete: Boolean(a.isProfileComplete),
+    badge: a.badge,
+    title: a.title,
   }));
 }
 
@@ -132,16 +137,16 @@ async function fetchAccounts(db: Database | null): Promise<FormattedAccount[]> {
   }
 
   const dbUsers = await getAllUsersWithAffiliations(db);
-  if (dbUsers.length === 0) {
-    return getFallbackAccounts();
-  }
-
   return dbUsers.map(formatAccountFromDb);
 }
 
 async function fetchPersonas(db: Database | null) {
   if (!db) {
     return DEV_PERSONAS;
+  }
+
+  if (DEV_PERSONAS.length === 0) {
+    return [];
   }
 
   const [adminFallback, instructorFallback, studentFallback] = DEV_PERSONAS;
@@ -161,22 +166,49 @@ async function fetchPersonas(db: Database | null) {
   ];
 }
 
-async function fetchCurrentUser(db: Database | null, userId: string | null) {
-  if (!db || !userId) {
-    return null;
-  }
-
-  const user = await getUserWithAffiliations(db, userId);
-  if (!user) return null;
-
+function formatDbCurrentUser(user: UserWithAffiliationsResult) {
+  const name =
+    user.displayName ?? `${user.firstName || ""} ${user.lastName || ""}`.trim();
   return {
     id: user.id,
-    name: user.displayName ?? `${user.firstName} ${user.lastName}`.trim(),
+    name: name || "User",
     email: user.affiliations[0]?.email ?? "",
     role: (user.affiliations[0]?.role as UserRole) ?? "student",
     affiliations: user.affiliations,
     isProfileComplete: isUserProfileComplete(user),
   };
+}
+
+function formatInMemoryCurrentUser(inMem: AccountDefinition) {
+  const isComplete = Boolean(inMem.firstName && inMem.lastName);
+  const fullName = `${inMem.firstName || ""} ${inMem.lastName || ""}`.trim();
+  return {
+    id: inMem.id,
+    name: inMem.name || fullName || "User",
+    email: inMem.email,
+    role: inMem.role,
+    affiliations: [
+      {
+        institutionId: inMem.institutionId ?? "school-aptitek",
+        cohortId: inMem.cohortId ?? null,
+        email: inMem.email,
+        role: inMem.role,
+      },
+    ],
+    isProfileComplete: isComplete,
+  };
+}
+
+async function fetchCurrentUser(db: Database | null, userId: string | null) {
+  if (!userId) return null;
+
+  if (db) {
+    const user = await getUserWithAffiliations(db, userId);
+    return user ? formatDbCurrentUser(user) : null;
+  }
+
+  const inMem = findInMemoryAccount(userId);
+  return inMem ? formatInMemoryCurrentUser(inMem) : null;
 }
 
 async function handleMeLoader(
@@ -220,10 +252,45 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   return handleMeLoader(db, activeUserId, session);
 }
 
+async function ensureDefaultInstitutionAndCohort(db: Database) {
+  let inst = await db.query.institutions.findFirst({
+    where: (inst, { eq }) => eq(inst.slug, "aptitek"),
+  });
+  if (!inst) {
+    const [created] = await db
+      .insert(institutions)
+      .values({
+        name: "Aptitek",
+        slug: "aptitek",
+        type: "academic",
+        logoUrl: "/aptitek-logo.svg",
+      })
+      .returning();
+    inst = created;
+  }
+
+  let cohort = await db.query.cohorts.findFirst({
+    where: (c, { eq }) => eq(c.name, "Cohort 2026"),
+  });
+  if (!cohort) {
+    const [createdCohort] = await db
+      .insert(cohorts)
+      .values({
+        institutionId: inst.id,
+        name: "Cohort 2026",
+        description: "Primary software engineering cohort.",
+      })
+      .returning();
+    cohort = createdCohort;
+  }
+
+  return { institutionId: inst.id, cohortId: cohort.id };
+}
+
 async function handleCreateAccount(db: Database | null, targetRole: UserRole) {
   if (!db) {
     const mockId = `new-${targetRole}-${Date.now().toString(36)}`;
-    const newMockAccount: FormattedAccount = {
+    const newMockAccount = updateInMemoryAccount(mockId, {
       id: mockId,
       name: `New ${resolveRoleBadge(targetRole)} (Pending Onboarding)`,
       firstName: "",
@@ -233,18 +300,12 @@ async function handleCreateAccount(db: Database | null, targetRole: UserRole) {
       isProfileComplete: false,
       badge: resolveRoleBadge(targetRole),
       title: resolveRoleTitle(targetRole, false),
-    };
+    });
     return Response.json({ success: true, account: newMockAccount });
   }
 
-  const defaultInst = await db.select().from(institutions).limit(1);
-  const institutionId = defaultInst[0]?.id ?? "aptispace-orbital-academy";
-
-  let cohortId: string | null = null;
-  if (targetRole === "student") {
-    const defaultCohort = await db.select().from(cohorts).limit(1);
-    cohortId = defaultCohort[0]?.id ?? null;
-  }
+  const { institutionId, cohortId } =
+    await ensureDefaultInstitutionAndCohort(db);
 
   const createdUser = await createUser(db, {
     firstName: "",
@@ -256,7 +317,7 @@ async function handleCreateAccount(db: Database | null, targetRole: UserRole) {
   await createAffiliation(db, {
     userId: createdUser.id,
     institutionId,
-    cohortId,
+    cohortId: targetRole === "student" ? cohortId : null,
     email: "",
     role: targetRole,
     isActive: true,
@@ -287,6 +348,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
   };
 
   const db = getDatabaseFromContext(context);
+
+  if (body.action === "reset" || body.action === "empty") {
+    resetInMemoryAccounts();
+    if (db) {
+      await resetDatabase(db);
+    }
+    return Response.json({ success: true, reset: true });
+  }
 
   if (body.action === "seed" && db) {
     const result = await seedDatabase(db);

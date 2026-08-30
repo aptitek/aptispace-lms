@@ -131,7 +131,7 @@ function getGuillocheClassName(
 }
 
 const defaultGuilloche = {
-  seed: "APTI-7810-CADET-SECURITY",
+  seed: "APTI-7810-SECURITY",
   variant: "holo-spectrum" as const,
   density: "medium" as const,
   showWaves: true,

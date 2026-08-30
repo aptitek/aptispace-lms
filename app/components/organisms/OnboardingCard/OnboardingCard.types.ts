@@ -40,9 +40,6 @@ export interface OnboardingProfile {
   email: string;
   avatarUrl: string;
   documentNumber?: string;
-  callSign?: string;
-  clearanceLevel?: string;
-  division?: string;
   nationality?: string;
   sex?: "M" | "F" | "X" | "<";
   birthDate?: string;
@@ -59,7 +56,7 @@ export interface OnboardingCardProps {
    */
   cohort?: CohortConfig;
   /**
-   * Cadet / Student profile state (controlled)
+   * Student profile state (controlled)
    */
   profile?: OnboardingProfile;
   /**

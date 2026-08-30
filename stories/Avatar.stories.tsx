@@ -61,7 +61,7 @@ const sampleAvatarUrl =
 export const Default: Story = {
   args: {
     src: sampleAvatarUrl,
-    alt: "Cadet Alex Mercer",
+    alt: "Alex Mercer",
     shape: "medium",
     height: "140px",
   },
@@ -75,7 +75,7 @@ export const Default: Story = {
 export const BiometricPortrait: Story = {
   args: {
     src: sampleAvatarUrl,
-    alt: "Cadet Alex Mercer",
+    alt: "Alex Mercer",
     shape: "biometric",
     showReticle: true,
     height: "180px",

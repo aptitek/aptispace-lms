@@ -2,7 +2,7 @@ import type { ActionFunctionArgs } from "react-router";
 import { getDatabaseFromContext, type Database } from "~/db";
 import { getUserWithAffiliations } from "~/services/userService";
 import { logAudit } from "~/services/assessmentService";
-import { DEV_PERSONAS, type UserRole } from "~/utils/auth";
+import type { UserRole } from "~/utils/auth";
 import {
   getSession,
   signSessionToken,
@@ -26,8 +26,8 @@ function formatDbUserResult(
   const fullName = `${user.firstName || ""} ${user.lastName || ""}`.trim();
   return {
     targetUserId: user.id,
-    targetDisplayName: user.displayName || fullName || "Cadet User",
-    targetUserEmail: primaryAffiliation?.email ?? "user@cadet.aptispace.io",
+    targetDisplayName: user.displayName || fullName || "User",
+    targetUserEmail: primaryAffiliation?.email ?? "user@aptitek.io",
     targetUserRole:
       (primaryAffiliation?.role as UserRole) ?? fallbackRole ?? "student",
   };
@@ -35,19 +35,15 @@ function formatDbUserResult(
 
 function resolvePersonaFallback(
   userId?: string,
-  personaId?: string,
+  _personaId?: string,
   role?: UserRole,
 ) {
-  const matched =
-    DEV_PERSONAS.find(
-      (p) => p.id === (userId || personaId) || p.role === role,
-    ) ?? DEV_PERSONAS[0];
-
+  const resolvedRole = role ?? "student";
   return {
-    targetUserId: matched.id,
-    targetUserRole: matched.role,
-    targetUserEmail: matched.email,
-    targetDisplayName: matched.name,
+    targetUserId: userId || `user-${resolvedRole}`,
+    targetUserRole: resolvedRole,
+    targetUserEmail: `${resolvedRole}@aptitek.io`,
+    targetDisplayName: `${resolvedRole.charAt(0).toUpperCase() + resolvedRole.slice(1)} User`,
   };
 }
 

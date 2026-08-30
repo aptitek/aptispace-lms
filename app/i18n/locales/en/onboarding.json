@@ -1,49 +1,36 @@
 {
-  "title": "AptiSpace Academy Cadet Onboarding",
-  "subtitle": "Initialize your flight credential badge and configure your academy clearance profile.",
+  "title": "AptiSpace Student Onboarding",
+  "subtitle": "Initialize your student identification badge and configure your profile.",
   "card": {
-    "agency": "APTISPACE EXPLORATION CORPS",
+    "agency": "APTISPACE LMS",
     "badgeType": "ISO/IEC 7810 ID-1 IDENTIFICATION BADGE",
-    "flipToBack": "Flip Badge",
-    "flipToFront": "Front Side",
-    "emvChip": "ISO/IEC 7816 Microchip",
-    "nfc": "ISO/IEC 14443 Contactless",
-    "magneticStripe": "ISO/IEC 7811 Magnetic Stripe",
-    "authorizedSignature": "Authorized Cadet Signature",
-    "securityKey": "Security Key",
+    "authorizedSignature": "Authorized Signature",
     "mrz": "Machine Readable Zone (MRZ)",
     "mrzZone": "ICAO 9303 Machine Readable Zone",
     "mrzValid": "ICAO OK",
     "mrzInvalid": "CHECK ERR",
     "logoAlt": "AptiSpace",
-    "defaultCohort": "Cadet Cohort {{year}}",
-    "defaultCohortDescription": "Avionics and orbital navigation flight cohort.",
-    "defaultDivision": "Orbital Flight Dynamics",
-    "defaultClearance": "LEVEL-4 OMNI"
+    "defaultCohort": "Cohort {{year}}",
+    "defaultCohortDescription": "Academic training and course cohort."
   },
   "form": {
-    "cadetName": "Cadet Full Name",
     "firstName": "First Name",
     "firstNamePlaceholder": "First name",
     "familyName": "Family Name",
     "familyNamePlaceholder": "Family name",
     "email": "Institutional Email",
-    "callSign": "Call Sign",
-    "division": "Specialization / Division",
-    "clearance": "Security Clearance",
-    "submit": "Complete & Continue",
-    "preview": "Live ID-1 Preview"
+    "submit": "Complete & Continue"
   },
   "requirements": {
     "title": "Complete to Continue",
-    "subtitle": "Fill in your name on the card to continue to the academy.",
+    "subtitle": "Fill in your name on the card to continue.",
     "firstName": "First Name",
     "familyName": "Family Name",
     "email": "Institutional Email",
     "readyChip": "✓ Ready to Continue",
     "progressChip": "{{completed}} / 3 Completed",
     "saving": "Saving...",
-    "tooltipReady": "All required fields filled! Click to continue to the academy.",
+    "tooltipReady": "All required fields filled! Click to continue.",
     "tooltipIncomplete": "Please fill in {{missing}} on the card to continue."
   }
 }

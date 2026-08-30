@@ -15,9 +15,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       courses: [
         {
           id: "demo-course-1",
-          title: "Orbital Mechanics & Astrodynamics",
+          title: "Fullstack Web Engineering",
           description:
-            "Comprehensive course on Keplerian trajectories, orbital rendezvous, and delta-v maneuvers.",
+            "Comprehensive course covering React, TypeScript, serverless architecture, and databases.",
         },
       ],
     });

@@ -52,11 +52,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
 export function meta() {
   return [
-    { title: "AptiSpace LMS • Cadet Credential Onboarding" },
+    { title: "AptiSpace LMS • Student Onboarding" },
     {
       name: "description",
       content:
-        "Configure your ISO/IEC 7810 ID-1 official identification card and begin your AptiSpace interstellar journey.",
+        "Configure your ISO/IEC 7810 ID-1 official identification card and begin your learning journey.",
     },
   ];
 }
@@ -211,10 +211,10 @@ export default function OnboardingPage() {
   const selectedCohort = useMemo<CohortConfig>(
     () => ({
       id: "cohort-2026",
-      name: t("card.defaultCohort", "Cadet Cohort 2026", { year: 2026 }),
+      name: t("card.defaultCohort", "Cohort 2026", { year: 2026 }),
       description: t(
         "card.defaultCohortDescription",
-        "Avionics and orbital navigation flight cohort.",
+        "Academic training and course cohort.",
       ),
     }),
     [t],
@@ -228,7 +228,7 @@ export default function OnboardingPage() {
     if (typeof document !== "undefined") {
       document.title = t(
         "meta:onboarding.title",
-        "AptiSpace LMS • Cadet Onboarding",
+        "AptiSpace LMS • Student Onboarding",
       );
     }
   }, [t]);

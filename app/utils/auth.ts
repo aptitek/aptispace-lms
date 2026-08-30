@@ -35,47 +35,98 @@ export interface AccountDefinition {
   cohortId?: string | null;
 }
 
-export const DEV_PERSONAS: readonly PersonaDefinition[] = [
-  {
-    id: "persona-admin",
-    role: "admin",
-    name: "Dr. Eleanor Vance",
-    title: "System Administrator & Lead Instructor",
-    email: "admin@aptispace.internal",
-    badge: "Admin",
-  },
-  {
-    id: "persona-student",
-    role: "student",
-    name: "Alex Mercer",
-    title: "Enrolled Cadet • Term 02",
-    email: "alex.mercer@cadet.aptispace.io",
-    badge: "Student",
-  },
-  {
-    id: "persona-instructor",
-    role: "instructor",
-    name: "Cmdr. Daniel Foster",
-    title: "Astrophysics Instructor",
-    email: "d.foster@faculty.aptispace.io",
-    badge: "Instructor",
-  },
-] as const;
+export const DEV_PERSONAS: readonly PersonaDefinition[] = [];
 
-let inMemoryAccounts: AccountDefinition[] = DEV_PERSONAS.map((p) => ({
-  id: p.id,
-  name: p.name,
-  firstName: p.name.split(" ")[0] || "",
-  lastName: p.name.split(" ").slice(1).join(" ") || "",
-  email: p.email,
-  role: p.role,
-  badge: p.badge,
-  title: p.title,
-  isProfileComplete: true,
-}));
+let inMemoryAccounts: AccountDefinition[] = [];
+
+export function resetInMemoryAccounts(): void {
+  inMemoryAccounts = [];
+}
 
 export function getInitialFallbackAccounts(): AccountDefinition[] {
   return [...inMemoryAccounts];
+}
+
+export function findInMemoryAccount(id: string): AccountDefinition | undefined {
+  return inMemoryAccounts.find((a) => a.id === id);
+}
+
+function getRoleLabel(role: UserRole): string {
+  if (role === "admin") return "Admin";
+  if (role === "instructor") return "Instructor";
+  return "Student";
+}
+
+function getRoleTitle(role: UserRole, isComplete: boolean): string {
+  if (!isComplete) return "Onboarding Pending • Unconfigured Profile";
+  if (role === "admin") return "System Administrator";
+  if (role === "instructor") return "Instructor";
+  return "Student";
+}
+
+function createInMemoryAccount(
+  id: string,
+  updates: Partial<AccountDefinition>,
+): AccountDefinition {
+  const role = updates.role ?? "student";
+  const roleLabel = getRoleLabel(role);
+  const firstName = updates.firstName ?? "";
+  const lastName = updates.lastName ?? "";
+  const fullName = `${firstName} ${lastName}`.trim();
+  const isComplete = Boolean(updates.isProfileComplete);
+
+  return {
+    id,
+    name: updates.name || fullName || `New ${roleLabel} (Pending Onboarding)`,
+    firstName,
+    lastName,
+    email: updates.email ?? "",
+    role,
+    badge: updates.badge ?? roleLabel,
+    title: updates.title ?? getRoleTitle(role, isComplete),
+    isProfileComplete: isComplete,
+    institutionId: updates.institutionId ?? "school-aptitek",
+    createdAt: new Date(),
+  };
+}
+
+function mergeInMemoryAccount(
+  existing: AccountDefinition,
+  updates: Partial<AccountDefinition>,
+): AccountDefinition {
+  const firstName = updates.firstName ?? existing.firstName ?? "";
+  const lastName = updates.lastName ?? existing.lastName ?? "";
+  const fullName = `${firstName} ${lastName}`.trim();
+  const isComplete =
+    updates.isProfileComplete !== undefined
+      ? updates.isProfileComplete
+      : Boolean(firstName && lastName);
+
+  return {
+    ...existing,
+    ...updates,
+    firstName,
+    lastName,
+    name: updates.name ?? (fullName || existing.name),
+    isProfileComplete: isComplete,
+    title: getRoleTitle(existing.role, isComplete),
+  };
+}
+
+export function updateInMemoryAccount(
+  id: string,
+  updates: Partial<AccountDefinition>,
+): AccountDefinition {
+  const index = inMemoryAccounts.findIndex((a) => a.id === id);
+  if (index === -1) {
+    const newAcc = createInMemoryAccount(id, updates);
+    inMemoryAccounts = [newAcc, ...inMemoryAccounts];
+    return newAcc;
+  }
+
+  const updated = mergeInMemoryAccount(inMemoryAccounts[index], updates);
+  inMemoryAccounts[index] = updated;
+  return updated;
 }
 
 export async function fetchAccountsFromDb(): Promise<AccountDefinition[]> {
@@ -88,8 +139,7 @@ export async function fetchAccountsFromDb(): Promise<AccountDefinition[]> {
         };
         if (
           accountsResponse.accounts &&
-          Array.isArray(accountsResponse.accounts) &&
-          accountsResponse.accounts.length > 0
+          Array.isArray(accountsResponse.accounts)
         ) {
           inMemoryAccounts = accountsResponse.accounts;
           return accountsResponse.accounts;
@@ -194,8 +244,14 @@ export async function loginAsAccount(
 }
 
 export async function loginAsPersona(personaRole: UserRole): Promise<AuthUser> {
-  const matched =
-    DEV_PERSONAS.find((p) => p.role === personaRole) ?? DEV_PERSONAS[0];
+  const matched = DEV_PERSONAS.find((p) => p.role === personaRole) ?? {
+    id: `dev-${personaRole}`,
+    role: personaRole,
+    name: `${personaRole.charAt(0).toUpperCase() + personaRole.slice(1)} User`,
+    email: `${personaRole}@aptitek.io`,
+    title: `${personaRole.charAt(0).toUpperCase() + personaRole.slice(1)}`,
+    badge: `${personaRole.charAt(0).toUpperCase() + personaRole.slice(1)}`,
+  };
 
   return loginAsAccount({
     id: matched.id,
@@ -264,7 +320,7 @@ function resolveDbUserName(dbUser: ResolveActiveUserDbParam): string {
   const first = dbUser.firstName || "";
   const last = dbUser.lastName || "";
   const combined = `${first} ${last}`.trim();
-  return combined || "Cadet User";
+  return combined || "User";
 }
 
 function resolveDbUserRole(
@@ -310,8 +366,8 @@ export function resolveActiveUser(
   if (session) {
     return {
       id: session.userId,
-      name: "Cadet User",
-      email: "user@aptispace.io",
+      name: "User",
+      email: "user@aptitek.io",
       role: session.role,
       impersonating: session.impersonating,
     };

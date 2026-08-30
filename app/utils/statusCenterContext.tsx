@@ -255,7 +255,7 @@ export function StatusCenterProvider({
     ) => {
       switch (simulationType) {
         case "nominal":
-          notifySuccess("Orbital Gateway carrier synchronization verified.");
+          notifySuccess("API Gateway synchronization verified.");
           break;
         case "warning":
           notifyWarning(

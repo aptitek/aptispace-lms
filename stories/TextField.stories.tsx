@@ -27,9 +27,9 @@ type Story = StoryObj<typeof meta>;
 
 export const DefaultOutlined: Story = {
   args: {
-    label: "Pilot Identifier",
+    label: "Student Identifier",
     variant: "outlined",
-    placeholder: "e.g. CADET-8092",
+    placeholder: "e.g. STU-8092",
     size: "medium",
   },
 };
