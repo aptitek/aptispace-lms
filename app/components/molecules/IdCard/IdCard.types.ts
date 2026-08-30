@@ -49,7 +49,7 @@ export interface IdCardProps {
   flipDuration?: number;
   onFlip?: (side: IdCardSide) => void;
   onFlipChange?: (isFlipped: boolean) => void;
-  onClick?: React.MouseEventHandler<HTMLDivElement>;
+  onClick?: () => void;
 
   // Dimensions & Layout
   orientation?: IdCardOrientation;

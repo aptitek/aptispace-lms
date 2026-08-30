@@ -1,13 +1,5 @@
-import {
-  forwardRef,
-  useState,
-  useEffect,
-  useMemo,
-  type ReactNode,
-  type MouseEvent,
-} from "react";
+import { forwardRef, useState, useEffect, useMemo } from "react";
 import { Card, type CardLayer, type CardShadow } from "deckfx";
-import type { Transition } from "framer-motion";
 import Electronics from "../../atoms/Electronics/Electronics";
 import type {
   ElectronicsFinish,
@@ -31,9 +23,7 @@ import {
   CardFaceContainer,
   ContentOverlay,
   TransparentGhostOverlay,
-  FlipPerspectiveStage,
-  MotionFlipFlipper,
-  CardFaceWrapper,
+  IdCardContainer,
   getDimensions,
 } from "./IdCard.styles";
 
@@ -95,7 +85,7 @@ interface ReverseGhostLayerProps {
   faceSide: IdCardSide;
   isVertical: boolean;
   opacity: number;
-  renderGhostContent?: (side: IdCardSide) => ReactNode;
+  renderGhostContent?: (side: IdCardSide) => React.ReactNode;
 }
 
 function ReverseGhostLayer({
@@ -194,38 +184,50 @@ function ElectronicsLayer({
   );
 }
 
-interface IdCardFaceProps {
-  conf: typeof DEFAULT_CARD_PROPS;
-  props: IdCardProps;
-  faceSide: IdCardSide;
-  dims: { width: number | string; height: number | string };
+function useIdCardFlipState(props: IdCardProps, defaultSide: IdCardSide) {
+  const [internalFlipped, setInternalFlipped] = useState(
+    props.isFlipped ??
+      (props.side !== undefined
+        ? props.side === "back"
+        : defaultSide === "back"),
+  );
+
+  const controlledSide = props.side;
+  const controlledIsFlipped = props.isFlipped;
+
+  useEffect(() => {
+    if (controlledIsFlipped !== undefined) {
+      setInternalFlipped(controlledIsFlipped);
+    } else if (controlledSide !== undefined) {
+      setInternalFlipped(controlledSide === "back");
+    }
+  }, [controlledSide, controlledIsFlipped]);
+
+  const isFlipped =
+    controlledIsFlipped !== undefined ? controlledIsFlipped : internalFlipped;
+
+  return { isFlipped, setInternalFlipped };
 }
 
-function IdCardFace({ conf, props, faceSide, dims }: IdCardFaceProps) {
-  const isBack = faceSide === "back";
-  const seed = getGuillocheSeed(props.guillocheSeed, isBack);
-
-  const mergedLayers = useMemo(() => {
+function useIdCardMergedLayers(
+  conf: typeof DEFAULT_CARD_PROPS,
+  props: IdCardProps,
+  frontSeed: string,
+  backSeed: string,
+): CardLayer[] {
+  return useMemo(() => {
     const rawLayers = Array.isArray(props.holoLayers) ? props.holoLayers : [];
-    const activeHoloLayers: IdHoloLayer[] = rawLayers
-      .map((layer) => {
-        if (typeof layer === "string") {
-          return {
-            id: `holo-string-${layer}`,
-            src: layer,
-            holographic: true,
-            side: "front" as const,
-          };
-        }
-        return layer as IdHoloLayer;
-      })
-      .filter((layer) => {
-        return (
-          layer.side === "both" ||
-          layer.side === faceSide ||
-          (!layer.side && faceSide === "front")
-        );
-      });
+    const activeHoloLayers: IdHoloLayer[] = rawLayers.map((layer) => {
+      if (typeof layer === "string") {
+        return {
+          id: `holo-string-${layer}`,
+          src: layer,
+          holographic: true,
+          side: "front" as const,
+        };
+      }
+      return layer as IdHoloLayer;
+    });
 
     const normalizedHoloLayers = activeHoloLayers.map((layer) => {
       let holographicOption: CardLayer["holographic"] = false;
@@ -243,15 +245,37 @@ function IdCardFace({ conf, props, faceSide, dims }: IdCardFaceProps) {
 
     const guillocheHoloLayers: CardLayer[] = [];
     if (conf.showGuilloche && conf.holographic) {
-      const maskDataUrl = generateGuillocheMaskDataUrl({
-        seed,
+      const frontMask = generateGuillocheMaskDataUrl({
+        seed: frontSeed,
+        density: conf.guillocheDensity,
+        noiseIntensity: conf.guillocheNoiseIntensity,
+      });
+      const backMask = generateGuillocheMaskDataUrl({
+        seed: backSeed,
         density: conf.guillocheDensity,
         noiseIntensity: conf.guillocheNoiseIntensity,
       });
 
       guillocheHoloLayers.push({
-        id: `guilloche-holo-${faceSide}`,
-        maskUrl: maskDataUrl,
+        id: "guilloche-holo-front",
+        side: "front",
+        maskUrl: frontMask,
+        maskSize: "100% 100%",
+        maskPosition: "center",
+        maskRepeat: "no-repeat",
+        holographic: {
+          variant: resolveHoloVariant(conf.holoVariant),
+          holoStrength: conf.holoStrength ?? 1,
+          blendMode: "color-dodge",
+        },
+        opacity: conf.guillocheOpacity ?? 0.85,
+        zIndex: 1,
+      });
+
+      guillocheHoloLayers.push({
+        id: "guilloche-holo-back",
+        side: "back",
+        maskUrl: backMask,
         maskSize: "100% 100%",
         maskPosition: "center",
         maskRepeat: "no-repeat",
@@ -273,7 +297,6 @@ function IdCardFace({ conf, props, faceSide, dims }: IdCardFaceProps) {
   }, [
     props.holoLayers,
     props.layers,
-    faceSide,
     conf.holoVariant,
     conf.holoStrength,
     conf.showGuilloche,
@@ -281,82 +304,9 @@ function IdCardFace({ conf, props, faceSide, dims }: IdCardFaceProps) {
     conf.guillocheDensity,
     conf.guillocheNoiseIntensity,
     conf.guillocheOpacity,
-    seed,
+    frontSeed,
+    backSeed,
   ]);
-
-  const faceContent =
-    faceSide === "front" ? props.frontContent : props.backContent;
-  const content = faceContent ?? props.children;
-
-  return (
-    <Card
-      width={dims.width}
-      height={dims.height}
-      showGlare={conf.showGlare}
-      glareOpacity={conf.glareOpacity}
-      maxTilt={conf.maxTilt}
-      scaleOnHover={conf.scaleOnHover}
-      shadow={conf.shadow}
-      holographic={
-        conf.holographic
-          ? {
-              variant: resolveHoloVariant(conf.holoVariant),
-              holoStrength: conf.holoStrength ?? 1,
-            }
-          : false
-      }
-      layers={mergedLayers}
-      className={props.className}
-      containerClassName={props.containerClassName}
-      data-testid={conf.testId}
-    >
-      <CardFaceContainer isBack={isBack} isTransparent={conf.transparent}>
-        <ElectronicsLayer
-          conf={conf}
-          props={props}
-          faceSide={faceSide}
-          isBack={isBack}
-          isTransparent={conf.transparent}
-        />
-
-        <ReverseGhostLayer
-          isTransparent={conf.transparent}
-          faceSide={faceSide}
-          isVertical={conf.flipDirection === "vertical"}
-          opacity={
-            props.transparentGhostOpacity ?? conf.transparentGhostOpacity
-          }
-          renderGhostContent={props.renderGhostContent}
-        />
-
-        {content && (
-          <ContentOverlay isTransparent={conf.transparent}>
-            {content}
-          </ContentOverlay>
-        )}
-      </CardFaceContainer>
-    </Card>
-  );
-}
-
-function getFlipAnimationTarget(
-  isFlipped: boolean,
-  flipDirection: "horizontal" | "vertical",
-) {
-  if (flipDirection === "vertical") {
-    return { rotateX: isFlipped ? 180 : 0 };
-  }
-  return { rotateY: isFlipped ? 180 : 0 };
-}
-
-function getFlipTransitionConfig(flipDuration?: number): Transition {
-  if (flipDuration) {
-    return {
-      duration: flipDuration,
-      ease: [0.23, 1, 0.32, 1] as [number, number, number, number],
-    };
-  }
-  return { type: "spring", stiffness: 220, damping: 24, mass: 0.8 };
 }
 
 /**
@@ -372,24 +322,10 @@ function getFlipTransitionConfig(flipDuration?: number): Transition {
  */
 export const IdCard = forwardRef<HTMLDivElement, IdCardProps>((props, ref) => {
   const conf = { ...DEFAULT_CARD_PROPS, ...props };
-  const [internalFlipped, setInternalFlipped] = useState(
-    props.isFlipped ??
-      (props.side !== undefined ? props.side === "back" : conf.side === "back"),
+  const { isFlipped, setInternalFlipped } = useIdCardFlipState(
+    props,
+    conf.side,
   );
-
-  const controlledSide = props.side;
-  const controlledIsFlipped = props.isFlipped;
-
-  useEffect(() => {
-    if (controlledIsFlipped !== undefined) {
-      setInternalFlipped(controlledIsFlipped);
-    } else if (controlledSide !== undefined) {
-      setInternalFlipped(controlledSide === "back");
-    }
-  }, [controlledSide, controlledIsFlipped]);
-
-  const isFlipped =
-    controlledIsFlipped !== undefined ? controlledIsFlipped : internalFlipped;
 
   const dims = getDimensions(
     conf.size,
@@ -398,64 +334,99 @@ export const IdCard = forwardRef<HTMLDivElement, IdCardProps>((props, ref) => {
     props.height,
   );
 
-  const handleCardClick = (e: MouseEvent<HTMLDivElement>) => {
+  const handleCardClick = () => {
     if (conf.flipOnClick) {
       const nextFlipped = !isFlipped;
       setInternalFlipped(nextFlipped);
       props.onFlipChange?.(nextFlipped);
       props.onFlip?.(nextFlipped ? "back" : "front");
     }
-    props.onClick?.(e);
+    props.onClick?.();
   };
 
-  if (!conf.enableFlip) {
-    return (
-      <IdCardFace
-        conf={conf}
-        props={props}
-        faceSide={isFlipped ? "back" : "front"}
-        dims={dims}
-      />
-    );
-  }
+  const frontSeed = getGuillocheSeed(props.guillocheSeed, false);
+  const backSeed = getGuillocheSeed(props.guillocheSeed, true);
+
+  const mergedLayers = useIdCardMergedLayers(conf, props, frontSeed, backSeed);
 
   return (
-    <FlipPerspectiveStage
+    <IdCardContainer
       ref={ref}
-      stageWidth={dims.width}
-      stageHeight={dims.height}
-      isClickable={conf.flipOnClick}
-      onClick={handleCardClick}
-      className={props.className}
+      className={props.containerClassName}
       data-testid={conf.testId}
+      isClickable={conf.flipOnClick}
     >
-      <MotionFlipFlipper
-        animate={getFlipAnimationTarget(isFlipped, conf.flipDirection)}
-        transition={getFlipTransitionConfig(conf.flipDuration)}
+      <Card
+        width={dims.width}
+        height={dims.height}
+        faceUp={!isFlipped}
+        flipDirection={conf.flipDirection}
+        flipDuration={conf.flipDuration}
+        showGlare={conf.showGlare}
+        glareOpacity={conf.glareOpacity}
+        maxTilt={conf.maxTilt}
+        scaleOnHover={conf.scaleOnHover}
+        shadow={conf.shadow}
+        holographic={
+          conf.holographic
+            ? {
+                variant: resolveHoloVariant(conf.holoVariant),
+                holoStrength: conf.holoStrength ?? 1,
+              }
+            : false
+        }
+        layers={mergedLayers}
+        onClick={handleCardClick}
+        className={props.className}
+        backContent={
+          <CardFaceContainer isBack={true} isTransparent={conf.transparent}>
+            <ElectronicsLayer
+              conf={conf}
+              props={props}
+              faceSide="back"
+              isBack={true}
+              isTransparent={conf.transparent}
+            />
+            <ReverseGhostLayer
+              isTransparent={conf.transparent}
+              faceSide="back"
+              isVertical={conf.flipDirection === "vertical"}
+              opacity={
+                props.transparentGhostOpacity ?? conf.transparentGhostOpacity
+              }
+              renderGhostContent={props.renderGhostContent}
+            />
+            {props.backContent && (
+              <ContentOverlay isTransparent={conf.transparent}>
+                {props.backContent}
+              </ContentOverlay>
+            )}
+          </CardFaceContainer>
+        }
       >
-        <CardFaceWrapper isActive={!isFlipped} isBack={false}>
-          <IdCardFace
+        <CardFaceContainer isBack={false} isTransparent={conf.transparent}>
+          <ElectronicsLayer
             conf={conf}
             props={props}
             faceSide="front"
-            dims={{ width: "100%", height: "100%" }}
+            isBack={false}
+            isTransparent={conf.transparent}
           />
-        </CardFaceWrapper>
-
-        <CardFaceWrapper
-          isActive={isFlipped}
-          isBack={true}
-          isVertical={conf.flipDirection === "vertical"}
-        >
-          <IdCardFace
-            conf={conf}
-            props={props}
-            faceSide="back"
-            dims={{ width: "100%", height: "100%" }}
+          <ReverseGhostLayer
+            isTransparent={conf.transparent}
+            faceSide="front"
+            isVertical={conf.flipDirection === "vertical"}
+            opacity={
+              props.transparentGhostOpacity ?? conf.transparentGhostOpacity
+            }
+            renderGhostContent={props.renderGhostContent}
           />
-        </CardFaceWrapper>
-      </MotionFlipFlipper>
-    </FlipPerspectiveStage>
+          <ContentOverlay isTransparent={conf.transparent}>
+            {props.frontContent ?? props.children}
+          </ContentOverlay>
+        </CardFaceContainer>
+      </Card>
+    </IdCardContainer>
   );
 });
 
