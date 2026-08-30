@@ -14,6 +14,9 @@ import { useTranslation } from "react-i18next";
 import type { Route } from "./+types/root";
 import { getThemeByMode } from "./tokens/theme";
 import { ThemeModeProvider, useThemeMode } from "./utils/themeContext";
+import { StatusCenterProvider } from "./utils/statusCenterContext";
+import M3Snackbar from "./components/molecules/StatusCenter/M3Snackbar";
+import StatusTerminalCard from "./components/organisms/StatusCenter/StatusTerminalCard";
 import { LANGUAGE_STORAGE_KEY } from "./i18n";
 import "~/i18n";
 import "./app.css";
@@ -40,6 +43,8 @@ function AppThemeContainer({ children }: { children: React.ReactNode }) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       {children}
+      <M3Snackbar />
+      <StatusTerminalCard />
     </ThemeProvider>
   );
 }
@@ -78,7 +83,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ThemeModeProvider>
-          <AppThemeContainer>{children}</AppThemeContainer>
+          <StatusCenterProvider>
+            <AppThemeContainer>{children}</AppThemeContainer>
+          </StatusCenterProvider>
         </ThemeModeProvider>
         <ScrollRestoration />
         <Scripts />

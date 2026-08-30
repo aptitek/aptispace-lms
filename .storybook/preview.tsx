@@ -6,18 +6,22 @@ import "../app/i18n";
 import "../app/app.css";
 
 import { ThemeModeProvider } from "../app/utils/themeContext";
+import { StatusCenterProvider } from "../app/utils/statusCenterContext";
 
 const preview: Preview = {
   decorators: [
     (Story) => (
       <ThemeModeProvider>
-        <ThemeProvider theme={appTheme}>
-          <CssBaseline />
-          <Story />
-        </ThemeProvider>
+        <StatusCenterProvider>
+          <ThemeProvider theme={appTheme}>
+            <CssBaseline />
+            <Story />
+          </ThemeProvider>
+        </StatusCenterProvider>
       </ThemeModeProvider>
     ),
   ],
+
   parameters: {
     controls: {
       matchers: {

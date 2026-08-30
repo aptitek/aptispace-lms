@@ -1,6 +1,7 @@
 import { styled } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import CraftedBy from "~/components/atoms/CraftedBy/CraftedBy";
+import StatusGatewayTrigger from "~/components/molecules/StatusCenter/StatusGatewayTrigger";
 
 export interface FooterProps {
   className?: string;
@@ -46,25 +47,6 @@ const FooterRight = styled("div")(({ theme }) => ({
   },
 }));
 
-const SystemStatus = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  fontFamily: "monospace",
-  fontSize: "0.75rem",
-  color: theme.palette.text.secondary,
-  letterSpacing: "0.05em",
-}));
-
-const StatusDot = styled("span")(({ theme }) => ({
-  width: 8,
-  height: 8,
-  borderRadius: "50%",
-  backgroundColor: theme.palette.success.main,
-  boxShadow: `0 0 8px ${theme.palette.success.main}`,
-  display: "inline-block",
-}));
-
 export default function Footer({ className }: FooterProps) {
   const { t } = useTranslation("common");
   const currentYear = new Date().getFullYear();
@@ -78,10 +60,7 @@ export default function Footer({ className }: FooterProps) {
       </CopyrightText>
       <CraftedBy size="small" />
       <FooterRight>
-        <SystemStatus>
-          <StatusDot />
-          <span>{t("systemStatus.gateway")}</span>
-        </SystemStatus>
+        <StatusGatewayTrigger />
       </FooterRight>
     </FooterRoot>
   );

@@ -18,13 +18,19 @@ describe("i18n Internationalization", () => {
   it("translates common namespace strings correctly in English and French", async () => {
     await i18n.changeLanguage("en");
     expect(i18n.t("common:systemStatus.gateway")).toBe(
-      "STATION GATEWAY: ONLINE",
+      "SYSTEM STATUS: OPERATIONAL",
+    );
+    expect(i18n.t("common:systemStatus.terminalTitle")).toBe(
+      "SYSTEM STATUS & DIAGNOSTICS",
     );
     expect(i18n.t("common:craftedBy")).toBe("Crafted by");
 
     await i18n.changeLanguage("fr");
     expect(i18n.t("common:systemStatus.gateway")).toBe(
-      "PASSERELLE STATION : EN LIGNE",
+      "STATUT SYSTÈME : EN LIGNE",
+    );
+    expect(i18n.t("common:systemStatus.terminalTitle")).toBe(
+      "STATUT DU SYSTÈME ET DIAGNOSTICS",
     );
     expect(i18n.t("common:craftedBy")).toBe("Créé par");
   });

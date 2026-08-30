@@ -11,4 +11,5 @@ export default [
   route("api/auth/logout", "routes/api.auth.logout.ts"),
   route("api/courses", "routes/api.courses.ts"),
   route("api/avatar/upload", "routes/api.avatar.upload.ts"),
+  route("api/errors/report", "routes/api.errors.report.ts"),
 ] satisfies RouteConfig;

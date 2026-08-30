@@ -308,6 +308,36 @@ export const auditLogs = sqliteTable("audit_logs", {
     .$defaultFn(() => new Date()),
 });
 
+// Suivi télémétrique des erreurs, alertes et infractions de sécurité (403/401/500/exceptions)
+export const errorReports = sqliteTable("error_reports", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  message: text("message").notNull(),
+  stack: text("stack"),
+  severity: text("severity", {
+    enum: ["info", "warning", "error", "critical", "security"],
+  })
+    .notNull()
+    .default("error"),
+  statusCode: integer("status_code"),
+  source: text("source").default("client"),
+  url: text("url"),
+  path: text("path"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  contextData: text("context_data"), // Serialized JSON metadata
+  userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+  status: text("status", {
+    enum: ["open", "investigating", "resolved", "ignored"],
+  })
+    .notNull()
+    .default("open"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 /* =========================================================================
  * Relations Definitions
  * ========================================================================= */
@@ -317,6 +347,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   groupMemberships: many(groupMembers),
   submissions: many(submissions),
   auditLogs: many(auditLogs),
+  errorReports: many(errorReports),
 }));
 
 export const institutionsRelations = relations(institutions, ({ many }) => ({
@@ -445,6 +476,10 @@ export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
   user: one(users, { fields: [auditLogs.userId], references: [users.id] }),
 }));
 
+export const errorReportsRelations = relations(errorReports, ({ one }) => ({
+  user: one(users, { fields: [errorReports.userId], references: [users.id] }),
+}));
+
 /* =========================================================================
  * Inferred Types
  * ========================================================================= */
@@ -496,3 +531,6 @@ export type NewGrade = typeof grades.$inferInsert;
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type NewAuditLog = typeof auditLogs.$inferInsert;
+
+export type ErrorReport = typeof errorReports.$inferSelect;
+export type NewErrorReport = typeof errorReports.$inferInsert;
