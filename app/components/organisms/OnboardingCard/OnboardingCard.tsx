@@ -23,6 +23,7 @@ import {
   CardFrontContainer,
   SchoolHeaderRow,
   SchoolBrandingHolder,
+  SchoolLogoImg,
   SchoolFallbackText,
   CohortValidityContainer,
   CardMainBody,
@@ -199,7 +200,13 @@ function CardFrontFace({
     <CardFrontContainer data-testid="onboarding-card-front">
       <SchoolHeaderRow>
         <SchoolBrandingHolder>
-          {!school.logoUrl && (
+          {school.logoUrl ? (
+            <SchoolLogoImg
+              src={school.logoUrl}
+              alt={schoolName}
+              data-testid="school-logo"
+            />
+          ) : (
             <SchoolFallbackText data-testid="school-logo-fallback">
               {schoolName}
             </SchoolFallbackText>
@@ -336,22 +343,6 @@ function buildHoloLayers(
   customHoloLayers?: (string | IdHoloLayer)[],
 ): IdHoloLayer[] {
   const layers: IdHoloLayer[] = [];
-
-  if (schoolLogoUrl) {
-    layers.push({
-      id: "school-holo-logo",
-      src: schoolLogoUrl,
-      side: "front",
-      left: "3%",
-      top: "8%",
-      width: "28%",
-      height: "9%",
-      objectFit: "contain",
-      blendMode: "normal",
-      opacity: 0.7,
-      holographic: true,
-    });
-  }
 
   if (customHoloLayers && Array.isArray(customHoloLayers)) {
     customHoloLayers.forEach((layerItem, idx) => {

@@ -34,6 +34,16 @@ export const SchoolBrandingHolder = styled("div")(({ theme }) => ({
   overflow: "hidden",
 }));
 
+export const SchoolLogoImg = styled("img")({
+  maxHeight: "36px",
+  maxWidth: "100%",
+  width: "auto",
+  height: "auto",
+  objectFit: "contain",
+  userSelect: "none",
+  pointerEvents: "none",
+});
+
 export const SchoolFallbackText = styled("span")(({ theme }) => ({
   fontSize: "1rem",
   fontWeight: 800,

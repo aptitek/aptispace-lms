@@ -196,7 +196,7 @@ export const AptiSpaceBrandLogo: Story = {
       id: "school-aptispace-academy",
       name: "AptiSpace Academy",
       slug: "aptispace-academy",
-      logoUrl: "/aptispace-logo.svg",
+      logoUrl: "/favicon.svg",
       emailDomain: "cadet.aptispace.io",
       emailPattern: "{first}.{last}@{domain}",
     },
@@ -215,7 +215,7 @@ export const AptiSpaceBrandLogo: Story = {
       }}
     >
       <Typography variant="caption" sx={{ color: "text.secondary" }}>
-        Full AptiSpace brand logo on both front badge and back branding area.
+        School logo (favicon) on front badge and AptiSpace branding on back face.
       </Typography>
       <OnboardingCard {...args} />
     </Box>
