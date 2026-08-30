@@ -68,9 +68,9 @@ export const CardMainBody = styled("div")(({ theme }) => ({
   display: "grid",
   gridTemplateColumns: "135px 1fr",
   gap: theme.spacing(1.5),
-  alignItems: "flex-start",
+  alignItems: "center",
   width: "100%",
-  paddingTop: "40px",
+  paddingTop: "24px",
   paddingBottom: 0,
 }));
 
