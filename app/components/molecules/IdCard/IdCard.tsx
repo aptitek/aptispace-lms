@@ -51,7 +51,9 @@ function getGuillocheSeed(
   customSeed: string | undefined,
   isBack: boolean,
 ): string {
-  if (customSeed) return customSeed;
+  if (customSeed) {
+    return isBack ? `${customSeed}-BACK` : `${customSeed}-FRONT`;
+  }
   return isBack ? "APTI-ID1-BACK" : "APTI-ID1-FRONT";
 }
 
@@ -213,6 +215,7 @@ function useIdCardMergedLayers(
   conf: typeof DEFAULT_CARD_PROPS,
   props: IdCardProps,
   frontSeed: string,
+  backSeed: string,
 ): CardLayer[] {
   return useMemo(() => {
     const rawLayers = Array.isArray(props.holoLayers) ? props.holoLayers : [];
@@ -250,6 +253,12 @@ function useIdCardMergedLayers(
         noiseIntensity: conf.guillocheNoiseIntensity,
       });
 
+      const backMask = generateGuillocheMaskDataUrl({
+        seed: backSeed,
+        density: conf.guillocheDensity,
+        noiseIntensity: conf.guillocheNoiseIntensity,
+      });
+
       guillocheHoloLayers.push({
         id: "guilloche-holo-front",
         side: "front",
@@ -264,6 +273,24 @@ function useIdCardMergedLayers(
         },
         opacity: conf.guillocheOpacity ?? 0.85,
         zIndex: 1,
+        holoOnly: true,
+      });
+
+      guillocheHoloLayers.push({
+        id: "guilloche-holo-back",
+        side: "back",
+        maskUrl: backMask,
+        maskSize: "100% 100%",
+        maskPosition: "center",
+        maskRepeat: "no-repeat",
+        holographic: {
+          variant: resolveHoloVariant(conf.holoVariant),
+          holoStrength: conf.holoStrength ?? 1,
+          blendMode: "color-dodge",
+        },
+        opacity: conf.guillocheOpacity ?? 0.85,
+        zIndex: 1,
+        holoOnly: true,
       });
     }
 
@@ -283,6 +310,7 @@ function useIdCardMergedLayers(
     conf.guillocheNoiseIntensity,
     conf.guillocheOpacity,
     frontSeed,
+    backSeed,
   ]);
 }
 
@@ -322,8 +350,9 @@ export const IdCard = forwardRef<HTMLDivElement, IdCardProps>((props, ref) => {
   };
 
   const frontSeed = getGuillocheSeed(props.guillocheSeed, false);
+  const backSeed = getGuillocheSeed(props.guillocheSeed, true);
 
-  const mergedLayers = useIdCardMergedLayers(conf, props, frontSeed);
+  const mergedLayers = useIdCardMergedLayers(conf, props, frontSeed, backSeed);
 
   return (
     <IdCardContainer
