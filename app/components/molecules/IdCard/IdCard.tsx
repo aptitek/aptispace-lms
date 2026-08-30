@@ -35,9 +35,9 @@ import {
   MotionFlipFlipper,
   CardFaceWrapper,
   getDimensions,
+  CustomHoloOverlay,
 } from "./IdCard.styles";
 import {
-  getHoloVariant,
   normalizeHoloLayers,
   HoloLayersLayer,
   resolveHoloMasksAsync,
@@ -283,31 +283,22 @@ function IdCardFace({ conf, props, faceSide, dims }: IdCardFaceProps) {
     faceSide,
   ]);
 
-  const holoConfig = useMemo(() => {
-    if (!conf.holographic) return false;
-    const variantKey = props.holoVariant || conf.guillocheVariant;
-    return {
-      maskUrl: effectiveMaskUrl,
-      maskSize: props.maskSize || "100% 100%",
-      maskPosition: props.maskPosition || "center",
-      maskRepeat: props.maskRepeat || "no-repeat",
-      variant: getHoloVariant(variantKey),
-      holoStrength: conf.holoStrength,
-    };
-  }, [
-    conf.holographic,
-    props.holoVariant,
-    conf.guillocheVariant,
-    effectiveMaskUrl,
-    props.maskSize,
-    props.maskPosition,
-    props.maskRepeat,
-    conf.holoStrength,
-  ]);
-
   const faceContent =
     faceSide === "front" ? props.frontContent : props.backContent;
   const content = faceContent ?? props.children;
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    e.currentTarget.style.setProperty("--pointer-x", `${x}%`);
+    e.currentTarget.style.setProperty("--pointer-y", `${y}%`);
+    e.currentTarget.style.setProperty("--holo-opacity", "1");
+  };
+
+  const handlePointerLeave = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.style.setProperty("--holo-opacity", "0");
+  };
 
   return (
     <Card
@@ -318,14 +309,19 @@ function IdCardFace({ conf, props, faceSide, dims }: IdCardFaceProps) {
       maxTilt={conf.maxTilt}
       scaleOnHover={conf.scaleOnHover}
       shadow={conf.shadow}
-      holographic={holoConfig}
+      holographic={false}
       holoStrength={conf.holoStrength}
       layers={props.layers}
       className={props.className}
       containerClassName={props.containerClassName}
       data-testid={conf.testId}
     >
-      <CardFaceContainer isBack={isBack} isTransparent={conf.transparent}>
+      <CardFaceContainer
+        isBack={isBack}
+        isTransparent={conf.transparent}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
+      >
         <ElectronicsLayer
           conf={conf}
           props={props}
@@ -348,6 +344,7 @@ function IdCardFace({ conf, props, faceSide, dims }: IdCardFaceProps) {
         <GuillocheLayer conf={conf} seed={seed} />
 
         <HoloLayersLayer layers={normalizedHoloLayers} faceSide={faceSide} />
+        {conf.holographic && <CustomHoloOverlay maskUrl={effectiveMaskUrl} />}
 
         {content && (
           <ContentOverlay isTransparent={conf.transparent}>

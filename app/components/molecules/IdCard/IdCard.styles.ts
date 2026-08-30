@@ -269,3 +269,40 @@ export const HoloLayerImage = styled("img")<{
   userSelect: "none",
   display: "block",
 }));
+
+export const CustomHoloOverlay = styled("div")<{ maskUrl?: string }>(
+  ({ maskUrl }) => ({
+    position: "absolute",
+    inset: 0,
+    width: "100%",
+    height: "100%",
+    pointerEvents: "none",
+    zIndex: 10,
+    opacity: "var(--holo-opacity, 0)",
+    background: `
+    radial-gradient(circle at var(--pointer-x, 50%) var(--pointer-y, 50%), 
+      transparent 0%, 
+      transparent 20%, 
+      rgba(255, 50, 50, 0.5) 35%, 
+      rgba(255, 255, 50, 0.5) 45%, 
+      rgba(50, 255, 50, 0.5) 55%, 
+      rgba(50, 255, 255, 0.5) 65%, 
+      rgba(50, 50, 255, 0.5) 75%, 
+      rgba(138, 43, 226, 0.5) 85%, 
+      transparent 90%,
+      transparent 100%)
+  `,
+    mixBlendMode: "color-dodge",
+    transition: "opacity 0.4s ease-out",
+    ...(maskUrl && {
+      WebkitMaskImage: `url(${maskUrl})`,
+      WebkitMaskSize: "100% 100%",
+      WebkitMaskPosition: "center",
+      WebkitMaskRepeat: "no-repeat",
+      maskImage: `url(${maskUrl})`,
+      maskSize: "100% 100%",
+      maskPosition: "center",
+      maskRepeat: "no-repeat",
+    }),
+  }),
+);
