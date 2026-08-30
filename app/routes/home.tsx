@@ -2,52 +2,10 @@ import { styled } from "@mui/material/styles";
 import { useLoaderData, type LoaderFunctionArgs } from "react-router";
 import Header from "~/components/organisms/Header/Header";
 import Footer from "~/components/organisms/Footer/Footer";
-import { authGuard, type SessionPayload } from "~/utils/session.server";
-import { logout, type AuthUser } from "~/utils/auth";
-import {
-  isUserProfileComplete,
-  type getUserWithAffiliations,
-} from "~/services/userService";
+import { authGuard } from "~/utils/session.server";
+import { logout, resolveActiveUser } from "~/utils/auth";
+import { isUserProfileComplete } from "~/services/userService";
 import type { Route } from "./+types/home";
-
-type DbUser =
-  Awaited<ReturnType<typeof getUserWithAffiliations>> | null | undefined;
-
-function mapDbUserToAuthUser(
-  user: NonNullable<DbUser>,
-  session?: SessionPayload | null,
-): AuthUser {
-  const primaryAffiliation = user.affiliations[0];
-  const displayName = user.displayName ?? `${user.firstName} ${user.lastName}`;
-  return {
-    id: user.id,
-    name: displayName,
-    email: primaryAffiliation?.email ?? "",
-    role: primaryAffiliation?.role ?? session?.role ?? "student",
-    impersonating: session?.impersonating,
-  };
-}
-
-function resolveActiveUser(
-  user: DbUser,
-  session?: SessionPayload | null,
-): AuthUser | null {
-  if (user) {
-    return mapDbUserToAuthUser(user, session);
-  }
-
-  if (session) {
-    return {
-      id: session.userId,
-      name: "Cadet User",
-      email: "user@aptispace.io",
-      role: session.role,
-      impersonating: session.impersonating,
-    };
-  }
-
-  return null;
-}
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const auth = await authGuard(request, context);

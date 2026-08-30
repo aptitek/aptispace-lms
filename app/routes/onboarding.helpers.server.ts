@@ -2,6 +2,7 @@ import type { Database } from "~/db";
 import type { SchoolConfig } from "~/components/organisms/OnboardingCard/OnboardingCard.types";
 import { validateFixedDomainEmail } from "~/utils/emailSecurity";
 import { authGuard } from "~/utils/session.server";
+import { resolveActiveUser } from "~/utils/auth";
 import {
   updateUser,
   updateUserAffiliation,
@@ -200,6 +201,7 @@ function extractLoaderData(auth: Awaited<ReturnType<typeof authGuard>>) {
   const user = auth?.user ?? null;
   return {
     userId: resolveAuthUserId(auth),
+    user: resolveActiveUser(user, auth?.session),
     profile: buildInitialProfile(user ?? undefined),
     isComplete: isUserProfileComplete(user),
     school: resolveUserSchool(user),

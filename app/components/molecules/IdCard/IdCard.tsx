@@ -339,7 +339,17 @@ export const IdCard = forwardRef<HTMLDivElement, IdCardProps>((props, ref) => {
     props.height,
   );
 
-  const handleCardClick = () => {
+  const handleCardClick = (e?: React.MouseEvent) => {
+    if (e) {
+      const target = e.target as HTMLElement | null;
+      if (
+        target?.closest(
+          "input, textarea, button, a, [role='button'], .MuiInputBase-root, .MuiButtonBase-root",
+        )
+      ) {
+        return;
+      }
+    }
     if (conf.flipOnClick) {
       const nextFlipped = !isFlipped;
       setInternalFlipped(nextFlipped);

@@ -1,11 +1,16 @@
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { styled } from "@mui/material/styles";
 import Galaxy from "~/components/atoms/Galaxy/Galaxy";
-import Header from "~/components/organisms/Header/Header";
+import Header, { type HeaderMode } from "~/components/organisms/Header/Header";
 import Footer from "~/components/organisms/Footer/Footer";
+import type { AuthUser } from "~/utils/auth";
 
 export interface AuthLayoutProps {
   children: ReactNode;
+  headerMode?: HeaderMode;
+  user?: AuthUser | null;
+  onLogout?: () => void;
+  headerChildren?: ReactNode;
 }
 
 const LayoutRoot = styled("div")(({ theme }) => ({
@@ -50,7 +55,13 @@ const ContentWrapper = styled("main")(({ theme }) => ({
   },
 }));
 
-export default function AuthLayout({ children }: AuthLayoutProps) {
+export default function AuthLayout({
+  children,
+  headerMode = "subtle",
+  user,
+  onLogout,
+  headerChildren,
+}: AuthLayoutProps) {
   return (
     <LayoutRoot>
       <CanvasBackdrop>
@@ -64,7 +75,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         />
       </CanvasBackdrop>
 
-      <Header mode="subtle" />
+      <Header mode={headerMode} user={user} onLogout={onLogout}>
+        {headerChildren}
+      </Header>
 
       <ContentWrapper>{children}</ContentWrapper>
 

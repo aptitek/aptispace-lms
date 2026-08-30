@@ -243,3 +243,79 @@ export async function getStoredUser(): Promise<AuthUser | null> {
   }
   return null;
 }
+
+export interface ResolveActiveUserDbParam {
+  id: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  displayName?: string | null;
+  email?: string | null;
+  role?: UserRole;
+  avatarUrl?: string | null;
+  affiliations?: Array<{
+    email?: string | null;
+    role?: UserRole;
+    avatarUrl?: string | null;
+  }>;
+}
+
+function resolveDbUserName(dbUser: ResolveActiveUserDbParam): string {
+  if (dbUser.displayName) return dbUser.displayName;
+  const first = dbUser.firstName || "";
+  const last = dbUser.lastName || "";
+  const combined = `${first} ${last}`.trim();
+  return combined || "Cadet User";
+}
+
+function resolveDbUserRole(
+  dbUser: ResolveActiveUserDbParam,
+  sessionRole?: UserRole,
+): UserRole {
+  return (
+    dbUser.affiliations?.[0]?.role ?? sessionRole ?? dbUser.role ?? "student"
+  );
+}
+
+function resolveDbUserEmail(dbUser: ResolveActiveUserDbParam): string {
+  return dbUser.affiliations?.[0]?.email ?? dbUser.email ?? "";
+}
+
+function mapDbUserToAuth(
+  dbUser: ResolveActiveUserDbParam,
+  session?: { role?: UserRole; impersonating?: boolean } | null,
+): AuthUser {
+  const primaryAffil = dbUser.affiliations?.[0];
+  return {
+    id: dbUser.id,
+    name: resolveDbUserName(dbUser),
+    email: resolveDbUserEmail(dbUser),
+    role: resolveDbUserRole(dbUser, session?.role),
+    avatarUrl: primaryAffil?.avatarUrl ?? dbUser.avatarUrl ?? undefined,
+    impersonating: session?.impersonating,
+  };
+}
+
+export function resolveActiveUser(
+  dbUser?: ResolveActiveUserDbParam | null,
+  session?: {
+    userId: string;
+    role: UserRole;
+    impersonating?: boolean;
+  } | null,
+): AuthUser | null {
+  if (dbUser) {
+    return mapDbUserToAuth(dbUser, session);
+  }
+
+  if (session) {
+    return {
+      id: session.userId,
+      name: "Cadet User",
+      email: "user@aptispace.io",
+      role: session.role,
+      impersonating: session.impersonating,
+    };
+  }
+
+  return null;
+}

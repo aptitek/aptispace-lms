@@ -131,6 +131,15 @@ export interface OnboardingCardProps {
    */
   readOnly?: boolean;
   /**
+   * Whether specular white glare overlay is displayed on tilt/hover
+   * @default false
+   */
+  showGlare?: boolean;
+  /**
+   * Glare opacity multiplier
+   */
+  glareOpacity?: number;
+  /**
    * Custom CSS class name
    */
   className?: string;

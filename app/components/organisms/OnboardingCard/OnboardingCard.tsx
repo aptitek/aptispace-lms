@@ -364,7 +364,8 @@ function buildHoloLayers(
 
 const DEFAULT_ONBOARDING_PROPS = {
   side: "front" as const,
-  flipOnClick: false,
+  flipOnClick: true,
+  showGlare: false,
   orientation: "landscape" as const,
   size: "responsive" as const,
   holoVariant: "rainbow" as const,
@@ -396,6 +397,8 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
       holoLayers: customHoloLayers,
       showGuilloche,
       transparent,
+      showGlare,
+      glareOpacity,
       readOnly,
       className,
       testId,
@@ -450,6 +453,8 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
         orientation={orientation}
         size={size}
         transparent={transparent}
+        showGlare={showGlare ?? false}
+        glareOpacity={glareOpacity}
         guillocheSeed={guillocheSeed}
         guillocheVariant={guillocheVariant}
         showGuilloche={showGuilloche}

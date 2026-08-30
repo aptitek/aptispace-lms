@@ -16,6 +16,7 @@ import type {
   OnboardingProfile,
 } from "~/components/organisms/OnboardingCard/OnboardingCard.types";
 import { validateFixedDomainEmail } from "~/utils/emailSecurity";
+import { logout } from "~/utils/auth";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import SyncIcon from "@mui/icons-material/Sync";
@@ -287,8 +288,16 @@ export default function OnboardingPage() {
     fetcher.submit(formData, { method: "post" });
   };
 
+  const handleLogout = () => {
+    void logout();
+  };
+
   return (
-    <AuthLayout>
+    <AuthLayout
+      headerMode="full"
+      user={loaderData.user}
+      onLogout={handleLogout}
+    >
       <CardWorkspaceContainer>
         <OnboardingCard
           school={selectedSchool}
@@ -297,8 +306,8 @@ export default function OnboardingPage() {
           onProfileChange={handleProfileChange}
           orientation="landscape"
           size="lg"
-          side="front"
-          flipOnClick={false}
+          flipOnClick={true}
+          showGlare={false}
           transparent={true}
           holoVariant="rainbow"
         />
