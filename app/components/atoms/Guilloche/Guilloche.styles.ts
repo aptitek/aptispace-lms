@@ -54,13 +54,13 @@ export const GuillocheSvg = styled("svg")<{ customOpacity: number }>(
     zIndex: 2,
 
     "@keyframes holoIridescence": {
-      "0%": { filter: "hue-rotate(0deg)" },
-      "50%": { filter: "hue-rotate(45deg)" },
-      "100%": { filter: "hue-rotate(0deg)" },
+      "0%": { filter: "hue-rotate(0deg) saturate(1.2)" },
+      "50%": { filter: "hue-rotate(90deg) saturate(1.8)" },
+      "100%": { filter: "hue-rotate(0deg) saturate(1.2)" },
     },
 
     "&.holo-animated": {
-      animation: "holoIridescence 12s ease-in-out infinite",
+      animation: "holoIridescence 8s ease-in-out infinite",
     },
   }),
 );

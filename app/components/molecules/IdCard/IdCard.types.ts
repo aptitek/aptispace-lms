@@ -29,34 +29,9 @@ export type Id1HoloVariant = IdHoloVariant;
  * Configuration for an image-based Holographic Layer on the ID card.
  * An image is rendered visually and its alpha transparency (or a custom mask) masks the holo foil reflection.
  */
-export interface IdHoloLayer {
-  id?: string;
-  src?: string;
-  maskUrl?: string; // If omitted, defaults to src (alpha mask)
-  alt?: string;
-  opacity?: number;
-  blendMode?: React.CSSProperties["mixBlendMode"];
-  objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
-  position?: string;
-  className?: string;
-  style?: React.CSSProperties;
+export type IdHoloLayer = CardLayer & {
   side?: IdCardSide | "both";
-  zIndex?: number;
-  holographic?: boolean;
-  holoStrength?: number;
-  maskSize?: string;
-  maskPosition?: string;
-  maskRepeat?: string;
-  x?: number | string;
-  y?: number | string;
-  left?: number | string;
-  top?: number | string;
-  right?: number | string;
-  bottom?: number | string;
-  width?: number | string;
-  height?: number | string;
-  preserveAspectRatio?: string;
-}
+};
 
 export type Id1HoloLayer = IdHoloLayer;
 

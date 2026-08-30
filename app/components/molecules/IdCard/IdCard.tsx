@@ -6,11 +6,9 @@ import {
   type ReactNode,
   type MouseEvent,
 } from "react";
-import { Card, type CardShadow } from "deckfx";
+import { Card, type CardLayer, type CardShadow } from "deckfx";
 import type { Transition } from "framer-motion";
 import Electronics from "../../atoms/Electronics/Electronics";
-import Guilloche from "../../atoms/Guilloche/Guilloche";
-import { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche/guillocheMath";
 import type {
   ElectronicsFinish,
   ElectronicsChipPosition,
@@ -19,6 +17,7 @@ import type {
   GuillocheVariant,
   GuillocheDensity,
 } from "../../atoms/Guilloche/Guilloche.types";
+import { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche/guillocheMath";
 import type {
   IdCardProps,
   IdCardSide,
@@ -26,6 +25,7 @@ import type {
   IdCardSize,
   IdCardFlipDirection,
   IdHoloLayer,
+  IdHoloVariant,
 } from "./IdCard.types";
 import {
   CardFaceContainer,
@@ -35,15 +35,27 @@ import {
   MotionFlipFlipper,
   CardFaceWrapper,
   getDimensions,
-  CustomHoloOverlay,
 } from "./IdCard.styles";
-import {
-  normalizeHoloLayers,
-  HoloLayersLayer,
-  resolveHoloMasksAsync,
-} from "./IdCard.holo";
 
-export { normalizeHoloLayers } from "./IdCard.holo";
+function resolveHoloVariant(
+  variant?: IdHoloVariant,
+): "default" | "rainbow" | "cosmic" | "gold" {
+  switch (variant) {
+    case "cosmic-crimson":
+    case "cosmic":
+      return "cosmic";
+    case "solarized-gold":
+    case "gold":
+      return "gold";
+    case "rainbow":
+      return "rainbow";
+    case "holo-spectrum":
+    case "cyber-cyan":
+    case "default":
+    default:
+      return "default";
+  }
+}
 
 function getGuillocheSeed(
   customSeed: string | undefined,
@@ -84,7 +96,6 @@ interface ReverseGhostLayerProps {
   isVertical: boolean;
   opacity: number;
   renderGhostContent?: (side: IdCardSide) => ReactNode;
-  holoLayers?: IdHoloLayer[];
 }
 
 function ReverseGhostLayer({
@@ -93,14 +104,10 @@ function ReverseGhostLayer({
   isVertical,
   opacity,
   renderGhostContent,
-  holoLayers,
 }: ReverseGhostLayerProps) {
-  if (!isTransparent) return null;
+  if (!isTransparent || !renderGhostContent) return null;
 
   const reverseSide = faceSide === "front" ? "back" : "front";
-
-  if (!renderGhostContent && (!holoLayers || holoLayers.length === 0))
-    return null;
 
   return (
     <TransparentGhostOverlay
@@ -108,10 +115,7 @@ function ReverseGhostLayer({
       isVertical={isVertical}
       opacity={opacity}
     >
-      {holoLayers && (
-        <HoloLayersLayer layers={holoLayers} faceSide={reverseSide} />
-      )}
-      {renderGhostContent?.(reverseSide)}
+      {renderGhostContent(reverseSide)}
     </TransparentGhostOverlay>
   );
 }
@@ -132,6 +136,7 @@ const DEFAULT_CARD_PROPS = {
   shadow: "xl" as CardShadow,
   holographic: true,
   holoStrength: 0.75,
+  holoVariant: "default" as IdHoloVariant,
   showElectronics: true,
   electronicsFinish: "gold" as ElectronicsFinish,
   chipPosition: "left" as ElectronicsChipPosition,
@@ -189,26 +194,6 @@ function ElectronicsLayer({
   );
 }
 
-interface GuillocheLayerProps {
-  conf: typeof DEFAULT_CARD_PROPS;
-  seed: string;
-}
-
-function GuillocheLayer({ conf, seed }: GuillocheLayerProps) {
-  if (!conf.showGuilloche) return null;
-
-  return (
-    <Guilloche
-      seed={seed}
-      variant={conf.guillocheVariant}
-      density={conf.guillocheDensity}
-      opacity={conf.guillocheOpacity}
-      noiseIntensity={conf.guillocheNoiseIntensity}
-      holographic={false}
-    />
-  );
-}
-
 interface IdCardFaceProps {
   conf: typeof DEFAULT_CARD_PROPS;
   props: IdCardProps;
@@ -220,85 +205,88 @@ function IdCardFace({ conf, props, faceSide, dims }: IdCardFaceProps) {
   const isBack = faceSide === "back";
   const seed = getGuillocheSeed(props.guillocheSeed, isBack);
 
-  const normalizedHoloLayers = useMemo(
-    () =>
-      normalizeHoloLayers({
-        holoLayers: props.holoLayers,
-        holoImage: props.holoImage,
-        holoImageMask: props.holoImageMask,
-        holoImageOpacity: props.holoImageOpacity,
-        holoImageBlendMode: props.holoImageBlendMode,
-        holoImageObjectFit: props.holoImageObjectFit,
-        holoImageSide: props.holoImageSide,
-      }),
-    [
-      props.holoLayers,
-      props.holoImage,
-      props.holoImageMask,
-      props.holoImageOpacity,
-      props.holoImageBlendMode,
-      props.holoImageObjectFit,
-      props.holoImageSide,
-    ],
-  );
-
-  const [effectiveMaskUrl, setEffectiveMaskUrl] = useState<string | undefined>(
-    undefined,
-  );
-
-  useEffect(() => {
-    let active = true;
-
-    const guillocheMaskUrl = conf.showGuilloche
-      ? generateGuillocheMaskDataUrl({
-          seed,
-          density: conf.guillocheDensity,
-          noiseIntensity: conf.guillocheNoiseIntensity,
-        })
-      : undefined;
-
-    resolveHoloMasksAsync({
-      customMaskUrl: props.maskUrl,
-      guillocheMaskUrl,
-      holoLayers: normalizedHoloLayers,
-      faceSide,
-    })
-      .then((maskUrl) => {
-        if (active) setEffectiveMaskUrl(maskUrl);
+  const mergedLayers = useMemo(() => {
+    const rawLayers = Array.isArray(props.holoLayers) ? props.holoLayers : [];
+    const activeHoloLayers: IdHoloLayer[] = rawLayers
+      .map((layer) => {
+        if (typeof layer === "string") {
+          return {
+            id: `holo-string-${layer}`,
+            src: layer,
+            holographic: true,
+            side: "front" as const,
+          };
+        }
+        return layer as IdHoloLayer;
       })
-      .catch((err) => {
-        console.warn("Failed to resolve async holo masks:", err);
+      .filter((layer) => {
+        return (
+          layer.side === "both" ||
+          layer.side === faceSide ||
+          (!layer.side && faceSide === "front")
+        );
       });
 
-    return () => {
-      active = false;
-    };
+    const normalizedHoloLayers = activeHoloLayers.map((layer) => {
+      let holographicOption: CardLayer["holographic"] = false;
+      if (layer.holographic) {
+        holographicOption = {
+          variant: resolveHoloVariant(conf.holoVariant),
+          holoStrength: layer.holoStrength ?? conf.holoStrength ?? 1,
+        };
+      }
+      return {
+        ...layer,
+        holographic: holographicOption,
+      } as CardLayer;
+    });
+
+    const guillocheHoloLayers: CardLayer[] = [];
+    if (conf.showGuilloche && conf.holographic) {
+      const maskDataUrl = generateGuillocheMaskDataUrl({
+        seed,
+        density: conf.guillocheDensity,
+        noiseIntensity: conf.guillocheNoiseIntensity,
+      });
+
+      guillocheHoloLayers.push({
+        id: `guilloche-holo-${faceSide}`,
+        maskUrl: maskDataUrl,
+        maskSize: "100% 100%",
+        maskPosition: "center",
+        maskRepeat: "no-repeat",
+        holographic: {
+          variant: resolveHoloVariant(conf.holoVariant),
+          holoStrength: conf.holoStrength ?? 1,
+          blendMode: "color-dodge",
+        },
+        opacity: conf.guillocheOpacity ?? 0.85,
+        zIndex: 1,
+      });
+    }
+
+    return [
+      ...guillocheHoloLayers,
+      ...normalizedHoloLayers,
+      ...(props.layers || []),
+    ];
   }, [
-    props.maskUrl,
+    props.holoLayers,
+    props.layers,
+    faceSide,
+    conf.holoVariant,
+    conf.holoStrength,
     conf.showGuilloche,
-    seed,
+    conf.holographic,
     conf.guillocheDensity,
     conf.guillocheNoiseIntensity,
-    normalizedHoloLayers,
-    faceSide,
+    conf.guillocheOpacity,
+    seed,
   ]);
 
   const faceContent =
     faceSide === "front" ? props.frontContent : props.backContent;
   const content = faceContent ?? props.children;
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    e.currentTarget.style.setProperty("--pointer-x", `${x}%`);
-    e.currentTarget.style.setProperty("--pointer-y", `${y}%`);
-    e.currentTarget.style.setProperty("--holo-opacity", "1");
-  };
-
-  const handlePointerLeave = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.style.setProperty("--holo-opacity", "0");
-  };
 
   return (
     <Card
@@ -309,19 +297,20 @@ function IdCardFace({ conf, props, faceSide, dims }: IdCardFaceProps) {
       maxTilt={conf.maxTilt}
       scaleOnHover={conf.scaleOnHover}
       shadow={conf.shadow}
-      holographic={false}
-      holoStrength={conf.holoStrength}
-      layers={props.layers}
+      holographic={
+        conf.holographic
+          ? {
+              variant: resolveHoloVariant(conf.holoVariant),
+              holoStrength: conf.holoStrength ?? 1,
+            }
+          : false
+      }
+      layers={mergedLayers}
       className={props.className}
       containerClassName={props.containerClassName}
       data-testid={conf.testId}
     >
-      <CardFaceContainer
-        isBack={isBack}
-        isTransparent={conf.transparent}
-        onPointerMove={handlePointerMove}
-        onPointerLeave={handlePointerLeave}
-      >
+      <CardFaceContainer isBack={isBack} isTransparent={conf.transparent}>
         <ElectronicsLayer
           conf={conf}
           props={props}
@@ -338,13 +327,7 @@ function IdCardFace({ conf, props, faceSide, dims }: IdCardFaceProps) {
             props.transparentGhostOpacity ?? conf.transparentGhostOpacity
           }
           renderGhostContent={props.renderGhostContent}
-          holoLayers={normalizedHoloLayers}
         />
-
-        <GuillocheLayer conf={conf} seed={seed} />
-
-        <HoloLayersLayer layers={normalizedHoloLayers} faceSide={faceSide} />
-        {conf.holographic && <CustomHoloOverlay maskUrl={effectiveMaskUrl} />}
 
         {content && (
           <ContentOverlay isTransparent={conf.transparent}>

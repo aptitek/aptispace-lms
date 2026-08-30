@@ -98,6 +98,38 @@ function RingGroup({
   );
 }
 
+interface GuillocheDefsProps {
+  colors: ReturnType<typeof getGuillocheColors>;
+}
+
+function GuillocheDefs({ colors }: GuillocheDefsProps) {
+  return (
+    <defs>
+      <linearGradient id="holoGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor={colors.strokePrimary} />
+        <stop offset="50%" stopColor={colors.strokeSecondary} />
+        <stop offset="100%" stopColor={colors.accent} />
+      </linearGradient>
+      <linearGradient id="holoGradient2" x1="100%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor={colors.strokeSecondary} />
+        <stop offset="70%" stopColor={colors.strokeTertiary} />
+        <stop offset="100%" stopColor={colors.strokePrimary} />
+      </linearGradient>
+    </defs>
+  );
+}
+
+function getGuillocheClassName(
+  variant: string,
+  holographic: boolean,
+  className?: string,
+): string {
+  const isAnimated = holographic || variant === "holo-spectrum";
+  return [isAnimated ? "holo-animated" : "", className]
+    .filter(Boolean)
+    .join(" ");
+}
+
 const defaultGuilloche = {
   seed: "APTI-7810-CADET-SECURITY",
   variant: "holo-spectrum" as const,
@@ -131,28 +163,21 @@ export default function Guilloche(props: GuillocheProps) {
     [seedNum, config.noiseIntensity, config.density],
   );
 
+  const className = getGuillocheClassName(
+    config.variant,
+    config.holographic,
+    config.className,
+  );
+
   return (
     <GuillocheSvg
       viewBox={`0 0 ${GUILLOCHE_VIEWBOX.width} ${GUILLOCHE_VIEWBOX.height}`}
       customOpacity={config.opacity}
-      className={`${config.variant === "holo-spectrum" ? "holo-animated" : ""} ${
-        config.className || ""
-      }`.trim()}
+      className={className}
       data-testid={config.testId}
       aria-hidden="true"
     >
-      <defs>
-        <linearGradient id="holoGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={colors.strokePrimary} />
-          <stop offset="50%" stopColor={colors.strokeSecondary} />
-          <stop offset="100%" stopColor={colors.accent} />
-        </linearGradient>
-        <linearGradient id="holoGradient2" x1="100%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor={colors.strokeSecondary} />
-          <stop offset="70%" stopColor={colors.strokeTertiary} />
-          <stop offset="100%" stopColor={colors.strokePrimary} />
-        </linearGradient>
-      </defs>
+      <GuillocheDefs colors={colors} />
 
       {config.showWaves && (
         <WaveGroup
