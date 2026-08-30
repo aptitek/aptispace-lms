@@ -236,7 +236,7 @@ function CardFrontFace({
       </SchoolHeaderRow>
 
       <CardMainBody>
-        <AvatarCol>
+        <AvatarCol onClick={(e) => e.stopPropagation()}>
           <EditableAvatar
             value={profile.avatarUrl}
             defaultValue={DEFAULT_PROFILE_TEMPLATE.avatarUrl}
@@ -250,7 +250,7 @@ function CardFrontFace({
           />
         </AvatarCol>
 
-        <FieldsList disablePadding>
+        <FieldsList disablePadding onClick={(e) => e.stopPropagation()}>
           <FieldListItem disableGutters disablePadding>
             <TextField
               id="card-field-firstname"
