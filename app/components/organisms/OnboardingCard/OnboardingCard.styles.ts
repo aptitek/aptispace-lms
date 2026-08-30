@@ -66,11 +66,11 @@ export const CohortValidityContainer = styled("div")(({ theme }) => ({
 
 export const CardMainBody = styled("div")(({ theme }) => ({
   display: "grid",
-  gridTemplateColumns: "140px 1fr",
+  gridTemplateColumns: "135px 1fr",
   gap: theme.spacing(1.5),
   alignItems: "flex-start",
   width: "100%",
-  paddingTop: 0,
+  paddingTop: "40px",
   paddingBottom: 0,
 }));
 
@@ -81,8 +81,8 @@ export const AvatarCol = styled("div")({
   justifyContent: "flex-start",
   position: "relative",
   flexShrink: 0,
-  width: "140px",
-  height: "180px",
+  width: "135px",
+  height: "164px",
   overflow: "hidden",
   "& .MuiBox-root, & [data-testid='card-editable-avatar'], & [data-testid='card-editable-avatar'] > div":
     {
@@ -131,8 +131,8 @@ export const BackMainArea = styled("div")(({ theme }) => ({
   display: "grid",
   gridTemplateColumns: "140px 1fr",
   gap: theme.spacing(1.5),
-  alignItems: "center",
-  paddingTop: theme.spacing(0.5),
+  alignItems: "flex-start",
+  paddingTop: "32px",
   paddingBottom: theme.spacing(0.5),
   flex: 1,
 }));
@@ -148,9 +148,9 @@ export const BackLeftContactCol = styled("div")({
 
 export const BackRightContentCol = styled("div")({
   display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  height: "60px",
+  alignItems: "flex-start",
+  justifyContent: "flex-start",
+  height: "56px",
   width: "100%",
   position: "relative",
 });
