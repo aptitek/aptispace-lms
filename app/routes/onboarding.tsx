@@ -53,9 +53,9 @@ import {
   resolveSchool,
   buildInitialProfile,
   resolveDefaultProfile,
-  handleOnboardingAction,
   computeMissingFields,
 } from "./onboarding.helpers";
+import { handleOnboardingAction } from "./onboarding.helpers.server";
 
 export { CADET_FIXED_DOMAIN, AVAILABLE_SCHOOLS };
 
