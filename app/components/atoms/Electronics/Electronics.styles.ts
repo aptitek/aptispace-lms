@@ -35,15 +35,15 @@ export const getFinishColors = (finish: ElectronicsFinish, theme: Theme) => {
   }
 };
 
-export const SvgLayer = styled("svg")<{ customOpacity: number }>(
-  ({ customOpacity }) => ({
-    position: "absolute",
-    inset: 0,
-    width: "100%",
-    height: "100%",
-    pointerEvents: "none",
-    opacity: customOpacity,
-    zIndex: 1,
-    overflow: "visible",
-  }),
-);
+export const SvgLayer = styled("svg", {
+  shouldForwardProp: (prop) => prop !== "customOpacity",
+})<{ customOpacity: number }>(({ customOpacity }) => ({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  pointerEvents: "none",
+  opacity: customOpacity,
+  zIndex: 1,
+  overflow: "visible",
+}));

@@ -120,7 +120,9 @@ export const FlightArcSvg = styled("svg")({
   zIndex: 1,
 });
 
-export const CountryMapZone = styled("div")<{
+export const CountryMapZone = styled("div", {
+  shouldForwardProp: filterDollarProp,
+})<{
   $position: "left" | "right";
   $cfg: (typeof MERIDIAN_SIZE_CONFIGS)[MeridianSize];
 }>(({ $position, $cfg }) => ({

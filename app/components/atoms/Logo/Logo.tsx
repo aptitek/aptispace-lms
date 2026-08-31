@@ -4,25 +4,25 @@ export interface LogoProps {
   size?: "small" | "medium" | "large";
 }
 
-const LogoRoot = styled("div")<{ logoSize: "small" | "medium" | "large" }>(
-  ({ theme, logoSize }) => ({
-    display: "inline-flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap:
-      logoSize === "small"
-        ? theme.spacing(1)
-        : logoSize === "large"
-          ? theme.spacing(2)
-          : theme.spacing(1.5),
-    userSelect: "none",
-  }),
-);
+const LogoRoot = styled("div", {
+  shouldForwardProp: (prop) => prop !== "logoSize",
+})<{ logoSize: "small" | "medium" | "large" }>(({ theme, logoSize }) => ({
+  display: "inline-flex",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  gap:
+    logoSize === "small"
+      ? theme.spacing(1)
+      : logoSize === "large"
+        ? theme.spacing(2)
+        : theme.spacing(1.5),
+  userSelect: "none",
+}));
 
-const LogoImage = styled("img")<{ logoSize: "small" | "medium" | "large" }>(({
-  logoSize,
-}) => {
+const LogoImage = styled("img", {
+  shouldForwardProp: (prop) => prop !== "logoSize",
+})<{ logoSize: "small" | "medium" | "large" }>(({ logoSize }) => {
   const dim = logoSize === "small" ? 36 : logoSize === "large" ? 64 : 48;
   return {
     width: dim,
@@ -33,7 +33,9 @@ const LogoImage = styled("img")<{ logoSize: "small" | "medium" | "large" }>(({
   };
 });
 
-const TextContainer = styled("div")<{
+const TextContainer = styled("div", {
+  shouldForwardProp: (prop) => prop !== "logoSize",
+})<{
   logoSize: "small" | "medium" | "large";
 }>(({ logoSize }) => {
   const fontSize =

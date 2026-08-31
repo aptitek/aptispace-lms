@@ -12,15 +12,15 @@ const FRANCE_PATH =
 const UK_PATH =
   "M 16.2 2.6 L 14.9 4.1 L 16.9 4.8 L 16.5 6.7 L 15.5 7.6 L 14.4 8.4 L 16.9 11.2 L 18.2 14.1 L 17.4 14.5 L 18.6 16.8 L 20.4 17.7 L 19.6 19.2 L 18.3 20.0 L 19.5 20.9 L 16.6 21.4 L 14.3 21.3 L 12.8 21.0 L 10.7 21.5 L 8.6 21.8 L 10.6 20.3 L 13.3 19.4 L 12.3 19.2 L 11.1 18.2 L 11.2 17.2 L 12.2 15.7 L 11.9 15.1 L 13.9 14.6 L 14.2 13.9 L 13.9 12.6 L 13.6 11.0 L 12.4 11.0 L 12.5 9.6 L 12.8 8.0 L 12.2 8.2 L 12.0 8.3 L 11.7 8.5 L 12.5 6.6 L 11.5 6.1 L 12.3 4.6 L 12.9 3.5 L 13.5 2.7 L 14.2 2.1 L 16.4 2.4 L 16.3 2.5 Z";
 
-const MapPathSilhouette = styled("path")<{ $active: boolean }>(
-  ({ theme, $active }) => ({
-    fill: $active ? theme.palette.primary.main : "currentColor",
-    fillOpacity: $active ? 0.28 : 0.08,
-    stroke: $active ? theme.palette.primary.main : theme.palette.divider,
-    strokeWidth: $active ? 1.2 : 0.8,
-    transition: "all 0.3s ease",
-  }),
-);
+const MapPathSilhouette = styled("path", {
+  shouldForwardProp: (prop) => prop !== "$active",
+})<{ $active: boolean }>(({ theme, $active }) => ({
+  fill: $active ? theme.palette.primary.main : "currentColor",
+  fillOpacity: $active ? 0.28 : 0.08,
+  stroke: $active ? theme.palette.primary.main : theme.palette.divider,
+  strokeWidth: $active ? 1.2 : 0.8,
+  transition: "all 0.3s ease",
+}));
 
 export const FranceMapSilhouette: React.FC<{
   size: number;

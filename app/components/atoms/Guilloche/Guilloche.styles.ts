@@ -42,25 +42,25 @@ export const getGuillocheColors = (variant: GuillocheVariant, theme: Theme) => {
   }
 };
 
-export const GuillocheSvg = styled("svg")<{ customOpacity: number }>(
-  ({ customOpacity }) => ({
-    position: "absolute",
-    inset: 0,
-    width: "100%",
-    height: "100%",
-    pointerEvents: "none",
-    opacity: customOpacity,
-    overflow: "visible",
-    zIndex: 2,
+export const GuillocheSvg = styled("svg", {
+  shouldForwardProp: (prop) => prop !== "customOpacity",
+})<{ customOpacity: number }>(({ customOpacity }) => ({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  pointerEvents: "none",
+  opacity: customOpacity,
+  overflow: "visible",
+  zIndex: 2,
 
-    "@keyframes holoIridescence": {
-      "0%": { filter: "hue-rotate(0deg) saturate(1.2)" },
-      "50%": { filter: "hue-rotate(90deg) saturate(1.8)" },
-      "100%": { filter: "hue-rotate(0deg) saturate(1.2)" },
-    },
+  "@keyframes holoIridescence": {
+    "0%": { filter: "hue-rotate(0deg) saturate(1.2)" },
+    "50%": { filter: "hue-rotate(90deg) saturate(1.8)" },
+    "100%": { filter: "hue-rotate(0deg) saturate(1.2)" },
+  },
 
-    "&.holo-animated": {
-      animation: "holoIridescence 8s ease-in-out infinite",
-    },
-  }),
-);
+  "&.holo-animated": {
+    animation: "holoIridescence 8s ease-in-out infinite",
+  },
+}));

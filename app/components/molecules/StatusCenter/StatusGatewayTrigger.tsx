@@ -30,7 +30,9 @@ const pulseGlow = (color: string) => keyframes`
   }
 `;
 
-const TriggerIconButton = styled("button")<{
+const TriggerIconButton = styled("button", {
+  shouldForwardProp: (prop) => prop !== "statusColor" && prop !== "isOffline",
+})<{
   statusColor: string;
   isOffline: boolean;
 }>(({ theme, statusColor, isOffline }) => ({

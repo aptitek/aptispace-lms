@@ -12,18 +12,18 @@ export interface EcgTelemetryProps {
   showMetrics?: boolean;
 }
 
-const TelemetryContainer = styled("div")<{ height: number }>(
-  ({ theme, height }) => ({
-    position: "relative",
-    width: "100%",
-    height,
-    overflow: "hidden",
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: theme.palette.background.paper,
-    border: `1px solid ${theme.palette.divider}`,
-    boxShadow: theme.shadows[2],
-  }),
-);
+const TelemetryContainer = styled("div", {
+  shouldForwardProp: (prop) => prop !== "height",
+})<{ height: number }>(({ theme, height }) => ({
+  position: "relative",
+  width: "100%",
+  height,
+  overflow: "hidden",
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: theme.palette.background.paper,
+  border: `1px solid ${theme.palette.divider}`,
+  boxShadow: theme.shadows[2],
+}));
 
 const CanvasOverlay = styled("canvas")({
   display: "block",
@@ -49,14 +49,18 @@ const TelemetryMetrics = styled("div")(({ theme }) => ({
   zIndex: 2,
 }));
 
-const MetricTag = styled("span")<{ color?: string }>(({ color }) => ({
+const MetricTag = styled("span", {
+  shouldForwardProp: (prop) => prop !== "color",
+})<{ color?: string }>(({ color }) => ({
   display: "inline-flex",
   alignItems: "center",
   gap: 6,
   color: color || "inherit",
 }));
 
-const StatusDot = styled("span")<{ color: string }>(({ color }) => ({
+const StatusDot = styled("span", {
+  shouldForwardProp: (prop) => prop !== "color",
+})<{ color: string }>(({ color }) => ({
   width: 6,
   height: 6,
   borderRadius: "50%",

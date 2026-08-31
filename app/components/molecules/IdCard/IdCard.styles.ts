@@ -62,13 +62,13 @@ export const getDimensions = (
   return orientation === "portrait" ? sizeEntry.portrait : sizeEntry.landscape;
 };
 
-export const IdCardContainer = styled("div")<{ isClickable?: boolean }>(
-  ({ isClickable }) => ({
-    display: "inline-block",
-    position: "relative",
-    cursor: isClickable ? "pointer" : "default",
-  }),
-);
+export const IdCardContainer = styled("div", {
+  shouldForwardProp: (prop) => prop !== "isClickable",
+})<{ isClickable?: boolean }>(({ isClickable }) => ({
+  display: "inline-block",
+  position: "relative",
+  cursor: isClickable ? "pointer" : "default",
+}));
 
 interface FaceStyleOptions {
   theme: Theme;
@@ -142,7 +142,9 @@ function getFaceBorderAndShadow({
   };
 }
 
-export const CardFaceContainer = styled("div")<{
+export const CardFaceContainer = styled("div", {
+  shouldForwardProp: (prop) => prop !== "isBack" && prop !== "isTransparent",
+})<{
   isBack?: boolean;
   isTransparent?: boolean;
 }>(({ theme, isBack, isTransparent }) => {
@@ -172,21 +174,24 @@ export const CardFaceContainer = styled("div")<{
   };
 });
 
-export const ContentOverlay = styled("div")<{ isTransparent?: boolean }>(
-  ({ theme }) => ({
-    position: "relative",
-    zIndex: 2,
-    width: "100%",
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    padding: theme.spacing(0.75),
-    boxSizing: "border-box",
-    pointerEvents: "auto",
-  }),
-);
+export const ContentOverlay = styled("div", {
+  shouldForwardProp: (prop) => prop !== "isTransparent",
+})<{ isTransparent?: boolean }>(({ theme }) => ({
+  position: "relative",
+  zIndex: 2,
+  width: "100%",
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  padding: theme.spacing(0.75),
+  boxSizing: "border-box",
+  pointerEvents: "auto",
+}));
 
-export const TransparentGhostOverlay = styled("div")<{
+export const TransparentGhostOverlay = styled("div", {
+  shouldForwardProp: (prop) =>
+    prop !== "isMirrored" && prop !== "isVertical" && prop !== "opacity",
+})<{
   isMirrored?: boolean;
   isVertical?: boolean;
   opacity?: number;

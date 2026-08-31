@@ -45,7 +45,9 @@ const SnackbarRoot = styled(motion.div)(({ theme }) => ({
   boxShadow: theme.shadows[8],
 }));
 
-const IconBox = styled("div")<{ color: string }>(({ color }) => ({
+const IconBox = styled("div", {
+  shouldForwardProp: (prop) => prop !== "color",
+})<{ color: string }>(({ color }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
