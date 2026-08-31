@@ -9,8 +9,6 @@ import DevImpersonator from "~/components/molecules/DevImpersonator/DevImpersona
 import {
   loginWithGitHub,
   loginAsAccount,
-  loginAsPersona,
-  type UserRole,
   type AuthUser,
   type AccountDefinition,
 } from "~/utils/auth";
@@ -124,17 +122,6 @@ export default function LoginCard({
     }
   };
 
-  const handlePersonaSelect = async (role: UserRole) => {
-    setLoading(true);
-    try {
-      const user = await loginAsPersona(role);
-      setActiveUser(user);
-      onSuccess?.(user);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <CardContainer>
       <HeaderSection>
@@ -185,7 +172,6 @@ export default function LoginCard({
       {showDevTool && (
         <DevImpersonator
           onSelectAccount={handleAccountSelect}
-          onSelectPersona={handlePersonaSelect}
           currentUserId={activeUser?.id}
           loading={loading}
         />

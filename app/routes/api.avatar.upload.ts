@@ -1,12 +1,5 @@
 import type { ActionFunctionArgs } from "react-router";
-import type { R2Bucket } from "@cloudflare/workers-types";
-
-interface CloudflareContextEnv {
-  AVATARS_BUCKET?: R2Bucket;
-  R2?: R2Bucket;
-  BUCKET?: R2Bucket;
-  [key: string]: unknown;
-}
+import { resolveR2Bucket, resolvePublicR2Url } from "~/utils/r2.server";
 
 const ALLOWED_MIME_TYPES = new Set([
   "image/jpeg",
@@ -38,17 +31,20 @@ function getFileExtension(mimeType: string, originalName?: string): string {
 
 function validateUploadFile(candidate: unknown): {
   errorMessage?: string;
+  errorCode?: string;
   validFile?: File;
 } {
   if (!candidate || !(candidate instanceof File)) {
     return {
       errorMessage: "Missing or invalid 'file' field in multipart form data.",
+      errorCode: "INVALID_FILE_TYPE",
     };
   }
 
   if (!ALLOWED_MIME_TYPES.has(candidate.type)) {
     return {
       errorMessage: `Unsupported image format (${candidate.type}). Allowed formats: JPG, PNG, WebP, GIF, SVG, AVIF.`,
+      errorCode: "INVALID_FILE_TYPE",
     };
   }
 
@@ -56,52 +52,35 @@ function validateUploadFile(candidate: unknown): {
     const sizeMb = (candidate.size / (1024 * 1024)).toFixed(2);
     return {
       errorMessage: `File size exceeds the 5MB limit (${sizeMb}MB).`,
+      errorCode: "FILE_TOO_LARGE",
     };
   }
 
   return { validFile: candidate };
 }
 
-function resolveR2Bucket(context: unknown): R2Bucket | undefined {
-  const contextRecord = context as {
-    cloudflare?: { env?: CloudflareContextEnv };
-    env?: CloudflareContextEnv;
-  };
-  const envObj = contextRecord?.cloudflare?.env || contextRecord?.env;
-  if (!envObj) return undefined;
-  return envObj.AVATARS_BUCKET || envObj.R2 || envObj.BUCKET;
-}
-
-function resolvePublicR2Url(context: unknown, storageKey: string): string {
-  const contextRecord = context as {
-    cloudflare?: { env?: { R2_PUBLIC_URL?: string } };
-    env?: { R2_PUBLIC_URL?: string };
-  };
-  const envObj = contextRecord?.cloudflare?.env || contextRecord?.env;
-  const publicBaseUrl = envObj?.R2_PUBLIC_URL;
-
-  if (publicBaseUrl) {
-    return `${publicBaseUrl.replace(/\/$/, "")}/${storageKey}`;
-  }
-  return `/api/avatar/file?key=${encodeURIComponent(storageKey)}`;
-}
-
 export async function action({ request, context }: ActionFunctionArgs) {
   if (request.method !== "POST") {
     return Response.json(
-      { error: "Method not allowed. Only POST is supported." },
+      {
+        error: "Method not allowed. Only POST is supported.",
+        errorCode: "FORBIDDEN",
+      },
       { status: 405 },
     );
   }
 
   try {
     const formData = await request.formData();
-    const { errorMessage, validFile } = validateUploadFile(
+    const { errorMessage, errorCode, validFile } = validateUploadFile(
       formData.get("file"),
     );
 
     if (errorMessage || !validFile) {
-      return Response.json({ error: errorMessage }, { status: 400 });
+      return Response.json(
+        { error: errorMessage, errorCode: errorCode || "INVALID_FILE_TYPE" },
+        { status: 400 },
+      );
     }
 
     const fileExtension = getFileExtension(validFile.type, validFile.name);
@@ -141,7 +120,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
         ? caughtError.message
         : "Unknown upload error";
     return Response.json(
-      { error: `Upload processing failed: ${details}` },
+      {
+        error: `Upload processing failed: ${details}`,
+        errorCode: "UPLOAD_FAILED",
+      },
       { status: 500 },
     );
   }

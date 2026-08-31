@@ -4,6 +4,7 @@ import type {
   NotifyInput,
   StatusCenterContextValue,
   SystemHealthStatus,
+  SystemInfrastructureHealth,
   TelemetryEventItem,
 } from "./statusCenter.types";
 
@@ -36,6 +37,7 @@ export function createTelemetryEvent(
     message: eventInput.message,
     severity,
     timestamp: new Date(),
+    errorCode: eventInput.errorCode,
     statusCode: eventInput.statusCode,
     source: eventInput.source || "application",
     stack: eventInput.stack,
@@ -45,6 +47,89 @@ export function createTelemetryEvent(
     contextData: eventInput.contextData,
     reported: false,
   };
+}
+
+export function resolveErrorMessage(errorEntity: unknown): string {
+  if (errorEntity instanceof Error) {
+    return errorEntity.message;
+  }
+  if (typeof errorEntity === "string") {
+    return errorEntity;
+  }
+  if (
+    typeof errorEntity === "object" &&
+    errorEntity !== null &&
+    "message" in errorEntity
+  ) {
+    return String((errorEntity as { message: unknown }).message);
+  }
+  return "An unexpected error occurred.";
+}
+
+export function resolveErrorStack(errorEntity: unknown): string | undefined {
+  if (errorEntity instanceof Error) {
+    return errorEntity.stack;
+  }
+  return undefined;
+}
+
+export function extractErrorCode(
+  errorEntity: unknown,
+  overrideCode?: string,
+): string | undefined {
+  if (overrideCode) return overrideCode;
+  if (typeof errorEntity === "object" && errorEntity !== null) {
+    const candidate = errorEntity as { errorCode?: unknown; code?: unknown };
+    if (typeof candidate.errorCode === "string") return candidate.errorCode;
+    if (typeof candidate.code === "string") return candidate.code;
+  }
+  return undefined;
+}
+
+export function createFallbackHealthReport(
+  errorMessage: string,
+): SystemInfrastructureHealth {
+  return {
+    status: "critical",
+    timestamp: new Date().toISOString(),
+    services: {
+      d1: {
+        name: "Cloudflare D1 (Database)",
+        status: "offline",
+        error: errorMessage,
+      },
+      r2: {
+        name: "Cloudflare R2 (Avatars Bucket)",
+        status: "offline",
+        error: errorMessage,
+      },
+    },
+  };
+}
+
+export function notifyIfServiceCritical(
+  report: SystemInfrastructureHealth,
+  notifyFn: (input: NotifyInput) => TelemetryEventItem,
+) {
+  if (!report.services) return;
+  const { d1, r2 } = report.services;
+  if (d1.status === "critical" || d1.status === "offline") {
+    notifyFn({
+      title: "Database Connectivity Alert",
+      message: d1.error || d1.details || "Cloudflare D1 Database offline.",
+      severity: "critical",
+      source: "d1-healthcheck",
+    });
+  }
+  if (r2.status === "critical" || r2.status === "offline") {
+    notifyFn({
+      title: "Storage Connectivity Alert",
+      message:
+        r2.error || r2.details || "Cloudflare R2 Object Storage offline.",
+      severity: "critical",
+      source: "r2-healthcheck",
+    });
+  }
 }
 
 export function calculateSystemStatus(
@@ -144,6 +229,8 @@ export const DEFAULT_STATUS_CENTER_FALLBACK: StatusCenterContextValue = {
   systemStatus: "nominal",
   bpm: 68,
   activeFilter: "all",
+  infrastructureHealth: null,
+  isCheckingHealth: false,
   setActiveFilter: () => {},
   notify: (eventInput) => ({
     id: "fallback-id",
@@ -169,5 +256,6 @@ export const DEFAULT_STATUS_CENTER_FALLBACK: StatusCenterContextValue = {
   clearItem: () => {},
   clearAll: () => {},
   reportItem: async () => null,
+  checkInfrastructureHealth: async () => null,
   simulateEvent: () => {},
 };

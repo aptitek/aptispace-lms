@@ -10,13 +10,19 @@ import type {
   EventFilterType,
   NotifyInput,
   StatusCenterContextValue,
+  SystemInfrastructureHealth,
   TelemetryEventItem,
 } from "./statusCenter.types";
 import {
   calculateBpm,
   calculateSystemStatus,
+  createFallbackHealthReport,
   createTelemetryEvent,
   DEFAULT_STATUS_CENTER_FALLBACK,
+  extractErrorCode,
+  notifyIfServiceCritical,
+  resolveErrorMessage,
+  resolveErrorStack,
 } from "./statusCenter.utils";
 
 export * from "./statusCenter.types";
@@ -28,30 +34,6 @@ const SNACKBAR_AUTO_DISMISS_MS = 6000;
 const StatusCenterContext = createContext<StatusCenterContextValue | null>(
   null,
 );
-
-function resolveErrorMessage(errorEntity: unknown): string {
-  if (errorEntity instanceof Error) {
-    return errorEntity.message;
-  }
-  if (typeof errorEntity === "string") {
-    return errorEntity;
-  }
-  if (
-    typeof errorEntity === "object" &&
-    errorEntity !== null &&
-    "message" in errorEntity
-  ) {
-    return String((errorEntity as { message: unknown }).message);
-  }
-  return "An unexpected error occurred.";
-}
-
-function resolveErrorStack(errorEntity: unknown): string | undefined {
-  if (errorEntity instanceof Error) {
-    return errorEntity.stack;
-  }
-  return undefined;
-}
 
 export function StatusCenterProvider({
   children,
@@ -66,6 +48,9 @@ export function StatusCenterProvider({
   const [activeSnackbar, setActiveSnackbar] =
     useState<TelemetryEventItem | null>(null);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+  const [infrastructureHealth, setInfrastructureHealth] =
+    useState<SystemInfrastructureHealth | null>(null);
+  const [isCheckingHealth, setIsCheckingHealth] = useState(false);
   const [isOnline, setIsOnline] = useState<boolean>(() => {
     if (
       typeof navigator !== "undefined" &&
@@ -97,11 +82,16 @@ export function StatusCenterProvider({
     (errorEntity: unknown, options: Partial<NotifyInput> = {}) => {
       const messageText = resolveErrorMessage(errorEntity);
       const stackTrace = resolveErrorStack(errorEntity);
+      const resolvedErrorCode = extractErrorCode(
+        errorEntity,
+        options.errorCode,
+      );
 
       return notify({
         title: options.title || "Diagnostic Error",
         message: options.message || messageText,
         severity: options.severity || "error",
+        errorCode: resolvedErrorCode,
         statusCode: options.statusCode,
         source: options.source || "application",
         stack: options.stack || stackTrace,
@@ -296,6 +286,42 @@ export function StatusCenterProvider({
     [notify, notifyError, notifySecurityBreach, notifySuccess, notifyWarning],
   );
 
+  const checkInfrastructureHealth =
+    useCallback(async (): Promise<SystemInfrastructureHealth | null> => {
+      if (typeof fetch === "undefined") return null;
+      setIsCheckingHealth(true);
+      try {
+        const response = await fetch("/api/health", { cache: "no-store" });
+        const healthPayload =
+          (await response.json()) as SystemInfrastructureHealth;
+        setInfrastructureHealth(healthPayload);
+        notifyIfServiceCritical(healthPayload, notify);
+        return healthPayload;
+      } catch (checkError) {
+        const failureMessage =
+          checkError instanceof Error
+            ? checkError.message
+            : "Health check failed";
+        const fallback = createFallbackHealthReport(failureMessage);
+        setInfrastructureHealth(fallback);
+        return fallback;
+      } finally {
+        setIsCheckingHealth(false);
+      }
+    }, [notify]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      void checkInfrastructureHealth();
+    }
+  }, [checkInfrastructureHealth]);
+
+  useEffect(() => {
+    if (isTerminalOpen) {
+      void checkInfrastructureHealth();
+    }
+  }, [isTerminalOpen, checkInfrastructureHealth]);
+
   const systemStatus = useMemo(
     () => calculateSystemStatus(events, isOnline),
     [events, isOnline],
@@ -330,33 +356,15 @@ export function StatusCenterProvider({
         return;
       }
 
-      notify({
-        title: "Runtime Diagnostic Error",
-        message: event.message || "Uncaught window runtime exception",
-        severity: "error",
+      notifyError(event.error || new Error(event.message), {
         source: "window.onerror",
-        stack: event.error?.stack,
         url: event.filename,
       });
     };
 
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      let rejectionMessage = "Unhandled asynchronous promise rejection";
-      let stackTrace: string | undefined;
-
-      if (event.reason instanceof Error) {
-        rejectionMessage = event.reason.message;
-        stackTrace = event.reason.stack;
-      } else if (typeof event.reason === "string") {
-        rejectionMessage = event.reason;
-      }
-
-      notify({
-        title: "Unhandled Asynchronous Exception",
-        message: rejectionMessage,
-        severity: "error",
+      notifyError(event.reason || new Error("Unhandled Promise Rejection"), {
         source: "unhandledrejection",
-        stack: stackTrace,
       });
     };
 
@@ -374,7 +382,7 @@ export function StatusCenterProvider({
         handleUnhandledRejection,
       );
     };
-  }, [notify, notifySuccess]);
+  }, [notify, notifyError, notifySuccess]);
 
   useEffect(() => {
     if (!activeSnackbar) return;
@@ -395,6 +403,8 @@ export function StatusCenterProvider({
       systemStatus,
       bpm,
       activeFilter,
+      infrastructureHealth,
+      isCheckingHealth,
       setActiveFilter,
       notify,
       notifyError,
@@ -409,6 +419,7 @@ export function StatusCenterProvider({
       clearItem,
       clearAll,
       reportItem,
+      checkInfrastructureHealth,
       simulateEvent,
     }),
     [
@@ -419,6 +430,9 @@ export function StatusCenterProvider({
       systemStatus,
       bpm,
       activeFilter,
+      infrastructureHealth,
+      isCheckingHealth,
+      setActiveFilter,
       notify,
       notifyError,
       notifySecurityBreach,
@@ -432,6 +446,7 @@ export function StatusCenterProvider({
       clearItem,
       clearAll,
       reportItem,
+      checkInfrastructureHealth,
       simulateEvent,
     ],
   );
@@ -445,5 +460,8 @@ export function StatusCenterProvider({
 
 export function useStatusCenter(): StatusCenterContextValue {
   const context = useContext(StatusCenterContext);
-  return context || DEFAULT_STATUS_CENTER_FALLBACK;
+  if (!context) {
+    return DEFAULT_STATUS_CENTER_FALLBACK;
+  }
+  return context;
 }

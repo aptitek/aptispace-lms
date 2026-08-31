@@ -133,7 +133,7 @@ async function createNewGitHubUser(
 }
 
 async function syncUserWithDatabase(
-  db: Database | null,
+  db: Database,
   profile: {
     githubUserId: string;
     githubUsername?: string;
@@ -143,13 +143,6 @@ async function syncUserWithDatabase(
 ) {
   const isAdmin = isAdminGithubUser(profile.githubUsername);
   const defaultRole = isAdmin ? ("admin" as const) : ("student" as const);
-
-  if (!db) {
-    return {
-      dbUserId: isAdmin ? "persona-admin" : "persona-student",
-      userRole: defaultRole,
-    };
-  }
 
   let user = await getUserByGithubId(db, profile.githubUserId);
   if (!user) {
@@ -177,6 +170,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   }
 
   const db = getDatabaseFromContext(context);
+  if (!db) {
+    return new Response("Database binding unavailable.", { status: 503 });
+  }
+
   const userProfile = await resolveUserProfile(code);
   const { dbUserId, userRole } = await syncUserWithDatabase(db, userProfile);
 

@@ -23,7 +23,6 @@ import {
   type UserRole,
   fetchAccountsFromDb,
   createAccountInDb,
-  getInitialFallbackAccounts,
 } from "~/utils/auth";
 import type {
   DevImpersonatorProps,
@@ -223,80 +222,72 @@ function DevQuickCreateSection({
       </QuickCreateHeader>
 
       <QuickCreateButtonGroup>
-        <Tooltip
-          title={t(
-            "devTool.createStudentTooltip",
-            "Create a new Student account (Triggers Onboarding)",
-          )}
-          arrow
-          placement="top"
-        >
-          <Box component="span" sx={{ display: "inline-flex", width: "100%" }}>
-            <RoleCreateButton
-              roleType="student"
-              disabled={isActionDisabled}
-              onClick={() => onQuickCreate("student")}
-              data-testid="create-student-btn"
+        {(
+          [
+            {
+              role: "student" as const,
+              labelKey: "devTool.newStudent",
+              defaultLabel: "+ Student",
+              tooltipKey: "devTool.createStudentTooltip",
+              defaultTooltip:
+                "Create a new Student account (Triggers Onboarding)",
+              Icon: SchoolIcon,
+            },
+            {
+              role: "instructor" as const,
+              labelKey: "devTool.newInstructor",
+              defaultLabel: "+ Instructor",
+              tooltipKey: "devTool.createInstructorTooltip",
+              defaultTooltip:
+                "Create a new Instructor account (Triggers Onboarding)",
+              Icon: SupervisorAccountIcon,
+            },
+            {
+              role: "admin" as const,
+              labelKey: "devTool.newAdmin",
+              defaultLabel: "+ Admin",
+              tooltipKey: "devTool.createAdminTooltip",
+              defaultTooltip:
+                "Create a new Administrator account (Triggers Onboarding)",
+              Icon: AdminPanelSettingsIcon,
+            },
+          ] as const
+        ).map(
+          ({
+            role,
+            labelKey,
+            defaultLabel,
+            tooltipKey,
+            defaultTooltip,
+            Icon,
+          }) => (
+            <Tooltip
+              key={role}
+              title={t(tooltipKey, defaultTooltip)}
+              arrow
+              placement="top"
             >
-              {isCreatingRole === "student" ? (
-                <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
-              ) : (
-                <SchoolIcon />
-              )}
-              <span>{t("devTool.newStudent", "+ Student")}</span>
-            </RoleCreateButton>
-          </Box>
-        </Tooltip>
-
-        <Tooltip
-          title={t(
-            "devTool.createInstructorTooltip",
-            "Create a new Instructor account (Triggers Onboarding)",
-          )}
-          arrow
-          placement="top"
-        >
-          <Box component="span" sx={{ display: "inline-flex", width: "100%" }}>
-            <RoleCreateButton
-              roleType="instructor"
-              disabled={isActionDisabled}
-              onClick={() => onQuickCreate("instructor")}
-              data-testid="create-instructor-btn"
-            >
-              {isCreatingRole === "instructor" ? (
-                <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
-              ) : (
-                <SupervisorAccountIcon />
-              )}
-              <span>{t("devTool.newInstructor", "+ Instructor")}</span>
-            </RoleCreateButton>
-          </Box>
-        </Tooltip>
-
-        <Tooltip
-          title={t(
-            "devTool.createAdminTooltip",
-            "Create a new Administrator account (Triggers Onboarding)",
-          )}
-          arrow
-          placement="top"
-        >
-          <Box component="span" sx={{ display: "inline-flex", width: "100%" }}>
-            <RoleCreateButton
-              roleType="admin"
-              disabled={isActionDisabled}
-              onClick={() => onQuickCreate("admin")}
-              data-testid="create-admin-btn"
-            >
-              {isCreatingRole === "admin" ? (
-                <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
-              ) : (
-                <AdminPanelSettingsIcon />
-              )}
-              <span>{t("devTool.newAdmin", "+ Admin")}</span>
-            </RoleCreateButton>
-          </Box>
-        </Tooltip>
+              <Box
+                component="span"
+                sx={{ display: "inline-flex", width: "100%" }}
+              >
+                <RoleCreateButton
+                  roleType={role}
+                  disabled={isActionDisabled}
+                  onClick={() => onQuickCreate(role)}
+                  data-testid={`create-${role}-btn`}
+                >
+                  {isCreatingRole === role ? (
+                    <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
+                  ) : (
+                    <Icon />
+                  )}
+                  <span>{t(labelKey, defaultLabel)}</span>
+                </RoleCreateButton>
+              </Box>
+            </Tooltip>
+          ),
+        )}
       </QuickCreateButtonGroup>
     </QuickCreateSection>
   );
@@ -383,7 +374,7 @@ export default function DevImpersonator({
   const { t } = useTranslation("auth");
 
   const [accounts, setAccounts] = useState<AccountDefinition[]>(
-    () => initialAccounts || getInitialFallbackAccounts(),
+    () => initialAccounts || [],
   );
   const [selectedId, setSelectedId] = useState<string>(() => {
     return currentUserId || (initialAccounts?.[0]?.id ?? accounts[0]?.id ?? "");
@@ -397,9 +388,7 @@ export default function DevImpersonator({
     setIsFetching(true);
     try {
       const fetched = await fetchAccountsFromDb();
-      if (fetched && fetched.length > 0) {
-        setAccounts(fetched);
-      }
+      setAccounts(fetched);
     } finally {
       setIsFetching(false);
     }
@@ -413,22 +402,30 @@ export default function DevImpersonator({
 
   const handleSelect = (account: AccountDefinition) => {
     setSelectedId(account.id);
-    onSelectAccount?.(account);
-    onSelectPersona?.(account.role);
+    if (onSelectAccount) {
+      onSelectAccount(account);
+    } else if (onSelectPersona) {
+      onSelectPersona(account.role);
+    }
   };
 
   const handleQuickCreate = async (role: UserRole) => {
     setIsCreatingRole(role);
     try {
       const newAccount = await createAccountInDb(role);
-      setAccounts((prev) => [
-        newAccount,
-        ...prev.filter((a) => a.id !== newAccount.id),
-      ]);
-      setSelectedId(newAccount.id);
-      onAccountCreated?.(newAccount);
-      onSelectAccount?.(newAccount);
-      onSelectPersona?.(newAccount.role);
+      if (newAccount) {
+        setAccounts((prev) => [
+          newAccount,
+          ...prev.filter((a) => a.id !== newAccount.id),
+        ]);
+        setSelectedId(newAccount.id);
+        onAccountCreated?.(newAccount);
+        if (onSelectAccount) {
+          onSelectAccount(newAccount);
+        } else if (onSelectPersona) {
+          onSelectPersona(newAccount.role);
+        }
+      }
     } finally {
       setIsCreatingRole(null);
     }

@@ -1,6 +1,23 @@
 {
   "oops": "Oops!",
-  "unexpected": "An unexpected error occurred.",
+  "unexpected": "An unexpected system anomaly occurred.",
   "notFound": "404",
-  "pageNotFound": "The requested page could not be found."
+  "pageNotFound": "The requested terminal route could not be found.",
+  "openTerminal": "Open Diagnostic Terminal",
+  "returnHome": "Return to Home",
+  "reloadPage": "Reload Interface",
+  "diagnosticDetails": "Diagnostic Telemetry Details",
+  "errorTitle": "System Diagnostic Alert",
+  "DATABASE_ERROR": "Database operation failed. Please verify D1 connectivity.",
+  "FOREIGN_KEY_ERROR": "Referenced institution or relationship was not found.",
+  "UNAUTHORIZED_EMAIL_DOMAIN": "Unauthorized email domain. Please use your institutional cadet address.",
+  "MISSING_REQUIRED_FIELDS": "First Name and Family Name are required to issue ID-1 credentials.",
+  "SERVICE_UNAVAILABLE": "Cloud infrastructure service is temporarily unavailable.",
+  "NETWORK_ERROR": "Network transmission error. Check your connection.",
+  "UNAUTHENTICATED": "Authentication required. Please sign in to proceed.",
+  "FORBIDDEN": "Access forbidden: Security permission required.",
+  "SERVER_ERROR": "Internal server execution failed. Telemetry logged.",
+  "UPLOAD_FAILED": "Object storage upload failed. Verify R2 bucket permissions.",
+  "INVALID_FILE_TYPE": "Invalid file format. Please select a valid image.",
+  "FILE_TOO_LARGE": "File size exceeds the allowable avatar limit (2MB)."
 }

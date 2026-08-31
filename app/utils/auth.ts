@@ -37,102 +37,21 @@ export interface AccountDefinition {
 
 export const DEV_PERSONAS: readonly PersonaDefinition[] = [];
 
-let inMemoryAccounts: AccountDefinition[] = [];
-
-export function resetInMemoryAccounts(): void {
-  inMemoryAccounts = [];
-}
-
-export function getInitialFallbackAccounts(): AccountDefinition[] {
-  return [...inMemoryAccounts];
-}
-
-export function findInMemoryAccount(id: string): AccountDefinition | undefined {
-  return inMemoryAccounts.find((a) => a.id === id);
-}
-
-function getRoleLabel(role: UserRole): string {
+export function getRoleLabel(role: UserRole): string {
   if (role === "admin") return "Admin";
   if (role === "instructor") return "Instructor";
   return "Student";
 }
 
-function getRoleTitle(role: UserRole, isComplete: boolean): string {
+export function getRoleTitle(role: UserRole, isComplete: boolean): string {
   if (!isComplete) return "Onboarding Pending • Unconfigured Profile";
   if (role === "admin") return "System Administrator";
   if (role === "instructor") return "Instructor";
   return "Student";
 }
 
-function createInMemoryAccount(
-  id: string,
-  updates: Partial<AccountDefinition>,
-): AccountDefinition {
-  const role = updates.role ?? "student";
-  const roleLabel = getRoleLabel(role);
-  const firstName = (updates.firstName ?? "").trim();
-  const lastName = (updates.lastName ?? "").trim().toUpperCase();
-  const fullName = `${firstName} ${lastName}`.trim();
-  const isComplete = Boolean(updates.isProfileComplete);
-
-  return {
-    id,
-    name: updates.name || fullName || `New ${roleLabel} (Pending Onboarding)`,
-    firstName,
-    lastName,
-    email: updates.email ?? "",
-    role,
-    badge: updates.badge ?? roleLabel,
-    title: updates.title ?? getRoleTitle(role, isComplete),
-    isProfileComplete: isComplete,
-    institutionId: updates.institutionId ?? "school-aptitek",
-    createdAt: new Date(),
-  };
-}
-
-function mergeInMemoryAccount(
-  existing: AccountDefinition,
-  updates: Partial<AccountDefinition>,
-): AccountDefinition {
-  const firstName = (updates.firstName ?? existing.firstName ?? "").trim();
-  const lastName = (updates.lastName ?? existing.lastName ?? "")
-    .trim()
-    .toUpperCase();
-  const fullName = `${firstName} ${lastName}`.trim();
-  const isComplete =
-    updates.isProfileComplete !== undefined
-      ? updates.isProfileComplete
-      : Boolean(firstName && lastName);
-
-  return {
-    ...existing,
-    ...updates,
-    firstName,
-    lastName,
-    name: updates.name ?? (fullName || existing.name),
-    isProfileComplete: isComplete,
-    title: getRoleTitle(existing.role, isComplete),
-  };
-}
-
-export function updateInMemoryAccount(
-  id: string,
-  updates: Partial<AccountDefinition>,
-): AccountDefinition {
-  const index = inMemoryAccounts.findIndex((a) => a.id === id);
-  if (index === -1) {
-    const newAcc = createInMemoryAccount(id, updates);
-    inMemoryAccounts = [newAcc, ...inMemoryAccounts];
-    return newAcc;
-  }
-
-  const updated = mergeInMemoryAccount(inMemoryAccounts[index], updates);
-  inMemoryAccounts[index] = updated;
-  return updated;
-}
-
 export async function fetchAccountsFromDb(): Promise<AccountDefinition[]> {
-  if (typeof window !== "undefined" && typeof fetch !== "undefined") {
+  if (typeof fetch !== "undefined") {
     try {
       const res = await fetch("/api/auth?action=accounts");
       if (res.ok) {
@@ -143,21 +62,20 @@ export async function fetchAccountsFromDb(): Promise<AccountDefinition[]> {
           accountsResponse.accounts &&
           Array.isArray(accountsResponse.accounts)
         ) {
-          inMemoryAccounts = accountsResponse.accounts;
           return accountsResponse.accounts;
         }
       }
     } catch {
-      // Fallback cleanly to in-memory store
+      // Network or offline error
     }
   }
-  return inMemoryAccounts;
+  return [];
 }
 
 export async function createAccountInDb(
   role: UserRole,
-): Promise<AccountDefinition> {
-  if (typeof window !== "undefined" && typeof fetch !== "undefined") {
+): Promise<AccountDefinition | null> {
+  if (typeof fetch !== "undefined") {
     try {
       const res = await fetch("/api/auth", {
         method: "POST",
@@ -169,37 +87,14 @@ export async function createAccountInDb(
           account?: AccountDefinition;
         };
         if (createResponse.account) {
-          inMemoryAccounts = [createResponse.account, ...inMemoryAccounts];
           return createResponse.account;
         }
       }
     } catch {
-      // Fallback
+      // Network or offline error
     }
   }
-
-  // In-memory fallback (e.g. Storybook / offline)
-  const roleLabel =
-    role === "admin"
-      ? "Admin"
-      : role === "instructor"
-        ? "Instructor"
-        : "Student";
-  const newMockAccount: AccountDefinition = {
-    id: `mock-${role}-${Date.now().toString(36)}`,
-    name: `New ${roleLabel} (Pending Onboarding)`,
-    firstName: "",
-    lastName: "",
-    email: "",
-    role,
-    badge: roleLabel,
-    title: "Onboarding Pending • Unconfigured Profile",
-    isProfileComplete: false,
-    createdAt: new Date(),
-  };
-
-  inMemoryAccounts = [newMockAccount, ...inMemoryAccounts];
-  return newMockAccount;
+  return null;
 }
 
 export function loginWithGitHub(redirectTarget = "/"): void {

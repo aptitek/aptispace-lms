@@ -1,36 +1,77 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import DevImpersonator from "./DevImpersonator";
 import {
   createAccountInDb,
-  getInitialFallbackAccounts,
+  fetchAccountsFromDb,
+  getRoleLabel,
+  getRoleTitle,
   loginAsAccount,
   loginAsPersona,
 } from "~/utils/auth";
 
 describe("DevImpersonator Molecule & Auth Utilities", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("exports DevImpersonator component properly", () => {
     expect(DevImpersonator).toBeDefined();
     expect(typeof DevImpersonator).toBe("function");
   });
 
-  it("exports clean initial fallback accounts starting empty", () => {
-    const initialAccounts = getInitialFallbackAccounts();
-    expect(Array.isArray(initialAccounts)).toBe(true);
+  it("formats role labels and titles correctly", () => {
+    expect(getRoleLabel("admin")).toBe("Admin");
+    expect(getRoleLabel("instructor")).toBe("Instructor");
+    expect(getRoleLabel("student")).toBe("Student");
+
+    expect(getRoleTitle("student", false)).toContain("Onboarding Pending");
+    expect(getRoleTitle("admin", true)).toBe("System Administrator");
+    expect(getRoleTitle("instructor", true)).toBe("Instructor");
+    expect(getRoleTitle("student", true)).toBe("Student");
   });
 
-  it("creates accounts with pending onboarding status", async () => {
-    const newStudent = await createAccountInDb("student");
-    expect(newStudent.id).toBeDefined();
-    expect(newStudent.role).toBe("student");
-    expect(newStudent.isProfileComplete).toBe(false);
+  it("fetches accounts from API via fetchAccountsFromDb", async () => {
+    const mockAccounts = [
+      {
+        id: "user-1",
+        name: "Alice Smith",
+        email: "alice.smith@aptitek.io",
+        role: "student" as const,
+        badge: "Student",
+        title: "Student",
+        isProfileComplete: true,
+      },
+    ];
 
-    const newAdmin = await createAccountInDb("admin");
-    expect(newAdmin.role).toBe("admin");
-    expect(newAdmin.isProfileComplete).toBe(false);
+    globalThis.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ accounts: mockAccounts }),
+    } as unknown as Response);
 
-    const newInstructor = await createAccountInDb("instructor");
-    expect(newInstructor.role).toBe("instructor");
-    expect(newInstructor.isProfileComplete).toBe(false);
+    const accounts = await fetchAccountsFromDb();
+    expect(accounts).toEqual(mockAccounts);
+  });
+
+  it("creates accounts via createAccountInDb", async () => {
+    const mockCreated = {
+      id: "user-new-123",
+      name: "New Student (Pending Onboarding)",
+      firstName: "",
+      lastName: "",
+      email: "",
+      role: "student" as const,
+      badge: "Student",
+      title: "Onboarding Pending • Unconfigured Profile",
+      isProfileComplete: false,
+    };
+
+    globalThis.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ account: mockCreated }),
+    } as unknown as Response);
+
+    const result = await createAccountInDb("student");
+    expect(result).toEqual(mockCreated);
   });
 
   it("resolves loginAsAccount with target account credentials", async () => {

@@ -131,20 +131,32 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
 
   it("converts family name to uppercase when saving user edits", async () => {
     const { saveUserEdits } = await import("./onboarding.helpers.server");
-    const { findInMemoryAccount, updateInMemoryAccount } =
-      await import("~/utils/auth");
-
-    updateInMemoryAccount("test-user-upper", {
+    const userService = await import("~/services/userService");
+    vi.spyOn(userService, "getUserById").mockResolvedValueOnce({
       id: "test-user-upper",
       firstName: "Jane",
-      lastName: "smith",
-      role: "student",
-      email: "jane.smith@aptitek.io",
-      name: "Jane smith",
+      lastName: "SMITH",
+      displayName: "Jane SMITH",
+      githubId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
+    const updateUserSpy = vi
+      .spyOn(userService, "updateUser")
+      .mockResolvedValueOnce({
+        id: "test-user-upper",
+        firstName: "Jane",
+        lastName: "SMITH",
+        displayName: "Jane SMITH",
+        githubId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+    const mockDb = {} as Parameters<typeof saveUserEdits>[0]["db"];
 
     await saveUserEdits({
-      db: null,
+      db: mockDb,
       userId: "test-user-upper",
       firstName: "Jane",
       familyName: "smith",
@@ -152,8 +164,52 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
       hasNameFields: true,
     });
 
-    const updated = findInMemoryAccount("test-user-upper");
-    expect(updated?.lastName).toBe("SMITH");
-    expect(updated?.name).toBe("Jane SMITH");
+    expect(updateUserSpy).toHaveBeenCalledWith(
+      mockDb,
+      "test-user-upper",
+      expect.objectContaining({
+        firstName: "Jane",
+        lastName: "SMITH",
+        displayName: "Jane SMITH",
+      }),
+    );
+  });
+
+  it("auto-creates user record if not present in database when saving edits", async () => {
+    const { saveUserEdits } = await import("./onboarding.helpers.server");
+    const userService = await import("~/services/userService");
+    vi.spyOn(userService, "getUserById").mockResolvedValueOnce(null);
+    const createUserSpy = vi
+      .spyOn(userService, "createUser")
+      .mockResolvedValueOnce({
+        id: "new-student-123",
+        firstName: "Alex",
+        lastName: "RIDER",
+        displayName: "Alex RIDER",
+        githubId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+    const mockDb = {} as Parameters<typeof saveUserEdits>[0]["db"];
+
+    await saveUserEdits({
+      db: mockDb,
+      userId: "new-student-123",
+      firstName: "Alex",
+      familyName: "rider",
+      schoolId: "school-aptitek",
+      hasNameFields: true,
+    });
+
+    expect(createUserSpy).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({
+        id: "new-student-123",
+        firstName: "Alex",
+        lastName: "RIDER",
+        displayName: "Alex RIDER",
+      }),
+    );
   });
 });

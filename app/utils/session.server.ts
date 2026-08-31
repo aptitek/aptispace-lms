@@ -1,6 +1,6 @@
 import { getDatabaseFromContext, type Database } from "../db/index";
 import { getUserWithAffiliations } from "../services/userService";
-import { findInMemoryAccount, type UserRole } from "./auth";
+import type { UserRole } from "./auth";
 
 export interface SessionPayload {
   userId: string;
@@ -204,43 +204,9 @@ function throwForbiddenRole(requiredRole: UserRole): never {
   );
 }
 
-function mapInMemoryUser(
-  inMem: NonNullable<ReturnType<typeof findInMemoryAccount>>,
-) {
-  return {
-    id: inMem.id,
-    firstName: inMem.firstName || "",
-    lastName: (inMem.lastName || "").toUpperCase(),
-    displayName: inMem.name,
-    githubId: null,
-    createdAt: inMem.createdAt ? new Date(inMem.createdAt) : new Date(),
-    updatedAt: new Date(),
-    affiliations: [
-      {
-        id: `affil-${inMem.id}`,
-        userId: inMem.id,
-        institutionId: inMem.institutionId ?? "school-aptitek",
-        cohortId: inMem.cohortId ?? null,
-        email: inMem.email,
-        role: inMem.role,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        institution: {} as never,
-        cohort: null,
-      },
-    ],
-  } as unknown as NonNullable<
-    Awaited<ReturnType<typeof getUserWithAffiliations>>
-  >;
-}
-
 async function resolveSessionUser(db: Database | null, userId: string) {
-  if (db) {
-    return getUserWithAffiliations(db, userId);
-  }
-  const inMem = findInMemoryAccount(userId);
-  return inMem ? mapInMemoryUser(inMem) : null;
+  if (!db) return null;
+  return getUserWithAffiliations(db, userId);
 }
 
 export async function authGuard(

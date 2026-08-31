@@ -1,11 +1,14 @@
 import type { Database } from "~/db";
+import { institutions } from "~/db/schema";
 import type { SchoolConfig } from "~/components/organisms/OnboardingCard/OnboardingCard.types";
 import { validateFixedDomainEmail } from "~/utils/emailSecurity";
 import { authGuard } from "~/utils/session.server";
-import { resolveActiveUser, updateInMemoryAccount } from "~/utils/auth";
+import { resolveActiveUser } from "~/utils/auth";
 import {
   updateUser,
   updateUserAffiliation,
+  getUserById,
+  createUser,
   isUserProfileComplete,
 } from "~/services/userService";
 import {
@@ -28,22 +31,29 @@ export function validateActionInputs(
   const { actionType, firstName, familyName, validation, hasNameFields } =
     params;
 
-  if (actionType !== "validate_credential") {
-    return null;
-  }
-
   if (!validation.isValid) {
     return Response.json(
-      { error: validation.error, code: "UNAUTHORIZED_EMAIL_DOMAIN" },
+      {
+        error: validation.error,
+        code: "UNAUTHORIZED_EMAIL_DOMAIN",
+        errorCode: "UNAUTHORIZED_EMAIL_DOMAIN",
+        success: false,
+      },
       { status: 400 },
     );
   }
 
-  if (hasNameFields && (!firstName || !familyName)) {
+  if (
+    actionType === "validate_credential" &&
+    hasNameFields &&
+    (!firstName || !familyName)
+  ) {
     return Response.json(
       {
         error: "First Name and Family Name are required.",
         code: "MISSING_REQUIRED_FIELDS",
+        errorCode: "MISSING_REQUIRED_FIELDS",
+        success: false,
       },
       { status: 400 },
     );
@@ -62,6 +72,86 @@ export interface SaveUserEditsParams {
   hasNameFields?: boolean;
 }
 
+async function findExistingInstitutionId(
+  db: Database,
+  schoolId?: string,
+): Promise<string | undefined> {
+  if (!schoolId) return undefined;
+  const slugCandidate = schoolId.replace(/^school-/, "");
+  const inst = await db.query.institutions.findFirst({
+    where: (i, { eq, or }) => or(eq(i.id, schoolId), eq(i.slug, slugCandidate)),
+  });
+  return inst?.id;
+}
+
+async function resolveTargetInstitutionId(
+  db: Database,
+  schoolId?: string,
+): Promise<string> {
+  const existingId = await findExistingInstitutionId(db, schoolId);
+  if (existingId) return existingId;
+
+  const anyInst = await db.query.institutions.findFirst();
+  if (anyInst) return anyInst.id;
+
+  const now = new Date();
+  const [created] = await db
+    .insert(institutions)
+    .values({
+      name: "Aptitek",
+      slug: "aptitek",
+      type: "academic",
+      logoUrl: "/aptitek-logo.svg",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+  return created.id;
+}
+
+interface SyncUserRecordParams {
+  db: Database;
+  userId: string;
+  firstName: string;
+  familyName: string;
+  displayName: string;
+  hasNameFields?: boolean;
+}
+
+async function updateExistingUser(
+  db: Database,
+  userId: string,
+  existingUser: NonNullable<Awaited<ReturnType<typeof getUserById>>>,
+  params: SyncUserRecordParams,
+) {
+  if (params.hasNameFields || params.firstName || params.familyName) {
+    await updateUser(db, userId, {
+      firstName: params.firstName || existingUser.firstName,
+      lastName: params.familyName || existingUser.lastName,
+      displayName: params.displayName || null,
+    });
+  }
+}
+
+async function syncUserRecord(params: SyncUserRecordParams) {
+  const { db, userId, firstName, familyName, displayName } = params;
+  const existingUser = await getUserById(db, userId);
+
+  if (existingUser) {
+    await updateExistingUser(db, userId, existingUser, params);
+    return;
+  }
+
+  const fallbackFirst = firstName || "Student";
+  const fallbackFamily = familyName || "CADET";
+  await createUser(db, {
+    id: userId,
+    firstName: fallbackFirst,
+    lastName: fallbackFamily,
+    displayName: displayName || `${fallbackFirst} ${fallbackFamily}`,
+  });
+}
+
 export async function saveUserEdits(params: SaveUserEditsParams) {
   const {
     db,
@@ -72,38 +162,28 @@ export async function saveUserEdits(params: SaveUserEditsParams) {
     schoolId,
     hasNameFields,
   } = params;
-  if (!userId) return;
+  if (!userId || !db) return;
 
   const trimmedFirst = firstName.trim();
   const trimmedFamily = familyName.trim().toUpperCase();
   const displayName = `${trimmedFirst} ${trimmedFamily}`.trim();
-  const isComplete = Boolean(trimmedFirst && trimmedFamily);
 
-  if (db) {
-    const typedDb = db as Database;
+  const typedDb = db as Database;
 
-    if (hasNameFields || firstName || familyName) {
-      await updateUser(typedDb, userId, {
-        firstName: trimmedFirst,
-        lastName: trimmedFamily,
-        displayName: displayName || null,
-      });
-    }
+  await syncUserRecord({
+    db: typedDb,
+    userId,
+    firstName: trimmedFirst,
+    familyName: trimmedFamily,
+    displayName,
+    hasNameFields,
+  });
 
-    if (fullEmail !== undefined) {
-      await updateUserAffiliation(typedDb, userId, {
-        email: fullEmail,
-        institutionId: schoolId,
-      });
-    }
-  } else {
-    updateInMemoryAccount(userId, {
-      firstName: trimmedFirst,
-      lastName: trimmedFamily,
-      name: displayName || undefined,
+  if (fullEmail !== undefined) {
+    const targetInstId = await resolveTargetInstitutionId(typedDb, schoolId);
+    await updateUserAffiliation(typedDb, userId, {
       email: fullEmail,
-      institutionId: schoolId,
-      isProfileComplete: isComplete,
+      institutionId: targetInstId,
     });
   }
 }
@@ -118,15 +198,21 @@ interface ActionFormData {
 }
 
 function parseActionFormData(formData: FormData): ActionFormData {
+  const actionType = String(formData.get("actionType") || "");
+  const firstName = String(formData.get("firstName") || "");
+  const familyName = String(formData.get("familyName") || "");
+  const rawEmail = String(formData.get("email") || "");
+  const schoolId = String(formData.get("schoolId") || "");
+  const school = resolveSchool(schoolId);
+  const hasNameFields = formData.has("firstName") || formData.has("familyName");
+
   return {
-    actionType: String(formData.get("actionType") || "validate_credential"),
-    firstName: String(formData.get("firstName") || "").trim(),
-    familyName: String(formData.get("familyName") || "")
-      .trim()
-      .toUpperCase(),
-    rawEmail: String(formData.get("email") || "").trim(),
-    school: resolveSchool(String(formData.get("schoolId") || "")),
-    hasNameFields: formData.has("firstName") || formData.has("familyName"),
+    actionType,
+    firstName,
+    familyName,
+    rawEmail,
+    school,
+    hasNameFields,
   };
 }
 
@@ -134,67 +220,102 @@ function createActionResponse(
   actionType: string,
   fullEmail?: string,
 ): Response {
-  if (actionType === "update_draft") {
+  if (actionType === "validate_credential") {
     return Response.json({
       success: true,
-      draftSaved: true,
-      email: fullEmail,
+      redirect: "/",
+      issuedAt: new Date().toISOString(),
     });
   }
 
   return Response.json({
     success: true,
+    draftSaved: true,
     email: fullEmail,
-    redirect: "/",
   });
 }
 
 async function saveUserEditsIfPresent(
   auth: Awaited<ReturnType<typeof authGuard>>,
   userId: string | undefined | null,
-  data: ActionFormData,
+  payload: ActionFormData,
   validation: ReturnType<typeof validateFixedDomainEmail>,
 ) {
   if (userId) {
     await saveUserEdits({
       db: auth?.db,
       userId,
-      firstName: data.firstName,
-      familyName: data.familyName,
-      fullEmail: validation.fullEmail || data.rawEmail,
-      schoolId: data.school.id,
-      hasNameFields: data.hasNameFields,
+      firstName: payload.firstName,
+      familyName: payload.familyName,
+      fullEmail: validation.fullEmail || payload.rawEmail,
+      schoolId: payload.school.id,
+      hasNameFields: payload.hasNameFields,
     });
   }
+}
+
+function classifyErrorMessage(errorMessage: string): {
+  errorCode: string;
+  isForeignKey: boolean;
+} {
+  const isForeignKey =
+    errorMessage.includes("FOREIGN KEY") ||
+    errorMessage.includes("SQLITE_CONSTRAINT");
+  return {
+    errorCode: isForeignKey ? "FOREIGN_KEY_ERROR" : "DATABASE_ERROR",
+    isForeignKey,
+  };
 }
 
 export async function handleOnboardingAction(
   request: Request,
   context: unknown,
 ): Promise<Response> {
-  const auth = await authGuard(request, context, { allowAnonymous: true });
-  const userId = auth?.session?.userId ?? auth?.user?.id;
+  try {
+    const auth = await authGuard(request, context, { allowAnonymous: true });
+    const userId = auth?.session?.userId ?? auth?.user?.id;
 
-  const formData = await request.formData().catch(() => new FormData());
-  const data = parseActionFormData(formData);
+    const formData = await request.formData().catch(() => new FormData());
+    const payload = parseActionFormData(formData);
 
-  const domain = data.school.emailDomain || CADET_FIXED_DOMAIN;
-  const validation = validateFixedDomainEmail(data.rawEmail, domain);
+    const domain = payload.school.emailDomain || CADET_FIXED_DOMAIN;
+    const validation = validateFixedDomainEmail(payload.rawEmail, domain);
 
-  const validationError = validateActionInputs({
-    actionType: data.actionType,
-    firstName: data.firstName,
-    familyName: data.familyName,
-    validation,
-    hasNameFields: data.hasNameFields,
-  });
-  if (validationError) {
-    return validationError;
+    const validationError = validateActionInputs({
+      actionType: payload.actionType,
+      firstName: payload.firstName,
+      familyName: payload.familyName,
+      validation,
+      hasNameFields: payload.hasNameFields,
+    });
+    if (validationError) {
+      return validationError;
+    }
+
+    await saveUserEditsIfPresent(auth, userId, payload, validation);
+
+    return createActionResponse(payload.actionType, validation.fullEmail);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Failed to process onboarding action";
+    const { errorCode } = classifyErrorMessage(errorMessage);
+
+    return Response.json(
+      {
+        success: false,
+        error: errorMessage,
+        code: errorCode,
+        errorCode,
+        details: errorMessage,
+      },
+      {
+        status: 400,
+        headers: { "Cache-Control": "no-store" },
+      },
+    );
   }
-
-  await saveUserEditsIfPresent(auth, userId, data, validation);
-
-  return createActionResponse(data.actionType, validation.fullEmail);
 }
 
 function resolveAuthUserId(

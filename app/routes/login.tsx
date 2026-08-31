@@ -3,22 +3,13 @@ import { useTranslation } from "react-i18next";
 import type { LoaderFunctionArgs } from "react-router";
 import AuthLayout from "~/components/templates/AuthLayout/AuthLayout";
 import LoginCard from "~/components/organisms/LoginCard/LoginCard";
-import { getSession } from "~/utils/session.server";
-import { getDatabaseFromContext } from "~/db";
-import {
-  getUserWithAffiliations,
-  isUserProfileComplete,
-} from "~/services/userService";
+import { authGuard } from "~/utils/session.server";
+import { isUserProfileComplete } from "~/services/userService";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const session = await getSession(request);
-  if (session) {
-    const db = getDatabaseFromContext(context);
-    const user =
-      db && session.userId
-        ? await getUserWithAffiliations(db, session.userId)
-        : null;
-    if (!user || !isUserProfileComplete(user)) {
+  const auth = await authGuard(request, context, { allowAnonymous: true });
+  if (auth && auth.session) {
+    if (!auth.user || !isUserProfileComplete(auth.user)) {
       return new Response(null, {
         status: 302,
         headers: { Location: "/onboarding" },

@@ -12,6 +12,7 @@ export interface TelemetryEventItem {
   message: string;
   severity: NotificationSeverity;
   timestamp: Date;
+  errorCode?: string;
   statusCode?: number;
   source?: string;
   stack?: string;
@@ -26,6 +27,7 @@ export interface NotifyInput {
   title?: string;
   message: string;
   severity?: NotificationSeverity;
+  errorCode?: string;
   statusCode?: number;
   source?: string;
   stack?: string;
@@ -36,6 +38,23 @@ export interface NotifyInput {
   showSnackbar?: boolean;
 }
 
+export interface ServiceHealthReport {
+  name: string;
+  status: SystemHealthStatus;
+  latencyMs?: number;
+  details?: string;
+  error?: string;
+}
+
+export interface SystemInfrastructureHealth {
+  status: SystemHealthStatus;
+  timestamp: string;
+  services: {
+    d1: ServiceHealthReport;
+    r2: ServiceHealthReport;
+  };
+}
+
 export interface StatusCenterContextValue {
   events: TelemetryEventItem[];
   activeSnackbar: TelemetryEventItem | null;
@@ -44,6 +63,8 @@ export interface StatusCenterContextValue {
   systemStatus: SystemHealthStatus;
   bpm: number;
   activeFilter: EventFilterType;
+  infrastructureHealth: SystemInfrastructureHealth | null;
+  isCheckingHealth: boolean;
   setActiveFilter: (filter: EventFilterType) => void;
   notify: (input: NotifyInput) => TelemetryEventItem;
   notifyError: (
@@ -73,6 +94,7 @@ export interface StatusCenterContextValue {
   clearItem: (eventId: string) => void;
   clearAll: () => void;
   reportItem: (eventId: string) => Promise<{ reportId: string } | null>;
+  checkInfrastructureHealth: () => Promise<SystemInfrastructureHealth | null>;
   simulateEvent: (
     type:
       "nominal" | "warning" | "error" | "critical" | "security_403" | "offline",

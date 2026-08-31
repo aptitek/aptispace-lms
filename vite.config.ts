@@ -16,9 +16,43 @@ const isTestOrStorybook =
     process.env.npm_lifecycle_event?.includes("test"),
   );
 
+function cloudflareDevPlugin() {
+  let proxyDispose: (() => Promise<void>) | null = null;
+  return {
+    name: "cloudflare-dev-proxy",
+    async configureServer() {
+      try {
+        const { getPlatformProxy } = await import("wrangler");
+        const proxy = await getPlatformProxy({
+          configPath: path.resolve(dirname, "./wrangler.jsonc"),
+          persist: true,
+        });
+        (
+          globalThis as unknown as { __CLOUDFLARE_ENV__?: unknown }
+        ).__CLOUDFLARE_ENV__ = proxy.env;
+        proxyDispose = proxy.dispose;
+      } catch (err) {
+        console.warn(
+          "[cloudflare-dev-proxy] Warning: local Cloudflare proxy not started:",
+          err,
+        );
+      }
+    },
+    async closeBundle() {
+      if (proxyDispose) {
+        await proxyDispose();
+      }
+    },
+  };
+}
+
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
-  plugins: [tailwindcss(), !isTestOrStorybook && reactRouter()].filter(Boolean),
+  plugins: [
+    tailwindcss(),
+    !isTestOrStorybook && cloudflareDevPlugin(),
+    !isTestOrStorybook && reactRouter(),
+  ].filter(Boolean),
   resolve: {
     alias: {
       "~": path.resolve(dirname, "./app"),

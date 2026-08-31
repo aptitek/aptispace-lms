@@ -55,6 +55,24 @@ CREATE TABLE `criteria` (
 	FOREIGN KEY (`module_id`) REFERENCES `modules`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE TABLE `error_reports` (
+	`id` text PRIMARY KEY NOT NULL,
+	`message` text NOT NULL,
+	`stack` text,
+	`severity` text DEFAULT 'error' NOT NULL,
+	`status_code` integer,
+	`source` text DEFAULT 'client',
+	`url` text,
+	`path` text,
+	`ip_address` text,
+	`user_agent` text,
+	`context_data` text,
+	`user_id` text,
+	`status` text DEFAULT 'open' NOT NULL,
+	`created_at` integer NOT NULL,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null
+);
+--> statement-breakpoint
 CREATE TABLE `grades` (
 	`id` text PRIMARY KEY NOT NULL,
 	`criteria_id` text NOT NULL,

@@ -12,14 +12,69 @@
     "build-storybook": "storybook build",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "wireit",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate:local": "wrangler d1 migrations apply aptispace-lms-db --local",
+    "db:generate": "wireit",
+    "db:migrate:local": "wireit",
     "db:migrate:remote": "wrangler d1 migrations apply aptispace-lms-db --remote",
+    "db:seed:local": "wireit",
+    "db:reset:local": "wireit",
+    "db:setup:local": "wireit",
     "typegen:cf": "wrangler types",
     "deploy": "wrangler deploy",
     "prepare": "husky"
   },
   "wireit": {
+    "db:generate": {
+      "command": "drizzle-kit generate",
+      "files": [
+        "app/db/schema.ts",
+        "drizzle.config.ts"
+      ],
+      "output": [
+        "drizzle/migrations/**/*"
+      ]
+    },
+    "db:migrate:local": {
+      "command": "wrangler d1 migrations apply aptispace-lms-db --local",
+      "env": {
+        "CI": "true"
+      },
+      "files": [
+        "drizzle/migrations/**/*",
+        "wrangler.jsonc"
+      ],
+      "output": []
+    },
+    "db:seed:local": {
+      "command": "tsx scripts/seed-local.ts",
+      "dependencies": [
+        "db:migrate:local"
+      ],
+      "files": [
+        "scripts/seed-local.ts",
+        "app/db/**/*",
+        "wrangler.jsonc"
+      ],
+      "output": []
+    },
+    "db:reset:local": {
+      "command": "tsx scripts/reset-local.ts",
+      "dependencies": [
+        "db:migrate:local"
+      ],
+      "files": [
+        "scripts/reset-local.ts",
+        "app/db/**/*",
+        "wrangler.jsonc"
+      ],
+      "output": []
+    },
+    "db:setup:local": {
+      "dependencies": [
+        "db:generate",
+        "db:migrate:local",
+        "db:seed:local"
+      ]
+    },
     "test": {
       "command": "vitest run",
       "files": [
@@ -98,6 +153,9 @@
     "dev": {
       "command": "react-router dev",
       "service": true,
+      "dependencies": [
+        "db:migrate:local"
+      ],
       "env": {
         "NODE_OPTIONS": "--max-http-header-size=65536"
       }

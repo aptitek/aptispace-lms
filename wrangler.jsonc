@@ -12,4 +12,10 @@
       "migrations_dir": "./drizzle/migrations",
     },
   ],
+  "r2_buckets": [
+    {
+      "binding": "AVATARS_BUCKET",
+      "bucket_name": "aptispace-avatars",
+    },
+  ],
 }

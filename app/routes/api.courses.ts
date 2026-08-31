@@ -11,16 +11,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const courseId = url.searchParams.get("id");
 
   if (!db) {
-    return Response.json({
-      courses: [
-        {
-          id: "demo-course-1",
-          title: "Fullstack Web Engineering",
-          description:
-            "Comprehensive course covering React, TypeScript, serverless architecture, and databases.",
-        },
-      ],
-    });
+    return Response.json(
+      { error: "Database binding unavailable." },
+      { status: 503 },
+    );
   }
 
   if (courseId) {

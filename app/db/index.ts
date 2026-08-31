@@ -12,17 +12,23 @@ export interface CloudflareEnv {
 }
 
 export function getDatabaseFromContext(context: unknown): Database | null {
-  if (!context || typeof context !== "object") return null;
+  if (context && typeof context === "object") {
+    const ctx = context as {
+      cloudflare?: { env?: CloudflareEnv };
+      env?: CloudflareEnv;
+    };
+    const d1 = ctx.cloudflare?.env?.DB ?? ctx.env?.DB;
+    if (d1) return getDb(d1);
+  }
 
-  const ctx = context as {
-    cloudflare?: { env?: CloudflareEnv };
-    env?: CloudflareEnv;
-  };
+  const globalEnv = (
+    globalThis as unknown as { __CLOUDFLARE_ENV__?: CloudflareEnv }
+  ).__CLOUDFLARE_ENV__;
+  if (globalEnv?.DB) {
+    return getDb(globalEnv.DB);
+  }
 
-  const d1 = ctx.cloudflare?.env?.DB ?? ctx.env?.DB;
-  if (!d1) return null;
-
-  return getDb(d1);
+  return null;
 }
 
 export type Database = DrizzleD1Database<typeof schema>;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -9,12 +9,23 @@ import {
 } from "react-router";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
+import TerminalRoundedIcon from "@mui/icons-material/TerminalRounded";
 import { useTranslation } from "react-i18next";
 
 import type { Route } from "./+types/root";
 import { getThemeByMode } from "./tokens/theme";
 import { ThemeModeProvider, useThemeMode } from "./utils/themeContext";
-import { StatusCenterProvider } from "./utils/statusCenterContext";
+import {
+  StatusCenterProvider,
+  useStatusCenter,
+} from "./utils/statusCenterContext";
 import M3Snackbar from "./components/molecules/StatusCenter/M3Snackbar";
 import StatusTerminalCard from "./components/organisms/StatusCenter/StatusTerminalCard";
 import { LANGUAGE_STORAGE_KEY } from "./i18n";
@@ -98,30 +109,155 @@ export default function App() {
   return <Outlet />;
 }
 
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  const { t } = useTranslation("errors");
-  let message = t("oops");
-  let details = t("unexpected");
-  let stack: string | undefined;
+interface ErrorDisplayDetails {
+  title: string;
+  details: string;
+  statusCode?: number;
+  stack?: string;
+  isNotFound: boolean;
+}
 
+function resolveErrorDisplayDetails(
+  error: unknown,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): ErrorDisplayDetails {
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? t("notFound") : "Error";
-    details =
-      error.status === 404 ? t("pageNotFound") : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
-    details = error.message;
-    stack = error.stack;
+    const isNotFound = error.status === 404;
+    return {
+      title: isNotFound ? t("notFound") : "HTTP Error",
+      details: isNotFound
+        ? t("pageNotFound")
+        : error.statusText || t("unexpected"),
+      statusCode: error.status,
+      isNotFound,
+    };
   }
 
-  return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
-    </main>
+  const isDev = import.meta.env.DEV;
+  const isErrInstance = error instanceof Error;
+
+  return {
+    title: t("oops"),
+    details: isErrInstance ? error.message : t("unexpected"),
+    statusCode: 500,
+    stack: isDev && isErrInstance ? error.stack : undefined,
+    isNotFound: false,
+  };
+}
+
+function ErrorBoundaryContent({ error }: { error: unknown }) {
+  const { t } = useTranslation("errors");
+  const { notifyError, openTerminal } = useStatusCenter();
+  const errorInfo = useMemo(
+    () => resolveErrorDisplayDetails(error, t),
+    [error, t],
   );
+
+  useEffect(() => {
+    notifyError(error, {
+      title: errorInfo.title,
+      message: errorInfo.details,
+      statusCode: errorInfo.statusCode,
+      source: "react-router.error-boundary",
+      stack: errorInfo.stack,
+    });
+  }, [error, errorInfo, notifyError]);
+
+  return (
+    <Box
+      component="main"
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        p: { xs: 2, sm: 4 },
+        backgroundColor: "background.default",
+      }}
+    >
+      <Paper
+        elevation={2}
+        sx={{
+          maxWidth: 600,
+          width: "100%",
+          p: { xs: 3, sm: 4 },
+          borderRadius: 3,
+          border: 1,
+          borderColor: "divider",
+          backgroundColor: "background.paper",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Chip
+            label={errorInfo.statusCode || "ERR"}
+            color={errorInfo.isNotFound ? "warning" : "error"}
+            variant="outlined"
+            sx={{ fontWeight: 800, fontFamily: "monospace" }}
+          />
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: 800, letterSpacing: "-0.02em" }}
+          >
+            {errorInfo.title}
+          </Typography>
+        </Box>
+
+        <Typography variant="body1" color="text.secondary">
+          {errorInfo.details}
+        </Typography>
+
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          sx={{ pt: 1 }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<HomeRoundedIcon />}
+            href="/"
+          >
+            {t("returnHome", { defaultValue: "Return to Home" })}
+          </Button>
+
+          <Button
+            variant="outlined"
+            color="inherit"
+            startIcon={<TerminalRoundedIcon />}
+            onClick={openTerminal}
+          >
+            {t("openTerminal", {
+              defaultValue: "Open Diagnostic Terminal",
+            })}
+          </Button>
+        </Stack>
+
+        {errorInfo.stack && (
+          <Box
+            component="pre"
+            sx={{
+              mt: 2,
+              p: 2,
+              borderRadius: 1.5,
+              backgroundColor: "action.hover",
+              color: "text.primary",
+              fontFamily: "monospace",
+              fontSize: "0.75rem",
+              overflowX: "auto",
+              maxHeight: 240,
+            }}
+          >
+            <code>{errorInfo.stack}</code>
+          </Box>
+        )}
+      </Paper>
+    </Box>
+  );
+}
+
+export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  return <ErrorBoundaryContent error={error} />;
 }

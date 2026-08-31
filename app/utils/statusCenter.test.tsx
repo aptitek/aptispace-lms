@@ -80,12 +80,14 @@ describe("StatusCenter Pure Calculations & Telemetry Functions", () => {
     const event = createTelemetryEvent({
       message: "Test message",
       severity: "warning",
+      errorCode: "DATABASE_ERROR",
     });
 
     expect(event.id).toBeDefined();
     expect(event.title).toBe("Telemetry Alert");
     expect(event.message).toBe("Test message");
     expect(event.severity).toBe("warning");
+    expect(event.errorCode).toBe("DATABASE_ERROR");
     expect(event.timestamp instanceof Date).toBe(true);
     expect(event.reported).toBe(false);
   });

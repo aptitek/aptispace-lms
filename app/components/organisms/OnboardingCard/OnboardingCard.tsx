@@ -387,7 +387,7 @@ const DEFAULT_ONBOARDING_PROPS = {
   holoVariant: "rainbow" as const,
   holoStrength: 0.85,
   showGuilloche: true,
-  transparent: true,
+  transparent: false,
   readOnly: false,
   testId: "onboarding-card",
 };
@@ -489,9 +489,6 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
         testId={testId}
         frontContent={frontContentNode}
         backContent={backContentNode}
-        renderGhostContent={(ghostSide) =>
-          ghostSide === "front" ? frontContentNode : backContentNode
-        }
       />
     );
   },

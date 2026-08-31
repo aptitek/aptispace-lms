@@ -9,6 +9,7 @@ import { useStatusCenter } from "~/utils/statusCenterContext";
 import { filterTelemetryEvents } from "~/utils/statusCenter.utils";
 import { EcgTelemetry } from "~/components/atoms/StatusCenter/EcgTelemetry";
 import { StatusTerminalHeader } from "./StatusTerminalHeader";
+import { StatusTerminalInfrastructure } from "./StatusTerminalInfrastructure";
 import { StatusTerminalFilterChips } from "./StatusTerminalFilterChips";
 import { StatusTerminalEventRow } from "./StatusTerminalEventRow";
 
@@ -86,6 +87,9 @@ export function StatusTerminalCard() {
               onClose={closeTerminal}
               onSimulate={simulateEvent}
             />
+
+            {/* Cloud Infrastructure Connectivity Monitor */}
+            <StatusTerminalInfrastructure />
 
             {/* Filter Chips Bar */}
             <StatusTerminalFilterChips

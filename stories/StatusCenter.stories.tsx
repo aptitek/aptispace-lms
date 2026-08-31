@@ -12,6 +12,7 @@ import EcgTelemetry from "~/components/atoms/StatusCenter/EcgTelemetry";
 import M3Snackbar from "~/components/molecules/StatusCenter/M3Snackbar";
 import StatusGatewayTrigger from "~/components/molecules/StatusCenter/StatusGatewayTrigger";
 import StatusTerminalCard from "~/components/organisms/StatusCenter/StatusTerminalCard";
+import StatusTerminalInfrastructure from "~/components/organisms/StatusCenter/StatusTerminalInfrastructure";
 
 const sampleWarning: TelemetryEventItem = {
   id: "evt-warn-1",
@@ -265,4 +266,17 @@ export const EcgTelemetryOscilloscope: Story = {
 
 export const M3SnackbarSeverityToasts: Story = {
   render: () => <SnackbarSeverityDemo />,
+};
+
+export const InfrastructureConnectivity: Story = {
+  render: () => (
+    <StatusCenterProvider>
+      <Box sx={{ p: 4, maxWidth: 720, mx: "auto" }}>
+        <Typography variant="h6" sx={{ mb: 2, fontFamily: "monospace" }}>
+          CLOUD INFRASTRUCTURE CONNECTIVITY TILES
+        </Typography>
+        <StatusTerminalInfrastructure />
+      </Box>
+    </StatusCenterProvider>
+  ),
 };

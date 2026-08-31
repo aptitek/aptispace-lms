@@ -5,6 +5,7 @@ import {
   type ClipboardEvent,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { useStatusCenter } from "~/utils/statusCenterContext";
 import type { UploadResponsePayload } from "./EditableAvatar.types";
 
 async function defaultR2Uploader(
@@ -60,6 +61,7 @@ export interface UseAvatarHandlersOptions {
 
 export function useAvatarHandlers(options: UseAvatarHandlersOptions) {
   const { t } = useTranslation("common");
+  const { notifyError } = useStatusCenter();
   const {
     value,
     defaultValue = "",
@@ -94,12 +96,16 @@ export function useAvatarHandlers(options: UseAvatarHandlersOptions) {
     async (pickedFile: File) => {
       if (!editable) return;
       if (!pickedFile.type.startsWith("image/")) {
-        setErrorMessage(
-          t(
-            "avatar.errors.invalidFileType",
-            "Please select a valid image file (PNG, JPG, WebP, SVG)",
-          ),
+        const invalidTypeMsg = t(
+          "avatar.errors.invalidFileType",
+          "Please select a valid image file (PNG, JPG, WebP, SVG)",
         );
+        setErrorMessage(invalidTypeMsg);
+        notifyError(new Error(invalidTypeMsg), {
+          title: "Invalid Avatar Format",
+          errorCode: "INVALID_FILE_TYPE",
+          source: "avatar.upload",
+        });
         return;
       }
       setIsUploading(true);
@@ -115,11 +121,17 @@ export function useAvatarHandlers(options: UseAvatarHandlersOptions) {
             ? uploadError.message
             : t("avatar.errors.uploadFailed", "Failed to upload avatar image");
         setErrorMessage(messageText);
+        notifyError(uploadError, {
+          title: "Avatar Upload Failed",
+          message: messageText,
+          errorCode: "UPLOAD_FAILED",
+          source: "avatar.upload",
+        });
       } finally {
         setIsUploading(false);
       }
     },
-    [editable, onUpload, uploadEndpoint, updateAvatarUrl, t],
+    [editable, onUpload, uploadEndpoint, updateAvatarUrl, notifyError, t],
   );
 
   const handleDragOver = useCallback(

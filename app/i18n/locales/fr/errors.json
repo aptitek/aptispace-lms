@@ -1,6 +1,23 @@
 {
   "oops": "Oups !",
-  "unexpected": "Une erreur inattendue est survenue.",
+  "unexpected": "Une anomalie système inattendue est survenue.",
   "notFound": "404",
-  "pageNotFound": "La page demandée est introuvable."
+  "pageNotFound": "La route de terminal demandée est introuvable.",
+  "openTerminal": "Ouvrir le Terminal de Diagnostic",
+  "returnHome": "Retour à l'accueil",
+  "reloadPage": "Recharger l'interface",
+  "diagnosticDetails": "Détails de télémétrie de diagnostic",
+  "errorTitle": "Alerte de Diagnostic Système",
+  "DATABASE_ERROR": "L'opération de base de données a échoué. Veuillez vérifier la connectivité D1.",
+  "FOREIGN_KEY_ERROR": "L'institution ou la relation référencée est introuvable.",
+  "UNAUTHORIZED_EMAIL_DOMAIN": "Domaine d'e-mail non autorisé. Veuillez utiliser votre adresse institutionnelle de cadet.",
+  "MISSING_REQUIRED_FIELDS": "Le prénom et le nom de famille sont requis pour émettre l'identifiant ID-1.",
+  "SERVICE_UNAVAILABLE": "Le service d'infrastructure cloud est temporairement indisponible.",
+  "NETWORK_ERROR": "Erreur de transmission réseau. Vérifiez votre connexion.",
+  "UNAUTHENTICATED": "Authentification requise. Veuillez vous connecter pour continuer.",
+  "FORBIDDEN": "Accès refusé : Permission de sécurité requise.",
+  "SERVER_ERROR": "L'exécution du serveur a échoué. Télémétrie enregistrée.",
+  "UPLOAD_FAILED": "Le téléversement vers le stockage objet a échoué. Vérifiez les autorisations du compartiment R2.",
+  "INVALID_FILE_TYPE": "Format de fichier non valide. Veuillez sélectionner une image valide.",
+  "FILE_TOO_LARGE": "La taille du fichier dépasse la limite autorisée pour l'avatar (2 Mo)."
 }

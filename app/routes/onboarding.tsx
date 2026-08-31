@@ -18,6 +18,7 @@ import type {
 } from "~/components/organisms/OnboardingCard/OnboardingCard.types";
 import { validateFixedDomainEmail } from "~/utils/emailSecurity";
 import { logout } from "~/utils/auth";
+import { useStatusCenter } from "~/utils/statusCenterContext";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
@@ -201,8 +202,48 @@ function RequirementsDock({
   );
 }
 
+interface FetcherActionPayload {
+  success?: boolean;
+  redirect?: string;
+  draftSaved?: boolean;
+  error?: string;
+  errorCode?: string;
+  code?: string;
+}
+
+function processFetcherFeedback(
+  payload: FetcherActionPayload | undefined,
+  notifyError: (err: unknown, opts: Record<string, unknown>) => void,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+) {
+  if (!payload) return;
+
+  if (payload.success && payload.redirect) {
+    window.location.href = payload.redirect;
+    return;
+  }
+
+  const errCode = payload.errorCode || payload.code;
+  if (payload.error || errCode) {
+    const code = errCode || "DATABASE_ERROR";
+    const translatedMessage = t(`errors:${code}`, {
+      defaultValue: payload.error || t("errors:unexpected"),
+    });
+
+    notifyError(new Error(translatedMessage), {
+      title: t("errors:errorTitle", {
+        defaultValue: "System Diagnostic Alert",
+      }),
+      message: translatedMessage,
+      errorCode: code,
+      source: "onboarding.action",
+    });
+  }
+}
+
 export default function OnboardingPage() {
-  const { t } = useTranslation(["onboarding", "meta"]);
+  const { t } = useTranslation(["onboarding", "meta", "errors"]);
+  const { notifyError } = useStatusCenter();
   const loaderData = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
 
@@ -304,13 +345,12 @@ export default function OnboardingPage() {
   }, [isFormComplete, missingFieldsList, t]);
 
   useEffect(() => {
-    const data = fetcher.data as
-      | { success?: boolean; redirect?: string; draftSaved?: boolean }
-      | undefined;
-    if (data?.success && data?.redirect) {
-      window.location.href = data.redirect;
-    }
-  }, [fetcher.data]);
+    processFetcherFeedback(
+      fetcher.data as FetcherActionPayload | undefined,
+      notifyError,
+      t,
+    );
+  }, [fetcher.data, notifyError, t]);
 
   const handleValidateAndSubmit = () => {
     if (!isFormComplete) return;
@@ -346,7 +386,7 @@ export default function OnboardingPage() {
           size="lg"
           flipOnClick={true}
           showGlare={false}
-          transparent={true}
+          transparent={false}
           holoVariant="rainbow"
         />
 

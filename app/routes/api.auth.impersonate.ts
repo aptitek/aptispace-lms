@@ -1,6 +1,12 @@
 import type { ActionFunctionArgs } from "react-router";
 import { getDatabaseFromContext, type Database } from "~/db";
-import { getUserWithAffiliations } from "~/services/userService";
+import {
+  getUserWithAffiliations,
+  getUserById,
+  createUser,
+  createAffiliation,
+} from "~/services/userService";
+import { institutions } from "~/db/schema";
 import { logAudit } from "~/services/assessmentService";
 import type { UserRole } from "~/utils/auth";
 import {
@@ -58,39 +64,84 @@ function resolvePersonaFallback(
   };
 }
 
+async function resolveDbTargetUser(
+  db: Database,
+  targetId: string,
+  fallbackRole?: UserRole,
+) {
+  const user = await getUserWithAffiliations(db, targetId);
+  return user ? formatDbUserResult(user, fallbackRole) : null;
+}
+
+async function ensurePersonaExistsInDb(
+  db: Database,
+  fallback: ReturnType<typeof resolvePersonaFallback>,
+) {
+  const existing = await getUserById(db, fallback.targetUserId);
+  if (!existing) {
+    const [firstName, ...restName] = fallback.targetDisplayName.split(" ");
+    const created = await createUser(db, {
+      id: fallback.targetUserId,
+      firstName: firstName || "Student",
+      lastName: (restName.join(" ") || "USER").toUpperCase(),
+      displayName: fallback.targetDisplayName,
+    });
+
+    let inst = await db.query.institutions.findFirst();
+    if (!inst) {
+      const now = new Date();
+      const [newInst] = await db
+        .insert(institutions)
+        .values({
+          name: "Aptitek",
+          slug: "aptitek",
+          type: "academic",
+          logoUrl: "/aptitek-logo.svg",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+      inst = newInst;
+    }
+
+    await createAffiliation(db, {
+      userId: created.id,
+      institutionId: inst.id,
+      email: fallback.targetUserEmail,
+      role: fallback.targetUserRole,
+    });
+  }
+}
+
 async function resolveTargetUser(
-  db: Database | null,
+  db: Database,
   userId?: string,
   personaId?: string,
   role?: UserRole,
 ) {
-  if (db && userId) {
-    const userFromDb = await getUserWithAffiliations(db, userId);
-    if (userFromDb) {
-      return formatDbUserResult(userFromDb, role);
-    }
+  if (userId) {
+    const user = await resolveDbTargetUser(db, userId, role);
+    if (user) return user;
   }
 
   const fallback = resolvePersonaFallback(userId, personaId, role);
-  if (!db) {
-    return fallback;
-  }
+  await ensurePersonaExistsInDb(db, fallback);
 
-  const userFromDb = await getUserWithAffiliations(db, fallback.targetUserId);
-  if (userFromDb) {
-    return formatDbUserResult(userFromDb, fallback.targetUserRole);
-  }
-
-  return fallback;
+  const userFromDb = await resolveDbTargetUser(
+    db,
+    fallback.targetUserId,
+    fallback.targetUserRole,
+  );
+  return userFromDb ?? fallback;
 }
 
 async function auditImpersonation(
-  db: Database | null,
+  db: Database,
   session: SessionPayload | null,
   targetUserId: string,
   targetUserRole: UserRole,
 ) {
-  if (db && session?.userId) {
+  if (session?.userId) {
     await logAudit(db, {
       tableName: "impersonation_events",
       recordId: targetUserId,
@@ -124,6 +175,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
     typeof process !== "undefined" && process.env.NODE_ENV !== "production";
   const currentSession = await getSession(request);
   const db = getDatabaseFromContext(context);
+  if (!db) {
+    return Response.json(
+      { error: "Database binding unavailable." },
+      { status: 503 },
+    );
+  }
 
   if (!isImpersonationPermitted(isDev, currentSession)) {
     return new Response(

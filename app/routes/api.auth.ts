@@ -12,12 +12,7 @@ import { institutions, cohorts } from "~/db/schema";
 import {
   DEV_PERSONAS,
   type PersonaDefinition,
-  type AccountDefinition,
   type UserRole,
-  resetInMemoryAccounts,
-  getInitialFallbackAccounts,
-  findInMemoryAccount,
-  updateInMemoryAccount,
 } from "~/utils/auth";
 import { getSession, type SessionPayload } from "~/utils/session.server";
 
@@ -120,34 +115,12 @@ function formatPersona(
   };
 }
 
-function getFallbackAccounts(): FormattedAccount[] {
-  return getInitialFallbackAccounts().map((a) => ({
-    id: a.id,
-    name: a.name,
-    firstName: a.firstName?.trim() ?? "",
-    lastName: (a.lastName ?? "").trim().toUpperCase(),
-    email: a.email,
-    role: a.role,
-    isProfileComplete: Boolean(a.isProfileComplete),
-    badge: a.badge,
-    title: a.title,
-  }));
-}
-
-async function fetchAccounts(db: Database | null): Promise<FormattedAccount[]> {
-  if (!db) {
-    return getFallbackAccounts();
-  }
-
+async function fetchAccounts(db: Database): Promise<FormattedAccount[]> {
   const dbUsers = await getAllUsersWithAffiliations(db);
   return dbUsers.map(formatAccountFromDb);
 }
 
-async function fetchPersonas(db: Database | null) {
-  if (!db) {
-    return DEV_PERSONAS;
-  }
-
+async function fetchPersonas(db: Database) {
   if (DEV_PERSONAS.length === 0) {
     return [];
   }
@@ -158,67 +131,38 @@ async function fetchPersonas(db: Database | null) {
   const instructor = await getUserWithAffiliations(db, instructorFallback.id);
   const student = await getUserWithAffiliations(db, studentFallback.id);
 
-  if (!admin || !instructor || !student) {
-    return DEV_PERSONAS;
-  }
-
   return [
-    formatPersona(admin, adminFallback),
-    formatPersona(instructor, instructorFallback),
-    formatPersona(student, studentFallback),
+    admin ? formatPersona(admin, adminFallback) : adminFallback,
+    instructor
+      ? formatPersona(instructor, instructorFallback)
+      : instructorFallback,
+    student ? formatPersona(student, studentFallback) : studentFallback,
   ];
 }
 
-function formatDbCurrentUser(user: UserWithAffiliationsResult) {
-  const name =
-    user.displayName ??
-    `${user.firstName?.trim() || ""} ${(user.lastName || "").trim().toUpperCase()}`.trim();
+function formatCurrentUser(user: UserWithAffiliationsResult) {
+  const primaryAffil = user.affiliations[0];
+  const role = (primaryAffil?.role as UserRole) || "student";
+  const first = user.firstName?.trim() || "";
+  const last = (user.lastName || "").trim().toUpperCase();
+  const calculatedName = `${first} ${last}`.trim() || "User";
+
   return {
     id: user.id,
-    name: name || "User",
-    email: user.affiliations[0]?.email ?? "",
-    role: (user.affiliations[0]?.role as UserRole) ?? "student",
-    affiliations: user.affiliations,
+    name: user.displayName ?? calculatedName,
+    email: primaryAffil?.email ?? "",
+    role,
     isProfileComplete: isUserProfileComplete(user),
   };
 }
 
-function formatInMemoryCurrentUser(inMem: AccountDefinition) {
-  const firstName = inMem.firstName?.trim() || "";
-  const lastName = (inMem.lastName || "").trim().toUpperCase();
-  const isComplete = Boolean(firstName && lastName);
-  const fullName = `${firstName} ${lastName}`.trim();
-  return {
-    id: inMem.id,
-    name: inMem.name || fullName || "User",
-    email: inMem.email,
-    role: inMem.role,
-    affiliations: [
-      {
-        institutionId: inMem.institutionId ?? "school-aptitek",
-        cohortId: inMem.cohortId ?? null,
-        email: inMem.email,
-        role: inMem.role,
-      },
-    ],
-    isProfileComplete: isComplete,
-  };
-}
-
-async function fetchCurrentUser(db: Database | null, userId: string | null) {
-  if (!userId) return null;
-
-  if (db) {
-    const user = await getUserWithAffiliations(db, userId);
-    return user ? formatDbCurrentUser(user) : null;
-  }
-
-  const inMem = findInMemoryAccount(userId);
-  return inMem ? formatInMemoryCurrentUser(inMem) : null;
+async function fetchCurrentUser(db: Database, userId: string) {
+  const dbUser = await getUserWithAffiliations(db, userId);
+  return dbUser ? formatCurrentUser(dbUser) : null;
 }
 
 async function handleMeLoader(
-  db: Database | null,
+  db: Database,
   activeUserId: string | null,
   session: SessionPayload | null,
 ) {
@@ -242,6 +186,13 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const actionType = url.searchParams.get("action") ?? "me";
   const explicitPersonaId = url.searchParams.get("personaId");
   const db = getDatabaseFromContext(context);
+  if (!db) {
+    return Response.json(
+      { error: "Database binding unavailable." },
+      { status: 503 },
+    );
+  }
+
   const session = await getSession(request);
 
   if (actionType === "accounts" || actionType === "users") {
@@ -260,7 +211,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
 async function ensureDefaultInstitutionAndCohort(db: Database) {
   let inst = await db.query.institutions.findFirst({
-    where: (inst, { eq }) => eq(inst.slug, "aptitek"),
+    where: (i, { eq }) => eq(i.slug, "aptitek"),
   });
   if (!inst) {
     const [created] = await db
@@ -293,23 +244,7 @@ async function ensureDefaultInstitutionAndCohort(db: Database) {
   return { institutionId: inst.id, cohortId: cohort.id };
 }
 
-async function handleCreateAccount(db: Database | null, targetRole: UserRole) {
-  if (!db) {
-    const mockId = `new-${targetRole}-${Date.now().toString(36)}`;
-    const newMockAccount = updateInMemoryAccount(mockId, {
-      id: mockId,
-      name: `New ${resolveRoleBadge(targetRole)} (Pending Onboarding)`,
-      firstName: "",
-      lastName: "",
-      email: "",
-      role: targetRole,
-      isProfileComplete: false,
-      badge: resolveRoleBadge(targetRole),
-      title: resolveRoleTitle(targetRole, false),
-    });
-    return Response.json({ success: true, account: newMockAccount });
-  }
-
+async function handleCreateAccount(db: Database, targetRole: UserRole) {
   const { institutionId, cohortId } =
     await ensureDefaultInstitutionAndCohort(db);
 
@@ -354,16 +289,19 @@ export async function action({ request, context }: ActionFunctionArgs) {
   };
 
   const db = getDatabaseFromContext(context);
+  if (!db) {
+    return Response.json(
+      { error: "Database binding unavailable." },
+      { status: 503 },
+    );
+  }
 
   if (body.action === "reset" || body.action === "empty") {
-    resetInMemoryAccounts();
-    if (db) {
-      await resetDatabase(db);
-    }
+    await resetDatabase(db);
     return Response.json({ success: true, reset: true });
   }
 
-  if (body.action === "seed" && db) {
+  if (body.action === "seed") {
     const result = await seedDatabase(db);
     return Response.json({ seeded: true, result });
   }
