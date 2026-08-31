@@ -44,5 +44,10 @@ export function resolvePublicR2Url(
   const envObj = contextRecord?.cloudflare?.env || contextRecord?.env;
   const baseUrl = envObj?.R2_PUBLIC_URL || "/avatars";
   const sanitizedBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-  return `${sanitizedBase}/${storageKey}`;
+  const sanitizedKey = storageKey.replace(/^\/+/, "");
+
+  if (sanitizedBase === "/avatars" && sanitizedKey.startsWith("avatars/")) {
+    return `/${sanitizedKey}`;
+  }
+  return `${sanitizedBase}/${sanitizedKey}`;
 }

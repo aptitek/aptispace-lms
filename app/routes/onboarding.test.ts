@@ -111,6 +111,29 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
     expect(body.draftSaved).toBe(true);
   });
 
+  it("allows draft saving and avatar uploads even if email domain is incomplete or invalid", async () => {
+    const formData = new FormData();
+    formData.set("actionType", "update_draft");
+    formData.set("firstName", "John");
+    formData.set("familyName", "Doe");
+    formData.set("email", "incomplete-email@unknown.com");
+    formData.set("avatarUrl", "https://example.com/avatar.webp");
+
+    const request = new Request("http://localhost:3000/onboarding", {
+      method: "POST",
+      body: formData,
+    });
+
+    const response = await action(createActionArgs(request));
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      success: boolean;
+      draftSaved: boolean;
+    };
+    expect(body.success).toBe(true);
+    expect(body.draftSaved).toBe(true);
+  });
+
   it("rejects validate_credential submission when first or family name is missing", async () => {
     const formData = new FormData();
     formData.set("actionType", "validate_credential");

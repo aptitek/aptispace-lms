@@ -91,4 +91,12 @@ export const FallbackAvatarHolder = styled(Box)(({ theme }) => ({
   fontWeight: 700,
   textTransform: "uppercase",
   backgroundColor: theme.palette.action.hover,
+  userSelect: "none",
+  "& svg": {
+    width: "60%",
+    height: "60%",
+    maxWidth: "4rem",
+    maxHeight: "4rem",
+    fill: "currentColor",
+  },
 }));

@@ -35,6 +35,34 @@ const StatusCenterContext = createContext<StatusCenterContextValue | null>(
   null,
 );
 
+interface ViteErrorPayload {
+  err?: {
+    message?: string;
+    stack?: string;
+    frame?: string;
+    plugin?: string;
+  };
+}
+
+function resolveViteErrorDetails(payload: ViteErrorPayload): {
+  message: string;
+  title: string;
+  stack?: string;
+} {
+  const err = payload.err;
+  const message = err?.message || "Vite HMR compilation error";
+  const title = err?.plugin
+    ? `HMR Build Alert (${err.plugin})`
+    : "HMR Build Alert";
+  const details = [err?.frame, err?.stack].filter(Boolean).join("\n\n");
+
+  return {
+    message,
+    title,
+    stack: details.length > 0 ? details : undefined,
+  };
+}
+
 export function StatusCenterProvider({
   children,
   initialEvents = [],
@@ -328,6 +356,23 @@ export function StatusCenterProvider({
   );
 
   const bpm = useMemo(() => calculateBpm(systemStatus), [systemStatus]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !import.meta.hot) return;
+
+    const handleViteError = (payload: ViteErrorPayload) => {
+      const details = resolveViteErrorDetails(payload);
+      notifyError(new Error(details.message), {
+        title: details.title,
+        source: "vite.hmr",
+        stack: details.stack,
+        severity: "error",
+        showSnackbar: true,
+      });
+    };
+
+    import.meta.hot.on("vite:error", handleViteError);
+  }, [notifyError]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

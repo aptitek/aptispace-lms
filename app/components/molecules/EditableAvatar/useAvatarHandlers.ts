@@ -6,6 +6,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useStatusCenter } from "~/utils/statusCenterContext";
+import { processImageToWebp } from "~/utils/imageProcessing";
 import type { UploadResponsePayload } from "./EditableAvatar.types";
 
 async function defaultR2Uploader(
@@ -111,9 +112,15 @@ export function useAvatarHandlers(options: UseAvatarHandlersOptions) {
       setIsUploading(true);
       setErrorMessage(null);
       try {
+        const optimizedFile = await processImageToWebp(pickedFile, {
+          maxWidth: 512,
+          maxHeight: 512,
+          quality: 0.88,
+        });
+
         const uploadedUrl = onUpload
-          ? await onUpload(pickedFile)
-          : await defaultR2Uploader(pickedFile, uploadEndpoint);
+          ? await onUpload(optimizedFile)
+          : await defaultR2Uploader(optimizedFile, uploadEndpoint);
         updateAvatarUrl(uploadedUrl);
       } catch (uploadError) {
         const messageText =

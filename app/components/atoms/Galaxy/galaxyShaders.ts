@@ -82,15 +82,15 @@ vec3 getRealisticStarColor(float tempRand) {
   // Realistic stellar blackbody spectrum:
   // Red (0.00-0.25) -> Orange (0.25-0.50) -> Yellow (0.50-0.75) -> White (0.75-0.90) -> Light Blue (0.90-1.00)
   // Strictly excludes green, cyan, purple, pink, and dark blue.
+  float t4 = tempRand * 4.0;
   if (tempRand < 0.25) {
-    return mix(uColorRed, uColorOrange, tempRand * 4.0);
+    return mix(uColorRed, uColorOrange, t4);
   } else if (tempRand < 0.50) {
-    return mix(uColorOrange, uColorYellow, (tempRand - 0.25) * 4.0);
+    return mix(uColorOrange, uColorYellow, t4 - 1.0);
   } else if (tempRand < 0.75) {
-    return mix(uColorYellow, uColorWhite, (tempRand - 0.50) * 4.0);
-  } else {
-    return mix(uColorWhite, uColorBlue, (tempRand - 0.75) * 4.0);
+    return mix(uColorYellow, uColorWhite, t4 - 2.0);
   }
+  return mix(uColorWhite, uColorBlue, t4 - 3.0);
 }
 
 vec3 StarLayer(vec2 uv) {

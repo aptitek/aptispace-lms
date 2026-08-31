@@ -214,6 +214,104 @@ function getSharedGalaxyCanvas(): HTMLCanvasElement {
   return canvas;
 }
 
+interface MouseInteractionHandlers {
+  onMouseMove: (e: MouseEvent) => void;
+  onMouseOut: (e: MouseEvent) => void;
+  onBlur: () => void;
+  onMouseLeave: () => void;
+  onVisibilityChange: () => void;
+}
+
+function attachGalaxyEventListeners(
+  mouseInteraction: boolean,
+  handlers: MouseInteractionHandlers,
+): () => void {
+  document.addEventListener("visibilitychange", handlers.onVisibilityChange);
+  if (!mouseInteraction) {
+    return () => {
+      document.removeEventListener(
+        "visibilitychange",
+        handlers.onVisibilityChange,
+      );
+    };
+  }
+
+  window.addEventListener("mousemove", handlers.onMouseMove, { passive: true });
+  window.addEventListener("mouseout", handlers.onMouseOut, { passive: true });
+  window.addEventListener("blur", handlers.onBlur);
+  document.addEventListener("mouseleave", handlers.onMouseLeave);
+
+  return () => {
+    document.removeEventListener(
+      "visibilitychange",
+      handlers.onVisibilityChange,
+    );
+    window.removeEventListener("mousemove", handlers.onMouseMove);
+    window.removeEventListener("mouseout", handlers.onMouseOut);
+    window.removeEventListener("blur", handlers.onBlur);
+    document.removeEventListener("mouseleave", handlers.onMouseLeave);
+  };
+}
+
+function setupGalaxyObservers(
+  ctn: HTMLElement,
+  resize: () => void,
+  onIntersection: (isIntersecting: boolean) => void,
+): () => void {
+  let resizeObserver: ResizeObserver | null = null;
+  if (typeof ResizeObserver !== "undefined") {
+    resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(ctn);
+  } else {
+    window.addEventListener("resize", resize, false);
+  }
+
+  let intersectionObserver: IntersectionObserver | null = null;
+  if (typeof IntersectionObserver !== "undefined") {
+    intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        onIntersection(entry?.isIntersecting ?? true);
+      },
+      { threshold: 0 },
+    );
+    intersectionObserver.observe(ctn);
+  }
+
+  return () => {
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+    } else {
+      window.removeEventListener("resize", resize);
+    }
+    if (intersectionObserver) {
+      intersectionObserver.disconnect();
+    }
+  };
+}
+
+function calculateMousePosition(
+  event: MouseEvent,
+  ctn: HTMLElement,
+): { x: number; y: number; active: number } {
+  const rect = ctn.getBoundingClientRect();
+  const mouseX = (event.clientX - rect.left) / rect.width;
+  const mouseY = 1.0 - (event.clientY - rect.top) / rect.height;
+  const isInside =
+    event.clientX >= 0 &&
+    event.clientX <= window.innerWidth &&
+    event.clientY >= 0 &&
+    event.clientY <= window.innerHeight &&
+    event.clientX >= rect.left &&
+    event.clientX <= rect.right &&
+    event.clientY >= rect.top &&
+    event.clientY <= rect.bottom;
+
+  return isInside
+    ? { x: mouseX, y: mouseY, active: 1.0 }
+    : { x: mouseX, y: mouseY, active: 0.0 };
+}
+
 export default function Galaxy(props: GalaxyProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -235,6 +333,12 @@ export default function Galaxy(props: GalaxyProps) {
   useEffect(() => {
     const ctn = ctnDom.current;
     if (!ctn) return;
+
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const isAnimationDisabled =
+      settings.disableAnimation || Boolean(prefersReducedMotion);
 
     const canvas = getSharedGalaxyCanvas();
     const resolvedDpr =
@@ -260,6 +364,7 @@ export default function Galaxy(props: GalaxyProps) {
     );
 
     const resize = () => {
+      if (!ctn) return;
       renderer.setSize(ctn.offsetWidth, ctn.offsetHeight);
       program.uniforms.uResolution.value = new Color(
         gl.canvas.width,
@@ -267,8 +372,6 @@ export default function Galaxy(props: GalaxyProps) {
         gl.canvas.width / gl.canvas.height,
       );
     };
-    window.addEventListener("resize", resize, false);
-    resize();
 
     const geometry = new Triangle(gl);
     const mesh = new Mesh(gl, { geometry, program });
@@ -282,10 +385,6 @@ export default function Galaxy(props: GalaxyProps) {
       typeof document !== "undefined" ? !document.hidden : true;
     let isIntersecting = true;
 
-    // GPU shader state is reset when the (rare) genuine context loss is restored
-    // by the browser, so recompile the program on the same shared gl and refresh
-    // dimensions. Lost-handling itself lives on the shared canvas (see
-    // getSharedGalaxyCanvas) so it fires even while no Galaxy is mounted.
     const handleContextRestored = () => {
       setupGlBlending(gl, settings.transparent, colors.background);
       program = createGalaxyProgram(
@@ -313,7 +412,7 @@ export default function Galaxy(props: GalaxyProps) {
       }
       lastRenderTime = timestampMs;
 
-      if (!settings.disableAnimation) {
+      if (!isAnimationDisabled) {
         program.uniforms.uTime.value = timestampMs * 0.001;
         program.uniforms.uStarSpeed.value =
           (timestampMs * 0.001 * settings.starSpeed) / 10.0;
@@ -356,111 +455,69 @@ export default function Galaxy(props: GalaxyProps) {
       }
     };
 
-    startLoop();
-    ctn.appendChild(gl.canvas);
-
-    const handleMouseMove = (event: MouseEvent) => {
-      const rect = ctn.getBoundingClientRect();
-      const mouseX = (event.clientX - rect.left) / rect.width;
-      const mouseY = 1.0 - (event.clientY - rect.top) / rect.height;
-      if (
-        event.clientX >= 0 &&
-        event.clientX <= window.innerWidth &&
-        event.clientY >= 0 &&
-        event.clientY <= window.innerHeight &&
-        event.clientX >= rect.left &&
-        event.clientX <= rect.right &&
-        event.clientY >= rect.top &&
-        event.clientY <= rect.bottom
-      ) {
-        targetMousePos.current = { x: mouseX, y: mouseY };
-        targetMouseActive.current = 1.0;
-      } else {
-        targetMouseActive.current = 0.0;
-      }
-    };
-
-    const handleMouseLeave = () => {
-      targetMouseActive.current = 0.0;
-    };
-
-    const handleMouseOut = (event: MouseEvent) => {
-      if (
-        !event.relatedTarget ||
-        event.clientX <= 0 ||
-        event.clientY <= 0 ||
-        event.clientX >= window.innerWidth ||
-        event.clientY >= window.innerHeight
-      ) {
-        targetMouseActive.current = 0.0;
-      }
-    };
-
-    const handleBlur = () => {
-      targetMouseActive.current = 0.0;
-    };
-
-    const handleVisibilityChange = () => {
-      isPageVisible = typeof document !== "undefined" ? !document.hidden : true;
-      if (!isPageVisible) {
-        targetMouseActive.current = 0.0;
+    const teardownObservers = setupGalaxyObservers(ctn, resize, (visible) => {
+      isIntersecting = visible;
+      if (!isIntersecting) {
         stopLoop();
       } else {
         startLoop();
       }
-    };
+    });
 
-    let observer: IntersectionObserver | null = null;
-    if (typeof IntersectionObserver !== "undefined") {
-      observer = new IntersectionObserver(
-        (entries) => {
-          const entry = entries[0];
-          isIntersecting = entry?.isIntersecting ?? true;
-          if (!isIntersecting) {
+    resize();
+    startLoop();
+    ctn.appendChild(gl.canvas);
+
+    const teardownEvents = attachGalaxyEventListeners(
+      settings.mouseInteraction,
+      {
+        onMouseMove: (event) => {
+          const { x, y, active } = calculateMousePosition(event, ctn);
+          targetMousePos.current = { x, y };
+          targetMouseActive.current = active;
+        },
+        onMouseOut: (event) => {
+          if (
+            !event.relatedTarget ||
+            event.clientX <= 0 ||
+            event.clientY <= 0 ||
+            event.clientX >= window.innerWidth ||
+            event.clientY >= window.innerHeight
+          ) {
+            targetMouseActive.current = 0.0;
+          }
+        },
+        onBlur: () => {
+          targetMouseActive.current = 0.0;
+        },
+        onMouseLeave: () => {
+          targetMouseActive.current = 0.0;
+        },
+        onVisibilityChange: () => {
+          isPageVisible =
+            typeof document !== "undefined" ? !document.hidden : true;
+          if (!isPageVisible) {
+            targetMouseActive.current = 0.0;
             stopLoop();
           } else {
             startLoop();
           }
         },
-        { threshold: 0 },
-      );
-      observer.observe(ctn);
-    }
-
-    if (settings.mouseInteraction) {
-      window.addEventListener("mousemove", handleMouseMove, { passive: true });
-      window.addEventListener("mouseout", handleMouseOut, { passive: true });
-      window.addEventListener("blur", handleBlur);
-      document.addEventListener("mouseleave", handleMouseLeave);
-      document.addEventListener("visibilitychange", handleVisibilityChange);
-    } else {
-      document.addEventListener("visibilitychange", handleVisibilityChange);
-    }
+      },
+    );
 
     return () => {
       stopLoop();
-      if (observer) {
-        observer.disconnect();
-      }
-      window.removeEventListener("resize", resize);
+      teardownObservers();
+      teardownEvents();
       canvas.removeEventListener(
         "webglcontextrestored",
         handleContextRestored,
         false,
       );
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      if (settings.mouseInteraction) {
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseout", handleMouseOut);
-        window.removeEventListener("blur", handleBlur);
-        document.removeEventListener("mouseleave", handleMouseLeave);
-      }
       if (gl.canvas.parentNode === ctn) {
         ctn.removeChild(gl.canvas);
       }
-      // Deliberately do NOT lose the WebGL context here: the canvas is shared
-      // page-wide (see getSharedGalaxyCanvas) and the next mount reuses it. The
-      // context is released by the browser when the page unloads.
     };
   }, [settings, colors]);
 

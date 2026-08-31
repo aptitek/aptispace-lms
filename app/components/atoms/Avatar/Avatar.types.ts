@@ -48,4 +48,5 @@ export interface AvatarProps {
   testId?: string;
   "data-testid"?: string;
   children?: ReactNode;
+  placeholderIcon?: ReactNode;
 }

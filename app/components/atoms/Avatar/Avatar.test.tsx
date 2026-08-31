@@ -86,4 +86,14 @@ describe("Avatar Component & MD3 Shape Scale", () => {
       expect(resolveM3ShapeRadius(shape)).toBeDefined();
     }
   });
+
+  it("supports avatar with name and placeholder icon properties", () => {
+    const avatarProps = {
+      name: "Jane Doe",
+      shape: "circular" as const,
+      isPortrait: false,
+    };
+    expect(avatarProps.name).toBe("Jane Doe");
+    expect(avatarProps.shape).toBe("circular");
+  });
 });

@@ -53,6 +53,11 @@ export default defineConfig({
     !isTestOrStorybook && cloudflareDevPlugin(),
     !isTestOrStorybook && reactRouter(),
   ].filter(Boolean),
+  server: {
+    hmr: {
+      overlay: false,
+    },
+  },
   resolve: {
     alias: {
       "~": path.resolve(dirname, "./app"),

@@ -31,7 +31,7 @@ export function validateActionInputs(
   const { actionType, firstName, familyName, validation, hasNameFields } =
     params;
 
-  if (!validation.isValid) {
+  if (actionType !== "update_draft" && !validation.isValid) {
     return Response.json(
       {
         error: validation.error,
@@ -247,7 +247,7 @@ async function saveUserEditsIfPresent(
       userId,
       firstName: payload.firstName,
       familyName: payload.familyName,
-      fullEmail: validation.fullEmail || payload.rawEmail,
+      fullEmail: validation.isValid ? validation.fullEmail : undefined,
       schoolId: payload.school.id,
       hasNameFields: payload.hasNameFields,
     });
