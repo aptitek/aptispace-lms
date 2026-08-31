@@ -375,6 +375,7 @@ export default function OnboardingPage() {
       headerMode="full"
       user={loaderData.user}
       onLogout={handleLogout}
+      showGalaxy={false}
     >
       <CardWorkspaceContainer>
         <OnboardingCard

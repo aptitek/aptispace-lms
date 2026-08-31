@@ -11,6 +11,7 @@ export interface AuthLayoutProps {
   user?: AuthUser | null;
   onLogout?: () => void;
   headerChildren?: ReactNode;
+  showGalaxy?: boolean;
 }
 
 const LayoutRoot = styled("div")(({ theme }) => ({
@@ -61,19 +62,22 @@ export default function AuthLayout({
   user,
   onLogout,
   headerChildren,
+  showGalaxy = true,
 }: AuthLayoutProps) {
   return (
     <LayoutRoot>
-      <CanvasBackdrop>
-        <Galaxy
-          density={0.5}
-          starSpeed={0.4}
-          glowIntensity={0.2}
-          mouseInteraction
-          mouseRepulsion
-          repulsionStrength={2}
-        />
-      </CanvasBackdrop>
+      {showGalaxy && (
+        <CanvasBackdrop>
+          <Galaxy
+            density={0.5}
+            starSpeed={0.4}
+            glowIntensity={0.2}
+            mouseInteraction
+            mouseRepulsion
+            repulsionStrength={2}
+          />
+        </CanvasBackdrop>
+      )}
 
       <Header mode={headerMode} user={user} onLogout={onLogout}>
         {headerChildren}

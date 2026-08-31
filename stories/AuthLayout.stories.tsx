@@ -55,3 +55,11 @@ export const CustomContent: Story = {
     </AuthLayout>
   ),
 };
+
+export const WithoutGalaxy: Story = {
+  render: () => (
+    <AuthLayout showGalaxy={false}>
+      <LoginCard />
+    </AuthLayout>
+  ),
+};

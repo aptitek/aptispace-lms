@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import Chip from "@mui/material/Chip";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useTranslation } from "react-i18next";
@@ -149,17 +149,26 @@ export default function Header({
 
         {user && (
           <Tooltip title={t("loginCard.logoutAria")} arrow placement="bottom">
-            <Button
-              variant="outlined"
+            <IconButton
               color="inherit"
               size="small"
               onClick={handleLogoutClick}
               aria-label={t("loginCard.logoutAria")}
               data-testid="header-logout-button"
-              startIcon={<LogoutIcon sx={{ fontSize: "1rem" }} />}
+              sx={{
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 1.5,
+                p: 0.75,
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  borderColor: "primary.main",
+                  bgcolor: "action.hover",
+                },
+              }}
             >
-              {t("loginCard.logout")}
-            </Button>
+              <LogoutIcon sx={{ fontSize: "1.15rem" }} />
+            </IconButton>
           </Tooltip>
         )}
       </RightSlot>

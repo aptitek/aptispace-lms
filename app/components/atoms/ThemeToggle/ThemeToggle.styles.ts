@@ -88,14 +88,14 @@ export const SwitchTrack = styled(motion.button, {
     padding: 0,
     borderRadius: $cfg.borderRadius,
     cursor: $disabled ? "not-allowed" : "pointer",
-    border: $isDark ? `2px solid ${primaryMain}` : `2px solid ${warningMain}`,
+    border: `2px solid ${theme.palette.divider}`,
     backgroundColor: $isDark ? bgDefault : bgPaper,
     backgroundImage: $isDark
       ? `linear-gradient(180deg, ${bgPaper} 0%, ${bgDefault} 100%)`
       : `linear-gradient(180deg, ${bgDefault} 0%, ${bgPaper} 100%)`,
     boxShadow: $isDark
-      ? `inset 0 1px 3px ${theme.palette.action.disabledBackground}, 0 0 10px ${primaryMain}`
-      : `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 10px ${warningLight}`,
+      ? `inset 0 1px 3px ${theme.palette.action.disabledBackground}, 0 0 8px ${theme.palette.action.hover}`
+      : `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 8px ${theme.palette.action.hover}`,
     overflow: "hidden",
     outline: "none",
     userSelect: "none",
@@ -105,8 +105,16 @@ export const SwitchTrack = styled(motion.button, {
     transition:
       "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.2s ease",
 
+    "&:hover": {
+      borderColor: $isDark ? primaryMain : warningMain,
+      boxShadow: $isDark
+        ? `inset 0 1px 3px ${theme.palette.action.disabledBackground}, 0 0 12px ${primaryMain}`
+        : `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 12px ${warningLight}`,
+    },
+
     "&:focus-visible": {
       outline: "none",
+      borderColor: $isDark ? primaryMain : warningMain,
       boxShadow: $isDark
         ? `0 0 0 2px ${bgDefault}, 0 0 0 4px ${primaryMain}, 0 0 16px ${primaryLight}`
         : `0 0 0 2px ${bgDefault}, 0 0 0 4px ${warningMain}, 0 0 16px ${warningLight}`,
