@@ -12,6 +12,8 @@ import {
   createSessionCookieHeader,
 } from "~/utils/session.server";
 
+import { isAdminGithubUser } from "~/config/admins";
+
 const OAUTH_STATE_COOKIE = "oauth_state";
 
 function parseCookie(request: Request, name: string): string | null {
@@ -67,6 +69,7 @@ async function resolveUserProfile(code: string | null) {
   if (isDev && code === "mock_dev_oauth_code") {
     return {
       githubUserId: "mock_dev_user_1",
+      githubUsername: "aptitek",
       userName: "Dev User",
       userEmail: "dev@aptitek.io",
       accessToken: undefined,
@@ -79,6 +82,7 @@ async function resolveUserProfile(code: string | null) {
       const profile = await fetchGitHubUserProfile(token);
       return {
         githubUserId: String(profile.id),
+        githubUsername: profile.login,
         userName: profile.name || profile.login,
         userEmail: profile.email || `${profile.login}@users.noreply.github.com`,
         accessToken: token,
@@ -88,45 +92,72 @@ async function resolveUserProfile(code: string | null) {
 
   return {
     githubUserId: "mock_github_user_1",
+    githubUsername: "aptitek",
     userName: "Developer",
     userEmail: "developer@aptitek.io",
     accessToken: undefined,
   };
 }
 
+async function createNewGitHubUser(
+  db: Database,
+  profile: {
+    githubUserId: string;
+    userName: string;
+    userEmail: string;
+  },
+  role: "admin" | "student",
+) {
+  const [firstName, ...restName] = profile.userName.split(" ");
+  const fallbackFirstName = role === "admin" ? "Admin" : "Student";
+  const created = await createUser(db, {
+    firstName: firstName || fallbackFirstName,
+    lastName: restName.join(" ") || "User",
+    displayName: profile.userName,
+    githubId: profile.githubUserId,
+  });
+
+  const inst = await db.query.institutions.findFirst();
+  const instId = inst?.id ?? "school-aptitek";
+
+  await createAffiliation(db, {
+    userId: created.id,
+    institutionId: instId,
+    email: profile.userEmail,
+    role,
+  });
+
+  return created;
+}
+
 async function syncUserWithDatabase(
   db: Database | null,
-  profile: { githubUserId: string; userName: string; userEmail: string },
+  profile: {
+    githubUserId: string;
+    githubUsername?: string;
+    userName: string;
+    userEmail: string;
+  },
 ) {
+  const isAdmin = isAdminGithubUser(profile.githubUsername);
+  const defaultRole = isAdmin ? ("admin" as const) : ("student" as const);
+
   if (!db) {
-    return { dbUserId: "persona-student", userRole: "student" as const };
+    return {
+      dbUserId: isAdmin ? "persona-admin" : "persona-student",
+      userRole: defaultRole,
+    };
   }
 
-  let existingUser = await getUserByGithubId(db, profile.githubUserId);
-  if (!existingUser) {
-    const [firstName, ...restName] = profile.userName.split(" ");
-    existingUser = await createUser(db, {
-      firstName: firstName || "Student",
-      lastName: restName.join(" ") || "User",
-      displayName: profile.userName,
-      githubId: profile.githubUserId,
-    });
-
-    const inst = await db.query.institutions.findFirst();
-    const instId = inst?.id ?? "school-aptitek";
-
-    await createAffiliation(db, {
-      userId: existingUser.id,
-      institutionId: instId,
-      email: profile.userEmail,
-      role: "student",
-    });
+  let user = await getUserByGithubId(db, profile.githubUserId);
+  if (!user) {
+    user = await createNewGitHubUser(db, profile, defaultRole);
   }
 
-  const fullUser = await getUserWithAffiliations(db, existingUser.id);
+  const fullUser = await getUserWithAffiliations(db, user.id);
   return {
-    dbUserId: existingUser.id,
-    userRole: fullUser?.affiliations[0]?.role ?? "student",
+    dbUserId: user.id,
+    userRole: fullUser?.affiliations[0]?.role ?? defaultRole,
   };
 }
 
