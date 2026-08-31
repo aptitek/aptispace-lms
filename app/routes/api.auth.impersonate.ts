@@ -18,18 +18,29 @@ function isImpersonationPermitted(
   return Boolean(session && session.role === "admin");
 }
 
+function extractUserFullName(user: {
+  firstName?: string | null;
+  lastName?: string | null;
+}): string {
+  const first = user.firstName ? user.firstName.trim() : "";
+  const last = user.lastName ? user.lastName.trim().toUpperCase() : "";
+  return `${first} ${last}`.trim();
+}
+
 function formatDbUserResult(
   user: NonNullable<Awaited<ReturnType<typeof getUserWithAffiliations>>>,
-  fallbackRole?: UserRole,
+  fallbackRole: UserRole = "student",
 ) {
   const primaryAffiliation = user.affiliations[0];
-  const fullName = `${user.firstName || ""} ${user.lastName || ""}`.trim();
+  const fullName = extractUserFullName(user);
+  const email = primaryAffiliation?.email || "user@aptitek.io";
+  const role = (primaryAffiliation?.role as UserRole) || fallbackRole;
+
   return {
     targetUserId: user.id,
     targetDisplayName: user.displayName || fullName || "User",
-    targetUserEmail: primaryAffiliation?.email ?? "user@aptitek.io",
-    targetUserRole:
-      (primaryAffiliation?.role as UserRole) ?? fallbackRole ?? "student",
+    targetUserEmail: email,
+    targetUserRole: role,
   };
 }
 

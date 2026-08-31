@@ -75,7 +75,7 @@ export async function saveUserEdits(params: SaveUserEditsParams) {
   if (!userId) return;
 
   const trimmedFirst = firstName.trim();
-  const trimmedFamily = familyName.trim();
+  const trimmedFamily = familyName.trim().toUpperCase();
   const displayName = `${trimmedFirst} ${trimmedFamily}`.trim();
   const isComplete = Boolean(trimmedFirst && trimmedFamily);
 
@@ -121,7 +121,9 @@ function parseActionFormData(formData: FormData): ActionFormData {
   return {
     actionType: String(formData.get("actionType") || "validate_credential"),
     firstName: String(formData.get("firstName") || "").trim(),
-    familyName: String(formData.get("familyName") || "").trim(),
+    familyName: String(formData.get("familyName") || "")
+      .trim()
+      .toUpperCase(),
     rawEmail: String(formData.get("email") || "").trim(),
     school: resolveSchool(String(formData.get("schoolId") || "")),
     hasNameFields: formData.has("firstName") || formData.has("familyName"),

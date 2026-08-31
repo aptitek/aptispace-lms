@@ -64,13 +64,21 @@ function createInitialProfile(
   school?: SchoolConfig,
 ): OnboardingProfile {
   const base = controlled || defaultProfile || DEFAULT_PROFILE_TEMPLATE;
-  if (!base.email && school) {
+  const normalizedBase: OnboardingProfile = {
+    ...base,
+    familyName: base.familyName ? base.familyName.toUpperCase() : "",
+  };
+  if (!normalizedBase.email && school) {
     return {
-      ...base,
-      email: formatInstitutionalEmail(base.firstName, base.familyName, school),
+      ...normalizedBase,
+      email: formatInstitutionalEmail(
+        normalizedBase.firstName,
+        normalizedBase.familyName,
+        school,
+      ),
     };
   }
-  return base;
+  return normalizedBase;
 }
 
 interface UseProfileStateParams {
@@ -114,11 +122,12 @@ function useOnboardingProfileState({
   };
 
   const handleFamilyNameChange = (familyName: string) => {
-    const patch: Partial<OnboardingProfile> = { familyName };
+    const upperFamilyName = familyName.toUpperCase();
+    const patch: Partial<OnboardingProfile> = { familyName: upperFamilyName };
     if (!isEmailCustomized) {
       patch.email = formatInstitutionalEmail(
         activeProfile.firstName,
-        familyName,
+        upperFamilyName,
         school,
       );
     }
@@ -273,8 +282,13 @@ function CardFrontFace({
               placeholder={t("form.familyNamePlaceholder", "Family name")}
               size="small"
               variant="outlined"
-              onChange={(e) => onFamilyNameChange(e.target.value)}
-              slotProps={{ htmlInput: { "data-testid": "input-familyname" } }}
+              onChange={(e) => onFamilyNameChange(e.target.value.toUpperCase())}
+              slotProps={{
+                htmlInput: {
+                  "data-testid": "input-familyname",
+                  style: { textTransform: "uppercase" },
+                },
+              }}
               fullWidth
             />
           </FieldListItem>

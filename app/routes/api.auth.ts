@@ -71,7 +71,8 @@ function resolveAccountName(
   user: UserWithAffiliationsResult,
   role: UserRole,
 ): string {
-  const fullName = `${user.firstName || ""} ${user.lastName || ""}`.trim();
+  const fullName =
+    `${user.firstName?.trim() || ""} ${(user.lastName || "").trim().toUpperCase()}`.trim();
   return (
     user.displayName ||
     fullName ||
@@ -89,8 +90,8 @@ function formatAccountFromDb(
   return {
     id: user.id,
     name: resolveAccountName(user, role),
-    firstName: user.firstName,
-    lastName: user.lastName,
+    firstName: user.firstName?.trim() || "",
+    lastName: (user.lastName || "").trim().toUpperCase(),
     email: primaryAffiliation?.email || "",
     role,
     isProfileComplete: isComplete,
@@ -107,9 +108,11 @@ function formatPersona(
   fallback: PersonaDefinition,
 ): PersonaDefinition {
   const primaryAffiliation = user.affiliations[0];
+  const fullName =
+    `${user.firstName?.trim() || ""} ${(user.lastName || "").trim().toUpperCase()}`.trim();
   return {
     id: user.id,
-    name: user.displayName ?? `${user.firstName} ${user.lastName}`,
+    name: user.displayName ?? fullName ?? fallback.name,
     email: primaryAffiliation?.email ?? fallback.email,
     role: (primaryAffiliation?.role as UserRole) ?? fallback.role,
     title: fallback.title,
@@ -121,8 +124,8 @@ function getFallbackAccounts(): FormattedAccount[] {
   return getInitialFallbackAccounts().map((a) => ({
     id: a.id,
     name: a.name,
-    firstName: a.firstName ?? "",
-    lastName: a.lastName ?? "",
+    firstName: a.firstName?.trim() ?? "",
+    lastName: (a.lastName ?? "").trim().toUpperCase(),
     email: a.email,
     role: a.role,
     isProfileComplete: Boolean(a.isProfileComplete),
@@ -168,7 +171,8 @@ async function fetchPersonas(db: Database | null) {
 
 function formatDbCurrentUser(user: UserWithAffiliationsResult) {
   const name =
-    user.displayName ?? `${user.firstName || ""} ${user.lastName || ""}`.trim();
+    user.displayName ??
+    `${user.firstName?.trim() || ""} ${(user.lastName || "").trim().toUpperCase()}`.trim();
   return {
     id: user.id,
     name: name || "User",
@@ -180,8 +184,10 @@ function formatDbCurrentUser(user: UserWithAffiliationsResult) {
 }
 
 function formatInMemoryCurrentUser(inMem: AccountDefinition) {
-  const isComplete = Boolean(inMem.firstName && inMem.lastName);
-  const fullName = `${inMem.firstName || ""} ${inMem.lastName || ""}`.trim();
+  const firstName = inMem.firstName?.trim() || "";
+  const lastName = (inMem.lastName || "").trim().toUpperCase();
+  const isComplete = Boolean(firstName && lastName);
+  const fullName = `${firstName} ${lastName}`.trim();
   return {
     id: inMem.id,
     name: inMem.name || fullName || "User",

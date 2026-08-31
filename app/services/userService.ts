@@ -67,10 +67,14 @@ export async function createUser(
   userFields: Omit<NewUser, "createdAt" | "updatedAt">,
 ): Promise<User> {
   const now = new Date();
+  const normalizedLastName = userFields.lastName
+    ? userFields.lastName.trim().toUpperCase()
+    : userFields.lastName;
   const [created] = await db
     .insert(users)
     .values({
       ...userFields,
+      lastName: normalizedLastName,
       createdAt: now,
       updatedAt: now,
     })
@@ -106,10 +110,17 @@ export async function updateUser(
   id: string,
   userFields: Partial<Omit<NewUser, "id" | "createdAt" | "updatedAt">>,
 ): Promise<User | null> {
+  const normalizedFields = { ...userFields };
+  if (normalizedFields.lastName !== undefined) {
+    normalizedFields.lastName = normalizedFields.lastName.trim().toUpperCase();
+  }
+  if (normalizedFields.firstName !== undefined) {
+    normalizedFields.firstName = normalizedFields.firstName.trim();
+  }
   const [updated] = await db
     .update(users)
     .set({
-      ...userFields,
+      ...normalizedFields,
       updatedAt: new Date(),
     })
     .where(eq(users.id, id))

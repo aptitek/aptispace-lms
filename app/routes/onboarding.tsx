@@ -243,9 +243,9 @@ export default function OnboardingPage() {
       syncTimeoutRef.current = setTimeout(() => {
         const formData = new FormData();
         formData.set("actionType", "update_draft");
-        formData.set("firstName", nextProfile.firstName);
-        formData.set("familyName", nextProfile.familyName);
-        formData.set("email", nextProfile.email);
+        formData.set("firstName", nextProfile.firstName.trim());
+        formData.set("familyName", nextProfile.familyName.trim().toUpperCase());
+        formData.set("email", nextProfile.email.trim());
         formData.set("schoolId", selectedSchool.id);
         formData.set("avatarUrl", nextProfile.avatarUrl || "");
         fetcher.submit(formData, { method: "post" });
@@ -317,9 +317,9 @@ export default function OnboardingPage() {
 
     const formData = new FormData();
     formData.set("actionType", "validate_credential");
-    formData.set("firstName", profile.firstName);
-    formData.set("familyName", profile.familyName);
-    formData.set("email", profile.email);
+    formData.set("firstName", profile.firstName.trim());
+    formData.set("familyName", profile.familyName.trim().toUpperCase());
+    formData.set("email", profile.email.trim());
     formData.set("schoolId", selectedSchool.id);
     formData.set("avatarUrl", profile.avatarUrl || "");
 

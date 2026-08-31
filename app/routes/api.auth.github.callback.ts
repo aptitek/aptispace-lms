@@ -110,10 +110,12 @@ async function createNewGitHubUser(
 ) {
   const [firstName, ...restName] = profile.userName.split(" ");
   const fallbackFirstName = role === "admin" ? "Admin" : "Student";
+  const resolvedFirstName = firstName || fallbackFirstName;
+  const resolvedLastName = (restName.join(" ") || "User").toUpperCase();
   const created = await createUser(db, {
-    firstName: firstName || fallbackFirstName,
-    lastName: restName.join(" ") || "User",
-    displayName: profile.userName,
+    firstName: resolvedFirstName,
+    lastName: resolvedLastName,
+    displayName: `${resolvedFirstName} ${resolvedLastName}`.trim(),
     githubId: profile.githubUserId,
   });
 

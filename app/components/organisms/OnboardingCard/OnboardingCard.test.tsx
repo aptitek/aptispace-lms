@@ -92,12 +92,19 @@ describe("OnboardingCard Component & Utilities", () => {
     expect(email).toBe("eleonore.st.exupery@aptitek.io");
   });
 
-  it("builds valid TD-1 MRZ dataset from profile and school info", () => {
+  it("builds valid TD-1 MRZ dataset from profile and school info with uppercase surname", () => {
     const mrz = buildTd1MrzData(mockProfile, mockSchoolWithLogo);
     expect(mrz.documentNumber).toBe("7810");
     expect(mrz.surname).toBe("ROSTOVA");
     expect(mrz.givenNames).toBe("ELENA");
     expect(mrz.issuingState).toBe("APT");
+
+    const mrzFromLower = buildTd1MrzData(
+      { ...mockProfile, familyName: "rostova", firstName: "elena" },
+      mockSchoolWithLogo,
+    );
+    expect(mrzFromLower.surname).toBe("ROSTOVA");
+    expect(mrzFromLower.givenNames).toBe("ELENA");
   });
 
   it("derives Guilloche seed from school ID, name, or slug", () => {

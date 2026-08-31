@@ -210,7 +210,7 @@ function mapInMemoryUser(
   return {
     id: inMem.id,
     firstName: inMem.firstName || "",
-    lastName: inMem.lastName || "",
+    lastName: (inMem.lastName || "").toUpperCase(),
     displayName: inMem.name,
     githubId: null,
     createdAt: inMem.createdAt ? new Date(inMem.createdAt) : new Date(),

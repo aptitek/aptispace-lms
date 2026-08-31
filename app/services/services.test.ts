@@ -126,7 +126,7 @@ describe("Backend Database & Service Architecture", () => {
 
   it("executes user and affiliation domain operations", async () => {
     const mockUserRecord = [
-      { id: "user-1", firstName: "Test", lastName: "Pilot", role: "student" },
+      { id: "user-1", firstName: "Test", lastName: "PILOT", role: "student" },
     ];
     const mockDb = {
       select: () => ({
@@ -146,10 +146,11 @@ describe("Backend Database & Service Architecture", () => {
 
     const user = await createUser(mockDb, {
       firstName: "Test",
-      lastName: "Pilot",
-      displayName: "Test Pilot",
+      lastName: "pilot",
+      displayName: "Test PILOT",
     });
     expect(user.id).toBe("user-1");
+    expect(user.lastName).toBe("PILOT");
 
     const fetchedUser = await getUserById(mockDb, "user-1");
     expect(fetchedUser?.firstName).toBe("Test");
@@ -198,10 +199,11 @@ describe("Backend Database & Service Architecture", () => {
 
     const updatedUser = await updateUser(mockDb, "user-1", {
       firstName: "Alex",
-      lastName: "Mercer",
-      displayName: "Alex Mercer",
+      lastName: "mercer",
+      displayName: "Alex MERCER",
     });
     expect(updatedUser?.firstName).toBe("Alex");
+    expect(updatedUser?.lastName).toBe("MERCER");
 
     const updatedAffiliation = await updateUserAffiliation(mockDb, "user-1", {
       email: "alex.mercer@aptitek.io",
@@ -212,8 +214,8 @@ describe("Backend Database & Service Architecture", () => {
       isUserProfileComplete({
         id: "user-1",
         firstName: "Alex",
-        lastName: "Mercer",
-        displayName: "Alex Mercer",
+        lastName: "MERCER",
+        displayName: "Alex MERCER",
         githubId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -239,8 +241,8 @@ describe("Backend Database & Service Architecture", () => {
       isUserProfileComplete({
         id: "user-1",
         firstName: "",
-        lastName: "Mercer",
-        displayName: "Alex Mercer",
+        lastName: "MERCER",
+        displayName: "Alex MERCER",
         githubId: null,
         createdAt: new Date(),
         updatedAt: new Date(),

@@ -36,8 +36,8 @@ export function buildInitialProfile(
 ): OnboardingProfile {
   const primaryAffiliation = dbUser?.affiliations?.[0];
   return {
-    firstName: dbUser?.firstName ?? "",
-    familyName: dbUser?.lastName ?? "",
+    firstName: dbUser?.firstName?.trim() ?? "",
+    familyName: (dbUser?.lastName ?? "").trim().toUpperCase(),
     email: primaryAffiliation?.email ?? "",
     avatarUrl: "",
   };
@@ -58,8 +58,8 @@ function resolveProfileEmail(
 export function resolveDefaultProfile(
   loaderProfile?: OnboardingProfile,
 ): OnboardingProfile {
-  const first = loaderProfile?.firstName ?? "";
-  const family = loaderProfile?.familyName ?? "";
+  const first = loaderProfile?.firstName?.trim() ?? "";
+  const family = (loaderProfile?.familyName ?? "").trim().toUpperCase();
   const email = resolveProfileEmail(first, family, loaderProfile?.email);
 
   return {

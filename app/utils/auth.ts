@@ -70,8 +70,8 @@ function createInMemoryAccount(
 ): AccountDefinition {
   const role = updates.role ?? "student";
   const roleLabel = getRoleLabel(role);
-  const firstName = updates.firstName ?? "";
-  const lastName = updates.lastName ?? "";
+  const firstName = (updates.firstName ?? "").trim();
+  const lastName = (updates.lastName ?? "").trim().toUpperCase();
   const fullName = `${firstName} ${lastName}`.trim();
   const isComplete = Boolean(updates.isProfileComplete);
 
@@ -94,8 +94,10 @@ function mergeInMemoryAccount(
   existing: AccountDefinition,
   updates: Partial<AccountDefinition>,
 ): AccountDefinition {
-  const firstName = updates.firstName ?? existing.firstName ?? "";
-  const lastName = updates.lastName ?? existing.lastName ?? "";
+  const firstName = (updates.firstName ?? existing.firstName ?? "").trim();
+  const lastName = (updates.lastName ?? existing.lastName ?? "")
+    .trim()
+    .toUpperCase();
   const fullName = `${firstName} ${lastName}`.trim();
   const isComplete =
     updates.isProfileComplete !== undefined
@@ -317,8 +319,8 @@ export interface ResolveActiveUserDbParam {
 
 function resolveDbUserName(dbUser: ResolveActiveUserDbParam): string {
   if (dbUser.displayName) return dbUser.displayName;
-  const first = dbUser.firstName || "";
-  const last = dbUser.lastName || "";
+  const first = dbUser.firstName?.trim() || "";
+  const last = (dbUser.lastName || "").trim().toUpperCase();
   const combined = `${first} ${last}`.trim();
   return combined || "User";
 }

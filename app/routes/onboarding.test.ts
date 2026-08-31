@@ -128,4 +128,32 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
     const body = (await response.json()) as { code: string; error: string };
     expect(body.code).toBe("MISSING_REQUIRED_FIELDS");
   });
+
+  it("converts family name to uppercase when saving user edits", async () => {
+    const { saveUserEdits } = await import("./onboarding.helpers.server");
+    const { findInMemoryAccount, updateInMemoryAccount } =
+      await import("~/utils/auth");
+
+    updateInMemoryAccount("test-user-upper", {
+      id: "test-user-upper",
+      firstName: "Jane",
+      lastName: "smith",
+      role: "student",
+      email: "jane.smith@aptitek.io",
+      name: "Jane smith",
+    });
+
+    await saveUserEdits({
+      db: null,
+      userId: "test-user-upper",
+      firstName: "Jane",
+      familyName: "smith",
+      schoolId: "school-aptitek",
+      hasNameFields: true,
+    });
+
+    const updated = findInMemoryAccount("test-user-upper");
+    expect(updated?.lastName).toBe("SMITH");
+    expect(updated?.name).toBe("Jane SMITH");
+  });
 });
