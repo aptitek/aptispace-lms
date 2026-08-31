@@ -1,0 +1,22 @@
+[ ] Enforce WCAG 2.1 AA AA Level Compliance in Design System, Forms and controls
+[ ] Check GDPR Compliance (ONLY once production starts and app is finished) DO NOT use cookies if possible except for github login. If cookies are needed, use localstorage instead.
+[ ] Make the logos on the id card holo again
+[ ] Backface rendering on onboarding card is broken again
+[ ] Render SVG and do image processign on client side to ensure light webp R2 storage
+[ ] Optimise Galaxy further
+[ ] Make language and mode toggle border consistent with each other and MD3
+[ ] Logout needs to be a icon-button with tooltip instead
+[ ] Placeholder for avatar (MDI avatar)
+[ ] Check Deadcode, test all features end to end
+[ ] If possible catch those full screen errors inm status center
+[ ] Update README.md to reflect current state
+[ ] In headerbar, we replace the user card with a shaped Avatar that opens the onboarding modal when clicked. Display it only once onboarding is complete.
+[ ] Add admin/student/instructor badges to the idcard along with github username as a card identifier
+[ ] Seed the guilloche properly with school id
+
+---
+
+[ ] Start the card grid component using the best between deck-fx card grid or MD3 grid system
+[ ] Implement a generic MD3 search and filter component for schools, cohort, group, students, activities and courses.
+[ ] Make an admin section for audit and reported errors.
+[ ] Setup a dashboard using the metrics from the DB to show usage statistics, errors etc. 
