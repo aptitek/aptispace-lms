@@ -190,7 +190,7 @@ export const TransparentGhostOverlay = styled("div")<{
   isMirrored?: boolean;
   isVertical?: boolean;
   opacity?: number;
-}>(({ theme, isMirrored = true, isVertical, opacity = 0.22 }) => ({
+}>(({ theme, isMirrored = true, isVertical, opacity = 0.35 }) => ({
   position: "absolute",
   inset: 0,
   width: "100%",

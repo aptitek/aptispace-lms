@@ -387,7 +387,7 @@ export default function OnboardingPage() {
           size="lg"
           flipOnClick={true}
           showGlare={false}
-          transparent={false}
+          transparent={true}
           holoVariant="rainbow"
         />
 

@@ -1,3 +1,4 @@
+import React from "react";
 import type {
   SchoolConfig,
   OnboardingProfile,
@@ -143,35 +144,103 @@ export function buildHoloLayers(
   const layers: IdHoloLayer[] = [];
 
   if (schoolLogoUrl) {
+    // 1) Main Front Holographic Logo
     layers.push({
       id: "school-holo-logo",
       src: schoolLogoUrl,
       side: "front",
-      left: "3.5%",
-      top: "3%",
+      left: "3%",
+      top: "2.8%",
       width: "28%",
-      height: "10%",
+      height: "9%",
       objectFit: "contain",
       blendMode: "screen",
       opacity: 0.95,
       holographic: true,
       zIndex: 20,
     });
+
+    // 2) Ghost of Front Logo (mirrored onto the back face)
+    layers.push({
+      id: "school-holo-logo-ghost",
+      side: "back",
+      left: 0,
+      top: 0,
+      width: "100%",
+      height: "100%",
+      blendMode: "screen",
+      opacity: 0.25, // Lower opacity for ghost effect
+      holographic: true,
+      zIndex: 1, // Below content on the back face
+      style: {
+        filter: "blur(0.35px) contrast(0.95)",
+      },
+      children: React.createElement(
+        "div",
+        { style: { width: "100%", height: "100%", transform: "scaleX(-1)" } },
+        React.createElement("img", {
+          src: schoolLogoUrl,
+          alt: "",
+          style: {
+            position: "absolute",
+            left: "3%",
+            top: "2.8%",
+            width: "28%",
+            height: "9%",
+            objectFit: "contain",
+          },
+        }),
+      ),
+    });
   }
 
+  // 1) Main Back Holographic Logo
   layers.push({
     id: "aptispace-holo-logo",
     src: "/aptispace-logo.svg",
     side: "back",
     left: "28%",
-    top: "10%",
-    width: "48%",
+    top: "12%",
+    width: "52%",
     height: "22%",
     objectFit: "contain",
     blendMode: "screen",
     opacity: 0.95,
     holographic: true,
     zIndex: 20,
+  });
+
+  // 2) Ghost of Back Logo (mirrored onto the front face)
+  layers.push({
+    id: "aptispace-holo-logo-ghost",
+    side: "front",
+    left: 0,
+    top: 0,
+    width: "100%",
+    height: "100%",
+    blendMode: "screen",
+    opacity: 0.25, // Lower opacity for ghost effect
+    holographic: true,
+    zIndex: 1, // Below content on the front face
+    style: {
+      filter: "blur(0.35px) contrast(0.95)",
+    },
+    children: React.createElement(
+      "div",
+      { style: { width: "100%", height: "100%", transform: "scaleX(-1)" } },
+      React.createElement("img", {
+        src: "/aptispace-logo.svg",
+        alt: "",
+        style: {
+          position: "absolute",
+          left: "28%",
+          top: "12%",
+          width: "52%",
+          height: "22%",
+          objectFit: "contain",
+        },
+      }),
+    ),
   });
 
   if (customHoloLayers && Array.isArray(customHoloLayers)) {

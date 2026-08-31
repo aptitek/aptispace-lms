@@ -117,9 +117,9 @@ describe("OnboardingCard Component & Utilities", () => {
 });
 
 describe("buildHoloLayers", () => {
-  it("generates school logo holo layer for front and AptiSpace logo for back", () => {
+  it("generates school logo and AptiSpace logo holo layers, along with their ghosts", () => {
     const layers = buildHoloLayers("/aptitek-logo.svg");
-    expect(layers).toHaveLength(2);
+    expect(layers).toHaveLength(4);
 
     const frontLayer = layers.find((l) => l.id === "school-holo-logo");
     expect(frontLayer).toBeDefined();
@@ -127,18 +127,27 @@ describe("buildHoloLayers", () => {
     expect(frontLayer?.side).toBe("front");
     expect(frontLayer?.holographic).toBe(true);
 
+    const frontGhost = layers.find((l) => l.id === "school-holo-logo-ghost");
+    expect(frontGhost).toBeDefined();
+    expect(frontGhost?.side).toBe("back");
+
     const backLayer = layers.find((l) => l.id === "aptispace-holo-logo");
     expect(backLayer).toBeDefined();
     expect(backLayer?.src).toBe("/aptispace-logo.svg");
     expect(backLayer?.side).toBe("back");
     expect(backLayer?.holographic).toBe(true);
+
+    const backGhost = layers.find((l) => l.id === "aptispace-holo-logo-ghost");
+    expect(backGhost).toBeDefined();
+    expect(backGhost?.side).toBe("front");
   });
 
   it("omits school logo layer when schoolLogoUrl is null or undefined", () => {
     const layers = buildHoloLayers(null);
-    expect(layers).toHaveLength(1);
-    expect(layers[0].id).toBe("aptispace-holo-logo");
-    expect(layers[0].side).toBe("back");
+    expect(layers).toHaveLength(2); // Aptispace logo + its ghost
+    const mainLayer = layers.find((l) => l.id === "aptispace-holo-logo");
+    expect(mainLayer).toBeDefined();
+    expect(mainLayer?.side).toBe("back");
   });
 
   it("appends custom holo layers properly", () => {
@@ -146,7 +155,7 @@ describe("buildHoloLayers", () => {
       "custom-pattern.png",
       { id: "layer-2", src: "test.png", side: "back", holographic: true },
     ]);
-    expect(layers).toHaveLength(4);
+    expect(layers).toHaveLength(6);
     const custom0 = layers.find((l) => l.id === "custom-holo-0");
     const custom2 = layers.find((l) => l.id === "layer-2");
     expect(custom0).toBeDefined();

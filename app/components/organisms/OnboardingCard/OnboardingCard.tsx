@@ -11,6 +11,7 @@ import type {
   OnboardingCardProps,
   OnboardingProfile,
   SchoolConfig,
+  CohortConfig,
 } from "./OnboardingCard.types";
 import {
   formatInstitutionalEmail,
@@ -35,8 +36,9 @@ import {
   FieldListItem,
   CardBackContainer,
   BackMainArea,
-  BackLeftContactCol,
-  BackRightContentCol,
+  BackLeftBrandingCol,
+  BackRightContactCol,
+  BackAptispaceLogoPlaceholder,
   FullWidthMrzHolder,
 } from "./OnboardingCard.styles";
 
@@ -137,8 +139,8 @@ function useOnboardingProfileState({
 }
 
 interface FrontFaceProps {
-  school: OnboardingCardProps["school"];
-  cohort?: OnboardingCardProps["cohort"];
+  school: SchoolConfig;
+  cohort?: CohortConfig;
   profile: OnboardingProfile;
   readOnly?: boolean;
   onFirstNameChange: (nextValue: string) => void;
@@ -284,7 +286,6 @@ interface BackFaceProps {
 }
 
 function CardBackFace({ school, profile }: BackFaceProps) {
-  const { t } = useTranslation("onboarding");
   const mrzData = useMemo(() => {
     return buildTd1MrzData(profile, school);
   }, [profile, school]);
@@ -292,14 +293,14 @@ function CardBackFace({ school, profile }: BackFaceProps) {
   return (
     <CardBackContainer data-testid="onboarding-card-back">
       <BackMainArea>
-        <BackLeftContactCol aria-hidden="true" />
-        <BackRightContentCol data-testid="card-back-branding">
-          <span
+        <BackLeftBrandingCol data-testid="card-back-branding">
+          <BackAptispaceLogoPlaceholder
             role="img"
-            aria-label={t("card.logoAlt", "AptiSpace")}
+            aria-label="AptiSpace"
             data-testid="card-back-logo"
           />
-        </BackRightContentCol>
+        </BackLeftBrandingCol>
+        <BackRightContactCol aria-hidden="true" />
       </BackMainArea>
 
       <FullWidthMrzHolder>
@@ -324,7 +325,7 @@ const DEFAULT_ONBOARDING_PROPS = {
   holoVariant: "rainbow" as const,
   holoStrength: 0.85,
   showGuilloche: true,
-  transparent: false,
+  transparent: true,
   readOnly: false,
   testId: "onboarding-card",
 };

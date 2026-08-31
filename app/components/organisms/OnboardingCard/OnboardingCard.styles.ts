@@ -27,19 +27,27 @@ export const SchoolHeaderRow = styled("div")(({ theme }) => ({
   flexShrink: 0,
 }));
 
-export const SchoolBrandingHolder = styled("div")(({ theme }) => ({
-  display: "inline-flex",
+export const SchoolBrandingHolder = styled("div")({
+  display: "flex",
   alignItems: "center",
-  gap: theme.spacing(1),
-  maxWidth: "55%",
-  height: "36px",
-  overflow: "hidden",
-}));
+  gap: "8px",
+  minHeight: "36px",
+});
+
+export const SchoolLogoImg = styled("img")({
+  maxHeight: "36px",
+  maxWidth: "140px",
+  width: "auto",
+  height: "auto",
+  objectFit: "contain",
+  userSelect: "none",
+  pointerEvents: "none",
+});
 
 export const SchoolLogoHoloPlaceholder = styled("span")({
   display: "inline-block",
-  height: "32px",
-  minWidth: "60px",
+  height: "36px",
+  minWidth: "100px",
   pointerEvents: "none",
 });
 
@@ -127,7 +135,7 @@ export const CardBackContainer = styled("div")(({ theme }) => ({
 
 export const BackMainArea = styled("div")(({ theme }) => ({
   display: "grid",
-  gridTemplateColumns: "135px 1fr",
+  gridTemplateColumns: "1fr 135px",
   gap: theme.spacing(1.5),
   alignItems: "center",
   paddingTop: theme.spacing(1),
@@ -135,16 +143,7 @@ export const BackMainArea = styled("div")(({ theme }) => ({
   flex: 1,
 }));
 
-export const BackLeftContactCol = styled("div")({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "flex-start",
-  justifyContent: "center",
-  position: "relative",
-  minHeight: "48px",
-});
-
-export const BackRightContentCol = styled("div")({
+export const BackLeftBrandingCol = styled("div")({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -152,13 +151,33 @@ export const BackRightContentCol = styled("div")({
   position: "relative",
 });
 
+export const BackRightContactCol = styled("div")({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-end",
+  justifyContent: "center",
+  position: "relative",
+  minHeight: "48px",
+});
+
+// Backward compatibility alias
+export const BackLeftContactCol = BackLeftBrandingCol;
+export const BackRightContentCol = BackRightContactCol;
+
 export const BackAptispaceLogo = styled("img")({
-  maxHeight: "56px",
+  maxHeight: "48px",
   maxWidth: "85%",
   width: "auto",
   height: "auto",
   objectFit: "contain",
   userSelect: "none",
+  pointerEvents: "none",
+});
+
+export const BackAptispaceLogoPlaceholder = styled("span")({
+  display: "inline-block",
+  height: "48px",
+  minWidth: "120px",
   pointerEvents: "none",
 });
 
