@@ -3,8 +3,11 @@ import type {
   OnboardingProfile,
   CohortConfig,
   CohortValidity,
+  OnboardingHoloVariant,
 } from "./OnboardingCard.types";
 import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
+import type { GuillocheVariant } from "../../atoms/Guilloche/Guilloche.types";
+import type { IdHoloLayer } from "../../molecules/IdCard/IdCard.types";
 
 function sanitizeEmailPart(name: string, fallback = ""): string {
   const sanitized = (name || "")
@@ -119,4 +122,102 @@ export function buildTd1MrzData(
     expiryDate: profile.expiryDate || "300828",
     optional1: school.id ? school.id.slice(0, 15).toUpperCase() : undefined,
   };
+}
+
+export function resolveGuillocheVariant(
+  variant?: OnboardingHoloVariant,
+): GuillocheVariant {
+  if (variant === "gold") return "solarized-gold";
+  if (variant === "cosmic") return "cosmic-crimson";
+  return "holo-spectrum";
+}
+
+export function resolveGuillocheSeed(school: SchoolConfig): string {
+  return school.id || school.name || school.slug || "APTISPACE-SCHOOL";
+}
+
+export function buildHoloLayers(
+  schoolLogoUrl?: string | null,
+  customHoloLayers?: (string | IdHoloLayer)[],
+): IdHoloLayer[] {
+  const layers: IdHoloLayer[] = [];
+
+  if (schoolLogoUrl) {
+    layers.push({
+      id: "school-holo-logo",
+      src: schoolLogoUrl,
+      side: "front",
+      left: "3.5%",
+      top: "3%",
+      width: "28%",
+      height: "10%",
+      objectFit: "contain",
+      blendMode: "screen",
+      opacity: 0.95,
+      holographic: true,
+      zIndex: 20,
+    });
+  }
+
+  layers.push({
+    id: "aptispace-holo-logo",
+    src: "/aptispace-logo.svg",
+    side: "back",
+    left: "28%",
+    top: "10%",
+    width: "48%",
+    height: "22%",
+    objectFit: "contain",
+    blendMode: "screen",
+    opacity: 0.95,
+    holographic: true,
+    zIndex: 20,
+  });
+
+  if (customHoloLayers && Array.isArray(customHoloLayers)) {
+    customHoloLayers.forEach((layerItem, idx) => {
+      if (typeof layerItem === "string") {
+        layers.push({
+          id: `custom-holo-${idx}`,
+          src: layerItem,
+          side: "front",
+          holographic: true,
+        });
+      } else {
+        layers.push(layerItem);
+      }
+    });
+  }
+
+  return layers;
+}
+
+export const DEFAULT_PROFILE_TEMPLATE: OnboardingProfile = {
+  firstName: "",
+  familyName: "",
+  email: "",
+  avatarUrl: "",
+};
+
+export function createInitialProfile(
+  controlled?: OnboardingProfile,
+  defaultProfile?: OnboardingProfile,
+  school?: SchoolConfig,
+): OnboardingProfile {
+  const base = controlled || defaultProfile || DEFAULT_PROFILE_TEMPLATE;
+  const normalizedBase: OnboardingProfile = {
+    ...base,
+    familyName: base.familyName ? base.familyName.toUpperCase() : "",
+  };
+  if (!normalizedBase.email && school) {
+    return {
+      ...normalizedBase,
+      email: formatInstitutionalEmail(
+        normalizedBase.firstName,
+        normalizedBase.familyName,
+        school,
+      ),
+    };
+  }
+  return normalizedBase;
 }

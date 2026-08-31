@@ -7,24 +7,26 @@ import IdCard from "../../molecules/IdCard/IdCard";
 import EditableAvatar from "../../molecules/EditableAvatar/EditableAvatar";
 import EmailField from "../../molecules/EmailField/EmailField";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
-import type { GuillocheVariant } from "../../atoms/Guilloche/Guilloche.types";
-import type { IdHoloLayer } from "../../molecules/IdCard/IdCard.types";
 import type {
   OnboardingCardProps,
   OnboardingProfile,
-  OnboardingHoloVariant,
   SchoolConfig,
 } from "./OnboardingCard.types";
 import {
   formatInstitutionalEmail,
   buildTd1MrzData,
   calculateCohortValidity,
+  resolveGuillocheVariant,
+  resolveGuillocheSeed,
+  buildHoloLayers,
+  createInitialProfile,
+  DEFAULT_PROFILE_TEMPLATE,
 } from "./OnboardingCard.utils";
 import {
   CardFrontContainer,
   SchoolHeaderRow,
   SchoolBrandingHolder,
-  SchoolLogoImg,
+  SchoolLogoHoloPlaceholder,
   SchoolFallbackText,
   CohortValidityContainer,
   CardMainBody,
@@ -35,51 +37,10 @@ import {
   BackMainArea,
   BackLeftContactCol,
   BackRightContentCol,
-  BackAptispaceLogo,
   FullWidthMrzHolder,
 } from "./OnboardingCard.styles";
 
-const DEFAULT_PROFILE_TEMPLATE: OnboardingProfile = {
-  firstName: "",
-  familyName: "",
-  email: "",
-  avatarUrl: "",
-};
-
-function resolveGuillocheVariant(
-  variant?: OnboardingHoloVariant,
-): GuillocheVariant {
-  if (variant === "gold") return "solarized-gold";
-  if (variant === "cosmic") return "cosmic-crimson";
-  return "holo-spectrum";
-}
-
-function resolveGuillocheSeed(school: SchoolConfig): string {
-  return school.id || school.name || school.slug || "APTISPACE-SCHOOL";
-}
-
-function createInitialProfile(
-  controlled?: OnboardingProfile,
-  defaultProfile?: OnboardingProfile,
-  school?: SchoolConfig,
-): OnboardingProfile {
-  const base = controlled || defaultProfile || DEFAULT_PROFILE_TEMPLATE;
-  const normalizedBase: OnboardingProfile = {
-    ...base,
-    familyName: base.familyName ? base.familyName.toUpperCase() : "",
-  };
-  if (!normalizedBase.email && school) {
-    return {
-      ...normalizedBase,
-      email: formatInstitutionalEmail(
-        normalizedBase.firstName,
-        normalizedBase.familyName,
-        school,
-      ),
-    };
-  }
-  return normalizedBase;
-}
+export { buildHoloLayers };
 
 interface UseProfileStateParams {
   school: SchoolConfig;
@@ -208,9 +169,9 @@ function CardFrontFace({
       <SchoolHeaderRow>
         <SchoolBrandingHolder>
           {school.logoUrl ? (
-            <SchoolLogoImg
-              src={school.logoUrl}
-              alt={schoolName}
+            <SchoolLogoHoloPlaceholder
+              role="img"
+              aria-label={schoolName}
               data-testid="school-logo"
             />
           ) : (
@@ -333,9 +294,9 @@ function CardBackFace({ school, profile }: BackFaceProps) {
       <BackMainArea>
         <BackLeftContactCol aria-hidden="true" />
         <BackRightContentCol data-testid="card-back-branding">
-          <BackAptispaceLogo
-            src="/aptispace-logo.svg"
-            alt={t("card.logoAlt", "AptiSpace")}
+          <span
+            role="img"
+            aria-label={t("card.logoAlt", "AptiSpace")}
             data-testid="card-back-logo"
           />
         </BackRightContentCol>
@@ -352,30 +313,6 @@ function CardBackFace({ school, profile }: BackFaceProps) {
       </FullWidthMrzHolder>
     </CardBackContainer>
   );
-}
-
-function buildHoloLayers(
-  schoolLogoUrl?: string | null,
-  customHoloLayers?: (string | IdHoloLayer)[],
-): IdHoloLayer[] {
-  const layers: IdHoloLayer[] = [];
-
-  if (customHoloLayers && Array.isArray(customHoloLayers)) {
-    customHoloLayers.forEach((layerItem, idx) => {
-      if (typeof layerItem === "string") {
-        layers.push({
-          id: `custom-holo-${idx}`,
-          src: layerItem,
-          side: "front",
-          holographic: true,
-        });
-      } else {
-        layers.push(layerItem);
-      }
-    });
-  }
-
-  return layers;
 }
 
 const DEFAULT_ONBOARDING_PROPS = {
@@ -458,6 +395,23 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
       <CardBackFace school={school} profile={activeProfile} />
     );
 
+    const ghostFrontNode = (
+      <CardFrontFace
+        school={school}
+        cohort={cohort}
+        profile={activeProfile}
+        readOnly={true}
+        onFirstNameChange={() => {}}
+        onFamilyNameChange={() => {}}
+        onEmailChange={() => {}}
+        onAvatarChange={() => {}}
+      />
+    );
+
+    const ghostBackNode = (
+      <CardBackFace school={school} profile={activeProfile} />
+    );
+
     return (
       <IdCard
         ref={ref}
@@ -476,6 +430,7 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
         showGuilloche={showGuilloche}
         holographic={true}
         holoStrength={holoStrength}
+        holoVariant={holoVariant}
         holoLayers={mergedHoloLayers}
         showElectronics={true}
         chipPosition="left"
@@ -489,6 +444,9 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
         testId={testId}
         frontContent={frontContentNode}
         backContent={backContentNode}
+        renderGhostContent={(ghostSide) =>
+          ghostSide === "front" ? ghostFrontNode : ghostBackNode
+        }
       />
     );
   },

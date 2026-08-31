@@ -36,13 +36,10 @@ export const SchoolBrandingHolder = styled("div")(({ theme }) => ({
   overflow: "hidden",
 }));
 
-export const SchoolLogoImg = styled("img")({
-  maxHeight: "32px",
-  maxWidth: "100%",
-  width: "auto",
-  height: "auto",
-  objectFit: "contain",
-  userSelect: "none",
+export const SchoolLogoHoloPlaceholder = styled("span")({
+  display: "inline-block",
+  height: "32px",
+  minWidth: "60px",
   pointerEvents: "none",
 });
 
@@ -125,14 +122,15 @@ export const CardBackContainer = styled("div")(({ theme }) => ({
   boxSizing: "border-box",
   position: "relative",
   zIndex: 10,
+  userSelect: "none",
 }));
 
 export const BackMainArea = styled("div")(({ theme }) => ({
   display: "grid",
-  gridTemplateColumns: "140px 1fr",
+  gridTemplateColumns: "135px 1fr",
   gap: theme.spacing(1.5),
-  alignItems: "flex-start",
-  paddingTop: "32px",
+  alignItems: "center",
+  paddingTop: theme.spacing(1),
   paddingBottom: theme.spacing(0.5),
   flex: 1,
 }));
@@ -143,21 +141,20 @@ export const BackLeftContactCol = styled("div")({
   alignItems: "flex-start",
   justifyContent: "center",
   position: "relative",
-  minHeight: "80px",
+  minHeight: "48px",
 });
 
 export const BackRightContentCol = styled("div")({
   display: "flex",
-  alignItems: "flex-start",
-  justifyContent: "flex-start",
-  height: "56px",
+  alignItems: "center",
+  justifyContent: "center",
   width: "100%",
   position: "relative",
 });
 
 export const BackAptispaceLogo = styled("img")({
-  maxHeight: "64px",
-  maxWidth: "80%",
+  maxHeight: "56px",
+  maxWidth: "85%",
   width: "auto",
   height: "auto",
   objectFit: "contain",
@@ -169,6 +166,7 @@ export const FullWidthMrzHolder = styled("div")({
   width: "100%",
   padding: 0,
   boxSizing: "border-box",
+  flexShrink: 0,
   "& pre": {
     margin: 0,
     width: "100%",

@@ -88,6 +88,8 @@ interface ReverseGhostLayerProps {
   isVertical: boolean;
   opacity: number;
   renderGhostContent?: (side: IdCardSide) => React.ReactNode;
+  frontContent?: React.ReactNode;
+  backContent?: React.ReactNode;
 }
 
 function ReverseGhostLayer({
@@ -96,18 +98,28 @@ function ReverseGhostLayer({
   isVertical,
   opacity,
   renderGhostContent,
+  frontContent,
+  backContent,
 }: ReverseGhostLayerProps) {
-  if (!isTransparent || !renderGhostContent) return null;
+  if (!isTransparent) return null;
 
   const reverseSide = faceSide === "front" ? "back" : "front";
+  const content = renderGhostContent
+    ? renderGhostContent(reverseSide)
+    : reverseSide === "front"
+      ? frontContent
+      : backContent;
+
+  if (!content) return null;
 
   return (
     <TransparentGhostOverlay
       isMirrored={true}
       isVertical={isVertical}
       opacity={opacity}
+      aria-hidden="true"
     >
-      {renderGhostContent(reverseSide)}
+      {content}
     </TransparentGhostOverlay>
   );
 }
@@ -410,6 +422,8 @@ export const IdCard = forwardRef<HTMLDivElement, IdCardProps>((props, ref) => {
                 props.transparentGhostOpacity ?? conf.transparentGhostOpacity
               }
               renderGhostContent={props.renderGhostContent}
+              frontContent={props.frontContent ?? props.children}
+              backContent={props.backContent}
             />
             {props.backContent && (
               <ContentOverlay isTransparent={conf.transparent}>
@@ -435,6 +449,8 @@ export const IdCard = forwardRef<HTMLDivElement, IdCardProps>((props, ref) => {
               props.transparentGhostOpacity ?? conf.transparentGhostOpacity
             }
             renderGhostContent={props.renderGhostContent}
+            frontContent={props.frontContent ?? props.children}
+            backContent={props.backContent}
           />
           <ContentOverlay isTransparent={conf.transparent}>
             {props.frontContent ?? props.children}

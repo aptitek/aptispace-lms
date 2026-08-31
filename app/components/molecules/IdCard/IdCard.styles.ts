@@ -180,7 +180,7 @@ export const ContentOverlay = styled("div")<{ isTransparent?: boolean }>(
     height: "100%",
     display: "flex",
     flexDirection: "column",
-    padding: theme.spacing(2),
+    padding: theme.spacing(0.75),
     boxSizing: "border-box",
     pointerEvents: "auto",
   }),
@@ -190,12 +190,12 @@ export const TransparentGhostOverlay = styled("div")<{
   isMirrored?: boolean;
   isVertical?: boolean;
   opacity?: number;
-}>(({ isMirrored = true, isVertical, opacity = 0.22 }) => ({
+}>(({ theme, isMirrored = true, isVertical, opacity = 0.22 }) => ({
   position: "absolute",
   inset: 0,
   width: "100%",
   height: "100%",
-  padding: "16px",
+  padding: theme.spacing(0.75),
   boxSizing: "border-box",
   pointerEvents: "none",
   zIndex: 1,

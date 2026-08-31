@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import OnboardingCard from "./OnboardingCard";
+import OnboardingCard, { buildHoloLayers } from "./OnboardingCard";
 import {
   formatInstitutionalEmail,
   buildTd1MrzData,
@@ -114,49 +114,87 @@ describe("OnboardingCard Component & Utilities", () => {
     const fallbackSeed = mockSchoolWithoutLogo.id;
     expect(fallbackSeed).toBe("school-quantum-institute");
   });
+});
 
-  describe("calculateCohortValidity", () => {
-    it("calculates school year validity starting 1st of September with 1 year duration", () => {
-      const cohort: CohortConfig = { name: "Cohort 2026" };
-      const validity = calculateCohortValidity(cohort);
-      expect(validity.startYear).toBe(2026);
-      expect(validity.endYear).toBe(2027);
-      expect(validity.validFrom).toBe("01/09/2026");
-      expect(validity.validUntil).toBe("31/08/2027");
-      expect(validity.formatted).toBe("01/09/2026 – 31/08/2027");
-    });
+describe("buildHoloLayers", () => {
+  it("generates school logo holo layer for front and AptiSpace logo for back", () => {
+    const layers = buildHoloLayers("/aptitek-logo.svg");
+    expect(layers).toHaveLength(2);
 
-    it("extracts year from various cohort name formats", () => {
-      const cohort1: CohortConfig = { name: "Promotion 2027" };
-      const validity1 = calculateCohortValidity(cohort1);
-      expect(validity1.startYear).toBe(2027);
-      expect(validity1.validFrom).toBe("01/09/2027");
-      expect(validity1.validUntil).toBe("31/08/2028");
+    const frontLayer = layers.find((l) => l.id === "school-holo-logo");
+    expect(frontLayer).toBeDefined();
+    expect(frontLayer?.src).toBe("/aptitek-logo.svg");
+    expect(frontLayer?.side).toBe("front");
+    expect(frontLayer?.holographic).toBe(true);
 
-      const cohort2: CohortConfig = { name: "Class of 2025 Engineering" };
-      const validity2 = calculateCohortValidity(cohort2);
-      expect(validity2.startYear).toBe(2025);
-      expect(validity2.validFrom).toBe("01/09/2025");
-      expect(validity2.validUntil).toBe("31/08/2026");
-    });
+    const backLayer = layers.find((l) => l.id === "aptispace-holo-logo");
+    expect(backLayer).toBeDefined();
+    expect(backLayer?.src).toBe("/aptispace-logo.svg");
+    expect(backLayer?.side).toBe("back");
+    expect(backLayer?.holographic).toBe(true);
+  });
 
-    it("respects custom validFrom and validUntil when provided", () => {
-      const customCohort: CohortConfig = {
-        name: "Spring Semester",
-        validFrom: "01/02/2026",
-        validUntil: "31/01/2027",
-      };
-      const validity = calculateCohortValidity(customCohort);
-      expect(validity.validFrom).toBe("01/02/2026");
-      expect(validity.validUntil).toBe("31/01/2027");
-      expect(validity.formatted).toBe("01/02/2026 – 31/01/2027");
-    });
+  it("omits school logo layer when schoolLogoUrl is null or undefined", () => {
+    const layers = buildHoloLayers(null);
+    expect(layers).toHaveLength(1);
+    expect(layers[0].id).toBe("aptispace-holo-logo");
+    expect(layers[0].side).toBe("back");
+  });
 
-    it("falls back gracefully when cohort has no year or is undefined", () => {
-      const validity = calculateCohortValidity(undefined);
-      expect(validity.startYear).toBe(2026);
-      expect(validity.validFrom).toBe("01/09/2026");
-      expect(validity.validUntil).toBe("31/08/2027");
-    });
+  it("appends custom holo layers properly", () => {
+    const layers = buildHoloLayers("/logo.svg", [
+      "custom-pattern.png",
+      { id: "layer-2", src: "test.png", side: "back", holographic: true },
+    ]);
+    expect(layers).toHaveLength(4);
+    const custom0 = layers.find((l) => l.id === "custom-holo-0");
+    const custom2 = layers.find((l) => l.id === "layer-2");
+    expect(custom0).toBeDefined();
+    expect(custom2).toBeDefined();
+  });
+});
+
+describe("calculateCohortValidity", () => {
+  it("calculates school year validity starting 1st of September with 1 year duration", () => {
+    const cohort: CohortConfig = { name: "Cohort 2026" };
+    const validity = calculateCohortValidity(cohort);
+    expect(validity.startYear).toBe(2026);
+    expect(validity.endYear).toBe(2027);
+    expect(validity.validFrom).toBe("01/09/2026");
+    expect(validity.validUntil).toBe("31/08/2027");
+    expect(validity.formatted).toBe("01/09/2026 – 31/08/2027");
+  });
+
+  it("extracts year from various cohort name formats", () => {
+    const cohort1: CohortConfig = { name: "Promotion 2027" };
+    const validity1 = calculateCohortValidity(cohort1);
+    expect(validity1.startYear).toBe(2027);
+    expect(validity1.validFrom).toBe("01/09/2027");
+    expect(validity1.validUntil).toBe("31/08/2028");
+
+    const cohort2: CohortConfig = { name: "Class of 2025 Engineering" };
+    const validity2 = calculateCohortValidity(cohort2);
+    expect(validity2.startYear).toBe(2025);
+    expect(validity2.validFrom).toBe("01/09/2025");
+    expect(validity2.validUntil).toBe("31/08/2026");
+  });
+
+  it("respects custom validFrom and validUntil when provided", () => {
+    const customCohort: CohortConfig = {
+      name: "Spring Semester",
+      validFrom: "01/02/2026",
+      validUntil: "31/01/2027",
+    };
+    const validity = calculateCohortValidity(customCohort);
+    expect(validity.validFrom).toBe("01/02/2026");
+    expect(validity.validUntil).toBe("31/01/2027");
+    expect(validity.formatted).toBe("01/02/2026 – 31/01/2027");
+  });
+
+  it("falls back gracefully when cohort has no year or is undefined", () => {
+    const validity = calculateCohortValidity(undefined);
+    expect(validity.startYear).toBe(2026);
+    expect(validity.validFrom).toBe("01/09/2026");
+    expect(validity.validUntil).toBe("31/08/2027");
   });
 });
