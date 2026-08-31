@@ -59,8 +59,8 @@ describe("API Avatar Upload Route", () => {
 
   it("processes valid image file upload in local fallback mode", async () => {
     const formData = new FormData();
-    const validImageFile = new File(["fake-image-bytes"], "user-avatar.png", {
-      type: "image/png",
+    const validImageFile = new File(["fake-image-bytes"], "user-avatar.webp", {
+      type: "image/webp",
     });
     formData.append("file", validImageFile);
 
@@ -80,20 +80,20 @@ describe("API Avatar Upload Route", () => {
     };
 
     expect(payload.success).toBe(true);
-    expect(payload.url.startsWith("data:image/png;base64,")).toBe(true);
-    expect(payload.fileName).toBe("user-avatar.png");
+    expect(payload.url.startsWith("data:image/webp;base64,")).toBe(true);
+    expect(payload.fileName).toBe("user-avatar.webp");
     expect(payload.fallbackMode).toBe(true);
   });
 
-  it("puts image into Cloudflare R2 bucket when R2 binding is provided", async () => {
+  it("puts WebP image into Cloudflare R2 bucket when R2 binding is provided", async () => {
     const mockPut = vi.fn().mockResolvedValue({});
     const mockR2Bucket = {
       put: mockPut,
     };
 
     const formData = new FormData();
-    const validImageFile = new File(["avatar-pixels"], "portrait.jpg", {
-      type: "image/jpeg",
+    const validImageFile = new File(["avatar-pixels"], "portrait.webp", {
+      type: "image/webp",
     });
     formData.append("file", validImageFile);
 
@@ -125,5 +125,28 @@ describe("API Avatar Upload Route", () => {
     expect(
       payload.url.startsWith("https://cdn.aptispace.academy/avatars/avatar-"),
     ).toBe(true);
+  });
+
+  it("rejects files exceeding 2MB limit", async () => {
+    const formData = new FormData();
+    const hugeBuffer = new Uint8Array(3 * 1024 * 1024);
+    const bigFile = new File([hugeBuffer], "huge-avatar.webp", {
+      type: "image/webp",
+    });
+    formData.append("file", bigFile);
+
+    const request = new Request("http://localhost/api/avatar/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const response = await action(makeActionArgs(request));
+
+    expect(response.status).toBe(400);
+    const payload = (await response.json()) as {
+      error: string;
+      errorCode: string;
+    };
+    expect(payload.errorCode).toBe("FILE_TOO_LARGE");
   });
 });

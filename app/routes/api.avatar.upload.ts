@@ -1,33 +1,9 @@
 import type { ActionFunctionArgs } from "react-router";
 import { resolveR2Bucket, resolvePublicR2Url } from "~/utils/r2.server";
 
-const ALLOWED_MIME_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "image/svg+xml",
-  "image/avif",
-]);
+const ALLOWED_MIME_TYPES = new Set(["image/webp", "image/png", "image/jpeg"]);
 
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
-
-const MIME_EXTENSION_MAP: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/gif": "gif",
-  "image/svg+xml": "svg",
-  "image/avif": "avif",
-};
-
-function getFileExtension(mimeType: string, originalName?: string): string {
-  if (originalName && originalName.includes(".")) {
-    const extensionParts = originalName.split(".");
-    return extensionParts[extensionParts.length - 1].toLowerCase();
-  }
-  return MIME_EXTENSION_MAP[mimeType] ?? "png";
-}
+const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB for client-processed avatars
 
 function validateUploadFile(candidate: unknown): {
   errorMessage?: string;
@@ -43,7 +19,7 @@ function validateUploadFile(candidate: unknown): {
 
   if (!ALLOWED_MIME_TYPES.has(candidate.type)) {
     return {
-      errorMessage: `Unsupported image format (${candidate.type}). Allowed formats: JPG, PNG, WebP, GIF, SVG, AVIF.`,
+      errorMessage: `Unsupported image format (${candidate.type}). Images must be processed into WebP before upload.`,
       errorCode: "INVALID_FILE_TYPE",
     };
   }
@@ -51,7 +27,7 @@ function validateUploadFile(candidate: unknown): {
   if (candidate.size > MAX_FILE_SIZE_BYTES) {
     const sizeMb = (candidate.size / (1024 * 1024)).toFixed(2);
     return {
-      errorMessage: `File size exceeds the 5MB limit (${sizeMb}MB).`,
+      errorMessage: `File size exceeds the 2MB limit (${sizeMb}MB).`,
       errorCode: "FILE_TOO_LARGE",
     };
   }
@@ -83,8 +59,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
       );
     }
 
-    const fileExtension = getFileExtension(validFile.type, validFile.name);
-    const uniqueKey = `avatars/avatar-${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${fileExtension}`;
+    const extension = validFile.type === "image/png" ? "png" : "webp";
+    const uniqueKey = `avatars/avatar-${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${extension}`;
     const arrayBufferData = await validFile.arrayBuffer();
 
     const r2Bucket = resolveR2Bucket(context);
