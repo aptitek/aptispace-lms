@@ -134,6 +134,7 @@ function PhysicCardFront({
   isTiltingEnabled,
   showHolo,
   holoMaskImage,
+  showSheen,
   sheenX,
   sheenY,
 }: {
@@ -142,6 +143,7 @@ function PhysicCardFront({
   isTiltingEnabled: boolean;
   showHolo: boolean;
   holoMaskImage?: string;
+  showSheen: boolean;
   sheenX: MotionValue<string>;
   sheenY: MotionValue<string>;
 }) {
@@ -158,7 +160,7 @@ function PhysicCardFront({
       }}
     >
       {frontContent}
-      {isTiltingEnabled ? (
+      {isTiltingEnabled && showSheen ? (
         /* eslint-disable-next-line no-restricted-syntax */
         <SheenLayer style={{ left: sheenX, top: sheenY }} />
       ) : null}
@@ -203,37 +205,25 @@ function PhysicCardBack({
   );
 }
 
-export default function PhysicCard({
-  frontContent,
+function useCardFlip({
+  interactive,
   backContent,
-  isFlipped: controlledIsFlipped,
-  defaultFlipped = false,
+  controlledIsFlipped,
+  defaultFlipped,
   onFlip,
-  ratio,
-  tiltStrength = 1,
-  interactive = true,
-  showHolo = false,
-  holoMaskImage,
-  sx,
-  ...cardProps
-}: PhysicCardProps) {
+}: {
+  interactive: boolean;
+  backContent: React.ReactNode;
+  controlledIsFlipped: boolean | undefined;
+  defaultFlipped: boolean;
+  onFlip?: (isFlipped: boolean) => void;
+}) {
   const [uncontrolledIsFlipped, setUncontrolledIsFlipped] =
     useState(defaultFlipped);
 
   const isControlled = controlledIsFlipped !== undefined;
   const isFlipped = isControlled ? controlledIsFlipped : uncontrolledIsFlipped;
-  const isTiltingEnabled = Boolean(interactive && tiltStrength > 0);
   const canFlip = Boolean(interactive && backContent);
-
-  const cardRef = useRef<HTMLDivElement>(null);
-  const {
-    rotateX,
-    rotateY,
-    sheenX,
-    sheenY,
-    handleMouseMove,
-    handleMouseLeave,
-  } = useCardMotion(isTiltingEnabled, tiltStrength, cardRef);
 
   const handleClick = () => {
     if (canFlip) {
@@ -246,6 +236,44 @@ export default function PhysicCard({
       }
     }
   };
+
+  return { isFlipped, canFlip, handleClick };
+}
+
+export default function PhysicCard({
+  frontContent,
+  backContent,
+  isFlipped: controlledIsFlipped,
+  defaultFlipped = false,
+  onFlip,
+  ratio,
+  tiltStrength = 1,
+  interactive = true,
+  showHolo = false,
+  holoMaskImage,
+  showSheen = true,
+  sx,
+  ...cardProps
+}: PhysicCardProps) {
+  const isTiltingEnabled = Boolean(interactive && tiltStrength > 0);
+
+  const { isFlipped, canFlip, handleClick } = useCardFlip({
+    interactive,
+    backContent,
+    controlledIsFlipped,
+    defaultFlipped,
+    onFlip,
+  });
+
+  const cardRef = useRef<HTMLDivElement>(null);
+  const {
+    rotateX,
+    rotateY,
+    sheenX,
+    sheenY,
+    handleMouseMove,
+    handleMouseLeave,
+  } = useCardMotion(isTiltingEnabled, tiltStrength, cardRef);
 
   const flipTransition = {
     type: "spring" as const,
@@ -281,6 +309,7 @@ export default function PhysicCard({
             isTiltingEnabled={isTiltingEnabled}
             showHolo={showHolo}
             holoMaskImage={holoMaskImage}
+            showSheen={showSheen}
             sheenX={sheenX}
             sheenY={sheenY}
           />

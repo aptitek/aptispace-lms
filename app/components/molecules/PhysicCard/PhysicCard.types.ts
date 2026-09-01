@@ -55,4 +55,9 @@ export interface PhysicCardProps extends Omit<CardProps, "children"> {
    * while the rest remains unaffected.
    */
   holoMaskImage?: string;
+  /**
+   * Whether to show the physical lighting sheen effect when tilting.
+   * @default true
+   */
+  showSheen?: boolean;
 }

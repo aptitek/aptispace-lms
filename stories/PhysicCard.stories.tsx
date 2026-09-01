@@ -5,7 +5,7 @@ import Button from "@mui/material/Button";
 import PhysicCard from "../app/components/molecules/PhysicCard/PhysicCard";
 
 const meta: Meta<typeof PhysicCard> = {
-  title: "Components/Molecules/PhysicCard",
+  title: "Molecules/PhysicCard",
   component: PhysicCard,
   tags: ["autodocs"],
   parameters: {
