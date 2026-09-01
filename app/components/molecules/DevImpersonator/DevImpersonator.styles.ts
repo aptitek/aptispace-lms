@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import ButtonBase from "@mui/material/ButtonBase";
 import Chip from "@mui/material/Chip";
 import TextField from "@mui/material/TextField";
-import { M3_MOTION } from "~/tokens/theme";
+import { M3_MOTION, SOLARIZED_BASE } from "~/tokens/theme";
 import type { UserRole } from "~/utils/auth";
 
 export const DevContainer = styled(Paper)(({ theme }) => {
@@ -119,7 +119,7 @@ export const RoleCreateButton = styled(ButtonBase, {
   const getRoleColor = () => {
     switch (roleType) {
       case "admin":
-        return theme.palette.warning.main;
+        return SOLARIZED_BASE.magenta;
       case "instructor":
         return theme.palette.info.main;
       case "student":

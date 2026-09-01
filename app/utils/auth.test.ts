@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { loginAsPersona, loginAsAccount, resolveActiveUser } from "./auth";
+import {
+  loginAsPersona,
+  loginAsAccount,
+  resolveActiveUser,
+  stopImpersonation,
+} from "./auth";
 
 describe("Authentication Utilities", () => {
   it("resolves active user correctly with fallback to User", () => {
@@ -34,5 +39,10 @@ describe("Authentication Utilities", () => {
     expect(user.id).toBe("custom-id-123");
     expect(user.name).toBe("Alice Smith");
     expect(user.role).toBe("instructor");
+  });
+
+  it("exports stopImpersonation function", () => {
+    expect(stopImpersonation).toBeDefined();
+    expect(typeof stopImpersonation).toBe("function");
   });
 });

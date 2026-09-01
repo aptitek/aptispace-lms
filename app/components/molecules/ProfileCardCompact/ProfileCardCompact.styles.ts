@@ -1,4 +1,5 @@
 import { styled, alpha } from "@mui/material/styles";
+import IconButton from "@mui/material/IconButton";
 import { SOLARIZED_BASE } from "~/tokens/theme";
 
 export const CompactCardContainer = styled("div", {
@@ -184,27 +185,42 @@ export const StudentDetails = styled("div")({
   minWidth: 0,
   flex: 1,
   overflow: "visible",
-  gap: "4px",
+  gap: "3px",
 });
 
-export const StudentName = styled("div")(({ theme }) => ({
-  fontSize: "1.05rem",
-  fontWeight: 700,
+export const StudentNameBlock = styled("div")({
+  display: "flex",
+  flexDirection: "column",
+  gap: "1px",
+  minWidth: 0,
+  overflow: "hidden",
+});
+
+export const StudentFirstName = styled("div")(({ theme }) => ({
+  fontSize: "0.925rem",
+  fontWeight: 600,
   letterSpacing: "-0.01em",
   color: theme.palette.text.primary,
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
-  lineHeight: 1.25,
+  lineHeight: 1.2,
+}));
 
-  "& span.family-name": {
-    textTransform: "uppercase",
-    fontWeight: 800,
-  },
+export const StudentFamilyName = styled("div")(({ theme }) => ({
+  fontSize: "1.05rem",
+  fontWeight: 800,
+  textTransform: "uppercase",
+  letterSpacing: "0.02em",
+  color: theme.palette.text.primary,
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  lineHeight: 1.2,
 }));
 
 export const StudentEmail = styled("div")(({ theme }) => ({
-  fontSize: "0.8rem",
+  fontSize: "0.775rem",
   color: theme.palette.text.secondary,
   whiteSpace: "nowrap",
   overflow: "hidden",
@@ -216,7 +232,7 @@ export const StudentEmail = styled("div")(({ theme }) => ({
 export const CardFooterRow = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  justifyContent: "flex-start",
+  justifyContent: "space-between",
   gap: theme.spacing(1),
   marginTop: "auto",
   paddingTop: theme.spacing(0.25),
@@ -225,3 +241,37 @@ export const CardFooterRow = styled("div")(({ theme }) => ({
   overflow: "visible",
   minWidth: 0,
 }));
+
+export const ImpersonateIconButton = styled(IconButton)(({ theme }) => {
+  const isDark = theme.palette.mode === "dark";
+  return {
+    width: "24px",
+    height: "24px",
+    padding: "3px",
+    borderRadius: "6px",
+    color: isDark ? SOLARIZED_BASE.cyan : SOLARIZED_BASE.blue,
+    backgroundColor: isDark
+      ? alpha(SOLARIZED_BASE.cyan, 0.1)
+      : alpha(SOLARIZED_BASE.blue, 0.08),
+    border: `1px solid ${
+      isDark
+        ? alpha(SOLARIZED_BASE.cyan, 0.3)
+        : alpha(SOLARIZED_BASE.blue, 0.25)
+    }`,
+    flexShrink: 0,
+    transition: theme.transitions.create(
+      ["background-color", "border-color", "transform", "color"],
+      { duration: theme.transitions.duration.shorter },
+    ),
+    "&:hover": {
+      backgroundColor: isDark
+        ? alpha(SOLARIZED_BASE.cyan, 0.2)
+        : alpha(SOLARIZED_BASE.blue, 0.16),
+      borderColor: isDark ? SOLARIZED_BASE.cyan : SOLARIZED_BASE.blue,
+      transform: "scale(1.08)",
+    },
+    "& .MuiSvgIcon-root": {
+      fontSize: "14px",
+    },
+  };
+});

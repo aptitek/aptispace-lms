@@ -178,6 +178,8 @@ interface StudentCardsZoneProps {
   columns: number;
   gap: number;
   onStudentClick?: (student: CompactStudentData) => void;
+  onImpersonate?: (student: CompactStudentData) => void;
+  showImpersonate?: boolean;
 }
 
 function StudentCardsZone({
@@ -187,6 +189,8 @@ function StudentCardsZone({
   columns,
   gap,
   onStudentClick,
+  onImpersonate,
+  showImpersonate,
 }: StudentCardsZoneProps) {
   const isInteractive = Boolean(onStudentClick);
 
@@ -205,6 +209,8 @@ function StudentCardsZone({
             school={school}
             cohort={cohort}
             onClick={onStudentClick}
+            onImpersonate={onImpersonate}
+            showImpersonate={showImpersonate}
             interactive={isInteractive}
             testId={`student-card-${student.id}`}
           />
@@ -220,6 +226,8 @@ export function StudentGrid(props: StudentGridProps) {
     school,
     cohort,
     onStudentClick,
+    onImpersonate,
+    showImpersonate,
     searchQuery: controlledQuery,
     onSearchChange,
     showSearch = true,
@@ -279,6 +287,8 @@ export function StudentGrid(props: StudentGridProps) {
           columns={columns}
           gap={gap}
           onStudentClick={onStudentClick}
+          onImpersonate={onImpersonate}
+          showImpersonate={showImpersonate}
         />
       )}
     </GridContainer>

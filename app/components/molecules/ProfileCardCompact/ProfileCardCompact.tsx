@@ -1,14 +1,16 @@
 import { forwardRef } from "react";
 import Chip from "@mui/material/Chip";
+import LoginIcon from "@mui/icons-material/Login";
 import Avatar from "../../atoms/Avatar/Avatar";
 import RoleBadge from "../../atoms/RoleBadge/RoleBadge";
 import GithubHandle from "../../atoms/GithubHandle/GithubHandle";
+import Tooltip from "../../atoms/Tooltip/Tooltip";
 import type {
   ProfileCardCompactProps,
   CompactStudentData,
 } from "./ProfileCardCompact.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
-import type { UserRole } from "~/utils/auth";
+import { loginAsAccount, type UserRole } from "~/utils/auth";
 import {
   CompactCardContainer,
   CardHoloAura,
@@ -21,9 +23,12 @@ import {
   AvatarContainer,
   FloatingBadge,
   StudentDetails,
-  StudentName,
+  StudentNameBlock,
+  StudentFirstName,
+  StudentFamilyName,
   StudentEmail,
   CardFooterRow,
+  ImpersonateIconButton,
 } from "./ProfileCardCompact.styles";
 
 function resolveDisplayName(student: CompactStudentData): string {
@@ -199,18 +204,53 @@ function CompactAvatarSlot({
 
 interface CompactDetailsProps {
   student: CompactStudentData;
+  displayName: string;
+  showImpersonate?: boolean;
+  onImpersonate?: (student: CompactStudentData) => void;
 }
 
-function CompactStudentDetailsSlot({ student }: CompactDetailsProps) {
+function CompactStudentDetailsSlot({
+  student,
+  displayName,
+  showImpersonate = true,
+  onImpersonate,
+}: CompactDetailsProps) {
   const firstName = student.firstName;
   const familyName = (student.familyName ?? "").toUpperCase();
   const emailText = student.email || "No institutional email";
 
+  const handleImpersonateClick = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+    event.preventDefault();
+    if (onImpersonate) {
+      onImpersonate(student);
+    } else {
+      try {
+        await loginAsAccount({
+          id: student.id,
+          name: displayName,
+          email: student.email,
+          role: student.role ?? "student",
+        });
+        if (typeof window !== "undefined") {
+          window.location.href = "/";
+        }
+      } catch {
+        // Handled
+      }
+    }
+  };
+
   return (
     <StudentDetails>
-      <StudentName data-testid="compact-student-name">
-        {firstName} <span className="family-name">{familyName}</span>
-      </StudentName>
+      <StudentNameBlock data-testid="compact-student-name">
+        <StudentFirstName data-testid="compact-first-name">
+          {firstName}
+        </StudentFirstName>
+        <StudentFamilyName data-testid="compact-family-name">
+          {familyName}
+        </StudentFamilyName>
+      </StudentNameBlock>
 
       <StudentEmail data-testid="compact-student-email">
         {emailText}
@@ -222,6 +262,19 @@ function CompactStudentDetailsSlot({ student }: CompactDetailsProps) {
           size="small"
           testId="compact-github-handle"
         />
+
+        {showImpersonate && (
+          <Tooltip title={`Impersonate ${displayName}`} arrow placement="top">
+            <ImpersonateIconButton
+              size="small"
+              onClick={handleImpersonateClick}
+              aria-label={`Impersonate ${displayName}`}
+              data-testid="compact-impersonate-btn"
+            >
+              <LoginIcon sx={{ fontSize: 14 }} />
+            </ImpersonateIconButton>
+          </Tooltip>
+        )}
       </CardFooterRow>
     </StudentDetails>
   );
@@ -237,6 +290,8 @@ export const ProfileCardCompact = forwardRef<
     cohort,
     variant = "elevated",
     onClick,
+    onImpersonate,
+    showImpersonate = true,
     interactive = true,
     className,
     testId = "profile-card-compact",
@@ -296,7 +351,12 @@ export const ProfileCardCompact = forwardRef<
           role={role}
         />
 
-        <CompactStudentDetailsSlot student={student} />
+        <CompactStudentDetailsSlot
+          student={student}
+          displayName={displayName}
+          showImpersonate={showImpersonate}
+          onImpersonate={onImpersonate}
+        />
       </CardBodyRow>
     </CompactCardContainer>
   );

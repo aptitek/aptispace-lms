@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import ProfileCardCompact from "./ProfileCardCompact";
 import type { CompactStudentData } from "./ProfileCardCompact.types";
@@ -23,9 +23,12 @@ describe("ProfileCardCompact Molecule", () => {
   });
 
   it("creates React element with appropriate props and student data", () => {
+    const onImpersonateMock = vi.fn();
     const element = React.createElement(ProfileCardCompact, {
       student: mockStudent,
       variant: "elevated",
+      onImpersonate: onImpersonateMock,
+      showImpersonate: true,
     });
 
     expect(element).toBeDefined();
@@ -36,6 +39,8 @@ describe("ProfileCardCompact Molecule", () => {
     expect(element.props.student.githubUsername).toBe("janedoe");
     expect(element.props.student.cohortStartYear).toBe("2026");
     expect(element.props.variant).toBe("elevated");
+    expect(element.props.showImpersonate).toBe(true);
+    expect(element.props.onImpersonate).toBe(onImpersonateMock);
   });
 
   it("supports incomplete profile and custom school configuration", () => {

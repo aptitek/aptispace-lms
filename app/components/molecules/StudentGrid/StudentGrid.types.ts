@@ -7,6 +7,8 @@ export interface StudentGridProps {
   school?: SchoolConfig;
   cohort?: CohortConfig;
   onStudentClick?: (student: CompactStudentData) => void;
+  onImpersonate?: (student: CompactStudentData) => void;
+  showImpersonate?: boolean;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
   showSearch?: boolean;

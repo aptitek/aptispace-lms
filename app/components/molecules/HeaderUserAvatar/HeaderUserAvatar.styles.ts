@@ -2,6 +2,7 @@ import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import IconButton from "@mui/material/IconButton";
+import { SOLARIZED_BASE } from "~/tokens/theme";
 
 export const HeaderAvatarContainer = styled(Box, {
   shouldForwardProp: (prop) => prop !== "$size" && prop !== "$isOpen",
@@ -116,34 +117,49 @@ export const SlidingPillTrack = styled(Box, {
 }));
 
 export const RoundLogoutButton = styled(IconButton, {
-  shouldForwardProp: (prop) => prop !== "$isOpen",
-})<{ $isOpen: boolean }>(({ theme, $isOpen }) => ({
-  width: 32,
-  height: 32,
-  borderRadius: "50%",
-  color: theme.palette.text.primary,
-  backgroundColor: alpha(theme.palette.error.main, 0.1),
-  border: `1px solid ${alpha(theme.palette.error.main, 0.25)}`,
-  transform: $isOpen
-    ? "translateX(0) scale(1)"
-    : "translateX(-28px) scale(0.6)",
-  opacity: $isOpen ? 1 : 0,
-  pointerEvents: $isOpen ? "auto" : "none",
-  transition: theme.transitions.create(
-    ["transform", "opacity", "background-color", "border-color", "color"],
-    {
-      duration: 300,
-      easing: "cubic-bezier(0.2, 0, 0, 1)",
+  shouldForwardProp: (prop) =>
+    prop !== "$isOpen" && prop !== "$isImpersonating",
+})<{ $isOpen: boolean; $isImpersonating?: boolean }>(({
+  theme,
+  $isOpen,
+  $isImpersonating,
+}) => {
+  const accentColor = $isImpersonating
+    ? SOLARIZED_BASE.magenta
+    : theme.palette.error.main;
+
+  return {
+    width: 32,
+    height: 32,
+    borderRadius: "50%",
+    color: $isImpersonating
+      ? SOLARIZED_BASE.magenta
+      : theme.palette.text.primary,
+    backgroundColor: alpha(accentColor, $isImpersonating ? 0.15 : 0.1),
+    border: `1px solid ${alpha(accentColor, $isImpersonating ? 0.4 : 0.25)}`,
+    transform: $isOpen
+      ? "translateX(0) scale(1)"
+      : "translateX(-28px) scale(0.6)",
+    opacity: $isOpen ? 1 : 0,
+    pointerEvents: $isOpen ? "auto" : "none",
+    transition: theme.transitions.create(
+      ["transform", "opacity", "background-color", "border-color", "color"],
+      {
+        duration: 300,
+        easing: "cubic-bezier(0.2, 0, 0, 1)",
+      },
+    ),
+    "&:hover": {
+      backgroundColor: alpha(accentColor, 0.25),
+      borderColor: accentColor,
+      color: accentColor,
+      transform: "scale(1.1)",
     },
-  ),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.error.main, 0.22),
-    borderColor: theme.palette.error.main,
-    color: theme.palette.error.main,
-    transform: "scale(1.1)",
-  },
-  "&:focus-visible": {
-    outline: `2px solid ${theme.palette.primary.main}`,
-    outlineOffset: "2px",
-  },
-}));
+    "&:focus-visible": {
+      outline: `2px solid ${
+        $isImpersonating ? SOLARIZED_BASE.magenta : theme.palette.primary.main
+      }`,
+      outlineOffset: "2px",
+    },
+  };
+});

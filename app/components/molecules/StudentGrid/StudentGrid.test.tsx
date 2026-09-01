@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import StudentGrid from "./StudentGrid";
 import type { CompactStudentData } from "../ProfileCardCompact/ProfileCardCompact.types";
@@ -34,12 +34,15 @@ describe("StudentGrid Molecule", () => {
   });
 
   it("creates React element with students list and configuration props", () => {
-    const onStudentClick = () => {};
+    const onStudentClick = vi.fn();
+    const onImpersonate = vi.fn();
     const element = React.createElement(StudentGrid, {
       students: sampleStudents,
       columns: 3,
       gap: 4,
       onStudentClick,
+      onImpersonate,
+      showImpersonate: true,
       title: "Active Students",
     });
 
@@ -48,6 +51,8 @@ describe("StudentGrid Molecule", () => {
     expect(element.props.columns).toBe(3);
     expect(element.props.gap).toBe(4);
     expect(element.props.title).toBe("Active Students");
+    expect(element.props.showImpersonate).toBe(true);
     expect(typeof element.props.onStudentClick).toBe("function");
+    expect(typeof element.props.onImpersonate).toBe("function");
   });
 });

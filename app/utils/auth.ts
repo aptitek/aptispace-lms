@@ -143,6 +143,36 @@ export async function loginAsAccount(
   return resolvedUser;
 }
 
+export async function stopImpersonation(): Promise<AuthUser | null> {
+  let resolvedUser: AuthUser | null = null;
+  if (typeof window !== "undefined" && typeof fetch !== "undefined") {
+    try {
+      const res = await fetch("/api/auth/impersonate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "stop" }),
+      });
+
+      if (res.ok) {
+        const responseBody = (await res.json()) as { user?: AuthUser };
+        if (responseBody.user) {
+          resolvedUser = responseBody.user;
+          sessionStorage.setItem(
+            "aptispace_auth_user",
+            JSON.stringify(resolvedUser),
+          );
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    window.location.href = "/admin";
+  }
+
+  return resolvedUser;
+}
+
 export async function loginAsPersona(personaRole: UserRole): Promise<AuthUser> {
   const matched = DEV_PERSONAS.find((p) => p.role === personaRole) ?? {
     id: `dev-${personaRole}`,

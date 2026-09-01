@@ -69,10 +69,10 @@ function resolveAvatarShape(role: UserRole): M3ExpressiveShapeName {
 
 function resolveRoleChipColor(
   role: UserRole,
-): "warning" | "info" | "success" | "default" {
+): "secondary" | "info" | "success" | "default" {
   switch (role) {
     case "admin":
-      return "warning";
+      return "secondary";
     case "instructor":
       return "info";
     case "student":

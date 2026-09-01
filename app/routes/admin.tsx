@@ -3,18 +3,21 @@ import { useLoaderData, type LoaderFunctionArgs } from "react-router";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Chip from "@mui/material/Chip";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import SchoolIcon from "@mui/icons-material/School";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import ClassIcon from "@mui/icons-material/Class";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import ShieldIcon from "@mui/icons-material/Shield";
 import Header from "~/components/organisms/Header/Header";
 import Footer from "~/components/organisms/Footer/Footer";
 import StudentGrid from "~/components/molecules/StudentGrid/StudentGrid";
 import ProfileCardModal from "~/components/organisms/ProfileCardModal/ProfileCardModal";
 import { authGuard } from "~/utils/session.server";
-import { logout, resolveActiveUser, type AuthUser } from "~/utils/auth";
+import {
+  logout,
+  loginAsAccount,
+  resolveActiveUser,
+  type AuthUser,
+} from "~/utils/auth";
 import {
   getAllUsersWithAffiliations,
   isUserProfileComplete,
@@ -29,12 +32,6 @@ import {
 import {
   PageRoot,
   AdminMainWorkspace,
-  AdminHeroHeader,
-  HeroTopRow,
-  HeroTitleArea,
-  HeroTitle,
-  HeroSubtitle,
-  StatsRow,
   StyledTabsContainer,
   StyledTab,
   TabPanelContainer,
@@ -91,72 +88,6 @@ export function meta(_args: Route.MetaArgs) {
         "Administrative dashboard for student roster management, credentials, and institutional oversight.",
     },
   ];
-}
-
-interface AdminHeroSectionProps {
-  totalStudents: number;
-}
-
-function AdminHeroSection({ totalStudents }: AdminHeroSectionProps) {
-  return (
-    <AdminHeroHeader data-testid="admin-hero">
-      <HeroTopRow>
-        <Chip
-          icon={<ShieldIcon sx={{ fontSize: 16 }} />}
-          label="ADMIN MANAGEMENT • ACCESS LEVEL 4"
-          size="small"
-          color="warning"
-          variant="outlined"
-          sx={{ fontWeight: 800, fontSize: "0.7rem", letterSpacing: "0.04em" }}
-          data-testid="admin-security-chip"
-        />
-        <Chip
-          label="SYSTEM OPERATIONAL"
-          size="small"
-          color="success"
-          variant="filled"
-          sx={{ fontWeight: 700, fontSize: "0.65rem" }}
-        />
-      </HeroTopRow>
-
-      <HeroTitleArea>
-        <HeroTitle variant="h1" data-testid="admin-title">
-          <AdminPanelSettingsIcon
-            sx={{ fontSize: "2rem", color: "warning.main" }}
-          />
-          Management Console
-        </HeroTitle>
-        <HeroSubtitle>
-          Review enrolled students, inspect credential security features, and
-          administer institutional cohorts in real time.
-        </HeroSubtitle>
-      </HeroTitleArea>
-
-      <StatsRow>
-        <Chip
-          icon={<SchoolIcon sx={{ fontSize: 16 }} />}
-          label={`Enrolled Students: ${totalStudents}`}
-          size="small"
-          variant="outlined"
-          sx={{ fontWeight: 600 }}
-          data-testid="admin-student-count-chip"
-        />
-        <Chip
-          icon={<ClassIcon sx={{ fontSize: 16 }} />}
-          label="Cohort 2026 (Active)"
-          size="small"
-          variant="outlined"
-          sx={{ fontWeight: 600 }}
-        />
-        <Chip
-          label="Institution: Aptitek"
-          size="small"
-          variant="outlined"
-          sx={{ fontWeight: 600 }}
-        />
-      </StatsRow>
-    </AdminHeroHeader>
-  );
 }
 
 interface AdminTabsSectionProps {
@@ -283,6 +214,22 @@ export default function AdminManagement() {
     setIsModalOpen(true);
   };
 
+  const handleImpersonate = async (student: CompactStudentData) => {
+    try {
+      await loginAsAccount({
+        id: student.id,
+        name: `${student.firstName} ${student.familyName}`.trim(),
+        email: student.email,
+        role: student.role ?? "student",
+      });
+      if (typeof window !== "undefined") {
+        window.location.href = "/";
+      }
+    } catch {
+      // Handled cleanly
+    }
+  };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedStudent(null);
@@ -300,8 +247,6 @@ export default function AdminManagement() {
       />
 
       <AdminMainWorkspace>
-        <AdminHeroSection totalStudents={loaderData.totalStudents} />
-
         <AdminTabsSection
           activeTab={activeTab}
           totalStudents={loaderData.totalStudents}
@@ -318,6 +263,7 @@ export default function AdminManagement() {
             <StudentGrid
               students={loaderData.students}
               onStudentClick={handleStudentClick}
+              onImpersonate={handleImpersonate}
               title="Registered Students"
               testId="admin-student-grid"
             />

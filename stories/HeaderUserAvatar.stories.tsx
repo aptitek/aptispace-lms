@@ -9,7 +9,7 @@ const meta: Meta<typeof HeaderUserAvatar> = {
     docs: {
       description: {
         component:
-          "Official 45-degree pill MD3 Expressive user avatar that morphs shape to circle on hover and slides out a pill with the round logoff button to the right.",
+          "Official 45-degree pill MD3 Expressive user avatar that morphs shape to circle on hover and slides out a pill with the round logoff or return-to-admin button to the right.",
       },
     },
   },
@@ -68,6 +68,22 @@ export const FallbackIcon: Story = {
     size: 40,
     onLogout: () => {
       console.warn("Logged out clicked");
+    },
+  },
+};
+
+export const ImpersonatingMode: Story = {
+  args: {
+    user: {
+      id: "student-2",
+      name: "Arthur Dent",
+      email: "arthur@galaxy.org",
+      role: "student",
+      impersonating: true,
+    },
+    size: 44,
+    onReturnToAdmin: () => {
+      console.warn("Return to admin clicked");
     },
   },
 };

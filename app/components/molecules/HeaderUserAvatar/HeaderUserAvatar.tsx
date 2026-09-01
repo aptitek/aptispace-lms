@@ -3,11 +3,11 @@ import {
   useRef,
   useId,
   useCallback,
-  type ReactNode,
   type KeyboardEvent,
 } from "react";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import LogoutIcon from "@mui/icons-material/Logout";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { useTranslation } from "react-i18next";
 import {
   MaterialShapes,
@@ -41,9 +41,38 @@ function computeUserInitials(name?: string): string | null {
   return (tokens[0][0] + tokens[tokens.length - 1][0]).toUpperCase();
 }
 
+interface AvatarMediaSlotProps {
+  avatarUrl?: string;
+  name?: string;
+  fallbackAria: string;
+}
+
+function AvatarMediaSlot({
+  avatarUrl,
+  name,
+  fallbackAria,
+}: AvatarMediaSlotProps) {
+  const initials = computeUserInitials(name);
+
+  if (avatarUrl) {
+    return <img src={avatarUrl} alt={name || fallbackAria} loading="lazy" />;
+  }
+
+  if (initials) {
+    return <AvatarInitialsFallback>{initials}</AvatarInitialsFallback>;
+  }
+
+  return (
+    <AvatarInitialsFallback>
+      <PersonRoundedIcon />
+    </AvatarInitialsFallback>
+  );
+}
+
 export function HeaderUserAvatar({
   user,
   onLogout,
+  onReturnToAdmin,
   onAvatarClick,
   size = 40,
   className,
@@ -116,26 +145,26 @@ export function HeaderUserAvatar({
   };
 
   const isMenuOpen = isHovered || isFocused;
-  const initials = computeUserInitials(user.name);
+  const isImpersonating = Boolean(user.impersonating);
 
-  let avatarMedia: ReactNode;
-  if (user.avatarUrl) {
-    avatarMedia = (
-      <img
-        src={user.avatarUrl}
-        alt={user.name || t("loginCard.logoutAria")}
-        loading="lazy"
-      />
-    );
-  } else if (initials) {
-    avatarMedia = <AvatarInitialsFallback>{initials}</AvatarInitialsFallback>;
-  } else {
-    avatarMedia = (
-      <AvatarInitialsFallback>
-        <PersonRoundedIcon />
-      </AvatarInitialsFallback>
-    );
-  }
+  const actionLabel = isImpersonating
+    ? t("loginCard.returnToAdmin", "Return to Admin Account")
+    : t("loginCard.logoutAria", "Sign out of your account");
+
+  const actionAria = isImpersonating
+    ? t(
+        "loginCard.returnToAdminAria",
+        "Exit impersonation and return to administrator account",
+      )
+    : t("loginCard.logoutAria", "Sign out of your account");
+
+  const handleActionClick = () => {
+    if (isImpersonating && onReturnToAdmin) {
+      onReturnToAdmin();
+      return;
+    }
+    onLogout?.();
+  };
 
   return (
     <HeaderAvatarContainer
@@ -163,11 +192,15 @@ export function HeaderUserAvatar({
         onClick={onAvatarClick}
         aria-haspopup="true"
         aria-expanded={isMenuOpen}
-        aria-label={user.name || t("loginCard.logoutAria")}
+        aria-label={user.name || actionAria}
         data-testid="header-avatar-trigger"
         data-shape="6-sided-cookie"
       >
-        {avatarMedia}
+        <AvatarMediaSlot
+          avatarUrl={user.avatarUrl}
+          name={user.name}
+          fallbackAria={actionAria}
+        />
       </AvatarMorphTrigger>
 
       <SlidingPillTrack
@@ -175,17 +208,27 @@ export function HeaderUserAvatar({
         $size={size}
         data-testid="header-avatar-sliding-pill"
         role="region"
-        aria-label={t("loginCard.logoutAria")}
+        aria-label={actionAria}
       >
-        <Tooltip title={t("loginCard.logoutAria")} arrow placement="bottom">
+        <Tooltip title={actionLabel} arrow placement="bottom">
           <RoundLogoutButton
             $isOpen={isMenuOpen}
-            onClick={onLogout}
-            aria-label={t("loginCard.logoutAria")}
-            data-testid="header-logout-button"
+            $isImpersonating={isImpersonating}
+            onClick={handleActionClick}
+            aria-label={actionAria}
+            data-testid={
+              isImpersonating
+                ? "header-return-admin-button"
+                : "header-logout-button"
+            }
+            data-action={isImpersonating ? "return-to-admin" : "logout"}
             size="small"
           >
-            <LogoutIcon sx={{ fontSize: "1.1rem" }} />
+            {isImpersonating ? (
+              <AdminPanelSettingsIcon sx={{ fontSize: "1.15rem" }} />
+            ) : (
+              <LogoutIcon sx={{ fontSize: "1.1rem" }} />
+            )}
           </RoundLogoutButton>
         </Tooltip>
       </SlidingPillTrack>

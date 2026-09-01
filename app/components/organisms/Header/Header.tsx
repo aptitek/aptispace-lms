@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { styled } from "@mui/material/styles";
+import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -8,7 +8,8 @@ import LanguageToggle from "../../atoms/LanguageToggle/LanguageToggle";
 import ThemeToggle from "../../atoms/ThemeToggle/ThemeToggle";
 import HeaderUserAvatar from "../../molecules/HeaderUserAvatar/HeaderUserAvatar";
 import ProfileCardModal from "../ProfileCardModal/ProfileCardModal";
-import { logout, type AuthUser } from "../../../utils/auth";
+import { logout, stopImpersonation, type AuthUser } from "../../../utils/auth";
+import { SOLARIZED_BASE } from "~/tokens/theme";
 
 export type HeaderMode = "subtle" | "full";
 
@@ -17,6 +18,7 @@ export interface HeaderProps {
   logoSize?: "small" | "medium";
   user?: AuthUser | null;
   onLogout?: () => void;
+  onReturnToAdmin?: () => void;
   onUserUpdated?: (updatedUser: AuthUser) => void;
   children?: ReactNode;
   className?: string;
@@ -76,11 +78,39 @@ const RightSlot = styled(Box)(({ theme }) => ({
   },
 }));
 
+const AdminHeaderButton = styled(Button)(({ theme }) => {
+  const isDark = theme.palette.mode === "dark";
+  return {
+    height: 32,
+    fontSize: "0.75rem",
+    fontWeight: 700,
+    borderRadius: "8px",
+    padding: theme.spacing(0, 1.25),
+    textDecoration: "none",
+    color: SOLARIZED_BASE.magenta,
+    backgroundColor: isDark
+      ? alpha(SOLARIZED_BASE.magenta, 0.12)
+      : alpha(SOLARIZED_BASE.magenta, 0.08),
+    border: `1px solid ${
+      isDark
+        ? alpha(SOLARIZED_BASE.magenta, 0.4)
+        : alpha(SOLARIZED_BASE.magenta, 0.3)
+    }`,
+    "&:hover": {
+      backgroundColor: isDark
+        ? alpha(SOLARIZED_BASE.magenta, 0.22)
+        : alpha(SOLARIZED_BASE.magenta, 0.16),
+      borderColor: SOLARIZED_BASE.magenta,
+    },
+  };
+});
+
 export default function Header({
   mode = "full",
   logoSize = "small",
   user,
   onLogout,
+  onReturnToAdmin,
   onUserUpdated,
   children,
   className,
@@ -88,7 +118,16 @@ export default function Header({
 }: HeaderProps) {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-  const handleLogoutClick = () => {
+  const handleActionClick = () => {
+    if (user?.impersonating) {
+      if (onReturnToAdmin) {
+        onReturnToAdmin();
+        return;
+      }
+      void stopImpersonation();
+      return;
+    }
+
     if (onLogout) {
       onLogout();
       return;
@@ -113,25 +152,15 @@ export default function Header({
         <RightSlot data-testid="header-actions-slot">
           {children}
           {user?.role === "admin" && (
-            <Button
-              component="a"
+            <AdminHeaderButton
               href="/admin"
               size="small"
               variant="outlined"
-              color="warning"
               startIcon={<AdminPanelSettingsIcon sx={{ fontSize: 16 }} />}
-              sx={{
-                height: 32,
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                borderRadius: "8px",
-                px: 1.25,
-                textDecoration: "none",
-              }}
               data-testid="header-admin-link"
             >
               Admin
-            </Button>
+            </AdminHeaderButton>
           )}
           <ThemeToggle size="small" />
           <LanguageToggle size="small" />
@@ -139,7 +168,8 @@ export default function Header({
           {user && (
             <HeaderUserAvatar
               user={user}
-              onLogout={handleLogoutClick}
+              onLogout={handleActionClick}
+              onReturnToAdmin={handleActionClick}
               onAvatarClick={() => setIsProfileModalOpen(true)}
               data-testid="header-user-avatar"
             />

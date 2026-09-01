@@ -28,6 +28,8 @@ export interface ProfileCardCompactProps {
   cohort?: CohortConfig;
   variant?: ProfileCardCompactVariant;
   onClick?: (student: CompactStudentData) => void;
+  onImpersonate?: (student: CompactStudentData) => void;
+  showImpersonate?: boolean;
   interactive?: boolean;
   className?: string;
   testId?: string;
