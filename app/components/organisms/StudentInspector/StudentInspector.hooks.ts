@@ -1,102 +1,12 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo } from "react";
 import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
 import type { CohortWithInstitution } from "./StudentInspector.types";
-import type {
-  OnboardingProfile,
-  SchoolConfig,
-  CohortConfig,
-} from "../OnboardingCard/OnboardingCard.types";
-import type { ProfileSaveStatus } from "./StudentInspector.components";
-import type { AuthUser } from "../../../utils/auth";
 import {
   DEFAULT_FALLBACK_SCHOOL,
-  studentToProfile,
-  isProfileIdentical,
-  saveStudentProfileApi,
-  resolveUpdatedAuthUser,
   sortCohortsBySchoolAndDate,
   resolveAssignedCohorts,
 } from "./StudentInspector.helpers";
-
-export function useInspectorProfileState(
-  student: EntityCardData | null,
-  onStudentUpdated?: (updatedUser: AuthUser) => void,
-) {
-  const [activeStudent, setActiveStudent] = useState<EntityCardData | null>(
-    student,
-  );
-  const targetStudent = student || activeStudent;
-
-  const [currentProfile, setCurrentProfile] = useState<OnboardingProfile>(() =>
-    student
-      ? studentToProfile(student)
-      : studentToProfile({ id: "", firstName: "", familyName: "", email: "" }),
-  );
-  const [saveStatus, setSaveStatus] = useState<ProfileSaveStatus>("idle");
-  const lastSavedProfileRef = useRef<OnboardingProfile>(currentProfile);
-
-  useEffect(() => {
-    if (student) {
-      setActiveStudent(student);
-      const initial = studentToProfile(student);
-      setCurrentProfile(initial);
-      lastSavedProfileRef.current = initial;
-      setSaveStatus("idle");
-    }
-  }, [student]);
-
-  const performSave = useCallback(
-    async (profileToSave: OnboardingProfile) => {
-      if (
-        !targetStudent ||
-        isProfileIdentical(lastSavedProfileRef.current, profileToSave)
-      ) {
-        return;
-      }
-      setSaveStatus("saving");
-      try {
-        const payload = await saveStudentProfileApi(
-          targetStudent.id,
-          profileToSave,
-        );
-        lastSavedProfileRef.current = { ...profileToSave };
-        setSaveStatus("saved");
-        if (onStudentUpdated) {
-          onStudentUpdated(
-            resolveUpdatedAuthUser(
-              targetStudent,
-              profileToSave,
-              payload.account,
-            ),
-          );
-        }
-      } catch {
-        setSaveStatus("error");
-      }
-    },
-    [targetStudent, onStudentUpdated],
-  );
-
-  const handleProfileChange = (nextProfile: OnboardingProfile) => {
-    const avatarChanged = nextProfile.avatarUrl !== currentProfile.avatarUrl;
-    setCurrentProfile(nextProfile);
-    if (avatarChanged) {
-      void performSave(nextProfile);
-    }
-  };
-
-  const handleFieldBlur = (blurredProfile: OnboardingProfile) => {
-    void performSave(blurredProfile);
-  };
-
-  return {
-    targetStudent,
-    currentProfile,
-    saveStatus,
-    handleProfileChange,
-    handleFieldBlur,
-  };
-}
+import type { SchoolConfig, CohortConfig } from "../../../types/institution";
 
 export function useInspectorCohortsState(
   targetStudent: EntityCardData | null,

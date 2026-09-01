@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import StudentInspector from "../app/components/organisms/StudentInspector/StudentInspector";
 import type { EntityCardData } from "../app/components/molecules/EntityCard/EntityCard.types";
-import type { SchoolConfig } from "../app/components/organisms/OnboardingCard/OnboardingCard.types";
+import type { SchoolConfig } from "../app/types/institution";
 import type { CohortWithInstitution } from "../app/components/organisms/StudentInspector/StudentInspector.types";
 
 const mockSchools: SchoolConfig[] = [

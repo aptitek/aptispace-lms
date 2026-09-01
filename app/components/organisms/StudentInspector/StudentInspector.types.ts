@@ -1,8 +1,5 @@
 import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
-import type {
-  SchoolConfig,
-  CohortConfig,
-} from "../OnboardingCard/OnboardingCard.types";
+import type { SchoolConfig, CohortConfig } from "../../../types/institution";
 import type { AuthUser } from "../../../utils/auth";
 
 export interface CohortWithInstitution extends CohortConfig {

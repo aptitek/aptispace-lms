@@ -1,4 +1,3 @@
-import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -8,8 +7,8 @@ import Logo from "../../atoms/Logo/Logo";
 import LanguageToggle from "../../atoms/LanguageToggle/LanguageToggle";
 import ThemeToggle from "../../atoms/ThemeToggle/ThemeToggle";
 import HeaderUserAvatar from "../../molecules/HeaderUserAvatar/HeaderUserAvatar";
-import ProfileCardModal from "../ProfileCardModal/ProfileCardModal";
 import { logout, stopImpersonation, type AuthUser } from "../../../utils/auth";
+import { type ReactNode } from "react";
 
 export type HeaderMode = "subtle" | "full";
 
@@ -111,13 +110,11 @@ export default function Header({
   user,
   onLogout,
   onReturnToAdmin,
-  onUserUpdated,
   children,
   className,
   "data-testid": dataTestId = "header",
 }: HeaderProps) {
   const { t } = useTranslation(["auth", "common"]);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const handleActionClick = () => {
     if (user?.impersonating) {
@@ -175,21 +172,11 @@ export default function Header({
               user={user}
               onLogout={handleActionClick}
               onReturnToAdmin={handleActionClick}
-              onAvatarClick={() => setIsProfileModalOpen(true)}
               data-testid="header-user-avatar"
             />
           )}
         </RightSlot>
       </HeaderRoot>
-
-      {user && (
-        <ProfileCardModal
-          isOpen={isProfileModalOpen}
-          onClose={() => setIsProfileModalOpen(false)}
-          user={user}
-          onUserUpdated={onUserUpdated}
-        />
-      )}
     </>
   );
 }

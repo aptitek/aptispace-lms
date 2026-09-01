@@ -10,12 +10,11 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import Chip from "@mui/material/Chip";
+import Paper from "@mui/material/Paper";
+import TextField from "@mui/material/TextField";
+import Stack from "@mui/material/Stack";
 import AuthLayout from "~/components/templates/AuthLayout/AuthLayout";
-import OnboardingCard from "~/components/organisms/OnboardingCard/OnboardingCard";
-import type {
-  CohortConfig,
-  OnboardingProfile,
-} from "~/components/organisms/OnboardingCard/OnboardingCard.types";
+import type { OnboardingProfile } from "~/types/profile";
 import { validateFixedDomainEmail } from "~/utils/emailSecurity";
 import { logout } from "~/utils/auth";
 import { useStatusCenter } from "~/utils/statusCenterContext";
@@ -249,18 +248,6 @@ export default function OnboardingPage() {
 
   const selectedSchool = loaderData?.school ?? AVAILABLE_SCHOOLS[0];
 
-  const selectedCohort = useMemo<CohortConfig>(
-    () => ({
-      id: "cohort-2026",
-      name: t("card.defaultCohort", "Cohort 2026", { year: 2026 }),
-      description: t(
-        "card.defaultCohortDescription",
-        "Academic training and course cohort.",
-      ),
-    }),
-    [t],
-  );
-
   const [profile, setProfile] = useState<OnboardingProfile>(() =>
     resolveDefaultProfile(loaderData?.profile),
   );
@@ -378,18 +365,52 @@ export default function OnboardingPage() {
       showGalaxy={false}
     >
       <CardWorkspaceContainer>
-        <OnboardingCard
-          school={selectedSchool}
-          cohort={selectedCohort}
-          profile={profile}
-          onProfileChange={handleProfileChange}
-          orientation="landscape"
-          size="lg"
-          flipOnClick={true}
-          showGlare={false}
-          transparent={true}
-          holoVariant="rainbow"
-        />
+        <Paper
+          elevation={3}
+          sx={{ p: 4, width: "100%", maxWidth: 500, borderRadius: 2 }}
+        >
+          <Typography
+            variant="h5"
+            sx={{ mb: 3, fontWeight: "bold", textAlign: "center" }}
+          >
+            {t("form.title", "Student Profile")}
+          </Typography>
+          <Stack spacing={3}>
+            <TextField
+              label={t("requirements.firstName", "First Name")}
+              variant="outlined"
+              fullWidth
+              value={profile.firstName}
+              onChange={(e) =>
+                handleProfileChange({ ...profile, firstName: e.target.value })
+              }
+            />
+            <TextField
+              label={t("requirements.familyName", "Family Name")}
+              variant="outlined"
+              fullWidth
+              value={profile.familyName}
+              onChange={(e) =>
+                handleProfileChange({ ...profile, familyName: e.target.value })
+              }
+            />
+            <TextField
+              label={t("requirements.email", "Institutional Email")}
+              variant="outlined"
+              fullWidth
+              value={profile.email}
+              onChange={(e) =>
+                handleProfileChange({ ...profile, email: e.target.value })
+              }
+              error={!isEmailFilled && profile.email.length > 0}
+              helperText={
+                !isEmailFilled && profile.email.length > 0
+                  ? "Invalid institutional email"
+                  : ""
+              }
+            />
+          </Stack>
+        </Paper>
 
         <RequirementsDock
           isFirstNameFilled={isFirstNameFilled}

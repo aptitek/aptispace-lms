@@ -1,13 +1,10 @@
 import type {
-  OnboardingProfile,
-  SchoolConfig,
-} from "../OnboardingCard/OnboardingCard.types";
-import type {
   EntityCardData,
   CompactCohortItem,
 } from "../../molecules/EntityCard/EntityCard.types";
 import type { CohortWithInstitution } from "./StudentInspector.types";
-import type { AuthUser } from "~/utils/auth";
+
+import type { SchoolConfig } from "../../../types/institution";
 
 export const DEFAULT_FALLBACK_SCHOOL: SchoolConfig = {
   id: "school-aptitek",
@@ -16,85 +13,6 @@ export const DEFAULT_FALLBACK_SCHOOL: SchoolConfig = {
   logoUrl: "/aptitek-logo.svg",
   emailDomain: "aptitek.io",
 };
-
-export function studentToProfile(student: EntityCardData): OnboardingProfile {
-  return {
-    firstName: student.firstName || "",
-    familyName: (student.familyName || "").toUpperCase(),
-    email: student.email || "",
-    avatarUrl: student.avatarUrl || "",
-    role: student.role || "student",
-    githubUsername: student.githubUsername,
-  };
-}
-
-export function studentToAuthUser(student: EntityCardData): AuthUser {
-  return {
-    id: student.id,
-    name: `${student.firstName} ${student.familyName}`.trim(),
-    email: student.email,
-    role: student.role || "student",
-    avatarUrl: student.avatarUrl,
-    githubUsername: student.githubUsername,
-    isProfileComplete: student.isProfileComplete,
-  };
-}
-
-export function isProfileIdentical(
-  a: OnboardingProfile | null,
-  b: OnboardingProfile,
-): boolean {
-  if (!a) return false;
-  return (
-    a.firstName === b.firstName &&
-    a.familyName === b.familyName &&
-    a.email === b.email &&
-    a.avatarUrl === b.avatarUrl &&
-    a.role === b.role &&
-    a.githubUsername === b.githubUsername
-  );
-}
-
-export function resolveUpdatedAuthUser(
-  student: EntityCardData,
-  savedProfile: OnboardingProfile,
-  accountPayload?: AuthUser,
-): AuthUser {
-  if (accountPayload) return accountPayload;
-  return {
-    id: student.id,
-    name: `${savedProfile.firstName} ${savedProfile.familyName}`.trim(),
-    email: savedProfile.email,
-    avatarUrl: savedProfile.avatarUrl,
-    role: savedProfile.role ?? student.role ?? "student",
-    githubUsername: savedProfile.githubUsername ?? student.githubUsername,
-    isProfileComplete: student.isProfileComplete,
-  };
-}
-
-export async function saveStudentProfileApi(
-  studentId: string,
-  profile: OnboardingProfile,
-): Promise<{ account?: AuthUser }> {
-  const response = await fetch("/api/auth", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "updateProfile",
-      userId: studentId,
-      firstName: profile.firstName,
-      lastName: profile.familyName,
-      email: profile.email,
-      avatarUrl: profile.avatarUrl,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to save profile changes.");
-  }
-
-  return (await response.json().catch(() => ({}))) as { account?: AuthUser };
-}
 
 export function parseCohortTimestamp(dateVal?: string | Date | null): number {
   if (!dateVal) return 0;

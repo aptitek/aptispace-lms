@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import StudentInspector from "./StudentInspector";
 import { SchoolBadgeInline } from "./StudentInspector.components";
 import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
-import type { SchoolConfig } from "../OnboardingCard/OnboardingCard.types";
+import type { SchoolConfig } from "../../../types/institution";
 import type { CohortWithInstitution } from "./StudentInspector.types";
 
 const mockSchools: SchoolConfig[] = [

@@ -1,5 +1,5 @@
 import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
-import type { SchoolConfig } from "~/components/organisms/OnboardingCard/OnboardingCard.types";
+import type { SchoolConfig } from "~/types/institution";
 import type { CohortWithInstitution } from "~/components/organisms/StudentInspector/StudentInspector.types";
 
 export function getDefaultSchools(): SchoolConfig[] {

@@ -2,5 +2,3 @@ allowBuilds:
   esbuild: true
   unrs-resolver: true
   workerd: true
-patchedDependencies:
-  deckfx@1.0.1: patches/deckfx@1.0.1.patch

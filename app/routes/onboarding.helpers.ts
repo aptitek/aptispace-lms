@@ -1,8 +1,5 @@
-import type {
-  SchoolConfig,
-  OnboardingProfile,
-} from "~/components/organisms/OnboardingCard/OnboardingCard.types";
-import { formatInstitutionalEmail } from "~/components/organisms/OnboardingCard/OnboardingCard.utils";
+import type { SchoolConfig } from "~/types/institution";
+import type { OnboardingProfile } from "~/types/profile";
 import type { getUserWithAffiliations } from "~/services/userService";
 
 export const DEFAULT_INSTITUTIONAL_DOMAIN = "aptitek.io";
@@ -20,6 +17,25 @@ export const AVAILABLE_SCHOOLS: SchoolConfig[] = [
 ];
 
 export const DEFAULT_AVATAR_URL = "";
+
+export function formatInstitutionalEmail(
+  first: string,
+  family: string,
+  school: SchoolConfig,
+): string {
+  const cleanFirst = first
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "");
+  const cleanLast = family
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "");
+  if (!cleanFirst && !cleanLast) return "";
+
+  const domain = school.emailDomain || "aptitek.io";
+  return `${cleanFirst}.${cleanLast}@${domain}`;
+}
 
 export function resolveSchool(schoolId?: string): SchoolConfig {
   return (

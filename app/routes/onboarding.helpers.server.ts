@@ -1,6 +1,7 @@
 import type { Database } from "~/db";
 import { institutions } from "~/db/schema";
-import type { SchoolConfig } from "~/components/organisms/OnboardingCard/OnboardingCard.types";
+
+import type { SchoolConfig } from "~/types/institution";
 import { validateFixedDomainEmail } from "~/utils/emailSecurity";
 import { authGuard } from "~/utils/session.server";
 import { resolveActiveUser } from "~/utils/auth";

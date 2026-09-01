@@ -16,7 +16,6 @@ import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
-import OnboardingCard from "../OnboardingCard/OnboardingCard";
 import { HoldButton } from "../../atoms/HoldButton";
 import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
 import type { StudentInspectorProps } from "./StudentInspector.types";
@@ -34,15 +33,9 @@ import {
   CohortOptionRow,
   CohortOptionLeft,
 } from "./StudentInspector.styles";
-import {
-  SchoolBadgeInline,
-  SaveStatusIndicator,
-} from "./StudentInspector.components";
+import { SchoolBadgeInline } from "./StudentInspector.components";
 import { extractCohortYear } from "./StudentInspector.helpers";
-import {
-  useInspectorProfileState,
-  useInspectorCohortsState,
-} from "./StudentInspector.hooks";
+import { useInspectorCohortsState } from "./StudentInspector.hooks";
 
 export default function StudentInspector({
   student,
@@ -53,20 +46,12 @@ export default function StudentInspector({
   onRemoveCohort,
   onImpersonate,
   onDelete,
-  onStudentUpdated,
   isSubmitting = false,
   className,
   "data-testid": dataTestId = "student-inspector",
 }: StudentInspectorProps) {
   const { t } = useTranslation(["common", "auth"]);
-  const {
-    targetStudent,
-    currentProfile,
-    saveStatus,
-    handleProfileChange,
-    handleFieldBlur,
-  } = useInspectorProfileState(student, onStudentUpdated);
-
+  const targetStudent = student;
   const {
     selectedCohortToAdd,
     setSelectedCohortToAdd,
@@ -74,8 +59,6 @@ export default function StudentInspector({
     sortedCohorts,
     assignedCohorts,
     availableToAdd,
-    activeSchool,
-    activeCohort,
     handleAdd,
   } = useInspectorCohortsState(targetStudent, schools, cohorts, onAddCohort);
 
@@ -105,25 +88,6 @@ export default function StudentInspector({
       </Box>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-        <Box
-          data-testid="inspector-card-preview"
-          sx={{ display: "flex", justifyContent: "center" }}
-        >
-          <OnboardingCard
-            school={activeSchool}
-            cohort={activeCohort}
-            profile={currentProfile}
-            onProfileChange={handleProfileChange}
-            onFieldBlur={handleFieldBlur}
-            readOnly={false}
-            flipOnClick={true}
-            size="lg"
-            transparent={true}
-            holoVariant="rainbow"
-            testId="inspector-onboarding-card"
-          />
-        </Box>
-
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <AssignmentSection data-testid="inspector-assignment-section">
             <SectionHeader>
@@ -137,7 +101,6 @@ export default function StudentInspector({
                   {t("common:inspector.assignedCohorts", "Assigned Cohorts")}
                 </Typography>
               </HeaderTitleRow>
-              <SaveStatusIndicator status={saveStatus} />
             </SectionHeader>
 
             <CohortChipsList data-testid="inspector-cohort-chips">

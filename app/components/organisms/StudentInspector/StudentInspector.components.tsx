@@ -10,7 +10,7 @@ import {
   SchoolLogoMini,
   SchoolNameFallbackBadge,
 } from "./StudentInspector.styles";
-import type { SchoolConfig } from "../OnboardingCard/OnboardingCard.types";
+import type { SchoolConfig } from "../../../types/institution";
 
 export type ProfileSaveStatus = "idle" | "saving" | "saved" | "error";
 
