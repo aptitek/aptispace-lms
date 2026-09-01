@@ -19,7 +19,7 @@
 
 --- MANUAL TASKS ---
 
-[ ] Start the card grid component using the best between deck-fx card grid or MD3 grid system
+[x] Start the card grid component using the best between deck-fx card grid or MD3 grid system
 [ ] Implement a generic MD3 search and filter component for schools, cohort, group, students, activities and courses.
 [ ] Make an admin section for audit and reported errors.
 [ ] Setup a dashboard using the metrics from the DB / R2 / Workers to show usage statistics, errors etc.

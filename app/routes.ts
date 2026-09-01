@@ -4,6 +4,7 @@ export default [
   index("routes/home.tsx"),
   route("login", "routes/login.tsx"),
   route("onboarding", "routes/onboarding.tsx"),
+  route("admin", "routes/admin.tsx"),
   route("api/auth", "routes/api.auth.ts"),
   route("api/auth/github", "routes/api.auth.github.ts"),
   route("api/auth/github/callback", "routes/api.auth.github.callback.ts"),

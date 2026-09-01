@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from "react";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import Logo from "../../atoms/Logo/Logo";
 import LanguageToggle from "../../atoms/LanguageToggle/LanguageToggle";
 import ThemeToggle from "../../atoms/ThemeToggle/ThemeToggle";
@@ -110,6 +112,27 @@ export default function Header({
 
         <RightSlot data-testid="header-actions-slot">
           {children}
+          {user?.role === "admin" && (
+            <Button
+              component="a"
+              href="/admin"
+              size="small"
+              variant="outlined"
+              color="warning"
+              startIcon={<AdminPanelSettingsIcon sx={{ fontSize: 16 }} />}
+              sx={{
+                height: 32,
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                borderRadius: "8px",
+                px: 1.25,
+                textDecoration: "none",
+              }}
+              data-testid="header-admin-link"
+            >
+              Admin
+            </Button>
+          )}
           <ThemeToggle size="small" />
           <LanguageToggle size="small" />
 
