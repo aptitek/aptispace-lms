@@ -58,7 +58,7 @@ export function FullScreenModal({
             sx={[
               {
                 width: "100%",
-                maxWidth: maxWidth ?? (asCard ? 720 : "max-content"),
+                maxWidth: maxWidth ?? (asCard ? 720 : "100%"),
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",

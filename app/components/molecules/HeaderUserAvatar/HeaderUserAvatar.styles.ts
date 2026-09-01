@@ -5,18 +5,14 @@ import IconButton from "@mui/material/IconButton";
 
 export const HeaderAvatarContainer = styled(Box, {
   shouldForwardProp: (prop) => prop !== "$size" && prop !== "$isOpen",
-})<{ $size: number; $isOpen: boolean }>(({ theme, $size, $isOpen }) => ({
+})<{ $size: number; $isOpen: boolean }>(({ $size }) => ({
   position: "relative",
   display: "inline-flex",
   alignItems: "center",
   height: $size,
-  width: $isOpen ? $size + 44 : $size,
-  minWidth: $size,
+  width: $size + 44,
+  minWidth: $size + 44,
   isolation: "isolate",
-  transition: theme.transitions.create(["width"], {
-    duration: 350,
-    easing: "cubic-bezier(0.2, 0, 0, 1)",
-  }),
 }));
 
 export const HiddenSvgClipDefs = styled("svg")({
@@ -92,7 +88,7 @@ export const SlidingPillTrack = styled(Box, {
   transform: "translateY(-50%)",
   zIndex: 1,
   height: $size,
-  width: "100%",
+  width: $isOpen ? $size + 44 : $size,
   borderRadius: 9999,
   backgroundColor:
     theme.palette.mode === "dark"
@@ -110,9 +106,10 @@ export const SlidingPillTrack = styled(Box, {
   justifyContent: "flex-end",
   paddingRight: theme.spacing(0.5),
   boxSizing: "border-box",
+  overflow: "hidden",
   opacity: $isOpen ? 1 : 0,
   pointerEvents: $isOpen ? "auto" : "none",
-  transition: theme.transitions.create(["opacity", "box-shadow"], {
+  transition: theme.transitions.create(["width", "opacity", "box-shadow"], {
     duration: 350,
     easing: "cubic-bezier(0.2, 0, 0, 1)",
   }),
@@ -129,8 +126,9 @@ export const RoundLogoutButton = styled(IconButton, {
   border: `1px solid ${alpha(theme.palette.error.main, 0.25)}`,
   transform: $isOpen
     ? "translateX(0) scale(1)"
-    : "translateX(-16px) scale(0.6)",
+    : "translateX(-28px) scale(0.6)",
   opacity: $isOpen ? 1 : 0,
+  pointerEvents: $isOpen ? "auto" : "none",
   transition: theme.transitions.create(
     ["transform", "opacity", "background-color", "border-color", "color"],
     {

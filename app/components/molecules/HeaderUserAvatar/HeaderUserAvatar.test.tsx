@@ -17,11 +17,11 @@ describe("HeaderUserAvatar Molecule (MD3 Sliding Pill)", () => {
     expect(HeaderUserAvatar.name).toBe("HeaderUserAvatar");
   });
 
-  it("supports official 6-sided cookie shape in M3 shape catalog", () => {
-    const resolved6Cookie = resolveM3ShapeStyle("6-sided-cookie");
-    expect(resolved6Cookie).toBeDefined();
-    expect(resolved6Cookie.clipPath).toBe("url(#m3-shape-6-sided-cookie)");
-    expect(resolved6Cookie.pathData).toBeDefined();
+  it("supports official 45-degree pill shape in M3 shape catalog", () => {
+    const resolvedPill = resolveM3ShapeStyle("pill");
+    expect(resolvedPill).toBeDefined();
+    expect(resolvedPill.clipPath).toBe("url(#m3-shape-pill)");
+    expect(resolvedPill.pathData).toBeDefined();
   });
 
   it("supports user avatar configuration and sliding pill logout properties", () => {

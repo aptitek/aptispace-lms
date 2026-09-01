@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import OnboardingCard from "../OnboardingCard/OnboardingCard";
+import { isUnnamedUser } from "../../atoms/Avatar/Avatar";
 import type {
   OnboardingProfile,
   SchoolConfig,
+  CohortConfig,
 } from "../OnboardingCard/OnboardingCard.types";
 import type {
   ProfileCardModalProps,
@@ -20,8 +22,23 @@ const DEFAULT_SCHOOL: SchoolConfig = {
   emailPattern: "{first}.{last}@{domain}",
 };
 
+const DEFAULT_COHORT: CohortConfig = {
+  id: "cohort-2026",
+  name: "Cohort 2026",
+  description: "Academic training and course cohort.",
+};
+
 function userToProfile(user: AuthUser): OnboardingProfile {
-  const parts = (user.name || "").trim().split(/\s+/).filter(Boolean);
+  const rawName = (user.name || "").trim();
+  if (isUnnamedUser(rawName)) {
+    return {
+      firstName: "",
+      familyName: "",
+      email: user.email || "",
+      avatarUrl: user.avatarUrl || "",
+    };
+  }
+  const parts = rawName.split(/\s+/).filter(Boolean);
   const firstName =
     parts.length > 1 ? parts.slice(0, -1).join(" ") : parts[0] || "";
   const familyName =
@@ -154,16 +171,21 @@ export function ProfileCardModal({
       isOpen={isOpen}
       onClose={handleModalClose}
       className={className}
+      maxWidth={580}
       testId={testId}
     >
       <OnboardingCard
         school={school}
-        cohort={cohort}
+        cohort={cohort || DEFAULT_COHORT}
         profile={currentProfile}
         onProfileChange={handleProfileChange}
         onFieldBlur={handleFieldBlur}
+        orientation="landscape"
+        size="lg"
         flipOnClick={true}
-        size="responsive"
+        showGlare={false}
+        transparent={true}
+        holoVariant="rainbow"
         testId="modal-onboarding-card"
       />
     </FullScreenModal>

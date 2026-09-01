@@ -28,7 +28,7 @@ import {
 } from "./HeaderUserAvatar.styles";
 
 const INITIAL_REST_PATH = roundedPolygonToPath(
-  MaterialShapes.Cookie6Sided,
+  MaterialShapes.Pill,
 ).toSvgPathData();
 
 function computeUserInitials(name?: string): string | null {
@@ -66,11 +66,11 @@ export function HeaderUserAvatar({
     }
 
     const startShape = towardsCircle
-      ? MaterialShapes.Cookie6Sided
+      ? MaterialShapes.Pill
       : MaterialShapes.Circle;
     const targetShape = towardsCircle
       ? MaterialShapes.Circle
-      : MaterialShapes.Cookie6Sided;
+      : MaterialShapes.Pill;
 
     activeAnimationRef.current = animateMorph(startShape, targetShape, {
       duration: towardsCircle ? 350 : 300,

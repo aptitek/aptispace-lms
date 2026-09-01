@@ -9,7 +9,7 @@ const meta: Meta<typeof HeaderUserAvatar> = {
     docs: {
       description: {
         component:
-          "6-sided cookie MD3 Expressive user avatar that morphs shape to circle on hover and slides out a pill with the round logoff button to the right.",
+          "Official 45-degree pill MD3 Expressive user avatar that morphs shape to circle on hover and slides out a pill with the round logoff button to the right.",
       },
     },
   },
