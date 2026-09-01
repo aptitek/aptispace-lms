@@ -44,4 +44,15 @@ export interface PhysicCardProps extends Omit<CardProps, "children"> {
    * @default true
    */
   interactive?: boolean;
+  /**
+   * Whether to show the holographic foil effect on the card.
+   * @default false
+   */
+  showHolo?: boolean;
+  /**
+   * Optional image URL to use as a CSS mask for the holo foil effect.
+   * Allows specific parts of the card (like an illustration) to have foil
+   * while the rest remains unaffected.
+   */
+  holoMaskImage?: string;
 }

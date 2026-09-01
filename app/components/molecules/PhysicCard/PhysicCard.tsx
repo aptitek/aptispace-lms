@@ -37,6 +37,48 @@ const SheenLayer = styled(motion.div)({
   mixBlendMode: "overlay",
 });
 
+const HoloLayer = styled(motion.div)<{ $maskImage?: string }>(({
+  $maskImage,
+}) => {
+  const isDirectCss =
+    $maskImage?.includes("url(") || $maskImage?.includes("-gradient");
+  const maskValue = isDirectCss ? $maskImage : `url("${$maskImage}")`;
+
+  return {
+    position: "absolute",
+    inset: 0,
+    pointerEvents: "none",
+    mixBlendMode: "screen",
+    opacity: 0.8,
+    backgroundImage: `radial-gradient(
+      circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(255, 0, 0, 0) 0%,
+      rgba(255, 0, 0, 0) 10%,
+      rgba(255, 0, 0, 0.6) 20%,
+      rgba(255, 165, 0, 0.6) 30%,
+      rgba(255, 255, 0, 0.6) 40%,
+      rgba(0, 128, 0, 0.6) 50%,
+      rgba(0, 255, 255, 0.6) 60%,
+      rgba(0, 0, 255, 0.6) 70%,
+      rgba(138, 43, 226, 0.6) 80%,
+      rgba(138, 43, 226, 0) 90%,
+      rgba(138, 43, 226, 0) 100%
+    )`,
+    backgroundSize: "200% 200%",
+    backgroundPosition: "center",
+    ...($maskImage && {
+      maskImage: maskValue,
+      WebkitMaskImage: maskValue,
+      maskSize: "cover",
+      WebkitMaskSize: "cover",
+      maskPosition: "center",
+      WebkitMaskPosition: "center",
+      maskRepeat: "no-repeat",
+      WebkitMaskRepeat: "no-repeat",
+    }),
+  };
+});
+
 function useCardMotion(
   isTiltingEnabled: boolean,
   tiltStrength: number,
@@ -90,12 +132,16 @@ function PhysicCardFront({
   cardProps,
   frontContent,
   isTiltingEnabled,
+  showHolo,
+  holoMaskImage,
   sheenX,
   sheenY,
 }: {
   cardProps: CardProps;
   frontContent: React.ReactNode;
   isTiltingEnabled: boolean;
+  showHolo: boolean;
+  holoMaskImage?: string;
   sheenX: MotionValue<string>;
   sheenY: MotionValue<string>;
 }) {
@@ -115,6 +161,17 @@ function PhysicCardFront({
       {isTiltingEnabled ? (
         /* eslint-disable-next-line no-restricted-syntax */
         <SheenLayer style={{ left: sheenX, top: sheenY }} />
+      ) : null}
+      {showHolo ? (
+        <HoloLayer
+          $maskImage={holoMaskImage}
+          style={
+            {
+              "--mouse-x": sheenX,
+              "--mouse-y": sheenY,
+            } as unknown as React.CSSProperties
+          }
+        />
       ) : null}
     </Card>
   );
@@ -155,6 +212,8 @@ export default function PhysicCard({
   ratio,
   tiltStrength = 1,
   interactive = true,
+  showHolo = false,
+  holoMaskImage,
   sx,
   ...cardProps
 }: PhysicCardProps) {
@@ -220,6 +279,8 @@ export default function PhysicCard({
             cardProps={cardProps}
             frontContent={frontContent}
             isTiltingEnabled={isTiltingEnabled}
+            showHolo={showHolo}
+            holoMaskImage={holoMaskImage}
             sheenX={sheenX}
             sheenY={sheenY}
           />

@@ -129,3 +129,70 @@ export const CustomContent: Story = {
     elevation: 8,
   },
 };
+
+export const HolographicFull: Story = {
+  args: {
+    sx: { width: 340, height: 480 },
+    showHolo: true,
+    frontContent: (
+      <Box
+        sx={{
+          p: 4,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          bgcolor: "#8892b0",
+          color: "white",
+        }}
+      >
+        <Typography variant="h1">✨</Typography>
+        <Typography
+          variant="h5"
+          sx={{ mt: 2, zIndex: 1, textShadow: "0px 1px 4px rgba(0,0,0,0.5)" }}
+        >
+          Full Foil
+        </Typography>
+      </Box>
+    ),
+    backContent: <BackPlaceholder />,
+    elevation: 8,
+  },
+};
+
+export const HolographicMasked: Story = {
+  args: {
+    sx: { width: 340, height: 480 },
+    showHolo: true,
+    // A radial gradient acting as a CSS mask (simulating a cutout around the dragon)
+    holoMaskImage:
+      "radial-gradient(circle at center, black 30%, transparent 60%)",
+    frontContent: (
+      <Box
+        sx={{
+          p: 4,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          bgcolor: "#64748b",
+          color: "white",
+        }}
+      >
+        <Typography variant="h1" sx={{ fontSize: "10rem" }}>
+          🐉
+        </Typography>
+        <Typography
+          variant="h5"
+          sx={{ mt: 2, zIndex: 1, textShadow: "0px 2px 10px rgba(0,0,0,0.8)" }}
+        >
+          Masked Holo
+        </Typography>
+      </Box>
+    ),
+    backContent: <BackPlaceholder />,
+    elevation: 8,
+  },
+};
