@@ -43,6 +43,11 @@ export type M3ExpressiveShapeName =
   | "8-leaf-clover"
   | "eight-leaf-clover"
   | "eightLeafClover"
+  | "8-cookie"
+  | "eight-cookie"
+  | "8-sided-cookie"
+  | "eight-sided-cookie"
+  | "eightSidedCookie"
   | "burst"
   | "soft-burst"
   | "softBurst"
@@ -137,6 +142,11 @@ const ALIASES: Record<string, string> = {
   fourLeafClover: "4-leaf-clover",
   "eight-leaf-clover": "8-leaf-clover",
   eightLeafClover: "8-leaf-clover",
+  "8-cookie": "8-leaf-clover",
+  "eight-cookie": "8-leaf-clover",
+  "8-sided-cookie": "8-leaf-clover",
+  "eight-sided-cookie": "8-leaf-clover",
+  eightSidedCookie: "8-leaf-clover",
   softBurst: "soft-burst",
   softBoom: "soft-boom",
   puffyDiamond: "puffy-diamond",

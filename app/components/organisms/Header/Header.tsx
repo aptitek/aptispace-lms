@@ -1,14 +1,10 @@
 import type { ReactNode } from "react";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import Chip from "@mui/material/Chip";
-import LogoutIcon from "@mui/icons-material/Logout";
-import { useTranslation } from "react-i18next";
 import Logo from "../../atoms/Logo/Logo";
 import LanguageToggle from "../../atoms/LanguageToggle/LanguageToggle";
 import ThemeToggle from "../../atoms/ThemeToggle/ThemeToggle";
-import Tooltip from "../../atoms/Tooltip/Tooltip";
+import HeaderUserAvatar from "../../molecules/HeaderUserAvatar/HeaderUserAvatar";
 import { logout, type AuthUser } from "../../../utils/auth";
 
 export type HeaderMode = "subtle" | "full";
@@ -76,19 +72,6 @@ const RightSlot = styled(Box)(({ theme }) => ({
   },
 }));
 
-const UserBadge = styled(Box)(({ theme }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  padding: theme.spacing(0.5, 1.25),
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: theme.palette.action.hover,
-  border: `1px solid ${theme.palette.divider}`,
-  fontSize: "0.85rem",
-  fontWeight: 500,
-  color: theme.palette.text.primary,
-}));
-
 export default function Header({
   mode = "full",
   logoSize = "small",
@@ -98,8 +81,6 @@ export default function Header({
   className,
   "data-testid": dataTestId = "header",
 }: HeaderProps) {
-  const { t } = useTranslation("auth");
-
   const handleLogoutClick = () => {
     if (onLogout) {
       onLogout();
@@ -123,53 +104,15 @@ export default function Header({
 
       <RightSlot data-testid="header-actions-slot">
         {children}
-
-        {user && (
-          <UserBadge data-testid="header-user-badge">
-            <span>{user.name}</span>
-            <Chip
-              color={
-                user.role === "admin"
-                  ? "warning"
-                  : user.role === "instructor"
-                    ? "info"
-                    : "success"
-              }
-              variant="outlined"
-              label={t(`devTool.roles.${user.role}`, user.role)}
-              size="small"
-              sx={{ fontWeight: 700 }}
-              data-testid={`role-chip-${user.role}`}
-            />
-          </UserBadge>
-        )}
-
         <ThemeToggle size="small" />
         <LanguageToggle size="small" />
 
         {user && (
-          <Tooltip title={t("loginCard.logoutAria")} arrow placement="bottom">
-            <IconButton
-              color="inherit"
-              size="small"
-              onClick={handleLogoutClick}
-              aria-label={t("loginCard.logoutAria")}
-              data-testid="header-logout-button"
-              sx={{
-                border: "1px solid",
-                borderColor: "divider",
-                borderRadius: 1.5,
-                p: 0.75,
-                transition: "all 0.2s ease",
-                "&:hover": {
-                  borderColor: "primary.main",
-                  bgcolor: "action.hover",
-                },
-              }}
-            >
-              <LogoutIcon sx={{ fontSize: "1.15rem" }} />
-            </IconButton>
-          </Tooltip>
+          <HeaderUserAvatar
+            user={user}
+            onLogout={handleLogoutClick}
+            data-testid="header-user-avatar"
+          />
         )}
       </RightSlot>
     </HeaderRoot>
