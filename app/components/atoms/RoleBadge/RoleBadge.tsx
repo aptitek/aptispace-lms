@@ -77,25 +77,23 @@ export const RoleBadge = forwardRef<HTMLSpanElement, RoleBadgeProps>(
       props["data-testid"] || props.testId || `role-badge-${config.role}`;
 
     const badgeNode = (
-      <>
+      <RoleBadgeRoot
+        ref={ref}
+        userRole={config.role}
+        roleVariant={config.variant}
+        roleSize={config.size}
+        className={props.className}
+        style={props.style}
+        role="status"
+        tabIndex={0}
+        aria-label={roleLabel}
+        data-testid={testId}
+        data-shape={shapeName}
+      >
         <ShapeDefs />
-        <RoleBadgeRoot
-          ref={ref}
-          userRole={config.role}
-          roleVariant={config.variant}
-          roleSize={config.size}
-          className={props.className}
-          style={props.style}
-          role="status"
-          tabIndex={0}
-          aria-label={roleLabel}
-          data-testid={testId}
-          data-shape={shapeName}
-        >
-          {roleIcon}
-          {config.variant !== "icon-only" && <span>{roleLabel}</span>}
-        </RoleBadgeRoot>
-      </>
+        {roleIcon}
+        {config.variant !== "icon-only" && <span>{roleLabel}</span>}
+      </RoleBadgeRoot>
     );
 
     if (config.showTooltip && tooltip) {

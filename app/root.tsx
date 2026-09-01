@@ -28,6 +28,7 @@ import {
 } from "./utils/statusCenterContext";
 import StatusSnackbar from "./components/molecules/StatusCenter/StatusSnackbar";
 import StatusTerminalCard from "./components/organisms/StatusCenter/StatusTerminalCard";
+import ShapeDefs from "./components/atoms/Avatar/ShapeDefs";
 import { LANGUAGE_STORAGE_KEY } from "./i18n";
 import "~/i18n";
 import "./app.css";
@@ -53,6 +54,7 @@ function AppThemeContainer({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <ShapeDefs />
       {children}
       <StatusSnackbar />
       <StatusTerminalCard />
