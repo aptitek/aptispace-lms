@@ -36,6 +36,8 @@ function userToProfile(user: AuthUser): OnboardingProfile {
       familyName: "",
       email: user.email || "",
       avatarUrl: user.avatarUrl || "",
+      role: user.role,
+      githubUsername: user.githubUsername,
     };
   }
   const parts = rawName.split(/\s+/).filter(Boolean);
@@ -48,6 +50,8 @@ function userToProfile(user: AuthUser): OnboardingProfile {
     familyName,
     email: user.email || "",
     avatarUrl: user.avatarUrl || "",
+    role: user.role,
+    githubUsername: user.githubUsername,
   };
 }
 
@@ -60,7 +64,9 @@ function isProfileIdentical(
     a.firstName === b.firstName &&
     a.familyName === b.familyName &&
     a.email === b.email &&
-    a.avatarUrl === b.avatarUrl
+    a.avatarUrl === b.avatarUrl &&
+    a.role === b.role &&
+    a.githubUsername === b.githubUsername
   );
 }
 
@@ -75,6 +81,8 @@ function resolveUpdatedAuthUser(
     name: `${savedProfile.firstName} ${savedProfile.familyName}`.trim(),
     email: savedProfile.email,
     avatarUrl: savedProfile.avatarUrl,
+    role: savedProfile.role ?? user.role,
+    githubUsername: savedProfile.githubUsername ?? user.githubUsername,
   };
 }
 

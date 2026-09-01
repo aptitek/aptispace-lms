@@ -7,12 +7,15 @@ import IdCard from "../../molecules/IdCard/IdCard";
 import EditableAvatar from "../../molecules/EditableAvatar/EditableAvatar";
 import EmailField from "../../molecules/EmailField/EmailField";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
+import RoleBadge from "../../atoms/RoleBadge/RoleBadge";
+import GithubHandle from "../../atoms/GithubHandle/GithubHandle";
 import type {
   OnboardingCardProps,
   OnboardingProfile,
   SchoolConfig,
   CohortConfig,
 } from "./OnboardingCard.types";
+import type { UserRole } from "../../../utils/auth";
 import {
   formatInstitutionalEmail,
   buildTd1MrzData,
@@ -32,6 +35,9 @@ import {
   CohortValidityContainer,
   CardMainBody,
   AvatarCol,
+  AvatarWrapper,
+  FloatingRoleBadgeHolder,
+  AvatarGithubHandleHolder,
   FieldsList,
   FieldListItem,
   CardBackContainer,
@@ -48,6 +54,8 @@ interface UseProfileStateParams {
   school: SchoolConfig;
   controlledProfile?: OnboardingProfile;
   defaultProfile?: OnboardingProfile;
+  role?: UserRole;
+  githubUsername?: string;
   onProfileChange?: (profile: OnboardingProfile) => void;
 }
 
@@ -55,14 +63,36 @@ function useOnboardingProfileState({
   school,
   controlledProfile,
   defaultProfile,
+  role,
+  githubUsername,
   onProfileChange,
 }: UseProfileStateParams) {
+  const mergedControlled = useMemo(() => {
+    if (!controlledProfile) return undefined;
+    return {
+      ...controlledProfile,
+      role: role ?? controlledProfile.role ?? "student",
+      githubUsername: githubUsername ?? controlledProfile.githubUsername,
+    };
+  }, [controlledProfile, role, githubUsername]);
+
   const [internalProfile, setInternalProfile] = useState<OnboardingProfile>(
-    () => createInitialProfile(controlledProfile, defaultProfile, school),
+    () => {
+      const initial = createInitialProfile(
+        controlledProfile,
+        defaultProfile,
+        school,
+      );
+      return {
+        ...initial,
+        role: role ?? initial.role ?? "student",
+        githubUsername: githubUsername ?? initial.githubUsername,
+      };
+    },
   );
   const [isEmailCustomized, setIsEmailCustomized] = useState<boolean>(false);
 
-  const activeProfile = controlledProfile || internalProfile;
+  const activeProfile = mergedControlled || internalProfile;
 
   const handleUpdate = (patch: Partial<OnboardingProfile>) => {
     const next: OnboardingProfile = { ...activeProfile, ...patch };
@@ -209,20 +239,38 @@ function CardFrontFace({
 
       <CardMainBody>
         <AvatarCol onClick={(e) => e.stopPropagation()}>
-          <EditableAvatar
-            value={profile.avatarUrl}
-            defaultValue={DEFAULT_PROFILE_TEMPLATE.avatarUrl}
-            name={`${profile.firstName} ${profile.familyName}`}
-            onChange={(url) => {
-              onAvatarChange(url);
-              onFieldBlur?.();
-            }}
-            shape="biometric"
-            size="xl"
-            editable={!readOnly}
-            mode="image-only"
-            testId="card-editable-avatar"
-          />
+          <AvatarWrapper data-testid="card-avatar-wrapper">
+            <EditableAvatar
+              value={profile.avatarUrl}
+              defaultValue={DEFAULT_PROFILE_TEMPLATE.avatarUrl}
+              name={`${profile.firstName} ${profile.familyName}`}
+              onChange={(url) => {
+                onAvatarChange(url);
+                onFieldBlur?.();
+              }}
+              shape="biometric"
+              size="xl"
+              editable={!readOnly}
+              mode="image-only"
+              testId="card-editable-avatar"
+            />
+            <FloatingRoleBadgeHolder data-testid="card-role-badge-holder">
+              <RoleBadge
+                role={profile.role || "student"}
+                size="small"
+                variant="icon-only"
+                testId="card-role-badge"
+              />
+            </FloatingRoleBadgeHolder>
+          </AvatarWrapper>
+
+          <AvatarGithubHandleHolder data-testid="card-github-handle-holder">
+            <GithubHandle
+              username={profile.githubUsername}
+              size="medium"
+              testId="card-github-handle"
+            />
+          </AvatarGithubHandleHolder>
         </AvatarCol>
 
         <FieldsList disablePadding onClick={(e) => e.stopPropagation()}>
@@ -346,6 +394,8 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
       cohort,
       profile: controlledProfile,
       defaultProfile,
+      role,
+      githubUsername,
       onProfileChange,
       onFieldBlur,
       side,
@@ -377,6 +427,8 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
       school,
       controlledProfile,
       defaultProfile,
+      role,
+      githubUsername,
       onProfileChange,
     });
 

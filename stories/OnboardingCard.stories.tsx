@@ -248,6 +248,65 @@ export const CustomValidityDates: Story = {
   ),
 };
 
+export const StudentRoleCard: Story = {
+  args: {
+    school: mockSchoolLogo,
+    cohort: mockCohort,
+    role: "student",
+    githubUsername: "cadet-42",
+    profile: {
+      firstName: "Alex",
+      familyName: "Mercer",
+      email: "alex.mercer@aptitek.io",
+      avatarUrl: "",
+      role: "student",
+      githubUsername: "cadet-42",
+    },
+    size: "lg",
+  },
+};
+
+export const InstructorRoleCard: Story = {
+  args: {
+    school: mockSchoolLogo,
+    cohort: {
+      name: "Faculty of Astrophysics",
+    },
+    role: "instructor",
+    githubUsername: "prof-aptispace",
+    profile: {
+      firstName: "Elena",
+      familyName: "Rostova",
+      email: "elena.rostova@aptitek.io",
+      avatarUrl:
+        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80",
+      role: "instructor",
+      githubUsername: "prof-aptispace",
+    },
+    size: "lg",
+  },
+};
+
+export const AdminRoleCard: Story = {
+  args: {
+    school: mockSchoolLogo,
+    cohort: {
+      name: "System Operations",
+    },
+    role: "admin",
+    githubUsername: "aptitek",
+    profile: {
+      firstName: "Dev",
+      familyName: "Admin",
+      email: "admin@aptitek.io",
+      avatarUrl: "",
+      role: "admin",
+      githubUsername: "aptitek",
+    },
+    size: "lg",
+  },
+};
+
 export const GoldThemeSchool: Story = {
   args: {
     school: {
@@ -266,6 +325,8 @@ export const GoldThemeSchool: Story = {
       avatarUrl:
         "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80",
       documentNumber: "7816",
+      role: "student",
+      githubUsername: "eleonore-v",
     },
     holoVariant: "gold",
     size: "lg",

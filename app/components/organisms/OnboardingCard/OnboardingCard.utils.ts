@@ -99,8 +99,9 @@ export function buildTd1MrzData(
   profile: OnboardingProfile,
   school: SchoolConfig,
 ): Td1MrzData {
-  const docNum = profile.documentNumber
-    ? profile.documentNumber
+  const docCandidate = profile.documentNumber || profile.githubUsername;
+  const docNum = docCandidate
+    ? docCandidate
         .replace(/[^A-Z0-9]/gi, "")
         .slice(0, 9)
         .toUpperCase()
@@ -266,6 +267,8 @@ export const DEFAULT_PROFILE_TEMPLATE: OnboardingProfile = {
   familyName: "",
   email: "",
   avatarUrl: "",
+  role: "student",
+  githubUsername: "",
 };
 
 export function createInitialProfile(

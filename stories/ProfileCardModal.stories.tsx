@@ -10,6 +10,7 @@ const mockUser: AuthUser = {
   email: "arthur.dent@aptitek.io",
   role: "student",
   avatarUrl: "",
+  githubUsername: "arthurdent",
 };
 
 const meta: Meta<typeof ProfileCardModal> = {

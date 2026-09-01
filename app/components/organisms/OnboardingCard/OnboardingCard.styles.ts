@@ -71,35 +71,69 @@ export const CohortValidityContainer = styled("div")(({ theme }) => ({
 
 export const CardMainBody = styled("div")(({ theme }) => ({
   display: "grid",
-  gridTemplateColumns: "135px 1fr",
+  gridTemplateColumns: "130px 1fr",
   gap: theme.spacing(1.5),
   alignItems: "center",
   width: "100%",
-  paddingTop: "24px",
+  paddingTop: "20px",
   paddingBottom: 0,
 }));
 
-export const AvatarCol = styled("div")({
+export const AvatarCol = styled("div")(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "flex-start",
   position: "relative",
   flexShrink: 0,
-  width: "135px",
-  height: "164px",
-  overflow: "hidden",
+  width: "130px",
+  gap: theme.spacing(0.75),
+}));
+
+export const AvatarWrapper = styled("div")({
+  position: "relative",
+  width: "130px",
+  height: "167px",
+  aspectRatio: "35 / 45",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexShrink: 0,
   "& .MuiBox-root, & [data-testid='card-editable-avatar'], & [data-testid='card-editable-avatar'] > div":
     {
       width: "100%",
       height: "100% !important",
       maxHeight: "100%",
+      aspectRatio: "35 / 45",
     },
   "& .MuiAvatar-root, & [data-testid='avatar']": {
     width: "100% !important",
     height: "100% !important",
+    aspectRatio: "35 / 45",
   },
 });
+
+export const FloatingRoleBadgeHolder = styled("div")({
+  position: "absolute",
+  top: 4,
+  right: 4,
+  zIndex: 15,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  pointerEvents: "auto",
+});
+
+export const AvatarGithubHandleHolder = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "100%",
+  maxWidth: "140px",
+  marginTop: theme.spacing(1.75),
+  zIndex: 20,
+  flexShrink: 0,
+}));
 
 export const FieldsList = styled(List)(({ theme }) => ({
   display: "flex",

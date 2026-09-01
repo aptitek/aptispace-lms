@@ -35,6 +35,7 @@ export interface FormattedAccount {
   cohortId?: string | null;
   badge: string;
   title: string;
+  githubUsername?: string;
 }
 
 function resolveRoleBadge(role: UserRole): string {
@@ -77,26 +78,44 @@ function resolveAccountName(
   );
 }
 
+function extractPrimaryAffiliation(user: UserWithAffiliationsResult) {
+  const primary = user.affiliations[0];
+  return {
+    role: (primary?.role as UserRole) || "student",
+    email: primary?.email || "",
+    institutionId: primary?.institutionId,
+    cohortId: primary?.cohortId,
+  };
+}
+
+function extractFormattedNames(user: UserWithAffiliationsResult) {
+  const firstName = user.firstName ? user.firstName.trim() : "";
+  const lastName = user.lastName ? user.lastName.trim().toUpperCase() : "";
+  const fullName = `${firstName} ${lastName}`.trim();
+  return { firstName, lastName, fullName };
+}
+
 function formatAccountFromDb(
   user: UserWithAffiliationsResult,
 ): FormattedAccount {
-  const primaryAffiliation = user.affiliations[0];
-  const role = (primaryAffiliation?.role as UserRole) || "student";
+  const affil = extractPrimaryAffiliation(user);
+  const names = extractFormattedNames(user);
   const isComplete = isUserProfileComplete(user);
 
   return {
     id: user.id,
-    name: resolveAccountName(user, role),
-    firstName: user.firstName?.trim() || "",
-    lastName: (user.lastName || "").trim().toUpperCase(),
-    email: primaryAffiliation?.email || "",
-    role,
+    name: resolveAccountName(user, affil.role),
+    firstName: names.firstName,
+    lastName: names.lastName,
+    email: affil.email,
+    role: affil.role,
     isProfileComplete: isComplete,
     createdAt: user.createdAt,
-    institutionId: primaryAffiliation?.institutionId,
-    cohortId: primaryAffiliation?.cohortId,
-    badge: resolveRoleBadge(role),
-    title: resolveRoleTitle(role, isComplete),
+    institutionId: affil.institutionId,
+    cohortId: affil.cohortId,
+    badge: resolveRoleBadge(affil.role),
+    title: resolveRoleTitle(affil.role, isComplete),
+    githubUsername: user.githubId || undefined,
   };
 }
 
@@ -104,16 +123,16 @@ function formatPersona(
   user: UserWithAffiliationsResult,
   fallback: PersonaDefinition,
 ): PersonaDefinition {
-  const primaryAffiliation = user.affiliations[0];
-  const fullName =
-    `${user.firstName?.trim() || ""} ${(user.lastName || "").trim().toUpperCase()}`.trim();
+  const affil = extractPrimaryAffiliation(user);
+  const names = extractFormattedNames(user);
   return {
     id: user.id,
-    name: user.displayName ?? fullName ?? fallback.name,
-    email: primaryAffiliation?.email ?? fallback.email,
-    role: (primaryAffiliation?.role as UserRole) ?? fallback.role,
+    name: user.displayName || names.fullName || fallback.name,
+    email: affil.email || fallback.email,
+    role: affil.role || fallback.role,
     title: fallback.title,
     badge: fallback.badge,
+    githubUsername: user.githubId || fallback.githubUsername,
   };
 }
 
@@ -143,18 +162,17 @@ async function fetchPersonas(db: Database) {
 }
 
 function formatCurrentUser(user: UserWithAffiliationsResult) {
-  const primaryAffil = user.affiliations[0];
-  const role = (primaryAffil?.role as UserRole) || "student";
-  const first = user.firstName?.trim() || "";
-  const last = (user.lastName || "").trim().toUpperCase();
-  const calculatedName = `${first} ${last}`.trim() || "User";
+  const affil = extractPrimaryAffiliation(user);
+  const names = extractFormattedNames(user);
+  const defaultDisplayName = names.fullName || "User";
 
   return {
     id: user.id,
-    name: user.displayName ?? calculatedName,
-    email: primaryAffil?.email ?? "",
-    role,
+    name: user.displayName || defaultDisplayName,
+    email: affil.email,
+    role: affil.role,
     isProfileComplete: isUserProfileComplete(user),
+    githubUsername: user.githubId || undefined,
   };
 }
 

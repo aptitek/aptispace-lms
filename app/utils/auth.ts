@@ -9,6 +9,7 @@ export interface AuthUser {
   impersonating?: boolean;
   affiliations?: unknown[];
   isProfileComplete?: boolean;
+  githubUsername?: string;
 }
 
 export interface PersonaDefinition {
@@ -18,6 +19,7 @@ export interface PersonaDefinition {
   title: string;
   email: string;
   badge: string;
+  githubUsername?: string;
 }
 
 export interface AccountDefinition {
@@ -33,6 +35,7 @@ export interface AccountDefinition {
   createdAt?: string | Date;
   institutionId?: string;
   cohortId?: string | null;
+  githubUsername?: string;
 }
 
 export const DEV_PERSONAS: readonly PersonaDefinition[] = [];
@@ -205,6 +208,7 @@ export interface ResolveActiveUserDbParam {
   email?: string | null;
   role?: UserRole;
   avatarUrl?: string | null;
+  githubId?: string | null;
   affiliations?: Array<{
     email?: string | null;
     role?: UserRole;
@@ -245,6 +249,7 @@ function mapDbUserToAuth(
     role: resolveDbUserRole(dbUser, session?.role),
     avatarUrl: primaryAffil?.avatarUrl ?? dbUser.avatarUrl ?? undefined,
     impersonating: session?.impersonating,
+    githubUsername: dbUser.githubId ?? undefined,
   };
 }
 

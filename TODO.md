@@ -11,8 +11,8 @@
 [ ] Check Deadcode, test all features end to end
 [x] If possible catch those full screen errors in status center also server side reporting of "Error: No route matches URL" getInternalRouterError
 [x] Update README.md to reflect current state
-[ ] In headerbar, we replace the user card with a shaped Avatar that opens the onboarding modal when clicked (rename that card to ProfileCard). Display it only once onboarding is complete.
-[ ] Add admin/student/instructor badges to the idcard along with github username as a card identifier
+[x] In headerbar, we replace the user card with a shaped Avatar that opens the onboarding modal when clicked (rename that card to ProfileCard). Display it only once onboarding is complete.
+[x] Add admin/student/instructor badges to the idcard along with github username as a card identifier
 [x] Seed the guilloche properly with school id
 [x] Remove galaxy background from onboarding page to save on performance.
 [x] Remove server.hmr.overlay and catch the errors with our status center if possible instead

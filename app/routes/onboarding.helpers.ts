@@ -31,15 +31,39 @@ type UserWithAffiliationsResult = Awaited<
   ReturnType<typeof getUserWithAffiliations>
 >;
 
+function extractDbProfileData(dbUser?: UserWithAffiliationsResult) {
+  if (!dbUser) {
+    return {
+      firstName: "",
+      familyName: "",
+      email: "",
+      role: "student" as const,
+      githubUsername: undefined,
+    };
+  }
+
+  const affiliations = dbUser.affiliations || [];
+  const primary = affiliations[0];
+  const firstName = dbUser.firstName ? dbUser.firstName.trim() : "";
+  const lastName = dbUser.lastName ? dbUser.lastName.trim().toUpperCase() : "";
+  const email = primary?.email || "";
+  const role = (primary?.role as OnboardingProfile["role"]) || "student";
+  const githubUsername = dbUser.githubId || undefined;
+
+  return { firstName, familyName: lastName, email, role, githubUsername };
+}
+
 export function buildInitialProfile(
   dbUser?: UserWithAffiliationsResult,
 ): OnboardingProfile {
-  const primaryAffiliation = dbUser?.affiliations?.[0];
+  const data = extractDbProfileData(dbUser);
   return {
-    firstName: dbUser?.firstName?.trim() ?? "",
-    familyName: (dbUser?.lastName ?? "").trim().toUpperCase(),
-    email: primaryAffiliation?.email ?? "",
+    firstName: data.firstName,
+    familyName: data.familyName,
+    email: data.email,
     avatarUrl: "",
+    role: data.role,
+    githubUsername: data.githubUsername,
   };
 }
 
@@ -58,15 +82,30 @@ function resolveProfileEmail(
 export function resolveDefaultProfile(
   loaderProfile?: OnboardingProfile,
 ): OnboardingProfile {
-  const first = loaderProfile?.firstName?.trim() ?? "";
-  const family = (loaderProfile?.familyName ?? "").trim().toUpperCase();
-  const email = resolveProfileEmail(first, family, loaderProfile?.email);
+  if (!loaderProfile) {
+    return {
+      firstName: "",
+      familyName: "",
+      email: "",
+      avatarUrl: "",
+      role: "student",
+      githubUsername: undefined,
+    };
+  }
+
+  const first = loaderProfile.firstName ? loaderProfile.firstName.trim() : "";
+  const family = loaderProfile.familyName
+    ? loaderProfile.familyName.trim().toUpperCase()
+    : "";
+  const email = resolveProfileEmail(first, family, loaderProfile.email);
 
   return {
     firstName: first,
     familyName: family,
     email,
-    avatarUrl: loaderProfile?.avatarUrl ?? "",
+    avatarUrl: loaderProfile.avatarUrl || "",
+    role: loaderProfile.role || "student",
+    githubUsername: loaderProfile.githubUsername,
   };
 }
 

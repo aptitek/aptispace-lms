@@ -114,6 +114,21 @@ describe("OnboardingCard Component & Utilities", () => {
     const fallbackSeed = mockSchoolWithoutLogo.id;
     expect(fallbackSeed).toBe("school-quantum-institute");
   });
+
+  it("builds TD-1 MRZ document number derived from githubUsername when documentNumber is missing", () => {
+    const profileWithGithub: OnboardingProfile = {
+      firstName: "Alex",
+      familyName: "Mercer",
+      email: "alex.mercer@aptitek.io",
+      avatarUrl: "",
+      githubUsername: "aptitek-42",
+      role: "admin",
+    };
+    const mrz = buildTd1MrzData(profileWithGithub, mockSchoolWithLogo);
+    expect(mrz.documentNumber).toBe("APTITEK42");
+    expect(mrz.surname).toBe("MERCER");
+    expect(mrz.givenNames).toBe("ALEX");
+  });
 });
 
 describe("buildHoloLayers", () => {

@@ -4,6 +4,7 @@ import type {
   IdCardSize,
   IdHoloLayer,
 } from "../../molecules/IdCard/IdCard.types";
+import type { UserRole } from "../../../utils/auth";
 
 export type OnboardingHoloVariant = "default" | "rainbow" | "cosmic" | "gold";
 
@@ -39,6 +40,8 @@ export interface OnboardingProfile {
   familyName: string;
   email: string;
   avatarUrl: string;
+  role?: UserRole;
+  githubUsername?: string;
   documentNumber?: string;
   nationality?: string;
   sex?: "M" | "F" | "X" | "<";
@@ -63,6 +66,14 @@ export interface OnboardingCardProps {
    * Default profile state (uncontrolled)
    */
   defaultProfile?: OnboardingProfile;
+  /**
+   * User role override (defaults to profile.role or "student")
+   */
+  role?: UserRole;
+  /**
+   * GitHub handle override (defaults to profile.githubUsername)
+   */
+  githubUsername?: string;
   /**
    * Callback fired when any profile attribute (names, email, avatar) updates
    */
