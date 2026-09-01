@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import { styled } from "@mui/material/styles";
+import { styled, useTheme, type Theme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import { SOLARIZED_BASE } from "~/tokens/theme";
 import type { SystemHealthStatus } from "~/utils/statusCenterContext";
 
 export interface EcgTelemetryProps {
@@ -113,14 +112,21 @@ function getEcgY(phase: number): number {
   );
 }
 
+interface GridConfig {
+  width: number;
+  h: number;
+  midY: number;
+  gridColor: string;
+  midLineColor: string;
+}
+
 function drawOscilloscopeGrid(
   ctx: CanvasRenderingContext2D,
-  width: number,
-  h: number,
-  midY: number,
+  config: GridConfig,
 ) {
+  const { width, h, midY, gridColor, midLineColor } = config;
   ctx.save();
-  ctx.strokeStyle = `${SOLARIZED_BASE.cyan}14`;
+  ctx.strokeStyle = gridColor;
   ctx.lineWidth = 1;
   const gridSize = 16;
   for (let x = 0; x < width; x += gridSize) {
@@ -136,7 +142,7 @@ function drawOscilloscopeGrid(
     ctx.stroke();
   }
 
-  ctx.strokeStyle = `${SOLARIZED_BASE.base01}26`;
+  ctx.strokeStyle = midLineColor;
   ctx.setLineDash([4, 4]);
   ctx.beginPath();
   ctx.moveTo(0, midY);
@@ -204,36 +210,40 @@ function updateSampleBuffer(buffer: Float32Array, config: SweepUpdateConfig) {
   }
 }
 
-function resolveStatusTelemetry(status: SystemHealthStatus, bpmProp: number) {
+function resolveStatusTelemetry(
+  status: SystemHealthStatus,
+  bpmProp: number,
+  theme: Theme,
+) {
   switch (status) {
     case "offline":
       return {
-        color: SOLARIZED_BASE.base01,
+        color: theme.palette.text.disabled,
         label: "OFFLINE",
         targetBpm: 0,
       };
     case "critical":
       return {
-        color: SOLARIZED_BASE.red,
+        color: theme.palette.error.main,
         label: "CRITICAL ERROR",
         targetBpm: bpmProp || 156,
       };
     case "security_breach":
       return {
-        color: SOLARIZED_BASE.magenta,
+        color: theme.palette.secondary.main,
         label: "SECURITY ALERT (403)",
         targetBpm: bpmProp || 132,
       };
     case "degraded":
       return {
-        color: SOLARIZED_BASE.yellow,
+        color: theme.palette.warning.main,
         label: "DEGRADED (WARNINGS)",
         targetBpm: bpmProp || 98,
       };
     case "nominal":
     default:
       return {
-        color: SOLARIZED_BASE.green,
+        color: theme.palette.success.main,
         label: "OPERATIONAL",
         targetBpm: bpmProp || 68,
       };
@@ -247,8 +257,9 @@ export function EcgTelemetry({
   className,
   showMetrics = true,
 }: EcgTelemetryProps) {
+  const theme = useTheme();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const statusConfig = resolveStatusTelemetry(status, bpm);
+  const statusConfig = resolveStatusTelemetry(status, bpm, theme);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -339,7 +350,13 @@ export function EcgTelemetry({
       }
 
       ctx.clearRect(0, 0, width, h);
-      drawOscilloscopeGrid(ctx, width, h, midY);
+      drawOscilloscopeGrid(ctx, {
+        width,
+        h,
+        midY,
+        gridColor: theme.palette.divider,
+        midLineColor: theme.palette.text.disabled,
+      });
 
       const traceColor = statusConfig.color;
       ctx.save();
@@ -382,7 +399,12 @@ export function EcgTelemetry({
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", resizeCanvas);
     };
-  }, [status, statusConfig]);
+  }, [
+    status,
+    statusConfig,
+    theme.palette.divider,
+    theme.palette.text.disabled,
+  ]);
 
   return (
     <TelemetryContainer height={height} className={className}>

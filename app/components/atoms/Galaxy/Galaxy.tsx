@@ -1,6 +1,6 @@
 import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
 import { useEffect, useRef, type HTMLAttributes } from "react";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, getLuminance } from "@mui/material/styles";
 import "./Galaxy.css";
 
 import { vertexShader, fragmentShader } from "./galaxyShaders";
@@ -314,7 +314,7 @@ function calculateMousePosition(
 
 export default function Galaxy(props: GalaxyProps) {
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
+  const isDark = getLuminance(theme.palette.background.default) < 0.5;
   const { settings, domProps } = extractProps(props, isDark);
   const { className, ...cleanDomProps } = domProps;
 

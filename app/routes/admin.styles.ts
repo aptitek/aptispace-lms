@@ -68,35 +68,7 @@ export const TabPanelContainer = styled("div")({
   flexDirection: "column",
 });
 
-export const SplitWorkspaceContainer = styled("div", {
-  shouldForwardProp: (prop) => prop !== "$hasInspector",
-})<{ $hasInspector: boolean }>(({ theme, $hasInspector }) => ({
-  width: "100%",
-  display: "grid",
-  gridTemplateColumns: $hasInspector ? "1fr 480px" : "1fr",
-  gap: theme.spacing(3),
-  alignItems: "start",
-  transition: theme.transitions.create(["grid-template-columns"], {
-    duration: theme.transitions.duration.standard,
-  }),
-
-  [theme.breakpoints.down("lg")]: {
-    gridTemplateColumns: "1fr",
-  },
-}));
-
 export const GridColumn = styled("div")({
   width: "100%",
   minWidth: 0,
 });
-
-export const InspectorColumn = styled("div")(({ theme }) => ({
-  width: "100%",
-  minWidth: 0,
-  display: "flex",
-  justifyContent: "center",
-
-  [theme.breakpoints.down("lg")]: {
-    marginTop: theme.spacing(2),
-  },
-}));

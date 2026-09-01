@@ -5,24 +5,23 @@ import Typography from "@mui/material/Typography";
 import ButtonBase from "@mui/material/ButtonBase";
 import Chip from "@mui/material/Chip";
 import TextField from "@mui/material/TextField";
-import { M3_MOTION, SOLARIZED_BASE } from "~/tokens/theme";
+import { M3_MOTION } from "~/tokens/theme";
 import type { UserRole } from "~/utils/auth";
 
 export const DevContainer = styled(Paper)(({ theme }) => {
-  const isDark = theme.palette.mode === "dark";
   const radius = Number(theme.shape.borderRadius) || 8;
   return {
     marginTop: theme.spacing(3),
     padding: theme.spacing(2.5),
     borderRadius: radius * 1.5,
-    border: `1px solid ${alpha(theme.palette.warning.main, isDark ? 0.35 : 0.45)}`,
-    backgroundColor: alpha(theme.palette.warning.main, isDark ? 0.04 : 0.03),
+    border: `1px solid ${alpha(theme.palette.warning.main, 0.45)}`,
+    backgroundColor: alpha(theme.palette.warning.main, 0.03),
     display: "flex",
     flexDirection: "column",
     gap: theme.spacing(2),
     position: "relative",
     overflow: "hidden",
-    boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, isDark ? 0.2 : 0.05)}`,
+    boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.05)}`,
     transition: `border-color ${M3_MOTION.duration.medium2}ms ${M3_MOTION.easing.emphasized}`,
 
     "&::before": {
@@ -35,6 +34,12 @@ export const DevContainer = styled(Paper)(({ theme }) => {
       background: `linear-gradient(90deg, ${theme.palette.warning.main}, ${theme.palette.info.main}, ${theme.palette.success.main})`,
       opacity: 0.8,
     },
+
+    ...theme.applyStyles("dark", {
+      border: `1px solid ${alpha(theme.palette.warning.main, 0.35)}`,
+      backgroundColor: alpha(theme.palette.warning.main, 0.04),
+      boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.2)}`,
+    }),
   };
 });
 
@@ -119,7 +124,7 @@ export const RoleCreateButton = styled(ButtonBase, {
   const getRoleColor = () => {
     switch (roleType) {
       case "admin":
-        return SOLARIZED_BASE.magenta;
+        return theme.palette.secondary.main;
       case "instructor":
         return theme.palette.info.main;
       case "student":
@@ -271,10 +276,8 @@ function resolveCardBackground(
   isSelected?: boolean,
   isCurrent?: boolean,
 ) {
-  const isDark = theme.palette.mode === "dark";
-  if (isSelected)
-    return alpha(theme.palette.primary.main, isDark ? 0.16 : 0.08);
-  if (isCurrent) return alpha(theme.palette.success.main, isDark ? 0.08 : 0.04);
+  if (isSelected) return alpha(theme.palette.primary.main, 0.08);
+  if (isCurrent) return alpha(theme.palette.success.main, 0.04);
   return alpha(theme.palette.background.paper, 0.9);
 }
 
@@ -286,7 +289,6 @@ export const AccountCard = styled(ButtonBase, {
   isCurrent,
 }) => {
   const radius = Number(theme.shape.borderRadius) || 8;
-  const isDark = theme.palette.mode === "dark";
 
   return {
     width: "100%",
@@ -305,7 +307,7 @@ export const AccountCard = styled(ButtonBase, {
 
     "&:hover": {
       backgroundColor: isSelected
-        ? alpha(theme.palette.primary.main, isDark ? 0.22 : 0.12)
+        ? alpha(theme.palette.primary.main, 0.12)
         : alpha(theme.palette.action.hover, 0.2),
       borderColor: isSelected
         ? theme.palette.primary.main
@@ -324,6 +326,19 @@ export const AccountCard = styled(ButtonBase, {
       cursor: "not-allowed",
       transform: "none",
     },
+
+    ...theme.applyStyles("dark", {
+      backgroundColor: isSelected
+        ? alpha(theme.palette.primary.main, 0.16)
+        : isCurrent
+          ? alpha(theme.palette.success.main, 0.08)
+          : alpha(theme.palette.background.paper, 0.9),
+      "&:hover": {
+        backgroundColor: isSelected
+          ? alpha(theme.palette.primary.main, 0.22)
+          : alpha(theme.palette.action.hover, 0.2),
+      },
+    }),
   };
 });
 

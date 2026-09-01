@@ -256,27 +256,38 @@ export default tseslint.config(
         },
         {
           selector:
+            "MemberExpression[object.property.name='palette'][property.name='mode']",
+          message:
+            "Do not read `theme.palette.mode` directly. Use CSS variables or MUI's `theme.applyStyles('dark', ...)` to avoid hydration mismatches and inline conditionals.",
+        },
+        {
+          selector: "MemberExpression[object.name='SOLARIZED_BASE']",
+          message:
+            "Do not access `SOLARIZED_BASE` directly. Use CSS variables or theme-level semantic tokens instead of low-level color primitives.",
+        },
+        {
+          selector:
             "Literal[value=/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
           message:
-            "Hardcoded hex color literal detected. Use MUI theme tokens (`theme.palette.*`) or Solarized design tokens (SOLARIZED_BASE.*) instead.",
+            "Hardcoded hex color literal detected. Use MUI theme semantic tokens or CSS variables instead.",
         },
         {
           selector:
             "TemplateElement[value.raw=/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
           message:
-            "Hardcoded hex color in template string detected. Use MUI theme tokens or Solarized design tokens instead.",
+            "Hardcoded hex color in template string detected. Use MUI theme semantic tokens or CSS variables instead.",
         },
         {
           selector:
             "Literal[value=/^(rgb|hsl)a?\\(/]:not([value=/rgba\\(0,\\s*0,\\s*0,/])",
           message:
-            "Hardcoded rgb/hsl color literal detected. Use MUI theme tokens (`theme.palette.*`) or design tokens instead.",
+            "Hardcoded rgb/hsl color literal detected. Use MUI theme semantic tokens or CSS variables instead.",
         },
         {
           selector:
             "TemplateElement[value.raw=/^(rgb|hsl)a?\\(/]:not([value.raw=/rgba\\(0,\\s*0,\\s*0,/])",
           message:
-            "Hardcoded rgb/hsl color in template string detected. Use MUI theme tokens or design tokens instead.",
+            "Hardcoded rgb/hsl color in template string detected. Use MUI theme semantic tokens or CSS variables instead.",
         },
       ],
 

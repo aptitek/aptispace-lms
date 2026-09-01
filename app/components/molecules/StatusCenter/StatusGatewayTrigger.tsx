@@ -1,10 +1,9 @@
 import React from "react";
-import { styled, keyframes } from "@mui/material/styles";
+import { styled, keyframes, useTheme, type Theme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import Tooltip from "@mui/material/Tooltip";
 import Badge from "@mui/material/Badge";
 import MonitorHeartRoundedIcon from "@mui/icons-material/MonitorHeartRounded";
-import { SOLARIZED_BASE } from "~/tokens/theme";
 import {
   useStatusCenter,
   type SystemHealthStatus,
@@ -71,19 +70,22 @@ const TriggerIconButton = styled("button", {
   },
 }));
 
-function resolveStatusColor(systemStatus: SystemHealthStatus): string {
+function resolveStatusColor(
+  systemStatus: SystemHealthStatus,
+  theme: Theme,
+): string {
   switch (systemStatus) {
     case "critical":
-      return SOLARIZED_BASE.red;
+      return theme.palette.error.main;
     case "security_breach":
-      return SOLARIZED_BASE.magenta;
+      return theme.palette.secondary.main;
     case "degraded":
-      return SOLARIZED_BASE.yellow;
+      return theme.palette.warning.main;
     case "offline":
-      return SOLARIZED_BASE.base01;
+      return theme.palette.text.secondary;
     case "nominal":
     default:
-      return SOLARIZED_BASE.green;
+      return theme.palette.success.main;
   }
 }
 
@@ -91,6 +93,7 @@ export default function StatusGatewayTrigger({
   className,
   showBadge = true,
 }: StatusGatewayTriggerProps) {
+  const theme = useTheme();
   const { t } = useTranslation("common");
   const { systemStatus, events, openTerminal, isTerminalOpen } =
     useStatusCenter();
@@ -103,7 +106,7 @@ export default function StatusGatewayTrigger({
       eventEntry.severity === "warning",
   ).length;
 
-  const statusColor = resolveStatusColor(systemStatus);
+  const statusColor = resolveStatusColor(systemStatus, theme);
   const neutralTooltip = t("systemStatus.tooltipNeutral", {
     defaultValue: "System status & telemetry",
   });

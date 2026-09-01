@@ -1,6 +1,5 @@
 import { styled, alpha } from "@mui/material/styles";
 import IconButton from "@mui/material/IconButton";
-import { SOLARIZED_BASE } from "~/tokens/theme";
 
 export const CompactCardContainer = styled("div", {
   shouldForwardProp: (prop) =>
@@ -9,8 +8,6 @@ export const CompactCardContainer = styled("div", {
   theme,
   isInteractive,
 }) => {
-  const isDark = theme.palette.mode === "dark";
-
   return {
     position: "relative",
     width: "100%",
@@ -22,25 +19,14 @@ export const CompactCardContainer = styled("div", {
     display: "flex",
     flexDirection: "column",
     gap: theme.spacing(1.5),
-    backgroundColor: isDark
-      ? alpha(SOLARIZED_BASE.base02, 0.75)
-      : alpha(theme.palette.background.paper, 0.9),
+    backgroundColor: alpha(theme.palette.background.paper, 0.9),
     backdropFilter: "blur(12px)",
     WebkitBackdropFilter: "blur(12px)",
-    border: `1px solid ${
-      isDark
-        ? alpha(SOLARIZED_BASE.base01, 0.35)
-        : alpha(SOLARIZED_BASE.base01, 0.2)
-    }`,
-    boxShadow: isDark
-      ? `0 4px 20px -2px ${alpha(SOLARIZED_BASE.base03, 0.6)}, inset 0 1px 0 ${alpha(
-          theme.palette.common.white,
-          0.05,
-        )}`
-      : `0 4px 16px -2px ${alpha(SOLARIZED_BASE.base03, 0.08)}, inset 0 1px 0 ${alpha(
-          theme.palette.common.white,
-          0.8,
-        )}`,
+    border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+    boxShadow: `0 4px 16px -2px ${alpha(theme.palette.common.black, 0.08)}, inset 0 1px 0 ${alpha(
+      theme.palette.common.white,
+      0.8,
+    )}`,
     cursor: isInteractive ? "pointer" : "default",
     overflow: "hidden",
     transition: theme.transitions.create(
@@ -52,46 +38,60 @@ export const CompactCardContainer = styled("div", {
     ...(isInteractive && {
       "&:hover": {
         transform: "translateY(-3px)",
-        borderColor: isDark ? SOLARIZED_BASE.cyan : SOLARIZED_BASE.blue,
-        boxShadow: isDark
-          ? `0 12px 28px -4px ${alpha(SOLARIZED_BASE.base03, 0.8)}, 0 0 0 1px ${alpha(
-              SOLARIZED_BASE.cyan,
-              0.4,
-            )}`
-          : `0 10px 24px -4px ${alpha(SOLARIZED_BASE.blue, 0.2)}, 0 0 0 1px ${alpha(
-              SOLARIZED_BASE.blue,
-              0.3,
-            )}`,
+        borderColor: theme.palette.primary.main,
+        boxShadow: `0 10px 24px -4px ${alpha(theme.palette.primary.main, 0.2)}, 0 0 0 1px ${alpha(
+          theme.palette.primary.main,
+          0.3,
+        )}`,
       },
       "&:focus-visible": {
-        outline: `2px solid ${
-          isDark ? SOLARIZED_BASE.cyan : SOLARIZED_BASE.blue
-        }`,
+        outline: `2px solid ${theme.palette.primary.main}`,
         outlineOffset: "2px",
       },
+    }),
+
+    ...theme.applyStyles("dark", {
+      backgroundColor: alpha(theme.palette.background.paper, 0.75),
+      border: `1px solid ${alpha(theme.palette.divider, 0.35)}`,
+      boxShadow: `0 4px 20px -2px ${alpha(theme.palette.common.black, 0.6)}, inset 0 1px 0 ${alpha(
+        theme.palette.common.white,
+        0.05,
+      )}`,
+      ...(isInteractive && {
+        "&:hover": {
+          borderColor: theme.palette.info.main,
+          boxShadow: `0 12px 28px -4px ${alpha(theme.palette.common.black, 0.8)}, 0 0 0 1px ${alpha(
+            theme.palette.info.main,
+            0.4,
+          )}`,
+        },
+        "&:focus-visible": {
+          outline: `2px solid ${theme.palette.info.main}`,
+        },
+      }),
     }),
   };
 });
 
 export const CardHoloAura = styled("div")(({ theme }) => {
-  const isDark = theme.palette.mode === "dark";
   return {
     position: "absolute",
     top: 0,
     right: 0,
     width: "140px",
     height: "140px",
-    background: isDark
-      ? `radial-gradient(circle at 100% 0%, ${alpha(
-          SOLARIZED_BASE.cyan,
-          0.15,
-        )}, transparent 70%)`
-      : `radial-gradient(circle at 100% 0%, ${alpha(
-          SOLARIZED_BASE.blue,
-          0.12,
-        )}, transparent 70%)`,
+    background: `radial-gradient(circle at 100% 0%, ${alpha(
+      theme.palette.primary.main,
+      0.12,
+    )}, transparent 70%)`,
     pointerEvents: "none",
     zIndex: 1,
+    ...theme.applyStyles("dark", {
+      background: `radial-gradient(circle at 100% 0%, ${alpha(
+        theme.palette.info.main,
+        0.15,
+      )}, transparent 70%)`,
+    }),
   };
 });
 
@@ -243,36 +243,34 @@ export const CardFooterRow = styled("div")(({ theme }) => ({
 }));
 
 export const ImpersonateIconButton = styled(IconButton)(({ theme }) => {
-  const isDark = theme.palette.mode === "dark";
   return {
     width: "24px",
     height: "24px",
     padding: "3px",
     borderRadius: "6px",
-    color: SOLARIZED_BASE.magenta,
-    backgroundColor: isDark
-      ? alpha(SOLARIZED_BASE.magenta, 0.15)
-      : alpha(SOLARIZED_BASE.magenta, 0.1),
-    border: `1px solid ${
-      isDark
-        ? alpha(SOLARIZED_BASE.magenta, 0.4)
-        : alpha(SOLARIZED_BASE.magenta, 0.3)
-    }`,
+    color: theme.palette.secondary.main,
+    backgroundColor: alpha(theme.palette.secondary.main, 0.1),
+    border: `1px solid ${alpha(theme.palette.secondary.main, 0.3)}`,
     flexShrink: 0,
     transition: theme.transitions.create(
       ["background-color", "border-color", "transform", "color"],
       { duration: theme.transitions.duration.shorter },
     ),
     "&:hover": {
-      backgroundColor: isDark
-        ? alpha(SOLARIZED_BASE.magenta, 0.25)
-        : alpha(SOLARIZED_BASE.magenta, 0.2),
-      borderColor: SOLARIZED_BASE.magenta,
-      color: SOLARIZED_BASE.magenta,
+      backgroundColor: alpha(theme.palette.secondary.main, 0.2),
+      borderColor: theme.palette.secondary.main,
+      color: theme.palette.secondary.main,
       transform: "scale(1.08)",
     },
     "& .MuiSvgIcon-root": {
       fontSize: "14px",
     },
+    ...theme.applyStyles("dark", {
+      backgroundColor: alpha(theme.palette.secondary.main, 0.15),
+      border: `1px solid ${alpha(theme.palette.secondary.main, 0.4)}`,
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.secondary.main, 0.25),
+      },
+    }),
   };
 });

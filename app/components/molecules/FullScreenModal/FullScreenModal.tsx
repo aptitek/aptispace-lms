@@ -38,9 +38,14 @@ export function FullScreenModal({
       {isOpen && (
         <ModalBackdrop
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          animate={{
+            opacity: 1,
+            transition: { duration: 0.4, ease: "easeOut" },
+          }}
+          exit={{
+            opacity: 0,
+            transition: { duration: 0.25, ease: "easeInOut" },
+          }}
           onClick={onClose}
           className={className}
           data-testid={testId}
@@ -49,10 +54,17 @@ export function FullScreenModal({
         >
           <Box
             component={motion.div}
-            initial={{ scale: 0.92, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 15 }}
-            transition={{ type: "spring", stiffness: 350, damping: 28 }}
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{
+              scale: 1,
+              opacity: 1,
+              transition: { duration: 0.4, ease: [0.2, 0, 0, 1] },
+            }}
+            exit={{
+              scale: 0.98,
+              opacity: 0,
+              transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] },
+            }}
             onClick={(clickEv: MouseEvent) => clickEv.stopPropagation()}
             onKeyDown={(e: KeyboardEvent) => e.stopPropagation()}
             sx={[

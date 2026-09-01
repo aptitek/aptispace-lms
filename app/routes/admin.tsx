@@ -52,9 +52,7 @@ import {
   StyledTabsContainer,
   StyledTab,
   TabPanelContainer,
-  SplitWorkspaceContainer,
   GridColumn,
-  InspectorColumn,
 } from "./admin.styles";
 import type { Route } from "./+types/admin";
 
@@ -406,34 +404,28 @@ export default function AdminManagement() {
             aria-labelledby="admin-tab-0"
             data-testid="admin-tabpanel-students"
           >
-            <SplitWorkspaceContainer $hasInspector={Boolean(selectedStudent)}>
-              <GridColumn>
-                <StudentGrid
-                  students={loaderData.students}
-                  onStudentClick={handleStudentClick}
-                  onImpersonate={handleImpersonate}
-                  title={t("common:studentGrid.title", "Registered Students")}
-                  testId="admin-student-grid"
-                />
-              </GridColumn>
+            <GridColumn>
+              <StudentGrid
+                students={loaderData.students}
+                onStudentClick={handleStudentClick}
+                onImpersonate={handleImpersonate}
+                title={t("common:studentGrid.title", "Registered Students")}
+                testId="admin-student-grid"
+              />
+            </GridColumn>
 
-              {selectedStudent && (
-                <InspectorColumn>
-                  <StudentInspector
-                    student={selectedStudent}
-                    schools={loaderData.schools}
-                    cohorts={loaderData.cohorts}
-                    onClose={handleCloseInspector}
-                    onAddCohort={handleAddCohort}
-                    onRemoveCohort={handleRemoveCohort}
-                    onStudentUpdated={handleStudentUpdated}
-                    onImpersonate={handleImpersonate}
-                    isSubmitting={fetcher.state !== "idle"}
-                    data-testid="admin-student-inspector"
-                  />
-                </InspectorColumn>
-              )}
-            </SplitWorkspaceContainer>
+            <StudentInspector
+              student={selectedStudent}
+              schools={loaderData.schools}
+              cohorts={loaderData.cohorts}
+              onClose={handleCloseInspector}
+              onAddCohort={handleAddCohort}
+              onRemoveCohort={handleRemoveCohort}
+              onStudentUpdated={handleStudentUpdated}
+              onImpersonate={handleImpersonate}
+              isSubmitting={fetcher.state !== "idle"}
+              data-testid="admin-student-inspector"
+            />
           </TabPanelContainer>
         )}
       </AdminMainWorkspace>

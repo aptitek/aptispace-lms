@@ -10,7 +10,6 @@ import ThemeToggle from "../../atoms/ThemeToggle/ThemeToggle";
 import HeaderUserAvatar from "../../molecules/HeaderUserAvatar/HeaderUserAvatar";
 import ProfileCardModal from "../ProfileCardModal/ProfileCardModal";
 import { logout, stopImpersonation, type AuthUser } from "../../../utils/auth";
-import { SOLARIZED_BASE } from "~/tokens/theme";
 
 export type HeaderMode = "subtle" | "full";
 
@@ -42,11 +41,7 @@ const HeaderRoot = styled("header", {
     alignItems: "center",
     justifyContent: isSubtle ? "flex-end" : "space-between",
     padding: theme.spacing(2, 4),
-    backgroundColor: isSubtle
-      ? "transparent"
-      : theme.palette.mode === "dark"
-        ? theme.palette.action.disabledBackground
-        : theme.palette.background.paper,
+    backgroundColor: isSubtle ? "transparent" : theme.palette.background.paper,
     backdropFilter: isSubtle ? "none" : "blur(16px)",
     WebkitBackdropFilter: isSubtle ? "none" : "blur(16px)",
     borderBottom: isSubtle ? "none" : `1px solid ${theme.palette.divider}`,
@@ -54,6 +49,11 @@ const HeaderRoot = styled("header", {
       ["background-color", "border-color", "backdrop-filter"],
       { duration: theme.transitions.duration.standard },
     ),
+    ...(isSubtle
+      ? {}
+      : theme.applyStyles("dark", {
+          backgroundColor: theme.palette.action.disabledBackground,
+        })),
 
     [theme.breakpoints.down("sm")]: {
       padding: theme.spacing(1.5, 2),
@@ -80,7 +80,6 @@ const RightSlot = styled(Box)(({ theme }) => ({
 }));
 
 const AdminHeaderButton = styled(Button)(({ theme }) => {
-  const isDark = theme.palette.mode === "dark";
   return {
     height: 32,
     fontSize: "0.75rem",
@@ -88,21 +87,21 @@ const AdminHeaderButton = styled(Button)(({ theme }) => {
     borderRadius: "8px",
     padding: theme.spacing(0, 1.25),
     textDecoration: "none",
-    color: SOLARIZED_BASE.magenta,
-    backgroundColor: isDark
-      ? alpha(SOLARIZED_BASE.magenta, 0.12)
-      : alpha(SOLARIZED_BASE.magenta, 0.08),
-    border: `1px solid ${
-      isDark
-        ? alpha(SOLARIZED_BASE.magenta, 0.4)
-        : alpha(SOLARIZED_BASE.magenta, 0.3)
-    }`,
+    color: theme.palette.secondary.main,
+    backgroundColor: alpha(theme.palette.secondary.main, 0.08),
+    border: `1px solid ${alpha(theme.palette.secondary.main, 0.3)}`,
     "&:hover": {
-      backgroundColor: isDark
-        ? alpha(SOLARIZED_BASE.magenta, 0.22)
-        : alpha(SOLARIZED_BASE.magenta, 0.16),
-      borderColor: SOLARIZED_BASE.magenta,
+      backgroundColor: alpha(theme.palette.secondary.main, 0.16),
+      borderColor: theme.palette.secondary.main,
     },
+    ...theme.applyStyles("dark", {
+      backgroundColor: alpha(theme.palette.secondary.main, 0.12),
+      border: `1px solid ${alpha(theme.palette.secondary.main, 0.4)}`,
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.secondary.main, 0.22),
+        borderColor: theme.palette.secondary.main,
+      },
+    }),
   };
 });
 

@@ -1,5 +1,4 @@
 import { styled, alpha } from "@mui/material/styles";
-import { SOLARIZED_BASE } from "~/tokens/theme";
 import type { GithubHandleSize } from "./GithubHandle.types";
 
 const SIZE_CONFIG: Record<
@@ -35,7 +34,6 @@ export const GithubHandleRoot = styled("span", {
   shouldForwardProp: (prop) => prop !== "handleSize",
 })<{ handleSize: GithubHandleSize }>(({ theme, handleSize }) => {
   const cfg = SIZE_CONFIG[handleSize] || SIZE_CONFIG.medium;
-  const isDark = theme.palette.mode === "dark";
 
   return {
     display: "inline-flex",
@@ -44,25 +42,14 @@ export const GithubHandleRoot = styled("span", {
     gap: `${cfg.gap}px`,
     padding: cfg.padding,
     borderRadius: "8px",
-    backgroundColor: isDark
-      ? alpha(SOLARIZED_BASE.base02, 0.6)
-      : alpha(theme.palette.background.paper, 0.85),
+    backgroundColor: alpha(theme.palette.background.paper, 0.85),
     backdropFilter: "blur(6px)",
     WebkitBackdropFilter: "blur(6px)",
-    border: `1px solid ${
-      isDark
-        ? alpha(SOLARIZED_BASE.base01, 0.3)
-        : alpha(SOLARIZED_BASE.base01, 0.2)
-    }`,
-    boxShadow: isDark
-      ? `0 1px 3px ${alpha(SOLARIZED_BASE.base03, 0.4)}, inset 0 1px 0 ${alpha(
-          theme.palette.common.white,
-          0.05,
-        )}`
-      : `0 1px 2px ${alpha(SOLARIZED_BASE.base03, 0.06)}, inset 0 1px 0 ${alpha(
-          theme.palette.common.white,
-          0.8,
-        )}`,
+    border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+    boxShadow: `0 1px 2px ${alpha(theme.palette.common.black, 0.06)}, inset 0 1px 0 ${alpha(
+      theme.palette.common.white,
+      0.8,
+    )}`,
     color: theme.palette.text.primary,
     fontFamily: '"Roboto Mono", "Fira Code", monospace',
     fontSize: cfg.fontSize,
@@ -89,14 +76,25 @@ export const GithubHandleRoot = styled("span", {
     },
 
     "&:hover": {
-      borderColor: isDark ? SOLARIZED_BASE.cyan : SOLARIZED_BASE.blue,
-      boxShadow: isDark
-        ? `0 0 8px ${alpha(SOLARIZED_BASE.cyan, 0.3)}`
-        : `0 0 8px ${alpha(SOLARIZED_BASE.blue, 0.25)}`,
+      borderColor: theme.palette.primary.main,
+      boxShadow: `0 0 8px ${alpha(theme.palette.primary.main, 0.25)}`,
       "& .octocat-icon": {
         color: theme.palette.text.primary,
       },
     },
+
+    ...theme.applyStyles("dark", {
+      backgroundColor: alpha(theme.palette.background.paper, 0.6),
+      border: `1px solid ${alpha(theme.palette.divider, 0.3)}`,
+      boxShadow: `0 1px 3px ${alpha(theme.palette.common.black, 0.4)}, inset 0 1px 0 ${alpha(
+        theme.palette.common.white,
+        0.05,
+      )}`,
+      "&:hover": {
+        borderColor: theme.palette.info.main,
+        boxShadow: `0 0 8px ${alpha(theme.palette.info.main, 0.3)}`,
+      },
+    }),
   };
 });
 

@@ -1,6 +1,5 @@
 import { styled, alpha } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
-import { SOLARIZED_BASE } from "~/tokens/theme";
 
 export const GridContainer = styled("section")(({ theme }) => ({
   display: "flex",
@@ -49,24 +48,30 @@ export const ControlsRight = styled("div")(({ theme }) => ({
 }));
 
 export const GridSearchField = styled(TextField)(({ theme }) => {
-  const isDark = theme.palette.mode === "dark";
   return {
     width: "100%",
     "& .MuiOutlinedInput-root": {
-      backgroundColor: isDark
-        ? alpha(SOLARIZED_BASE.base02, 0.6)
-        : alpha(theme.palette.background.paper, 0.8),
+      backgroundColor: alpha(theme.palette.background.paper, 0.8),
       borderRadius: "12px",
       fontSize: "0.875rem",
       "& fieldset": {
         borderColor: theme.palette.divider,
       },
       "&:hover fieldset": {
-        borderColor: isDark ? SOLARIZED_BASE.cyan : SOLARIZED_BASE.blue,
+        borderColor: theme.palette.primary.main,
       },
       "&.Mui-focused fieldset": {
-        borderColor: isDark ? SOLARIZED_BASE.cyan : SOLARIZED_BASE.blue,
+        borderColor: theme.palette.primary.main,
       },
+      ...theme.applyStyles("dark", {
+        backgroundColor: alpha(theme.palette.background.paper, 0.6),
+        "&:hover fieldset": {
+          borderColor: theme.palette.primary.light,
+        },
+        "&.Mui-focused fieldset": {
+          borderColor: theme.palette.primary.light,
+        },
+      }),
     },
   };
 });
@@ -86,7 +91,6 @@ export const ZoneWrapper = styled("div")(({ theme }) => ({
 }));
 
 export const EmptyGridContainer = styled("div")(({ theme }) => {
-  const isDark = theme.palette.mode === "dark";
   return {
     display: "flex",
     flexDirection: "column",
@@ -95,11 +99,12 @@ export const EmptyGridContainer = styled("div")(({ theme }) => {
     padding: theme.spacing(8, 3),
     borderRadius: "16px",
     border: `1px dashed ${theme.palette.divider}`,
-    backgroundColor: isDark
-      ? alpha(SOLARIZED_BASE.base02, 0.3)
-      : alpha(theme.palette.background.paper, 0.4),
+    backgroundColor: alpha(theme.palette.background.paper, 0.4),
     gap: theme.spacing(1.5),
     textAlign: "center",
     color: theme.palette.text.secondary,
+    ...theme.applyStyles("dark", {
+      backgroundColor: alpha(theme.palette.background.paper, 0.3),
+    }),
   };
 });

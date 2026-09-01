@@ -72,73 +72,90 @@ export const IdCardContainer = styled("div", {
 
 interface FaceStyleOptions {
   theme: Theme;
-  isDark: boolean;
   isBack?: boolean;
   isTransparent?: boolean;
 }
 
-function getFaceBackground({
-  theme,
-  isDark,
-  isBack,
-  isTransparent,
-}: FaceStyleOptions) {
+function getFaceBackground({ theme, isBack, isTransparent }: FaceStyleOptions) {
   if (isTransparent) {
-    const bgBase = isDark
-      ? alpha(theme.palette.background.default, 0.2)
-      : alpha(theme.palette.common.white, 0.35);
-    const primHaze = alpha(theme.palette.primary.main, isDark ? 0.14 : 0.08);
-    const secHaze = alpha(theme.palette.secondary.main, isDark ? 0.14 : 0.08);
+    const bgBase = alpha(theme.palette.common.white, 0.35);
+    const primHaze = alpha(theme.palette.primary.main, 0.08);
+    const secHaze = alpha(theme.palette.secondary.main, 0.08);
     const bgGradient = isBack
       ? `radial-gradient(ellipse at 80% 20%, ${secHaze}, transparent 70%), radial-gradient(ellipse at 20% 80%, ${primHaze}, transparent 70%)`
       : `radial-gradient(ellipse at 20% 20%, ${primHaze}, transparent 70%), radial-gradient(ellipse at 80% 80%, ${secHaze}, transparent 70%)`;
-    return { bgBase, bgGradient };
+
+    const darkBgBase = alpha(theme.palette.background.default, 0.2);
+    const darkPrimHaze = alpha(theme.palette.primary.main, 0.14);
+    const darkSecHaze = alpha(theme.palette.secondary.main, 0.14);
+    const darkBgGradient = isBack
+      ? `radial-gradient(ellipse at 80% 20%, ${darkSecHaze}, transparent 70%), radial-gradient(ellipse at 20% 80%, ${darkPrimHaze}, transparent 70%)`
+      : `radial-gradient(ellipse at 20% 20%, ${darkPrimHaze}, transparent 70%), radial-gradient(ellipse at 80% 80%, ${darkSecHaze}, transparent 70%)`;
+
+    return {
+      backgroundColor: bgBase,
+      backgroundImage: bgGradient,
+      ...theme.applyStyles("dark", {
+        backgroundColor: darkBgBase,
+        backgroundImage: darkBgGradient,
+      }),
+    };
   }
 
-  const bgBase = isDark
-    ? theme.palette.background.default
-    : theme.palette.background.paper;
-  const primHaze = alpha(theme.palette.primary.main, isDark ? 0.18 : 0.08);
-  const secHaze = alpha(theme.palette.secondary.main, isDark ? 0.18 : 0.08);
+  const bgBase = theme.palette.background.paper;
+  const primHaze = alpha(theme.palette.primary.main, 0.08);
+  const secHaze = alpha(theme.palette.secondary.main, 0.08);
   const bgGradient = isBack
     ? `radial-gradient(ellipse at 80% 20%, ${secHaze}, transparent 70%), radial-gradient(ellipse at 20% 80%, ${primHaze}, transparent 70%)`
     : `radial-gradient(ellipse at 20% 20%, ${primHaze}, transparent 70%), radial-gradient(ellipse at 80% 80%, ${secHaze}, transparent 70%)`;
-  return { bgBase, bgGradient };
+
+  const darkBgBase = theme.palette.background.default;
+  const darkPrimHaze = alpha(theme.palette.primary.main, 0.18);
+  const darkSecHaze = alpha(theme.palette.secondary.main, 0.18);
+  const darkBgGradient = isBack
+    ? `radial-gradient(ellipse at 80% 20%, ${darkSecHaze}, transparent 70%), radial-gradient(ellipse at 20% 80%, ${darkPrimHaze}, transparent 70%)`
+    : `radial-gradient(ellipse at 20% 20%, ${darkPrimHaze}, transparent 70%), radial-gradient(ellipse at 80% 80%, ${darkSecHaze}, transparent 70%)`;
+
+  return {
+    backgroundColor: bgBase,
+    backgroundImage: bgGradient,
+    ...theme.applyStyles("dark", {
+      backgroundColor: darkBgBase,
+      backgroundImage: darkBgGradient,
+    }),
+  };
 }
 
-function getFaceBorderAndShadow({
-  theme,
-  isDark,
-  isTransparent,
-}: FaceStyleOptions) {
+function getFaceBorderAndShadow({ theme, isTransparent }: FaceStyleOptions) {
   if (isTransparent) {
     return {
-      border: isDark
-        ? `1px solid ${alpha(theme.palette.common.white, 0.25)}`
-        : `1px solid ${alpha(theme.palette.common.white, 0.6)}`,
-      boxShadow: isDark
-        ? `inset 0 1.5px 2px ${alpha(theme.palette.common.white, 0.35)}, inset 0 -1.5px 2px ${alpha(
-            theme.palette.common.black,
-            0.4,
-          )}, 0 16px 36px 0 ${alpha(theme.palette.common.black, 0.5)}`
-        : `inset 0 1.5px 2px ${alpha(theme.palette.common.white, 0.85)}, inset 0 -1.5px 2px ${alpha(
-            theme.palette.common.black,
-            0.08,
-          )}, 0 16px 36px 0 ${alpha(theme.palette.primary.dark, 0.15)}`,
+      border: `1px solid ${alpha(theme.palette.common.white, 0.6)}`,
+      boxShadow: `inset 0 1.5px 2px ${alpha(theme.palette.common.white, 0.85)}, inset 0 -1.5px 2px ${alpha(
+        theme.palette.common.black,
+        0.08,
+      )}, 0 16px 36px 0 ${alpha(theme.palette.primary.dark, 0.15)}`,
+      ...theme.applyStyles("dark", {
+        border: `1px solid ${alpha(theme.palette.common.white, 0.25)}`,
+        boxShadow: `inset 0 1.5px 2px ${alpha(theme.palette.common.white, 0.35)}, inset 0 -1.5px 2px ${alpha(
+          theme.palette.common.black,
+          0.4,
+        )}, 0 16px 36px 0 ${alpha(theme.palette.common.black, 0.5)}`,
+      }),
     };
   }
 
   return {
     border: `1px solid ${theme.palette.divider}`,
-    boxShadow: isDark
-      ? `inset 0 1px 1px ${alpha(theme.palette.common.white, 0.15)}, inset 0 -1px 1px ${alpha(
-          theme.palette.common.black,
-          0.4,
-        )}`
-      : `inset 0 1px 1px ${alpha(theme.palette.common.white, 0.8)}, inset 0 -1px 1px ${alpha(
-          theme.palette.common.black,
-          0.1,
-        )}`,
+    boxShadow: `inset 0 1px 1px ${alpha(theme.palette.common.white, 0.8)}, inset 0 -1px 1px ${alpha(
+      theme.palette.common.black,
+      0.1,
+    )}`,
+    ...theme.applyStyles("dark", {
+      boxShadow: `inset 0 1px 1px ${alpha(theme.palette.common.white, 0.15)}, inset 0 -1px 1px ${alpha(
+        theme.palette.common.black,
+        0.4,
+      )}`,
+    }),
   };
 }
 
@@ -148,10 +165,9 @@ export const CardFaceContainer = styled("div", {
   isBack?: boolean;
   isTransparent?: boolean;
 }>(({ theme, isBack, isTransparent }) => {
-  const isDark = theme.palette.mode === "dark";
-  const opts: FaceStyleOptions = { theme, isDark, isBack, isTransparent };
-  const { bgBase, bgGradient } = getFaceBackground(opts);
-  const { border, boxShadow } = getFaceBorderAndShadow(opts);
+  const opts: FaceStyleOptions = { theme, isBack, isTransparent };
+  const bgStyles = getFaceBackground(opts);
+  const borderShadowStyles = getFaceBorderAndShadow(opts);
 
   return {
     position: "relative",
@@ -162,10 +178,8 @@ export const CardFaceContainer = styled("div", {
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    backgroundColor: bgBase,
-    backgroundImage: bgGradient,
-    border,
-    boxShadow,
+    ...bgStyles,
+    ...borderShadowStyles,
     backdropFilter: isTransparent ? "blur(20px) saturate(190%)" : undefined,
     WebkitBackdropFilter: isTransparent
       ? "blur(20px) saturate(190%)"

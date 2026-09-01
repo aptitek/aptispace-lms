@@ -1,5 +1,4 @@
 import { styled, alpha } from "@mui/material/styles";
-import { SOLARIZED_BASE } from "../../../tokens/theme";
 
 export const MrzContainer = styled("div", {
   shouldForwardProp: (prop) =>
@@ -13,23 +12,27 @@ export const MrzContainer = styled("div", {
   width: fullWidth ? "100%" : "auto",
   fontFamily: '"OCR-B", "Courier New", Courier, monospace',
   backgroundColor: darkOnLight
-    ? alpha(SOLARIZED_BASE.base3, 0.94)
+    ? alpha(theme.palette.common.white, 0.94)
     : theme.palette.background.paper,
   border: darkOnLight
-    ? `1px solid ${alpha(SOLARIZED_BASE.base03, 0.16)}`
+    ? `1px solid ${alpha(theme.palette.common.black, 0.16)}`
     : `1px solid ${theme.palette.divider}`,
   borderRadius: "6px",
   padding: compact ? "6px 8px" : "10px 14px",
-  color: darkOnLight ? SOLARIZED_BASE.base03 : theme.palette.text.primary,
+  color: darkOnLight ? theme.palette.common.black : theme.palette.text.primary,
   boxShadow: darkOnLight
-    ? `0 2px 8px ${alpha(SOLARIZED_BASE.base03, 0.1)}, inset 0 1px 1px ${alpha(SOLARIZED_BASE.base3, 0.9)}`
-    : theme.palette.mode === "dark"
-      ? `inset 0 1px 3px ${alpha(SOLARIZED_BASE.base03, 0.5)}`
-      : `inset 0 1px 3px ${alpha(SOLARIZED_BASE.base03, 0.2)}`,
+    ? `0 2px 8px ${alpha(theme.palette.common.black, 0.1)}, inset 0 1px 1px ${alpha(theme.palette.common.white, 0.9)}`
+    : `inset 0 1px 3px ${alpha(theme.palette.common.black, 0.2)}`,
   userSelect: "all",
   overflow: "hidden",
   zIndex: 2,
   boxSizing: "border-box",
+
+  ...theme.applyStyles("dark", {
+    boxShadow: darkOnLight
+      ? `0 2px 8px ${alpha(theme.palette.common.black, 0.1)}, inset 0 1px 1px ${alpha(theme.palette.common.white, 0.9)}`
+      : `inset 0 1px 3px ${alpha(theme.palette.common.black, 0.5)}`,
+  }),
 }));
 
 export const MrzPre = styled("pre", {
@@ -54,7 +57,7 @@ export const MrzPre = styled("pre", {
   whiteSpace: "pre",
   display: "block",
   textAlign: "justify",
-  color: darkOnLight ? SOLARIZED_BASE.base03 : theme.palette.text.primary,
+  color: darkOnLight ? theme.palette.common.black : theme.palette.text.primary,
   textShadow: darkOnLight ? "none" : `0 0 2px ${theme.palette.primary.light}`,
 
   "& code": {

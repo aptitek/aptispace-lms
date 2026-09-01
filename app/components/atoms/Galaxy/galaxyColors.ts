@@ -1,5 +1,4 @@
 import { lighten, type Theme } from "@mui/material/styles";
-import { SOLARIZED_BASE } from "~/tokens/theme";
 
 export interface GalaxyStarColors {
   red?: string;
@@ -57,59 +56,21 @@ export function resolveBackgroundHex(theme: Theme, customBg?: string): string {
   if (customBg) {
     return customBg;
   }
-  if (theme.palette.mode === "dark") {
-    return theme.palette.background.default || theme.palette.common.black;
-  }
-  return theme.palette.background.default || theme.palette.common.white;
+  return theme.palette.background.default || theme.palette.common.black;
 }
 
-export function getStellarDarkColors(): ResolvedGalaxyColors {
+export function getStellarColors(
+  palette: Theme["palette"],
+): ResolvedGalaxyColors {
   return {
-    red: parseColorToRgb(SOLARIZED_BASE.red),
-    orange: parseColorToRgb(SOLARIZED_BASE.orange),
-    yellow: parseColorToRgb(lighten(SOLARIZED_BASE.yellow, 0.4)),
-    white: parseColorToRgb(lighten(SOLARIZED_BASE.base2, 0.35)),
-    blue: parseColorToRgb(lighten(SOLARIZED_BASE.blue, 0.45)),
-    background: parseColorToRgb(SOLARIZED_BASE.base03),
-  };
-}
-
-export function getStellarLightColors(): ResolvedGalaxyColors {
-  return {
-    red: parseColorToRgb(SOLARIZED_BASE.red),
-    orange: parseColorToRgb(SOLARIZED_BASE.orange),
-    yellow: parseColorToRgb(SOLARIZED_BASE.yellow),
-    white: parseColorToRgb(SOLARIZED_BASE.base00),
-    blue: parseColorToRgb(SOLARIZED_BASE.blue),
-    background: parseColorToRgb(SOLARIZED_BASE.base3),
-  };
-}
-
-export function getDarkStarPalette(
-  _palette: Theme["palette"],
-  custom: GalaxyStarColors,
-) {
-  const stellar = getStellarDarkColors();
-  return {
-    red: custom.red ? parseColorToRgb(custom.red) : stellar.red,
-    orange: custom.orange ? parseColorToRgb(custom.orange) : stellar.orange,
-    yellow: custom.yellow ? parseColorToRgb(custom.yellow) : stellar.yellow,
-    white: custom.white ? parseColorToRgb(custom.white) : stellar.white,
-    blue: custom.blue ? parseColorToRgb(custom.blue) : stellar.blue,
-  };
-}
-
-export function getLightStarPalette(
-  _palette: Theme["palette"],
-  custom: GalaxyStarColors,
-) {
-  const stellar = getStellarLightColors();
-  return {
-    red: custom.red ? parseColorToRgb(custom.red) : stellar.red,
-    orange: custom.orange ? parseColorToRgb(custom.orange) : stellar.orange,
-    yellow: custom.yellow ? parseColorToRgb(custom.yellow) : stellar.yellow,
-    white: custom.white ? parseColorToRgb(custom.white) : stellar.white,
-    blue: custom.blue ? parseColorToRgb(custom.blue) : stellar.blue,
+    red: parseColorToRgb(palette.error.main),
+    orange: parseColorToRgb(palette.warning.main),
+    yellow: parseColorToRgb(
+      lighten(palette.warning.light || palette.warning.main, 0.4),
+    ),
+    white: parseColorToRgb(palette.text.primary),
+    blue: parseColorToRgb(palette.info.main),
+    background: parseColorToRgb(palette.background.default),
   };
 }
 
@@ -120,13 +81,14 @@ export function resolveThemeColors(
 ): ResolvedGalaxyColors {
   const custom = starColors ?? {};
   const bgHex = resolveBackgroundHex(theme, customBg);
-  const stars =
-    theme.palette.mode === "dark"
-      ? getDarkStarPalette(theme.palette, custom)
-      : getLightStarPalette(theme.palette, custom);
+  const stellar = getStellarColors(theme.palette);
 
   return {
-    ...stars,
+    red: custom.red ? parseColorToRgb(custom.red) : stellar.red,
+    orange: custom.orange ? parseColorToRgb(custom.orange) : stellar.orange,
+    yellow: custom.yellow ? parseColorToRgb(custom.yellow) : stellar.yellow,
+    white: custom.white ? parseColorToRgb(custom.white) : stellar.white,
+    blue: custom.blue ? parseColorToRgb(custom.blue) : stellar.blue,
     background: parseColorToRgb(bgHex),
   };
 }

@@ -81,10 +81,7 @@ export const MeridianTrack = styled(motion.button, {
     border: `2px solid ${theme.palette.divider}`,
     backgroundColor: bgDefault,
     backgroundImage: `linear-gradient(180deg, ${bgPaper} 0%, ${bgDefault} 100%)`,
-    boxShadow:
-      theme.palette.mode === "dark"
-        ? `inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 8px ${theme.palette.action.hover}`
-        : `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 8px ${theme.palette.action.hover}`,
+    boxShadow: `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 8px ${theme.palette.action.hover}`,
     overflow: "hidden",
     outline: "none",
     userSelect: "none",
@@ -96,11 +93,16 @@ export const MeridianTrack = styled(motion.button, {
 
     "&:hover": {
       borderColor: primaryMain,
-      boxShadow:
-        theme.palette.mode === "dark"
-          ? `inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 12px ${primaryMain}`
-          : `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 12px ${primaryMain}`,
+      boxShadow: `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 12px ${primaryMain}`,
     },
+
+    ...theme.applyStyles("dark", {
+      boxShadow: `inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 8px ${theme.palette.action.hover}`,
+      "&:hover": {
+        borderColor: primaryMain,
+        boxShadow: `inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 12px ${primaryMain}`,
+      },
+    }),
 
     "&:focus-visible": {
       outline: "none",
@@ -155,14 +157,12 @@ export const PeekingAirplane = styled(motion.div, {
   justifyContent: "center",
   zIndex: 3,
   pointerEvents: "none",
-  color:
-    theme.palette.mode === "dark"
-      ? theme.palette.common.white
-      : theme.palette.primary.main,
-  filter:
-    theme.palette.mode === "dark"
-      ? `drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 4px ${theme.palette.primary.main})`
-      : `drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2)) drop-shadow(0 0 4px ${theme.palette.primary.main})`,
+  color: theme.palette.primary.main,
+  filter: `drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2)) drop-shadow(0 0 4px ${theme.palette.primary.main})`,
+  ...theme.applyStyles("dark", {
+    color: theme.palette.common.white,
+    filter: `drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 4px ${theme.palette.primary.main})`,
+  }),
 }));
 
 export const FlightPuck = styled(motion.span, {
@@ -182,10 +182,10 @@ export const FlightPuck = styled(motion.span, {
   zIndex: 4,
   cursor: "inherit",
   background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-  boxShadow:
-    theme.palette.mode === "dark"
-      ? `0 0 10px ${theme.palette.primary.main}, 0 2px 6px rgba(0, 0, 0, 0.4)`
-      : `0 0 10px ${theme.palette.primary.main}, 0 2px 6px rgba(0, 0, 0, 0.2)`,
+  boxShadow: `0 0 10px ${theme.palette.primary.main}, 0 2px 6px rgba(0, 0, 0, 0.2)`,
+  ...theme.applyStyles("dark", {
+    boxShadow: `0 0 10px ${theme.palette.primary.main}, 0 2px 6px rgba(0, 0, 0, 0.4)`,
+  }),
 }));
 
 export const StateRippleLayer = styled(motion.div, {

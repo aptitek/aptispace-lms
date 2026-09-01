@@ -8,42 +8,12 @@ export function getRoleThemeColor(
 ) {
   switch (role) {
     case "admin":
-      return {
-        main: theme.palette.secondary.main,
-        light: theme.palette.secondary.light,
-        contrastText: theme.palette.secondary.contrastText,
-        bg: alpha(
-          theme.palette.secondary.main,
-          theme.palette.mode === "dark" ? 0.22 : 0.15,
-        ),
-        border: alpha(theme.palette.secondary.main, 0.5),
-        glow: alpha(theme.palette.secondary.main, 0.4),
-      };
+      return theme.palette.secondary;
     case "instructor":
-      return {
-        main: theme.palette.primary.main,
-        light: theme.palette.primary.light,
-        contrastText: theme.palette.primary.contrastText,
-        bg: alpha(
-          theme.palette.primary.main,
-          theme.palette.mode === "dark" ? 0.22 : 0.15,
-        ),
-        border: alpha(theme.palette.primary.main, 0.5),
-        glow: alpha(theme.palette.primary.main, 0.4),
-      };
+      return theme.palette.primary;
     case "student":
     default:
-      return {
-        main: theme.palette.success.main,
-        light: theme.palette.success.light,
-        contrastText: theme.palette.success.contrastText,
-        bg: alpha(
-          theme.palette.success.main,
-          theme.palette.mode === "dark" ? 0.22 : 0.15,
-        ),
-        border: alpha(theme.palette.success.main, 0.5),
-        glow: alpha(theme.palette.success.main, 0.4),
-      };
+      return theme.palette.success;
   }
 }
 
@@ -88,7 +58,7 @@ export const RoleBadgeRoot = styled("span", {
   shouldForwardProp: (prop) =>
     prop !== "roleVariant" && prop !== "roleSize" && prop !== "userRole",
 })<RoleBadgeContainerProps>(({ theme, roleVariant, roleSize, userRole }) => {
-  const colors = getRoleThemeColor(userRole, theme);
+  const paletteColor = getRoleThemeColor(userRole, theme);
   const sizeConfig = SIZE_MAP[roleSize] || SIZE_MAP.small;
 
   const isIconOnly = roleVariant === "icon-only";
@@ -98,12 +68,12 @@ export const RoleBadgeRoot = styled("span", {
     alignItems: "center",
     justifyContent: "center",
     gap: theme.spacing(0.5),
-    backgroundColor: colors.bg,
-    color: colors.main,
-    border: `1px solid ${colors.border}`,
+    backgroundColor: alpha(paletteColor.main, 0.15),
+    color: paletteColor.main,
+    border: `1px solid ${alpha(paletteColor.main, 0.5)}`,
     backdropFilter: "blur(8px)",
     WebkitBackdropFilter: "blur(8px)",
-    boxShadow: `0 2px 8px ${colors.glow}`,
+    boxShadow: `0 2px 8px ${alpha(paletteColor.main, 0.4)}`,
     boxSizing: "border-box",
     fontWeight: 700,
     letterSpacing: "0.04em",
@@ -139,9 +109,13 @@ export const RoleBadgeRoot = styled("span", {
         }),
 
     "&:hover": {
-      boxShadow: `0 0 12px ${colors.glow}`,
-      borderColor: colors.main,
+      boxShadow: `0 0 12px ${alpha(paletteColor.main, 0.4)}`,
+      borderColor: paletteColor.main,
       transform: "scale(1.05)",
     },
+
+    ...theme.applyStyles("dark", {
+      backgroundColor: alpha(paletteColor.main, 0.22),
+    }),
   };
 });

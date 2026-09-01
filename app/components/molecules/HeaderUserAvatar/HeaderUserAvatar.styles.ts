@@ -2,8 +2,6 @@ import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import IconButton from "@mui/material/IconButton";
-import { SOLARIZED_BASE } from "~/tokens/theme";
-
 export const HeaderAvatarContainer = styled(Box, {
   shouldForwardProp: (prop) => prop !== "$size" && prop !== "$isOpen",
 })<{ $size: number; $isOpen: boolean }>(({ $size }) => ({
@@ -91,17 +89,11 @@ export const SlidingPillTrack = styled(Box, {
   height: $size,
   width: $isOpen ? $size + 44 : $size,
   borderRadius: 9999,
-  backgroundColor:
-    theme.palette.mode === "dark"
-      ? alpha(theme.palette.background.paper, 0.94)
-      : alpha(theme.palette.background.paper, 0.96),
+  backgroundColor: alpha(theme.palette.background.paper, 0.96),
   backdropFilter: "blur(16px)",
   WebkitBackdropFilter: "blur(16px)",
   border: `1px solid ${theme.palette.divider}`,
-  boxShadow:
-    theme.palette.mode === "dark"
-      ? `0 4px 16px ${alpha(theme.palette.common.black, 0.45)}`
-      : `0 4px 16px ${alpha(theme.palette.common.black, 0.12)}`,
+  boxShadow: `0 4px 16px ${alpha(theme.palette.common.black, 0.12)}`,
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-end",
@@ -114,6 +106,11 @@ export const SlidingPillTrack = styled(Box, {
     duration: 350,
     easing: "cubic-bezier(0.2, 0, 0, 1)",
   }),
+
+  ...theme.applyStyles("dark", {
+    backgroundColor: alpha(theme.palette.background.paper, 0.94),
+    boxShadow: `0 4px 16px ${alpha(theme.palette.common.black, 0.45)}`,
+  }),
 }));
 
 export const RoundLogoutButton = styled(IconButton, {
@@ -125,7 +122,7 @@ export const RoundLogoutButton = styled(IconButton, {
   $isImpersonating,
 }) => {
   const accentColor = $isImpersonating
-    ? SOLARIZED_BASE.magenta
+    ? theme.palette.secondary.main
     : theme.palette.error.main;
 
   return {
@@ -133,7 +130,7 @@ export const RoundLogoutButton = styled(IconButton, {
     height: 32,
     borderRadius: "50%",
     color: $isImpersonating
-      ? SOLARIZED_BASE.magenta
+      ? theme.palette.secondary.main
       : theme.palette.text.primary,
     backgroundColor: alpha(accentColor, $isImpersonating ? 0.15 : 0.1),
     border: `1px solid ${alpha(accentColor, $isImpersonating ? 0.4 : 0.25)}`,
@@ -157,7 +154,9 @@ export const RoundLogoutButton = styled(IconButton, {
     },
     "&:focus-visible": {
       outline: `2px solid ${
-        $isImpersonating ? SOLARIZED_BASE.magenta : theme.palette.primary.main
+        $isImpersonating
+          ? theme.palette.secondary.main
+          : theme.palette.primary.main
       }`,
       outlineOffset: "2px",
     },

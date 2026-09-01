@@ -1,5 +1,5 @@
 import React from "react";
-import { styled } from "@mui/material/styles";
+import { styled, useTheme, type Theme } from "@mui/material/styles";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
@@ -11,7 +11,6 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import TerminalRoundedIcon from "@mui/icons-material/TerminalRounded";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
-import { SOLARIZED_BASE } from "~/tokens/theme";
 import {
   useStatusCenter,
   type NotificationSeverity,
@@ -80,10 +79,7 @@ const MessageText = styled("span")(({ theme }) => ({
   fontSize: "0.75rem",
   fontWeight: 400,
   lineHeight: 1.4,
-  color:
-    theme.palette.mode === "dark"
-      ? SOLARIZED_BASE.base0
-      : SOLARIZED_BASE.base00,
+  color: theme.palette.text.secondary,
   overflow: "hidden",
   textOverflow: "ellipsis",
   display: "-webkit-box",
@@ -98,32 +94,32 @@ const ActionGroup = styled("div")(({ theme }) => ({
   flexShrink: 0,
 }));
 
-function resolveSeverityDetails(severity: NotificationSeverity) {
+function resolveSeverityDetails(severity: NotificationSeverity, theme: Theme) {
   switch (severity) {
     case "critical":
     case "error":
       return {
-        color: SOLARIZED_BASE.red,
+        color: theme.palette.error.main,
         icon: <ErrorOutlineRoundedIcon fontSize="small" />,
       };
     case "security":
       return {
-        color: SOLARIZED_BASE.magenta,
+        color: theme.palette.secondary.main,
         icon: <ShieldRoundedIcon fontSize="small" />,
       };
     case "warning":
       return {
-        color: SOLARIZED_BASE.yellow,
+        color: theme.palette.warning.main,
         icon: <WarningAmberRoundedIcon fontSize="small" />,
       };
     case "info":
       return {
-        color: SOLARIZED_BASE.cyan,
+        color: theme.palette.info.main,
         icon: <InfoOutlinedIcon fontSize="small" />,
       };
     case "success":
       return {
-        color: SOLARIZED_BASE.green,
+        color: theme.palette.success.main,
         icon: <CheckCircleOutlineRoundedIcon fontSize="small" />,
       };
   }
@@ -135,6 +131,7 @@ export default function M3Snackbar({
   onViewDetails: propViewDetails,
   className,
 }: M3SnackbarProps) {
+  const theme = useTheme();
   const { t } = useTranslation("common");
   const statusCenter = useStatusCenter();
 
@@ -152,7 +149,7 @@ export default function M3Snackbar({
 
   if (!activeEvent) return null;
 
-  const severityDetails = resolveSeverityDetails(activeEvent.severity);
+  const severityDetails = resolveSeverityDetails(activeEvent.severity, theme);
 
   return (
     <AnimatePresence>
