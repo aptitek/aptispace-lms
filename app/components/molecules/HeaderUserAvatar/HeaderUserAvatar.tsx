@@ -54,12 +54,14 @@ function computeUserInitials(name?: string): string | null {
 interface AvatarMediaSlotProps {
   avatarUrl?: string;
   name?: string;
+  role?: string | null;
   fallbackAria: string;
 }
 
 function AvatarMediaSlot({
   avatarUrl,
   name,
+  role,
   fallbackAria,
 }: AvatarMediaSlotProps) {
   const initials = computeUserInitials(name);
@@ -69,13 +71,60 @@ function AvatarMediaSlot({
   }
 
   if (initials) {
-    return <AvatarInitialsFallback>{initials}</AvatarInitialsFallback>;
+    return (
+      <AvatarInitialsFallback $role={role}>{initials}</AvatarInitialsFallback>
+    );
   }
 
   return (
-    <AvatarInitialsFallback>
+    <AvatarInitialsFallback $role={role}>
       <PersonRoundedIcon />
     </AvatarInitialsFallback>
+  );
+}
+
+function resolveHeaderShapeName(role?: string | null): string {
+  if (role === "admin") return "9-sided-cookie";
+  if (role === "instructor") return "ghost-ish";
+  return "pill";
+}
+
+interface HeaderActionButtonSlotProps {
+  isOpen: boolean;
+  isImpersonating: boolean;
+  role?: string | null;
+  onClick: () => void;
+  actionAria: string;
+}
+
+function HeaderActionButtonSlot({
+  isOpen,
+  isImpersonating,
+  role,
+  onClick,
+  actionAria,
+}: HeaderActionButtonSlotProps) {
+  const Icon = isImpersonating ? (
+    <AdminPanelSettingsIcon sx={{ fontSize: "1.15rem" }} />
+  ) : (
+    <LogoutIcon sx={{ fontSize: "1.1rem" }} />
+  );
+
+  return (
+    <RoundLogoutButton
+      $isOpen={isOpen}
+      $isImpersonating={isImpersonating}
+      $role={role}
+      onClick={onClick}
+      aria-label={actionAria}
+      data-testid={
+        isImpersonating ? "header-return-admin-button" : "header-logout-button"
+      }
+      data-action={isImpersonating ? "return-to-admin" : "logout"}
+      size="small"
+    >
+      {Icon}
+    </RoundLogoutButton>
   );
 }
 
@@ -136,9 +185,7 @@ export function HeaderUserAvatar({
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    if (!isFocused) {
-      startMorph(false);
-    }
+    if (!isFocused) startMorph(false);
   };
 
   const handleFocus = () => {
@@ -149,9 +196,7 @@ export function HeaderUserAvatar({
   const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
     if (!event.currentTarget.contains(event.relatedTarget)) {
       setIsFocused(false);
-      if (!isHovered) {
-        startMorph(false);
-      }
+      if (!isHovered) startMorph(false);
     }
   };
 
@@ -208,16 +253,18 @@ export function HeaderUserAvatar({
       <AvatarMorphTrigger
         $size={size}
         $clipId={clipId}
+        $role={user.role}
         onClick={onAvatarClick}
         aria-haspopup="true"
         aria-expanded={isMenuOpen}
         aria-label={user.name || actionAria}
         data-testid="header-avatar-trigger"
-        data-shape="6-sided-cookie"
+        data-shape={resolveHeaderShapeName(user.role)}
       >
         <AvatarMediaSlot
           avatarUrl={user.avatarUrl}
           name={user.name}
+          role={user.role}
           fallbackAria={actionAria}
         />
       </AvatarMorphTrigger>
@@ -230,25 +277,15 @@ export function HeaderUserAvatar({
         aria-label={actionAria}
       >
         <Tooltip title={actionLabel} arrow placement="bottom">
-          <RoundLogoutButton
-            $isOpen={isMenuOpen}
-            $isImpersonating={isImpersonating}
-            onClick={handleActionClick}
-            aria-label={actionAria}
-            data-testid={
-              isImpersonating
-                ? "header-return-admin-button"
-                : "header-logout-button"
-            }
-            data-action={isImpersonating ? "return-to-admin" : "logout"}
-            size="small"
-          >
-            {isImpersonating ? (
-              <AdminPanelSettingsIcon sx={{ fontSize: "1.15rem" }} />
-            ) : (
-              <LogoutIcon sx={{ fontSize: "1.1rem" }} />
-            )}
-          </RoundLogoutButton>
+          <div>
+            <HeaderActionButtonSlot
+              isOpen={isMenuOpen}
+              isImpersonating={isImpersonating}
+              role={user.role}
+              onClick={handleActionClick}
+              actionAria={actionAria}
+            />
+          </div>
         </Tooltip>
       </SlidingPillTrack>
     </HeaderAvatarContainer>

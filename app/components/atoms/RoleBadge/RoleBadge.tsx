@@ -5,7 +5,8 @@ import SupervisorAccountRoundedIcon from "@mui/icons-material/SupervisorAccountR
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
 import Tooltip from "../Tooltip/Tooltip";
 import type { RoleBadgeProps } from "./RoleBadge.types";
-import { RoleBadgeRoot } from "./RoleBadge.styles";
+import { RoleBadgeRoot, getRoleBadgeShapeName } from "./RoleBadge.styles";
+import ShapeDefs from "../Avatar/ShapeDefs";
 import type { UserRole } from "../../../utils/auth";
 
 export function getRoleIcon(role?: UserRole | string) {
@@ -71,25 +72,30 @@ export const RoleBadge = forwardRef<HTMLSpanElement, RoleBadgeProps>(
     const roleLabel = getRoleLabelText(config.role, t);
     const roleIcon = getRoleIcon(config.role);
     const tooltip = props.tooltipText || roleLabel;
+    const shapeName = getRoleBadgeShapeName(config.role);
     const testId =
       props["data-testid"] || props.testId || `role-badge-${config.role}`;
 
     const badgeNode = (
-      <RoleBadgeRoot
-        ref={ref}
-        userRole={config.role}
-        roleVariant={config.variant}
-        roleSize={config.size}
-        className={props.className}
-        style={props.style}
-        role="status"
-        tabIndex={0}
-        aria-label={roleLabel}
-        data-testid={testId}
-      >
-        {roleIcon}
-        {config.variant !== "icon-only" && <span>{roleLabel}</span>}
-      </RoleBadgeRoot>
+      <>
+        <ShapeDefs />
+        <RoleBadgeRoot
+          ref={ref}
+          userRole={config.role}
+          roleVariant={config.variant}
+          roleSize={config.size}
+          className={props.className}
+          style={props.style}
+          role="status"
+          tabIndex={0}
+          aria-label={roleLabel}
+          data-testid={testId}
+          data-shape={shapeName}
+        >
+          {roleIcon}
+          {config.variant !== "icon-only" && <span>{roleLabel}</span>}
+        </RoleBadgeRoot>
+      </>
     );
 
     if (config.showTooltip && tooltip) {

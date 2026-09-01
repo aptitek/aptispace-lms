@@ -1,7 +1,8 @@
-import { styled, alpha } from "@mui/material/styles";
+import { styled, alpha, type Theme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import IconButton from "@mui/material/IconButton";
+
 export const HeaderAvatarContainer = styled(Box, {
   shouldForwardProp: (prop) => prop !== "$size" && prop !== "$isOpen",
 })<{ $size: number; $isOpen: boolean }>(({ $size }) => ({
@@ -22,61 +23,98 @@ export const HiddenSvgClipDefs = styled("svg")({
   pointerEvents: "none",
 });
 
+export function getHeaderRoleColor(
+  role: string | null | undefined,
+  theme: Theme,
+): string {
+  const normalized = (role || "").toLowerCase().trim();
+  switch (normalized) {
+    case "admin":
+    case "administrator":
+      return theme.palette.secondary.main;
+    case "instructor":
+    case "teacher":
+    case "faculty":
+    case "editingteacher":
+      return theme.palette.info.main;
+    case "student":
+    default:
+      return theme.palette.success.main;
+  }
+}
+
 export const AvatarMorphTrigger = styled(ButtonBase, {
-  shouldForwardProp: (prop) => prop !== "$size" && prop !== "$clipId",
-})<{ $size: number; $clipId: string }>(({ theme, $size, $clipId }) => ({
-  position: "relative",
-  zIndex: 2,
-  width: $size,
-  height: $size,
-  borderRadius: "0px",
-  overflow: "hidden",
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  clipPath: `url(#${$clipId})`,
-  WebkitClipPath: `url(#${$clipId})`,
-  backgroundColor: theme.palette.action.selected,
-  cursor: "pointer",
-  transition: theme.transitions.create(["transform", "filter"], {
-    duration: 350,
-    easing: "cubic-bezier(0.2, 0, 0, 1)",
-  }),
-  "&:hover, &:focus-visible": {
-    transform: "scale(1.05)",
-  },
-  "&:focus-visible": {
-    outline: `2px solid ${theme.palette.primary.main}`,
-    outlineOffset: "2px",
-  },
-  "& img": {
+  shouldForwardProp: (prop) =>
+    prop !== "$size" && prop !== "$clipId" && prop !== "$role",
+})<{ $size: number; $clipId: string; $role?: string | null }>(({
+  theme,
+  $size,
+  $clipId,
+  $role,
+}) => {
+  const roleColor = getHeaderRoleColor($role, theme);
+
+  return {
+    position: "relative",
+    zIndex: 2,
+    width: $size,
+    height: $size,
+    borderRadius: "0px",
+    overflow: "hidden",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    clipPath: `url(#${$clipId})`,
+    WebkitClipPath: `url(#${$clipId})`,
+    backgroundColor: alpha(roleColor, 0.1),
+    cursor: "pointer",
+    transition: theme.transitions.create(["transform", "filter"], {
+      duration: 350,
+      easing: "cubic-bezier(0.2, 0, 0, 1)",
+    }),
+    "&:hover, &:focus-visible": {
+      transform: "scale(1.05)",
+      filter: `drop-shadow(0 2px 8px ${alpha(roleColor, 0.35)})`,
+    },
+    "&:focus-visible": {
+      outline: `2px solid ${roleColor}`,
+      outlineOffset: "2px",
+    },
+    "& img": {
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+      display: "block",
+      pointerEvents: "none",
+    },
+  };
+});
+
+export const AvatarInitialsFallback = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "$role",
+})<{ $role?: string | null }>(({ theme, $role }) => {
+  const roleColor = getHeaderRoleColor($role, theme);
+
+  return {
     width: "100%",
     height: "100%",
-    objectFit: "cover",
-    display: "block",
-    pointerEvents: "none",
-  },
-}));
-
-export const AvatarInitialsFallback = styled(Box)(({ theme }) => ({
-  width: "100%",
-  height: "100%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  color: theme.palette.text.primary,
-  fontSize: "0.95rem",
-  fontWeight: 700,
-  letterSpacing: "0.02em",
-  textTransform: "uppercase",
-  backgroundColor: alpha(theme.palette.primary.main, 0.15),
-  userSelect: "none",
-  "& svg": {
-    width: "60%",
-    height: "60%",
-    fill: "currentColor",
-  },
-}));
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: roleColor,
+    fontSize: "0.95rem",
+    fontWeight: 700,
+    letterSpacing: "0.02em",
+    textTransform: "uppercase",
+    backgroundColor: alpha(roleColor, 0.15),
+    userSelect: "none",
+    "& svg": {
+      width: "60%",
+      height: "60%",
+      fill: "currentColor",
+    },
+  };
+});
 
 export const SlidingPillTrack = styled(Box, {
   shouldForwardProp: (prop) => prop !== "$isOpen" && prop !== "$size",
@@ -115,23 +153,21 @@ export const SlidingPillTrack = styled(Box, {
 
 export const RoundLogoutButton = styled(IconButton, {
   shouldForwardProp: (prop) =>
-    prop !== "$isOpen" && prop !== "$isImpersonating",
-})<{ $isOpen: boolean; $isImpersonating?: boolean }>(({
+    prop !== "$isOpen" && prop !== "$isImpersonating" && prop !== "$role",
+})<{ $isOpen: boolean; $isImpersonating?: boolean; $role?: string | null }>(({
   theme,
   $isOpen,
   $isImpersonating,
+  $role,
 }) => {
-  const accentColor = $isImpersonating
-    ? theme.palette.secondary.main
-    : theme.palette.error.main;
+  const roleColor = getHeaderRoleColor($role, theme);
+  const accentColor = $isImpersonating ? roleColor : theme.palette.error.main;
 
   return {
     width: 32,
     height: 32,
     borderRadius: "50%",
-    color: $isImpersonating
-      ? theme.palette.secondary.main
-      : theme.palette.text.primary,
+    color: $isImpersonating ? roleColor : theme.palette.text.primary,
     backgroundColor: alpha(accentColor, $isImpersonating ? 0.15 : 0.1),
     border: `1px solid ${alpha(accentColor, $isImpersonating ? 0.4 : 0.25)}`,
     transform: $isOpen
@@ -154,9 +190,7 @@ export const RoundLogoutButton = styled(IconButton, {
     },
     "&:focus-visible": {
       outline: `2px solid ${
-        $isImpersonating
-          ? theme.palette.secondary.main
-          : theme.palette.primary.main
+        $isImpersonating ? roleColor : theme.palette.primary.main
       }`,
       outlineOffset: "2px",
     },

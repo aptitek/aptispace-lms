@@ -1,7 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { HeaderUserAvatar } from "./HeaderUserAvatar";
+import { getHeaderRoleColor } from "./HeaderUserAvatar.styles";
 import type { AuthUser } from "../../../utils/auth";
 import { resolveShapeStyle } from "../../atoms/Avatar/shapes";
+
+import { darkTheme } from "../../../tokens/theme";
 
 const mockUser: AuthUser = {
   id: "user-123",
@@ -31,16 +34,16 @@ describe("HeaderUserAvatar Molecule (MD3 Sliding Pill)", () => {
     expect(resolvedCookie.clipPath).toBe("url(#avatar-shape-9-sided-cookie)");
   });
 
-  it("supports user avatar configuration and sliding pill logout properties", () => {
-    const props = {
-      user: mockUser,
-      size: 40,
-      onLogout: () => {},
-    };
-
-    expect(props.user.name).toBe("Arthur Dent");
-    expect(props.user.role).toBe("student");
-    expect(props.size).toBe(40);
-    expect(typeof props.onLogout).toBe("function");
+  it("resolves role colors appropriately for admin, instructor, and student", () => {
+    expect(mockUser.role).toBe("student");
+    expect(getHeaderRoleColor("admin", darkTheme)).toBe(
+      darkTheme.palette.secondary.main,
+    );
+    expect(getHeaderRoleColor("instructor", darkTheme)).toBe(
+      darkTheme.palette.info.main,
+    );
+    expect(getHeaderRoleColor("student", darkTheme)).toBe(
+      darkTheme.palette.success.main,
+    );
   });
 });

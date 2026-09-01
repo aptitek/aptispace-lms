@@ -3,6 +3,7 @@ import { RoleBadge, getRoleLabelText } from "./RoleBadge";
 import {
   getRoleThemeColor,
   getRoleBadgeBorderRadius,
+  getRoleBadgeShapeName,
 } from "./RoleBadge.styles";
 import { darkTheme, lightTheme } from "../../../tokens/theme";
 
@@ -18,7 +19,7 @@ describe("RoleBadge Atom Component & Tokens", () => {
     expect(studentColor.main).toBe(darkTheme.palette.success.main);
 
     const instructorColor = getRoleThemeColor("instructor", darkTheme);
-    expect(instructorColor.main).toBe(darkTheme.palette.primary.main);
+    expect(instructorColor.main).toBe(darkTheme.palette.info.main);
 
     const adminColor = getRoleThemeColor("admin", darkTheme);
     expect(adminColor.main).toBe(darkTheme.palette.secondary.main);
@@ -29,7 +30,7 @@ describe("RoleBadge Atom Component & Tokens", () => {
     expect(studentColor.main).toBe(lightTheme.palette.success.main);
 
     const instructorColor = getRoleThemeColor("instructor", lightTheme);
-    expect(instructorColor.main).toBe(lightTheme.palette.primary.main);
+    expect(instructorColor.main).toBe(lightTheme.palette.info.main);
 
     const adminColor = getRoleThemeColor("admin", lightTheme);
     expect(adminColor.main).toBe(lightTheme.palette.secondary.main);
@@ -43,12 +44,18 @@ describe("RoleBadge Atom Component & Tokens", () => {
     expect(getRoleLabelText(undefined, mockT)).toBe("Student");
   });
 
-  it("resolves role-based badge shapes (pill, arch, cookie)", () => {
-    expect(getRoleBadgeBorderRadius("student", true)).toBe("11px 4px 11px 4px");
+  it("resolves exact role-based MD3 shapes (pill for student, ghost for instructor, 9-sided cookie for admin)", () => {
+    expect(getRoleBadgeShapeName("student")).toBe("pill");
+    expect(getRoleBadgeShapeName("instructor")).toBe("ghost-ish");
+    expect(getRoleBadgeShapeName("teacher")).toBe("ghost-ish");
+    expect(getRoleBadgeShapeName("admin")).toBe("9-sided-cookie");
+    expect(getRoleBadgeShapeName("administrator")).toBe("9-sided-cookie");
+    expect(getRoleBadgeShapeName(undefined)).toBe("pill");
+
     expect(getRoleBadgeBorderRadius("student", false)).toBe("9999px");
-    expect(getRoleBadgeBorderRadius("instructor", true)).toBe(
-      "10px 10px 3px 3px",
+    expect(getRoleBadgeBorderRadius("instructor", false)).toBe(
+      "12px 12px 4px 4px",
     );
-    expect(getRoleBadgeBorderRadius("admin", true)).toBe("7px 2px 7px 2px");
+    expect(getRoleBadgeBorderRadius("admin", false)).toBe("8px 3px 8px 3px");
   });
 });
