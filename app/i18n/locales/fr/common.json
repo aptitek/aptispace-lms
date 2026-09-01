@@ -99,5 +99,43 @@
       "uploadFailed": "Échec du téléversement de l'avatar",
       "invalidPayload": "Réponse de téléversement invalide du serveur"
     }
+  },
+  "inspector": {
+    "title": "Inspecteur d'Étudiant",
+    "closeAria": "Fermer l'inspecteur",
+    "assignedCohorts": "Cohortes Affectées",
+    "noCohorts": "Aucune cohorte affectée",
+    "addCohort": "Ajouter à une cohorte",
+    "removeCohortTooltip": "Retirer de {{cohort}}",
+    "addButton": "Ajouter",
+    "assignmentTitle": "Affectation Établissement & Cohorte",
+    "schoolLabel": "Établissement / École",
+    "cohortLabel": "Cohorte",
+    "unassignedCohort": "Non affecté",
+    "saveAssignment": "Enregistrer l'affectation",
+    "saving": "Enregistrement...",
+    "assignmentSaved": "Affectation de la cohorte mise à jour avec succès",
+    "impersonate": "Emprunter l'identité",
+    "editProfile": "Modifier le profil étudiant"
+  },
+  "studentGrid": {
+    "title": "Étudiants Inscrits",
+    "searchPlaceholder": "Rechercher par nom, email, github...",
+    "searchAria": "Rechercher des étudiants",
+    "clearSearchAria": "Effacer la recherche",
+    "clearFilter": "Effacer le filtre",
+    "emptyMessage": "Aucun étudiant trouvé dans l'annuaire",
+    "countBadge": "{{count}} étudiants"
+  },
+  "admin": {
+    "title": "AptiSpace LMS • Gestion Administrative",
+    "description": "Tableau de bord administratif pour la gestion de la liste des étudiants, des identifiants et de la supervision institutionnelle.",
+    "tabs": {
+      "aria": "Onglets de navigation de la gestion administrative",
+      "students": "Étudiants",
+      "instructors": "Instructeurs",
+      "cohorts": "Cohortes",
+      "courses": "Cours"
+    }
   }
 }

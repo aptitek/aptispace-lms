@@ -2,6 +2,15 @@ import type React from "react";
 import type { UserRole } from "~/utils/auth";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 
+export interface CompactCohortItem {
+  id: string;
+  name: string;
+  startDate?: string | Date | null;
+  startYear?: string | number | null;
+  institutionId?: string;
+  institutionName?: string;
+}
+
 export interface CompactStudentData {
   id: string;
   firstName: string;
@@ -16,6 +25,7 @@ export interface CompactStudentData {
   cohortName?: string;
   cohortStartDate?: string | Date | null;
   cohortStartYear?: string | number | null;
+  cohorts?: CompactCohortItem[];
   institutionId?: string;
   institutionName?: string;
 }

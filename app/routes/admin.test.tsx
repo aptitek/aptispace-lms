@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
-import AdminManagement, { meta, loader } from "./admin";
+import AdminManagement, { meta, loader, action } from "./admin";
 import * as sessionServer from "~/utils/session.server";
+import * as cohortService from "~/services/cohortService";
 
 describe("Admin Route", () => {
   beforeEach(() => {
@@ -63,7 +64,7 @@ describe("Admin Route", () => {
       expect(errorResponse?.headers.get("Location")).toBe("/onboarding");
     });
 
-    it("returns active admin user and students when authorized", async () => {
+    it("returns active admin user, students, schools, and cohorts when authorized", async () => {
       vi.spyOn(sessionServer, "authGuard").mockResolvedValue({
         session: {
           userId: "admin-1",
@@ -112,16 +113,125 @@ describe("Admin Route", () => {
         context: {},
         params: {},
       } as unknown as Parameters<typeof loader>[0];
+
       const result = (await loader(args)) as {
-        user: { id: string; role: string };
+        user: { role: string };
         students: unknown[];
         totalStudents: number;
+        schools: unknown[];
+        cohorts: unknown[];
       };
 
       expect(result.user).toBeDefined();
       expect(result.user.role).toBe("admin");
       expect(result.students.length).toBeGreaterThan(0);
       expect(result.totalStudents).toBe(result.students.length);
+      expect(result.schools.length).toBeGreaterThan(0);
+      expect(result.cohorts.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("action", () => {
+    it("handles add-cohort intent correctly", async () => {
+      const mockDb = {} as never;
+      vi.spyOn(sessionServer, "authGuard").mockResolvedValue({
+        session: {
+          userId: "admin-1",
+          role: "admin",
+          issuedAt: Date.now(),
+          expiresAt: Date.now() + 10000,
+        },
+        db: mockDb,
+        user: {
+          id: "admin-1",
+          firstName: "Admin",
+          lastName: "USER",
+          displayName: "Admin User",
+          githubId: "admin",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          affiliations: [],
+        },
+      });
+
+      const addSpy = vi
+        .spyOn(cohortService, "addStudentToCohort")
+        .mockResolvedValue({} as never);
+
+      const formData = new FormData();
+      formData.append("intent", "add-cohort");
+      formData.append("studentId", "std-123");
+      formData.append("cohortId", "cohort-2026");
+
+      const request = new Request("http://localhost:3000/admin", {
+        method: "POST",
+        body: formData,
+      });
+
+      const args = {
+        request,
+        context: {},
+        params: {},
+      } as unknown as Parameters<typeof action>[0];
+
+      const res = await action(args);
+      expect(res).toEqual({ success: true });
+      expect(addSpy).toHaveBeenCalledWith(mockDb, {
+        userId: "std-123",
+        cohortId: "cohort-2026",
+        actorUserId: "admin-1",
+      });
+    });
+
+    it("handles remove-cohort intent correctly", async () => {
+      const mockDb = {} as never;
+      vi.spyOn(sessionServer, "authGuard").mockResolvedValue({
+        session: {
+          userId: "admin-1",
+          role: "admin",
+          issuedAt: Date.now(),
+          expiresAt: Date.now() + 10000,
+        },
+        db: mockDb,
+        user: {
+          id: "admin-1",
+          firstName: "Admin",
+          lastName: "USER",
+          displayName: "Admin User",
+          githubId: "admin",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          affiliations: [],
+        },
+      });
+
+      const removeSpy = vi
+        .spyOn(cohortService, "removeStudentFromCohort")
+        .mockResolvedValue({ success: true, count: 1 } as never);
+
+      const formData = new FormData();
+      formData.append("intent", "remove-cohort");
+      formData.append("studentId", "std-123");
+      formData.append("cohortId", "cohort-2026");
+
+      const request = new Request("http://localhost:3000/admin", {
+        method: "POST",
+        body: formData,
+      });
+
+      const args = {
+        request,
+        context: {},
+        params: {},
+      } as unknown as Parameters<typeof action>[0];
+
+      const res = await action(args);
+      expect(res).toEqual({ success: true });
+      expect(removeSpy).toHaveBeenCalledWith(mockDb, {
+        userId: "std-123",
+        cohortId: "cohort-2026",
+        actorUserId: "admin-1",
+      });
     });
   });
 

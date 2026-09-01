@@ -99,5 +99,43 @@
       "uploadFailed": "Failed to upload avatar image",
       "invalidPayload": "Invalid upload response payload from server"
     }
+  },
+  "inspector": {
+    "title": "Student Inspector",
+    "closeAria": "Close Inspector",
+    "assignedCohorts": "Assigned Cohorts",
+    "noCohorts": "No cohorts assigned yet",
+    "addCohort": "Add to Cohort",
+    "removeCohortTooltip": "Remove from {{cohort}}",
+    "addButton": "Add",
+    "assignmentTitle": "Institution & Cohort Assignment",
+    "schoolLabel": "School / Institution",
+    "cohortLabel": "Cohort",
+    "unassignedCohort": "Unassigned",
+    "saveAssignment": "Save Cohort Assignment",
+    "saving": "Saving...",
+    "assignmentSaved": "Cohort assignment updated successfully",
+    "impersonate": "Impersonate Student",
+    "editProfile": "Edit Student Profile"
+  },
+  "studentGrid": {
+    "title": "Registered Students",
+    "searchPlaceholder": "Search by name, email, github...",
+    "searchAria": "Search students",
+    "clearSearchAria": "Clear search",
+    "clearFilter": "Clear filter",
+    "emptyMessage": "No students found in directory",
+    "countBadge": "{{count}} students"
+  },
+  "admin": {
+    "title": "AptiSpace LMS • Admin Management",
+    "description": "Administrative dashboard for student roster management, credentials, and institutional oversight.",
+    "tabs": {
+      "aria": "Admin management navigation tabs",
+      "students": "Students",
+      "instructors": "Instructors",
+      "cohorts": "Cohorts",
+      "courses": "Courses"
+    }
   }
 }

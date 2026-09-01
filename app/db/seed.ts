@@ -72,7 +72,7 @@ export async function seedDatabase(db: Database) {
     institutionId = inst.id;
   }
 
-  // 2. Cohort
+  // 2. Cohorts
   const existingCohort = await db
     .select()
     .from(cohorts)
@@ -101,6 +101,44 @@ export async function seedDatabase(db: Database) {
       })
       .returning();
     cohortId = cohort.id;
+  }
+
+  const cohort2025 = await db
+    .select()
+    .from(cohorts)
+    .where(eq(cohorts.name, "Cohort 2025"))
+    .limit(1);
+  if (cohort2025.length === 0) {
+    const d2025 = new Date("2025-09-01");
+    const end2025 = new Date("2026-06-30");
+    await db.insert(cohorts).values({
+      institutionId,
+      name: "Cohort 2025",
+      description: "Alumni software engineering cohort.",
+      startDate: d2025,
+      endDate: end2025,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  const cohort2027 = await db
+    .select()
+    .from(cohorts)
+    .where(eq(cohorts.name, "Cohort 2027"))
+    .limit(1);
+  if (cohort2027.length === 0) {
+    const d2027 = new Date("2027-09-01");
+    const end2027 = new Date("2028-06-30");
+    await db.insert(cohorts).values({
+      institutionId,
+      name: "Cohort 2027",
+      description: "Upcoming software engineering cohort.",
+      startDate: d2027,
+      endDate: end2027,
+      createdAt: now,
+      updatedAt: now,
+    });
   }
 
   // 3. Courses & Modules (Neutral curriculum)

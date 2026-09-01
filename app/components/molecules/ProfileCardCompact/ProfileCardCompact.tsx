@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import { useTranslation } from "react-i18next";
 import Chip from "@mui/material/Chip";
 import LoginIcon from "@mui/icons-material/Login";
 import Avatar from "../../atoms/Avatar/Avatar";
@@ -120,6 +121,8 @@ function CompactHeaderSlot({
   cohortYear,
   isProfileComplete,
 }: CompactHeaderRowProps) {
+  const { t } = useTranslation(["auth", "common"]);
+
   return (
     <CardHeaderRow>
       <InstitutionBadge data-testid="compact-institution">
@@ -155,7 +158,7 @@ function CompactHeaderSlot({
         />
         {isProfileComplete === false && (
           <Chip
-            label="Pending"
+            label={t("auth:pending", "Pending")}
             size="small"
             color="warning"
             variant="filled"
@@ -215,9 +218,15 @@ function CompactStudentDetailsSlot({
   showImpersonate = true,
   onImpersonate,
 }: CompactDetailsProps) {
+  const { t } = useTranslation(["auth", "common"]);
   const firstName = student.firstName;
   const familyName = (student.familyName ?? "").toUpperCase();
-  const emailText = student.email || "No institutional email";
+  const emailText =
+    student.email || t("auth:noInstitutionalEmail", "No institutional email");
+  const impersonateLabel = t("auth:impersonateUser", {
+    name: displayName,
+    defaultValue: `Impersonate ${displayName}`,
+  });
 
   const handleImpersonateClick = async (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -264,11 +273,11 @@ function CompactStudentDetailsSlot({
         />
 
         {showImpersonate && (
-          <Tooltip title={`Impersonate ${displayName}`} arrow placement="top">
+          <Tooltip title={impersonateLabel} arrow placement="top">
             <ImpersonateIconButton
               size="small"
               onClick={handleImpersonateClick}
-              aria-label={`Impersonate ${displayName}`}
+              aria-label={impersonateLabel}
               data-testid="compact-impersonate-btn"
             >
               <LoginIcon sx={{ fontSize: 14 }} />

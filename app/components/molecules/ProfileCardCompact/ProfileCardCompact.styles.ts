@@ -249,14 +249,14 @@ export const ImpersonateIconButton = styled(IconButton)(({ theme }) => {
     height: "24px",
     padding: "3px",
     borderRadius: "6px",
-    color: isDark ? SOLARIZED_BASE.cyan : SOLARIZED_BASE.blue,
+    color: SOLARIZED_BASE.magenta,
     backgroundColor: isDark
-      ? alpha(SOLARIZED_BASE.cyan, 0.1)
-      : alpha(SOLARIZED_BASE.blue, 0.08),
+      ? alpha(SOLARIZED_BASE.magenta, 0.15)
+      : alpha(SOLARIZED_BASE.magenta, 0.1),
     border: `1px solid ${
       isDark
-        ? alpha(SOLARIZED_BASE.cyan, 0.3)
-        : alpha(SOLARIZED_BASE.blue, 0.25)
+        ? alpha(SOLARIZED_BASE.magenta, 0.4)
+        : alpha(SOLARIZED_BASE.magenta, 0.3)
     }`,
     flexShrink: 0,
     transition: theme.transitions.create(
@@ -265,9 +265,10 @@ export const ImpersonateIconButton = styled(IconButton)(({ theme }) => {
     ),
     "&:hover": {
       backgroundColor: isDark
-        ? alpha(SOLARIZED_BASE.cyan, 0.2)
-        : alpha(SOLARIZED_BASE.blue, 0.16),
-      borderColor: isDark ? SOLARIZED_BASE.cyan : SOLARIZED_BASE.blue,
+        ? alpha(SOLARIZED_BASE.magenta, 0.25)
+        : alpha(SOLARIZED_BASE.magenta, 0.2),
+      borderColor: SOLARIZED_BASE.magenta,
+      color: SOLARIZED_BASE.magenta,
       transform: "scale(1.08)",
     },
     "& .MuiSvgIcon-root": {

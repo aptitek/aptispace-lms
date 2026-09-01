@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -116,6 +117,7 @@ export default function Header({
   className,
   "data-testid": dataTestId = "header",
 }: HeaderProps) {
+  const { t } = useTranslation(["auth", "common"]);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const handleActionClick = () => {
@@ -157,9 +159,13 @@ export default function Header({
               size="small"
               variant="outlined"
               startIcon={<AdminPanelSettingsIcon sx={{ fontSize: 16 }} />}
+              aria-label={t(
+                "auth:adminButtonAria",
+                "Access administration management",
+              )}
               data-testid="header-admin-link"
             >
-              Admin
+              {t("auth:adminButton", "Admin")}
             </AdminHeaderButton>
           )}
           <ThemeToggle size="small" />

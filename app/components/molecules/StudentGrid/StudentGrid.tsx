@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -56,13 +57,15 @@ interface GridSearchInputProps {
 }
 
 function GridSearchInput({ query, onChange, onClear }: GridSearchInputProps) {
+  const { t } = useTranslation(["common", "auth"]);
+
   const endAdornment = query ? (
     <InputAdornment position="end">
       <Button
         size="small"
         onClick={onClear}
         sx={{ minWidth: "auto", p: 0.5 }}
-        aria-label="Clear search"
+        aria-label={t("common:studentGrid.clearSearchAria", "Clear search")}
         data-testid="clear-search-btn"
       >
         <ClearIcon sx={{ fontSize: 16 }} />
@@ -73,12 +76,15 @@ function GridSearchInput({ query, onChange, onClear }: GridSearchInputProps) {
   return (
     <GridSearchField
       size="small"
-      placeholder="Search by name, email, github..."
+      placeholder={t(
+        "common:studentGrid.searchPlaceholder",
+        "Search by name, email, github...",
+      )}
       value={query}
       onChange={(event) => onChange(event.target.value)}
       slotProps={{
         htmlInput: {
-          "aria-label": "Search students",
+          "aria-label": t("common:studentGrid.searchAria", "Search students"),
           "data-testid": "student-grid-search",
         },
         input: {
@@ -151,6 +157,8 @@ interface EmptyGridProps {
 }
 
 function EmptyGridState({ message, hasQuery, onReset }: EmptyGridProps) {
+  const { t } = useTranslation(["common", "auth"]);
+
   return (
     <EmptyGridContainer data-testid="student-grid-empty">
       <PeopleAltIcon sx={{ fontSize: 44, opacity: 0.4 }} />
@@ -164,7 +172,7 @@ function EmptyGridState({ message, hasQuery, onReset }: EmptyGridProps) {
           onClick={onReset}
           data-testid="reset-filter-btn"
         >
-          Clear filter
+          {t("common:studentGrid.clearFilter", "Clear filter")}
         </Button>
       )}
     </EmptyGridContainer>
@@ -221,6 +229,7 @@ function StudentCardsZone({
 }
 
 export function StudentGrid(props: StudentGridProps) {
+  const { t } = useTranslation(["common", "auth"]);
   const {
     students,
     school,
@@ -235,12 +244,21 @@ export function StudentGrid(props: StudentGridProps) {
     gap = 4,
     className,
     testId = "student-grid",
-    emptyMessage = "No students found matching your criteria",
-    title = "Student Directory",
+    emptyMessage,
+    title,
   } = props;
 
   const [internalQuery, setInternalQuery] = useState("");
   const activeQuery = controlledQuery ?? internalQuery;
+
+  const resolvedEmptyMessage =
+    emptyMessage ||
+    t("common:studentGrid.emptyMessage", "No students found in directory");
+
+  const resolvedTitle =
+    title !== undefined
+      ? title
+      : t("common:studentGrid.title", "Registered Students");
 
   const handleQueryChange = (searchQueryText: string) => {
     if (onSearchChange) {
@@ -258,14 +276,15 @@ export function StudentGrid(props: StudentGridProps) {
     return filterStudents(students, activeQuery);
   }, [students, activeQuery]);
 
-  const countLabel = `${filteredStudents.length} ${
-    filteredStudents.length === 1 ? "student" : "students"
-  }`;
+  const countLabel = t("common:studentGrid.countBadge", {
+    count: filteredStudents.length,
+    defaultValue: `${filteredStudents.length} students`,
+  });
 
   return (
     <GridContainer className={className} data-testid={testId}>
       <ControlsHeaderSlot
-        title={title}
+        title={resolvedTitle}
         countLabel={countLabel}
         showSearch={showSearch}
         activeQuery={activeQuery}
@@ -275,7 +294,7 @@ export function StudentGrid(props: StudentGridProps) {
 
       {filteredStudents.length === 0 ? (
         <EmptyGridState
-          message={emptyMessage}
+          message={resolvedEmptyMessage}
           hasQuery={Boolean(activeQuery)}
           onReset={handleClear}
         />

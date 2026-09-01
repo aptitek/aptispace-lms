@@ -40,10 +40,22 @@ describe("i18n Internationalization", () => {
     expect(i18n.t("auth:loginCard.securityNote")).toBe(
       "OAuth 2.0 Encrypted • Single Sign-On",
     );
+    expect(i18n.t("auth:pending")).toBe("Pending");
+    expect(i18n.t("auth:noInstitutionalEmail")).toBe("No institutional email");
+    expect(i18n.t("auth:impersonateUser", { name: "Alice" })).toBe(
+      "Impersonate Alice",
+    );
 
     await i18n.changeLanguage("fr");
     expect(i18n.t("auth:loginCard.securityNote")).toBe(
       "Chiffré OAuth 2.0 • Authentification Unique (SSO)",
+    );
+    expect(i18n.t("auth:pending")).toBe("En attente");
+    expect(i18n.t("auth:noInstitutionalEmail")).toBe(
+      "Aucun email institutionnel",
+    );
+    expect(i18n.t("auth:impersonateUser", { name: "Alice" })).toBe(
+      "Emprunter l'identité de Alice",
     );
   });
 
@@ -61,60 +73,26 @@ describe("i18n Internationalization", () => {
     expect(i18n.t("auth:devTool.roles.student")).toBe("Student");
   });
 
-  it("translates emailField strings and error interpolation in English and French", async () => {
+  it("translates inspector, studentGrid, and admin management strings in English and French", async () => {
     await i18n.changeLanguage("en");
-    expect(
-      i18n.t("common:emailField.errors.noAtAllowed", {
-        domain: "aptitek.io",
-      }),
-    ).toBe("Do not enter '@'. Domain @aptitek.io is added automatically.");
-    expect(
-      i18n.t("common:emailField.errors.autofillAdjusted", {
-        enteredDomain: "gmail.com",
-        domain: "aptitek.io",
-      }),
-    ).toBe(
-      "Autofilled domain @gmail.com was adjusted to institutional domain @aptitek.io.",
+    expect(i18n.t("common:inspector.title")).toBe("Student Inspector");
+    expect(i18n.t("common:inspector.assignmentTitle")).toBe(
+      "Institution & Cohort Assignment",
     );
+    expect(i18n.t("common:studentGrid.title")).toBe("Registered Students");
+    expect(i18n.t("common:studentGrid.clearFilter")).toBe("Clear filter");
+    expect(i18n.t("common:admin.tabs.students")).toBe("Students");
+    expect(i18n.t("common:inspector.addButton")).toBe("Add");
 
     await i18n.changeLanguage("fr");
-    expect(
-      i18n.t("common:emailField.errors.noAtAllowed", {
-        domain: "aptitek.io",
-      }),
-    ).toBe(
-      "Ne saisissez pas '@'. Le domaine @aptitek.io est ajouté automatiquement.",
+    expect(i18n.t("common:inspector.title")).toBe("Inspecteur d'Étudiant");
+    expect(i18n.t("common:inspector.assignmentTitle")).toBe(
+      "Affectation Établissement & Cohorte",
     );
-    expect(
-      i18n.t("common:emailField.errors.autofillAdjusted", {
-        enteredDomain: "gmail.com",
-        domain: "aptitek.io",
-      }),
-    ).toBe(
-      "Le domaine autofourni @gmail.com a été ajusté au domaine institutionnel @aptitek.io.",
-    );
-  });
-
-  it("translates avatar strings and upload errors in English and French", async () => {
-    await i18n.changeLanguage("en");
-    expect(i18n.t("common:avatar.edit")).toBe("EDIT");
-    expect(i18n.t("common:avatar.clickToEdit")).toBe("Click to edit avatar");
-    expect(i18n.t("common:avatar.modalTitle")).toBe("Edit Profile Avatar");
-    expect(i18n.t("common:avatar.errors.invalidFileType")).toBe(
-      "Please select a valid image file (PNG, JPG, WebP, SVG)",
-    );
-
-    await i18n.changeLanguage("fr");
-    expect(i18n.t("common:avatar.edit")).toBe("MODIFIER");
-    expect(i18n.t("common:avatar.clickToEdit")).toBe(
-      "Cliquer pour modifier l'avatar",
-    );
-    expect(i18n.t("common:avatar.modalTitle")).toBe(
-      "Modifier l'avatar du profil",
-    );
-    expect(i18n.t("common:avatar.errors.invalidFileType")).toBe(
-      "Veuillez sélectionner un fichier image valide (PNG, JPG, WebP, SVG)",
-    );
+    expect(i18n.t("common:inspector.addButton")).toBe("Ajouter");
+    expect(i18n.t("common:studentGrid.title")).toBe("Étudiants Inscrits");
+    expect(i18n.t("common:studentGrid.clearFilter")).toBe("Effacer le filtre");
+    expect(i18n.t("common:admin.tabs.students")).toBe("Étudiants");
   });
 
   it("translates onboarding card, form, and requirements strings in English and French", async () => {

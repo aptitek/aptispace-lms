@@ -1,5 +1,12 @@
-import { useState } from "react";
-import { useLoaderData, type LoaderFunctionArgs } from "react-router";
+import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  useLoaderData,
+  useFetcher,
+  useRevalidator,
+  type LoaderFunctionArgs,
+  type ActionFunctionArgs,
+} from "react-router";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Chip from "@mui/material/Chip";
@@ -10,7 +17,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import Header from "~/components/organisms/Header/Header";
 import Footer from "~/components/organisms/Footer/Footer";
 import StudentGrid from "~/components/molecules/StudentGrid/StudentGrid";
-import ProfileCardModal from "~/components/organisms/ProfileCardModal/ProfileCardModal";
+import StudentInspector from "~/components/organisms/StudentInspector/StudentInspector";
 import { authGuard } from "~/utils/session.server";
 import {
   logout,
@@ -22,11 +29,21 @@ import {
   getAllUsersWithAffiliations,
   isUserProfileComplete,
 } from "~/services/userService";
+import {
+  getAllInstitutions,
+  getAllCohorts,
+  addStudentToCohort,
+  removeStudentFromCohort,
+} from "~/services/cohortService";
+import type { Database } from "~/db/index";
 import type { CompactStudentData } from "~/components/molecules/ProfileCardCompact/ProfileCardCompact.types";
+import type { SchoolConfig } from "~/components/organisms/OnboardingCard/OnboardingCard.types";
+import type { CohortWithInstitution } from "~/components/organisms/StudentInspector/StudentInspector.types";
 import {
   mapDbUserToStudent,
   getDefaultStudents,
-  resolveModalUser,
+  getDefaultSchools,
+  getDefaultCohorts,
   type DbUserWithAffil,
 } from "./admin.helpers";
 import {
@@ -35,6 +52,9 @@ import {
   StyledTabsContainer,
   StyledTab,
   TabPanelContainer,
+  SplitWorkspaceContainer,
+  GridColumn,
+  InspectorColumn,
 } from "./admin.styles";
 import type { Route } from "./+types/admin";
 
@@ -51,9 +71,16 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const db = auth.db;
 
   let dbUsers: DbUserWithAffil[] = [];
+  let dbInstitutions: Awaited<ReturnType<typeof getAllInstitutions>> = [];
+  let dbCohorts: Awaited<ReturnType<typeof getAllCohorts>> = [];
+
   if (db) {
     try {
-      dbUsers = await getAllUsersWithAffiliations(db);
+      [dbUsers, dbInstitutions, dbCohorts] = await Promise.all([
+        getAllUsersWithAffiliations(db),
+        getAllInstitutions(db),
+        getAllCohorts(db),
+      ]);
     } catch {
       dbUsers = [];
     }
@@ -72,11 +99,103 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const students =
     mappedStudents.length > 0 ? mappedStudents : getDefaultStudents();
 
+  const schools: SchoolConfig[] =
+    dbInstitutions.length > 0
+      ? dbInstitutions.map((inst) => ({
+          id: inst.id,
+          name: inst.name,
+          slug: inst.slug,
+          logoUrl: inst.logoUrl,
+        }))
+      : getDefaultSchools();
+
+  const cohorts: CohortWithInstitution[] =
+    dbCohorts.length > 0
+      ? dbCohorts.map((c) => ({
+          id: c.id,
+          name: c.name,
+          institutionId: c.institutionId,
+          description: c.description ?? undefined,
+          startDate: c.startDate ? c.startDate.toISOString() : undefined,
+          endDate: c.endDate ? c.endDate.toISOString() : undefined,
+        }))
+      : getDefaultCohorts();
+
   return {
     user: activeUser,
     students,
     totalStudents: students.length,
+    schools,
+    cohorts,
   };
+}
+
+async function handleAddCohortAction(
+  formData: FormData,
+  db: Database,
+  actorUserId: string,
+) {
+  const studentId = String(formData.get("studentId") || "");
+  const cohortId = String(formData.get("cohortId") || "");
+
+  if (!studentId || !cohortId) {
+    return { success: false, error: "Missing studentId or cohortId" };
+  }
+
+  try {
+    await addStudentToCohort(db, {
+      userId: studentId,
+      cohortId,
+      actorUserId,
+    });
+    return { success: true };
+  } catch {
+    return { success: false, error: "Failed to add student to cohort" };
+  }
+}
+
+async function handleRemoveCohortAction(
+  formData: FormData,
+  db: Database,
+  actorUserId: string,
+) {
+  const studentId = String(formData.get("studentId") || "");
+  const cohortId = String(formData.get("cohortId") || "");
+
+  if (!studentId || !cohortId) {
+    return { success: false, error: "Missing studentId or cohortId" };
+  }
+
+  try {
+    await removeStudentFromCohort(db, {
+      userId: studentId,
+      cohortId,
+      actorUserId,
+    });
+    return { success: true };
+  } catch {
+    return { success: false, error: "Failed to remove student from cohort" };
+  }
+}
+
+export async function action({ request, context }: ActionFunctionArgs) {
+  const auth = await authGuard(request, context, { requiredRole: "admin" });
+  if (!auth?.user || !auth.db) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+
+  if (intent === "add-cohort") {
+    return handleAddCohortAction(formData, auth.db, auth.user.id);
+  }
+
+  if (intent === "remove-cohort") {
+    return handleRemoveCohortAction(formData, auth.db, auth.user.id);
+  }
+
+  return { success: false, error: "Unknown action" };
 }
 
 export function meta(_args: Route.MetaArgs) {
@@ -101,12 +220,17 @@ function AdminTabsSection({
   totalStudents,
   onChange,
 }: AdminTabsSectionProps) {
+  const { t } = useTranslation(["common", "auth"]);
+
   return (
     <StyledTabsContainer>
       <Tabs
         value={activeTab}
         onChange={onChange}
-        aria-label="Admin management navigation tabs"
+        aria-label={t(
+          "common:admin.tabs.aria",
+          "Admin management navigation tabs",
+        )}
         data-testid="admin-tabs"
       >
         <StyledTab
@@ -114,7 +238,7 @@ function AdminTabsSection({
           iconPosition="start"
           label={
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <span>Students</span>
+              <span>{t("common:admin.tabs.students", "Students")}</span>
               <Chip
                 label={totalStudents}
                 size="small"
@@ -131,7 +255,7 @@ function AdminTabsSection({
         <StyledTab
           icon={<SupervisorAccountIcon sx={{ fontSize: 18, mr: 0.5 }} />}
           iconPosition="start"
-          label="Instructors"
+          label={t("common:admin.tabs.instructors", "Instructors")}
           id="admin-tab-1"
           aria-controls="admin-tabpanel-1"
           disabled
@@ -140,7 +264,7 @@ function AdminTabsSection({
         <StyledTab
           icon={<ClassIcon sx={{ fontSize: 18, mr: 0.5 }} />}
           iconPosition="start"
-          label="Cohorts"
+          label={t("common:admin.tabs.cohorts", "Cohorts")}
           id="admin-tab-2"
           aria-controls="admin-tabpanel-2"
           disabled
@@ -149,7 +273,7 @@ function AdminTabsSection({
         <StyledTab
           icon={<MenuBookIcon sx={{ fontSize: 18, mr: 0.5 }} />}
           iconPosition="start"
-          label="Courses"
+          label={t("common:admin.tabs.courses", "Courses")}
           id="admin-tab-3"
           aria-controls="admin-tabpanel-3"
           disabled
@@ -160,46 +284,24 @@ function AdminTabsSection({
   );
 }
 
-interface StudentModalProps {
-  isOpen: boolean;
-  student: CompactStudentData | null;
-  user: AuthUser | null;
-  onClose: () => void;
-}
-
-function StudentModalWrapper({
-  isOpen,
-  student,
-  user,
-  onClose,
-}: StudentModalProps) {
-  if (!user) return null;
-
-  return (
-    <ProfileCardModal
-      isOpen={isOpen}
-      onClose={onClose}
-      user={user}
-      school={{
-        id: student?.institutionId ?? "school-aptitek",
-        name: student?.institutionName ?? "Aptitek",
-        logoUrl: "/aptitek-logo.svg",
-        emailDomain: "aptitek.io",
-      }}
-      cohort={{
-        id: student?.cohortId ?? "cohort-2026",
-        name: student?.cohortName ?? "Cohort 2026",
-      }}
-    />
-  );
-}
-
 export default function AdminManagement() {
   const loaderData = useLoaderData<typeof loader>();
+  const fetcher = useFetcher();
+  const revalidator = useRevalidator();
+  const { t } = useTranslation(["common", "auth"]);
   const [activeTab, setActiveTab] = useState<number>(0);
   const [selectedStudent, setSelectedStudent] =
     useState<CompactStudentData | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const selectedStudentId = selectedStudent?.id;
+  useEffect(() => {
+    if (selectedStudentId) {
+      const fresh = loaderData.students.find((s) => s.id === selectedStudentId);
+      if (fresh) {
+        setSelectedStudent(fresh);
+      }
+    }
+  }, [loaderData.students, selectedStudentId]);
 
   const handleLogout = () => {
     void logout();
@@ -211,7 +313,58 @@ export default function AdminManagement() {
 
   const handleStudentClick = (student: CompactStudentData) => {
     setSelectedStudent(student);
-    setIsModalOpen(true);
+  };
+
+  const handleCloseInspector = () => {
+    setSelectedStudent(null);
+  };
+
+  const handleAddCohort = (params: { studentId: string; cohortId: string }) => {
+    fetcher.submit(
+      {
+        intent: "add-cohort",
+        studentId: params.studentId,
+        cohortId: params.cohortId,
+      },
+      { method: "post" },
+    );
+  };
+
+  const handleRemoveCohort = (params: {
+    studentId: string;
+    cohortId: string;
+  }) => {
+    fetcher.submit(
+      {
+        intent: "remove-cohort",
+        studentId: params.studentId,
+        cohortId: params.cohortId,
+      },
+      { method: "post" },
+    );
+  };
+
+  const handleStudentUpdated = (updatedUser: AuthUser) => {
+    setSelectedStudent((prev) => {
+      if (!prev || prev.id !== updatedUser.id) return prev;
+      const parts = (updatedUser.name || "").trim().split(/\s+/);
+      const firstName =
+        parts.length > 1 ? parts.slice(0, -1).join(" ") : parts[0] || "";
+      const familyName =
+        parts.length > 1 ? parts[parts.length - 1].toUpperCase() : "";
+      return {
+        ...prev,
+        firstName,
+        familyName,
+        displayName: updatedUser.name,
+        email: updatedUser.email,
+        avatarUrl: updatedUser.avatarUrl,
+        role: updatedUser.role,
+        githubUsername: updatedUser.githubUsername,
+        isProfileComplete: updatedUser.isProfileComplete,
+      };
+    });
+    revalidator.revalidate();
   };
 
   const handleImpersonate = async (student: CompactStudentData) => {
@@ -229,13 +382,6 @@ export default function AdminManagement() {
       // Handled cleanly
     }
   };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedStudent(null);
-  };
-
-  const modalUser = resolveModalUser(selectedStudent);
 
   return (
     <PageRoot>
@@ -260,23 +406,37 @@ export default function AdminManagement() {
             aria-labelledby="admin-tab-0"
             data-testid="admin-tabpanel-students"
           >
-            <StudentGrid
-              students={loaderData.students}
-              onStudentClick={handleStudentClick}
-              onImpersonate={handleImpersonate}
-              title="Registered Students"
-              testId="admin-student-grid"
-            />
+            <SplitWorkspaceContainer $hasInspector={Boolean(selectedStudent)}>
+              <GridColumn>
+                <StudentGrid
+                  students={loaderData.students}
+                  onStudentClick={handleStudentClick}
+                  onImpersonate={handleImpersonate}
+                  title={t("common:studentGrid.title", "Registered Students")}
+                  testId="admin-student-grid"
+                />
+              </GridColumn>
+
+              {selectedStudent && (
+                <InspectorColumn>
+                  <StudentInspector
+                    student={selectedStudent}
+                    schools={loaderData.schools}
+                    cohorts={loaderData.cohorts}
+                    onClose={handleCloseInspector}
+                    onAddCohort={handleAddCohort}
+                    onRemoveCohort={handleRemoveCohort}
+                    onStudentUpdated={handleStudentUpdated}
+                    onImpersonate={handleImpersonate}
+                    isSubmitting={fetcher.state !== "idle"}
+                    data-testid="admin-student-inspector"
+                  />
+                </InspectorColumn>
+              )}
+            </SplitWorkspaceContainer>
           </TabPanelContainer>
         )}
       </AdminMainWorkspace>
-
-      <StudentModalWrapper
-        isOpen={isModalOpen}
-        student={selectedStudent}
-        user={modalUser}
-        onClose={handleCloseModal}
-      />
 
       <Footer />
     </PageRoot>

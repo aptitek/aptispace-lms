@@ -25,6 +25,12 @@ import {
   gradeSubmission,
   logAudit,
 } from "./assessmentService";
+import {
+  getAllInstitutions,
+  getAllCohorts,
+  addStudentToCohort,
+  removeStudentFromCohort,
+} from "./cohortService";
 import { seedDatabase } from "../db/seed";
 
 // Helper to create a mock D1Database for unit testing Drizzle D1 integration
@@ -396,5 +402,68 @@ describe("Backend Database & Service Architecture", () => {
       userId: "instructor-1",
     });
     expect(audit.id).toBe("record-1");
+  });
+
+  it("queries institutions and cohorts and manages cohort assignment", async () => {
+    const mockDb = {
+      select: () => ({
+        from: () => ({
+          orderBy: () =>
+            Promise.resolve([
+              { id: "cohort-1", name: "Cohort 2026", institutionId: "inst-1" },
+            ]),
+          where: () =>
+            Object.assign(
+              Promise.resolve([
+                {
+                  id: "affil-1",
+                  userId: "user-1",
+                  cohortId: "cohort-1",
+                  institutionId: "inst-1",
+                },
+              ]),
+              {
+                limit: () =>
+                  Promise.resolve([
+                    {
+                      id: "cohort-1",
+                      name: "Cohort 2026",
+                      institutionId: "inst-1",
+                    },
+                  ]),
+              },
+            ),
+        }),
+      }),
+      insert: () => ({
+        values: (recordValues: Record<string, unknown>) => ({
+          returning: () =>
+            Promise.resolve([{ id: "affil-1", ...recordValues }]),
+        }),
+      }),
+      delete: () => ({
+        where: () => Promise.resolve({ success: true }),
+      }),
+    } as unknown as ReturnType<typeof getDb>;
+
+    const insts = await getAllInstitutions(mockDb);
+    expect(insts).toHaveLength(1);
+
+    const cohortList = await getAllCohorts(mockDb);
+    expect(cohortList).toHaveLength(1);
+
+    const added = await addStudentToCohort(mockDb, {
+      userId: "user-1",
+      cohortId: "cohort-1",
+      actorUserId: "admin-1",
+    });
+    expect(added.id).toBe("cohort-1");
+
+    const removed = await removeStudentFromCohort(mockDb, {
+      userId: "user-1",
+      cohortId: "cohort-1",
+      actorUserId: "admin-1",
+    });
+    expect(removed.success).toBe(true);
   });
 });

@@ -19,7 +19,7 @@ export const AdminMainWorkspace = styled("main")(({ theme }) => ({
   flexDirection: "column",
   alignItems: "center",
   width: "100%",
-  maxWidth: "1400px",
+  maxWidth: "1500px",
   margin: "0 auto",
   padding: theme.spacing(3, 3, 8),
   boxSizing: "border-box",
@@ -67,3 +67,36 @@ export const TabPanelContainer = styled("div")({
   display: "flex",
   flexDirection: "column",
 });
+
+export const SplitWorkspaceContainer = styled("div", {
+  shouldForwardProp: (prop) => prop !== "$hasInspector",
+})<{ $hasInspector: boolean }>(({ theme, $hasInspector }) => ({
+  width: "100%",
+  display: "grid",
+  gridTemplateColumns: $hasInspector ? "1fr 480px" : "1fr",
+  gap: theme.spacing(3),
+  alignItems: "start",
+  transition: theme.transitions.create(["grid-template-columns"], {
+    duration: theme.transitions.duration.standard,
+  }),
+
+  [theme.breakpoints.down("lg")]: {
+    gridTemplateColumns: "1fr",
+  },
+}));
+
+export const GridColumn = styled("div")({
+  width: "100%",
+  minWidth: 0,
+});
+
+export const InspectorColumn = styled("div")(({ theme }) => ({
+  width: "100%",
+  minWidth: 0,
+  display: "flex",
+  justifyContent: "center",
+
+  [theme.breakpoints.down("lg")]: {
+    marginTop: theme.spacing(2),
+  },
+}));
