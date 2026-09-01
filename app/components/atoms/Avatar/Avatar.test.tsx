@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import Avatar from "./Avatar";
+import Avatar, { isUnnamedUser } from "./Avatar";
 import { ISO_19794_5_CONSTANTS } from "./Avatar.types";
 import { resolveM3ShapeRadius } from "./Avatar.styles";
 
@@ -87,13 +87,14 @@ describe("Avatar Component & MD3 Shape Scale", () => {
     }
   });
 
-  it("supports avatar with name and placeholder icon properties", () => {
-    const avatarProps = {
-      name: "Jane Doe",
-      shape: "circular" as const,
-      isPortrait: false,
-    };
-    expect(avatarProps.name).toBe("Jane Doe");
-    expect(avatarProps.shape).toBe("circular");
+  it("identifies unnamed users and pending onboarding accounts", () => {
+    expect(isUnnamedUser(undefined)).toBe(true);
+    expect(isUnnamedUser("")).toBe(true);
+    expect(isUnnamedUser("   ")).toBe(true);
+    expect(isUnnamedUser("New Student (Pending Onboarding)")).toBe(true);
+    expect(isUnnamedUser("New Teacher (Pending Onboarding)")).toBe(true);
+    expect(isUnnamedUser("New Admin")).toBe(true);
+    expect(isUnnamedUser("student")).toBe(true);
+    expect(isUnnamedUser("Arthur Dent")).toBe(false);
   });
 });

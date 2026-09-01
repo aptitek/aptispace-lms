@@ -8,9 +8,21 @@ import {
 } from "./Avatar.styles";
 import M3ShapeDefs from "./M3ShapeDefs";
 
+export function isUnnamedUser(name?: string): boolean {
+  if (!name) return true;
+  const trimmed = name.trim();
+  if (!trimmed) return true;
+  if (/^new\s+/i.test(trimmed)) return true;
+  if (/\(pending\s+onboarding\)/i.test(trimmed)) return true;
+  if (/^(student|teacher|admin|guest|user|unnamed|anonymous)$/i.test(trimmed)) {
+    return true;
+  }
+  return false;
+}
+
 function getAvatarInitials(name?: string, alt?: string): string | null {
   const target = name?.trim() || (alt && alt !== "Avatar" ? alt.trim() : "");
-  if (!target) return null;
+  if (!target || isUnnamedUser(target)) return null;
   const parts = target.split(/\s+/).filter(Boolean);
   if (parts.length === 0) return null;
   if (parts.length === 1) {

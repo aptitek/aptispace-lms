@@ -1,0 +1,173 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+import OnboardingCard from "../OnboardingCard/OnboardingCard";
+import type {
+  OnboardingProfile,
+  SchoolConfig,
+} from "../OnboardingCard/OnboardingCard.types";
+import type {
+  ProfileCardModalProps,
+  ProfileSaveStatus,
+} from "./ProfileCardModal.types";
+import FullScreenModal from "../../molecules/FullScreenModal/FullScreenModal";
+import type { AuthUser } from "../../../utils/auth";
+
+const DEFAULT_SCHOOL: SchoolConfig = {
+  id: "school-aptitek",
+  name: "Aptitek",
+  slug: "aptitek",
+  logoUrl: "/aptitek-logo.svg",
+  emailDomain: "aptitek.io",
+  emailPattern: "{first}.{last}@{domain}",
+};
+
+function userToProfile(user: AuthUser): OnboardingProfile {
+  const parts = (user.name || "").trim().split(/\s+/).filter(Boolean);
+  const firstName =
+    parts.length > 1 ? parts.slice(0, -1).join(" ") : parts[0] || "";
+  const familyName =
+    parts.length > 1 ? parts[parts.length - 1].toUpperCase() : "";
+  return {
+    firstName,
+    familyName,
+    email: user.email || "",
+    avatarUrl: user.avatarUrl || "",
+  };
+}
+
+function isProfileIdentical(
+  a: OnboardingProfile | null,
+  b: OnboardingProfile,
+): boolean {
+  if (!a) return false;
+  return (
+    a.firstName === b.firstName &&
+    a.familyName === b.familyName &&
+    a.email === b.email &&
+    a.avatarUrl === b.avatarUrl
+  );
+}
+
+function resolveUpdatedAuthUser(
+  user: AuthUser,
+  savedProfile: OnboardingProfile,
+  accountPayload?: AuthUser,
+): AuthUser {
+  if (accountPayload) return accountPayload;
+  return {
+    ...user,
+    name: `${savedProfile.firstName} ${savedProfile.familyName}`.trim(),
+    email: savedProfile.email,
+    avatarUrl: savedProfile.avatarUrl,
+  };
+}
+
+export function ProfileCardModal({
+  isOpen,
+  onClose,
+  user,
+  school = DEFAULT_SCHOOL,
+  cohort,
+  onUserUpdated,
+  saveEndpoint = "/api/auth",
+  className,
+  testId = "profile-card-modal",
+}: ProfileCardModalProps) {
+  const [currentProfile, setCurrentProfile] = useState<OnboardingProfile>(() =>
+    userToProfile(user),
+  );
+  const [, setSaveStatus] = useState<ProfileSaveStatus>("idle");
+  const lastSavedProfileRef = useRef<OnboardingProfile>(userToProfile(user));
+  const currentProfileRef = useRef<OnboardingProfile>(currentProfile);
+
+  useEffect(() => {
+    currentProfileRef.current = currentProfile;
+  }, [currentProfile]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const initial = userToProfile(user);
+      setCurrentProfile(initial);
+      lastSavedProfileRef.current = initial;
+      setSaveStatus("idle");
+    }
+  }, [isOpen, user]);
+
+  const performSave = useCallback(
+    async (profileToSave: OnboardingProfile) => {
+      if (isProfileIdentical(lastSavedProfileRef.current, profileToSave)) {
+        return;
+      }
+
+      setSaveStatus("saving");
+
+      try {
+        const response = await fetch(saveEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "updateProfile",
+            userId: user.id,
+            firstName: profileToSave.firstName,
+            lastName: profileToSave.familyName,
+            email: profileToSave.email,
+            avatarUrl: profileToSave.avatarUrl,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to save profile changes.");
+        }
+
+        const payload = (await response.json().catch(() => ({}))) as {
+          account?: AuthUser;
+        };
+        lastSavedProfileRef.current = { ...profileToSave };
+        setSaveStatus("saved");
+
+        if (onUserUpdated) {
+          onUserUpdated(
+            resolveUpdatedAuthUser(user, profileToSave, payload.account),
+          );
+        }
+      } catch {
+        setSaveStatus("error");
+      }
+    },
+    [saveEndpoint, user, onUserUpdated],
+  );
+
+  const handleProfileChange = (nextProfile: OnboardingProfile) => {
+    setCurrentProfile(nextProfile);
+  };
+
+  const handleFieldBlur = (blurredProfile: OnboardingProfile) => {
+    void performSave(blurredProfile);
+  };
+
+  const handleModalClose = () => {
+    void performSave(currentProfileRef.current);
+    onClose();
+  };
+
+  return (
+    <FullScreenModal
+      isOpen={isOpen}
+      onClose={handleModalClose}
+      className={className}
+      testId={testId}
+    >
+      <OnboardingCard
+        school={school}
+        cohort={cohort}
+        profile={currentProfile}
+        onProfileChange={handleProfileChange}
+        onFieldBlur={handleFieldBlur}
+        flipOnClick={true}
+        size="responsive"
+        testId="modal-onboarding-card"
+      />
+    </FullScreenModal>
+  );
+}
+
+export default ProfileCardModal;

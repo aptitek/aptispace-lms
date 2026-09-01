@@ -16,6 +16,7 @@ import {
   type MorphAnimation,
 } from "material-shapes-ts";
 import Tooltip from "../../atoms/Tooltip/Tooltip";
+import { isUnnamedUser } from "../../atoms/Avatar/Avatar";
 import { type HeaderUserAvatarProps } from "./HeaderUserAvatar.types";
 import {
   HeaderAvatarContainer,
@@ -31,7 +32,7 @@ const INITIAL_REST_PATH = roundedPolygonToPath(
 ).toSvgPathData();
 
 function computeUserInitials(name?: string): string | null {
-  if (!name) return null;
+  if (!name || isUnnamedUser(name)) return null;
   const tokens = name.trim().split(/\s+/).filter(Boolean);
   if (tokens.length === 0) return null;
   if (tokens.length === 1) {
@@ -43,6 +44,7 @@ function computeUserInitials(name?: string): string | null {
 export function HeaderUserAvatar({
   user,
   onLogout,
+  onAvatarClick,
   size = 40,
   className,
   testId = "header-user-avatar",
@@ -158,6 +160,7 @@ export function HeaderUserAvatar({
       <AvatarMorphTrigger
         $size={size}
         $clipId={clipId}
+        onClick={onAvatarClick}
         aria-haspopup="true"
         aria-expanded={isMenuOpen}
         aria-label={user.name || t("loginCard.logoutAria")}

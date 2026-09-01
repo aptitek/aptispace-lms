@@ -1,10 +1,11 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Logo from "../../atoms/Logo/Logo";
 import LanguageToggle from "../../atoms/LanguageToggle/LanguageToggle";
 import ThemeToggle from "../../atoms/ThemeToggle/ThemeToggle";
 import HeaderUserAvatar from "../../molecules/HeaderUserAvatar/HeaderUserAvatar";
+import ProfileCardModal from "../ProfileCardModal/ProfileCardModal";
 import { logout, type AuthUser } from "../../../utils/auth";
 
 export type HeaderMode = "subtle" | "full";
@@ -14,6 +15,7 @@ export interface HeaderProps {
   logoSize?: "small" | "medium";
   user?: AuthUser | null;
   onLogout?: () => void;
+  onUserUpdated?: (updatedUser: AuthUser) => void;
   children?: ReactNode;
   className?: string;
   "data-testid"?: string;
@@ -77,10 +79,13 @@ export default function Header({
   logoSize = "small",
   user,
   onLogout,
+  onUserUpdated,
   children,
   className,
   "data-testid": dataTestId = "header",
 }: HeaderProps) {
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
   const handleLogoutClick = () => {
     if (onLogout) {
       onLogout();
@@ -90,32 +95,44 @@ export default function Header({
   };
 
   return (
-    <HeaderRoot
-      $mode={mode}
-      className={className}
-      data-testid={dataTestId}
-      data-mode={mode}
-    >
-      {mode === "full" && (
-        <LeftSlot data-testid="header-brand-slot">
-          <Logo size={logoSize} />
-        </LeftSlot>
-      )}
-
-      <RightSlot data-testid="header-actions-slot">
-        {children}
-        <ThemeToggle size="small" />
-        <LanguageToggle size="small" />
-
-        {user && (
-          <HeaderUserAvatar
-            user={user}
-            onLogout={handleLogoutClick}
-            data-testid="header-user-avatar"
-          />
+    <>
+      <HeaderRoot
+        $mode={mode}
+        className={className}
+        data-testid={dataTestId}
+        data-mode={mode}
+      >
+        {mode === "full" && (
+          <LeftSlot data-testid="header-brand-slot">
+            <Logo size={logoSize} />
+          </LeftSlot>
         )}
-      </RightSlot>
-    </HeaderRoot>
+
+        <RightSlot data-testid="header-actions-slot">
+          {children}
+          <ThemeToggle size="small" />
+          <LanguageToggle size="small" />
+
+          {user && (
+            <HeaderUserAvatar
+              user={user}
+              onLogout={handleLogoutClick}
+              onAvatarClick={() => setIsProfileModalOpen(true)}
+              data-testid="header-user-avatar"
+            />
+          )}
+        </RightSlot>
+      </HeaderRoot>
+
+      {user && (
+        <ProfileCardModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          user={user}
+          onUserUpdated={onUserUpdated}
+        />
+      )}
+    </>
   );
 }
 

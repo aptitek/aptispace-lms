@@ -5,6 +5,8 @@ import {
   getAllUsersWithAffiliations,
   createUser,
   createAffiliation,
+  updateUser,
+  updateUserAffiliation,
   isUserProfileComplete,
 } from "~/services/userService";
 import { seedDatabase, resetDatabase } from "~/db/seed";
@@ -282,10 +284,71 @@ async function handleCreateAccount(db: Database, targetRole: UserRole) {
   return Response.json({ success: true, account: formatted });
 }
 
+interface UpdateProfileBody {
+  userId?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
+function buildUserUpdatePayload(
+  firstName?: string,
+  lastName?: string,
+): { firstName?: string; lastName?: string; displayName?: string } | null {
+  if (firstName === undefined && lastName === undefined) return null;
+  const payload: {
+    firstName?: string;
+    lastName?: string;
+    displayName?: string;
+  } = {};
+  if (firstName !== undefined) payload.firstName = firstName;
+  if (lastName !== undefined) payload.lastName = lastName;
+  const f = firstName ?? "";
+  const l = lastName ?? "";
+  if (f || l) {
+    payload.displayName = `${f.trim()} ${l.trim().toUpperCase()}`.trim();
+  }
+  return payload;
+}
+
+async function handleUpdateProfile(
+  db: Database,
+  request: Request,
+  body: UpdateProfileBody,
+) {
+  const session = await getSession(request);
+  const targetUserId = body.userId || session?.userId;
+  if (!targetUserId) {
+    return Response.json(
+      { error: "Authentication required to update profile." },
+      { status: 401 },
+    );
+  }
+
+  const userPayload = buildUserUpdatePayload(body.firstName, body.lastName);
+  if (userPayload) {
+    await updateUser(db, targetUserId, userPayload);
+  }
+
+  if (body.email?.trim()) {
+    await updateUserAffiliation(db, targetUserId, {
+      email: body.email.trim().toLowerCase(),
+    });
+  }
+
+  const updatedDbUser = await getUserWithAffiliations(db, targetUserId);
+  const formatted = updatedDbUser ? formatAccountFromDb(updatedDbUser) : null;
+  return Response.json({ success: true, account: formatted });
+}
+
 export async function action({ request, context }: ActionFunctionArgs) {
   const body = (await request.json().catch(() => ({}))) as {
     action?: string;
     role?: UserRole;
+    userId?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
   };
 
   const db = getDatabaseFromContext(context);
@@ -296,19 +359,20 @@ export async function action({ request, context }: ActionFunctionArgs) {
     );
   }
 
-  if (body.action === "reset" || body.action === "empty") {
-    await resetDatabase(db);
-    return Response.json({ success: true, reset: true });
+  switch (body.action) {
+    case "updateProfile":
+      return handleUpdateProfile(db, request, body);
+    case "reset":
+    case "empty":
+      await resetDatabase(db);
+      return Response.json({ success: true, reset: true });
+    case "seed": {
+      const result = await seedDatabase(db);
+      return Response.json({ seeded: true, result });
+    }
+    case "createAccount":
+      return handleCreateAccount(db, body.role ?? "student");
+    default:
+      return Response.json({ error: "Invalid action" }, { status: 400 });
   }
-
-  if (body.action === "seed") {
-    const result = await seedDatabase(db);
-    return Response.json({ seeded: true, result });
-  }
-
-  if (body.action === "createAccount") {
-    return handleCreateAccount(db, body.role ?? "student");
-  }
-
-  return Response.json({ error: "Invalid action" }, { status: 400 });
 }

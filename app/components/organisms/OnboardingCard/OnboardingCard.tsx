@@ -147,6 +147,7 @@ interface FrontFaceProps {
   onFamilyNameChange: (nextValue: string) => void;
   onEmailChange: (nextValue: string) => void;
   onAvatarChange: (nextValue: string) => void;
+  onFieldBlur?: () => void;
 }
 
 function CardFrontFace({
@@ -158,6 +159,7 @@ function CardFrontFace({
   onFamilyNameChange,
   onEmailChange,
   onAvatarChange,
+  onFieldBlur,
 }: FrontFaceProps) {
   const { t } = useTranslation(["onboarding", "common"]);
   const schoolName = school.name || "Aptitek";
@@ -211,7 +213,10 @@ function CardFrontFace({
             value={profile.avatarUrl}
             defaultValue={DEFAULT_PROFILE_TEMPLATE.avatarUrl}
             name={`${profile.firstName} ${profile.familyName}`}
-            onChange={onAvatarChange}
+            onChange={(url) => {
+              onAvatarChange(url);
+              onFieldBlur?.();
+            }}
             shape="biometric"
             size="xl"
             editable={!readOnly}
@@ -231,6 +236,7 @@ function CardFrontFace({
               size="small"
               variant="outlined"
               onChange={(e) => onFirstNameChange(e.target.value)}
+              onBlur={onFieldBlur}
               slotProps={{ htmlInput: { "data-testid": "input-firstname" } }}
               fullWidth
             />
@@ -246,6 +252,7 @@ function CardFrontFace({
               size="small"
               variant="outlined"
               onChange={(e) => onFamilyNameChange(e.target.value.toUpperCase())}
+              onBlur={onFieldBlur}
               slotProps={{
                 htmlInput: {
                   "data-testid": "input-familyname",
@@ -271,6 +278,7 @@ function CardFrontFace({
                 "username",
               )}
               onEmailChange={onEmailChange}
+              onBlur={onFieldBlur}
               testId="input-email"
             />
           </FieldListItem>
@@ -339,6 +347,7 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
       profile: controlledProfile,
       defaultProfile,
       onProfileChange,
+      onFieldBlur,
       side,
       isFlipped: controlledFlipped,
       onFlip,
@@ -389,6 +398,7 @@ export const OnboardingCard = forwardRef<HTMLDivElement, OnboardingCardProps>(
         onFamilyNameChange={handleFamilyNameChange}
         onEmailChange={handleEmailChange}
         onAvatarChange={handleAvatarChange}
+        onFieldBlur={() => onFieldBlur?.(activeProfile)}
       />
     );
 

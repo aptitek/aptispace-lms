@@ -68,6 +68,10 @@ export interface OnboardingCardProps {
    */
   onProfileChange?: (profile: OnboardingProfile) => void;
   /**
+   * Callback fired when a card input field loses focus (onBlur)
+   */
+  onFieldBlur?: (profile: OnboardingProfile) => void;
+  /**
    * Active card side ("front" | "back")
    * @default "front"
    */
