@@ -42,14 +42,9 @@ export const GithubHandleRoot = styled("span", {
     gap: `${cfg.gap}px`,
     padding: cfg.padding,
     borderRadius: "8px",
-    backgroundColor: alpha(theme.palette.background.paper, 0.85),
-    backdropFilter: "blur(6px)",
-    WebkitBackdropFilter: "blur(6px)",
-    border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-    boxShadow: `0 1px 2px ${alpha(theme.palette.common.black, 0.06)}, inset 0 1px 0 ${alpha(
-      theme.palette.common.white,
-      0.8,
-    )}`,
+    backgroundColor: theme.palette.background.paper,
+    border: `1px solid ${theme.palette.divider}`,
+    boxShadow: `0 1px 2px ${alpha(theme.palette.common.black, 0.06)}`,
     color: theme.palette.text.primary,
     fontFamily: '"Roboto Mono", "Fira Code", monospace',
     fontSize: cfg.fontSize,
@@ -84,12 +79,9 @@ export const GithubHandleRoot = styled("span", {
     },
 
     ...theme.applyStyles("dark", {
-      backgroundColor: alpha(theme.palette.background.paper, 0.6),
-      border: `1px solid ${alpha(theme.palette.divider, 0.3)}`,
-      boxShadow: `0 1px 3px ${alpha(theme.palette.common.black, 0.4)}, inset 0 1px 0 ${alpha(
-        theme.palette.common.white,
-        0.05,
-      )}`,
+      backgroundColor: theme.palette.background.paper,
+      border: `1px solid ${theme.palette.divider}`,
+      boxShadow: `0 1px 3px ${alpha(theme.palette.common.black, 0.4)}`,
       "&:hover": {
         borderColor: theme.palette.info.main,
         boxShadow: `0 0 8px ${alpha(theme.palette.info.main, 0.3)}`,
