@@ -252,13 +252,14 @@ function CardFrontFace({
               size="xl"
               editable={!readOnly}
               mode="image-only"
+              disableTooltip
               testId="card-editable-avatar"
             />
             <FloatingRoleBadgeHolder data-testid="card-role-badge-holder">
               <RoleBadge
                 role={profile.role || "student"}
                 size="small"
-                variant="icon-only"
+                variant="chip"
                 testId="card-role-badge"
               />
             </FloatingRoleBadgeHolder>

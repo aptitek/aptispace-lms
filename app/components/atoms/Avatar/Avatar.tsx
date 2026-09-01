@@ -6,7 +6,8 @@ import {
   BiometricReticle,
   FallbackAvatarHolder,
 } from "./Avatar.styles";
-import M3ShapeDefs from "./M3ShapeDefs";
+import ShapeDefs from "./ShapeDefs";
+import { getRoleAvatarShape } from "./shapes";
 
 export function isUnnamedUser(name?: string): boolean {
   if (!name) return true;
@@ -66,9 +67,10 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
       src,
       alt = "Avatar",
       name,
+      role,
       isPortrait = true,
       showReticle = false,
-      shape = "medium",
+      shape,
       height,
       width,
       aspectRatio,
@@ -79,6 +81,9 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
       children,
       placeholderIcon,
     } = props;
+
+    const resolvedShape =
+      shape !== undefined ? shape : role ? getRoleAvatarShape(role) : "medium";
 
     const initials = getAvatarInitials(name, alt);
     const content = renderAvatarContent({
@@ -91,7 +96,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
 
     return (
       <>
-        <M3ShapeDefs />
+        <ShapeDefs />
         <AvatarRoot
           ref={ref}
           isPortrait={isPortrait}
@@ -99,10 +104,10 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
           customWidth={width}
           customRatio={aspectRatio}
           customRadius={borderRadius}
-          shapePreset={shape}
+          shapePreset={resolvedShape}
           className={className}
           data-testid={testId ?? dataTestId ?? "avatar"}
-          data-shape={shape}
+          data-shape={resolvedShape}
         >
           {content}
           {showReticle && <BiometricReticle />}
@@ -114,5 +119,5 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
 
 Avatar.displayName = "Avatar";
 
-export { M3ShapeDefs };
+export { ShapeDefs };
 export default Avatar;

@@ -17,12 +17,14 @@ import {
   type TelemetryEventItem,
 } from "~/utils/statusCenterContext";
 
-export interface M3SnackbarProps {
+export interface StatusSnackbarProps {
   eventEntry?: TelemetryEventItem | null;
   onDismiss?: () => void;
   onViewDetails?: () => void;
   className?: string;
 }
+
+export type M3SnackbarProps = StatusSnackbarProps;
 
 const SnackbarRoot = styled(motion.div)(({ theme }) => ({
   position: "fixed",
@@ -125,12 +127,12 @@ function resolveSeverityDetails(severity: NotificationSeverity, theme: Theme) {
   }
 }
 
-export default function M3Snackbar({
+export function StatusSnackbar({
   eventEntry: propEventEntry,
   onDismiss: propDismiss,
   onViewDetails: propViewDetails,
   className,
-}: M3SnackbarProps) {
+}: StatusSnackbarProps) {
   const theme = useTheme();
   const { t } = useTranslation("common");
   const statusCenter = useStatusCenter();
@@ -208,3 +210,5 @@ export default function M3Snackbar({
     </AnimatePresence>
   );
 }
+
+export default StatusSnackbar;

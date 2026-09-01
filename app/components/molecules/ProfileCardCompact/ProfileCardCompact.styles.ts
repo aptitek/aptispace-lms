@@ -154,27 +154,25 @@ export const AvatarContainer = styled("div")({
   justifyContent: "center",
   overflow: "visible",
 
-  "& [data-testid='avatar'], & [data-testid='compact-avatar']": {
-    width: "77px !important",
-    height: "99px !important",
-    maxWidth: "77px !important",
-    maxHeight: "99px !important",
-    aspectRatio: "35 / 45",
-  },
-  "& .MuiBox-root": {
-    width: "77px !important",
-    height: "99px !important",
-    maxWidth: "77px !important",
-    maxHeight: "99px !important",
-    aspectRatio: "35 / 45",
-  },
+  "& > [data-testid='avatar'], & > [data-testid='compact-avatar'], & > .MuiBox-root":
+    {
+      width: "77px !important",
+      height: "99px !important",
+      maxWidth: "77px !important",
+      maxHeight: "99px !important",
+      aspectRatio: "35 / 45",
+    },
 });
 
 export const FloatingBadge = styled("div")({
   position: "absolute",
-  bottom: -2,
-  right: -2,
-  zIndex: 5,
+  top: -4,
+  right: -4,
+  zIndex: 10,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  pointerEvents: "auto",
 });
 
 export const StudentDetails = styled("div")({

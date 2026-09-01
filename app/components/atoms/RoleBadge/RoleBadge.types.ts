@@ -34,6 +34,10 @@ export interface RoleBadgeProps {
    */
   className?: string;
   /**
+   * Optional inline styles
+   */
+  style?: React.CSSProperties;
+  /**
    * Test identifier
    */
   testId?: string;

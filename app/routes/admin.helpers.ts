@@ -14,8 +14,12 @@ export type DbUserWithAffil = Awaited<
 >[number];
 type AffilType = DbUserWithAffil["affiliations"][number] | undefined;
 
-function resolveRole(affil: AffilType): UserRole {
-  if (affil?.role) return affil.role;
+export function resolveUserGlobalRole(dbUser: DbUserWithAffil): UserRole {
+  const affils = dbUser.affiliations || [];
+  if (affils.some((a) => a.role === "admin")) return "admin";
+  if (affils.some((a) => a.role === "instructor")) return "instructor";
+  const primary = affils[0]?.role;
+  if (primary) return primary;
   return "student";
 }
 
@@ -95,6 +99,7 @@ export function mapDbUserToStudent(
   const cohortAffils = getSortedCohortAffils(dbUser);
   const studentCohorts = buildStudentCohorts(cohortAffils);
   const primaryAffil = cohortAffils[0] || dbUser.affiliations?.[0];
+  const role = resolveUserGlobalRole(dbUser);
 
   return {
     id: dbUser.id,
@@ -102,7 +107,7 @@ export function mapDbUserToStudent(
     familyName: dbUser.lastName,
     displayName: resolveUserDisplayName(dbUser),
     email: primaryAffil?.email ?? "",
-    role: resolveRole(primaryAffil),
+    role,
     avatarUrl: undefined,
     githubUsername: dbUser.githubId ?? undefined,
     cohortName: resolveCohort(primaryAffil),

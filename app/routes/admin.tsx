@@ -36,6 +36,7 @@ import type { CohortWithInstitution } from "~/components/organisms/StudentInspec
 import { useStatusCenter } from "~/utils/statusCenterContext";
 import {
   mapDbUserToStudent,
+  resolveUserGlobalRole,
   getDefaultStudents,
   getDefaultInstructors,
   getDefaultSchools,
@@ -84,18 +85,15 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const mappedStudents = dbUsers
     .filter((u) => {
-      const primaryAffil = u.affiliations?.[0];
-      return (
-        primaryAffil?.role === "student" ||
-        (!primaryAffil?.role && u.id !== auth.user?.id)
-      );
+      const role = resolveUserGlobalRole(u);
+      return role === "student" && u.id !== auth.user?.id;
     })
     .map(mapDbUserToStudent);
 
   const mappedInstructors = dbUsers
     .filter((u) => {
-      const primaryAffil = u.affiliations?.[0];
-      return primaryAffil?.role === "instructor";
+      const role = resolveUserGlobalRole(u);
+      return role === "instructor";
     })
     .map(mapDbUserToStudent);
 

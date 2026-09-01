@@ -2,6 +2,8 @@ import {
   useState,
   useRef,
   useId,
+  useMemo,
+  useEffect,
   useCallback,
   type KeyboardEvent,
 } from "react";
@@ -27,9 +29,17 @@ import {
   RoundLogoutButton,
 } from "./HeaderUserAvatar.styles";
 
-const INITIAL_REST_PATH = roundedPolygonToPath(
-  MaterialShapes.Pill,
-).toSvgPathData();
+function getRolePolygonShape(role?: string | null) {
+  switch (role) {
+    case "admin":
+      return MaterialShapes.Cookie9Sided;
+    case "instructor":
+      return MaterialShapes.Ghostish;
+    case "student":
+    default:
+      return MaterialShapes.Pill;
+  }
+}
 
 function computeUserInitials(name?: string): string | null {
   if (!name || isUnnamedUser(name)) return null;
@@ -82,33 +92,42 @@ export function HeaderUserAvatar({
   const rawId = useId();
   const clipId = `avatar-clip-${rawId.replace(/:/g, "")}`;
 
+  const restPolygon = getRolePolygonShape(user.role);
+  const restPath = useMemo(
+    () => roundedPolygonToPath(restPolygon).toSvgPathData(),
+    [restPolygon],
+  );
+
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [currentPathD, setCurrentPathD] = useState(INITIAL_REST_PATH);
+  const [currentPathD, setCurrentPathD] = useState(restPath);
+
+  useEffect(() => {
+    setCurrentPathD(restPath);
+  }, [restPath]);
 
   const activeAnimationRef = useRef<MorphAnimation | null>(null);
 
-  const startMorph = useCallback((towardsCircle: boolean) => {
-    if (activeAnimationRef.current) {
-      activeAnimationRef.current.cancel();
-      activeAnimationRef.current = null;
-    }
+  const startMorph = useCallback(
+    (towardsCircle: boolean) => {
+      if (activeAnimationRef.current) {
+        activeAnimationRef.current.cancel();
+        activeAnimationRef.current = null;
+      }
 
-    const startShape = towardsCircle
-      ? MaterialShapes.Pill
-      : MaterialShapes.Circle;
-    const targetShape = towardsCircle
-      ? MaterialShapes.Circle
-      : MaterialShapes.Pill;
+      const startShape = towardsCircle ? restPolygon : MaterialShapes.Circle;
+      const targetShape = towardsCircle ? MaterialShapes.Circle : restPolygon;
 
-    activeAnimationRef.current = animateMorph(startShape, targetShape, {
-      duration: towardsCircle ? 350 : 300,
-      easing: "emphasized",
-      onFrame: (nextPathData) => {
-        setCurrentPathD(nextPathData);
-      },
-    });
-  }, []);
+      activeAnimationRef.current = animateMorph(startShape, targetShape, {
+        duration: towardsCircle ? 350 : 300,
+        easing: "emphasized",
+        onFrame: (nextPathData) => {
+          setCurrentPathD(nextPathData);
+        },
+      });
+    },
+    [restPolygon],
+  );
 
   const handleMouseEnter = () => {
     setIsHovered(true);

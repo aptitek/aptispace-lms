@@ -17,7 +17,10 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Avatar from "~/components/atoms/Avatar/Avatar";
-import type { M3ExpressiveShapeName } from "~/components/atoms/Avatar/m3Shapes";
+import {
+  getRoleAvatarShape,
+  type ExpressiveShapeName,
+} from "~/components/atoms/Avatar/shapes";
 import {
   type AccountDefinition,
   type UserRole,
@@ -55,16 +58,8 @@ import {
   StatusPill,
 } from "./DevImpersonator.styles";
 
-function resolveAvatarShape(role: UserRole): M3ExpressiveShapeName {
-  switch (role) {
-    case "admin":
-      return "sunny";
-    case "instructor":
-      return "flower";
-    case "student":
-    default:
-      return "circle";
-  }
+function resolveAvatarShape(role: UserRole): ExpressiveShapeName {
+  return getRoleAvatarShape(role);
 }
 
 function resolveRoleChipColor(
@@ -116,16 +111,17 @@ function DevAccountItem({
   onSelect,
 }: DevAccountItemProps) {
   const { t } = useTranslation("auth");
-  const roleLabel = t(`devTool.roles.${account.role}` as const, {
-    defaultValue: account.badge || account.role,
-  });
   const avatarShape = resolveAvatarShape(account.role);
   const chipColor = resolveRoleChipColor(account.role);
+  const roleLabel = t(`devTool.roles.${account.role}` as const, {
+    defaultValue: account.role,
+  });
 
   return (
     <AccountCard
       isSelected={isSelected}
       isCurrent={isCurrent}
+      accountRole={account.role}
       disabled={disabled}
       onClick={() => onSelect(account)}
       role="option"
@@ -137,6 +133,7 @@ function DevAccountItem({
           <Avatar
             name={account.name}
             shape={avatarShape}
+            role={account.role}
             width={34}
             height={34}
             isPortrait={false}

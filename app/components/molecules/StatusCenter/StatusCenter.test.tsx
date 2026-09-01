@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import EcgTelemetry from "~/components/atoms/StatusCenter/EcgTelemetry";
-import M3Snackbar from "./M3Snackbar";
+import StatusSnackbar from "./StatusSnackbar";
 import StatusGatewayTrigger from "./StatusGatewayTrigger";
 
 describe("StatusCenter Molecule Components", () => {
@@ -9,9 +9,9 @@ describe("StatusCenter Molecule Components", () => {
     expect(typeof EcgTelemetry).toBe("function");
   });
 
-  it("exports M3Snackbar properly", () => {
-    expect(M3Snackbar).toBeDefined();
-    expect(typeof M3Snackbar).toBe("function");
+  it("exports StatusSnackbar properly", () => {
+    expect(StatusSnackbar).toBeDefined();
+    expect(typeof StatusSnackbar).toBe("function");
   });
 
   it("exports StatusGatewayTrigger properly", () => {

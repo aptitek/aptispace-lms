@@ -59,6 +59,11 @@ export interface EditableAvatarProps {
    */
   editable?: boolean;
   /**
+   * Whether to disable the hover tooltip over the avatar
+   * @default false
+   */
+  disableTooltip?: boolean;
+  /**
    * Whether to render the integrated avatar preview (inline mode only)
    * @default true
    */

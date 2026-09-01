@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
-import PsychologyRoundedIcon from "@mui/icons-material/PsychologyRounded";
+import SupervisorAccountRoundedIcon from "@mui/icons-material/SupervisorAccountRounded";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
 import Tooltip from "../Tooltip/Tooltip";
 import type { RoleBadgeProps } from "./RoleBadge.types";
@@ -9,11 +9,18 @@ import { RoleBadgeRoot } from "./RoleBadge.styles";
 import type { UserRole } from "../../../utils/auth";
 
 export function getRoleIcon(role?: UserRole | string) {
-  switch (role) {
+  const normalized = (role || "").toLowerCase().trim();
+  switch (normalized) {
     case "admin":
+    case "administrator":
       return <AdminPanelSettingsRoundedIcon data-testid="role-icon-admin" />;
     case "instructor":
-      return <PsychologyRoundedIcon data-testid="role-icon-instructor" />;
+    case "teacher":
+    case "editingteacher":
+    case "faculty":
+      return (
+        <SupervisorAccountRoundedIcon data-testid="role-icon-instructor" />
+      );
     case "student":
     default:
       return <SchoolRoundedIcon data-testid="role-icon-student" />;
@@ -24,10 +31,15 @@ export function getRoleLabelText(
   role: UserRole | string | undefined,
   t: (key: string, fallback: string) => string,
 ): string {
-  switch (role) {
+  const normalized = (role || "").toLowerCase().trim();
+  switch (normalized) {
     case "admin":
+    case "administrator":
       return t("auth:devTool.roles.admin", "Admin");
     case "instructor":
+    case "teacher":
+    case "editingteacher":
+    case "faculty":
       return t("auth:devTool.roles.instructor", "Instructor");
     case "student":
     default:
@@ -69,7 +81,9 @@ export const RoleBadge = forwardRef<HTMLSpanElement, RoleBadgeProps>(
         roleVariant={config.variant}
         roleSize={config.size}
         className={props.className}
+        style={props.style}
         role="status"
+        tabIndex={0}
         aria-label={roleLabel}
         data-testid={testId}
       >

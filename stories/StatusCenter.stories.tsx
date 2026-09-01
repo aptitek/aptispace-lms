@@ -9,7 +9,7 @@ import {
   type TelemetryEventItem,
 } from "~/utils/statusCenterContext";
 import EcgTelemetry from "~/components/atoms/StatusCenter/EcgTelemetry";
-import M3Snackbar from "~/components/molecules/StatusCenter/M3Snackbar";
+import StatusSnackbar from "~/components/molecules/StatusCenter/StatusSnackbar";
 import StatusGatewayTrigger from "~/components/molecules/StatusCenter/StatusGatewayTrigger";
 import StatusTerminalCard from "~/components/organisms/StatusCenter/StatusTerminalCard";
 import StatusTerminalInfrastructure from "~/components/organisms/StatusCenter/StatusTerminalInfrastructure";
@@ -105,7 +105,7 @@ function SnackbarSeverityDemo() {
         </Button>
       </Stack>
 
-      <M3Snackbar
+      <StatusSnackbar
         eventEntry={activeToast}
         onDismiss={() => setActiveToast(null)}
         onViewDetails={() => {}}
@@ -264,7 +264,7 @@ export const EcgTelemetryOscilloscope: Story = {
   ),
 };
 
-export const M3SnackbarSeverityToasts: Story = {
+export const StatusSnackbarSeverityToasts: Story = {
   render: () => <SnackbarSeverityDemo />,
 };
 

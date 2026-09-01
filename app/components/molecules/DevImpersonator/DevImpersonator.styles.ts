@@ -261,34 +261,29 @@ export const AccountsList = styled(Box)(({ theme }) => ({
   },
 }));
 
-function resolveCardBorder(
-  theme: Theme,
-  isSelected?: boolean,
-  isCurrent?: boolean,
-) {
-  if (isSelected) return theme.palette.primary.main;
-  if (isCurrent) return alpha(theme.palette.success.main, 0.5);
-  return alpha(theme.palette.divider, 0.7);
-}
-
-function resolveCardBackground(
-  theme: Theme,
-  isSelected?: boolean,
-  isCurrent?: boolean,
-) {
-  if (isSelected) return alpha(theme.palette.primary.main, 0.08);
-  if (isCurrent) return alpha(theme.palette.success.main, 0.04);
-  return alpha(theme.palette.background.paper, 0.9);
+function resolveRoleColor(theme: Theme, role?: UserRole) {
+  switch (role) {
+    case "admin":
+      return theme.palette.secondary.main;
+    case "instructor":
+      return theme.palette.info.main;
+    case "student":
+      return theme.palette.success.main;
+    default:
+      return theme.palette.primary.main;
+  }
 }
 
 export const AccountCard = styled(ButtonBase, {
-  shouldForwardProp: (prop) => prop !== "isSelected" && prop !== "isCurrent",
-})<{ isSelected?: boolean; isCurrent?: boolean }>(({
-  theme,
-  isSelected,
-  isCurrent,
-}) => {
+  shouldForwardProp: (prop) =>
+    prop !== "isSelected" && prop !== "isCurrent" && prop !== "accountRole",
+})<{
+  isSelected?: boolean;
+  isCurrent?: boolean;
+  accountRole?: UserRole;
+}>(({ theme, isSelected, isCurrent, accountRole }) => {
   const radius = Number(theme.shape.borderRadius) || 8;
+  const roleColor = resolveRoleColor(theme, accountRole);
 
   return {
     width: "100%",
@@ -297,28 +292,30 @@ export const AccountCard = styled(ButtonBase, {
     justifyContent: "space-between",
     padding: theme.spacing(1.125, 1.375),
     borderRadius: radius,
-    border: `1px solid ${resolveCardBorder(theme, isSelected, isCurrent)}`,
-    backgroundColor: resolveCardBackground(theme, isSelected, isCurrent),
+    border: `1px solid ${isSelected ? roleColor : alpha(roleColor, 0.35)}`,
+    borderLeft: `4px solid ${roleColor}`,
+    backgroundColor: isSelected
+      ? alpha(roleColor, 0.14)
+      : isCurrent
+        ? alpha(roleColor, 0.07)
+        : alpha(roleColor, 0.03),
     color: theme.palette.text.primary,
     cursor: "pointer",
     textAlign: "left",
     position: "relative",
+    boxShadow: isSelected ? `0 4px 14px ${alpha(roleColor, 0.2)}` : "none",
     transition: `all ${M3_MOTION.duration.short3}ms ${M3_MOTION.easing.emphasized}`,
 
     "&:hover": {
-      backgroundColor: isSelected
-        ? alpha(theme.palette.primary.main, 0.12)
-        : alpha(theme.palette.action.hover, 0.2),
-      borderColor: isSelected
-        ? theme.palette.primary.main
-        : theme.palette.primary.light,
+      backgroundColor: alpha(roleColor, 0.12),
+      borderColor: roleColor,
       transform: "translateX(3px)",
-      boxShadow: `0 4px 12px ${alpha(theme.palette.common.black, 0.1)}`,
+      boxShadow: `0 4px 16px ${alpha(roleColor, 0.25)}`,
     },
 
     "&:focus-visible": {
-      borderColor: theme.palette.primary.main,
-      boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.35)}`,
+      borderColor: roleColor,
+      boxShadow: `0 0 0 2px ${alpha(roleColor, 0.35)}`,
     },
 
     "&:disabled": {
@@ -329,14 +326,12 @@ export const AccountCard = styled(ButtonBase, {
 
     ...theme.applyStyles("dark", {
       backgroundColor: isSelected
-        ? alpha(theme.palette.primary.main, 0.16)
+        ? alpha(roleColor, 0.2)
         : isCurrent
-          ? alpha(theme.palette.success.main, 0.08)
-          : alpha(theme.palette.background.paper, 0.9),
+          ? alpha(roleColor, 0.1)
+          : alpha(roleColor, 0.05),
       "&:hover": {
-        backgroundColor: isSelected
-          ? alpha(theme.palette.primary.main, 0.22)
-          : alpha(theme.palette.action.hover, 0.2),
+        backgroundColor: alpha(roleColor, 0.18),
       },
     }),
   };

@@ -4,7 +4,7 @@ import {
   type RoundedPolygon,
 } from "material-shapes-ts";
 
-export type M3ExpressiveShapeName =
+export type ExpressiveShapeName =
   | "circle"
   | "square"
   | "slanted"
@@ -67,7 +67,9 @@ export type M3ExpressiveShapeName =
   | "bun"
   | "heart";
 
-export interface M3ShapeDefinition {
+export type M3ExpressiveShapeName = ExpressiveShapeName;
+
+export interface ShapeDefinition {
   name: string;
   label: string;
   pathData: string;
@@ -75,7 +77,9 @@ export interface M3ShapeDefinition {
   borderRadius?: string;
 }
 
-const RAW_M3_SHAPE_ENTRIES: Array<[string, string, RoundedPolygon]> = [
+export type M3ShapeDefinition = ShapeDefinition;
+
+const RAW_SHAPE_ENTRIES: Array<[string, string, RoundedPolygon]> = [
   ["circle", "Circle", MaterialShapes.Circle],
   ["square", "Square", MaterialShapes.Square],
   ["slanted", "Slanted", MaterialShapes.Slanted],
@@ -113,15 +117,16 @@ const RAW_M3_SHAPE_ENTRIES: Array<[string, string, RoundedPolygon]> = [
   ["heart", "Heart", MaterialShapes.Heart],
 ];
 
-export const M3_EXPRESSIVE_CATALOG: Record<string, M3ShapeDefinition> = {};
+export const EXPRESSIVE_SHAPE_CATALOG: Record<string, ShapeDefinition> = {};
+export const M3_EXPRESSIVE_CATALOG = EXPRESSIVE_SHAPE_CATALOG;
 
-for (const [key, label, shapePolygon] of RAW_M3_SHAPE_ENTRIES) {
+for (const [key, label, shapePolygon] of RAW_SHAPE_ENTRIES) {
   const path = roundedPolygonToPath(shapePolygon);
-  M3_EXPRESSIVE_CATALOG[key] = {
+  EXPRESSIVE_SHAPE_CATALOG[key] = {
     name: key,
     label,
     pathData: path.toSvgPathData(),
-    clipPath: `url(#m3-shape-${key})`,
+    clipPath: `url(#avatar-shape-${key})`,
   };
 }
 
@@ -151,20 +156,17 @@ const ALIASES: Record<string, string> = {
   softBoom: "soft-boom",
   puffyDiamond: "puffy-diamond",
   ghostIsh: "ghost-ish",
-  ghostish: "ghost-ish",
   pixelCircle: "pixel-circle",
   pixelTriangle: "pixel-triangle",
 };
 
-for (const [aliasKey, targetKey] of Object.entries(ALIASES)) {
-  const target = M3_EXPRESSIVE_CATALOG[targetKey];
-  if (target) {
-    M3_EXPRESSIVE_CATALOG[aliasKey] = target;
+for (const [alias, canonicalKey] of Object.entries(ALIASES)) {
+  if (EXPRESSIVE_SHAPE_CATALOG[canonicalKey]) {
+    EXPRESSIVE_SHAPE_CATALOG[alias] = EXPRESSIVE_SHAPE_CATALOG[canonicalKey];
   }
 }
 
-// Canonical 35 Expressive Shapes in official AOSP order
-export const ALL_35_M3_SHAPES: M3ExpressiveShapeName[] = [
+export const ALL_EXPRESSIVE_SHAPES: string[] = [
   "circle",
   "square",
   "slanted",
@@ -202,7 +204,9 @@ export const ALL_35_M3_SHAPES: M3ExpressiveShapeName[] = [
   "heart",
 ];
 
-export const M3_SCALE_RADIUS_MAP: Record<string, string> = {
+export const ALL_35_M3_SHAPES = ALL_EXPRESSIVE_SHAPES;
+
+export const SHAPE_SCALE_RADIUS_MAP: Record<string, string> = {
   none: "0px",
   "extra-small": "4px",
   "extra-small-top": "4px 4px 0 0",
@@ -222,13 +226,15 @@ export const M3_SCALE_RADIUS_MAP: Record<string, string> = {
   biometric: "10px",
 };
 
+export const M3_SCALE_RADIUS_MAP = SHAPE_SCALE_RADIUS_MAP;
+
 export interface ResolvedShapeStyle {
   borderRadius: string;
   clipPath?: string;
   pathData?: string;
 }
 
-export function resolveM3ShapeStyle(
+export function resolveShapeStyle(
   shape?: string | number,
   customRadius?: number | string,
 ): ResolvedShapeStyle {
@@ -244,7 +250,7 @@ export function resolveM3ShapeStyle(
     return { borderRadius: `${shape}px` };
   }
 
-  const expressiveDef = M3_EXPRESSIVE_CATALOG[shape];
+  const expressiveDef = EXPRESSIVE_SHAPE_CATALOG[shape];
   if (expressiveDef) {
     return {
       borderRadius: expressiveDef.borderRadius ?? "0px",
@@ -253,10 +259,30 @@ export function resolveM3ShapeStyle(
     };
   }
 
-  const scaleRad = M3_SCALE_RADIUS_MAP[shape];
+  const scaleRad = SHAPE_SCALE_RADIUS_MAP[shape];
   if (scaleRad) {
     return { borderRadius: scaleRad };
   }
 
   return { borderRadius: shape };
+}
+
+export const resolveM3ShapeStyle = resolveShapeStyle;
+
+/**
+ * Shape-based avatar system resolver:
+ * - student: MD3 pill ("pill")
+ * - instructor: Ghost-ish ("ghost-ish")
+ * - admin: 9-sided cookie ("9-sided-cookie")
+ */
+export function getRoleAvatarShape(role?: string | null): ExpressiveShapeName {
+  switch (role) {
+    case "admin":
+      return "9-sided-cookie";
+    case "instructor":
+      return "ghost-ish";
+    case "student":
+    default:
+      return "pill";
+  }
 }

@@ -2,22 +2,34 @@ import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import type { AvatarShape } from "./Avatar.types";
 import {
+  resolveShapeStyle,
   resolveM3ShapeStyle,
+  SHAPE_SCALE_RADIUS_MAP,
   M3_SCALE_RADIUS_MAP,
+  EXPRESSIVE_SHAPE_CATALOG,
   M3_EXPRESSIVE_CATALOG,
+  ALL_EXPRESSIVE_SHAPES,
   ALL_35_M3_SHAPES,
-} from "./m3Shapes";
+} from "./shapes";
 
-export { M3_EXPRESSIVE_CATALOG, ALL_35_M3_SHAPES };
+export {
+  EXPRESSIVE_SHAPE_CATALOG,
+  M3_EXPRESSIVE_CATALOG,
+  ALL_EXPRESSIVE_SHAPES,
+  ALL_35_M3_SHAPES,
+  SHAPE_SCALE_RADIUS_MAP,
+};
 export const MD3_SHAPE_SCALE_MAP = M3_SCALE_RADIUS_MAP;
 
-export function resolveM3ShapeRadius(
+export function resolveAvatarShapeRadius(
   shape?: AvatarShape,
   customRadius?: number | string,
 ): string {
-  const resolved = resolveM3ShapeStyle(shape, customRadius);
+  const resolved = resolveShapeStyle(shape, customRadius);
   return resolved.borderRadius;
 }
+
+export const resolveM3ShapeRadius = resolveAvatarShapeRadius;
 
 export const AvatarRoot = styled(Box, {
   shouldForwardProp: (prop) =>

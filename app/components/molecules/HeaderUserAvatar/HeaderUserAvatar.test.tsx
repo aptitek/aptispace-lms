@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { HeaderUserAvatar } from "./HeaderUserAvatar";
 import type { AuthUser } from "../../../utils/auth";
-import { resolveM3ShapeStyle } from "../../atoms/Avatar/m3Shapes";
+import { resolveShapeStyle } from "../../atoms/Avatar/shapes";
 
 const mockUser: AuthUser = {
   id: "user-123",
@@ -17,11 +17,18 @@ describe("HeaderUserAvatar Molecule (MD3 Sliding Pill)", () => {
     expect(HeaderUserAvatar.name).toBe("HeaderUserAvatar");
   });
 
-  it("supports official 45-degree pill shape in M3 shape catalog", () => {
-    const resolvedPill = resolveM3ShapeStyle("pill");
+  it("supports role-based expressive shapes in avatar shape catalog", () => {
+    const resolvedPill = resolveShapeStyle("pill");
     expect(resolvedPill).toBeDefined();
-    expect(resolvedPill.clipPath).toBe("url(#m3-shape-pill)");
-    expect(resolvedPill.pathData).toBeDefined();
+    expect(resolvedPill.clipPath).toBe("url(#avatar-shape-pill)");
+
+    const resolvedGhost = resolveShapeStyle("ghost-ish");
+    expect(resolvedGhost).toBeDefined();
+    expect(resolvedGhost.clipPath).toBe("url(#avatar-shape-ghost-ish)");
+
+    const resolvedCookie = resolveShapeStyle("9-sided-cookie");
+    expect(resolvedCookie).toBeDefined();
+    expect(resolvedCookie.clipPath).toBe("url(#avatar-shape-9-sided-cookie)");
   });
 
   it("supports user avatar configuration and sliding pill logout properties", () => {

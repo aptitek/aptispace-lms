@@ -88,6 +88,7 @@ export const AvatarCol = styled("div")(({ theme }) => ({
   flexShrink: 0,
   width: "130px",
   gap: theme.spacing(0.75),
+  overflow: "visible",
 }));
 
 export const AvatarWrapper = styled("div")({
@@ -99,14 +100,15 @@ export const AvatarWrapper = styled("div")({
   alignItems: "center",
   justifyContent: "center",
   flexShrink: 0,
-  "& .MuiBox-root, & [data-testid='card-editable-avatar'], & [data-testid='card-editable-avatar'] > div":
+  overflow: "visible",
+  "& > .MuiBox-root, & > [data-testid='card-editable-avatar'], & > [data-testid='card-editable-avatar'] > div":
     {
       width: "100%",
       height: "100% !important",
       maxHeight: "100%",
       aspectRatio: "35 / 45",
     },
-  "& .MuiAvatar-root, & [data-testid='avatar']": {
+  "& > [data-testid='avatar']": {
     width: "100% !important",
     height: "100% !important",
     aspectRatio: "35 / 45",
@@ -115,13 +117,16 @@ export const AvatarWrapper = styled("div")({
 
 export const FloatingRoleBadgeHolder = styled("div")({
   position: "absolute",
-  top: 4,
-  right: 4,
-  zIndex: 15,
+  top: -11,
+  left: "50%",
+  transform: "translateX(-50%)",
+  zIndex: 20,
+  isolation: "isolate",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   pointerEvents: "auto",
+  whiteSpace: "nowrap",
 });
 
 export const AvatarGithubHandleHolder = styled("div")(({ theme }) => ({
@@ -130,8 +135,9 @@ export const AvatarGithubHandleHolder = styled("div")(({ theme }) => ({
   justifyContent: "center",
   width: "100%",
   maxWidth: "140px",
-  marginTop: theme.spacing(1.75),
-  zIndex: 20,
+  marginTop: theme.spacing(1),
+  position: "relative",
+  zIndex: 10,
   flexShrink: 0,
 }));
 

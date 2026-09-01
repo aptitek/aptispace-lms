@@ -6,10 +6,15 @@ export function getRoleThemeColor(
   role: UserRole | string | undefined,
   theme: Theme,
 ) {
-  switch (role) {
+  const normalized = (role || "").toLowerCase().trim();
+  switch (normalized) {
     case "admin":
+    case "administrator":
       return theme.palette.secondary;
     case "instructor":
+    case "teacher":
+    case "editingteacher":
+    case "faculty":
       return theme.palette.primary;
     case "student":
     default:
@@ -54,6 +59,29 @@ const SIZE_MAP: Record<
   },
 };
 
+const BORDER_RADIUS_MAP: Record<string, { iconOnly: string; chip: string }> = {
+  admin: { iconOnly: "7px 2px 7px 2px", chip: "8px 3px 8px 3px" },
+  administrator: { iconOnly: "7px 2px 7px 2px", chip: "8px 3px 8px 3px" },
+  instructor: { iconOnly: "10px 10px 3px 3px", chip: "12px 12px 4px 4px" },
+  teacher: { iconOnly: "10px 10px 3px 3px", chip: "12px 12px 4px 4px" },
+  editingteacher: { iconOnly: "10px 10px 3px 3px", chip: "12px 12px 4px 4px" },
+  faculty: { iconOnly: "10px 10px 3px 3px", chip: "12px 12px 4px 4px" },
+};
+
+const DEFAULT_BORDER_RADIUS = {
+  iconOnly: "11px 4px 11px 4px",
+  chip: "9999px",
+};
+
+export function getRoleBadgeBorderRadius(
+  role: UserRole | string | undefined,
+  isIconOnly: boolean,
+): string {
+  const key = (role || "").toLowerCase().trim();
+  const config = BORDER_RADIUS_MAP[key] || DEFAULT_BORDER_RADIUS;
+  return isIconOnly ? config.iconOnly : config.chip;
+}
+
 export const RoleBadgeRoot = styled("span", {
   shouldForwardProp: (prop) =>
     prop !== "roleVariant" && prop !== "roleSize" && prop !== "userRole",
@@ -62,60 +90,84 @@ export const RoleBadgeRoot = styled("span", {
   const sizeConfig = SIZE_MAP[roleSize] || SIZE_MAP.small;
 
   const isIconOnly = roleVariant === "icon-only";
+  const badgeRadius = getRoleBadgeBorderRadius(userRole, isIconOnly);
 
   return {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
     gap: theme.spacing(0.5),
-    backgroundColor: alpha(paletteColor.main, 0.15),
+    backgroundColor: alpha(paletteColor.main, 0.22),
     color: paletteColor.main,
-    border: `1px solid ${alpha(paletteColor.main, 0.5)}`,
+    border: `1px solid ${alpha(paletteColor.main, 0.65)}`,
+    borderRadius: badgeRadius,
     backdropFilter: "blur(8px)",
     WebkitBackdropFilter: "blur(8px)",
-    boxShadow: `0 2px 8px ${alpha(paletteColor.main, 0.4)}`,
+    boxShadow: `0 2px 8px ${alpha(paletteColor.main, 0.45)}`,
     boxSizing: "border-box",
     fontWeight: 700,
     letterSpacing: "0.04em",
     textTransform: "uppercase",
+    userSelect: "none",
+    flexShrink: 0,
+    cursor: "default",
+    position: "relative",
+    zIndex: 10,
+    isolation: "isolate",
+    lineHeight: 1,
+    verticalAlign: "middle",
+    whiteSpace: "nowrap",
     transition: theme.transitions.create([
       "background-color",
       "border-color",
       "box-shadow",
       "transform",
+      "border-radius",
     ]),
-    userSelect: "none",
-    flexShrink: 0,
-    cursor: "default",
+
+    "& svg, & .MuiSvgIcon-root": {
+      display: "inline-block",
+      flexShrink: 0,
+      fill: "currentColor",
+      color: "inherit",
+      fontSize: isIconOnly
+        ? `${sizeConfig.iconOnly.iconSize}px !important`
+        : `${sizeConfig.chip.iconSize}px !important`,
+      width: "1em",
+      height: "1em",
+    },
+
+    "& > span": {
+      display: "inline-block",
+      lineHeight: 1,
+      whiteSpace: "nowrap",
+    },
 
     ...(isIconOnly
       ? {
           width: sizeConfig.iconOnly.width,
           height: sizeConfig.iconOnly.height,
-          borderRadius: "50%",
+          minWidth: sizeConfig.iconOnly.width,
+          minHeight: sizeConfig.iconOnly.height,
           padding: 0,
-          "& svg": {
-            fontSize: sizeConfig.iconOnly.iconSize,
-          },
         }
       : {
           height: sizeConfig.chip.height,
+          minHeight: sizeConfig.chip.height,
           padding: sizeConfig.chip.padding,
           fontSize: sizeConfig.chip.fontSize,
-          borderRadius: theme.shape.borderRadius,
-          "& svg": {
-            fontSize: sizeConfig.chip.iconSize,
-          },
         }),
 
     "&:hover": {
-      boxShadow: `0 0 12px ${alpha(paletteColor.main, 0.4)}`,
+      boxShadow: `0 0 12px ${alpha(paletteColor.main, 0.6)}`,
       borderColor: paletteColor.main,
-      transform: "scale(1.05)",
+      transform: "scale(1.08)",
     },
 
     ...theme.applyStyles("dark", {
-      backgroundColor: alpha(paletteColor.main, 0.22),
+      backgroundColor: alpha(paletteColor.main, 0.28),
+      border: `1px solid ${alpha(paletteColor.main, 0.65)}`,
+      color: paletteColor.main,
     }),
   };
 });

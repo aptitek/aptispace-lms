@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import Avatar, { isUnnamedUser } from "./Avatar";
 import { ISO_19794_5_CONSTANTS } from "./Avatar.types";
 import { resolveM3ShapeRadius } from "./Avatar.styles";
+import { getRoleAvatarShape } from "./shapes";
 
 describe("Avatar Component & MD3 Shape Scale", () => {
   it("exports Avatar component properly", () => {
@@ -96,5 +97,12 @@ describe("Avatar Component & MD3 Shape Scale", () => {
     expect(isUnnamedUser("New Admin")).toBe(true);
     expect(isUnnamedUser("student")).toBe(true);
     expect(isUnnamedUser("Arthur Dent")).toBe(false);
+  });
+
+  it("resolves role-based avatar shapes correctly", () => {
+    expect(getRoleAvatarShape("student")).toBe("pill");
+    expect(getRoleAvatarShape("instructor")).toBe("ghost-ish");
+    expect(getRoleAvatarShape("admin")).toBe("9-sided-cookie");
+    expect(getRoleAvatarShape(undefined)).toBe("pill");
   });
 });

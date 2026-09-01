@@ -3,7 +3,7 @@ import {
   M3_EXPRESSIVE_CATALOG,
   M3_SCALE_RADIUS_MAP,
   resolveM3ShapeStyle,
-} from "../components/atoms/Avatar/m3Shapes";
+} from "../components/atoms/Avatar/shapes";
 
 declare module "@mui/material/styles" {
   interface Shape {

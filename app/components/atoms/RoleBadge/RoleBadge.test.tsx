@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { RoleBadge, getRoleLabelText } from "./RoleBadge";
-import { getRoleThemeColor } from "./RoleBadge.styles";
+import {
+  getRoleThemeColor,
+  getRoleBadgeBorderRadius,
+} from "./RoleBadge.styles";
 import { darkTheme, lightTheme } from "../../../tokens/theme";
 
 describe("RoleBadge Atom Component & Tokens", () => {
@@ -38,5 +41,14 @@ describe("RoleBadge Atom Component & Tokens", () => {
     expect(getRoleLabelText("instructor", mockT)).toBe("Instructor");
     expect(getRoleLabelText("admin", mockT)).toBe("Admin");
     expect(getRoleLabelText(undefined, mockT)).toBe("Student");
+  });
+
+  it("resolves role-based badge shapes (pill, arch, cookie)", () => {
+    expect(getRoleBadgeBorderRadius("student", true)).toBe("11px 4px 11px 4px");
+    expect(getRoleBadgeBorderRadius("student", false)).toBe("9999px");
+    expect(getRoleBadgeBorderRadius("instructor", true)).toBe(
+      "10px 10px 3px 3px",
+    );
+    expect(getRoleBadgeBorderRadius("admin", true)).toBe("7px 2px 7px 2px");
   });
 });

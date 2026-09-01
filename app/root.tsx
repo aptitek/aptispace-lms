@@ -26,7 +26,7 @@ import {
   StatusCenterProvider,
   useStatusCenter,
 } from "./utils/statusCenterContext";
-import M3Snackbar from "./components/molecules/StatusCenter/M3Snackbar";
+import StatusSnackbar from "./components/molecules/StatusCenter/StatusSnackbar";
 import StatusTerminalCard from "./components/organisms/StatusCenter/StatusTerminalCard";
 import { LANGUAGE_STORAGE_KEY } from "./i18n";
 import "~/i18n";
@@ -54,7 +54,7 @@ function AppThemeContainer({ children }: { children: React.ReactNode }) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       {children}
-      <M3Snackbar />
+      <StatusSnackbar />
       <StatusTerminalCard />
     </ThemeProvider>
   );

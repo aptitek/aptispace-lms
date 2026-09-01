@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { M3ExpressiveShapeName } from "./m3Shapes";
+import type { ExpressiveShapeName } from "./shapes";
 
 export const ISO_19794_5_CONSTANTS = {
   standard: "ISO/IEC 19794-5:2011",
@@ -31,12 +31,13 @@ export type M3ScaleShape =
   | "biometric";
 
 export type AvatarShape =
-  M3ScaleShape | M3ExpressiveShapeName | (string & {}) | number;
+  M3ScaleShape | ExpressiveShapeName | (string & {}) | number;
 
 export interface AvatarProps {
   src?: string;
   alt?: string;
   name?: string;
+  role?: string | null;
   isPortrait?: boolean;
   showReticle?: boolean;
   shape?: AvatarShape;

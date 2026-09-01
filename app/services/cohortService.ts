@@ -62,6 +62,21 @@ async function resolveUserEmail(db: Database, userId: string): Promise<string> {
   return "student@aptitek.io";
 }
 
+async function resolveUserRole(
+  db: Database,
+  userId: string,
+): Promise<"admin" | "instructor" | "student"> {
+  const existingAffils = await db
+    .select()
+    .from(affiliations)
+    .where(eq(affiliations.userId, userId));
+
+  if (existingAffils.some((a) => a.role === "admin")) return "admin";
+  if (existingAffils.some((a) => a.role === "instructor")) return "instructor";
+  if (existingAffils[0]?.role) return existingAffils[0].role;
+  return "student";
+}
+
 async function upsertAffiliationRecord(
   db: Database,
   params: {
@@ -69,9 +84,11 @@ async function upsertAffiliationRecord(
     institutionId: string;
     cohortId: string;
     email: string;
+    role?: "admin" | "instructor" | "student";
   },
 ) {
   const { userId, institutionId, cohortId, email } = params;
+  const userRole = params.role || (await resolveUserRole(db, userId));
 
   const unassigned = await db
     .select()
@@ -100,7 +117,7 @@ async function upsertAffiliationRecord(
       institutionId,
       cohortId,
       email,
-      role: "student",
+      role: userRole,
       isActive: true,
     })
     .returning();

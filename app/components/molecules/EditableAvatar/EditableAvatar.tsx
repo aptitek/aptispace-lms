@@ -69,66 +69,110 @@ interface MD3AvatarProps {
   shape?: EditableAvatarShape;
   size?: EditableAvatarSize;
   editable?: boolean;
+  disableTooltip?: boolean;
   isModified: boolean;
   isDragging: boolean;
   onAvatarClick: () => void;
   onResetClick: (e: MouseEvent) => void;
 }
 
-function MD3AvatarDisplay(props: MD3AvatarProps) {
+interface ResetBadgeProps {
+  onResetClick: (e: MouseEvent) => void;
+}
+
+function AvatarResetActionButton({ onResetClick }: ResetBadgeProps) {
   const { t } = useTranslation("common");
+  const label = t("avatar.resetToDefault", "Reset avatar to default");
+  return (
+    <Tooltip title={label}>
+      <AvatarResetBadge type="button" onClick={onResetClick} aria-label={label}>
+        <RestartAltIcon sx={{ fontSize: "14px" }} />
+      </AvatarResetBadge>
+    </Tooltip>
+  );
+}
+
+interface HoverOverlayProps {
+  shape?: EditableAvatarShape;
+  size?: EditableAvatarSize;
+}
+
+function AvatarHoverActionOverlay({ shape, size }: HoverOverlayProps) {
+  const { t } = useTranslation("common");
+  return (
+    <AvatarHoverOverlay
+      className="avatar-hover-overlay"
+      avatarShape={shape}
+      avatarSize={size}
+    >
+      <EditIcon sx={{ fontSize: "1.1rem" }} />
+      <span>{t("avatar.edit", "EDIT")}</span>
+    </AvatarHoverOverlay>
+  );
+}
+
+function handleAvatarKeyDown(
+  event: KeyboardEvent<HTMLDivElement>,
+  isInteractive: boolean,
+  onAvatarClick: () => void,
+) {
+  if (isInteractive && (event.key === "Enter" || event.key === " ")) {
+    onAvatarClick();
+  }
+}
+
+function resolveAvatarDisplayConfig(
+  props: MD3AvatarProps,
+  t: (key: string, fallback: string) => string,
+) {
   const isInteractive = props.editable !== false;
   const tooltipText = isInteractive
     ? t("avatar.clickToEdit", "Click to edit avatar")
     : props.name || "";
+  const shouldShowTooltip = !props.disableTooltip && Boolean(tooltipText);
+
+  return {
+    isInteractive,
+    tooltipText,
+    shouldShowTooltip,
+    role: isInteractive ? ("button" as const) : undefined,
+    tabIndex: isInteractive ? 0 : undefined,
+    onClick: isInteractive ? props.onAvatarClick : undefined,
+  };
+}
+
+function MD3AvatarDisplay(props: MD3AvatarProps) {
+  const { t } = useTranslation("common");
+  const config = resolveAvatarDisplayConfig(props, t);
 
   return (
     <Tooltip
-      title={tooltipText}
+      title={config.tooltipText}
       arrow
       placement="top"
-      disableHoverListener={!tooltipText}
+      disableHoverListener={!config.shouldShowTooltip}
     >
       <MD3AvatarContainer
         avatarShape={props.shape}
         avatarSize={props.size}
-        isInteractive={isInteractive}
+        isInteractive={config.isInteractive}
         isDragging={props.isDragging}
-        onClick={isInteractive ? props.onAvatarClick : undefined}
-        role={isInteractive ? "button" : undefined}
-        tabIndex={isInteractive ? 0 : undefined}
-        aria-label={tooltipText || undefined}
-        onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-          if (isInteractive && (event.key === "Enter" || event.key === " ")) {
-            props.onAvatarClick();
-          }
-        }}
+        onClick={config.onClick}
+        role={config.role}
+        tabIndex={config.tabIndex}
+        aria-label={config.tooltipText || undefined}
+        onKeyDown={(event) =>
+          handleAvatarKeyDown(event, config.isInteractive, props.onAvatarClick)
+        }
       >
         <AvatarInner url={props.url} name={props.name} shape={props.shape} />
 
-        {isInteractive ? (
-          <AvatarHoverOverlay
-            className="avatar-hover-overlay"
-            avatarShape={props.shape}
-            avatarSize={props.size}
-          >
-            <EditIcon sx={{ fontSize: "1.1rem" }} />
-            <span>{t("avatar.edit", "EDIT")}</span>
-          </AvatarHoverOverlay>
+        {config.isInteractive ? (
+          <AvatarHoverActionOverlay shape={props.shape} size={props.size} />
         ) : null}
 
-        {isInteractive && props.isModified ? (
-          <Tooltip
-            title={t("avatar.resetToDefault", "Reset avatar to default")}
-          >
-            <AvatarResetBadge
-              type="button"
-              onClick={props.onResetClick}
-              aria-label={t("avatar.resetToDefault", "Reset avatar to default")}
-            >
-              <RestartAltIcon sx={{ fontSize: "14px" }} />
-            </AvatarResetBadge>
-          </Tooltip>
+        {config.isInteractive && props.isModified ? (
+          <AvatarResetActionButton onResetClick={props.onResetClick} />
         ) : null}
       </MD3AvatarContainer>
     </Tooltip>
@@ -391,6 +435,7 @@ export function EditableAvatar(props: EditableAvatarProps) {
       shape={props.shape}
       size={props.size}
       editable={isEditable}
+      disableTooltip={props.disableTooltip}
       isModified={isModified}
       isDragging={isDragging}
       onAvatarClick={handleAvatarClick}
