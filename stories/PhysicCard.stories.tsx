@@ -196,3 +196,54 @@ export const HolographicMasked: Story = {
     elevation: 8,
   },
 };
+
+export const TransparentCard: Story = {
+  args: {
+    sx: { width: 340, height: 480 },
+    isTransparent: true,
+    frontContent: (
+      <Box
+        sx={{
+          p: 4,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          color: "primary.main",
+        }}
+      >
+        <Typography variant="h1" sx={{ fontSize: "6rem" }}>
+          👻
+        </Typography>
+        <Typography variant="h5" sx={{ mt: 2, fontWeight: "bold" }}>
+          Ghost Mode
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 1, textAlign: "center" }}>
+          Flip me to see the back content overlaid
+        </Typography>
+      </Box>
+    ),
+    backContent: (
+      <Box
+        sx={{
+          p: 4,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          color: "secondary.main",
+        }}
+      >
+        <Typography variant="h2" sx={{ fontWeight: "bold", mb: 2 }}>
+          TOP SECRET
+        </Typography>
+        <Typography variant="body1" align="center">
+          This content is physically located on the back of the glass card.
+        </Typography>
+      </Box>
+    ),
+    elevation: 0,
+  },
+};

@@ -135,6 +135,8 @@ function PhysicCardFront({
   showHolo,
   holoMaskImage,
   showSheen,
+  isTransparent,
+  isFlipped,
   sheenX,
   sheenY,
 }: {
@@ -144,6 +146,8 @@ function PhysicCardFront({
   showHolo: boolean;
   holoMaskImage?: string;
   showSheen: boolean;
+  isTransparent: boolean;
+  isFlipped: boolean;
   sheenX: MotionValue<string>;
   sheenY: MotionValue<string>;
 }) {
@@ -153,10 +157,17 @@ function PhysicCardFront({
       sx={{
         position: "absolute",
         inset: 0,
-        backfaceVisibility: "hidden",
-        WebkitBackfaceVisibility: "hidden",
+        backfaceVisibility: isTransparent ? "visible" : "hidden",
+        WebkitBackfaceVisibility: isTransparent ? "visible" : "hidden",
         overflow: "hidden",
         transformStyle: "preserve-3d",
+        transform: "translateZ(1px)",
+        opacity: isTransparent && isFlipped ? 0.2 : 1,
+        transition: "opacity 0.4s ease-in-out",
+        ...(isTransparent && {
+          bgcolor: "action.hover",
+          backdropFilter: "blur(10px)",
+        }),
       }}
     >
       {frontContent}
@@ -182,9 +193,13 @@ function PhysicCardFront({
 function PhysicCardBack({
   cardProps,
   backContent,
+  isTransparent,
+  isFlipped,
 }: {
   cardProps: CardProps;
   backContent?: React.ReactNode;
+  isTransparent: boolean;
+  isFlipped: boolean;
 }) {
   if (!backContent) return null;
   return (
@@ -193,11 +208,17 @@ function PhysicCardBack({
       sx={{
         position: "absolute",
         inset: 0,
-        backfaceVisibility: "hidden",
-        WebkitBackfaceVisibility: "hidden",
-        transform: "rotateY(180deg)",
+        backfaceVisibility: isTransparent ? "visible" : "hidden",
+        WebkitBackfaceVisibility: isTransparent ? "visible" : "hidden",
+        transform: "rotateY(180deg) translateZ(1px)",
         overflow: "hidden",
         transformStyle: "preserve-3d",
+        opacity: isTransparent && !isFlipped ? 0.2 : 1,
+        transition: "opacity 0.4s ease-in-out",
+        ...(isTransparent && {
+          bgcolor: "action.hover",
+          backdropFilter: "blur(10px)",
+        }),
       }}
     >
       {backContent}
@@ -252,6 +273,7 @@ export default function PhysicCard({
   showHolo = false,
   holoMaskImage,
   showSheen = true,
+  isTransparent = false,
   sx,
   ...cardProps
 }: PhysicCardProps) {
@@ -310,10 +332,17 @@ export default function PhysicCard({
             showHolo={showHolo}
             holoMaskImage={holoMaskImage}
             showSheen={showSheen}
+            isTransparent={isTransparent}
+            isFlipped={isFlipped}
             sheenX={sheenX}
             sheenY={sheenY}
           />
-          <PhysicCardBack cardProps={cardProps} backContent={backContent} />
+          <PhysicCardBack
+            cardProps={cardProps}
+            backContent={backContent}
+            isTransparent={isTransparent}
+            isFlipped={isFlipped}
+          />
         </FlipContainer>
       </TiltContainer>
     </Box>

@@ -60,4 +60,10 @@ export interface PhysicCardProps extends Omit<CardProps, "children"> {
    * @default true
    */
   showSheen?: boolean;
+  /**
+   * If true, enables transparent glass mode where the opposite face
+   * is faintly visible as a mirrored ghost.
+   * @default false
+   */
+  isTransparent?: boolean;
 }
