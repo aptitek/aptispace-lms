@@ -19,5 +19,8 @@
   "SERVER_ERROR": "Internal server execution failed. Telemetry logged.",
   "UPLOAD_FAILED": "Object storage upload failed. Verify R2 bucket permissions.",
   "INVALID_FILE_TYPE": "Invalid file format. Please select a valid image.",
-  "FILE_TOO_LARGE": "File size exceeds the allowable avatar limit (2MB)."
+  "FILE_TOO_LARGE": "File size exceeds the allowable avatar limit (2MB).",
+  "IMPERSONATION_FAILED": "Failed to initiate impersonation session. Diagnostic recorded.",
+  "IMPERSONATION_FORBIDDEN": "Security infraction: Only administrators are authorized to impersonate users.",
+  "IMPERSONATION_EXIT_FAILED": "Failed to exit impersonation mode. Telemetry logged."
 }

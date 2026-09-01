@@ -148,19 +148,93 @@ export async function gradeSubmission(
   return resultGrade;
 }
 
+async function resolveExistingUserId(
+  db: Database,
+  userId?: string | null,
+): Promise<string | null> {
+  if (!userId) return null;
+  const dbAny = db as unknown as {
+    query?: {
+      users?: {
+        findFirst: (options: {
+          where: (
+            u: unknown,
+            op: { eq: (a: unknown, b: unknown) => unknown },
+          ) => unknown;
+        }) => Promise<{ id: string } | null | undefined>;
+      };
+    };
+  };
+
+  if (dbAny?.query?.users) {
+    try {
+      const user = await dbAny.query.users.findFirst({
+        where: (u, { eq }) => eq((u as { id: unknown }).id, userId),
+      });
+      return user ? user.id : null;
+    } catch {
+      return null;
+    }
+  }
+  return userId;
+}
+
 export async function logAudit(
   db: Database,
   auditFields: Omit<NewAuditLog, "createdAt">,
 ): Promise<AuditLog> {
   const now = new Date();
-  const [log] = await db
-    .insert(auditLogs)
-    .values({
-      ...auditFields,
+  const validUserId = await resolveExistingUserId(db, auditFields.userId);
+
+  try {
+    const [log] = await db
+      .insert(auditLogs)
+      .values({
+        ...auditFields,
+        userId: validUserId,
+        createdAt: now,
+      })
+      .returning();
+
+    return (
+      log ?? {
+        id: crypto.randomUUID(),
+        tableName: auditFields.tableName,
+        recordId: auditFields.recordId,
+        action: auditFields.action,
+        userId: validUserId,
+        oldValues: auditFields.oldValues ?? null,
+        newValues: auditFields.newValues ?? null,
+        createdAt: now,
+      }
+    );
+  } catch (error) {
+    try {
+      const [fallbackLog] = await db
+        .insert(auditLogs)
+        .values({
+          ...auditFields,
+          userId: null,
+          createdAt: now,
+        })
+        .returning();
+      if (fallbackLog) return fallbackLog;
+    } catch {
+      // Best-effort fallback
+    }
+
+    console.error("[AuditLog Error] Failed to write audit record:", error);
+    return {
+      id: crypto.randomUUID(),
+      tableName: auditFields.tableName,
+      recordId: auditFields.recordId,
+      action: auditFields.action,
+      userId: null,
+      oldValues: auditFields.oldValues ?? null,
+      newValues: auditFields.newValues ?? null,
       createdAt: now,
-    })
-    .returning();
-  return log;
+    };
+  }
 }
 
 function resolveAuditActorId(

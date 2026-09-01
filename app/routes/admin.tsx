@@ -29,21 +29,19 @@ import {
   getAllUsersWithAffiliations,
   isUserProfileComplete,
 } from "~/services/userService";
-import {
-  getAllInstitutions,
-  getAllCohorts,
-  addStudentToCohort,
-  removeStudentFromCohort,
-} from "~/services/cohortService";
-import type { Database } from "~/db/index";
+import { getAllInstitutions, getAllCohorts } from "~/services/cohortService";
 import type { CompactStudentData } from "~/components/molecules/ProfileCardCompact/ProfileCardCompact.types";
 import type { SchoolConfig } from "~/components/organisms/OnboardingCard/OnboardingCard.types";
 import type { CohortWithInstitution } from "~/components/organisms/StudentInspector/StudentInspector.types";
+import { useStatusCenter } from "~/utils/statusCenterContext";
 import {
   mapDbUserToStudent,
   getDefaultStudents,
+  getDefaultInstructors,
   getDefaultSchools,
   getDefaultCohorts,
+  handleAddCohortAction,
+  handleRemoveCohortAction,
   type DbUserWithAffil,
 } from "./admin.helpers";
 import {
@@ -94,8 +92,18 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     })
     .map(mapDbUserToStudent);
 
+  const mappedInstructors = dbUsers
+    .filter((u) => {
+      const primaryAffil = u.affiliations?.[0];
+      return primaryAffil?.role === "instructor";
+    })
+    .map(mapDbUserToStudent);
+
   const students =
     mappedStudents.length > 0 ? mappedStudents : getDefaultStudents();
+
+  const instructors =
+    mappedInstructors.length > 0 ? mappedInstructors : getDefaultInstructors();
 
   const schools: SchoolConfig[] =
     dbInstitutions.length > 0
@@ -123,57 +131,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     user: activeUser,
     students,
     totalStudents: students.length,
+    instructors,
+    totalInstructors: instructors.length,
     schools,
     cohorts,
   };
-}
-
-async function handleAddCohortAction(
-  formData: FormData,
-  db: Database,
-  actorUserId: string,
-) {
-  const studentId = String(formData.get("studentId") || "");
-  const cohortId = String(formData.get("cohortId") || "");
-
-  if (!studentId || !cohortId) {
-    return { success: false, error: "Missing studentId or cohortId" };
-  }
-
-  try {
-    await addStudentToCohort(db, {
-      userId: studentId,
-      cohortId,
-      actorUserId,
-    });
-    return { success: true };
-  } catch {
-    return { success: false, error: "Failed to add student to cohort" };
-  }
-}
-
-async function handleRemoveCohortAction(
-  formData: FormData,
-  db: Database,
-  actorUserId: string,
-) {
-  const studentId = String(formData.get("studentId") || "");
-  const cohortId = String(formData.get("cohortId") || "");
-
-  if (!studentId || !cohortId) {
-    return { success: false, error: "Missing studentId or cohortId" };
-  }
-
-  try {
-    await removeStudentFromCohort(db, {
-      userId: studentId,
-      cohortId,
-      actorUserId,
-    });
-    return { success: true };
-  } catch {
-    return { success: false, error: "Failed to remove student from cohort" };
-  }
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -216,12 +178,14 @@ export function meta(_args: Route.MetaArgs) {
 interface AdminTabsSectionProps {
   activeTab: number;
   totalStudents: number;
+  totalInstructors: number;
   onChange: (event: React.SyntheticEvent, newValue: number) => void;
 }
 
 function AdminTabsSection({
   activeTab,
   totalStudents,
+  totalInstructors,
   onChange,
 }: AdminTabsSectionProps) {
   const { t } = useTranslation(["common", "auth"]);
@@ -259,10 +223,20 @@ function AdminTabsSection({
         <StyledTab
           icon={<SupervisorAccountIcon sx={{ fontSize: 18, mr: 0.5 }} />}
           iconPosition="start"
-          label={t("common:admin.tabs.instructors", "Instructors")}
+          label={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <span>{t("common:admin.tabs.instructors", "Instructors")}</span>
+              <Chip
+                label={totalInstructors}
+                size="small"
+                color="primary"
+                sx={{ height: 18, fontSize: "0.65rem", fontWeight: 800 }}
+                data-testid="tab-instructors-count"
+              />
+            </Box>
+          }
           id="admin-tab-1"
           aria-controls="admin-tabpanel-1"
-          disabled
           data-testid="tab-instructors"
         />
         <StyledTab
@@ -292,7 +266,8 @@ export default function AdminManagement() {
   const loaderData = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
-  const { t } = useTranslation(["common", "auth"]);
+  const { t } = useTranslation(["common", "auth", "errors"]);
+  const { notifyError, notifySuccess } = useStatusCenter();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [selectedStudent, setSelectedStudent] =
     useState<CompactStudentData | null>(null);
@@ -300,12 +275,14 @@ export default function AdminManagement() {
   const selectedStudentId = selectedStudent?.id;
   useEffect(() => {
     if (selectedStudentId) {
-      const fresh = loaderData.students.find((s) => s.id === selectedStudentId);
+      const fresh =
+        loaderData.students.find((s) => s.id === selectedStudentId) ||
+        loaderData.instructors?.find((s) => s.id === selectedStudentId);
       if (fresh) {
         setSelectedStudent(fresh);
       }
     }
-  }, [loaderData.students, selectedStudentId]);
+  }, [loaderData.students, loaderData.instructors, selectedStudentId]);
 
   const handleLogout = () => {
     void logout();
@@ -372,18 +349,36 @@ export default function AdminManagement() {
   };
 
   const handleImpersonate = async (student: CompactStudentData) => {
+    const studentName = `${student.firstName} ${student.familyName}`.trim();
     try {
       await loginAsAccount({
         id: student.id,
-        name: `${student.firstName} ${student.familyName}`.trim(),
+        name: studentName,
         email: student.email,
         role: student.role ?? "student",
       });
+      notifySuccess(
+        t("auth:impersonationSuccess", {
+          name: studentName,
+          defaultValue: `Impersonation active: Logged in as ${studentName}.`,
+        }),
+      );
       if (typeof window !== "undefined") {
         window.location.href = "/";
       }
-    } catch {
-      // Handled cleanly
+    } catch (err: unknown) {
+      notifyError(err, {
+        title: t("errors:errorTitle", "System Diagnostic Alert"),
+        message: t("errors:IMPERSONATION_FAILED", {
+          defaultValue:
+            "Failed to initiate impersonation session. Diagnostic recorded.",
+        }),
+        contextData: {
+          studentId: student.id,
+          role: student.role,
+          name: studentName,
+        },
+      });
     }
   };
 
@@ -400,6 +395,7 @@ export default function AdminManagement() {
         <AdminTabsSection
           activeTab={activeTab}
           totalStudents={loaderData.totalStudents}
+          totalInstructors={loaderData.totalInstructors}
           onChange={handleTabChange}
         />
 
@@ -431,6 +427,59 @@ export default function AdminManagement() {
               onImpersonate={handleImpersonate}
               isSubmitting={fetcher.state !== "idle"}
               data-testid="admin-student-inspector"
+            />
+          </TabPanelContainer>
+        )}
+
+        {activeTab === 1 && (
+          <TabPanelContainer
+            role="tabpanel"
+            id="admin-tabpanel-1"
+            aria-labelledby="admin-tab-1"
+            data-testid="admin-tabpanel-instructors"
+          >
+            <GridColumn>
+              <StudentGrid
+                students={loaderData.instructors}
+                onStudentClick={handleStudentClick}
+                onImpersonate={handleImpersonate}
+                title={t(
+                  "common:instructorGrid.title",
+                  "Registered Instructors",
+                )}
+                emptyMessage={t(
+                  "common:instructorGrid.emptyMessage",
+                  "No instructors found in directory",
+                )}
+                searchPlaceholder={t(
+                  "common:instructorGrid.searchPlaceholder",
+                  "Search by name, email, github...",
+                )}
+                searchAriaLabel={t(
+                  "common:instructorGrid.searchAria",
+                  "Search instructors",
+                )}
+                icon={
+                  <SupervisorAccountIcon
+                    sx={{ fontSize: 20, color: "primary.main" }}
+                  />
+                }
+                userType="instructor"
+                testId="admin-instructor-grid"
+              />
+            </GridColumn>
+
+            <StudentInspector
+              student={selectedStudent}
+              schools={loaderData.schools}
+              cohorts={loaderData.cohorts}
+              onClose={handleCloseInspector}
+              onAddCohort={handleAddCohort}
+              onRemoveCohort={handleRemoveCohort}
+              onStudentUpdated={handleStudentUpdated}
+              onImpersonate={handleImpersonate}
+              isSubmitting={fetcher.state !== "idle"}
+              data-testid="admin-instructor-inspector"
             />
           </TabPanelContainer>
         )}

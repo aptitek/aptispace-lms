@@ -3,6 +3,11 @@ import type { CompactStudentData } from "~/components/molecules/ProfileCardCompa
 import type { AuthUser, UserRole } from "~/utils/auth";
 import type { SchoolConfig } from "~/components/organisms/OnboardingCard/OnboardingCard.types";
 import type { CohortWithInstitution } from "~/components/organisms/StudentInspector/StudentInspector.types";
+import type { Database } from "~/db/index";
+import {
+  addStudentToCohort,
+  removeStudentFromCohort,
+} from "~/services/cohortService";
 
 export type DbUserWithAffil = Awaited<
   ReturnType<typeof getAllUsersWithAffiliations>
@@ -310,6 +315,142 @@ export function getDefaultStudents(): CompactStudentData[] {
       isProfileComplete: false,
     },
   ];
+}
+
+export function getDefaultInstructors(): CompactStudentData[] {
+  return [
+    {
+      id: "inst-001",
+      firstName: "Sarah",
+      familyName: "CONNOR",
+      displayName: "Sarah CONNOR",
+      email: "sarah.connor@aptitek.io",
+      role: "instructor",
+      avatarUrl:
+        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+      githubUsername: "sconnor",
+      cohortName: "Cohort 2026",
+      cohortId: "cohort-2026",
+      cohortStartYear: "2026",
+      cohorts: [
+        {
+          id: "cohort-2026",
+          name: "Cohort 2026",
+          startYear: "2026",
+          institutionId: "school-aptitek",
+          institutionName: "Aptitek",
+        },
+        {
+          id: "cohort-2027",
+          name: "Cohort 2027",
+          startYear: "2027",
+          institutionId: "school-aptitek",
+          institutionName: "Aptitek",
+        },
+      ],
+      institutionId: "school-aptitek",
+      institutionName: "Aptitek",
+      isProfileComplete: true,
+    },
+    {
+      id: "inst-002",
+      firstName: "Marcus",
+      familyName: "AURELIUS",
+      displayName: "Marcus AURELIUS",
+      email: "marcus.aurelius@aptitek.io",
+      role: "instructor",
+      avatarUrl:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      githubUsername: "maurelius",
+      cohortName: "42 Common Core 2026",
+      cohortId: "cohort-42-2026",
+      cohortStartYear: "2026",
+      cohorts: [
+        {
+          id: "cohort-42-2026",
+          name: "42 Common Core 2026",
+          startYear: "2026",
+          institutionId: "school-42",
+          institutionName: "42 Paris",
+        },
+      ],
+      institutionId: "school-42",
+      institutionName: "42 Paris",
+      isProfileComplete: true,
+    },
+    {
+      id: "inst-003",
+      firstName: "Elena",
+      familyName: "ROSTOVA",
+      displayName: "Elena ROSTOVA",
+      email: "elena.rostova@aptitek.io",
+      role: "instructor",
+      githubUsername: "erostova",
+      cohortName: "Cohort 2025",
+      cohortId: "cohort-2025",
+      cohortStartYear: "2025",
+      cohorts: [
+        {
+          id: "cohort-2025",
+          name: "Cohort 2025",
+          startYear: "2025",
+          institutionId: "school-aptitek",
+          institutionName: "Aptitek",
+        },
+      ],
+      institutionId: "school-aptitek",
+      institutionName: "Aptitek",
+      isProfileComplete: true,
+    },
+  ];
+}
+
+export async function handleAddCohortAction(
+  formData: FormData,
+  db: Database,
+  actorUserId: string,
+) {
+  const studentId = String(formData.get("studentId") || "");
+  const cohortId = String(formData.get("cohortId") || "");
+
+  if (!studentId || !cohortId) {
+    return { success: false, error: "Missing studentId or cohortId" };
+  }
+
+  try {
+    await addStudentToCohort(db, {
+      userId: studentId,
+      cohortId,
+      actorUserId,
+    });
+    return { success: true };
+  } catch {
+    return { success: false, error: "Failed to add student to cohort" };
+  }
+}
+
+export async function handleRemoveCohortAction(
+  formData: FormData,
+  db: Database,
+  actorUserId: string,
+) {
+  const studentId = String(formData.get("studentId") || "");
+  const cohortId = String(formData.get("cohortId") || "");
+
+  if (!studentId || !cohortId) {
+    return { success: false, error: "Missing studentId or cohortId" };
+  }
+
+  try {
+    await removeStudentFromCohort(db, {
+      userId: studentId,
+      cohortId,
+      actorUserId,
+    });
+    return { success: true };
+  } catch {
+    return { success: false, error: "Failed to remove student from cohort" };
+  }
 }
 
 export function resolveModalUser(

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import StudentGrid from "~/components/molecules/StudentGrid/StudentGrid";
+import StudentGrid from "../app/components/molecules/StudentGrid/StudentGrid";
 
 const meta: Meta<typeof StudentGrid> = {
   title: "Molecules/StudentGrid",
@@ -57,6 +57,35 @@ const sampleStudents = [
   },
 ];
 
+const sampleInstructors = [
+  {
+    id: "inst-001",
+    firstName: "Sarah",
+    familyName: "CONNOR",
+    displayName: "Sarah CONNOR",
+    email: "sarah.connor@aptitek.io",
+    role: "instructor" as const,
+    avatarUrl:
+      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+    githubUsername: "sconnor",
+    cohortName: "Cohort 2026",
+    isProfileComplete: true,
+  },
+  {
+    id: "inst-002",
+    firstName: "Marcus",
+    familyName: "AURELIUS",
+    displayName: "Marcus AURELIUS",
+    email: "marcus.aurelius@aptitek.io",
+    role: "instructor" as const,
+    avatarUrl:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    githubUsername: "maurelius",
+    cohortName: "42 Common Core 2026",
+    isProfileComplete: true,
+  },
+];
+
 export const Default: Story = {
   args: {
     students: sampleStudents,
@@ -64,9 +93,36 @@ export const Default: Story = {
   },
 };
 
-export const Empty: Story = {
+export const LoadingSkeleton: Story = {
+  args: {
+    students: [],
+    isLoading: true,
+    skeletonCount: 6,
+    title: "Enrolled Students",
+  },
+};
+
+export const EmptyWithStaticPlaceholders: Story = {
   args: {
     students: [],
     title: "Enrolled Students",
+    emptyPlaceholderCount: 3,
+  },
+};
+
+export const InstructorDirectory: Story = {
+  args: {
+    students: sampleInstructors,
+    title: "Registered Instructors",
+    userType: "instructor",
+  },
+};
+
+export const LazyLoading: Story = {
+  args: {
+    students: sampleStudents,
+    title: "Lazy Loading Students",
+    lazy: true,
+    pageSize: 2,
   },
 };

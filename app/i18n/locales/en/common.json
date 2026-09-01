@@ -116,6 +116,7 @@
     "saving": "Saving...",
     "assignmentSaved": "Cohort assignment updated successfully",
     "impersonate": "Impersonate Student",
+    "impersonateInstructor": "Impersonate Instructor",
     "editProfile": "Edit Student Profile"
   },
   "studentGrid": {
@@ -125,7 +126,18 @@
     "clearSearchAria": "Clear search",
     "clearFilter": "Clear filter",
     "emptyMessage": "No students found in directory",
-    "countBadge": "{{count}} students"
+    "countBadge": "{{count}} students",
+    "loadingMore": "Loading more students..."
+  },
+  "instructorGrid": {
+    "title": "Registered Instructors",
+    "searchPlaceholder": "Search by name, email, github...",
+    "searchAria": "Search instructors",
+    "clearSearchAria": "Clear search",
+    "clearFilter": "Clear filter",
+    "emptyMessage": "No instructors found in directory",
+    "countBadge": "{{count}} instructors",
+    "loadingMore": "Loading more instructors..."
   },
   "admin": {
     "title": "AptiSpace LMS • Admin Management",

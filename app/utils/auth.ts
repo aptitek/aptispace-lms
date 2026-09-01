@@ -118,24 +118,33 @@ export async function loginAsAccount(
   };
 
   if (typeof window !== "undefined" && typeof fetch !== "undefined") {
-    try {
-      const res = await fetch("/api/auth/impersonate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: account.id,
-          role: account.role,
-        }),
-      });
+    const res = await fetch("/api/auth/impersonate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: account.id,
+        role: account.role,
+      }),
+    });
 
-      if (res.ok) {
-        const responseBody = (await res.json()) as { user?: AuthUser };
-        if (responseBody.user) {
-          resolvedUser = responseBody.user;
-        }
+    if (res.ok) {
+      const responseBody = (await res.json()) as { user?: AuthUser };
+      if (responseBody.user) {
+        resolvedUser = responseBody.user;
       }
-    } catch {
-      // Fallback cleanly if running offline or in tests
+    } else {
+      const errorData = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        errorCode?: string;
+      };
+      const error = new Error(
+        errorData.error || errorData.errorCode || "Impersonation failed",
+      );
+      Object.assign(error, {
+        statusCode: res.status,
+        errorCode: errorData.errorCode,
+      });
+      throw error;
     }
 
     sessionStorage.setItem("aptispace_auth_user", JSON.stringify(resolvedUser));
@@ -147,25 +156,34 @@ export async function loginAsAccount(
 export async function stopImpersonation(): Promise<AuthUser | null> {
   let resolvedUser: AuthUser | null = null;
   if (typeof window !== "undefined" && typeof fetch !== "undefined") {
-    try {
-      const res = await fetch("/api/auth/impersonate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "stop" }),
-      });
+    const res = await fetch("/api/auth/impersonate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "stop" }),
+    });
 
-      if (res.ok) {
-        const responseBody = (await res.json()) as { user?: AuthUser };
-        if (responseBody.user) {
-          resolvedUser = responseBody.user;
-          sessionStorage.setItem(
-            "aptispace_auth_user",
-            JSON.stringify(resolvedUser),
-          );
-        }
+    if (res.ok) {
+      const responseBody = (await res.json()) as { user?: AuthUser };
+      if (responseBody.user) {
+        resolvedUser = responseBody.user;
+        sessionStorage.setItem(
+          "aptispace_auth_user",
+          JSON.stringify(resolvedUser),
+        );
       }
-    } catch {
-      // Fallback
+    } else {
+      const errorData = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        errorCode?: string;
+      };
+      const error = new Error(
+        errorData.error || errorData.errorCode || "Stop impersonation failed",
+      );
+      Object.assign(error, {
+        statusCode: res.status,
+        errorCode: errorData.errorCode,
+      });
+      throw error;
     }
 
     window.location.href = "/admin";

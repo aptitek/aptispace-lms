@@ -18,4 +18,13 @@ export interface StudentGridProps {
   testId?: string;
   emptyMessage?: string;
   title?: React.ReactNode;
+  icon?: React.ReactNode;
+  searchPlaceholder?: string;
+  searchAriaLabel?: string;
+  userType?: "student" | "instructor" | "user";
+  isLoading?: boolean;
+  skeletonCount?: number;
+  lazy?: boolean;
+  pageSize?: number;
+  emptyPlaceholderCount?: number;
 }

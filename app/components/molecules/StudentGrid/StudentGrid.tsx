@@ -1,4 +1,3 @@
-import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
@@ -9,9 +8,15 @@ import ClearIcon from "@mui/icons-material/Clear";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import { CardZone } from "deckfx";
 import ProfileCardCompact from "../ProfileCardCompact/ProfileCardCompact";
+import ProfileCardSkeleton from "../ProfileCardCompact/ProfileCardSkeleton";
 import type { StudentGridProps } from "./StudentGrid.types";
 import type { CompactStudentData } from "../ProfileCardCompact/ProfileCardCompact.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
+import {
+  useStudentGridLogic,
+  STATIC_PLACEHOLDER_KEYS,
+  SKELETON_SLOT_KEYS,
+} from "./StudentGrid.helpers";
 import {
   GridContainer,
   ControlsHeader,
@@ -21,43 +26,36 @@ import {
   GridSearchField,
   ZoneWrapper,
   EmptyGridContainer,
+  EmptyStateWrapper,
+  EmptyPlaceholderGrid,
+  LoadingSentinel,
 } from "./StudentGrid.styles";
-
-function matchesStudentSearch(
-  student: CompactStudentData,
-  query: string,
-): boolean {
-  const name =
-    `${student.firstName} ${student.familyName} ${student.displayName || ""}`.toLowerCase();
-  const email = (student.email || "").toLowerCase();
-  const github = (student.githubUsername || "").toLowerCase();
-  const cohortName = (student.cohortName || "").toLowerCase();
-
-  return (
-    name.includes(query) ||
-    email.includes(query) ||
-    github.includes(query) ||
-    cohortName.includes(query)
-  );
-}
-
-function filterStudents(
-  students: CompactStudentData[],
-  rawQuery: string,
-): CompactStudentData[] {
-  const query = rawQuery.toLowerCase().trim();
-  if (!query) return students;
-  return students.filter((student) => matchesStudentSearch(student, query));
-}
 
 interface GridSearchInputProps {
   query: string;
+  placeholder?: string;
+  ariaLabel?: string;
   onChange: (nextQuery: string) => void;
   onClear: () => void;
 }
 
-function GridSearchInput({ query, onChange, onClear }: GridSearchInputProps) {
+function GridSearchInput({
+  query,
+  placeholder,
+  ariaLabel,
+  onChange,
+  onClear,
+}: GridSearchInputProps) {
   const { t } = useTranslation(["common", "auth"]);
+
+  const resolvedPlaceholder =
+    placeholder ||
+    t(
+      "common:studentGrid.searchPlaceholder",
+      "Search by name, email, github...",
+    );
+  const resolvedAriaLabel =
+    ariaLabel || t("common:studentGrid.searchAria", "Search directory");
 
   const endAdornment = query ? (
     <InputAdornment position="end">
@@ -76,15 +74,12 @@ function GridSearchInput({ query, onChange, onClear }: GridSearchInputProps) {
   return (
     <GridSearchField
       size="small"
-      placeholder={t(
-        "common:studentGrid.searchPlaceholder",
-        "Search by name, email, github...",
-      )}
+      placeholder={resolvedPlaceholder}
       value={query}
       onChange={(event) => onChange(event.target.value)}
       slotProps={{
         htmlInput: {
-          "aria-label": t("common:studentGrid.searchAria", "Search students"),
+          "aria-label": resolvedAriaLabel,
           "data-testid": "student-grid-search",
         },
         input: {
@@ -102,27 +97,37 @@ function GridSearchInput({ query, onChange, onClear }: GridSearchInputProps) {
 
 interface ControlsHeaderSlotProps {
   title?: React.ReactNode;
+  icon?: React.ReactNode;
   countLabel: string;
   showSearch: boolean;
   activeQuery: string;
+  searchPlaceholder?: string;
+  searchAriaLabel?: string;
   onQueryChange: (query: string) => void;
   onClear: () => void;
 }
 
 function ControlsHeaderSlot({
   title,
+  icon,
   countLabel,
   showSearch,
   activeQuery,
+  searchPlaceholder,
+  searchAriaLabel,
   onQueryChange,
   onClear,
 }: ControlsHeaderSlotProps) {
+  const resolvedIcon = icon || (
+    <PeopleAltIcon sx={{ fontSize: 20, color: "primary.main" }} />
+  );
+
   return (
     <ControlsHeader>
       <ControlsLeft>
         {title && (
           <CollectionTitle data-testid="student-grid-title">
-            <PeopleAltIcon sx={{ fontSize: 20, color: "primary.main" }} />
+            {resolvedIcon}
             <span>{title}</span>
           </CollectionTitle>
         )}
@@ -141,6 +146,8 @@ function ControlsHeaderSlot({
         <ControlsRight>
           <GridSearchInput
             query={activeQuery}
+            placeholder={searchPlaceholder}
+            ariaLabel={searchAriaLabel}
             onChange={onQueryChange}
             onClear={onClear}
           />
@@ -153,29 +160,86 @@ function ControlsHeaderSlot({
 interface EmptyGridProps {
   message: string;
   hasQuery: boolean;
+  placeholderCount: number;
   onReset: () => void;
 }
 
-function EmptyGridState({ message, hasQuery, onReset }: EmptyGridProps) {
+function EmptyGridState({
+  message,
+  hasQuery,
+  placeholderCount,
+  onReset,
+}: EmptyGridProps) {
   const { t } = useTranslation(["common", "auth"]);
+  const placeholderKeys = STATIC_PLACEHOLDER_KEYS.slice(0, placeholderCount);
 
   return (
-    <EmptyGridContainer data-testid="student-grid-empty">
-      <PeopleAltIcon sx={{ fontSize: 44, opacity: 0.4 }} />
-      <Typography variant="body1" sx={{ fontWeight: 600 }}>
-        {message}
-      </Typography>
-      {hasQuery && (
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={onReset}
-          data-testid="reset-filter-btn"
-        >
-          {t("common:studentGrid.clearFilter", "Clear filter")}
-        </Button>
+    <EmptyStateWrapper data-testid="student-grid-empty-state">
+      <EmptyGridContainer data-testid="student-grid-empty">
+        <PeopleAltIcon sx={{ fontSize: 44, opacity: 0.4 }} />
+        <Typography variant="body1" sx={{ fontWeight: 600 }}>
+          {message}
+        </Typography>
+        {hasQuery && (
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={onReset}
+            data-testid="reset-filter-btn"
+          >
+            {t("common:studentGrid.clearFilter", "Clear filter")}
+          </Button>
+        )}
+      </EmptyGridContainer>
+
+      {placeholderCount > 0 && (
+        <EmptyPlaceholderGrid data-testid="static-skeleton-placeholders">
+          {placeholderKeys.map((slotKey) => (
+            <ProfileCardSkeleton
+              key={slotKey}
+              variant="static"
+              animated={false}
+              opacity={0.35}
+              testId={slotKey}
+            />
+          ))}
+        </EmptyPlaceholderGrid>
       )}
-    </EmptyGridContainer>
+    </EmptyStateWrapper>
+  );
+}
+
+interface LoadingSkeletonZoneProps {
+  count: number;
+  columns: number;
+  gap: number;
+}
+
+function LoadingSkeletonZone({
+  count,
+  columns,
+  gap,
+}: LoadingSkeletonZoneProps) {
+  const keys = SKELETON_SLOT_KEYS.slice(0, count);
+
+  return (
+    <ZoneWrapper data-testid="grid-skeleton-loading-zone">
+      <CardZone
+        layout="grid"
+        columns={columns}
+        gap={gap}
+        zoneId="skeleton-collection"
+      >
+        {keys.map((slotKey) => (
+          <ProfileCardSkeleton
+            key={slotKey}
+            variant="shimmer"
+            animated={true}
+            testId={slotKey}
+          />
+        ))}
+      </CardZone>
+    </ZoneWrapper>
   );
 }
 
@@ -185,6 +249,7 @@ interface StudentCardsZoneProps {
   cohort?: CohortConfig;
   columns: number;
   gap: number;
+  zoneId?: string;
   onStudentClick?: (student: CompactStudentData) => void;
   onImpersonate?: (student: CompactStudentData) => void;
   showImpersonate?: boolean;
@@ -196,6 +261,7 @@ function StudentCardsZone({
   cohort,
   columns,
   gap,
+  zoneId = "students-collection",
   onStudentClick,
   onImpersonate,
   showImpersonate,
@@ -204,12 +270,7 @@ function StudentCardsZone({
 
   return (
     <ZoneWrapper data-testid="student-zone-wrapper">
-      <CardZone
-        layout="grid"
-        columns={columns}
-        gap={gap}
-        zoneId="students-collection"
-      >
+      <CardZone layout="grid" columns={columns} gap={gap} zoneId={zoneId}>
         {students.map((student: CompactStudentData) => (
           <ProfileCardCompact
             key={student.id}
@@ -228,86 +289,125 @@ function StudentCardsZone({
   );
 }
 
-export function StudentGrid(props: StudentGridProps) {
-  const { t } = useTranslation(["common", "auth"]);
-  const {
-    students,
-    school,
-    cohort,
-    onStudentClick,
-    onImpersonate,
-    showImpersonate,
-    searchQuery: controlledQuery,
-    onSearchChange,
-    showSearch = true,
-    columns = 3,
-    gap = 4,
-    className,
-    testId = "student-grid",
-    emptyMessage,
-    title,
-  } = props;
+interface GridBodyProps {
+  filteredStudents: CompactStudentData[];
+  displayedStudents: CompactStudentData[];
+  resolvedEmptyMessage: string;
+  hasQuery: boolean;
+  emptyPlaceholderCount: number;
+  lazy: boolean;
+  visibleCount: number;
+  isInstructor: boolean;
+  school?: SchoolConfig;
+  cohort?: CohortConfig;
+  columns: number;
+  gap: number;
+  onStudentClick?: (student: CompactStudentData) => void;
+  onImpersonate?: (student: CompactStudentData) => void;
+  showImpersonate?: boolean;
+  sentinelRef: React.RefObject<HTMLDivElement | null>;
+  onClear: () => void;
+}
 
-  const [internalQuery, setInternalQuery] = useState("");
-  const activeQuery = controlledQuery ?? internalQuery;
+function GridBody({
+  filteredStudents,
+  displayedStudents,
+  resolvedEmptyMessage,
+  hasQuery,
+  emptyPlaceholderCount,
+  lazy,
+  visibleCount,
+  isInstructor,
+  school,
+  cohort,
+  columns,
+  gap,
+  onStudentClick,
+  onImpersonate,
+  showImpersonate,
+  sentinelRef,
+  onClear,
+}: GridBodyProps) {
+  if (filteredStudents.length === 0) {
+    return (
+      <EmptyGridState
+        message={resolvedEmptyMessage}
+        hasQuery={hasQuery}
+        placeholderCount={emptyPlaceholderCount}
+        onReset={onClear}
+      />
+    );
+  }
 
-  const resolvedEmptyMessage =
-    emptyMessage ||
-    t("common:studentGrid.emptyMessage", "No students found in directory");
-
-  const resolvedTitle =
-    title !== undefined
-      ? title
-      : t("common:studentGrid.title", "Registered Students");
-
-  const handleQueryChange = (searchQueryText: string) => {
-    if (onSearchChange) {
-      onSearchChange(searchQueryText);
-    } else {
-      setInternalQuery(searchQueryText);
-    }
-  };
-
-  const handleClear = () => {
-    handleQueryChange("");
-  };
-
-  const filteredStudents = useMemo(() => {
-    return filterStudents(students, activeQuery);
-  }, [students, activeQuery]);
-
-  const countLabel = t("common:studentGrid.countBadge", {
-    count: filteredStudents.length,
-    defaultValue: `${filteredStudents.length} students`,
-  });
+  const zoneId = isInstructor
+    ? "instructors-collection"
+    : "students-collection";
 
   return (
-    <GridContainer className={className} data-testid={testId}>
+    <>
+      <StudentCardsZone
+        students={displayedStudents}
+        school={school}
+        cohort={cohort}
+        columns={columns}
+        gap={gap}
+        zoneId={zoneId}
+        onStudentClick={onStudentClick}
+        onImpersonate={onImpersonate}
+        showImpersonate={showImpersonate}
+      />
+      {lazy && visibleCount < filteredStudents.length && (
+        <LoadingSentinel
+          ref={sentinelRef}
+          data-testid="lazy-loading-sentinel"
+        />
+      )}
+    </>
+  );
+}
+
+export function StudentGrid(props: StudentGridProps) {
+  const logic = useStudentGridLogic(props);
+
+  return (
+    <GridContainer className={props.className} data-testid={logic.testId}>
       <ControlsHeaderSlot
-        title={resolvedTitle}
-        countLabel={countLabel}
-        showSearch={showSearch}
-        activeQuery={activeQuery}
-        onQueryChange={handleQueryChange}
-        onClear={handleClear}
+        title={logic.resolvedTitle}
+        icon={props.icon}
+        countLabel={logic.isLoading ? "…" : logic.countBadge}
+        showSearch={logic.showSearch}
+        activeQuery={logic.activeQuery}
+        searchPlaceholder={props.searchPlaceholder}
+        searchAriaLabel={props.searchAriaLabel}
+        onQueryChange={logic.handleQueryChange}
+        onClear={() => logic.handleQueryChange("")}
       />
 
-      {filteredStudents.length === 0 ? (
-        <EmptyGridState
-          message={resolvedEmptyMessage}
-          hasQuery={Boolean(activeQuery)}
-          onReset={handleClear}
+      {logic.isLoading ? (
+        <LoadingSkeletonZone
+          count={logic.skeletonCount}
+          columns={logic.columns}
+          gap={logic.gap}
         />
       ) : (
-        <StudentCardsZone
-          students={filteredStudents}
-          school={school}
-          cohort={cohort}
-          columns={columns}
-          gap={gap}
-          onStudentClick={onStudentClick}
-          onImpersonate={onImpersonate}
-          showImpersonate={showImpersonate}
+        <GridBody
+          filteredStudents={logic.filteredStudents}
+          displayedStudents={logic.displayedStudents}
+          resolvedEmptyMessage={logic.resolvedEmptyMessage}
+          hasQuery={Boolean(logic.activeQuery)}
+          emptyPlaceholderCount={logic.emptyPlaceholderCount}
+          lazy={logic.lazy}
+          visibleCount={logic.visibleCount}
+          isInstructor={logic.isInstructor}
+          school={props.school}
+          cohort={props.cohort}
+          columns={logic.columns}
+          gap={logic.gap}
+          onStudentClick={props.onStudentClick}
+          onImpersonate={props.onImpersonate}
+          showImpersonate={props.showImpersonate}
+          sentinelRef={logic.sentinelRef}
+          onClear={() => logic.handleQueryChange("")}
         />
       )}
     </GridContainer>

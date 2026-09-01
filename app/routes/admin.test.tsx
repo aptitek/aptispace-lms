@@ -120,6 +120,8 @@ describe("Admin Route", () => {
         user: { name: string; role: string };
         students: unknown[];
         totalStudents: number;
+        instructors: unknown[];
+        totalInstructors: number;
         schools: unknown[];
         cohorts: unknown[];
       };
@@ -127,6 +129,8 @@ describe("Admin Route", () => {
       expect(result.user.role).toBe("admin");
       expect(result.students.length).toBeGreaterThan(0);
       expect(result.totalStudents).toBe(result.students.length);
+      expect(result.instructors.length).toBeGreaterThan(0);
+      expect(result.totalInstructors).toBe(result.instructors.length);
       expect(result.schools.length).toBeGreaterThan(0);
       expect(result.cohorts.length).toBeGreaterThan(0);
     });

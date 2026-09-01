@@ -19,5 +19,8 @@
   "SERVER_ERROR": "L'exécution du serveur a échoué. Télémétrie enregistrée.",
   "UPLOAD_FAILED": "Le téléversement vers le stockage objet a échoué. Vérifiez les autorisations du compartiment R2.",
   "INVALID_FILE_TYPE": "Format de fichier non valide. Veuillez sélectionner une image valide.",
-  "FILE_TOO_LARGE": "La taille du fichier dépasse la limite autorisée pour l'avatar (2 Mo)."
+  "FILE_TOO_LARGE": "La taille du fichier dépasse la limite autorisée pour l'avatar (2 Mo).",
+  "IMPERSONATION_FAILED": "Échec de l'initialisation de la session d'usurpation. Diagnostic enregistré.",
+  "IMPERSONATION_FORBIDDEN": "Infraction de sécurité : Seuls les administrateurs sont autorisés à usurper l'identité d'utilisateurs.",
+  "IMPERSONATION_EXIT_FAILED": "Impossible de quitter le mode usurpation. Télémétrie enregistrée."
 }

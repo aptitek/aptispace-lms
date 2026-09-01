@@ -26,6 +26,19 @@ const sampleStudents: CompactStudentData[] = [
   },
 ];
 
+const sampleInstructors: CompactStudentData[] = [
+  {
+    id: "inst-1",
+    firstName: "Sarah",
+    familyName: "CONNOR",
+    email: "sarah.connor@aptitek.io",
+    role: "instructor",
+    githubUsername: "sconnor",
+    cohortName: "Cohort 2026",
+    isProfileComplete: true,
+  },
+];
+
 describe("StudentGrid Molecule", () => {
   it("exports StudentGrid component properly", () => {
     expect(StudentGrid).toBeDefined();
@@ -54,5 +67,37 @@ describe("StudentGrid Molecule", () => {
     expect(element.props.showImpersonate).toBe(true);
     expect(typeof element.props.onStudentClick).toBe("function");
     expect(typeof element.props.onImpersonate).toBe("function");
+  });
+
+  it("supports instructor userType and customized search placeholder and empty state props", () => {
+    const element = React.createElement(StudentGrid, {
+      students: sampleInstructors,
+      userType: "instructor",
+      title: "Registered Instructors",
+      searchPlaceholder: "Search instructors...",
+      emptyMessage: "No instructors available",
+      emptyPlaceholderCount: 4,
+      lazy: true,
+      pageSize: 3,
+    });
+
+    expect(element.props.userType).toBe("instructor");
+    expect(element.props.title).toBe("Registered Instructors");
+    expect(element.props.searchPlaceholder).toBe("Search instructors...");
+    expect(element.props.emptyMessage).toBe("No instructors available");
+    expect(element.props.emptyPlaceholderCount).toBe(4);
+    expect(element.props.lazy).toBe(true);
+    expect(element.props.pageSize).toBe(3);
+  });
+
+  it("supports skeleton loading state configuration", () => {
+    const element = React.createElement(StudentGrid, {
+      students: [],
+      isLoading: true,
+      skeletonCount: 6,
+    });
+
+    expect(element.props.isLoading).toBe(true);
+    expect(element.props.skeletonCount).toBe(6);
   });
 });

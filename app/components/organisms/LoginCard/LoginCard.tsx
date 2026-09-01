@@ -12,6 +12,7 @@ import {
   type AuthUser,
   type AccountDefinition,
 } from "~/utils/auth";
+import { useStatusCenter } from "~/utils/statusCenterContext";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
@@ -98,7 +99,8 @@ export default function LoginCard({
   onSuccess,
   showDevTool = import.meta.env.DEV,
 }: LoginCardProps) {
-  const { t } = useTranslation("auth");
+  const { t } = useTranslation(["auth", "errors"]);
+  const { notifyError } = useStatusCenter();
   const [loading, setLoading] = useState(false);
   const [activeUser, setActiveUser] = useState<AuthUser | null>(null);
 
@@ -106,6 +108,11 @@ export default function LoginCard({
     setLoading(true);
     try {
       await loginWithGitHub();
+    } catch (err) {
+      notifyError(err, {
+        title: t("errors:errorTitle", "System Diagnostic Alert"),
+        message: t("errors:UNAUTHENTICATED", "Authentication failed."),
+      });
     } finally {
       setLoading(false);
     }
@@ -117,6 +124,15 @@ export default function LoginCard({
       const user = await loginAsAccount(account);
       setActiveUser(user);
       onSuccess?.(user);
+    } catch (err) {
+      notifyError(err, {
+        title: t("errors:errorTitle", "System Diagnostic Alert"),
+        message: t(
+          "errors:IMPERSONATION_FAILED",
+          "Failed to initiate impersonation session.",
+        ),
+        contextData: { role: account.role, accountId: account.id },
+      });
     } finally {
       setLoading(false);
     }

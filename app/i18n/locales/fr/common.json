@@ -116,6 +116,7 @@
     "saving": "Enregistrement...",
     "assignmentSaved": "Affectation de la cohorte mise à jour avec succès",
     "impersonate": "Emprunter l'identité",
+    "impersonateInstructor": "Emprunter l'identité instructeur",
     "editProfile": "Modifier le profil étudiant"
   },
   "studentGrid": {
@@ -125,7 +126,18 @@
     "clearSearchAria": "Effacer la recherche",
     "clearFilter": "Effacer le filtre",
     "emptyMessage": "Aucun étudiant trouvé dans l'annuaire",
-    "countBadge": "{{count}} étudiants"
+    "countBadge": "{{count}} étudiants",
+    "loadingMore": "Chargement d'autres étudiants..."
+  },
+  "instructorGrid": {
+    "title": "Instructeurs Inscrits",
+    "searchPlaceholder": "Rechercher par nom, email, github...",
+    "searchAria": "Rechercher des instructeurs",
+    "clearSearchAria": "Effacer la recherche",
+    "clearFilter": "Effacer le filtre",
+    "emptyMessage": "Aucun instructeur trouvé dans l'annuaire",
+    "countBadge": "{{count}} instructeurs",
+    "loadingMore": "Chargement d'autres instructeurs..."
   },
   "admin": {
     "title": "AptiSpace LMS • Gestion Administrative",

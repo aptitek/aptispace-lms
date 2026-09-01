@@ -96,7 +96,7 @@ export const EmptyGridContainer = styled("div")(({ theme }) => {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    padding: theme.spacing(8, 3),
+    padding: theme.spacing(6, 3),
     borderRadius: "16px",
     border: `1px dashed ${theme.palette.divider}`,
     backgroundColor: alpha(theme.palette.background.paper, 0.4),
@@ -107,4 +107,26 @@ export const EmptyGridContainer = styled("div")(({ theme }) => {
       backgroundColor: alpha(theme.palette.background.paper, 0.3),
     }),
   };
+});
+
+export const EmptyStateWrapper = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  width: "100%",
+  gap: theme.spacing(3),
+}));
+
+export const EmptyPlaceholderGrid = styled("div")(({ theme }) => ({
+  display: "grid",
+  width: "100%",
+  gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+  gap: theme.spacing(2.5),
+  justifyItems: "stretch",
+  alignItems: "stretch",
+}));
+
+export const LoadingSentinel = styled("div")({
+  width: "100%",
+  height: "24px",
+  pointerEvents: "none",
 });

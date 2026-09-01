@@ -6,7 +6,7 @@ import {
   createUser,
   createAffiliation,
 } from "~/services/userService";
-import { institutions } from "~/db/schema";
+import { institutions, errorReports } from "~/db/schema";
 import { logAudit } from "~/services/assessmentService";
 import type { UserRole } from "~/utils/auth";
 import {
@@ -188,61 +188,107 @@ async function auditStopImpersonation(
   });
 }
 
+async function logTelemetryError(
+  db: Database,
+  requestUrl: string,
+  session: SessionPayload | null,
+  errorData: {
+    message: string;
+    stack?: string;
+    severity?: "security" | "error";
+    statusCode?: number;
+    contextData?: string;
+  },
+) {
+  try {
+    await db.insert(errorReports).values({
+      message: errorData.message.slice(0, 2000),
+      stack: errorData.stack?.slice(0, 10000) ?? null,
+      severity: errorData.severity ?? "error",
+      statusCode: errorData.statusCode ?? 500,
+      source: "api/auth/impersonate",
+      url: requestUrl,
+      userId: session?.userId ?? null,
+      contextData: errorData.contextData,
+      status: "open",
+    });
+  } catch {
+    // Best-effort telemetry recording
+  }
+}
+
 async function handleStopImpersonation(
   db: Database,
   currentSession: SessionPayload | null,
+  requestUrl: string,
 ) {
   if (!currentSession) {
-    return new Response(JSON.stringify({ error: "No active session found" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
+    return Response.json(
+      { error: "No active session found", errorCode: "UNAUTHENTICATED" },
+      { status: 401 },
+    );
   }
 
-  const targetAdminId = currentSession.originalUserId ?? currentSession.userId;
-  await auditStopImpersonation(db, currentSession, targetAdminId);
+  try {
+    const targetAdminId =
+      currentSession.originalUserId ?? currentSession.userId;
+    await auditStopImpersonation(db, currentSession, targetAdminId);
 
-  const adminDbUser = await getUserWithAffiliations(db, targetAdminId);
+    const adminDbUser = await getUserWithAffiliations(db, targetAdminId);
 
-  const formattedAdmin = adminDbUser
-    ? formatDbUserResult(adminDbUser, "admin")
-    : {
-        targetUserId: targetAdminId,
-        targetDisplayName: "Administrator",
-        targetUserEmail: "admin@aptitek.io",
-        targetUserRole: "admin" as UserRole,
-      };
+    const formattedAdmin = adminDbUser
+      ? formatDbUserResult(adminDbUser, "admin")
+      : {
+          targetUserId: targetAdminId,
+          targetDisplayName: "Administrator",
+          targetUserEmail: "admin@aptitek.io",
+          targetUserRole: "admin" as UserRole,
+        };
 
-  const now = Date.now();
-  const sessionToken = await signSessionToken({
-    userId: formattedAdmin.targetUserId,
-    role: "admin",
-    impersonating: false,
-    issuedAt: now,
-    expiresAt: now + 7 * 24 * 60 * 60 * 1000,
-  });
+    const now = Date.now();
+    const sessionToken = await signSessionToken({
+      userId: formattedAdmin.targetUserId,
+      role: "admin",
+      impersonating: false,
+      issuedAt: now,
+      expiresAt: now + 7 * 24 * 60 * 60 * 1000,
+    });
 
-  const sessionCookie = createSessionCookieHeader(sessionToken);
+    const sessionCookie = createSessionCookieHeader(sessionToken);
 
-  return new Response(
-    JSON.stringify({
-      success: true,
-      user: {
-        id: formattedAdmin.targetUserId,
-        name: formattedAdmin.targetDisplayName,
-        email: formattedAdmin.targetUserEmail,
-        role: "admin",
-        impersonating: false,
+    return Response.json(
+      {
+        success: true,
+        user: {
+          id: formattedAdmin.targetUserId,
+          name: formattedAdmin.targetDisplayName,
+          email: formattedAdmin.targetUserEmail,
+          role: "admin",
+          impersonating: false,
+        },
       },
-    }),
-    {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Set-Cookie": sessionCookie,
+      {
+        status: 200,
+        headers: { "Set-Cookie": sessionCookie },
       },
-    },
-  );
+    );
+  } catch (caughtError) {
+    await logTelemetryError(db, requestUrl, currentSession, {
+      message:
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Stop impersonation failed",
+      stack: caughtError instanceof Error ? caughtError.stack : undefined,
+      statusCode: 500,
+    });
+    return Response.json(
+      {
+        error: "Failed to exit impersonation mode.",
+        errorCode: "SERVER_ERROR",
+      },
+      { status: 500 },
+    );
+  }
 }
 
 interface ImpersonationPayload {
@@ -255,57 +301,76 @@ async function handleStartImpersonation(
   db: Database,
   currentSession: SessionPayload | null,
   payload: ImpersonationPayload,
+  requestUrl: string,
 ) {
-  const { targetUserId, targetUserRole, targetUserEmail, targetDisplayName } =
-    await resolveTargetUser(
-      db,
-      payload.userId,
-      payload.personaId,
-      payload.role,
+  try {
+    const { targetUserId, targetUserRole, targetUserEmail, targetDisplayName } =
+      await resolveTargetUser(
+        db,
+        payload.userId,
+        payload.personaId,
+        payload.role,
+      );
+
+    await auditImpersonation(db, currentSession, targetUserId, targetUserRole);
+
+    const now = Date.now();
+    const sessionToken = await signSessionToken({
+      userId: targetUserId,
+      role: targetUserRole,
+      impersonating: true,
+      originalUserId:
+        currentSession?.originalUserId ??
+        currentSession?.userId ??
+        targetUserId,
+      issuedAt: now,
+      expiresAt: now + 7 * 24 * 60 * 60 * 1000,
+    });
+
+    const sessionCookie = createSessionCookieHeader(sessionToken);
+
+    return Response.json(
+      {
+        success: true,
+        user: {
+          id: targetUserId,
+          name: targetDisplayName,
+          email: targetUserEmail,
+          role: targetUserRole,
+          impersonating: true,
+        },
+      },
+      {
+        status: 200,
+        headers: { "Set-Cookie": sessionCookie },
+      },
     );
-
-  await auditImpersonation(db, currentSession, targetUserId, targetUserRole);
-
-  const now = Date.now();
-  const sessionToken = await signSessionToken({
-    userId: targetUserId,
-    role: targetUserRole,
-    impersonating: true,
-    originalUserId:
-      currentSession?.originalUserId ?? currentSession?.userId ?? targetUserId,
-    issuedAt: now,
-    expiresAt: now + 7 * 24 * 60 * 60 * 1000,
-  });
-
-  const sessionCookie = createSessionCookieHeader(sessionToken);
-
-  return new Response(
-    JSON.stringify({
-      success: true,
-      user: {
-        id: targetUserId,
-        name: targetDisplayName,
-        email: targetUserEmail,
-        role: targetUserRole,
-        impersonating: true,
+  } catch (caughtError) {
+    await logTelemetryError(db, requestUrl, currentSession, {
+      message:
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Start impersonation failed",
+      stack: caughtError instanceof Error ? caughtError.stack : undefined,
+      statusCode: 500,
+      contextData: JSON.stringify({ payload }),
+    });
+    return Response.json(
+      {
+        error: "Failed to initiate impersonation session.",
+        errorCode: "SERVER_ERROR",
       },
-    }),
-    {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Set-Cookie": sessionCookie,
-      },
-    },
-  );
+      { status: 500 },
+    );
+  }
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
   if (request.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { "Content-Type": "application/json" },
-    });
+    return Response.json(
+      { error: "Method not allowed. Only POST is supported." },
+      { status: 405 },
+    );
   }
 
   const payload = (await request.json().catch(() => ({}))) as {
@@ -321,27 +386,33 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const db = getDatabaseFromContext(context);
   if (!db) {
     return Response.json(
-      { error: "Database binding unavailable." },
+      {
+        error: "Database binding unavailable.",
+        errorCode: "SERVICE_UNAVAILABLE",
+      },
       { status: 503 },
     );
   }
 
   if (payload.action === "stop" || payload.action === "revert") {
-    return handleStopImpersonation(db, currentSession);
+    return handleStopImpersonation(db, currentSession, request.url);
   }
 
   if (!isImpersonationPermitted(isDev, currentSession)) {
-    return new Response(
-      JSON.stringify({
-        error: "Forbidden: Impersonation is only allowed for Administrators",
-        code: "FORBIDDEN",
-      }),
+    await logTelemetryError(db, request.url, currentSession, {
+      message: "Security Infraction: Unauthorized impersonation attempt.",
+      severity: "security",
+      statusCode: 403,
+      contextData: JSON.stringify({ payload }),
+    });
+    return Response.json(
       {
-        status: 403,
-        headers: { "Content-Type": "application/json" },
+        error: "Forbidden: Impersonation is only allowed for Administrators",
+        errorCode: "FORBIDDEN",
       },
+      { status: 403 },
     );
   }
 
-  return handleStartImpersonation(db, currentSession, payload);
+  return handleStartImpersonation(db, currentSession, payload, request.url);
 }

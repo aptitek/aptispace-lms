@@ -411,29 +411,52 @@ export default function StudentInspector({
           </AssignmentSection>
 
           {onImpersonate && targetStudent && (
-            <Button
-              variant="outlined"
-              color="secondary"
-              size="large"
-              startIcon={<LoginRoundedIcon />}
-              onClick={() => onImpersonate(targetStudent)}
-              data-testid="inspector-impersonate-btn-standalone"
-              sx={{
-                mt: 2,
-                alignSelf: "flex-start",
-                borderRadius: "12px",
-                borderWidth: "2px",
-                fontWeight: 700,
-                "&:hover": {
-                  borderWidth: "2px",
-                },
-              }}
-            >
-              {t("common:inspector.impersonate", "Impersonate Student")}
-            </Button>
+            <InspectorImpersonateButton
+              targetStudent={targetStudent}
+              onImpersonate={onImpersonate}
+            />
           )}
         </RightPanel>
       </ContentSplit>
     </FullScreenModal>
+  );
+}
+
+interface InspectorImpersonateButtonProps {
+  targetStudent: CompactStudentData;
+  onImpersonate: (student: CompactStudentData) => void;
+}
+
+function InspectorImpersonateButton({
+  targetStudent,
+  onImpersonate,
+}: InspectorImpersonateButtonProps) {
+  const { t } = useTranslation(["common", "auth"]);
+  const isInstructor = targetStudent.role === "instructor";
+  const label = isInstructor
+    ? t("common:inspector.impersonateInstructor", "Impersonate Instructor")
+    : t("common:inspector.impersonate", "Impersonate Student");
+
+  return (
+    <Button
+      variant="outlined"
+      color="secondary"
+      size="large"
+      startIcon={<LoginRoundedIcon />}
+      onClick={() => onImpersonate(targetStudent)}
+      data-testid="inspector-impersonate-btn-standalone"
+      sx={{
+        mt: 2,
+        alignSelf: "flex-start",
+        borderRadius: "12px",
+        borderWidth: "2px",
+        fontWeight: 700,
+        "&:hover": {
+          borderWidth: "2px",
+        },
+      }}
+    >
+      {label}
+    </Button>
   );
 }
