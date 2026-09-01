@@ -1,6 +1,5 @@
 import { styled } from "@mui/material/styles";
 import Tab from "@mui/material/Tab";
-import { SOLARIZED_BASE } from "~/tokens/theme";
 
 export const PageRoot = styled("div")(({ theme }) => ({
   minHeight: "100vh",
@@ -39,7 +38,9 @@ export const StyledTabsContainer = styled("div")(({ theme }) => {
     "& .MuiTabs-indicator": {
       height: 3,
       borderRadius: "3px 3px 0 0",
-      backgroundColor: isDark ? SOLARIZED_BASE.cyan : SOLARIZED_BASE.blue,
+      backgroundColor: isDark
+        ? theme.palette.secondary.main
+        : theme.palette.primary.main,
     },
   };
 });
@@ -54,7 +55,7 @@ export const StyledTab = styled(Tab)(({ theme }) => {
     padding: theme.spacing(1, 2.5),
     color: theme.palette.text.secondary,
     "&.Mui-selected": {
-      color: isDark ? SOLARIZED_BASE.cyan : SOLARIZED_BASE.blue,
+      color: isDark ? theme.palette.secondary.main : theme.palette.primary.main,
     },
     "&.Mui-disabled": {
       opacity: 0.4,

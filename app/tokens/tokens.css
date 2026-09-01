@@ -19,9 +19,33 @@
   --color-solarized-cyan: #2aa198;
   --color-solarized-green: #859900;
 
-  /* Official EU / French identity-card flag colours (EU Reg. 2019/1157) */
-  --color-eu-blue: #003399;
-  --color-eu-gold: #ffcc00;
+  /* Official Identity Card & National / International flag colours */
+  --color-flag-eu-blue: #003399;
+  --color-flag-eu-gold: #ffcc00;
+  --color-flag-fr-blue: #002654;
+  --color-flag-fr-white: #ffffff;
+  --color-flag-fr-red: #ed2939;
+  --color-flag-uk-blue: #012169;
+  --color-flag-uk-red: #c8102e;
+  --color-flag-uk-white: #ffffff;
+  --color-eu-blue: var(--color-flag-eu-blue);
+  --color-eu-gold: var(--color-flag-eu-gold);
+
+  /* Named Role Color Tokens */
+  --color-role-student: var(--color-solarized-green);
+  --color-role-instructor: var(--color-solarized-blue);
+  --color-role-admin: var(--color-solarized-magenta);
+  --color-role-guest: var(--color-solarized-base01);
+
+  /* Named Celestial / Astronomy Tokens */
+  --color-celestial-sun-main: var(--color-solarized-yellow);
+  --color-celestial-sun-glow: #d4a400;
+  --color-celestial-sun-light: var(--color-solarized-base3);
+  --color-celestial-moon-main: var(--color-solarized-blue);
+  --color-celestial-moon-glow: var(--color-solarized-violet);
+  --color-celestial-moon-crater: var(--color-solarized-base01);
+  --color-celestial-horizon-day: var(--color-solarized-base3);
+  --color-celestial-horizon-night: var(--color-solarized-base03);
 
   /* Material 3 Expressive System Colors - Dark Mode (Solarized Dark) */
   --md-sys-color-primary: var(--color-solarized-blue); /* #268bd2 */

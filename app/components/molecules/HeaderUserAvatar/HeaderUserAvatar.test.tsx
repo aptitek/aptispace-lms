@@ -37,13 +37,13 @@ describe("HeaderUserAvatar Molecule (MD3 Sliding Pill)", () => {
   it("resolves role colors appropriately for admin, instructor, and student", () => {
     expect(mockUser.role).toBe("student");
     expect(getHeaderRoleColor("admin", darkTheme)).toBe(
-      darkTheme.palette.secondary.main,
+      darkTheme.palette.roles.admin,
     );
     expect(getHeaderRoleColor("instructor", darkTheme)).toBe(
-      darkTheme.palette.info.main,
+      darkTheme.palette.roles.instructor,
     );
     expect(getHeaderRoleColor("student", darkTheme)).toBe(
-      darkTheme.palette.success.main,
+      darkTheme.palette.roles.student,
     );
   });
 });

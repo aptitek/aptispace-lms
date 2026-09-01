@@ -5,7 +5,51 @@ import {
   resolveM3ShapeStyle,
 } from "../components/atoms/Avatar/shapes";
 
+import {
+  ROLE_COLORS,
+  CELESTIAL_COLORS,
+  EU_FLAG_COLORS,
+  FRENCH_FLAG_COLORS,
+  UK_FLAG_COLORS,
+  FLAG_COLORS,
+  NAMED_COLORS,
+  type NamedColors,
+  type RoleColors,
+  type CelestialColors,
+  type FlagColors,
+} from "./namedColors";
+
+export {
+  ROLE_COLORS,
+  CELESTIAL_COLORS,
+  EU_FLAG_COLORS,
+  FRENCH_FLAG_COLORS,
+  UK_FLAG_COLORS,
+  FLAG_COLORS,
+  NAMED_COLORS,
+  type NamedColors,
+  type RoleColors,
+  type CelestialColors,
+  type FlagColors,
+};
+
 declare module "@mui/material/styles" {
+  interface Palette {
+    roles: typeof ROLE_COLORS;
+    celestial: typeof CELESTIAL_COLORS;
+    flags: typeof FLAG_COLORS;
+  }
+  interface PaletteOptions {
+    roles?: typeof ROLE_COLORS;
+    celestial?: typeof CELESTIAL_COLORS;
+    flags?: typeof FLAG_COLORS;
+  }
+  interface Theme {
+    named: typeof NAMED_COLORS;
+  }
+  interface ThemeOptions {
+    named?: typeof NAMED_COLORS;
+  }
   interface Shape {
     borderRadius: number | string;
     m3: typeof M3_EXPRESSIVE_CATALOG;
@@ -19,32 +63,6 @@ declare module "@mui/material/styles" {
     resolve?: typeof resolveM3ShapeStyle;
   }
 }
-
-// Solarized canonical color spectrum
-export const SOLARIZED_BASE = {
-  base03: "#002b36",
-  base02: "#073642",
-  base01: "#586e75",
-  base00: "#657b83",
-  base0: "#839496",
-  base1: "#93a1a1",
-  base2: "#eee8d5",
-  base3: "#fdf6e3",
-  yellow: "#b58900",
-  orange: "#cb4b16",
-  red: "#dc322f",
-  magenta: "#d33682",
-  violet: "#6c71c4",
-  blue: "#268bd2",
-  cyan: "#2aa198",
-  green: "#859900",
-} as const;
-
-// Official EU / French identity-card flag colours (EU Reg. 2019/1157)
-export const EU_FLAG_COLORS = {
-  blue: "#003399", // EU Reflex Blue field
-  gold: "#ffcc00", // EU Yellow 12-stars circle & country code
-} as const;
 
 export const M3_SHAPE_SCALE = {
   none: 0,
@@ -86,8 +104,8 @@ const m3TooltipDarkOverrides = {
     zIndex: 1500,
   },
   tooltip: {
-    backgroundColor: SOLARIZED_BASE.base2,
-    color: SOLARIZED_BASE.base03,
+    backgroundColor: "#eee8d5",
+    color: "#002b36",
     fontSize: "0.75rem",
     fontWeight: 500,
     lineHeight: "1rem",
@@ -98,7 +116,7 @@ const m3TooltipDarkOverrides = {
     backdropFilter: "blur(8px)",
   },
   arrow: {
-    color: SOLARIZED_BASE.base2,
+    color: "#eee8d5",
   },
 };
 
@@ -107,8 +125,8 @@ const m3TooltipLightOverrides = {
     zIndex: 1500,
   },
   tooltip: {
-    backgroundColor: SOLARIZED_BASE.base02,
-    color: SOLARIZED_BASE.base3,
+    backgroundColor: "#073642",
+    color: "#fdf6e3",
     fontSize: "0.75rem",
     fontWeight: 500,
     lineHeight: "1rem",
@@ -119,7 +137,7 @@ const m3TooltipLightOverrides = {
     backdropFilter: "blur(8px)",
   },
   arrow: {
-    color: SOLARIZED_BASE.base02,
+    color: "#073642",
   },
 };
 
@@ -127,53 +145,57 @@ export const darkThemeOptions: ThemeOptions = {
   palette: {
     mode: "dark",
     primary: {
-      main: SOLARIZED_BASE.blue,
-      light: SOLARIZED_BASE.cyan,
+      main: "#268bd2",
+      light: "#2aa198",
       dark: "#1e6fa8",
-      contrastText: SOLARIZED_BASE.base3,
+      contrastText: "#fdf6e3",
     },
     secondary: {
-      main: SOLARIZED_BASE.magenta,
+      main: "#d33682",
       light: "#e0589c",
       dark: "#a82161",
-      contrastText: SOLARIZED_BASE.base3,
+      contrastText: "#fdf6e3",
     },
     error: {
-      main: SOLARIZED_BASE.red,
+      main: "#dc322f",
       light: "#e75856",
       dark: "#b02421",
-      contrastText: SOLARIZED_BASE.base3,
+      contrastText: "#fdf6e3",
     },
     warning: {
-      main: SOLARIZED_BASE.yellow,
+      main: "#b58900",
       light: "#d4a400",
       dark: "#8f6c00",
-      contrastText: SOLARIZED_BASE.base03,
+      contrastText: "#002b36",
     },
     info: {
-      main: SOLARIZED_BASE.violet,
-      light: "#8a8ed4",
-      dark: "#53579c",
-      contrastText: SOLARIZED_BASE.base3,
+      main: "#268bd2",
+      light: "#2aa198",
+      dark: "#1e6fa8",
+      contrastText: "#fdf6e3",
     },
+
     success: {
-      main: SOLARIZED_BASE.green,
+      main: "#859900",
       light: "#a1b700",
       dark: "#687a00",
-      contrastText: SOLARIZED_BASE.base03,
+      contrastText: "#002b36",
     },
     background: {
-      default: SOLARIZED_BASE.base03,
-      paper: SOLARIZED_BASE.base02,
+      default: "#002b36",
+      paper: "#073642",
     },
     text: {
-      primary: SOLARIZED_BASE.base0,
-      secondary: SOLARIZED_BASE.base01,
-      disabled: SOLARIZED_BASE.base02,
+      primary: "#839496",
+      secondary: "#586e75",
+      disabled: "#073642",
     },
     divider: "rgba(88, 110, 117, 0.25)",
+    roles: ROLE_COLORS,
+    celestial: CELESTIAL_COLORS,
+    flags: FLAG_COLORS,
     action: {
-      active: SOLARIZED_BASE.base1,
+      active: "#93a1a1",
       hover: "rgba(131, 148, 150, 0.08)",
       selected: "rgba(131, 148, 150, 0.16)",
       disabled: "rgba(88, 110, 117, 0.38)",
@@ -181,6 +203,8 @@ export const darkThemeOptions: ThemeOptions = {
       focus: "rgba(38, 139, 210, 0.25)",
     },
   },
+  named: NAMED_COLORS,
+
   typography: {
     fontFamily:
       '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -263,20 +287,20 @@ export const darkThemeOptions: ThemeOptions = {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: SOLARIZED_BASE.base03,
-          color: SOLARIZED_BASE.base0,
+          backgroundColor: "#002b36",
+          color: "#839496",
           transition: "background-color 0.3s ease, color 0.3s ease",
-          scrollbarColor: `${SOLARIZED_BASE.base01} ${SOLARIZED_BASE.base03}`,
+          scrollbarColor: "#586e75 #002b36",
           "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
             width: 8,
             height: 8,
           },
           "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
             borderRadius: 8,
-            backgroundColor: SOLARIZED_BASE.base01,
+            backgroundColor: "#586e75",
           },
           "&::-webkit-scrollbar-track, & *::-webkit-scrollbar-track": {
-            backgroundColor: SOLARIZED_BASE.base03,
+            backgroundColor: "#002b36",
           },
         },
       },
@@ -290,51 +314,55 @@ export const lightThemeOptions: ThemeOptions = {
   palette: {
     mode: "light",
     primary: {
-      main: SOLARIZED_BASE.blue,
-      light: SOLARIZED_BASE.cyan,
+      main: "#268bd2",
+      light: "#2aa198",
       dark: "#1e6fa8",
-      contrastText: SOLARIZED_BASE.base3,
+      contrastText: "#fdf6e3",
     },
     secondary: {
-      main: SOLARIZED_BASE.magenta,
+      main: "#d33682",
       light: "#e0589c",
       dark: "#a82161",
-      contrastText: SOLARIZED_BASE.base3,
+      contrastText: "#fdf6e3",
     },
     error: {
-      main: SOLARIZED_BASE.red,
+      main: "#dc322f",
       light: "#e75856",
       dark: "#b02421",
-      contrastText: SOLARIZED_BASE.base3,
+      contrastText: "#fdf6e3",
     },
     warning: {
-      main: SOLARIZED_BASE.yellow,
+      main: "#b58900",
       light: "#d4a400",
       dark: "#8f6b00",
-      contrastText: SOLARIZED_BASE.base03,
+      contrastText: "#002b36",
     },
     info: {
-      main: SOLARIZED_BASE.cyan,
-      light: "#4fb3ab",
-      dark: "#1f756f",
-      contrastText: SOLARIZED_BASE.base3,
+      main: "#268bd2",
+      light: "#2aa198",
+      dark: "#1e6fa8",
+      contrastText: "#fdf6e3",
     },
+
     success: {
-      main: SOLARIZED_BASE.green,
+      main: "#859900",
       light: "#9cb01f",
       dark: "#687500",
-      contrastText: SOLARIZED_BASE.base3,
+      contrastText: "#fdf6e3",
     },
     background: {
-      default: SOLARIZED_BASE.base3,
-      paper: SOLARIZED_BASE.base2,
+      default: "#fdf6e3",
+      paper: "#eee8d5",
     },
     text: {
-      primary: SOLARIZED_BASE.base00,
-      secondary: SOLARIZED_BASE.base01,
+      primary: "#657b83",
+      secondary: "#586e75",
       disabled: "#a0b0b5",
     },
     divider: "rgba(88, 110, 117, 0.2)",
+    roles: ROLE_COLORS,
+    celestial: CELESTIAL_COLORS,
+    flags: FLAG_COLORS,
     action: {
       hover: "rgba(0, 43, 54, 0.04)",
       selected: "rgba(0, 43, 54, 0.08)",
@@ -342,6 +370,8 @@ export const lightThemeOptions: ThemeOptions = {
       disabledBackground: "rgba(0, 43, 54, 0.12)",
     },
   },
+  named: NAMED_COLORS,
+
   typography: {
     fontFamily:
       '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
@@ -424,20 +454,20 @@ export const lightThemeOptions: ThemeOptions = {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: SOLARIZED_BASE.base3,
-          color: SOLARIZED_BASE.base00,
+          backgroundColor: "#fdf6e3",
+          color: "#657b83",
           transition: "background-color 0.3s ease, color 0.3s ease",
-          scrollbarColor: `${SOLARIZED_BASE.base1} ${SOLARIZED_BASE.base3}`,
+          scrollbarColor: "#93a1a1 #fdf6e3",
           "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
             width: 8,
             height: 8,
           },
           "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
             borderRadius: 8,
-            backgroundColor: SOLARIZED_BASE.base1,
+            backgroundColor: "#93a1a1",
           },
           "&::-webkit-scrollbar-track, & *::-webkit-scrollbar-track": {
-            backgroundColor: SOLARIZED_BASE.base3,
+            backgroundColor: "#fdf6e3",
           },
         },
       },

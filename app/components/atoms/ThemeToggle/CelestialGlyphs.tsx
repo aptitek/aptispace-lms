@@ -17,7 +17,7 @@ const StyledSunIcon = styled(LightModeIcon, {
 })<{ $iconSize: number }>(({ theme, $iconSize }) => ({
   fontSize: $iconSize,
   color: theme.palette.common.white,
-  filter: `drop-shadow(0 0 4px ${theme.palette.warning.light})`,
+  filter: `drop-shadow(0 0 4px ${theme.palette.celestial.sun.glow})`,
   display: "block",
 }));
 
@@ -26,7 +26,7 @@ const StyledMoonIcon = styled(DarkModeIcon, {
 })<{ $iconSize: number }>(({ theme, $iconSize }) => ({
   fontSize: $iconSize,
   color: theme.palette.common.white,
-  filter: `drop-shadow(0 0 4px ${theme.palette.primary.main})`,
+  filter: `drop-shadow(0 0 4px ${theme.palette.celestial.moon.glow})`,
   display: "block",
 }));
 
@@ -34,8 +34,8 @@ const StyledPeekingSun = styled(WbSunnyIcon, {
   shouldForwardProp: filterIconProp,
 })<{ $iconSize: number }>(({ theme, $iconSize }) => ({
   fontSize: $iconSize,
-  color: theme.palette.warning.light,
-  filter: `drop-shadow(0 0 3px ${theme.palette.warning.main})`,
+  color: theme.palette.celestial.sun.main,
+  filter: `drop-shadow(0 0 3px ${theme.palette.celestial.sun.glow})`,
   display: "block",
 }));
 
@@ -43,8 +43,8 @@ const StyledPeekingMoon = styled(NightlightRoundIcon, {
   shouldForwardProp: filterIconProp,
 })<{ $iconSize: number }>(({ theme, $iconSize }) => ({
   fontSize: $iconSize,
-  color: theme.palette.primary.main,
-  filter: `drop-shadow(0 0 3px ${theme.palette.primary.main})`,
+  color: theme.palette.celestial.moon.main,
+  filter: `drop-shadow(0 0 3px ${theme.palette.celestial.moon.glow})`,
   display: "block",
 }));
 

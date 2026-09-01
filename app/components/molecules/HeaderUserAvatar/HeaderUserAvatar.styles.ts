@@ -23,24 +23,23 @@ export const HiddenSvgClipDefs = styled("svg")({
   pointerEvents: "none",
 });
 
+const ROLE_KEY_MAP: Record<string, "admin" | "instructor" | "student"> = {
+  admin: "admin",
+  administrator: "admin",
+  instructor: "instructor",
+  teacher: "instructor",
+  faculty: "instructor",
+  editingteacher: "instructor",
+  student: "student",
+};
+
 export function getHeaderRoleColor(
   role: string | null | undefined,
   theme: Theme,
 ): string {
   const normalized = (role || "").toLowerCase().trim();
-  switch (normalized) {
-    case "admin":
-    case "administrator":
-      return theme.palette.secondary.main;
-    case "instructor":
-    case "teacher":
-    case "faculty":
-    case "editingteacher":
-      return theme.palette.info.main;
-    case "student":
-    default:
-      return theme.palette.success.main;
-  }
+  const roleKey = ROLE_KEY_MAP[normalized] || "student";
+  return theme.palette.roles[roleKey];
 }
 
 export const AvatarMorphTrigger = styled(ButtonBase, {
