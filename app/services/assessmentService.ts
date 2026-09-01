@@ -163,6 +163,39 @@ export async function logAudit(
   return log;
 }
 
+function resolveAuditActorId(
+  session?: {
+    userId?: string;
+    originalUserId?: string;
+    impersonating?: boolean;
+  } | null,
+): { actorUserId?: string; isImpersonating: boolean } {
+  const isImpersonating = Boolean(
+    session?.impersonating && session?.originalUserId,
+  );
+  return {
+    isImpersonating,
+    actorUserId: isImpersonating
+      ? session?.originalUserId
+      : (session?.userId ?? undefined),
+  };
+}
+
+function mergeImpersonationMetadata(
+  newValuesString: string | undefined | null,
+  meta: Record<string, unknown>,
+): string {
+  if (!newValuesString) {
+    return JSON.stringify(meta);
+  }
+  try {
+    const parsed = JSON.parse(newValuesString);
+    return JSON.stringify({ ...parsed, ...meta });
+  } catch {
+    return newValuesString;
+  }
+}
+
 export async function logImpersonatedAudit(
   db: Database,
   session:
@@ -178,33 +211,16 @@ export async function logImpersonatedAudit(
     targetUserId?: string;
   },
 ): Promise<AuditLog> {
-  const isImpersonating = Boolean(
-    session?.impersonating && session?.originalUserId,
-  );
-  const actorUserId = isImpersonating
-    ? session?.originalUserId
-    : (session?.userId ?? undefined);
+  const { actorUserId, isImpersonating } = resolveAuditActorId(session);
 
-  let newValuesString = auditFields.newValues;
-
+  let newValues = auditFields.newValues;
   if (isImpersonating) {
-    const impersonationMeta = {
+    newValues = mergeImpersonationMetadata(newValues, {
       actorUserId,
       impersonatedUserId: session?.userId,
       targetUserId: auditFields.targetUserId,
       isImpersonated: true,
-    };
-
-    if (newValuesString) {
-      try {
-        const parsed = JSON.parse(newValuesString);
-        newValuesString = JSON.stringify({ ...parsed, ...impersonationMeta });
-      } catch {
-        // If not JSON, retain as is
-      }
-    } else {
-      newValuesString = JSON.stringify(impersonationMeta);
-    }
+    });
   }
 
   return logAudit(db, {
@@ -213,6 +229,6 @@ export async function logImpersonatedAudit(
     action: auditFields.action,
     userId: actorUserId,
     oldValues: auditFields.oldValues,
-    newValues: newValuesString,
+    newValues: newValues ?? undefined,
   });
 }

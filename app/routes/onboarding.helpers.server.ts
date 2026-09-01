@@ -268,6 +268,49 @@ function classifyErrorMessage(errorMessage: string): {
   };
 }
 
+async function auditOnboardingIfImpersonating(
+  auth: Awaited<ReturnType<typeof authGuard>>,
+  userId: string | undefined | null,
+  payload: ActionFormData,
+) {
+  if (auth?.session?.impersonating && auth.db && userId) {
+    await logImpersonatedAudit(auth.db, auth.session, {
+      tableName: "users",
+      recordId: userId,
+      action: "UPDATE",
+      targetUserId: userId,
+      newValues: JSON.stringify({
+        actionType: payload.actionType,
+        firstName: payload.firstName,
+        familyName: payload.familyName,
+        schoolId: payload.school.id,
+      }),
+    });
+  }
+}
+
+function handleOnboardingError(error: unknown): Response {
+  const errorMessage =
+    error instanceof Error
+      ? error.message
+      : "Failed to process onboarding action";
+  const { errorCode } = classifyErrorMessage(errorMessage);
+
+  return Response.json(
+    {
+      success: false,
+      error: errorMessage,
+      code: errorCode,
+      errorCode,
+      details: errorMessage,
+    },
+    {
+      status: 400,
+      headers: { "Cache-Control": "no-store" },
+    },
+  );
+}
+
 export async function handleOnboardingAction(
   request: Request,
   context: unknown,
@@ -294,43 +337,11 @@ export async function handleOnboardingAction(
     }
 
     await saveUserEditsIfPresent(auth, userId, payload, validation);
-
-    if (auth?.session?.impersonating && auth.db && userId) {
-      await logImpersonatedAudit(auth.db, auth.session, {
-        tableName: "users",
-        recordId: userId,
-        action: "UPDATE",
-        targetUserId: userId,
-        newValues: JSON.stringify({
-          actionType: payload.actionType,
-          firstName: payload.firstName,
-          familyName: payload.familyName,
-          schoolId: payload.school.id,
-        }),
-      });
-    }
+    await auditOnboardingIfImpersonating(auth, userId, payload);
 
     return createActionResponse(payload.actionType, validation.fullEmail);
   } catch (error) {
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "Failed to process onboarding action";
-    const { errorCode } = classifyErrorMessage(errorMessage);
-
-    return Response.json(
-      {
-        success: false,
-        error: errorMessage,
-        code: errorCode,
-        errorCode,
-        details: errorMessage,
-      },
-      {
-        status: 400,
-        headers: { "Cache-Control": "no-store" },
-      },
-    );
+    return handleOnboardingError(error);
   }
 }
 

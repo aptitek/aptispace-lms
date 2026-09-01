@@ -330,6 +330,45 @@ function buildUserUpdatePayload(
   return payload;
 }
 
+async function auditProfileUpdateIfAuthorized(
+  db: Database,
+  session: SessionPayload | null,
+  targetUserId: string,
+  body: UpdateProfileBody,
+) {
+  if (session?.impersonating || session?.role === "admin") {
+    await logImpersonatedAudit(db, session, {
+      tableName: "users",
+      recordId: targetUserId,
+      action: "UPDATE",
+      targetUserId,
+      newValues: JSON.stringify({
+        firstName: body.firstName,
+        lastName: body.lastName,
+        email: body.email,
+      }),
+    });
+  }
+}
+
+async function applyProfileFieldUpdates(
+  db: Database,
+  targetUserId: string,
+  body: UpdateProfileBody,
+) {
+  const userPayload = buildUserUpdatePayload(body.firstName, body.lastName);
+  if (userPayload) {
+    await updateUser(db, targetUserId, userPayload);
+  }
+
+  const trimmedEmail = body.email?.trim();
+  if (trimmedEmail) {
+    await updateUserAffiliation(db, targetUserId, {
+      email: trimmedEmail.toLowerCase(),
+    });
+  }
+}
+
 async function handleUpdateProfile(
   db: Database,
   request: Request,
@@ -344,30 +383,8 @@ async function handleUpdateProfile(
     );
   }
 
-  const userPayload = buildUserUpdatePayload(body.firstName, body.lastName);
-  if (userPayload) {
-    await updateUser(db, targetUserId, userPayload);
-  }
-
-  if (body.email?.trim()) {
-    await updateUserAffiliation(db, targetUserId, {
-      email: body.email.trim().toLowerCase(),
-    });
-  }
-
-  if (session?.impersonating || session?.role === "admin") {
-    await logImpersonatedAudit(db, session, {
-      tableName: "users",
-      recordId: targetUserId,
-      action: "UPDATE",
-      targetUserId,
-      newValues: JSON.stringify({
-        firstName: body.firstName,
-        lastName: body.lastName,
-        email: body.email,
-      }),
-    });
-  }
+  await applyProfileFieldUpdates(db, targetUserId, body);
+  await auditProfileUpdateIfAuthorized(db, session, targetUserId, body);
 
   const updatedDbUser = await getUserWithAffiliations(db, targetUserId);
   const formatted = updatedDbUser ? formatAccountFromDb(updatedDbUser) : null;

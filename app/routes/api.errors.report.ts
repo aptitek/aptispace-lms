@@ -118,6 +118,64 @@ function constructReportRecord(options: BuildReportOptions): NewErrorReport {
   };
 }
 
+function resolveTelemetryContextData(
+  payload: ErrorReportInput,
+  session: Awaited<ReturnType<typeof getSession>>,
+) {
+  const isImpersonating = Boolean(
+    session?.impersonating && session?.originalUserId,
+  );
+  if (!isImpersonating) return;
+
+  const existingContext =
+    typeof payload.contextData === "string"
+      ? (() => {
+          try {
+            return JSON.parse(payload.contextData);
+          } catch {
+            return { rawContext: payload.contextData };
+          }
+        })()
+      : (payload.contextData ?? {});
+
+  payload.contextData = {
+    ...existingContext,
+    isImpersonated: true,
+    impersonatedUserId: session?.userId,
+    actorAdminUserId: session?.originalUserId,
+  };
+}
+
+function resolveTelemetryUserId(
+  session: Awaited<ReturnType<typeof getSession>>,
+): string | null {
+  const isImpersonating = Boolean(
+    session?.impersonating && session?.originalUserId,
+  );
+  return isImpersonating
+    ? (session?.originalUserId ?? null)
+    : (session?.userId ?? null);
+}
+
+async function persistErrorReport(
+  context: unknown,
+  recordToInsert: NewErrorReport,
+) {
+  const databaseInstance = getDatabaseFromContext(context);
+  if (databaseInstance) {
+    await databaseInstance.insert(errorReports).values(recordToInsert);
+  }
+}
+
+function handleTelemetryActionError(caughtError: unknown): Response {
+  const errorDetails =
+    caughtError instanceof Error ? caughtError.message : "Internal error";
+  return Response.json(
+    { error: `Failed to process telemetry report: ${errorDetails}` },
+    { status: 500 },
+  );
+}
+
 export async function action({ request, context }: ActionFunctionArgs) {
   if (request.method !== "POST") {
     return Response.json(
@@ -138,35 +196,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     const clientMeta = extractNetworkMetadata(request);
     const session = await getSession(request);
-    const isImpersonating = Boolean(
-      session?.impersonating && session?.originalUserId,
-    );
-    const userId = isImpersonating
-      ? (session?.originalUserId ?? null)
-      : (session?.userId ?? null);
-
-    if (isImpersonating) {
-      const existingContext =
-        typeof payload.contextData === "string"
-          ? (() => {
-              try {
-                return JSON.parse(payload.contextData);
-              } catch {
-                return { rawContext: payload.contextData };
-              }
-            })()
-          : (payload.contextData ?? {});
-
-      payload.contextData = {
-        ...existingContext,
-        isImpersonated: true,
-        impersonatedUserId: session?.userId,
-        actorAdminUserId: session?.originalUserId,
-      };
-    }
+    const userId = resolveTelemetryUserId(session);
+    resolveTelemetryContextData(payload, session);
 
     const reportId = crypto.randomUUID();
-
     const recordToInsert = constructReportRecord({
       reportId,
       payload,
@@ -175,10 +208,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       userId,
     });
 
-    const databaseInstance = getDatabaseFromContext(context);
-    if (databaseInstance) {
-      await databaseInstance.insert(errorReports).values(recordToInsert);
-    }
+    await persistErrorReport(context, recordToInsert);
 
     return Response.json(
       {
@@ -190,11 +220,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
       { status: 201 },
     );
   } catch (caughtError) {
-    const errorDetails =
-      caughtError instanceof Error ? caughtError.message : "Internal error";
-    return Response.json(
-      { error: `Failed to process telemetry report: ${errorDetails}` },
-      { status: 500 },
-    );
+    return handleTelemetryActionError(caughtError);
   }
 }

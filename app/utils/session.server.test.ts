@@ -165,7 +165,9 @@ describe("Session & Auth-by-Default Security Guard", () => {
       issuedAt: Date.now(),
       expiresAt: Date.now() + 3600000,
     };
-    expect(getAuditActorUserId(impersonatedSession)).toBe("admin-superuser-999");
+    expect(getAuditActorUserId(impersonatedSession)).toBe(
+      "admin-superuser-999",
+    );
     expect(getAuditActorContext(impersonatedSession)).toEqual({
       actorUserId: "admin-superuser-999",
       isImpersonating: true,
