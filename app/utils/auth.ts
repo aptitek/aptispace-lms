@@ -7,6 +7,7 @@ export interface AuthUser {
   role: UserRole;
   avatarUrl?: string;
   impersonating?: boolean;
+  originalUserId?: string;
   affiliations?: unknown[];
   isProfileComplete?: boolean;
   githubUsername?: string;
@@ -269,7 +270,11 @@ function resolveDbUserEmail(dbUser: ResolveActiveUserDbParam): string {
 
 function mapDbUserToAuth(
   dbUser: ResolveActiveUserDbParam,
-  session?: { role?: UserRole; impersonating?: boolean } | null,
+  session?: {
+    role?: UserRole;
+    impersonating?: boolean;
+    originalUserId?: string;
+  } | null,
 ): AuthUser {
   const primaryAffil = dbUser.affiliations?.[0];
   return {
@@ -279,6 +284,7 @@ function mapDbUserToAuth(
     role: resolveDbUserRole(dbUser, session?.role),
     avatarUrl: primaryAffil?.avatarUrl ?? dbUser.avatarUrl ?? undefined,
     impersonating: session?.impersonating,
+    originalUserId: session?.originalUserId,
     githubUsername: dbUser.githubId ?? undefined,
   };
 }
@@ -289,6 +295,7 @@ export function resolveActiveUser(
     userId: string;
     role: UserRole;
     impersonating?: boolean;
+    originalUserId?: string;
   } | null,
 ): AuthUser | null {
   if (dbUser) {
@@ -302,6 +309,7 @@ export function resolveActiveUser(
       email: "user@aptitek.io",
       role: session.role,
       impersonating: session.impersonating,
+      originalUserId: session.originalUserId,
     };
   }
 

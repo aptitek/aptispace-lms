@@ -24,6 +24,7 @@ import {
   createSubmission,
   gradeSubmission,
   logAudit,
+  logImpersonatedAudit,
 } from "./assessmentService";
 import {
   getAllInstitutions,
@@ -402,6 +403,30 @@ describe("Backend Database & Service Architecture", () => {
       userId: "instructor-1",
     });
     expect(audit.id).toBe("record-1");
+
+    // Impersonated audit: accounts action to admin while recording impersonated target user
+    const impersonatedAudit = await logImpersonatedAudit(
+      mockDb,
+      {
+        userId: "student-target-456",
+        role: "student",
+        impersonating: true,
+        originalUserId: "admin-actor-123",
+      },
+      {
+        tableName: "users",
+        recordId: "student-target-456",
+        action: "UPDATE",
+        targetUserId: "student-target-456",
+        newValues: JSON.stringify({ firstName: "NewName" }),
+      },
+    );
+    expect(impersonatedAudit.userId).toBe("admin-actor-123");
+    const parsedNewVals = JSON.parse(impersonatedAudit.newValues || "{}");
+    expect(parsedNewVals.actorUserId).toBe("admin-actor-123");
+    expect(parsedNewVals.impersonatedUserId).toBe("student-target-456");
+    expect(parsedNewVals.isImpersonated).toBe(true);
+    expect(parsedNewVals.firstName).toBe("NewName");
   });
 
   it("queries institutions and cohorts and manages cohort assignment", async () => {

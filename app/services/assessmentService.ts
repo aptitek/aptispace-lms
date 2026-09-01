@@ -162,3 +162,57 @@ export async function logAudit(
     .returning();
   return log;
 }
+
+export async function logImpersonatedAudit(
+  db: Database,
+  session:
+    | {
+        userId?: string;
+        originalUserId?: string;
+        impersonating?: boolean;
+        role?: string;
+      }
+    | null
+    | undefined,
+  auditFields: Omit<NewAuditLog, "createdAt" | "userId"> & {
+    targetUserId?: string;
+  },
+): Promise<AuditLog> {
+  const isImpersonating = Boolean(
+    session?.impersonating && session?.originalUserId,
+  );
+  const actorUserId = isImpersonating
+    ? session?.originalUserId
+    : (session?.userId ?? undefined);
+
+  let newValuesString = auditFields.newValues;
+
+  if (isImpersonating) {
+    const impersonationMeta = {
+      actorUserId,
+      impersonatedUserId: session?.userId,
+      targetUserId: auditFields.targetUserId,
+      isImpersonated: true,
+    };
+
+    if (newValuesString) {
+      try {
+        const parsed = JSON.parse(newValuesString);
+        newValuesString = JSON.stringify({ ...parsed, ...impersonationMeta });
+      } catch {
+        // If not JSON, retain as is
+      }
+    } else {
+      newValuesString = JSON.stringify(impersonationMeta);
+    }
+  }
+
+  return logAudit(db, {
+    tableName: auditFields.tableName,
+    recordId: auditFields.recordId,
+    action: auditFields.action,
+    userId: actorUserId,
+    oldValues: auditFields.oldValues,
+    newValues: newValuesString,
+  });
+}

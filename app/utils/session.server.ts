@@ -154,6 +154,40 @@ export async function getSession(
   return verifySessionToken(token, customSecret);
 }
 
+export interface AuditActorContext {
+  actorUserId?: string;
+  isImpersonating: boolean;
+  impersonatedUserId?: string;
+  originalUserId?: string;
+}
+
+export function getAuditActorUserId(
+  session: SessionPayload | null | undefined,
+): string | undefined {
+  if (!session) return undefined;
+  if (session.impersonating && session.originalUserId) {
+    return session.originalUserId;
+  }
+  return session.userId;
+}
+
+export function getAuditActorContext(
+  session: SessionPayload | null | undefined,
+): AuditActorContext {
+  if (!session) {
+    return { isImpersonating: false };
+  }
+  const isImpersonating = Boolean(
+    session.impersonating && session.originalUserId,
+  );
+  return {
+    actorUserId: isImpersonating ? session.originalUserId : session.userId,
+    isImpersonating,
+    impersonatedUserId: isImpersonating ? session.userId : undefined,
+    originalUserId: session.originalUserId,
+  };
+}
+
 export interface AuthGuardOptions {
   allowAnonymous?: boolean;
   requiredRole?: UserRole;
@@ -163,6 +197,7 @@ export interface AuthenticatedContext {
   session: SessionPayload;
   db: Database | null;
   user: Awaited<ReturnType<typeof getUserWithAffiliations>>;
+  actorUserId: string;
 }
 
 function throwUnauthenticated(request: Request): never {
@@ -232,5 +267,10 @@ export async function authGuard(
     ? await resolveSessionUser(db, session.userId)
     : null;
 
-  return { session, db, user };
+  const actorUserId =
+    session.impersonating && session.originalUserId
+      ? session.originalUserId
+      : session.userId;
+
+  return { session, db, user, actorUserId };
 }

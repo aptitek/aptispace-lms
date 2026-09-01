@@ -143,20 +143,49 @@ async function auditImpersonation(
   targetUserId: string,
   targetUserRole: UserRole,
 ) {
-  if (session?.userId) {
-    await logAudit(db, {
-      tableName: "impersonation_events",
-      recordId: targetUserId,
-      action: "UPDATE",
-      userId: session.userId,
-      newValues: JSON.stringify({
-        impersonatedUserId: targetUserId,
-        impersonatedRole: targetUserRole,
-        actorUserId: session.userId,
-        actorRole: session.role,
-      }),
-    });
-  }
+  const actorUserId =
+    session?.impersonating && session?.originalUserId
+      ? session.originalUserId
+      : (session?.userId ?? "admin");
+
+  await logAudit(db, {
+    tableName: "impersonation_events",
+    recordId: targetUserId,
+    action: "UPDATE",
+    userId: actorUserId,
+    newValues: JSON.stringify({
+      action: "START_IMPERSONATION",
+      impersonatedUserId: targetUserId,
+      impersonatedRole: targetUserRole,
+      actorUserId,
+      actorRole: session?.role ?? "admin",
+      isImpersonated: true,
+    }),
+  });
+}
+
+async function auditStopImpersonation(
+  db: Database,
+  session: SessionPayload | null,
+  targetAdminId: string,
+) {
+  const actorUserId =
+    session?.impersonating && session?.originalUserId
+      ? session.originalUserId
+      : (session?.userId ?? targetAdminId);
+
+  await logAudit(db, {
+    tableName: "impersonation_events",
+    recordId: targetAdminId,
+    action: "UPDATE",
+    userId: actorUserId,
+    newValues: JSON.stringify({
+      action: "STOP_IMPERSONATION",
+      actorUserId,
+      exitedUserId: session?.userId,
+      isImpersonated: false,
+    }),
+  });
 }
 
 async function handleStopImpersonation(
@@ -171,6 +200,8 @@ async function handleStopImpersonation(
   }
 
   const targetAdminId = currentSession.originalUserId ?? currentSession.userId;
+  await auditStopImpersonation(db, currentSession, targetAdminId);
+
   const adminDbUser = await getUserWithAffiliations(db, targetAdminId);
 
   const formattedAdmin = adminDbUser

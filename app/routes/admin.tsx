@@ -182,15 +182,21 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return { success: false, error: "Unauthorized" };
   }
 
+  const actorUserId =
+    auth.actorUserId ??
+    auth.session.originalUserId ??
+    auth.session.userId ??
+    auth.user.id;
+
   const formData = await request.formData();
   const intent = formData.get("intent");
 
   if (intent === "add-cohort") {
-    return handleAddCohortAction(formData, auth.db, auth.user.id);
+    return handleAddCohortAction(formData, auth.db, actorUserId);
   }
 
   if (intent === "remove-cohort") {
-    return handleRemoveCohortAction(formData, auth.db, auth.user.id);
+    return handleRemoveCohortAction(formData, auth.db, actorUserId);
   }
 
   return { success: false, error: "Unknown action" };

@@ -32,6 +32,7 @@ describe("Admin Route", () => {
           issuedAt: Date.now(),
           expiresAt: Date.now() + 10000,
         },
+        actorUserId: "admin-1",
         db: null,
         user: {
           id: "admin-1",
@@ -72,6 +73,7 @@ describe("Admin Route", () => {
           issuedAt: Date.now(),
           expiresAt: Date.now() + 10000,
         },
+        actorUserId: "admin-1",
         db: null,
         user: {
           id: "admin-1",
@@ -115,14 +117,13 @@ describe("Admin Route", () => {
       } as unknown as Parameters<typeof loader>[0];
 
       const result = (await loader(args)) as {
-        user: { role: string };
+        user: { name: string; role: string };
         students: unknown[];
         totalStudents: number;
         schools: unknown[];
         cohorts: unknown[];
       };
 
-      expect(result.user).toBeDefined();
       expect(result.user.role).toBe("admin");
       expect(result.students.length).toBeGreaterThan(0);
       expect(result.totalStudents).toBe(result.students.length);
@@ -141,6 +142,7 @@ describe("Admin Route", () => {
           issuedAt: Date.now(),
           expiresAt: Date.now() + 10000,
         },
+        actorUserId: "admin-1",
         db: mockDb,
         user: {
           id: "admin-1",
@@ -192,6 +194,7 @@ describe("Admin Route", () => {
           issuedAt: Date.now(),
           expiresAt: Date.now() + 10000,
         },
+        actorUserId: "admin-1",
         db: mockDb,
         user: {
           id: "admin-1",

@@ -11,6 +11,7 @@ import {
 } from "~/services/userService";
 import { seedDatabase, resetDatabase } from "~/db/seed";
 import { institutions, cohorts } from "~/db/schema";
+import { logImpersonatedAudit } from "~/services/assessmentService";
 import {
   DEV_PERSONAS,
   type PersonaDefinition,
@@ -351,6 +352,20 @@ async function handleUpdateProfile(
   if (body.email?.trim()) {
     await updateUserAffiliation(db, targetUserId, {
       email: body.email.trim().toLowerCase(),
+    });
+  }
+
+  if (session?.impersonating || session?.role === "admin") {
+    await logImpersonatedAudit(db, session, {
+      tableName: "users",
+      recordId: targetUserId,
+      action: "UPDATE",
+      targetUserId,
+      newValues: JSON.stringify({
+        firstName: body.firstName,
+        lastName: body.lastName,
+        email: body.email,
+      }),
     });
   }
 

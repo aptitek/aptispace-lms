@@ -4,6 +4,7 @@ import type { SchoolConfig } from "~/components/organisms/OnboardingCard/Onboard
 import { validateFixedDomainEmail } from "~/utils/emailSecurity";
 import { authGuard } from "~/utils/session.server";
 import { resolveActiveUser } from "~/utils/auth";
+import { logImpersonatedAudit } from "~/services/assessmentService";
 import {
   updateUser,
   updateUserAffiliation,
@@ -293,6 +294,21 @@ export async function handleOnboardingAction(
     }
 
     await saveUserEditsIfPresent(auth, userId, payload, validation);
+
+    if (auth?.session?.impersonating && auth.db && userId) {
+      await logImpersonatedAudit(auth.db, auth.session, {
+        tableName: "users",
+        recordId: userId,
+        action: "UPDATE",
+        targetUserId: userId,
+        newValues: JSON.stringify({
+          actionType: payload.actionType,
+          firstName: payload.firstName,
+          familyName: payload.familyName,
+          schoolId: payload.school.id,
+        }),
+      });
+    }
 
     return createActionResponse(payload.actionType, validation.fullEmail);
   } catch (error) {

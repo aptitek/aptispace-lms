@@ -6,6 +6,8 @@ import {
   createLogoutCookieHeader,
   parseSessionCookie,
   authGuard,
+  getAuditActorUserId,
+  getAuditActorContext,
   type SessionPayload,
 } from "./session.server";
 
@@ -137,5 +139,59 @@ describe("Session & Auth-by-Default Security Guard", () => {
     expect(authContext).not.toBeNull();
     expect(authContext?.session.userId).toBe("admin-1");
     expect(authContext?.session.role).toBe("admin");
+    expect(authContext?.actorUserId).toBe("admin-1");
+  });
+
+  it("getAuditActorUserId and getAuditActorContext correctly attribute impersonated sessions to the admin", () => {
+    const normalSession: SessionPayload = {
+      userId: "student-1",
+      role: "student",
+      issuedAt: Date.now(),
+      expiresAt: Date.now() + 3600000,
+    };
+    expect(getAuditActorUserId(normalSession)).toBe("student-1");
+    expect(getAuditActorContext(normalSession)).toEqual({
+      actorUserId: "student-1",
+      isImpersonating: false,
+      impersonatedUserId: undefined,
+      originalUserId: undefined,
+    });
+
+    const impersonatedSession: SessionPayload = {
+      userId: "student-1",
+      role: "student",
+      impersonating: true,
+      originalUserId: "admin-superuser-999",
+      issuedAt: Date.now(),
+      expiresAt: Date.now() + 3600000,
+    };
+    expect(getAuditActorUserId(impersonatedSession)).toBe("admin-superuser-999");
+    expect(getAuditActorContext(impersonatedSession)).toEqual({
+      actorUserId: "admin-superuser-999",
+      isImpersonating: true,
+      impersonatedUserId: "student-1",
+      originalUserId: "admin-superuser-999",
+    });
+  });
+
+  it("authGuard assigns actorUserId to the admin when impersonation is active", async () => {
+    const impersonatedToken = await signSessionToken({
+      userId: "student-target",
+      role: "student",
+      impersonating: true,
+      originalUserId: "admin-actual-actor",
+      issuedAt: Date.now(),
+      expiresAt: Date.now() + 3600000,
+    });
+
+    const impersonatedReq = new Request("http://localhost:3000/api/courses", {
+      headers: { Cookie: `aptispace_session=${impersonatedToken}` },
+    });
+
+    const authContext = await authGuard(impersonatedReq, {});
+    expect(authContext).not.toBeNull();
+    expect(authContext?.session.userId).toBe("student-target");
+    expect(authContext?.session.impersonating).toBe(true);
+    expect(authContext?.actorUserId).toBe("admin-actual-actor");
   });
 });

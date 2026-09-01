@@ -138,7 +138,33 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     const clientMeta = extractNetworkMetadata(request);
     const session = await getSession(request);
-    const userId = session?.userId ?? null;
+    const isImpersonating = Boolean(
+      session?.impersonating && session?.originalUserId,
+    );
+    const userId = isImpersonating
+      ? (session?.originalUserId ?? null)
+      : (session?.userId ?? null);
+
+    if (isImpersonating) {
+      const existingContext =
+        typeof payload.contextData === "string"
+          ? (() => {
+              try {
+                return JSON.parse(payload.contextData);
+              } catch {
+                return { rawContext: payload.contextData };
+              }
+            })()
+          : (payload.contextData ?? {});
+
+      payload.contextData = {
+        ...existingContext,
+        isImpersonated: true,
+        impersonatedUserId: session?.userId,
+        actorAdminUserId: session?.originalUserId,
+      };
+    }
+
     const reportId = crypto.randomUUID();
 
     const recordToInsert = constructReportRecord({
