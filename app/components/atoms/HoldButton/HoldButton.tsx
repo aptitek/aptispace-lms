@@ -1,0 +1,452 @@
+import React, {
+  useCallback,
+  useRef,
+  useState,
+  useEffect,
+  useId,
+  useImperativeHandle,
+} from "react";
+import type { ButtonProps } from "@mui/material/Button";
+import { useTheme, type Theme } from "@mui/material/styles";
+import {
+  useMotionValue,
+  animate,
+  useAnimation,
+  motion,
+  type AnimationPlaybackControls,
+  type MotionValue,
+} from "framer-motion";
+import {
+  HoldButtonWrapper,
+  StyledHoldButton,
+  SvgBorderContainer,
+  HiddenClipDefs,
+} from "./HoldButton.styles";
+import {
+  EXPRESSIVE_SHAPE_CATALOG,
+  resolveShapeStyle,
+  type ExpressiveShapeName,
+  type ShapeDefinition,
+  type ResolvedShapeStyle,
+} from "../Avatar/shapes";
+
+export interface HoldButtonProps extends Omit<
+  ButtonProps,
+  "onAnimationStart" | "onDragStart" | "onDragEnd" | "onDrag"
+> {
+  /** Callback fired when the button is held for the required duration */
+  onHoldComplete: () => void;
+  /** Hold duration in milliseconds (default: 1000) */
+  holdTime?: number;
+  /** Thickness of the animated outline line stroke in pixels (default: 2.5) */
+  borderThickness?: number;
+  /** Distance/gap between the button boundary and the outer outline in pixels (default: 3.5) */
+  outlineGap?: number;
+  /**
+   * M3 Expressive shape name (e.g. 'pill', 'circle', 'sunny', '4-sided-cookie', '9-sided-cookie', 'arch', 'gem', etc.)
+   * or standard radius token ('small', 'medium', 'large', 'full', etc.)
+   */
+  shape?: ExpressiveShapeName | string;
+}
+
+function triggerHaptic(type: "light" | "medium" | "heavy") {
+  if (typeof navigator !== "undefined" && navigator.vibrate) {
+    if (type === "light") navigator.vibrate(10);
+    else if (type === "medium") navigator.vibrate(20);
+    else if (type === "heavy") navigator.vibrate([30, 50, 30]);
+  }
+}
+
+/**
+ * Computes an SVG path for a rounded rectangle starting at top-center and moving clockwise.
+ */
+function getRoundedRectPath(
+  width: number,
+  height: number,
+  radius: number,
+  strokeWidth: number,
+): string {
+  if (width <= 0 || height <= 0) return "";
+
+  const halfStroke = strokeWidth / 2;
+  const x = halfStroke;
+  const y = halfStroke;
+  const w = width - strokeWidth;
+  const h = height - strokeWidth;
+
+  if (w <= 0 || h <= 0) return "";
+
+  const r = Math.max(0, Math.min(radius, w / 2, h / 2));
+
+  if (r <= 0) {
+    return `M ${x + w / 2} ${y} L ${x + w} ${y} L ${x + w} ${y + h} L ${x} ${y + h} L ${x} ${y} Z`;
+  }
+
+  return `M ${x + w / 2} ${y} L ${x + w - r} ${y} A ${r} ${r} 0 0 1 ${x + w} ${y + r} L ${x + w} ${y + h - r} A ${r} ${r} 0 0 1 ${x + w - r} ${y + h} L ${x + r} ${y + h} A ${r} ${r} 0 0 1 ${x} ${y + h - r} L ${x} ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} L ${x + w / 2} ${y} Z`;
+}
+
+function resolvePaletteColor(theme: Theme, color?: string): string {
+  if (color && color in theme.palette) {
+    return (
+      theme.palette[color as keyof typeof theme.palette] as Record<
+        string,
+        string
+      >
+    ).main;
+  }
+  return theme.palette.primary.main;
+}
+
+function getIconButtonDimension(size?: "small" | "medium" | "large"): number {
+  if (size === "small") return 40;
+  if (size === "large") return 56;
+  return 48;
+}
+
+interface PathDataParams {
+  expressiveDef?: ShapeDefinition;
+  outerWidth: number;
+  outerHeight: number;
+  outerRadius: number;
+  borderThickness: number;
+}
+
+function resolvePathData({
+  expressiveDef,
+  outerWidth,
+  outerHeight,
+  outerRadius,
+  borderThickness,
+}: PathDataParams): string {
+  if (expressiveDef) return expressiveDef.pathData;
+  return getRoundedRectPath(
+    outerWidth,
+    outerHeight,
+    outerRadius,
+    borderThickness,
+  );
+}
+
+function computeOuterBounds(
+  dimensions: { width: number; height: number },
+  computedBorderRadius: number,
+  outlineGap: number,
+) {
+  return {
+    outerWidth: dimensions.width + 2 * outlineGap,
+    outerHeight: dimensions.height + 2 * outlineGap,
+    outerRadius:
+      computedBorderRadius > 0 ? computedBorderRadius + outlineGap : 0,
+  };
+}
+
+function buildButtonBaseSx(
+  isExpressivePolygon: boolean,
+  resolvedShape: ResolvedShapeStyle,
+  clipId: string,
+) {
+  return {
+    WebkitUserSelect: "none" as const,
+    userSelect: "none" as const,
+    borderRadius: resolvedShape.borderRadius,
+    ...(isExpressivePolygon && {
+      clipPath: `url(#${clipId})`,
+      width: "100%",
+      height: "100%",
+      minWidth: "unset",
+      minHeight: "unset",
+      p: 0,
+    }),
+  };
+}
+
+function useButtonMeasure(elementRef: React.RefObject<HTMLElement | null>) {
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [computedBorderRadius, setComputedBorderRadius] = useState(8);
+
+  const measure = useCallback(() => {
+    if (!elementRef.current) return;
+    const rect = elementRef.current.getBoundingClientRect();
+    const style = window.getComputedStyle(elementRef.current);
+    const rad = parseFloat(style.borderRadius) || 8;
+    if (rect.width > 0 && rect.height > 0) {
+      setDimensions({ width: rect.width, height: rect.height });
+      setComputedBorderRadius(rad);
+    }
+  }, [elementRef]);
+
+  useEffect(() => {
+    measure();
+    if (!elementRef.current) return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(elementRef.current);
+    return () => observer.disconnect();
+  }, [measure, elementRef]);
+
+  return { dimensions, computedBorderRadius };
+}
+
+function useHoldGesture(
+  holdTime: number,
+  onHoldComplete: () => void,
+  buttonControls: ReturnType<typeof useAnimation>,
+) {
+  const progress = useMotionValue(0);
+  const opacity = useMotionValue(0);
+  const animControlsRef = useRef<AnimationPlaybackControls | null>(null);
+  const isComplete = useRef(false);
+
+  const startHold = useCallback(
+    (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (e.button === 2) return;
+      isComplete.current = false;
+
+      if (animControlsRef.current) animControlsRef.current.stop();
+
+      triggerHaptic("light");
+      opacity.set(1);
+      progress.set(0.04);
+
+      animControlsRef.current = animate(progress, 1, {
+        duration: holdTime / 1000,
+        ease: [0.2, 0, 0, 1],
+        onComplete: async () => {
+          isComplete.current = true;
+          triggerHaptic("heavy");
+          onHoldComplete();
+
+          await new Promise((r) => setTimeout(r, 200));
+          await animate(opacity, 0, { duration: 0.3 });
+          progress.set(0);
+        },
+      });
+    },
+    [holdTime, onHoldComplete, progress, opacity],
+  );
+
+  const cancelHold = useCallback(() => {
+    if (isComplete.current) return;
+    if (animControlsRef.current) animControlsRef.current.stop();
+
+    const currentProgress = progress.get();
+    if (currentProgress > 0 && currentProgress < 0.25) {
+      triggerHaptic("medium");
+      buttonControls.start({
+        x: [0, -6, 6, -6, 6, 0],
+        transition: { duration: 0.3, ease: "easeInOut" },
+      });
+    }
+
+    animate(progress, 0, { type: "spring", stiffness: 300, damping: 30 });
+    animate(opacity, 0, { duration: 0.25 });
+  }, [progress, opacity, buttonControls]);
+
+  return { progress, opacity, startHold, cancelHold };
+}
+
+interface SvgOverlayProps {
+  isExpressivePolygon: boolean;
+  pathD: string;
+  paletteColor: string;
+  borderThickness: number;
+  totalOffset: number;
+  outerWidth: number;
+  outerHeight: number;
+  progress: MotionValue<number>;
+  opacity: MotionValue<number>;
+}
+
+function SvgOverlay({
+  isExpressivePolygon,
+  pathD,
+  paletteColor,
+  borderThickness,
+  totalOffset,
+  outerWidth,
+  outerHeight,
+  progress,
+  opacity,
+}: SvgOverlayProps) {
+  if (!pathD || outerWidth <= 0 || outerHeight <= 0) return null;
+
+  if (isExpressivePolygon) {
+    const minDim = Math.min(outerWidth, outerHeight);
+    const halfStrokeRatio = borderThickness / (2 * minDim);
+    const scaleFactor = Math.max(0.01, 1 - 2 * halfStrokeRatio);
+    const normalizedStrokeWidth = borderThickness / (minDim * scaleFactor);
+
+    return (
+      <SvgBorderContainer color={paletteColor} offset={totalOffset}>
+        <g
+          transform={`translate(${outerWidth * halfStrokeRatio} ${outerHeight * halfStrokeRatio}) scale(${outerWidth * scaleFactor} ${outerHeight * scaleFactor})`}
+        >
+          <motion.path
+            d={pathD}
+            fill="none"
+            stroke={paletteColor}
+            strokeWidth={normalizedStrokeWidth}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            // eslint-disable-next-line no-restricted-syntax
+            style={{
+              pathLength: progress,
+              opacity,
+            }}
+          />
+        </g>
+      </SvgBorderContainer>
+    );
+  }
+
+  return (
+    <SvgBorderContainer color={paletteColor} offset={totalOffset}>
+      <motion.path
+        d={pathD}
+        fill="none"
+        stroke={paletteColor}
+        strokeWidth={borderThickness}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        // eslint-disable-next-line no-restricted-syntax
+        style={{
+          pathLength: progress,
+          opacity,
+        }}
+      />
+    </SvgBorderContainer>
+  );
+}
+
+function ClipDefs({ clipId, pathData }: { clipId: string; pathData?: string }) {
+  if (!pathData) return null;
+  return (
+    <HiddenClipDefs aria-hidden="true">
+      <defs>
+        <clipPath id={clipId} clipPathUnits="objectBoundingBox">
+          <path d={pathData} />
+        </clipPath>
+      </defs>
+    </HiddenClipDefs>
+  );
+}
+
+export const HoldButton = React.forwardRef<HTMLButtonElement, HoldButtonProps>(
+  (
+    {
+      onHoldComplete,
+      holdTime = 1000,
+      borderThickness = 2.5,
+      outlineGap = 3.5,
+      shape,
+      children,
+      color = "primary",
+      size,
+      sx,
+      ...props
+    },
+    forwardedRef,
+  ) => {
+    const theme = useTheme();
+    const rawId = useId();
+    const clipId = `hold-button-clip-${rawId.replace(/:/g, "")}`;
+
+    const internalRef = useRef<HTMLButtonElement | null>(null);
+    useImperativeHandle(
+      forwardedRef,
+      () => internalRef.current as HTMLButtonElement,
+    );
+
+    const { dimensions, computedBorderRadius } = useButtonMeasure(internalRef);
+    const buttonControls = useAnimation();
+    const { progress, opacity, startHold, cancelHold } = useHoldGesture(
+      holdTime,
+      onHoldComplete,
+      buttonControls,
+    );
+
+    const paletteColor = resolvePaletteColor(theme, color);
+    const expressiveDef = shape ? EXPRESSIVE_SHAPE_CATALOG[shape] : undefined;
+    const resolvedShape = resolveShapeStyle(shape);
+    const isExpressivePolygon = Boolean(expressiveDef);
+
+    const { outerWidth, outerHeight, outerRadius } = computeOuterBounds(
+      dimensions,
+      computedBorderRadius,
+      outlineGap,
+    );
+
+    const pathD = resolvePathData({
+      expressiveDef,
+      outerWidth,
+      outerHeight,
+      outerRadius,
+      borderThickness,
+    });
+
+    const iconDim = getIconButtonDimension(size);
+    const baseSx = buildButtonBaseSx(
+      isExpressivePolygon,
+      resolvedShape,
+      clipId,
+    );
+
+    return (
+      <HoldButtonWrapper
+        animate={buttonControls}
+        sx={{
+          ...(isExpressivePolygon && {
+            width: iconDim,
+            height: iconDim,
+            minWidth: iconDim,
+            minHeight: iconDim,
+            flexShrink: 0,
+          }),
+        }}
+      >
+        {isExpressivePolygon && (
+          <ClipDefs clipId={clipId} pathData={expressiveDef?.pathData} />
+        )}
+
+        <StyledHoldButton
+          ref={internalRef}
+          color={color}
+          size={size}
+          {...props}
+          onPointerDown={(e) => {
+            startHold(e);
+            props.onPointerDown?.(e);
+          }}
+          onPointerUp={(e) => {
+            cancelHold();
+            props.onPointerUp?.(e);
+          }}
+          onPointerLeave={(e) => {
+            cancelHold();
+            props.onPointerLeave?.(e);
+          }}
+          onPointerCancel={(e) => {
+            cancelHold();
+            props.onPointerCancel?.(e);
+          }}
+          sx={[baseSx, ...(Array.isArray(sx) ? sx : [sx])]}
+        >
+          {children}
+        </StyledHoldButton>
+
+        <SvgOverlay
+          isExpressivePolygon={isExpressivePolygon}
+          pathD={pathD}
+          paletteColor={paletteColor}
+          borderThickness={borderThickness}
+          totalOffset={outlineGap}
+          outerWidth={outerWidth}
+          outerHeight={outerHeight}
+          progress={progress}
+          opacity={opacity}
+        />
+      </HoldButtonWrapper>
+    );
+  },
+);
+
+HoldButton.displayName = "HoldButton";
