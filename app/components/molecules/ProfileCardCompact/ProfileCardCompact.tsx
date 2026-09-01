@@ -1,11 +1,15 @@
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
+import Box from "@mui/material/Box";
+import { alpha } from "@mui/material/styles";
 import Chip from "@mui/material/Chip";
 import LoginIcon from "@mui/icons-material/Login";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import Avatar from "../../atoms/Avatar/Avatar";
 import RoleBadge from "../../atoms/RoleBadge/RoleBadge";
 import GithubHandle from "../../atoms/GithubHandle/GithubHandle";
 import Tooltip from "../../atoms/Tooltip/Tooltip";
+import { HoldButton } from "../../atoms/HoldButton";
 import type {
   ProfileCardCompactProps,
   CompactStudentData,
@@ -210,6 +214,8 @@ interface CompactDetailsProps {
   displayName: string;
   showImpersonate?: boolean;
   onImpersonate?: (student: CompactStudentData) => void;
+  showDelete?: boolean;
+  onDelete?: (student: CompactStudentData) => void;
 }
 
 function CompactStudentDetailsSlot({
@@ -217,6 +223,8 @@ function CompactStudentDetailsSlot({
   displayName,
   showImpersonate = true,
   onImpersonate,
+  showDelete = true,
+  onDelete,
 }: CompactDetailsProps) {
   const { t } = useTranslation(["auth", "common"]);
   const firstName = student.firstName;
@@ -226,6 +234,10 @@ function CompactStudentDetailsSlot({
   const impersonateLabel = t("auth:impersonateUser", {
     name: displayName,
     defaultValue: `Impersonate ${displayName}`,
+  });
+  const deleteLabel = t("common:deleteUser", {
+    name: displayName,
+    defaultValue: `Hold to delete ${displayName}`,
   });
 
   const handleImpersonateClick = async (event: React.MouseEvent) => {
@@ -250,6 +262,8 @@ function CompactStudentDetailsSlot({
     }
   };
 
+  const shouldRenderDelete = Boolean(showDelete && onDelete);
+
   return (
     <StudentDetails>
       <StudentNameBlock data-testid="compact-student-name">
@@ -272,21 +286,127 @@ function CompactStudentDetailsSlot({
           testId="compact-github-handle"
         />
 
-        {showImpersonate && (
-          <Tooltip title={impersonateLabel} arrow placement="top">
-            <ImpersonateIconButton
-              size="small"
-              onClick={handleImpersonateClick}
-              aria-label={impersonateLabel}
-              data-testid="compact-impersonate-btn"
-            >
-              <LoginIcon sx={{ fontSize: 14 }} />
-            </ImpersonateIconButton>
-          </Tooltip>
-        )}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.75,
+            flexShrink: 0,
+          }}
+        >
+          {showImpersonate && (
+            <Tooltip title={impersonateLabel} arrow placement="top">
+              <ImpersonateIconButton
+                size="small"
+                onClick={handleImpersonateClick}
+                aria-label={impersonateLabel}
+                data-testid="compact-impersonate-btn"
+              >
+                <LoginIcon sx={{ fontSize: 14 }} />
+              </ImpersonateIconButton>
+            </Tooltip>
+          )}
+
+          {shouldRenderDelete && (
+            <Tooltip title={deleteLabel} arrow placement="top">
+              <Box
+                component="span"
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+                sx={{
+                  display: "inline-flex",
+                  width: "24px",
+                  height: "24px",
+                  flexShrink: 0,
+                }}
+              >
+                <HoldButton
+                  color="error"
+                  size="small"
+                  holdTime={1000}
+                  borderThickness={1.5}
+                  outlineGap={2}
+                  onHoldComplete={() => onDelete?.(student)}
+                  aria-label={deleteLabel}
+                  data-testid="compact-delete-btn"
+                  wrapperSx={{
+                    width: "24px",
+                    height: "24px",
+                    minWidth: "24px",
+                    maxWidth: "24px",
+                    minHeight: "24px",
+                    maxHeight: "24px",
+                    flexShrink: 0,
+                    display: "inline-flex",
+                  }}
+                  sx={{
+                    width: "24px",
+                    height: "24px",
+                    minWidth: "24px",
+                    maxWidth: "24px",
+                    minHeight: "24px",
+                    maxHeight: "24px",
+                    p: 0,
+                    padding: "3px",
+                    borderRadius: "6px",
+                    boxSizing: "border-box",
+                    color: "error.main",
+                    backgroundColor: (theme) =>
+                      alpha(theme.palette.error.main, 0.1),
+                    border: (theme) =>
+                      `1px solid ${alpha(theme.palette.error.main, 0.3)}`,
+                    transition: (theme) =>
+                      theme.transitions.create(
+                        [
+                          "background-color",
+                          "border-color",
+                          "transform",
+                          "color",
+                        ],
+                        { duration: theme.transitions.duration.shorter },
+                      ),
+                    "&:hover": {
+                      backgroundColor: (theme) =>
+                        alpha(theme.palette.error.main, 0.2),
+                      borderColor: "error.main",
+                      color: "error.main",
+                      transform: "scale(1.08)",
+                    },
+                    "& .MuiSvgIcon-root": {
+                      fontSize: "14px",
+                    },
+                  }}
+                >
+                  <DeleteOutlineRoundedIcon sx={{ fontSize: 14 }} />
+                </HoldButton>
+              </Box>
+            </Tooltip>
+          )}
+        </Box>
       </CardFooterRow>
     </StudentDetails>
   );
+}
+
+function useCardInteractivity(
+  interactive: boolean,
+  onClick: ((student: CompactStudentData) => void) | undefined,
+  student: CompactStudentData,
+) {
+  const isInteractive = Boolean(interactive && onClick);
+  const handleClick = () => {
+    if (isInteractive && onClick) {
+      onClick(student);
+    }
+  };
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const isActivationKey = event.key === "Enter" || event.key === " ";
+    if (isInteractive && isActivationKey) {
+      event.preventDefault();
+      onClick?.(student);
+    }
+  };
+  return { isInteractive, handleClick, handleKeyDown };
 }
 
 export const ProfileCardCompact = forwardRef<
@@ -301,32 +421,24 @@ export const ProfileCardCompact = forwardRef<
     onClick,
     onImpersonate,
     showImpersonate = true,
+    onDelete,
+    showDelete = true,
     interactive = true,
     className,
     testId = "profile-card-compact",
     style,
   } = props;
 
-  const isInteractive = Boolean(interactive && onClick);
+  const { isInteractive, handleClick, handleKeyDown } = useCardInteractivity(
+    interactive,
+    onClick,
+    student,
+  );
   const role: UserRole = student.role ?? "student";
   const displayName = resolveDisplayName(student);
   const cohortLabel = resolveCohortLabel(student, cohort);
   const cohortYear = resolveCohortYear(student, cohort);
   const institutionLabel = resolveInstitutionLabel(student, school);
-
-  const handleClick = () => {
-    if (isInteractive && onClick) {
-      onClick(student);
-    }
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    const isActivationKey = event.key === "Enter" || event.key === " ";
-    if (isInteractive && isActivationKey) {
-      event.preventDefault();
-      onClick?.(student);
-    }
-  };
 
   return (
     <CompactCardContainer
@@ -365,6 +477,8 @@ export const ProfileCardCompact = forwardRef<
           displayName={displayName}
           showImpersonate={showImpersonate}
           onImpersonate={onImpersonate}
+          showDelete={showDelete}
+          onDelete={onDelete}
         />
       </CardBodyRow>
     </CompactCardContainer>

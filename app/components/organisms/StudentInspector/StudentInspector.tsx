@@ -1,4 +1,3 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
@@ -12,17 +11,15 @@ import Tooltip from "@mui/material/Tooltip";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 import OnboardingCard from "../OnboardingCard/OnboardingCard";
 import FullScreenModal from "../../molecules/FullScreenModal/FullScreenModal";
+import { HoldButton } from "../../atoms/HoldButton";
 import type { CompactStudentData } from "../../molecules/ProfileCardCompact/ProfileCardCompact.types";
 import type { StudentInspectorProps } from "./StudentInspector.types";
-import type {
-  OnboardingProfile,
-  SchoolConfig,
-  CohortConfig,
-} from "../OnboardingCard/OnboardingCard.types";
+
 import {
   HeaderTitleRow,
   ContentSplit,
@@ -42,18 +39,12 @@ import {
 import {
   SchoolBadgeInline,
   SaveStatusIndicator,
-  type ProfileSaveStatus,
 } from "./StudentInspector.components";
+import { extractCohortYear } from "./StudentInspector.helpers";
 import {
-  DEFAULT_FALLBACK_SCHOOL,
-  studentToProfile,
-  isProfileIdentical,
-  resolveUpdatedAuthUser,
-  saveStudentProfileApi,
-  extractCohortYear,
-  sortCohortsBySchoolAndDate,
-  resolveAssignedCohorts,
-} from "./StudentInspector.helpers";
+  useInspectorProfileState,
+  useInspectorCohortsState,
+} from "./StudentInspector.hooks";
 
 export default function StudentInspector({
   student,
@@ -63,132 +54,32 @@ export default function StudentInspector({
   onAddCohort,
   onRemoveCohort,
   onImpersonate,
+  onDelete,
   onStudentUpdated,
   isSubmitting = false,
   className,
   "data-testid": dataTestId = "student-inspector",
 }: StudentInspectorProps) {
   const { t } = useTranslation(["common", "auth"]);
-  const [selectedCohortToAdd, setSelectedCohortToAdd] = useState<string>("");
-  const [currentProfile, setCurrentProfile] = useState<OnboardingProfile>(() =>
-    student
-      ? studentToProfile(student)
-      : studentToProfile({ id: "", firstName: "", familyName: "", email: "" }),
-  );
-  const [saveStatus, setSaveStatus] = useState<ProfileSaveStatus>("idle");
-  const lastSavedProfileRef = useRef<OnboardingProfile>(currentProfile);
+  const {
+    targetStudent,
+    currentProfile,
+    saveStatus,
+    handleProfileChange,
+    handleFieldBlur,
+  } = useInspectorProfileState(student, onStudentUpdated);
 
-  const [activeStudent, setActiveStudent] = useState<CompactStudentData | null>(
-    student,
-  );
-  const targetStudent = student || activeStudent;
-
-  useEffect(() => {
-    if (student) {
-      setActiveStudent(student);
-      const initial = studentToProfile(student);
-      setCurrentProfile(initial);
-      lastSavedProfileRef.current = initial;
-      setSaveStatus("idle");
-    }
-  }, [student]);
-
-  const performSave = useCallback(
-    async (profileToSave: OnboardingProfile) => {
-      if (
-        !targetStudent ||
-        isProfileIdentical(lastSavedProfileRef.current, profileToSave)
-      ) {
-        return;
-      }
-      setSaveStatus("saving");
-      try {
-        const payload = await saveStudentProfileApi(
-          targetStudent.id,
-          profileToSave,
-        );
-        lastSavedProfileRef.current = { ...profileToSave };
-        setSaveStatus("saved");
-        if (onStudentUpdated) {
-          onStudentUpdated(
-            resolveUpdatedAuthUser(
-              targetStudent,
-              profileToSave,
-              payload.account,
-            ),
-          );
-        }
-      } catch {
-        setSaveStatus("error");
-      }
-    },
-    [targetStudent, onStudentUpdated],
-  );
-
-  const handleProfileChange = (nextProfile: OnboardingProfile) => {
-    const avatarChanged = nextProfile.avatarUrl !== currentProfile.avatarUrl;
-    setCurrentProfile(nextProfile);
-    if (avatarChanged) {
-      void performSave(nextProfile);
-    }
-  };
-
-  const handleFieldBlur = (blurredProfile: OnboardingProfile) => {
-    void performSave(blurredProfile);
-  };
-
-  const schoolMap = useMemo(() => {
-    const map = new Map<string, SchoolConfig>();
-    for (const school of schools) {
-      map.set(school.id, school);
-    }
-    return map;
-  }, [schools]);
-
-  const sortedCohorts = useMemo(() => {
-    return sortCohortsBySchoolAndDate(cohorts, schoolMap);
-  }, [cohorts, schoolMap]);
-
-  const assignedCohorts = useMemo(() => {
-    if (!targetStudent) return [];
-    return resolveAssignedCohorts(targetStudent);
-  }, [targetStudent]);
-
-  const assignedCohortIds = useMemo(() => {
-    return new Set(assignedCohorts.map((c) => c.id));
-  }, [assignedCohorts]);
-
-  const availableToAdd = useMemo(() => {
-    return sortedCohorts.filter((c) => c.id && !assignedCohortIds.has(c.id));
-  }, [sortedCohorts, assignedCohortIds]);
-
-  const activeSchool: SchoolConfig = useMemo(() => {
-    if (!targetStudent) return DEFAULT_FALLBACK_SCHOOL;
-    const found = schools.find((s) => s.id === targetStudent.institutionId);
-    return found || schools[0] || DEFAULT_FALLBACK_SCHOOL;
-  }, [targetStudent, schools]);
-
-  const activeCohort: CohortConfig | undefined = useMemo(() => {
-    const primary = assignedCohorts[0];
-    if (!primary) return undefined;
-    const matched = cohorts.find((c) => c.id === primary.id);
-    return (
-      matched || {
-        id: primary.id,
-        name: primary.name,
-        startDate: primary.startDate ? String(primary.startDate) : undefined,
-      }
-    );
-  }, [assignedCohorts, cohorts]);
-
-  const handleAdd = () => {
-    if (!selectedCohortToAdd || !targetStudent) return;
-    void onAddCohort({
-      studentId: targetStudent.id,
-      cohortId: selectedCohortToAdd,
-    });
-    setSelectedCohortToAdd("");
-  };
+  const {
+    selectedCohortToAdd,
+    setSelectedCohortToAdd,
+    schoolMap,
+    sortedCohorts,
+    assignedCohorts,
+    availableToAdd,
+    activeSchool,
+    activeCohort,
+    handleAdd,
+  } = useInspectorCohortsState(targetStudent, schools, cohorts, onAddCohort);
 
   return (
     <FullScreenModal
@@ -410,15 +301,54 @@ export default function StudentInspector({
             </QuickAddRow>
           </AssignmentSection>
 
-          {onImpersonate && targetStudent && (
-            <InspectorImpersonateButton
-              targetStudent={targetStudent}
-              onImpersonate={onImpersonate}
-            />
-          )}
+          <InspectorActionGroup
+            targetStudent={targetStudent}
+            onImpersonate={onImpersonate}
+            onDelete={onDelete}
+          />
         </RightPanel>
       </ContentSplit>
     </FullScreenModal>
+  );
+}
+
+interface InspectorActionGroupProps {
+  targetStudent?: CompactStudentData | null;
+  onImpersonate?: (student: CompactStudentData) => void;
+  onDelete?: (student: CompactStudentData) => void;
+}
+
+function InspectorActionGroup({
+  targetStudent,
+  onImpersonate,
+  onDelete,
+}: InspectorActionGroupProps) {
+  if (!targetStudent || (!onImpersonate && !onDelete)) return null;
+
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns:
+          onImpersonate && onDelete ? "repeat(2, minmax(0, 1fr))" : "1fr",
+        gap: 2,
+        mt: 2,
+        width: "100%",
+      }}
+    >
+      {onImpersonate && (
+        <InspectorImpersonateButton
+          targetStudent={targetStudent}
+          onImpersonate={onImpersonate}
+        />
+      )}
+      {onDelete && (
+        <InspectorDeleteButton
+          targetStudent={targetStudent}
+          onDelete={onDelete}
+        />
+      )}
+    </Box>
   );
 }
 
@@ -446,11 +376,14 @@ function InspectorImpersonateButton({
       onClick={() => onImpersonate(targetStudent)}
       data-testid="inspector-impersonate-btn-standalone"
       sx={{
-        mt: 2,
-        alignSelf: "flex-start",
+        width: "100%",
+        height: "44px",
+        minHeight: "44px",
         borderRadius: "12px",
         borderWidth: "2px",
         fontWeight: 700,
+        textTransform: "none",
+        whiteSpace: "nowrap",
         "&:hover": {
           borderWidth: "2px",
         },
@@ -458,5 +391,54 @@ function InspectorImpersonateButton({
     >
       {label}
     </Button>
+  );
+}
+
+interface InspectorDeleteButtonProps {
+  targetStudent: CompactStudentData;
+  onDelete: (student: CompactStudentData) => void;
+}
+
+function InspectorDeleteButton({
+  targetStudent,
+  onDelete,
+}: InspectorDeleteButtonProps) {
+  const { t } = useTranslation(["common", "auth"]);
+  const isInstructor = targetStudent.role === "instructor";
+  const label = isInstructor
+    ? t("common:inspector.deleteInstructor", "Hold to Delete Instructor")
+    : t("common:inspector.deleteStudent", "Hold to Delete Student");
+
+  return (
+    <HoldButton
+      variant="outlined"
+      color="error"
+      size="large"
+      holdTime={1000}
+      borderThickness={2}
+      outlineGap={3.5}
+      startIcon={<DeleteOutlineRoundedIcon />}
+      onHoldComplete={() => onDelete(targetStudent)}
+      data-testid="inspector-delete-btn-standalone"
+      wrapperSx={{
+        width: "100%",
+      }}
+
+      sx={{
+        width: "100%",
+        height: "44px",
+        minHeight: "44px",
+        borderRadius: "12px",
+        borderWidth: "2px",
+        fontWeight: 700,
+        textTransform: "none",
+        whiteSpace: "nowrap",
+        "&:hover": {
+          borderWidth: "2px",
+        },
+      }}
+    >
+      {label}
+    </HoldButton>
   );
 }

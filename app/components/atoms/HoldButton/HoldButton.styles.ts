@@ -20,6 +20,7 @@ export const StyledHoldButton = styled(Button)<ButtonProps>(() => ({
   zIndex: 1,
   width: "100%",
   height: "100%",
+  minWidth: "unset",
 }));
 
 export const SvgBorderContainer = styled("svg", {

@@ -201,8 +201,23 @@ describe("Backend Database & Service Architecture", () => {
       }),
     } as unknown as ReturnType<typeof getDb>;
 
-    const { updateUser, updateUserAffiliation, isUserProfileComplete } =
-      await import("./userService");
+    const {
+      updateUser,
+      updateUserAffiliation,
+      deleteUser,
+      isUserProfileComplete,
+    } = await import("./userService");
+
+    const deleteMockDb = {
+      delete: () => ({
+        where: () => ({
+          returning: () => Promise.resolve([{ id: "user-1" }]),
+        }),
+      }),
+    } as unknown as ReturnType<typeof getDb>;
+
+    const deleteResult = await deleteUser(deleteMockDb, "user-1");
+    expect(deleteResult).toBe(true);
 
     const updatedUser = await updateUser(mockDb, "user-1", {
       firstName: "Alex",

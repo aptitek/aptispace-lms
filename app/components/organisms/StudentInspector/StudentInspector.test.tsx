@@ -76,6 +76,7 @@ describe("StudentInspector Organism", () => {
     const onStudentUpdated = vi.fn();
     const onClose = vi.fn();
     const onImpersonate = vi.fn();
+    const onDelete = vi.fn();
 
     const props = {
       student: mockStudent,
@@ -86,6 +87,7 @@ describe("StudentInspector Organism", () => {
       onRemoveCohort,
       onStudentUpdated,
       onImpersonate,
+      onDelete,
       isSubmitting: false,
     };
 
@@ -99,5 +101,6 @@ describe("StudentInspector Organism", () => {
     expect(typeof props.onRemoveCohort).toBe("function");
     expect(typeof props.onStudentUpdated).toBe("function");
     expect(typeof props.onImpersonate).toBe("function");
+    expect(typeof props.onDelete).toBe("function");
   });
 });

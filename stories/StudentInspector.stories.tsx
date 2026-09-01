@@ -96,6 +96,7 @@ export const Default: Story = {
     onRemoveCohort: () => {},
     onStudentUpdated: () => {},
     onImpersonate: () => {},
+    onDelete: () => {},
   },
 };
 
@@ -113,5 +114,6 @@ export const UnassignedStudent: Story = {
     onAddCohort: () => {},
     onRemoveCohort: () => {},
     onStudentUpdated: () => {},
+    onDelete: () => {},
   },
 };

@@ -117,8 +117,14 @@
     "assignmentSaved": "Affectation de la cohorte mise à jour avec succès",
     "impersonate": "Emprunter l'identité",
     "impersonateInstructor": "Emprunter l'identité instructeur",
+    "deleteStudent": "Maintenir pour supprimer l'étudiant",
+    "deleteInstructor": "Maintenir pour supprimer l'instructeur",
+    "deleteUser": "Maintenir pour supprimer l'utilisateur",
     "editProfile": "Modifier le profil étudiant"
   },
+  "deleteUser": "Maintenir pour supprimer {{name}}",
+  "userDeleted": "{{name}} a été supprimé avec succès.",
+  "userDeleteFailed": "Échec de la suppression de l'utilisateur.",
   "studentGrid": {
     "title": "Étudiants Inscrits",
     "searchPlaceholder": "Rechercher par nom, email, github...",

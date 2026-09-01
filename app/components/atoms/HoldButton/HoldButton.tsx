@@ -47,6 +47,8 @@ export interface HoldButtonProps extends Omit<
    * or standard radius token ('small', 'medium', 'large', 'full', etc.)
    */
   shape?: ExpressiveShapeName | string;
+  /** Optional sx props to customize the outer wrapper element */
+  wrapperSx?: ButtonProps["sx"];
 }
 
 function triggerHaptic(type: "light" | "medium" | "heavy") {
@@ -57,23 +59,18 @@ function triggerHaptic(type: "light" | "medium" | "heavy") {
   }
 }
 
+interface RectBounds {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 /**
  * Computes an SVG path for a rounded rectangle starting at top-center and moving clockwise.
  */
-function getRoundedRectPath(
-  width: number,
-  height: number,
-  radius: number,
-  strokeWidth: number,
-): string {
-  if (width <= 0 || height <= 0) return "";
-
-  const halfStroke = strokeWidth / 2;
-  const x = halfStroke;
-  const y = halfStroke;
-  const w = width - strokeWidth;
-  const h = height - strokeWidth;
-
+function getRoundedRectPath(bounds: RectBounds, radius: number): string {
+  const { x, y, w, h } = bounds;
   if (w <= 0 || h <= 0) return "";
 
   const r = Math.max(0, Math.min(radius, w / 2, h / 2));
@@ -105,38 +102,43 @@ function getIconButtonDimension(size?: "small" | "medium" | "large"): number {
 
 interface PathDataParams {
   expressiveDef?: ShapeDefinition;
-  outerWidth: number;
-  outerHeight: number;
-  outerRadius: number;
+  dimensions: { width: number; height: number };
+  computedBorderRadius: number;
+  outlineGap: number;
   borderThickness: number;
 }
 
 function resolvePathData({
   expressiveDef,
-  outerWidth,
-  outerHeight,
-  outerRadius,
+  dimensions,
+  computedBorderRadius,
+  outlineGap,
   borderThickness,
 }: PathDataParams): string {
   if (expressiveDef) return expressiveDef.pathData;
-  return getRoundedRectPath(
-    outerWidth,
-    outerHeight,
-    outerRadius,
-    borderThickness,
-  );
+
+  const halfStroke = borderThickness / 2;
+  const bounds: RectBounds = {
+    x: halfStroke,
+    y: halfStroke,
+    w: dimensions.width + 2 * outlineGap,
+    h: dimensions.height + 2 * outlineGap,
+  };
+  const r = computedBorderRadius > 0 ? computedBorderRadius + outlineGap : 0;
+
+  return getRoundedRectPath(bounds, r);
 }
 
 function computeOuterBounds(
   dimensions: { width: number; height: number },
-  computedBorderRadius: number,
   outlineGap: number,
+  borderThickness: number,
 ) {
+  const totalOffset = outlineGap + borderThickness / 2;
   return {
-    outerWidth: dimensions.width + 2 * outlineGap,
-    outerHeight: dimensions.height + 2 * outlineGap,
-    outerRadius:
-      computedBorderRadius > 0 ? computedBorderRadius + outlineGap : 0,
+    totalOffset,
+    outerWidth: dimensions.width + 2 * totalOffset,
+    outerHeight: dimensions.height + 2 * totalOffset,
   };
 }
 
@@ -144,11 +146,12 @@ function buildButtonBaseSx(
   isExpressivePolygon: boolean,
   resolvedShape: ResolvedShapeStyle,
   clipId: string,
+  hasShape: boolean,
 ) {
   return {
     WebkitUserSelect: "none" as const,
     userSelect: "none" as const,
-    borderRadius: resolvedShape.borderRadius,
+    ...(hasShape && { borderRadius: resolvedShape.borderRadius }),
     ...(isExpressivePolygon && {
       clipPath: `url(#${clipId})`,
       width: "100%",
@@ -166,11 +169,13 @@ function useButtonMeasure(elementRef: React.RefObject<HTMLElement | null>) {
 
   const measure = useCallback(() => {
     if (!elementRef.current) return;
-    const rect = elementRef.current.getBoundingClientRect();
-    const style = window.getComputedStyle(elementRef.current);
+    const el = elementRef.current;
+    const width = el.offsetWidth || el.getBoundingClientRect().width;
+    const height = el.offsetHeight || el.getBoundingClientRect().height;
+    const style = window.getComputedStyle(el);
     const rad = parseFloat(style.borderRadius) || 8;
-    if (rect.width > 0 && rect.height > 0) {
-      setDimensions({ width: rect.width, height: rect.height });
+    if (width > 0 && height > 0) {
+      setDimensions({ width, height });
       setComputedBorderRadius(rad);
     }
   }, [elementRef]);
@@ -276,30 +281,34 @@ function SvgOverlay({
     const normalizedStrokeWidth = borderThickness / (minDim * scaleFactor);
 
     return (
-      <SvgBorderContainer color={paletteColor} offset={totalOffset}>
-        <g
-          transform={`translate(${outerWidth * halfStrokeRatio} ${outerHeight * halfStrokeRatio}) scale(${outerWidth * scaleFactor} ${outerHeight * scaleFactor})`}
-        >
-          <motion.path
-            d={pathD}
-            fill="none"
-            stroke={paletteColor}
-            strokeWidth={normalizedStrokeWidth}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            // eslint-disable-next-line no-restricted-syntax
-            style={{
-              pathLength: progress,
-              opacity,
-            }}
-          />
-        </g>
+      <SvgBorderContainer
+        color={paletteColor}
+        offset={totalOffset}
+        viewBox={`0 0 ${outerWidth} ${outerHeight}`}
+      >
+        <motion.path
+          d={pathD}
+          fill="none"
+          stroke={paletteColor}
+          strokeWidth={normalizedStrokeWidth}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          // eslint-disable-next-line no-restricted-syntax
+          style={{
+            pathLength: progress,
+            opacity,
+          }}
+        />
       </SvgBorderContainer>
     );
   }
 
   return (
-    <SvgBorderContainer color={paletteColor} offset={totalOffset}>
+    <SvgBorderContainer
+      color={paletteColor}
+      offset={totalOffset}
+      viewBox={`0 0 ${outerWidth} ${outerHeight}`}
+    >
       <motion.path
         d={pathD}
         fill="none"
@@ -330,6 +339,23 @@ function ClipDefs({ clipId, pathData }: { clipId: string; pathData?: string }) {
   );
 }
 
+function resolveWrapperSx(
+  isExpressivePolygon: boolean,
+  iconDim: number,
+  wrapperSx?: ButtonProps["sx"],
+) {
+  const shapeStyles = isExpressivePolygon
+    ? {
+        width: iconDim,
+        height: iconDim,
+        minWidth: iconDim,
+        minHeight: iconDim,
+        flexShrink: 0,
+      }
+    : {};
+  return [shapeStyles, ...(Array.isArray(wrapperSx) ? wrapperSx : [wrapperSx])];
+}
+
 export const HoldButton = React.forwardRef<HTMLButtonElement, HoldButtonProps>(
   (
     {
@@ -342,6 +368,7 @@ export const HoldButton = React.forwardRef<HTMLButtonElement, HoldButtonProps>(
       color = "primary",
       size,
       sx,
+      wrapperSx,
       ...props
     },
     forwardedRef,
@@ -368,18 +395,18 @@ export const HoldButton = React.forwardRef<HTMLButtonElement, HoldButtonProps>(
     const expressiveDef = shape ? EXPRESSIVE_SHAPE_CATALOG[shape] : undefined;
     const resolvedShape = resolveShapeStyle(shape);
     const isExpressivePolygon = Boolean(expressiveDef);
-
-    const { outerWidth, outerHeight, outerRadius } = computeOuterBounds(
+    const hasShape = Boolean(shape);
+    const { totalOffset, outerWidth, outerHeight } = computeOuterBounds(
       dimensions,
-      computedBorderRadius,
       outlineGap,
+      borderThickness,
     );
 
     const pathD = resolvePathData({
       expressiveDef,
-      outerWidth,
-      outerHeight,
-      outerRadius,
+      dimensions,
+      computedBorderRadius,
+      outlineGap,
       borderThickness,
     });
 
@@ -388,21 +415,17 @@ export const HoldButton = React.forwardRef<HTMLButtonElement, HoldButtonProps>(
       isExpressivePolygon,
       resolvedShape,
       clipId,
+      hasShape,
+    );
+
+    const combinedWrapperSx = resolveWrapperSx(
+      isExpressivePolygon,
+      iconDim,
+      wrapperSx,
     );
 
     return (
-      <HoldButtonWrapper
-        animate={buttonControls}
-        sx={{
-          ...(isExpressivePolygon && {
-            width: iconDim,
-            height: iconDim,
-            minWidth: iconDim,
-            minHeight: iconDim,
-            flexShrink: 0,
-          }),
-        }}
-      >
+      <HoldButtonWrapper animate={buttonControls} sx={combinedWrapperSx}>
         {isExpressivePolygon && (
           <ClipDefs clipId={clipId} pathData={expressiveDef?.pathData} />
         )}
@@ -438,7 +461,7 @@ export const HoldButton = React.forwardRef<HTMLButtonElement, HoldButtonProps>(
           pathD={pathD}
           paletteColor={paletteColor}
           borderThickness={borderThickness}
-          totalOffset={outlineGap}
+          totalOffset={totalOffset}
           outerWidth={outerWidth}
           outerHeight={outerHeight}
           progress={progress}

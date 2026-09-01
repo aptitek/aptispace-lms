@@ -46,6 +46,10 @@ export interface StudentInspectorProps {
    */
   onImpersonate?: (student: CompactStudentData) => void;
   /**
+   * Callback to delete the inspected student
+   */
+  onDelete?: (student: CompactStudentData) => void;
+  /**
    * Callback fired when student profile is updated via the extended ProfileCard
    */
   onStudentUpdated?: (updatedUser: AuthUser) => void;

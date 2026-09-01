@@ -24,11 +24,14 @@ describe("ProfileCardCompact Molecule", () => {
 
   it("creates React element with appropriate props and student data", () => {
     const onImpersonateMock = vi.fn();
+    const onDeleteMock = vi.fn();
     const element = React.createElement(ProfileCardCompact, {
       student: mockStudent,
       variant: "elevated",
       onImpersonate: onImpersonateMock,
       showImpersonate: true,
+      onDelete: onDeleteMock,
+      showDelete: true,
     });
 
     expect(element).toBeDefined();
@@ -41,6 +44,8 @@ describe("ProfileCardCompact Molecule", () => {
     expect(element.props.variant).toBe("elevated");
     expect(element.props.showImpersonate).toBe(true);
     expect(element.props.onImpersonate).toBe(onImpersonateMock);
+    expect(element.props.showDelete).toBe(true);
+    expect(element.props.onDelete).toBe(onDeleteMock);
   });
 
   it("supports incomplete profile and custom school configuration", () => {

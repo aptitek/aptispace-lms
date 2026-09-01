@@ -49,6 +49,7 @@ describe("StudentGrid Molecule", () => {
   it("creates React element with students list and configuration props", () => {
     const onStudentClick = vi.fn();
     const onImpersonate = vi.fn();
+    const onDelete = vi.fn();
     const element = React.createElement(StudentGrid, {
       students: sampleStudents,
       columns: 3,
@@ -56,6 +57,8 @@ describe("StudentGrid Molecule", () => {
       onStudentClick,
       onImpersonate,
       showImpersonate: true,
+      onDelete,
+      showDelete: true,
       title: "Active Students",
     });
 
@@ -65,8 +68,10 @@ describe("StudentGrid Molecule", () => {
     expect(element.props.gap).toBe(4);
     expect(element.props.title).toBe("Active Students");
     expect(element.props.showImpersonate).toBe(true);
+    expect(element.props.showDelete).toBe(true);
     expect(typeof element.props.onStudentClick).toBe("function");
     expect(typeof element.props.onImpersonate).toBe("function");
+    expect(typeof element.props.onDelete).toBe("function");
   });
 
   it("supports instructor userType and customized search placeholder and empty state props", () => {

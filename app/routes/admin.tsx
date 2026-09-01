@@ -43,6 +43,7 @@ import {
   getDefaultCohorts,
   handleAddCohortAction,
   handleRemoveCohortAction,
+  handleDeleteUserAction,
   type DbUserWithAffil,
 } from "./admin.helpers";
 import {
@@ -157,6 +158,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   if (intent === "remove-cohort") {
     return handleRemoveCohortAction(formData, auth.db, actorUserId);
+  }
+
+  if (intent === "delete-user") {
+    return handleDeleteUserAction(formData, auth.db, actorUserId, auth.session);
   }
 
   return { success: false, error: "Unknown action" };
@@ -346,6 +351,37 @@ export default function AdminManagement() {
     revalidator.revalidate();
   };
 
+  const handleDeleteUser = async (student: CompactStudentData) => {
+    const studentName = `${student.firstName} ${student.familyName}`.trim();
+    try {
+      fetcher.submit(
+        { intent: "delete-user", studentId: student.id },
+        { method: "post" },
+      );
+      if (selectedStudent?.id === student.id) {
+        setSelectedStudent(null);
+      }
+      notifySuccess(
+        t("common:userDeleted", {
+          name: studentName,
+          defaultValue: `${studentName} has been deleted successfully.`,
+        }),
+      );
+    } catch (err: unknown) {
+      notifyError(err, {
+        title: t("errors:errorTitle", "System Diagnostic Alert"),
+        message: t("common:userDeleteFailed", {
+          defaultValue: "Failed to delete user.",
+        }),
+        contextData: {
+          studentId: student.id,
+          role: student.role,
+          name: studentName,
+        },
+      });
+    }
+  };
+
   const handleImpersonate = async (student: CompactStudentData) => {
     const studentName = `${student.firstName} ${student.familyName}`.trim();
     try {
@@ -409,6 +445,7 @@ export default function AdminManagement() {
                 students={loaderData.students}
                 onStudentClick={handleStudentClick}
                 onImpersonate={handleImpersonate}
+                onDelete={handleDeleteUser}
                 title={t("common:studentGrid.title", "Registered Students")}
                 testId="admin-student-grid"
               />
@@ -423,6 +460,7 @@ export default function AdminManagement() {
               onRemoveCohort={handleRemoveCohort}
               onStudentUpdated={handleStudentUpdated}
               onImpersonate={handleImpersonate}
+              onDelete={handleDeleteUser}
               isSubmitting={fetcher.state !== "idle"}
               data-testid="admin-student-inspector"
             />
@@ -441,6 +479,7 @@ export default function AdminManagement() {
                 students={loaderData.instructors}
                 onStudentClick={handleStudentClick}
                 onImpersonate={handleImpersonate}
+                onDelete={handleDeleteUser}
                 title={t(
                   "common:instructorGrid.title",
                   "Registered Instructors",
@@ -476,6 +515,7 @@ export default function AdminManagement() {
               onRemoveCohort={handleRemoveCohort}
               onStudentUpdated={handleStudentUpdated}
               onImpersonate={handleImpersonate}
+              onDelete={handleDeleteUser}
               isSubmitting={fetcher.state !== "idle"}
               data-testid="admin-instructor-inspector"
             />

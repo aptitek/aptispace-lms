@@ -40,6 +40,8 @@ export interface ProfileCardCompactProps {
   onClick?: (student: CompactStudentData) => void;
   onImpersonate?: (student: CompactStudentData) => void;
   showImpersonate?: boolean;
+  onDelete?: (student: CompactStudentData) => void;
+  showDelete?: boolean;
   interactive?: boolean;
   className?: string;
   testId?: string;

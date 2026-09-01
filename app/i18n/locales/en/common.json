@@ -117,8 +117,14 @@
     "assignmentSaved": "Cohort assignment updated successfully",
     "impersonate": "Impersonate Student",
     "impersonateInstructor": "Impersonate Instructor",
+    "deleteStudent": "Hold to Delete Student",
+    "deleteInstructor": "Hold to Delete Instructor",
+    "deleteUser": "Hold to Delete User",
     "editProfile": "Edit Student Profile"
   },
+  "deleteUser": "Hold to delete {{name}}",
+  "userDeleted": "{{name}} has been deleted successfully.",
+  "userDeleteFailed": "Failed to delete user.",
   "studentGrid": {
     "title": "Registered Students",
     "searchPlaceholder": "Search by name, email, github...",

@@ -253,6 +253,8 @@ interface StudentCardsZoneProps {
   onStudentClick?: (student: CompactStudentData) => void;
   onImpersonate?: (student: CompactStudentData) => void;
   showImpersonate?: boolean;
+  onDelete?: (student: CompactStudentData) => void;
+  showDelete?: boolean;
 }
 
 function StudentCardsZone({
@@ -265,6 +267,8 @@ function StudentCardsZone({
   onStudentClick,
   onImpersonate,
   showImpersonate,
+  onDelete,
+  showDelete,
 }: StudentCardsZoneProps) {
   const isInteractive = Boolean(onStudentClick);
 
@@ -280,6 +284,8 @@ function StudentCardsZone({
             onClick={onStudentClick}
             onImpersonate={onImpersonate}
             showImpersonate={showImpersonate}
+            onDelete={onDelete}
+            showDelete={showDelete}
             interactive={isInteractive}
             testId={`student-card-${student.id}`}
           />
@@ -305,6 +311,8 @@ interface GridBodyProps {
   onStudentClick?: (student: CompactStudentData) => void;
   onImpersonate?: (student: CompactStudentData) => void;
   showImpersonate?: boolean;
+  onDelete?: (student: CompactStudentData) => void;
+  showDelete?: boolean;
   sentinelRef: React.RefObject<HTMLDivElement | null>;
   onClear: () => void;
 }
@@ -325,6 +333,8 @@ function GridBody({
   onStudentClick,
   onImpersonate,
   showImpersonate,
+  onDelete,
+  showDelete,
   sentinelRef,
   onClear,
 }: GridBodyProps) {
@@ -355,6 +365,8 @@ function GridBody({
         onStudentClick={onStudentClick}
         onImpersonate={onImpersonate}
         showImpersonate={showImpersonate}
+        onDelete={onDelete}
+        showDelete={showDelete}
       />
       {lazy && visibleCount < filteredStudents.length && (
         <LoadingSentinel
@@ -406,6 +418,8 @@ export function StudentGrid(props: StudentGridProps) {
           onStudentClick={props.onStudentClick}
           onImpersonate={props.onImpersonate}
           showImpersonate={props.showImpersonate}
+          onDelete={props.onDelete}
+          showDelete={props.showDelete}
           sentinelRef={logic.sentinelRef}
           onClear={() => logic.handleQueryChange("")}
         />

@@ -167,6 +167,14 @@ export async function updateUserAffiliation(
   return null;
 }
 
+export async function deleteUser(db: Database, id: string): Promise<boolean> {
+  const result = await db
+    .delete(users)
+    .where(eq(users.id, id))
+    .returning({ id: users.id });
+  return result.length > 0;
+}
+
 export function isUserProfileComplete(
   user: Awaited<ReturnType<typeof getUserWithAffiliations>> | null,
 ): boolean {

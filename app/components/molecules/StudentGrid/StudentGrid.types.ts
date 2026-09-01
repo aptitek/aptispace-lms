@@ -9,6 +9,8 @@ export interface StudentGridProps {
   onStudentClick?: (student: CompactStudentData) => void;
   onImpersonate?: (student: CompactStudentData) => void;
   showImpersonate?: boolean;
+  onDelete?: (student: CompactStudentData) => void;
+  showDelete?: boolean;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
   showSearch?: boolean;
