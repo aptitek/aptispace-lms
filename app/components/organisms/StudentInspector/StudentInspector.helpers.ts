@@ -3,9 +3,9 @@ import type {
   SchoolConfig,
 } from "../OnboardingCard/OnboardingCard.types";
 import type {
-  CompactStudentData,
+  EntityCardData,
   CompactCohortItem,
-} from "../../molecules/ProfileCardCompact/ProfileCardCompact.types";
+} from "../../molecules/EntityCard/EntityCard.types";
 import type { CohortWithInstitution } from "./StudentInspector.types";
 import type { AuthUser } from "~/utils/auth";
 
@@ -17,9 +17,7 @@ export const DEFAULT_FALLBACK_SCHOOL: SchoolConfig = {
   emailDomain: "aptitek.io",
 };
 
-export function studentToProfile(
-  student: CompactStudentData,
-): OnboardingProfile {
+export function studentToProfile(student: EntityCardData): OnboardingProfile {
   return {
     firstName: student.firstName || "",
     familyName: (student.familyName || "").toUpperCase(),
@@ -30,7 +28,7 @@ export function studentToProfile(
   };
 }
 
-export function studentToAuthUser(student: CompactStudentData): AuthUser {
+export function studentToAuthUser(student: EntityCardData): AuthUser {
   return {
     id: student.id,
     name: `${student.firstName} ${student.familyName}`.trim(),
@@ -58,7 +56,7 @@ export function isProfileIdentical(
 }
 
 export function resolveUpdatedAuthUser(
-  student: CompactStudentData,
+  student: EntityCardData,
   savedProfile: OnboardingProfile,
   accountPayload?: AuthUser,
 ): AuthUser {
@@ -167,7 +165,7 @@ export function sortAssignedByDate(
 }
 
 export function resolveAssignedCohorts(
-  student: CompactStudentData,
+  student: EntityCardData,
 ): CompactCohortItem[] {
   if (student.cohorts && student.cohorts.length > 0) {
     return sortAssignedByDate(student.cohorts);

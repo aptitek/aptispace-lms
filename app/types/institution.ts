@@ -1,5 +1,5 @@
 export interface SchoolConfig {
-  id?: string;
+  id: string;
   name: string;
   slug?: string;
   logoUrl?: string | null;
@@ -9,6 +9,7 @@ export interface SchoolConfig {
 
 export interface CohortConfig {
   id?: string;
+  institutionId?: string;
   name: string;
   description?: string;
   startDate?: string | Date;

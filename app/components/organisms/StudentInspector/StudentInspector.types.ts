@@ -1,4 +1,4 @@
-import type { CompactStudentData } from "../../molecules/ProfileCardCompact/ProfileCardCompact.types";
+import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
 import type {
   SchoolConfig,
   CohortConfig,
@@ -14,7 +14,7 @@ export interface StudentInspectorProps {
   /**
    * The currently selected student data
    */
-  student: CompactStudentData | null;
+  student: EntityCardData | null;
   /**
    * Available institutions/schools
    */
@@ -44,11 +44,11 @@ export interface StudentInspectorProps {
   /**
    * Callback to impersonate the inspected student
    */
-  onImpersonate?: (student: CompactStudentData) => void;
+  onImpersonate?: (student: EntityCardData) => void;
   /**
    * Callback to delete the inspected student
    */
-  onDelete?: (student: CompactStudentData) => void;
+  onDelete?: (student: EntityCardData) => void;
   /**
    * Callback fired when student profile is updated via the extended ProfileCard
    */

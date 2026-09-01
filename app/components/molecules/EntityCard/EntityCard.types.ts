@@ -11,7 +11,7 @@ export interface CompactCohortItem {
   institutionName?: string;
 }
 
-export interface CompactStudentData {
+export interface EntityCardData {
   id: string;
   firstName: string;
   familyName: string;
@@ -30,17 +30,17 @@ export interface CompactStudentData {
   institutionName?: string;
 }
 
-export type ProfileCardCompactVariant = "elevated" | "outlined" | "glass";
+export type EntityCardVariant = "elevation" | "outlined"; // MD3 variants mapped to MUI Card
 
-export interface ProfileCardCompactProps {
-  student: CompactStudentData;
+export interface EntityCardProps {
+  entity: EntityCardData;
   school?: SchoolConfig;
   cohort?: CohortConfig;
-  variant?: ProfileCardCompactVariant;
-  onClick?: (student: CompactStudentData) => void;
-  onImpersonate?: (student: CompactStudentData) => void;
+  variant?: EntityCardVariant;
+  onClick?: (entity: EntityCardData) => void;
+  onImpersonate?: (entity: EntityCardData) => void;
   showImpersonate?: boolean;
-  onDelete?: (student: CompactStudentData) => void;
+  onDelete?: (entity: EntityCardData) => void;
   showDelete?: boolean;
   interactive?: boolean;
   className?: string;

@@ -76,18 +76,13 @@ export const GridSearchField = styled(TextField)(({ theme }) => {
   };
 });
 
-export const ZoneWrapper = styled("div")(({ theme }) => ({
+export const MD3CollectionGrid = styled("div")(({ theme }) => ({
+  display: "grid",
   width: "100%",
-  position: "relative",
-
-  "& .grid": {
-    display: "grid",
-    width: "100%",
-    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr)) !important",
-    gap: `${theme.spacing(2.5)} !important`,
-    justifyItems: "stretch",
-    alignItems: "stretch",
-  },
+  gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+  gap: theme.spacing(2),
+  justifyItems: "stretch",
+  alignItems: "stretch",
 }));
 
 export const EmptyGridContainer = styled("div")(({ theme }) => {

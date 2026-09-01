@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -8,6 +9,7 @@ import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import CircularProgress from "@mui/material/CircularProgress";
 import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
@@ -15,16 +17,12 @@ import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 import OnboardingCard from "../OnboardingCard/OnboardingCard";
-import FullScreenModal from "../../molecules/FullScreenModal/FullScreenModal";
 import { HoldButton } from "../../atoms/HoldButton";
-import type { CompactStudentData } from "../../molecules/ProfileCardCompact/ProfileCardCompact.types";
+import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
 import type { StudentInspectorProps } from "./StudentInspector.types";
 
 import {
   HeaderTitleRow,
-  ContentSplit,
-  LeftPanel,
-  RightPanel,
   AssignmentSection,
   SectionHeader,
   CohortChipsList,
@@ -81,17 +79,36 @@ export default function StudentInspector({
     handleAdd,
   } = useInspectorCohortsState(targetStudent, schools, cohorts, onAddCohort);
 
+  if (!student) return null;
+
   return (
-    <FullScreenModal
-      isOpen={Boolean(student)}
-      onClose={onClose}
-      maxWidth={1000}
-      asCard={false}
+    <Card
+      sx={{
+        p: 2,
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+        height: "calc(100vh - 200px)",
+        maxHeight: "900px",
+        overflowY: "auto",
+        position: "sticky",
+        top: 24,
+      }}
+      variant="outlined"
       className={className}
-      testId={dataTestId}
+      data-testid={dataTestId}
     >
-      <ContentSplit>
-        <LeftPanel data-testid="inspector-card-preview">
+      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <IconButton onClick={onClose} size="small" aria-label="Close inspector">
+          <CloseRoundedIcon />
+        </IconButton>
+      </Box>
+
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        <Box
+          data-testid="inspector-card-preview"
+          sx={{ display: "flex", justifyContent: "center" }}
+        >
           <OnboardingCard
             school={activeSchool}
             cohort={activeCohort}
@@ -105,9 +122,9 @@ export default function StudentInspector({
             holoVariant="rainbow"
             testId="inspector-onboarding-card"
           />
-        </LeftPanel>
+        </Box>
 
-        <RightPanel>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <AssignmentSection data-testid="inspector-assignment-section">
             <SectionHeader>
               <HeaderTitleRow>
@@ -306,16 +323,16 @@ export default function StudentInspector({
             onImpersonate={onImpersonate}
             onDelete={onDelete}
           />
-        </RightPanel>
-      </ContentSplit>
-    </FullScreenModal>
+        </Box>
+      </Box>
+    </Card>
   );
 }
 
 interface InspectorActionGroupProps {
-  targetStudent?: CompactStudentData | null;
-  onImpersonate?: (student: CompactStudentData) => void;
-  onDelete?: (student: CompactStudentData) => void;
+  targetStudent?: EntityCardData | null;
+  onImpersonate?: (student: EntityCardData) => void;
+  onDelete?: (student: EntityCardData) => void;
 }
 
 function InspectorActionGroup({
@@ -353,8 +370,8 @@ function InspectorActionGroup({
 }
 
 interface InspectorImpersonateButtonProps {
-  targetStudent: CompactStudentData;
-  onImpersonate: (student: CompactStudentData) => void;
+  targetStudent: EntityCardData;
+  onImpersonate: (student: EntityCardData) => void;
 }
 
 function InspectorImpersonateButton({
@@ -395,8 +412,8 @@ function InspectorImpersonateButton({
 }
 
 interface InspectorDeleteButtonProps {
-  targetStudent: CompactStudentData;
-  onDelete: (student: CompactStudentData) => void;
+  targetStudent: EntityCardData;
+  onDelete: (student: EntityCardData) => void;
 }
 
 function InspectorDeleteButton({

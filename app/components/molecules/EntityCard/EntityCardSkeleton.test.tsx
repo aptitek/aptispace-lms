@@ -1,16 +1,16 @@
 import { describe, it, expect } from "vitest";
 import React from "react";
-import ProfileCardSkeleton from "./ProfileCardSkeleton";
+import EntityCardSkeleton from "./EntityCardSkeleton";
 
-describe("ProfileCardSkeleton Molecule", () => {
-  it("exports ProfileCardSkeleton component properly", () => {
-    expect(ProfileCardSkeleton).toBeDefined();
-    expect(typeof ProfileCardSkeleton).toBe("function");
-    expect(ProfileCardSkeleton.name).toBe("ProfileCardSkeleton");
+describe("EntityCardSkeleton Molecule", () => {
+  it("exports EntityCardSkeleton component properly", () => {
+    expect(EntityCardSkeleton).toBeDefined();
+    expect(typeof EntityCardSkeleton).toBe("function");
+    expect(EntityCardSkeleton.name).toBe("EntityCardSkeleton");
   });
 
   it("creates React element with default shimmer props", () => {
-    const element = React.createElement(ProfileCardSkeleton, {
+    const element = React.createElement(EntityCardSkeleton, {
       variant: "shimmer",
       animated: true,
       testId: "test-shimmer-skeleton",
@@ -23,7 +23,7 @@ describe("ProfileCardSkeleton Molecule", () => {
   });
 
   it("creates React element with static placeholder props", () => {
-    const element = React.createElement(ProfileCardSkeleton, {
+    const element = React.createElement(EntityCardSkeleton, {
       variant: "static",
       animated: false,
       opacity: 0.35,

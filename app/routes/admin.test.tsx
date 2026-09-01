@@ -120,19 +120,17 @@ describe("Admin Route", () => {
 
       const result = (await loader(args)) as {
         user: { name: string; role: string };
-        students: unknown[];
-        totalStudents: number;
-        instructors: unknown[];
-        totalInstructors: number;
+        users: unknown[];
+        totalUsers: number;
         schools: unknown[];
         cohorts: unknown[];
+        schoolStudentCounts: Record<string, number>;
+        cohortStudentCounts: Record<string, number>;
       };
 
       expect(result.user.role).toBe("admin");
-      expect(result.students.length).toBeGreaterThan(0);
-      expect(result.totalStudents).toBe(result.students.length);
-      expect(result.instructors.length).toBeGreaterThan(0);
-      expect(result.totalInstructors).toBe(result.instructors.length);
+      expect(result.users.length).toBeGreaterThan(0);
+      expect(result.totalUsers).toBe(result.users.length);
       expect(result.schools.length).toBeGreaterThan(0);
       expect(result.cohorts.length).toBeGreaterThan(0);
     });

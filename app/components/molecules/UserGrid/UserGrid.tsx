@@ -6,17 +6,16 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
-import { CardZone } from "deckfx";
-import ProfileCardCompact from "../ProfileCardCompact/ProfileCardCompact";
-import ProfileCardSkeleton from "../ProfileCardCompact/ProfileCardSkeleton";
-import type { StudentGridProps } from "./StudentGrid.types";
-import type { CompactStudentData } from "../ProfileCardCompact/ProfileCardCompact.types";
+import EntityCard from "../EntityCard/EntityCard";
+import EntityCardSkeleton from "../EntityCard/EntityCardSkeleton";
+import type { UserGridProps } from "./UserGrid.types";
+import type { EntityCardData } from "../EntityCard/EntityCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import {
-  useStudentGridLogic,
+  useUserGridLogic,
   STATIC_PLACEHOLDER_KEYS,
   SKELETON_SLOT_KEYS,
-} from "./StudentGrid.helpers";
+} from "./UserGrid.helpers";
 import {
   GridContainer,
   ControlsHeader,
@@ -24,12 +23,12 @@ import {
   CollectionTitle,
   ControlsRight,
   GridSearchField,
-  ZoneWrapper,
+  MD3CollectionGrid,
   EmptyGridContainer,
   EmptyStateWrapper,
   EmptyPlaceholderGrid,
   LoadingSentinel,
-} from "./StudentGrid.styles";
+} from "./UserGrid.styles";
 
 interface GridSearchInputProps {
   query: string;
@@ -50,12 +49,9 @@ function GridSearchInput({
 
   const resolvedPlaceholder =
     placeholder ||
-    t(
-      "common:studentGrid.searchPlaceholder",
-      "Search by name, email, github...",
-    );
+    t("common:userGrid.searchPlaceholder", "Search by name, email, github...");
   const resolvedAriaLabel =
-    ariaLabel || t("common:studentGrid.searchAria", "Search directory");
+    ariaLabel || t("common:userGrid.searchAria", "Search directory");
 
   const endAdornment = query ? (
     <InputAdornment position="end">
@@ -63,7 +59,7 @@ function GridSearchInput({
         size="small"
         onClick={onClear}
         sx={{ minWidth: "auto", p: 0.5 }}
-        aria-label={t("common:studentGrid.clearSearchAria", "Clear search")}
+        aria-label={t("common:userGrid.clearSearchAria", "Clear search")}
         data-testid="clear-search-btn"
       >
         <ClearIcon sx={{ fontSize: 16 }} />
@@ -80,7 +76,7 @@ function GridSearchInput({
       slotProps={{
         htmlInput: {
           "aria-label": resolvedAriaLabel,
-          "data-testid": "student-grid-search",
+          "data-testid": "user-grid-search",
         },
         input: {
           startAdornment: (
@@ -126,7 +122,7 @@ function ControlsHeaderSlot({
     <ControlsHeader>
       <ControlsLeft>
         {title && (
-          <CollectionTitle data-testid="student-grid-title">
+          <CollectionTitle data-testid="user-grid-title">
             {resolvedIcon}
             <span>{title}</span>
           </CollectionTitle>
@@ -138,7 +134,7 @@ function ControlsHeaderSlot({
           color="primary"
           variant="filled"
           sx={{ fontWeight: 700 }}
-          data-testid="student-count-badge"
+          data-testid="user-count-badge"
         />
       </ControlsLeft>
 
@@ -174,8 +170,8 @@ function EmptyGridState({
   const placeholderKeys = STATIC_PLACEHOLDER_KEYS.slice(0, placeholderCount);
 
   return (
-    <EmptyStateWrapper data-testid="student-grid-empty-state">
-      <EmptyGridContainer data-testid="student-grid-empty">
+    <EmptyStateWrapper data-testid="user-grid-empty-state">
+      <EmptyGridContainer data-testid="user-grid-empty">
         <PeopleAltIcon sx={{ fontSize: 44, opacity: 0.4 }} />
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
           {message}
@@ -187,7 +183,7 @@ function EmptyGridState({
             onClick={onReset}
             data-testid="reset-filter-btn"
           >
-            {t("common:studentGrid.clearFilter", "Clear filter")}
+            {t("common:userGrid.clearFilter", "Clear filter")}
           </Button>
         )}
       </EmptyGridContainer>
@@ -195,7 +191,7 @@ function EmptyGridState({
       {placeholderCount > 0 && (
         <EmptyPlaceholderGrid data-testid="static-skeleton-placeholders">
           {placeholderKeys.map((slotKey) => (
-            <ProfileCardSkeleton
+            <EntityCardSkeleton
               key={slotKey}
               variant="static"
               animated={false}
@@ -211,93 +207,74 @@ function EmptyGridState({
 
 interface LoadingSkeletonZoneProps {
   count: number;
-  columns: number;
-  gap: number;
 }
 
-function LoadingSkeletonZone({
-  count,
-  columns,
-  gap,
-}: LoadingSkeletonZoneProps) {
+function LoadingSkeletonZone({ count }: LoadingSkeletonZoneProps) {
   const keys = SKELETON_SLOT_KEYS.slice(0, count);
 
   return (
-    <ZoneWrapper data-testid="grid-skeleton-loading-zone">
-      <CardZone
-        layout="grid"
-        columns={columns}
-        gap={gap}
-        zoneId="skeleton-collection"
-      >
-        {keys.map((slotKey) => (
-          <ProfileCardSkeleton
-            key={slotKey}
-            variant="shimmer"
-            animated={true}
-            testId={slotKey}
-          />
-        ))}
-      </CardZone>
-    </ZoneWrapper>
+    <MD3CollectionGrid data-testid="grid-skeleton-loading-zone">
+      {keys.map((slotKey) => (
+        <EntityCardSkeleton
+          key={slotKey}
+          variant="shimmer"
+          animated={true}
+          testId={slotKey}
+        />
+      ))}
+    </MD3CollectionGrid>
   );
 }
 
-interface StudentCardsZoneProps {
-  students: CompactStudentData[];
+interface UserCardsZoneProps {
+  students: EntityCardData[];
   school?: SchoolConfig;
   cohort?: CohortConfig;
-  columns: number;
-  gap: number;
   zoneId?: string;
-  onStudentClick?: (student: CompactStudentData) => void;
-  onImpersonate?: (student: CompactStudentData) => void;
+  onStudentClick?: (student: EntityCardData) => void;
+  onImpersonate?: (student: EntityCardData) => void;
   showImpersonate?: boolean;
-  onDelete?: (student: CompactStudentData) => void;
+  onDelete?: (student: EntityCardData) => void;
   showDelete?: boolean;
 }
 
-function StudentCardsZone({
+function UserCardsZone({
   students,
   school,
   cohort,
-  columns,
-  gap,
-  zoneId = "students-collection",
+  zoneId = "users-collection",
   onStudentClick,
   onImpersonate,
   showImpersonate,
   onDelete,
   showDelete,
-}: StudentCardsZoneProps) {
+}: UserCardsZoneProps) {
   const isInteractive = Boolean(onStudentClick);
 
   return (
-    <ZoneWrapper data-testid="student-zone-wrapper">
-      <CardZone layout="grid" columns={columns} gap={gap} zoneId={zoneId}>
-        {students.map((student: CompactStudentData) => (
-          <ProfileCardCompact
-            key={student.id}
-            student={student}
-            school={school}
-            cohort={cohort}
-            onClick={onStudentClick}
-            onImpersonate={onImpersonate}
-            showImpersonate={showImpersonate}
-            onDelete={onDelete}
-            showDelete={showDelete}
-            interactive={isInteractive}
-            testId={`student-card-${student.id}`}
-          />
-        ))}
-      </CardZone>
-    </ZoneWrapper>
+    <MD3CollectionGrid data-testid="user-zone-wrapper" id={zoneId}>
+      {students.map((student: EntityCardData) => (
+        <EntityCard
+          key={student.id}
+          entity={student}
+          school={school}
+          cohort={cohort}
+          onClick={onStudentClick}
+          onImpersonate={onImpersonate}
+          showImpersonate={showImpersonate}
+          onDelete={onDelete}
+          showDelete={showDelete}
+          interactive={isInteractive}
+          testId={`user-card-${student.id}`}
+        />
+      ))}
+    </MD3CollectionGrid>
   );
 }
 
 interface GridBodyProps {
-  filteredStudents: CompactStudentData[];
-  displayedStudents: CompactStudentData[];
+  filteredStudents: EntityCardData[];
+  displayedStudents: EntityCardData[];
   resolvedEmptyMessage: string;
   hasQuery: boolean;
   emptyPlaceholderCount: number;
@@ -306,12 +283,10 @@ interface GridBodyProps {
   isInstructor: boolean;
   school?: SchoolConfig;
   cohort?: CohortConfig;
-  columns: number;
-  gap: number;
-  onStudentClick?: (student: CompactStudentData) => void;
-  onImpersonate?: (student: CompactStudentData) => void;
+  onStudentClick?: (student: EntityCardData) => void;
+  onImpersonate?: (student: EntityCardData) => void;
   showImpersonate?: boolean;
-  onDelete?: (student: CompactStudentData) => void;
+  onDelete?: (student: EntityCardData) => void;
   showDelete?: boolean;
   sentinelRef: React.RefObject<HTMLDivElement | null>;
   onClear: () => void;
@@ -328,8 +303,6 @@ function GridBody({
   isInstructor,
   school,
   cohort,
-  columns,
-  gap,
   onStudentClick,
   onImpersonate,
   showImpersonate,
@@ -349,18 +322,14 @@ function GridBody({
     );
   }
 
-  const zoneId = isInstructor
-    ? "instructors-collection"
-    : "students-collection";
+  const zoneId = isInstructor ? "instructors-collection" : "users-collection";
 
   return (
     <>
-      <StudentCardsZone
+      <UserCardsZone
         students={displayedStudents}
         school={school}
         cohort={cohort}
-        columns={columns}
-        gap={gap}
         zoneId={zoneId}
         onStudentClick={onStudentClick}
         onImpersonate={onImpersonate}
@@ -378,8 +347,8 @@ function GridBody({
   );
 }
 
-export function StudentGrid(props: StudentGridProps) {
-  const logic = useStudentGridLogic(props);
+export function UserGrid(props: UserGridProps) {
+  const logic = useUserGridLogic(props);
 
   return (
     <GridContainer className={props.className} data-testid={logic.testId}>
@@ -396,11 +365,7 @@ export function StudentGrid(props: StudentGridProps) {
       />
 
       {logic.isLoading ? (
-        <LoadingSkeletonZone
-          count={logic.skeletonCount}
-          columns={logic.columns}
-          gap={logic.gap}
-        />
+        <LoadingSkeletonZone count={logic.skeletonCount} />
       ) : (
         <GridBody
           filteredStudents={logic.filteredStudents}
@@ -413,8 +378,6 @@ export function StudentGrid(props: StudentGridProps) {
           isInstructor={logic.isInstructor}
           school={props.school}
           cohort={props.cohort}
-          columns={logic.columns}
-          gap={logic.gap}
           onStudentClick={props.onStudentClick}
           onImpersonate={props.onImpersonate}
           showImpersonate={props.showImpersonate}
@@ -428,4 +391,4 @@ export function StudentGrid(props: StudentGridProps) {
   );
 }
 
-export default StudentGrid;
+export default UserGrid;

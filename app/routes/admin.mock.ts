@@ -1,4 +1,4 @@
-import type { CompactStudentData } from "~/components/molecules/ProfileCardCompact/ProfileCardCompact.types";
+import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
 import type { SchoolConfig } from "~/components/organisms/OnboardingCard/OnboardingCard.types";
 import type { CohortWithInstitution } from "~/components/organisms/StudentInspector/StudentInspector.types";
 
@@ -54,7 +54,7 @@ export function getDefaultCohorts(): CohortWithInstitution[] {
   ];
 }
 
-export function getDefaultStudents(): CompactStudentData[] {
+export function getDefaultStudents(): EntityCardData[] {
   return [
     {
       id: "std-001",
@@ -203,7 +203,7 @@ export function getDefaultStudents(): CompactStudentData[] {
   ];
 }
 
-export function getDefaultInstructors(): CompactStudentData[] {
+export function getDefaultInstructors(): EntityCardData[] {
   return [
     {
       id: "inst-001",

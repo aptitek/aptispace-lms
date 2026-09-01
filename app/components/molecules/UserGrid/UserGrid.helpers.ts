@@ -1,11 +1,11 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import type { StudentGridProps } from "./StudentGrid.types";
-import type { CompactStudentData } from "../ProfileCardCompact/ProfileCardCompact.types";
+import type { UserGridProps } from "./UserGrid.types";
+import type { EntityCardData } from "../EntityCard/EntityCard.types";
 
 export function matchesStudentSearch(
-  student: CompactStudentData,
+  student: EntityCardData,
   query: string,
 ): boolean {
   const name =
@@ -23,9 +23,9 @@ export function matchesStudentSearch(
 }
 
 export function filterStudents(
-  students: CompactStudentData[],
+  students: EntityCardData[],
   rawQuery: string,
-): CompactStudentData[] {
+): EntityCardData[] {
   const query = rawQuery.toLowerCase().trim();
   if (!query) return students;
   return students.filter((student) => matchesStudentSearch(student, query));
@@ -116,7 +116,7 @@ export function resolveGridMeta(
   return { defaultEmptyMsg, defaultTitle, countBadge };
 }
 
-function extractGridOptions(props: StudentGridProps) {
+function extractGridOptions(props: UserGridProps) {
   return {
     userType: props.userType || "student",
     isLoading: Boolean(props.isLoading),
@@ -131,7 +131,7 @@ function extractGridOptions(props: StudentGridProps) {
   };
 }
 
-export function useStudentGridLogic(props: StudentGridProps) {
+export function useUserGridLogic(props: UserGridProps) {
   const { t } = useTranslation(["common", "auth"]);
   const options = extractGridOptions(props);
 

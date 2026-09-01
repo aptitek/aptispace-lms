@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import StudentGrid from "../app/components/molecules/StudentGrid/StudentGrid";
+import UserGrid from "../app/components/molecules/UserGrid/UserGrid";
 
-const meta: Meta<typeof StudentGrid> = {
-  title: "Molecules/StudentGrid",
-  component: StudentGrid,
+const meta: Meta<typeof UserGrid> = {
+  title: "Molecules/UserGrid",
+  component: UserGrid,
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
@@ -11,7 +11,7 @@ const meta: Meta<typeof StudentGrid> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof StudentGrid>;
+type Story = StoryObj<typeof UserGrid>;
 
 const sampleStudents = [
   {

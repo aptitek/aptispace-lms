@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import StudentInspector from "./StudentInspector";
 import { SchoolBadgeInline } from "./StudentInspector.components";
-import type { CompactStudentData } from "../../molecules/ProfileCardCompact/ProfileCardCompact.types";
+import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
 import type { SchoolConfig } from "../OnboardingCard/OnboardingCard.types";
 import type { CohortWithInstitution } from "./StudentInspector.types";
 
@@ -41,7 +41,7 @@ const mockCohorts: CohortWithInstitution[] = [
   },
 ];
 
-const mockStudent: CompactStudentData = {
+const mockStudent: EntityCardData = {
   id: "student-123",
   firstName: "Ada",
   familyName: "LOVELACE",

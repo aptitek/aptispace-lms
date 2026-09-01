@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import type { CompactStudentData } from "../../molecules/ProfileCardCompact/ProfileCardCompact.types";
+import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
 import type { CohortWithInstitution } from "./StudentInspector.types";
 import type {
   OnboardingProfile,
@@ -19,10 +19,10 @@ import {
 } from "./StudentInspector.helpers";
 
 export function useInspectorProfileState(
-  student: CompactStudentData | null,
+  student: EntityCardData | null,
   onStudentUpdated?: (updatedUser: AuthUser) => void,
 ) {
-  const [activeStudent, setActiveStudent] = useState<CompactStudentData | null>(
+  const [activeStudent, setActiveStudent] = useState<EntityCardData | null>(
     student,
   );
   const targetStudent = student || activeStudent;
@@ -99,7 +99,7 @@ export function useInspectorProfileState(
 }
 
 export function useInspectorCohortsState(
-  targetStudent: CompactStudentData | null,
+  targetStudent: EntityCardData | null,
   schools: SchoolConfig[],
   cohorts: CohortWithInstitution[],
   onAddCohort: (params: {

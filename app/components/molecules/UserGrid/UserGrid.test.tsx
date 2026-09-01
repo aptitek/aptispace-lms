@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
-import StudentGrid from "./StudentGrid";
-import type { CompactStudentData } from "../ProfileCardCompact/ProfileCardCompact.types";
+import UserGrid from "./UserGrid";
+import type { EntityCardData } from "../EntityCard/EntityCard.types";
 
-const sampleStudents: CompactStudentData[] = [
+const sampleStudents: EntityCardData[] = [
   {
     id: "s1",
     firstName: "Alice",
@@ -26,7 +26,7 @@ const sampleStudents: CompactStudentData[] = [
   },
 ];
 
-const sampleInstructors: CompactStudentData[] = [
+const sampleInstructors: EntityCardData[] = [
   {
     id: "inst-1",
     firstName: "Sarah",
@@ -39,18 +39,18 @@ const sampleInstructors: CompactStudentData[] = [
   },
 ];
 
-describe("StudentGrid Molecule", () => {
-  it("exports StudentGrid component properly", () => {
-    expect(StudentGrid).toBeDefined();
-    expect(typeof StudentGrid).toBe("function");
-    expect(StudentGrid.name).toBe("StudentGrid");
+describe("UserGrid Molecule", () => {
+  it("exports UserGrid component properly", () => {
+    expect(UserGrid).toBeDefined();
+    expect(typeof UserGrid).toBe("function");
+    expect(UserGrid.name).toBe("UserGrid");
   });
 
   it("creates React element with students list and configuration props", () => {
     const onStudentClick = vi.fn();
     const onImpersonate = vi.fn();
     const onDelete = vi.fn();
-    const element = React.createElement(StudentGrid, {
+    const element = React.createElement(UserGrid, {
       students: sampleStudents,
       columns: 3,
       gap: 4,
@@ -75,7 +75,7 @@ describe("StudentGrid Molecule", () => {
   });
 
   it("supports instructor userType and customized search placeholder and empty state props", () => {
-    const element = React.createElement(StudentGrid, {
+    const element = React.createElement(UserGrid, {
       students: sampleInstructors,
       userType: "instructor",
       title: "Registered Instructors",
@@ -96,7 +96,7 @@ describe("StudentGrid Molecule", () => {
   });
 
   it("supports skeleton loading state configuration", () => {
-    const element = React.createElement(StudentGrid, {
+    const element = React.createElement(UserGrid, {
       students: [],
       isLoading: true,
       skeletonCount: 6,

@@ -1,15 +1,15 @@
 import type React from "react";
-import type { CompactStudentData } from "../ProfileCardCompact/ProfileCardCompact.types";
+import type { EntityCardData } from "../EntityCard/EntityCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 
-export interface StudentGridProps {
-  students: CompactStudentData[];
+export interface UserGridProps {
+  students: EntityCardData[];
   school?: SchoolConfig;
   cohort?: CohortConfig;
-  onStudentClick?: (student: CompactStudentData) => void;
-  onImpersonate?: (student: CompactStudentData) => void;
+  onStudentClick?: (student: EntityCardData) => void;
+  onImpersonate?: (student: EntityCardData) => void;
   showImpersonate?: boolean;
-  onDelete?: (student: CompactStudentData) => void;
+  onDelete?: (student: EntityCardData) => void;
   showDelete?: boolean;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;

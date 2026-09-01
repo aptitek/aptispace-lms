@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import ProfileCardCompact from "~/components/molecules/ProfileCardCompact/ProfileCardCompact";
+import EntityCard from "~/components/molecules/EntityCard/EntityCard";
 
-const meta: Meta<typeof ProfileCardCompact> = {
-  title: "Molecules/ProfileCardCompact",
-  component: ProfileCardCompact,
+const meta: Meta<typeof EntityCard> = {
+  title: "Molecules/EntityCard",
+  component: EntityCard,
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
@@ -11,11 +11,11 @@ const meta: Meta<typeof ProfileCardCompact> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof ProfileCardCompact>;
+type Story = StoryObj<typeof EntityCard>;
 
 export const DefaultStudent: Story = {
   args: {
-    student: {
+    entity: {
       id: "student-001",
       firstName: "Alexandre",
       familyName: "MOREAU",
@@ -43,7 +43,7 @@ export const DefaultStudent: Story = {
 
 export const PendingOnboarding: Story = {
   args: {
-    student: {
+    entity: {
       id: "student-002",
       firstName: "Thomas",
       familyName: "DUBOIS",
@@ -59,7 +59,7 @@ export const PendingOnboarding: Story = {
 
 export const WithoutGithub: Story = {
   args: {
-    student: {
+    entity: {
       id: "student-003-uuid-longer-example",
       firstName: "Sophie",
       familyName: "LAURENT",
@@ -74,7 +74,7 @@ export const WithoutGithub: Story = {
 
 export const InstructorRole: Story = {
   args: {
-    student: {
+    entity: {
       id: "inst-001",
       firstName: "Marc",
       familyName: "BERTRAND",

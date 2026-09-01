@@ -32,6 +32,210 @@ export async function getCohortsByInstitution(
     .orderBy(desc(cohorts.startDate), desc(cohorts.createdAt), cohorts.name);
 }
 
+export async function createInstitution(
+  db: Database,
+  params: {
+    name: string;
+    slug: string;
+    logoUrl?: string;
+    actorUserId?: string;
+  },
+) {
+  const [created] = await db
+    .insert(institutions)
+    .values({
+      name: params.name,
+      slug: params.slug,
+      logoUrl: params.logoUrl,
+    })
+    .returning();
+
+  if (params.actorUserId) {
+    await logAudit(db, {
+      tableName: "institutions",
+      recordId: created.id,
+      action: "INSERT",
+      userId: params.actorUserId,
+      newValues: JSON.stringify(created),
+    });
+  }
+  return created;
+}
+
+export async function updateInstitution(
+  db: Database,
+  id: string,
+  params: {
+    name?: string;
+    slug?: string;
+    logoUrl?: string;
+    actorUserId?: string;
+  },
+) {
+  const [existing] = await db
+    .select()
+    .from(institutions)
+    .where(eq(institutions.id, id))
+    .limit(1);
+  if (!existing) throw new Error("Institution not found");
+
+  const [updated] = await db
+    .update(institutions)
+    .set({
+      name: params.name ?? existing.name,
+      slug: params.slug ?? existing.slug,
+      logoUrl: params.logoUrl !== undefined ? params.logoUrl : existing.logoUrl,
+      updatedAt: new Date(),
+    })
+    .where(eq(institutions.id, id))
+    .returning();
+
+  if (params.actorUserId) {
+    await logAudit(db, {
+      tableName: "institutions",
+      recordId: id,
+      action: "UPDATE",
+      userId: params.actorUserId,
+      oldValues: JSON.stringify(existing),
+      newValues: JSON.stringify(updated),
+    });
+  }
+  return updated;
+}
+
+export async function deleteInstitution(
+  db: Database,
+  id: string,
+  actorUserId?: string,
+) {
+  const [existing] = await db
+    .select()
+    .from(institutions)
+    .where(eq(institutions.id, id))
+    .limit(1);
+  if (!existing) return false;
+
+  await db.delete(institutions).where(eq(institutions.id, id));
+
+  if (actorUserId) {
+    await logAudit(db, {
+      tableName: "institutions",
+      recordId: id,
+      action: "DELETE",
+      userId: actorUserId,
+      oldValues: JSON.stringify(existing),
+    });
+  }
+  return true;
+}
+
+export async function createCohort(
+  db: Database,
+  params: {
+    institutionId: string;
+    name: string;
+    description?: string;
+    startDate?: Date;
+    endDate?: Date;
+    actorUserId?: string;
+  },
+) {
+  const [created] = await db
+    .insert(cohorts)
+    .values({
+      institutionId: params.institutionId,
+      name: params.name,
+      description: params.description,
+      startDate: params.startDate,
+      endDate: params.endDate,
+    })
+    .returning();
+
+  if (params.actorUserId) {
+    await logAudit(db, {
+      tableName: "cohorts",
+      recordId: created.id,
+      action: "INSERT",
+      userId: params.actorUserId,
+      newValues: JSON.stringify(created),
+    });
+  }
+  return created;
+}
+
+export async function updateCohort(
+  db: Database,
+  id: string,
+  params: {
+    name?: string;
+    description?: string;
+    startDate?: Date | null;
+    endDate?: Date | null;
+    actorUserId?: string;
+  },
+) {
+  const [existing] = await db
+    .select()
+    .from(cohorts)
+    .where(eq(cohorts.id, id))
+    .limit(1);
+  if (!existing) throw new Error("Cohort not found");
+
+  const [updated] = await db
+    .update(cohorts)
+    .set({
+      name: params.name ?? existing.name,
+      description:
+        params.description !== undefined
+          ? params.description
+          : existing.description,
+      startDate:
+        params.startDate !== undefined ? params.startDate : existing.startDate,
+      endDate: params.endDate !== undefined ? params.endDate : existing.endDate,
+      updatedAt: new Date(),
+    })
+    .where(eq(cohorts.id, id))
+    .returning();
+
+  if (params.actorUserId) {
+    await logAudit(db, {
+      tableName: "cohorts",
+      recordId: id,
+      action: "UPDATE",
+      userId: params.actorUserId,
+      oldValues: JSON.stringify(existing),
+      newValues: JSON.stringify(updated),
+    });
+  }
+  return updated;
+}
+
+export async function deleteCohort(
+  db: Database,
+  id: string,
+  actorUserId?: string,
+) {
+  const [existing] = await db
+    .select()
+    .from(cohorts)
+    .where(eq(cohorts.id, id))
+    .limit(1);
+  if (!existing) return false;
+
+  await db.delete(cohorts).where(eq(cohorts.id, id));
+
+  if (actorUserId) {
+    await logAudit(db, {
+      tableName: "cohorts",
+      recordId: id,
+      action: "DELETE",
+      userId: actorUserId,
+      oldValues: JSON.stringify(existing),
+    });
+  }
+  return true;
+}
+
 export interface AddStudentCohortParams {
   userId: string;
   cohortId: string;
