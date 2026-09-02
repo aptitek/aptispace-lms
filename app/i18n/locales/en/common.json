@@ -164,7 +164,7 @@
     "searchAria": "Search students",
     "clearSearchAria": "Clear search",
     "clearFilter": "Clear filter",
-    "emptyMessage": "No students found in directory",
+    "emptyMessage": "No users found in directory",
     "countBadge": "{{count}} students",
     "loadingMore": "Loading more students..."
   },

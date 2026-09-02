@@ -21,6 +21,7 @@ export interface UserGridProps {
   emptyMessage?: string;
   title?: React.ReactNode;
   icon?: React.ReactNode;
+  showHeader?: boolean;
   searchPlaceholder?: string;
   searchAriaLabel?: string;
   userType?: "student" | "instructor" | "user";

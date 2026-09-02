@@ -459,9 +459,8 @@ export default function AdminManagement() {
                 onStudentClick={handleUserClick}
                 onImpersonate={handleImpersonate}
                 onDelete={handleDeleteUser}
-                title={t("common:userGrid.title", "Registered Users")}
                 testId="admin-user-grid"
-                searchPlaceholder="" // Search is handled by FilterBar
+                showHeader={false}
               />
             </MainColumn>
 

@@ -105,4 +105,13 @@ describe("UserGrid Molecule", () => {
     expect(element.props.isLoading).toBe(true);
     expect(element.props.skeletonCount).toBe(6);
   });
+
+  it("supports hiding the controls header via showHeader prop", () => {
+    const element = React.createElement(UserGrid, {
+      students: sampleStudents,
+      showHeader: false,
+    });
+
+    expect(element.props.showHeader).toBe(false);
+  });
 });

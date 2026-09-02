@@ -97,7 +97,7 @@ export function resolveGridMeta(
         "common:instructorGrid.emptyMessage",
         "No instructors found in directory",
       )
-    : t("common:studentGrid.emptyMessage", "No students found in directory");
+    : t("common:studentGrid.emptyMessage", "No users found in directory");
 
   const defaultTitle = isInstructor
     ? t("common:instructorGrid.title", "Registered Instructors")
@@ -126,6 +126,7 @@ function extractGridOptions(props: UserGridProps) {
     gap: props.gap || 4,
     testId: props.testId || "student-grid",
     showSearch: props.showSearch !== false,
+    showHeader: props.showHeader !== false,
     skeletonCount: props.skeletonCount || 6,
     emptyPlaceholderCount: props.emptyPlaceholderCount ?? 3,
   };

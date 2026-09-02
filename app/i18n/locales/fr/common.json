@@ -164,7 +164,7 @@
     "searchAria": "Rechercher des étudiants",
     "clearSearchAria": "Effacer la recherche",
     "clearFilter": "Effacer le filtre",
-    "emptyMessage": "Aucun étudiant trouvé dans l'annuaire",
+    "emptyMessage": "Aucun utilisateur trouvé dans l'annuaire",
     "countBadge": "{{count}} étudiants",
     "loadingMore": "Chargement d'autres étudiants..."
   },

@@ -352,17 +352,19 @@ export function UserGrid(props: UserGridProps) {
 
   return (
     <GridContainer className={props.className} data-testid={logic.testId}>
-      <ControlsHeaderSlot
-        title={logic.resolvedTitle}
-        icon={props.icon}
-        countLabel={logic.isLoading ? "…" : logic.countBadge}
-        showSearch={logic.showSearch}
-        activeQuery={logic.activeQuery}
-        searchPlaceholder={props.searchPlaceholder}
-        searchAriaLabel={props.searchAriaLabel}
-        onQueryChange={logic.handleQueryChange}
-        onClear={() => logic.handleQueryChange("")}
-      />
+      {logic.showHeader && (
+        <ControlsHeaderSlot
+          title={logic.resolvedTitle}
+          icon={props.icon}
+          countLabel={logic.isLoading ? "…" : logic.countBadge}
+          showSearch={logic.showSearch}
+          activeQuery={logic.activeQuery}
+          searchPlaceholder={props.searchPlaceholder}
+          searchAriaLabel={props.searchAriaLabel}
+          onQueryChange={logic.handleQueryChange}
+          onClear={() => logic.handleQueryChange("")}
+        />
+      )}
 
       {logic.isLoading ? (
         <LoadingSkeletonZone count={logic.skeletonCount} />
