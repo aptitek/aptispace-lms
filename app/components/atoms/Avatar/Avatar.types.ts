@@ -28,7 +28,8 @@ export type M3ScaleShape =
   | "circular"
   | "rounded"
   | "square"
-  | "biometric";
+  | "biometric"
+  | "landscape";
 
 export type AvatarShape =
   M3ScaleShape | ExpressiveShapeName | (string & {}) | number;
@@ -48,6 +49,7 @@ export interface AvatarProps {
   className?: string;
   testId?: string;
   "data-testid"?: string;
+  objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
   children?: ReactNode;
   placeholderIcon?: ReactNode;
 }

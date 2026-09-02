@@ -213,6 +213,7 @@ export const SHAPE_SCALE_RADIUS_MAP: Record<string, string> = {
   small: "8px",
   medium: "12px",
   rounded: "12px",
+  landscape: "8px",
   large: "16px",
   "large-end": "0 16px 16px 0",
   "large-top": "16px 16px 0 0",

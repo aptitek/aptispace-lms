@@ -92,6 +92,22 @@ export interface EditableAvatarProps {
    * Accessible test ID
    */
   testId?: string;
+  /**
+   * Optional custom aspect ratio (e.g. "16 / 9", "3 / 1", "auto")
+   */
+  aspectRatio?: string;
+  /**
+   * Optional custom width (e.g. "100%", 200, "240px")
+   */
+  width?: number | string;
+  /**
+   * Optional custom height (e.g. 64, "72px", "100%")
+   */
+  height?: number | string;
+  /**
+   * Optional image object fit strategy (e.g. "contain", "cover")
+   */
+  objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
 }
 
 export interface UploadResponsePayload {

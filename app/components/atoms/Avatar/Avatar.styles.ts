@@ -38,7 +38,8 @@ export const AvatarRoot = styled(Box, {
     prop !== "customWidth" &&
     prop !== "customRatio" &&
     prop !== "customRadius" &&
-    prop !== "shapePreset",
+    prop !== "shapePreset" &&
+    prop !== "customObjectFit",
 })<{
   isPortrait?: boolean;
   customHeight?: number | string;
@@ -46,6 +47,7 @@ export const AvatarRoot = styled(Box, {
   customRatio?: string;
   customRadius?: number | string;
   shapePreset?: AvatarShape;
+  customObjectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
 }>(({
   theme,
   isPortrait,
@@ -54,16 +56,21 @@ export const AvatarRoot = styled(Box, {
   customRatio,
   customRadius,
   shapePreset,
+  customObjectFit,
 }) => {
   const shapeStyle = resolveM3ShapeStyle(shapePreset, customRadius);
+  const isLandscape = shapePreset === "landscape";
   const isBiometric =
     shapePreset === "biometric" || (isPortrait && !shapePreset);
+
+  const resolvedFit = customObjectFit ?? (isLandscape ? "contain" : "cover");
+  const isContain = resolvedFit === "contain";
 
   return {
     position: "relative",
     height: customHeight ?? (isBiometric ? "140px" : "100%"),
-    width: customWidth ?? "auto",
-    aspectRatio: customRatio ?? (isBiometric ? "35 / 45" : "1 / 1"),
+    width: customWidth ?? (isLandscape ? "100%" : "auto"),
+    aspectRatio: customRatio ?? (isBiometric ? "35 / 45" : isLandscape ? "auto" : "1 / 1"),
     borderRadius: shapeStyle.borderRadius,
     clipPath: shapeStyle.clipPath,
     WebkitClipPath: shapeStyle.clipPath,
@@ -75,10 +82,13 @@ export const AvatarRoot = styled(Box, {
     alignItems: "center",
     justifyContent: "center",
     boxSizing: "border-box",
+    padding: isContain ? theme.spacing(0.75, 1.5) : 0,
     "& img": {
-      width: "100%",
-      height: "100%",
-      objectFit: "cover",
+      maxWidth: "100%",
+      maxHeight: "100%",
+      width: isContain ? "auto" : "100%",
+      height: isContain ? "auto" : "100%",
+      objectFit: resolvedFit,
       display: "block",
     },
   };

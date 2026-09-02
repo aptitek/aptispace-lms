@@ -53,6 +53,10 @@ interface MD3AvatarProps {
   disableTooltip?: boolean;
   isModified: boolean;
   isDragging: boolean;
+  aspectRatio?: string;
+  width?: number | string;
+  height?: number | string;
+  objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
   onAvatarClick: () => void;
   onResetClick: (e: MouseEvent) => void;
 }
@@ -132,6 +136,9 @@ function MD3AvatarDisplay(props: MD3AvatarProps) {
       <MD3AvatarContainer
         avatarShape={props.shape}
         avatarSize={props.size}
+        customRatio={props.aspectRatio}
+        customWidth={props.width}
+        customHeight={props.height}
         isInteractive={isInteractive}
         isDragging={props.isDragging}
         onClick={isInteractive ? props.onAvatarClick : undefined}
@@ -150,14 +157,17 @@ function MD3AvatarDisplay(props: MD3AvatarProps) {
           name={props.name}
           showReticle={props.shape === "biometric"}
           shape={props.shape}
-          height="100%"
-          width="100%"
+          height={props.height ?? "100%"}
+          width={props.width ?? "100%"}
+          aspectRatio={props.aspectRatio}
+          objectFit={props.objectFit}
         />
         {isInteractive ? (
           <AvatarHoverOverlay
             className="avatar-hover-overlay"
             avatarShape={props.shape}
             avatarSize={props.size}
+            customRatio={props.aspectRatio}
           >
             <EditIcon sx={{ fontSize: "1.1rem" }} />
             <span>{t("avatar.edit", "EDIT")}</span>
@@ -443,6 +453,10 @@ export function EditableAvatar(props: EditableAvatarProps) {
       disableTooltip={props.disableTooltip}
       isModified={isModified}
       isDragging={isDragging}
+      aspectRatio={props.aspectRatio}
+      width={props.width}
+      height={props.height}
+      objectFit={props.objectFit}
       onAvatarClick={handleAvatarClick}
       onResetClick={handleResetBadge}
     />

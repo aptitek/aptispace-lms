@@ -11,6 +11,7 @@ import type {
 function calculateAvatarDimensions(
   sizePreset: EditableAvatarSize = "md",
   shapePreset: EditableAvatarShape = "circular",
+  customRatio?: string,
 ): {
   dimension: string;
   radius: string;
@@ -19,23 +20,32 @@ function calculateAvatarDimensions(
   clipPath?: string;
 } {
   const isBiometric = shapePreset === "biometric";
+  const isLandscape = shapePreset === "landscape";
 
   const sizeMap: Record<
     EditableAvatarSize,
-    { biometric: string; standard: string; fontSize: string }
+    { biometric: string; standard: string; fontSize: string; landscapeHeight: string }
   > = {
-    sm: { biometric: "56px", standard: "40px", fontSize: "0.85rem" },
-    md: { biometric: "88px", standard: "56px", fontSize: "1.15rem" },
-    lg: { biometric: "120px", standard: "80px", fontSize: "1.6rem" },
-    xl: { biometric: "144px", standard: "104px", fontSize: "2rem" },
+    sm: { biometric: "56px", standard: "40px", fontSize: "0.85rem", landscapeHeight: "36px" },
+    md: { biometric: "88px", standard: "56px", fontSize: "1.15rem", landscapeHeight: "56px" },
+    lg: { biometric: "120px", standard: "80px", fontSize: "1.6rem", landscapeHeight: "64px" },
+    xl: { biometric: "144px", standard: "104px", fontSize: "2rem", landscapeHeight: "80px" },
   };
 
   const selectedDimension = isBiometric
     ? sizeMap[sizePreset].biometric
-    : sizeMap[sizePreset].standard;
+    : isLandscape
+      ? sizeMap[sizePreset].landscapeHeight
+      : sizeMap[sizePreset].standard;
 
   const shapeStyle = resolveM3ShapeStyle(shapePreset);
-  const selectedRatio = isBiometric ? "35 / 45" : "1 / 1";
+  const selectedRatio = customRatio
+    ? customRatio
+    : isBiometric
+      ? "35 / 45"
+      : isLandscape
+        ? "auto"
+        : "1 / 1";
 
   return {
     dimension: selectedDimension,
@@ -51,8 +61,9 @@ export const EditableAvatarRoot = styled(Box, {
 })<{
   isDisabled?: boolean;
 }>(({ theme, isDisabled }) => ({
-  display: "inline-flex",
+  display: "flex",
   flexDirection: "column",
+  width: "100%",
   gap: theme.spacing(1),
   boxSizing: "border-box",
   opacity: isDisabled ? 0.6 : 1,
@@ -90,20 +101,39 @@ export const MD3AvatarContainer = styled(Box, {
     prop !== "avatarShape" &&
     prop !== "avatarSize" &&
     prop !== "isInteractive" &&
-    prop !== "isDragging",
+    prop !== "isDragging" &&
+    prop !== "customRatio" &&
+    prop !== "customWidth" &&
+    prop !== "customHeight",
 })<{
   avatarShape?: EditableAvatarShape;
   avatarSize?: EditableAvatarSize;
   isInteractive?: boolean;
   isDragging?: boolean;
-}>(({ theme, avatarShape, avatarSize, isInteractive, isDragging }) => {
+  customRatio?: string;
+  customWidth?: number | string;
+  customHeight?: number | string;
+}>(({
+  theme,
+  avatarShape,
+  avatarSize,
+  isInteractive,
+  isDragging,
+  customRatio,
+  customWidth,
+  customHeight,
+}) => {
   const { dimension, radius, clipPath, ratio, fontSize } =
-    calculateAvatarDimensions(avatarSize, avatarShape);
+    calculateAvatarDimensions(avatarSize, avatarShape, customRatio);
+  const isLandscape = avatarShape === "landscape";
 
   return {
     position: "relative",
-    height: dimension,
-    width: avatarShape === "biometric" ? "auto" : dimension,
+    height: customHeight ?? dimension,
+    width:
+      customWidth ??
+      (avatarShape === "biometric" ? "auto" : isLandscape ? "100%" : dimension),
+    maxWidth: isLandscape ? "100%" : undefined,
     aspectRatio: ratio,
     borderRadius: radius,
     clipPath,
@@ -143,14 +173,19 @@ export const MD3AvatarContainer = styled(Box, {
 });
 
 export const AvatarHoverOverlay = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "avatarShape" && prop !== "avatarSize",
+  shouldForwardProp: (prop) =>
+    prop !== "avatarShape" &&
+    prop !== "avatarSize" &&
+    prop !== "customRatio",
 })<{
   avatarShape?: EditableAvatarShape;
   avatarSize?: EditableAvatarSize;
-}>(({ theme, avatarShape, avatarSize }) => {
+  customRatio?: string;
+}>(({ theme, avatarShape, avatarSize, customRatio }) => {
   const { radius, clipPath } = calculateAvatarDimensions(
     avatarSize,
     avatarShape,
+    customRatio,
   );
   return {
     position: "absolute",

@@ -78,6 +78,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
       className,
       testId,
       "data-testid": dataTestId,
+      objectFit,
       children,
       placeholderIcon,
     } = props;
@@ -85,7 +86,10 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
     const resolvedShape =
       shape !== undefined ? shape : role ? getRoleAvatarShape(role) : "medium";
 
-    const initials = getAvatarInitials(name, alt);
+    const initials =
+      resolvedShape === "landscape" && name
+        ? name
+        : getAvatarInitials(name, alt);
     const content = renderAvatarContent({
       src,
       alt,
@@ -105,6 +109,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
           customRatio={aspectRatio}
           customRadius={borderRadius}
           shapePreset={resolvedShape}
+          customObjectFit={objectFit}
           className={className}
           data-testid={testId ?? dataTestId ?? "avatar"}
           data-shape={resolvedShape}

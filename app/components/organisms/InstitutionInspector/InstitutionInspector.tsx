@@ -7,7 +7,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import InstitutionLogo from "~/components/atoms/InstitutionLogo/InstitutionLogo";
+import EditableAvatar from "~/components/molecules/EditableAvatar/EditableAvatar";
 import type { SchoolConfig } from "~/types/institution";
 
 interface InstitutionInspectorProps {
@@ -88,28 +88,20 @@ export default function InstitutionInspector({
         </IconButton>
       </Box>
 
-      <Box
-        sx={{
-          p: 2,
-          borderRadius: 2,
-          bgcolor: "action.hover",
-          border: "1px dashed",
-          borderColor: "divider",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: 72,
-        }}
-      >
-        <InstitutionLogo
-          logoUrl={logoUrl}
-          name={name || t("inspector.institutionName", "Institution Name")}
-          height={48}
-          maxWidth={200}
-          testId="inspector-institution-preview"
-        />
-      </Box>
+      <EditableAvatar
+        mode="image-only"
+        value={logoUrl}
+        defaultValue={institution.logoUrl || ""}
+        name={name || t("inspector.institutionName", "Institution Name")}
+        shape="landscape"
+        size="lg"
+        width="100%"
+        height={80}
+        objectFit="contain"
+        editable={!isSubmitting}
+        onChange={(newUrl) => setLogoUrl(newUrl)}
+        testId="inspector-institution-avatar"
+      />
 
       <TextField
         label={t("inspector.institutionName", "Name")}
@@ -126,13 +118,6 @@ export default function InstitutionInspector({
         fullWidth
         disabled={isSubmitting}
         required
-      />
-      <TextField
-        label={t("inspector.logoUrl", "Logo URL")}
-        value={logoUrl}
-        onChange={(e) => setLogoUrl(e.target.value)}
-        fullWidth
-        disabled={isSubmitting}
       />
 
       <Box
