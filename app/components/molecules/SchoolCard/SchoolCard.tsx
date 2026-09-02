@@ -3,14 +3,16 @@ import { useTranslation } from "react-i18next";
 import Badge from "~/components/atoms/Badge/Badge";
 import InstitutionLogo from "~/components/atoms/InstitutionLogo/InstitutionLogo";
 import SchoolIcon from "@mui/icons-material/School";
-import AddIcon from "@mui/icons-material/Add";
 import Box from "@mui/material/Box";
 import type { SchoolConfig } from "~/types/institution";
+import Skeleton from "@mui/material/Skeleton";
+import { GhostActionButton } from "~/components/atoms/GhostActionButton";
 import {
   CardContainer,
   LogoContainer,
   SchoolName,
   SkeletonContainer,
+  GhostFabOverlay,
 } from "./SchoolCard.styles";
 
 export interface SchoolCardProps {
@@ -85,13 +87,23 @@ SchoolCard.displayName = "SchoolCard";
 export function SchoolCardSkeleton({ onClick }: { onClick?: () => void }) {
   const { t } = useTranslation("common");
   const isInteractive = Boolean(onClick);
+  const tooltipTitle = t("admin.addInstitution", "Add Institution");
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isInteractive && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      onClick?.();
+    }
+  };
 
   return (
     <SkeletonContainer
       isInteractive={isInteractive}
       onClick={onClick}
+      onKeyDown={handleKeyDown}
       role={isInteractive ? "button" : "presentation"}
       tabIndex={isInteractive ? 0 : undefined}
+      aria-label={isInteractive ? tooltipTitle : undefined}
       data-testid="school-card-skeleton"
     >
       <Box
@@ -99,15 +111,33 @@ export function SchoolCardSkeleton({ onClick }: { onClick?: () => void }) {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 1,
-          opacity: 0.5,
+          gap: 2,
+          opacity: 0.35,
+          width: "100%",
+          pointerEvents: "none",
         }}
       >
-        <AddIcon sx={{ fontSize: 32 }} />
-        <SchoolName sx={{ fontSize: "0.9rem" }}>
-          {t("admin.addInstitution", "Add Institution")}
-        </SchoolName>
+        <LogoContainer>
+          <Skeleton
+            variant="rounded"
+            width={100}
+            height={40}
+            sx={{ borderRadius: "8px" }}
+          />
+        </LogoContainer>
+        <Skeleton
+          variant="text"
+          width="60%"
+          height={22}
+          sx={{ borderRadius: "4px" }}
+        />
       </Box>
+
+      {isInteractive && (
+        <GhostFabOverlay>
+          <GhostActionButton tooltip={tooltipTitle} testId="school-ghost-fab" />
+        </GhostFabOverlay>
+      )}
     </SkeletonContainer>
   );
 }

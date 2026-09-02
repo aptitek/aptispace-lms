@@ -402,6 +402,12 @@ export default function AdminManagement() {
     }
   };
 
+  const handleCreateNewUser = () => {
+    if (typeof window !== "undefined") {
+      window.location.href = "/onboarding";
+    }
+  };
+
   const filteredUsers = useMemo(() => {
     return loaderData.users.filter((user) =>
       matchesUserFilters(user, {
@@ -456,6 +462,7 @@ export default function AdminManagement() {
                 students={filteredUsers}
                 selectedStudentId={selectedUser?.id}
                 onStudentClick={handleUserClick}
+                onAddUser={handleCreateNewUser}
                 onImpersonate={handleImpersonate}
                 onDelete={handleDeleteUser}
                 testId="admin-user-grid"

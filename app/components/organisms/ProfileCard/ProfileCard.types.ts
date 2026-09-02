@@ -58,4 +58,12 @@ export interface ProfileCardProps extends Omit<BoxProps, "onChange"> {
    * Callback fired when avatar is clicked to edit
    */
   onAvatarEdit?: () => void;
+  /**
+   * Whether the avatar inside the card is interactive and editable
+   */
+  editableAvatar?: boolean;
+  /**
+   * Callback fired when the avatar image URL is updated
+   */
+  onAvatarChange?: (avatarUrl: string) => void;
 }

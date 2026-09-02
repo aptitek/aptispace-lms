@@ -14,7 +14,7 @@
 [x] Remove galaxy background from onboarding page to save on performance.
 [x] Remove server.hmr.overlay and catch the errors with our status center if possible instead
 [ ] In status center remove the mention of REALTIME and BPM
-[ ] Dev impersonation should not logout to another user but normal logout
+[x] Dev impersonation should not logout to another user but normal logout
 
 --- MANUAL TASKS ---
 

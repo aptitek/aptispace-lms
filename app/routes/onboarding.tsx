@@ -252,9 +252,7 @@ export default function OnboardingPage() {
     emailPrefix,
     mrzData,
     handleCardFieldChange,
-    fileInputRef,
-    handleAvatarEditClick,
-    handleAvatarFileChange,
+    handleAvatarChange,
   } = useOnboardingProfile({
     initialProfile: loaderData?.profile,
     school: selectedSchool,
@@ -317,7 +315,8 @@ export default function OnboardingPage() {
           emailDomain={formattedEmailDomain}
           mrzData={mrzData}
           onChange={handleCardFieldChange}
-          onAvatarEdit={handleAvatarEditClick}
+          editableAvatar={true}
+          onAvatarChange={handleAvatarChange}
           sx={{
             flex: 1,
             display: "flex",
@@ -325,15 +324,6 @@ export default function OnboardingPage() {
             width: "100%",
             maxWidth: 600,
           }}
-        />
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          style={{ display: "none" }}
-          onChange={handleAvatarFileChange}
-          data-testid="onboarding-avatar-file-input"
         />
 
         <RequirementsDock

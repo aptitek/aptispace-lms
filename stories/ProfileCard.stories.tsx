@@ -104,3 +104,31 @@ export const Admin: Story = {
     sx: { width: 540 },
   },
 };
+
+export const WithEditableAvatar: Story = {
+  args: {
+    institutionName: "AptiSpace Academy",
+    cohortName: "Web Development",
+    year: "2026",
+    role: "student",
+    firstName: "Alex",
+    familyName: "Mercer",
+    emailPrefix: "alex.mercer",
+    emailDomain: "@aptispace.com",
+    githubUsername: "alexmercer",
+    editableAvatar: true,
+    avatarUrl: "",
+    mrzData: {
+      documentCode: "I",
+      issuingState: "APT",
+      documentNumber: "0942",
+      birthDate: "990101",
+      sex: "M",
+      expiryDate: "300828",
+      nationality: "APT",
+      surname: "MERCER",
+      givenNames: "ALEX",
+    },
+    sx: { width: 540 },
+  },
+};

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -111,6 +111,7 @@ interface HeaderProfileCardModalProps {
   user: AuthUser;
   isOpen: boolean;
   onClose: () => void;
+  onUserUpdated?: (updatedUser: AuthUser) => void;
 }
 
 function parseUserNames(name?: string) {
@@ -137,7 +138,21 @@ function HeaderProfileCardModal({
   user,
   isOpen,
   onClose,
+  onUserUpdated,
 }: HeaderProfileCardModalProps) {
+  const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl);
+
+  useEffect(() => {
+    setAvatarUrl(user.avatarUrl);
+  }, [user.avatarUrl]);
+
+  const handleAvatarChange = (newUrl: string) => {
+    setAvatarUrl(newUrl);
+    if (onUserUpdated) {
+      onUserUpdated({ ...user, avatarUrl: newUrl });
+    }
+  };
+
   const { firstName, familyName } = parseUserNames(user.name);
   const { prefix: emailPrefix, domain: emailDomain } = parseUserEmail(
     user.email,
@@ -181,33 +196,27 @@ function HeaderProfileCardModal({
           familyName={familyName}
           emailPrefix={emailPrefix}
           emailDomain={emailDomain}
-          avatarUrl={user.avatarUrl}
+          avatarUrl={avatarUrl}
           role={user.role}
           githubUsername={user.githubUsername}
           institutionName="AptiSpace Academy"
           cohortName={user.role === "student" ? "Core Batch" : undefined}
           year={user.role === "student" ? "2026" : undefined}
           mrzData={mrzData}
+          editableAvatar={true}
+          onAvatarChange={handleAvatarChange}
         />
       </Box>
     </FullScreenModal>
   );
 }
 
-export default function Header({
-  mode = "full",
-  logoSize = "small",
-  user,
-  onLogout,
-  onReturnToAdmin,
-  children,
-  className,
-  "data-testid": dataTestId = "header",
-}: HeaderProps) {
-  const { t } = useTranslation(["auth", "common"]);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-
-  const handleActionClick = () => {
+function createHeaderActionHandler(
+  user?: AuthUser | null,
+  onLogout?: () => void,
+  onReturnToAdmin?: () => void,
+) {
+  return () => {
     if (user?.impersonating) {
       if (onReturnToAdmin) {
         onReturnToAdmin();
@@ -223,6 +232,68 @@ export default function Header({
     }
     void logout();
   };
+}
+
+function AdminNavButton({
+  user,
+  onReturnToAdmin,
+}: {
+  user: AuthUser;
+  onReturnToAdmin?: () => void;
+}) {
+  const { t } = useTranslation(["auth", "common"]);
+
+  if (user.impersonating && onReturnToAdmin) {
+    return (
+      <AdminHeaderButton
+        variant="outlined"
+        size="small"
+        onClick={onReturnToAdmin}
+        data-testid="header-return-admin-btn"
+      >
+        {t("auth:backToAdmin", "Return to Admin")}
+      </AdminHeaderButton>
+    );
+  }
+
+  if (user.role === "admin" && !user.impersonating) {
+    return (
+      <AdminHeaderButton
+        href="/admin"
+        size="small"
+        variant="outlined"
+        startIcon={<AdminPanelSettingsIcon sx={{ fontSize: 16 }} />}
+        aria-label={t(
+          "auth:adminButtonAria",
+          "Access administration management",
+        )}
+        data-testid="header-admin-link"
+      >
+        {t("auth:adminButton", "Admin")}
+      </AdminHeaderButton>
+    );
+  }
+
+  return null;
+}
+
+export default function Header({
+  mode = "full",
+  logoSize = "small",
+  user,
+  onLogout,
+  onReturnToAdmin,
+  onUserUpdated,
+  children,
+  className,
+  "data-testid": dataTestId = "header",
+}: HeaderProps) {
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const handleActionClick = createHeaderActionHandler(
+    user,
+    onLogout,
+    onReturnToAdmin,
+  );
 
   return (
     <>
@@ -230,33 +301,23 @@ export default function Header({
         $mode={mode}
         className={className}
         data-testid={dataTestId}
-        data-mode={mode}
+        role="banner"
       >
-        {mode === "full" && (
-          <LeftSlot data-testid="header-brand-slot">
-            <Logo size={logoSize} />
+        {mode !== "subtle" && (
+          <LeftSlot>
+            <Logo size={logoSize} data-testid="header-main-logo" />
           </LeftSlot>
         )}
 
-        <RightSlot data-testid="header-actions-slot">
+        <RightSlot>
           {children}
-          {user?.role === "admin" && (
-            <AdminHeaderButton
-              href="/admin"
-              size="small"
-              variant="outlined"
-              startIcon={<AdminPanelSettingsIcon sx={{ fontSize: 16 }} />}
-              aria-label={t(
-                "auth:adminButtonAria",
-                "Access administration management",
-              )}
-              data-testid="header-admin-link"
-            >
-              {t("auth:adminButton", "Admin")}
-            </AdminHeaderButton>
+
+          {user && (
+            <AdminNavButton user={user} onReturnToAdmin={onReturnToAdmin} />
           )}
-          <ThemeToggle size="small" />
-          <LanguageToggle size="small" />
+
+          <ThemeToggle data-testid="header-theme-toggle" />
+          <LanguageToggle data-testid="header-language-toggle" />
 
           {user && (
             <HeaderUserAvatar
@@ -275,6 +336,7 @@ export default function Header({
           user={user}
           isOpen={isProfileModalOpen}
           onClose={() => setIsProfileModalOpen(false)}
+          onUserUpdated={onUserUpdated}
         />
       )}
     </>

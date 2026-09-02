@@ -27,3 +27,11 @@ export const StaticEmptyPlaceholder: Story = {
     opacity: 0.35,
   },
 };
+
+export const GhostAddUserCard: Story = {
+  args: {
+    isGhost: true,
+    onClick: () => alert("Add User clicked!"),
+    tooltipTitle: "Add User",
+  },
+};

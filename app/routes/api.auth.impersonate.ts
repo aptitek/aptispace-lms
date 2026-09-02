@@ -297,6 +297,33 @@ interface ImpersonationPayload {
   role?: UserRole;
 }
 
+function buildImpersonatedSessionPayload(
+  targetUserId: string,
+  targetUserRole: UserRole,
+  currentSession: SessionPayload | null,
+) {
+  const isActualAdminImpersonation = Boolean(
+    currentSession &&
+    (currentSession.role === "admin" ||
+      (currentSession.impersonating && currentSession.originalUserId)),
+  );
+  const now = Date.now();
+
+  return {
+    isActualAdminImpersonation,
+    sessionTokenData: {
+      userId: targetUserId,
+      role: targetUserRole,
+      impersonating: isActualAdminImpersonation,
+      originalUserId: isActualAdminImpersonation
+        ? (currentSession?.originalUserId ?? currentSession?.userId)
+        : undefined,
+      issuedAt: now,
+      expiresAt: now + 7 * 24 * 60 * 60 * 1000,
+    },
+  };
+}
+
 async function handleStartImpersonation(
   db: Database,
   currentSession: SessionPayload | null,
@@ -314,19 +341,14 @@ async function handleStartImpersonation(
 
     await auditImpersonation(db, currentSession, targetUserId, targetUserRole);
 
-    const now = Date.now();
-    const sessionToken = await signSessionToken({
-      userId: targetUserId,
-      role: targetUserRole,
-      impersonating: true,
-      originalUserId:
-        currentSession?.originalUserId ??
-        currentSession?.userId ??
+    const { isActualAdminImpersonation, sessionTokenData } =
+      buildImpersonatedSessionPayload(
         targetUserId,
-      issuedAt: now,
-      expiresAt: now + 7 * 24 * 60 * 60 * 1000,
-    });
+        targetUserRole,
+        currentSession,
+      );
 
+    const sessionToken = await signSessionToken(sessionTokenData);
     const sessionCookie = createSessionCookieHeader(sessionToken);
 
     return Response.json(
@@ -337,7 +359,7 @@ async function handleStartImpersonation(
           name: targetDisplayName,
           email: targetUserEmail,
           role: targetUserRole,
-          impersonating: true,
+          impersonating: isActualAdminImpersonation,
         },
       },
       {

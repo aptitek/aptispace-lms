@@ -8,6 +8,9 @@ export interface UserGridProps {
   cohort?: CohortConfig;
   onStudentClick?: (student: EntityCardData) => void;
   selectedStudentId?: string | null;
+  onAddUser?: () => void;
+  showAddUser?: boolean;
+  addUserTooltip?: string;
   onImpersonate?: (student: EntityCardData) => void;
   showImpersonate?: boolean;
   onDelete?: (student: EntityCardData) => void;

@@ -1,15 +1,17 @@
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import Badge from "~/components/atoms/Badge/Badge";
-import AddIcon from "@mui/icons-material/Add";
 import Box from "@mui/material/Box";
 import type { CohortConfig } from "~/types/institution";
+import Skeleton from "@mui/material/Skeleton";
+import { GhostActionButton } from "~/components/atoms/GhostActionButton";
 import {
   CardContainer,
   CohortName,
   CohortDescription,
   CohortDates,
   SkeletonContainer,
+  GhostFabOverlay,
 } from "./CohortCard.styles";
 
 export interface CohortCardProps {
@@ -90,29 +92,66 @@ CohortCard.displayName = "CohortCard";
 export function CohortCardSkeleton({ onClick }: { onClick?: () => void }) {
   const { t } = useTranslation("common");
   const isInteractive = Boolean(onClick);
+  const tooltipTitle = t("admin.addCohort", "Add Cohort");
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isInteractive && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      onClick?.();
+    }
+  };
 
   return (
     <SkeletonContainer
       isInteractive={isInteractive}
       onClick={onClick}
+      onKeyDown={handleKeyDown}
       role={isInteractive ? "button" : "presentation"}
       tabIndex={isInteractive ? 0 : undefined}
+      aria-label={isInteractive ? tooltipTitle : undefined}
       data-testid="cohort-card-skeleton"
     >
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
           gap: 1,
-          opacity: 0.5,
+          opacity: 0.35,
+          width: "100%",
+          pointerEvents: "none",
         }}
       >
-        <AddIcon sx={{ fontSize: 32 }} />
-        <CohortName sx={{ fontSize: "0.9rem" }}>
-          {t("admin.addCohort", "Add Cohort")}
-        </CohortName>
+        <Skeleton
+          variant="text"
+          width="50%"
+          height={24}
+          sx={{ borderRadius: "4px" }}
+        />
+        <Skeleton
+          variant="text"
+          width="85%"
+          height={16}
+          sx={{ borderRadius: "3px" }}
+        />
+        <Skeleton
+          variant="text"
+          width="60%"
+          height={16}
+          sx={{ borderRadius: "3px" }}
+        />
+        <Skeleton
+          variant="text"
+          width="40%"
+          height={14}
+          sx={{ mt: 1, borderRadius: "3px" }}
+        />
       </Box>
+
+      {isInteractive && (
+        <GhostFabOverlay>
+          <GhostActionButton tooltip={tooltipTitle} testId="cohort-ghost-fab" />
+        </GhostFabOverlay>
+      )}
     </SkeletonContainer>
   );
 }

@@ -186,6 +186,9 @@
     "cohortsForSchool": "Promotions pour {{school}}",
     "addInstitution": "Ajouter un établissement",
     "addCohort": "Ajouter une promotion",
+    "addUser": "Ajouter un utilisateur",
+    "addStudent": "Ajouter un étudiant",
+    "addInstructor": "Ajouter un instructeur",
     "tabs": {
       "aria": "Onglets de navigation de la gestion administrative",
       "users": "Utilisateurs",

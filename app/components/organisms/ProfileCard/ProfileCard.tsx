@@ -18,6 +18,7 @@ import RoleChip from "../../atoms/RoleChip/RoleChip";
 import InstitutionLogo from "../../atoms/InstitutionLogo/InstitutionLogo";
 import Guilloche, { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche";
 import Electronics from "../../atoms/Electronics/Electronics";
+import EditableAvatar from "../../molecules/EditableAvatar/EditableAvatar";
 import { getRoleConfig } from "../../../tokens/roles";
 import { ProfileTextField } from "./ProfileCard.styles";
 import { ProfileHeaderChips, BackContent } from "./ProfileCard.components";
@@ -33,6 +34,8 @@ interface FrontContentProps {
   githubUsername?: string;
   emailDomain: string;
   onAvatarEdit?: () => void;
+  editableAvatar?: boolean;
+  onAvatarChange?: (avatarUrl: string) => void;
   internalFirstName: string;
   internalFamilyName: string;
   internalEmailPrefix: string;
@@ -51,6 +54,8 @@ function FrontContent({
   githubUsername,
   emailDomain,
   onAvatarEdit,
+  editableAvatar,
+  onAvatarChange,
   internalFirstName,
   internalFamilyName,
   internalEmailPrefix,
@@ -155,40 +160,60 @@ function FrontContent({
               position: "relative",
               display: "inline-flex",
               alignSelf: "center",
+              width: 96,
+              height: 96,
+              alignItems: "center",
+              justifyContent: "center",
             }}
+            onClick={(e) => e.stopPropagation()}
+            data-no-flip="true"
           >
-            <Avatar
-              src={avatarUrl}
-              name={internalFirstName}
-              role={role}
-              shape={roleConfig.avatarShape}
-              width={96}
-              height={96}
-              isPortrait={false}
-              placeholderIcon={internalFirstName?.[0] || "U"}
-            />
+            {editableAvatar ? (
+              <EditableAvatar
+                mode="image-only"
+                value={avatarUrl}
+                name={internalFirstName}
+                shape={roleConfig.avatarShape}
+                size="xl"
+                onChange={onAvatarChange}
+                testId="profile-card-editable-avatar"
+              />
+            ) : (
+              <>
+                <Avatar
+                  src={avatarUrl}
+                  name={internalFirstName}
+                  role={role}
+                  shape={roleConfig.avatarShape}
+                  width={96}
+                  height={96}
+                  isPortrait={false}
+                  placeholderIcon={internalFirstName?.[0] || "U"}
+                />
 
-            {onAvatarEdit && (
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAvatarEdit();
-                }}
-                data-no-flip="true"
-                aria-label={t("common:profile.editAvatar", "Edit avatar")}
-                sx={{
-                  position: "absolute",
-                  top: -6,
-                  right: -6,
-                  zIndex: 3,
-                  bgcolor: "background.paper",
-                  boxShadow: 1,
-                  "&:hover": { bgcolor: "action.hover" },
-                }}
-              >
-                <EditRoundedIcon fontSize="small" />
-              </IconButton>
+                {onAvatarEdit && (
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAvatarEdit();
+                    }}
+                    data-no-flip="true"
+                    aria-label={t("common:profile.editAvatar", "Edit avatar")}
+                    sx={{
+                      position: "absolute",
+                      top: -6,
+                      right: -6,
+                      zIndex: 3,
+                      bgcolor: "background.paper",
+                      boxShadow: 1,
+                      "&:hover": { bgcolor: "action.hover" },
+                    }}
+                  >
+                    <EditRoundedIcon fontSize="small" />
+                  </IconButton>
+                )}
+              </>
             )}
           </Box>
 
@@ -302,6 +327,8 @@ export default function ProfileCard({
   mrzData,
   onChange,
   onAvatarEdit,
+  editableAvatar,
+  onAvatarChange,
   sx,
   ...props
 }: ProfileCardProps) {
@@ -364,6 +391,8 @@ export default function ProfileCard({
             githubUsername={githubUsername}
             emailDomain={emailDomain}
             onAvatarEdit={onAvatarEdit}
+            editableAvatar={editableAvatar}
+            onAvatarChange={onAvatarChange}
             internalFirstName={internalFirstName}
             internalFamilyName={internalFamilyName}
             internalEmailPrefix={internalEmailPrefix}

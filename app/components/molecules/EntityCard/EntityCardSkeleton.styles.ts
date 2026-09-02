@@ -1,22 +1,94 @@
-import { styled } from "@mui/material/styles";
+import { styled, alpha, type Theme } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 
+function getSkeletonBg(theme: Theme, isGhost?: boolean) {
+  return isGhost
+    ? alpha(theme.palette.background.paper, 0.45)
+    : theme.palette.background.paper;
+}
+
+function getSkeletonBorder(theme: Theme, isGhost?: boolean) {
+  return isGhost
+    ? `1.5px dashed ${alpha(theme.palette.divider, 0.35)}`
+    : undefined;
+}
+
 export const SkeletonCardContainer = styled(Card, {
-  shouldForwardProp: (prop) => prop !== "animated" && prop !== "opacity",
-})<{ animated?: boolean; opacity?: number }>(({ theme, opacity }) => ({
-  position: "relative",
-  width: "100%",
-  minWidth: "260px",
-  maxWidth: "100%",
-  borderRadius: "16px",
+  shouldForwardProp: (prop) =>
+    prop !== "animated" &&
+    prop !== "opacity" &&
+    prop !== "isGhost" &&
+    prop !== "isInteractive",
+})<{
+  animated?: boolean;
+  opacity?: number;
+  isGhost?: boolean;
+  isInteractive?: boolean;
+}>(({ theme, opacity, isGhost, isInteractive }) => {
+  const primary = theme.palette.primary.main;
+  const bg = getSkeletonBg(theme, isGhost);
+  const border = getSkeletonBorder(theme, isGhost);
+
+  return {
+    position: "relative",
+    width: "100%",
+    minWidth: "260px",
+    maxWidth: "100%",
+    borderRadius: "16px",
+    display: "flex",
+    flexDirection: "column",
+    boxSizing: "border-box",
+    opacity: opacity ?? 1,
+    pointerEvents: isInteractive ? "auto" : "none",
+    cursor: isInteractive ? "pointer" : "default",
+    backgroundColor: bg,
+    border,
+    backdropFilter: isGhost ? "blur(8px)" : undefined,
+    WebkitBackdropFilter: isGhost ? "blur(8px)" : undefined,
+    overflow: "hidden",
+    userSelect: "none",
+    transition: theme.transitions.create(
+      ["transform", "box-shadow", "border-color", "background-color"],
+      { duration: theme.transitions.duration.shorter },
+    ),
+    ...(isInteractive && {
+      "&:hover": {
+        transform: "translateY(-3px)",
+        borderColor: primary,
+        backgroundColor: alpha(primary, 0.04),
+        boxShadow: `0 8px 24px -4px ${alpha(primary, 0.15)}`,
+        "& .md3-ghost-fab": {
+          transform: "scale(1.1)",
+          boxShadow: `0 8px 20px -2px ${alpha(primary, 0.55)}, 0 4px 10px -1px ${alpha(theme.palette.common.black, 0.25)}`,
+        },
+      },
+      "&:focus-visible": {
+        outline: `2px solid ${primary}`,
+        outlineOffset: "2px",
+      },
+    }),
+    ...theme.applyStyles("dark", {
+      backgroundColor: isGhost
+        ? alpha(theme.palette.background.paper, 0.35)
+        : theme.palette.background.paper,
+      borderColor: isGhost ? alpha(theme.palette.divider, 0.25) : undefined,
+    }),
+  };
+});
+
+export const GhostFabOverlay = styled("div")({
+  position: "absolute",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
   display: "flex",
-  flexDirection: "column",
-  boxSizing: "border-box",
-  opacity: opacity ?? 1,
-  pointerEvents: "none",
-  backgroundColor: theme.palette.background.paper,
-}));
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 2,
+  pointerEvents: "auto",
+});
 
 export const SkeletonCardContent = styled(CardContent)(({ theme }) => ({
   display: "flex",

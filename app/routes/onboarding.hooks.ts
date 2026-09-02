@@ -81,6 +81,17 @@ export function useOnboardingProfile(options: UseOnboardingProfileOptions) {
     [emailDomain, syncProfileToDb],
   );
 
+  const handleAvatarChange = useCallback(
+    (avatarUrl: string) => {
+      setProfile((prev) => {
+        const next = { ...prev, avatarUrl };
+        syncProfileToDb(next);
+        return next;
+      });
+    },
+    [syncProfileToDb],
+  );
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleAvatarEditClick = () => {
@@ -102,9 +113,7 @@ export function useOnboardingProfile(options: UseOnboardingProfileOptions) {
       if (res.ok) {
         const data = (await res.json()) as { url?: string };
         if (data.url) {
-          const next = { ...profile, avatarUrl: data.url };
-          setProfile(next);
-          syncProfileToDb(next);
+          handleAvatarChange(data.url);
         }
       }
     } catch (err) {
@@ -120,6 +129,7 @@ export function useOnboardingProfile(options: UseOnboardingProfileOptions) {
     emailPrefix,
     mrzData,
     handleCardFieldChange,
+    handleAvatarChange,
     fileInputRef,
     handleAvatarEditClick,
     handleAvatarFileChange,

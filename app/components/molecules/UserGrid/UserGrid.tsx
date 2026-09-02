@@ -237,6 +237,9 @@ interface UserCardsZoneProps {
   showImpersonate?: boolean;
   onDelete?: (student: EntityCardData) => void;
   showDelete?: boolean;
+  onAddUser?: () => void;
+  showAddUser?: boolean;
+  addUserTooltip?: string;
 }
 
 function UserCardsZone({
@@ -250,8 +253,12 @@ function UserCardsZone({
   showImpersonate,
   onDelete,
   showDelete,
+  onAddUser,
+  showAddUser,
+  addUserTooltip,
 }: UserCardsZoneProps) {
   const isInteractive = Boolean(onStudentClick);
+  const shouldRenderGhost = Boolean(showAddUser ?? Boolean(onAddUser));
 
   return (
     <MD3CollectionGrid data-testid="user-zone-wrapper" id={zoneId}>
@@ -273,6 +280,14 @@ function UserCardsZone({
           testId={`user-card-${student.id}`}
         />
       ))}
+      {shouldRenderGhost && (
+        <EntityCardSkeleton
+          isGhost
+          onClick={onAddUser}
+          tooltipTitle={addUserTooltip}
+          testId="user-card-skeleton-ghost"
+        />
+      )}
     </MD3CollectionGrid>
   );
 }
@@ -294,6 +309,9 @@ interface GridBodyProps {
   showImpersonate?: boolean;
   onDelete?: (student: EntityCardData) => void;
   showDelete?: boolean;
+  onAddUser?: () => void;
+  showAddUser?: boolean;
+  addUserTooltip?: string;
   sentinelRef: React.RefObject<HTMLDivElement | null>;
   onClear: () => void;
 }
@@ -315,6 +333,9 @@ function GridBody({
   showImpersonate,
   onDelete,
   showDelete,
+  onAddUser,
+  showAddUser,
+  addUserTooltip,
   sentinelRef,
   onClear,
 }: GridBodyProps) {
@@ -344,6 +365,9 @@ function GridBody({
         showImpersonate={showImpersonate}
         onDelete={onDelete}
         showDelete={showDelete}
+        onAddUser={onAddUser}
+        showAddUser={showAddUser}
+        addUserTooltip={addUserTooltip}
       />
       {lazy && visibleCount < filteredStudents.length && (
         <LoadingSentinel
@@ -356,7 +380,15 @@ function GridBody({
 }
 
 export function UserGrid(props: UserGridProps) {
+  const { t } = useTranslation(["common", "admin"]);
   const logic = useUserGridLogic(props);
+  const resolvedAddUserTooltip =
+    props.addUserTooltip ||
+    (props.userType === "instructor"
+      ? t("common:admin.addInstructor", "Add Instructor")
+      : props.userType === "student"
+        ? t("common:admin.addStudent", "Add Student")
+        : t("common:admin.addUser", "Add User"));
 
   return (
     <GridContainer className={props.className} data-testid={logic.testId}>
@@ -394,6 +426,9 @@ export function UserGrid(props: UserGridProps) {
           showImpersonate={props.showImpersonate}
           onDelete={props.onDelete}
           showDelete={props.showDelete}
+          onAddUser={props.onAddUser}
+          showAddUser={props.showAddUser}
+          addUserTooltip={resolvedAddUserTooltip}
           sentinelRef={logic.sentinelRef}
           onClear={() => logic.handleQueryChange("")}
         />

@@ -186,6 +186,9 @@
     "cohortsForSchool": "Cohorts for {{school}}",
     "addInstitution": "Add Institution",
     "addCohort": "Add Cohort",
+    "addUser": "Add User",
+    "addStudent": "Add Student",
+    "addInstructor": "Add Instructor",
     "tabs": {
       "aria": "Admin management navigation tabs",
       "users": "Users",

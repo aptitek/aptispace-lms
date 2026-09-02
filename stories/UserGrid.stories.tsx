@@ -126,3 +126,11 @@ export const LazyLoading: Story = {
     pageSize: 2,
   },
 };
+
+export const WithAddUserGhostCard: Story = {
+  args: {
+    students: sampleStudents,
+    title: "Enrolled Students",
+    onAddUser: () => alert("Create user requested"),
+  },
+};
