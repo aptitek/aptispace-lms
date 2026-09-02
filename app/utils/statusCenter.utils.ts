@@ -86,6 +86,34 @@ export function extractErrorCode(
   return undefined;
 }
 
+export interface ViteErrorPayload {
+  err?: {
+    message?: string;
+    stack?: string;
+    frame?: string;
+    plugin?: string;
+  };
+}
+
+export function resolveViteErrorDetails(payload: ViteErrorPayload): {
+  message: string;
+  title: string;
+  stack?: string;
+} {
+  const err = payload.err;
+  const message = err?.message || "Vite HMR compilation error";
+  const title = err?.plugin
+    ? `HMR Build Alert (${err.plugin})`
+    : "HMR Build Alert";
+  const details = [err?.frame, err?.stack].filter(Boolean).join("\n\n");
+
+  return {
+    message,
+    title,
+    stack: details.length > 0 ? details : undefined,
+  };
+}
+
 export function createFallbackHealthReport(
   errorMessage: string,
 ): SystemInfrastructureHealth {

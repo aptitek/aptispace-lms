@@ -24,9 +24,14 @@ import {
   resolveErrorMessage,
   resolveErrorStack,
 } from "./statusCenter.utils";
+import { executeTelemetrySimulation } from "./statusCenterSimulation";
+import { useStatusCenterListeners } from "./statusCenterListeners";
 
 export * from "./statusCenter.types";
 export * from "./statusCenter.utils";
+export * from "./hydrationTracker";
+export * from "./statusCenterSimulation";
+export * from "./statusCenterListeners";
 
 const MAX_STORED_EVENTS = 100;
 const SNACKBAR_AUTO_DISMISS_MS = 6000;
@@ -34,34 +39,6 @@ const SNACKBAR_AUTO_DISMISS_MS = 6000;
 const StatusCenterContext = createContext<StatusCenterContextValue | null>(
   null,
 );
-
-interface ViteErrorPayload {
-  err?: {
-    message?: string;
-    stack?: string;
-    frame?: string;
-    plugin?: string;
-  };
-}
-
-function resolveViteErrorDetails(payload: ViteErrorPayload): {
-  message: string;
-  title: string;
-  stack?: string;
-} {
-  const err = payload.err;
-  const message = err?.message || "Vite HMR compilation error";
-  const title = err?.plugin
-    ? `HMR Build Alert (${err.plugin})`
-    : "HMR Build Alert";
-  const details = [err?.frame, err?.stack].filter(Boolean).join("\n\n");
-
-  return {
-    message,
-    title,
-    stack: details.length > 0 ? details : undefined,
-  };
-}
 
 export function StatusCenterProvider({
   children,
@@ -269,47 +246,17 @@ export function StatusCenterProvider({
         | "error"
         | "critical"
         | "security_403"
-        | "offline",
+        | "offline"
+        | "hydration",
     ) => {
-      switch (simulationType) {
-        case "nominal":
-          notifySuccess("API Gateway synchronization verified.");
-          break;
-        case "warning":
-          notifyWarning(
-            "Gateway node latency elevated to 240ms. Minor packet jitter.",
-          );
-          break;
-        case "error":
-          notifyError(
-            new Error("Diagnostic runtime exception: D1 query timeout"),
-          );
-          break;
-        case "critical":
-          notify({
-            title: "STATION FAULT: TELEMETRY ANOMALY",
-            message:
-              "Primary propulsion sub-controller dropped out of consensus ring.",
-            severity: "critical",
-            source: "flight-control",
-          });
-          break;
-        case "security_403":
-          notifySecurityBreach(
-            "Security Infraction (403): Unauthorized attempt to access /api/admin/credentials",
-          );
-          break;
-        case "offline":
-          setIsOnline(false);
-          notify({
-            title: "GATEWAY CARRIER LOST",
-            message:
-              "Station connection flatlined. Operating on emergency cached telemetry.",
-            severity: "critical",
-            source: "carrier-detect",
-          });
-          break;
-      }
+      executeTelemetrySimulation(simulationType, {
+        notify,
+        notifyError,
+        notifySecurityBreach,
+        notifySuccess,
+        notifyWarning,
+        setIsOnline,
+      });
     },
     [notify, notifyError, notifySecurityBreach, notifySuccess, notifyWarning],
   );
@@ -357,77 +304,12 @@ export function StatusCenterProvider({
 
   const bpm = useMemo(() => calculateBpm(systemStatus), [systemStatus]);
 
-  useEffect(() => {
-    if (typeof window === "undefined" || !import.meta.hot) return;
-
-    const handleViteError = (payload: ViteErrorPayload) => {
-      const details = resolveViteErrorDetails(payload);
-      notifyError(new Error(details.message), {
-        title: details.title,
-        source: "vite.hmr",
-        stack: details.stack,
-        severity: "error",
-        showSnackbar: true,
-      });
-    };
-
-    import.meta.hot.on("vite:error", handleViteError);
-  }, [notifyError]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const handleOnline = () => {
-      setIsOnline(true);
-      notifySuccess("Station gateway link restored. System telemetry online.");
-    };
-
-    const handleOffline = () => {
-      setIsOnline(false);
-      notify({
-        title: "GATEWAY CARRIER LOST",
-        message:
-          "Network link disconnected. Flatline telemetry mode activated.",
-        severity: "critical",
-        source: "carrier-detect",
-      });
-    };
-
-    const handleError = (event: ErrorEvent) => {
-      if (
-        event.message?.includes("ResizeObserver loop") ||
-        event.message?.includes("Script error.")
-      ) {
-        return;
-      }
-
-      notifyError(event.error || new Error(event.message), {
-        source: "window.onerror",
-        url: event.filename,
-      });
-    };
-
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      notifyError(event.reason || new Error("Unhandled Promise Rejection"), {
-        source: "unhandledrejection",
-      });
-    };
-
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-    window.addEventListener("error", handleError);
-    window.addEventListener("unhandledrejection", handleUnhandledRejection);
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-      window.removeEventListener("error", handleError);
-      window.removeEventListener(
-        "unhandledrejection",
-        handleUnhandledRejection,
-      );
-    };
-  }, [notify, notifyError, notifySuccess]);
+  useStatusCenterListeners({
+    notify,
+    notifyError,
+    notifySuccess,
+    setIsOnline,
+  });
 
   useEffect(() => {
     if (!activeSnackbar) return;

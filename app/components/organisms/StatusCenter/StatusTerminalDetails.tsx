@@ -165,6 +165,44 @@ function StackTraceBlock({ stack }: { stack?: string }) {
   );
 }
 
+function ComponentStackBlock({ componentStack }: { componentStack?: string }) {
+  const { t } = useTranslation("common");
+  if (!componentStack) return null;
+
+  return (
+    <Box>
+      <Typography
+        variant="caption"
+        sx={{ color: "text.secondary", display: "block", mb: 0.5 }}
+      >
+        {t("systemStatus.componentStackField", {
+          defaultValue: "COMPONENT HIERARCHY & STACK",
+        })}
+      </Typography>
+      <Box
+        component="pre"
+        sx={{
+          m: 0,
+          p: 1.5,
+          borderRadius: 1.5,
+          backgroundColor: "background.paper",
+          border: 1,
+          borderColor: "divider",
+          fontFamily: "monospace",
+          fontSize: "0.7rem",
+          maxHeight: 180,
+          overflow: "auto",
+          color: "warning.light",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-all",
+        }}
+      >
+        {componentStack}
+      </Box>
+    </Box>
+  );
+}
+
 export function StatusTerminalDetails({
   eventEntry,
   onReport,
@@ -207,6 +245,7 @@ export function StatusTerminalDetails({
     >
       <DiagnosticMetaGrid eventEntry={eventEntry} />
       <ContextPayloadBlock contextData={eventEntry.contextData} />
+      <ComponentStackBlock componentStack={eventEntry.componentStack} />
       <StackTraceBlock stack={eventEntry.stack} />
 
       {/* Action Footer: Copy & Report to Admin */}

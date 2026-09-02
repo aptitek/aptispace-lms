@@ -1,5 +1,6 @@
-import React from "react";
-import { styled } from "@mui/material/styles";
+import React, { useId } from "react";
+import { styled, useTheme } from "@mui/material/styles";
+import { UK_FLAG_COLORS, FRENCH_FLAG_COLORS } from "~/tokens/namedColors";
 
 export const StyledSvg = styled("svg")({
   display: "block",
@@ -12,45 +13,71 @@ const FRANCE_PATH =
 const UK_PATH =
   "M 16.2 2.6 L 14.9 4.1 L 16.9 4.8 L 16.5 6.7 L 15.5 7.6 L 14.4 8.4 L 16.9 11.2 L 18.2 14.1 L 17.4 14.5 L 18.6 16.8 L 20.4 17.7 L 19.6 19.2 L 18.3 20.0 L 19.5 20.9 L 16.6 21.4 L 14.3 21.3 L 12.8 21.0 L 10.7 21.5 L 8.6 21.8 L 10.6 20.3 L 13.3 19.4 L 12.3 19.2 L 11.1 18.2 L 11.2 17.2 L 12.2 15.7 L 11.9 15.1 L 13.9 14.6 L 14.2 13.9 L 13.9 12.6 L 13.6 11.0 L 12.4 11.0 L 12.5 9.6 L 12.8 8.0 L 12.2 8.2 L 12.0 8.3 L 11.7 8.5 L 12.5 6.6 L 11.5 6.1 L 12.3 4.6 L 12.9 3.5 L 13.5 2.7 L 14.2 2.1 L 16.4 2.4 L 16.3 2.5 Z";
 
-const MapPathSilhouette = styled("path", {
-  shouldForwardProp: (prop) => prop !== "$active",
-})<{ $active: boolean }>(({ theme, $active }) => ({
-  fill: $active ? theme.palette.primary.main : "currentColor",
-  fillOpacity: $active ? 0.28 : 0.08,
-  stroke: $active ? theme.palette.primary.main : theme.palette.divider,
-  strokeWidth: $active ? 1.2 : 0.8,
+const SilhouettePath = styled("path")({
   transition: "all 0.3s ease",
-}));
+});
 
 export const FranceMapSilhouette: React.FC<{
   size: number;
   active: boolean;
-}> = ({ size, active }) => (
-  <StyledSvg
-    width={size}
-    height={size}
-    viewBox="0 0 28 25"
-    fill="none"
-    aria-hidden="true"
-  >
-    <MapPathSilhouette d={FRANCE_PATH} $active={active} />
-  </StyledSvg>
-);
+}> = ({ size, active }) => {
+  const theme = useTheme();
+  const fillColor = active ? theme.palette.primary.main : "currentColor";
+  const strokeColor = active
+    ? theme.palette.primary.main
+    : theme.palette.divider;
+  const fillOpacity = active ? 0.28 : 0.08;
+  const strokeWidth = active ? 1.2 : 0.8;
+
+  return (
+    <StyledSvg
+      width={size}
+      height={size}
+      viewBox="0 0 28 25"
+      fill="none"
+      aria-hidden="true"
+    >
+      <SilhouettePath
+        d={FRANCE_PATH}
+        fill={fillColor}
+        fillOpacity={fillOpacity}
+        stroke={strokeColor}
+        strokeWidth={strokeWidth}
+      />
+    </StyledSvg>
+  );
+};
 
 export const UkMapSilhouette: React.FC<{
   size: number;
   active: boolean;
-}> = ({ size, active }) => (
-  <StyledSvg
-    width={size}
-    height={size}
-    viewBox="0 0 28 25"
-    fill="none"
-    aria-hidden="true"
-  >
-    <MapPathSilhouette d={UK_PATH} $active={active} />
-  </StyledSvg>
-);
+}> = ({ size, active }) => {
+  const theme = useTheme();
+  const fillColor = active ? theme.palette.primary.main : "currentColor";
+  const strokeColor = active
+    ? theme.palette.primary.main
+    : theme.palette.divider;
+  const fillOpacity = active ? 0.28 : 0.08;
+  const strokeWidth = active ? 1.2 : 0.8;
+
+  return (
+    <StyledSvg
+      width={size}
+      height={size}
+      viewBox="0 0 28 25"
+      fill="none"
+      aria-hidden="true"
+    >
+      <SilhouettePath
+        d={UK_PATH}
+        fill={fillColor}
+        fillOpacity={fillOpacity}
+        stroke={strokeColor}
+        strokeWidth={strokeWidth}
+      />
+    </StyledSvg>
+  );
+};
 
 const MDI_AIRPLANE_PATH =
   "M21,16V14L13,9V3.5A1.5,1.5 0 0,0 11.5,2A1.5,1.5 0 0,0 10,3.5V9L2,14V16L10,13.5V19L8,20.5V22L11.5,21L15,22V20.5L13,19V13.5L21,16Z";
@@ -74,72 +101,105 @@ export const MdiAirplaneGlyph: React.FC<{
 const FLAG_RADIUS = 16;
 const FLAG_VIEWBOX = 32;
 
-const UkFlagBackground = styled("rect")(({ theme }) => ({
-  fill: theme.palette.primary.dark,
-}));
+export const UkFlag: React.FC<{ size: number }> = ({ size }) => {
+  const rawId = useId();
+  const clipId = `uk-circle-flag-${rawId.replace(/:/g, "")}`;
 
-const UkFlagWhiteCross = styled("path")(({ theme }) => ({
-  stroke: theme.palette.common.white,
-}));
-
-const UkFlagRedCross = styled("path")(({ theme }) => ({
-  stroke: theme.palette.error.main,
-}));
-
-export const UkFlag: React.FC<{ size: number }> = ({ size }) => (
-  <StyledSvg
-    width={size}
-    height={size}
-    viewBox={`0 0 ${FLAG_VIEWBOX} ${FLAG_VIEWBOX}`}
-    aria-hidden="true"
-  >
-    <clipPath id="uk-circle-flag">
-      <circle cx={FLAG_RADIUS} cy={FLAG_RADIUS} r={FLAG_RADIUS} />
-    </clipPath>
-    <g clipPath="url(#uk-circle-flag)">
-      <UkFlagBackground width={FLAG_VIEWBOX} height={FLAG_VIEWBOX} />
-      <UkFlagWhiteCross d="M0 0 L32 32 M32 0 L0 32" strokeWidth={5.5} />
-      <UkFlagRedCross d="M0 0 L32 32 M32 0 L0 32" strokeWidth={2.5} />
-      <UkFlagWhiteCross d="M16 0 V32 M0 16 H32" strokeWidth={9} />
-      <UkFlagRedCross d="M16 0 V32 M0 16 H32" strokeWidth={5} />
-    </g>
-  </StyledSvg>
-);
+  return (
+    <StyledSvg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${FLAG_VIEWBOX} ${FLAG_VIEWBOX}`}
+      aria-hidden="true"
+    >
+      <defs>
+        <clipPath id={clipId}>
+          <circle cx={FLAG_RADIUS} cy={FLAG_RADIUS} r={FLAG_RADIUS} />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#${clipId})`}>
+        {/* Deep Navy Blue Field */}
+        <rect
+          width={FLAG_VIEWBOX}
+          height={FLAG_VIEWBOX}
+          fill={UK_FLAG_COLORS.blue}
+        />
+        {/* Diagonal Broad White Cross (St Andrew) */}
+        <path
+          d="M0 0 L32 32 M32 0 L0 32"
+          fill="none"
+          stroke={UK_FLAG_COLORS.white}
+          strokeWidth={5.5}
+        />
+        {/* Diagonal Red Cross (St Patrick) */}
+        <path
+          d="M0 0 L32 32 M32 0 L0 32"
+          fill="none"
+          stroke={UK_FLAG_COLORS.red}
+          strokeWidth={2.5}
+        />
+        {/* Horizontal & Vertical Broad White Cross (St George Outer) */}
+        <path
+          d="M16 0 V32 M0 16 H32"
+          fill="none"
+          stroke={UK_FLAG_COLORS.white}
+          strokeWidth={9}
+        />
+        {/* Horizontal & Vertical Red Cross (St George Inner) */}
+        <path
+          d="M16 0 V32 M0 16 H32"
+          fill="none"
+          stroke={UK_FLAG_COLORS.red}
+          strokeWidth={5}
+        />
+      </g>
+    </StyledSvg>
+  );
+};
 
 const FR_STRIPE_W = 10.66;
 const FR_STRIPE_MID_W = 10.68;
 const FR_STRIPE_X3 = 21.34;
 
-const FrStripeBlue = styled("rect")(({ theme }) => ({
-  fill: theme.palette.primary.dark,
-}));
+export const FrFlag: React.FC<{ size: number }> = ({ size }) => {
+  const rawId = useId();
+  const clipId = `fr-circle-flag-${rawId.replace(/:/g, "")}`;
 
-const FrStripeWhite = styled("rect")(({ theme }) => ({
-  fill: theme.palette.common.white,
-}));
-
-const FrStripeRed = styled("rect")(({ theme }) => ({
-  fill: theme.palette.error.main,
-}));
-
-export const FrFlag: React.FC<{ size: number }> = ({ size }) => (
-  <StyledSvg
-    width={size}
-    height={size}
-    viewBox={`0 0 ${FLAG_VIEWBOX} ${FLAG_VIEWBOX}`}
-    aria-hidden="true"
-  >
-    <clipPath id="fr-circle-flag">
-      <circle cx={FLAG_RADIUS} cy={FLAG_RADIUS} r={FLAG_RADIUS} />
-    </clipPath>
-    <g clipPath="url(#fr-circle-flag)">
-      <FrStripeBlue x={0} width={FR_STRIPE_W} height={FLAG_VIEWBOX} />
-      <FrStripeWhite
-        x={FR_STRIPE_W}
-        width={FR_STRIPE_MID_W}
-        height={FLAG_VIEWBOX}
-      />
-      <FrStripeRed x={FR_STRIPE_X3} width={FR_STRIPE_W} height={FLAG_VIEWBOX} />
-    </g>
-  </StyledSvg>
-);
+  return (
+    <StyledSvg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${FLAG_VIEWBOX} ${FLAG_VIEWBOX}`}
+      aria-hidden="true"
+    >
+      <defs>
+        <clipPath id={clipId}>
+          <circle cx={FLAG_RADIUS} cy={FLAG_RADIUS} r={FLAG_RADIUS} />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#${clipId})`}>
+        <rect
+          x={0}
+          y={0}
+          width={FR_STRIPE_W}
+          height={FLAG_VIEWBOX}
+          fill={FRENCH_FLAG_COLORS.blue}
+        />
+        <rect
+          x={FR_STRIPE_W}
+          y={0}
+          width={FR_STRIPE_MID_W}
+          height={FLAG_VIEWBOX}
+          fill={FRENCH_FLAG_COLORS.white}
+        />
+        <rect
+          x={FR_STRIPE_X3}
+          y={0}
+          width={FR_STRIPE_W}
+          height={FLAG_VIEWBOX}
+          fill={FRENCH_FLAG_COLORS.red}
+        />
+      </g>
+    </StyledSvg>
+  );
+};

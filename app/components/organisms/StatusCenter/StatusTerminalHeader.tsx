@@ -18,7 +18,13 @@ interface StatusTerminalHeaderProps {
   onClose: () => void;
   onSimulate: (
     simulationType:
-      "nominal" | "warning" | "error" | "critical" | "security_403" | "offline",
+      | "nominal"
+      | "warning"
+      | "error"
+      | "critical"
+      | "security_403"
+      | "offline"
+      | "hydration",
   ) => void;
 }
 
@@ -183,6 +189,17 @@ export function StatusTerminalHeader({
           >
             🔴{" "}
             {t("systemStatus.simError", { defaultValue: "Diagnostic Error" })}
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              onSimulate("hydration");
+              setSimulationMenuAnchor(null);
+            }}
+          >
+            💧{" "}
+            {t("systemStatus.simHydration", {
+              defaultValue: "Hydration Mismatch (SSR)",
+            })}
           </MenuItem>
           <MenuItem
             onClick={() => {

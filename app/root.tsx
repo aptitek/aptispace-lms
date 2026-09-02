@@ -29,6 +29,7 @@ import {
 import StatusSnackbar from "./components/molecules/StatusCenter/StatusSnackbar";
 import StatusTerminalCard from "./components/organisms/StatusCenter/StatusTerminalCard";
 import ShapeDefs from "./components/atoms/Avatar/ShapeDefs";
+import { isHydrationError } from "./utils/hydrationTracker";
 import { LANGUAGE_STORAGE_KEY } from "./i18n";
 import "~/i18n";
 import "./app.css";
@@ -137,9 +138,10 @@ function resolveErrorDisplayDetails(
 
   const isDev = import.meta.env.DEV;
   const isErrInstance = error instanceof Error;
+  const isHydration = isHydrationError(error);
 
   return {
-    title: t("oops"),
+    title: isHydration ? "HYDRATION MISMATCH (SSR/Client)" : t("oops"),
     details: isErrInstance ? error.message : t("unexpected"),
     statusCode: 500,
     stack: isDev && isErrInstance ? error.stack : undefined,
@@ -156,11 +158,12 @@ function ErrorBoundaryContent({ error }: { error: unknown }) {
   );
 
   useEffect(() => {
+    const isHydration = isHydrationError(error);
     notifyError(error, {
       title: errorInfo.title,
       message: errorInfo.details,
       statusCode: errorInfo.statusCode,
-      source: "react-router.error-boundary",
+      source: isHydration ? "react.hydration" : "react-router.error-boundary",
       stack: errorInfo.stack,
     });
   }, [error, errorInfo, notifyError]);

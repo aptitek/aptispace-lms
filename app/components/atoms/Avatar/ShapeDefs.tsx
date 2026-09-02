@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, Fragment } from "react";
 import { styled } from "@mui/material/styles";
 import { ALL_EXPRESSIVE_SHAPES, EXPRESSIVE_SHAPE_CATALOG } from "./shapes";
 
@@ -18,7 +18,7 @@ export const ShapeDefs = memo(function ShapeDefs() {
           const shape = EXPRESSIVE_SHAPE_CATALOG[shapeKey];
           if (!shape?.pathData) return null;
           return (
-            <span key={shapeKey}>
+            <Fragment key={shapeKey}>
               <clipPath
                 id={`avatar-shape-${shapeKey}`}
                 clipPathUnits="objectBoundingBox"
@@ -32,7 +32,7 @@ export const ShapeDefs = memo(function ShapeDefs() {
               >
                 <path d={shape.pathData} />
               </clipPath>
-            </span>
+            </Fragment>
           );
         })}
       </defs>

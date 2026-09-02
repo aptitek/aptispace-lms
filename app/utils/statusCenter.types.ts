@@ -97,6 +97,12 @@ export interface StatusCenterContextValue {
   checkInfrastructureHealth: () => Promise<SystemInfrastructureHealth | null>;
   simulateEvent: (
     type:
-      "nominal" | "warning" | "error" | "critical" | "security_403" | "offline",
+      | "nominal"
+      | "warning"
+      | "error"
+      | "critical"
+      | "security_403"
+      | "offline"
+      | "hydration",
   ) => void;
 }

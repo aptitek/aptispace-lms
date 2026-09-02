@@ -7,6 +7,8 @@ import {
   DEFAULT_STATUS_CENTER_FALLBACK,
   StatusCenterProvider,
   useStatusCenter,
+  isHydrationError,
+  recordHydrationError,
   type TelemetryEventItem,
 } from "./statusCenterContext";
 
@@ -99,5 +101,10 @@ describe("StatusCenter Pure Calculations & Telemetry Functions", () => {
     expect(DEFAULT_STATUS_CENTER_FALLBACK.isOnline).toBe(true);
     expect(DEFAULT_STATUS_CENTER_FALLBACK.events).toEqual([]);
     expect(DEFAULT_STATUS_CENTER_FALLBACK.isTerminalOpen).toBe(false);
+  });
+
+  it("exports hydration tracker utilities through statusCenterContext", () => {
+    expect(typeof isHydrationError).toBe("function");
+    expect(typeof recordHydrationError).toBe("function");
   });
 });
