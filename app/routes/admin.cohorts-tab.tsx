@@ -41,6 +41,8 @@ export interface AdminCohortsTabPanelProps {
     slug: string;
     type?: string;
     logoUrl?: string;
+    emailDomain?: string;
+    usernamePattern?: string;
   }) => void;
   onSaveCohort: (payload: {
     id?: string;

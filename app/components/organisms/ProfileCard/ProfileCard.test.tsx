@@ -82,4 +82,18 @@ describe("ProfileCard Organism", () => {
     expect(props.onAvatarChange).toBe(onAvatarChangeMock);
     expect(props.avatarUrl).toBe("https://example.com/avatar.webp");
   });
+
+  it("creates React element with custom usernamePattern and emailDomain", () => {
+    const element = React.createElement(ProfileCard, {
+      firstName: "Jean",
+      familyName: "DUPONT",
+      usernamePattern: "{f}{last}",
+      emailDomain: "aptitek.io",
+    });
+
+    expect(element).toBeDefined();
+    const props = element.props as ProfileCardProps;
+    expect(props.usernamePattern).toBe("{f}{last}");
+    expect(props.emailDomain).toBe("aptitek.io");
+  });
 });

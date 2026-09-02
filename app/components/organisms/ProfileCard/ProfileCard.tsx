@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
@@ -20,6 +20,11 @@ import Guilloche, { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche";
 import Electronics from "../../atoms/Electronics/Electronics";
 import EditableAvatar from "../../molecules/EditableAvatar/EditableAvatar";
 import { getRoleConfig } from "../../../tokens/roles";
+import {
+  generateUsernameFromPattern,
+  cleanDomainName,
+  DEFAULT_USERNAME_PATTERN,
+} from "../../../utils/emailFormat";
 import { ProfileTextField } from "./ProfileCard.styles";
 import { ProfileHeaderChips, BackContent } from "./ProfileCard.components";
 import type { ProfileCardProps } from "./ProfileCard.types";
@@ -312,29 +317,27 @@ function FrontContent({
   );
 }
 
-export default function ProfileCard({
-  schoolLogoUrl,
-  institutionName = "Institution",
-  cohortName = "Cohort",
-  year = "2026",
-  avatarUrl,
-  role = "student",
-  githubUsername,
-  firstName = "",
-  familyName = "",
-  emailPrefix = "",
-  emailDomain = "@aptispace.com",
-  mrzData,
-  onChange,
-  onAvatarEdit,
-  editableAvatar,
-  onAvatarChange,
-  sx,
-  ...props
-}: ProfileCardProps) {
+interface ProfileCardFieldsOptions {
+  firstName?: string;
+  familyName?: string;
+  emailPrefix?: string;
+  usernamePattern?: string;
+  onChange?: (field: string, value: string) => void;
+}
+
+function useProfileCardFields(options: ProfileCardFieldsOptions) {
+  const {
+    firstName = "",
+    familyName = "",
+    emailPrefix = "",
+    usernamePattern = DEFAULT_USERNAME_PATTERN,
+    onChange,
+  } = options;
+
   const [internalFirstName, setInternalFirstName] = useState(firstName);
   const [internalFamilyName, setInternalFamilyName] = useState(familyName);
   const [internalEmailPrefix, setInternalEmailPrefix] = useState(emailPrefix);
+  const isEmailManuallyEdited = useRef(Boolean(emailPrefix));
 
   useEffect(() => {
     setInternalFirstName(firstName);
@@ -346,23 +349,92 @@ export default function ProfileCard({
 
   useEffect(() => {
     setInternalEmailPrefix(emailPrefix);
+    if (emailPrefix) {
+      isEmailManuallyEdited.current = true;
+    }
   }, [emailPrefix]);
 
   const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInternalFirstName(e.target.value);
-    onChange?.("firstName", e.target.value);
+    const newFirst = e.target.value;
+    setInternalFirstName(newFirst);
+    onChange?.("firstName", newFirst);
+
+    if (!isEmailManuallyEdited.current) {
+      const autoPrefix = generateUsernameFromPattern({
+        firstName: newFirst,
+        lastName: internalFamilyName,
+        pattern: usernamePattern,
+      });
+      setInternalEmailPrefix(autoPrefix);
+      onChange?.("emailPrefix", autoPrefix);
+    }
   };
 
   const handleFamilyNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uppercaseValue = e.target.value.toUpperCase();
     setInternalFamilyName(uppercaseValue);
     onChange?.("familyName", uppercaseValue);
+
+    if (!isEmailManuallyEdited.current) {
+      const autoPrefix = generateUsernameFromPattern({
+        firstName: internalFirstName,
+        lastName: uppercaseValue,
+        pattern: usernamePattern,
+      });
+      setInternalEmailPrefix(autoPrefix);
+      onChange?.("emailPrefix", autoPrefix);
+    }
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    isEmailManuallyEdited.current = true;
     setInternalEmailPrefix(e.target.value);
     onChange?.("emailPrefix", e.target.value);
   };
+
+  return {
+    internalFirstName,
+    internalFamilyName,
+    internalEmailPrefix,
+    handleFirstNameChange,
+    handleFamilyNameChange,
+    handleEmailChange,
+  };
+}
+
+export default function ProfileCard(props: ProfileCardProps) {
+  const {
+    schoolLogoUrl,
+    institutionName = "Institution",
+    cohortName = "Cohort",
+    year = "2026",
+    avatarUrl,
+    role = "student",
+    githubUsername,
+    firstName,
+    familyName,
+    emailPrefix,
+    emailDomain = "@aptispace.com",
+    usernamePattern,
+    mrzData,
+    onChange,
+    onAvatarEdit,
+    editableAvatar,
+    onAvatarChange,
+    sx,
+    ...restProps
+  } = props;
+
+  const fields = useProfileCardFields({
+    firstName,
+    familyName,
+    emailPrefix,
+    usernamePattern,
+    onChange,
+  });
+
+  const cleanDomain = cleanDomainName(emailDomain) || "aptispace.com";
+  const formattedEmailDomain = `@${cleanDomain}`;
 
   return (
     <Box
@@ -374,7 +446,7 @@ export default function ProfileCard({
         boxSizing: "border-box",
         ...sx,
       }}
-      {...props}
+      {...restProps}
     >
       <PhysicCard
         isTransparent
@@ -389,16 +461,16 @@ export default function ProfileCard({
             avatarUrl={avatarUrl}
             role={role}
             githubUsername={githubUsername}
-            emailDomain={emailDomain}
+            emailDomain={formattedEmailDomain}
             onAvatarEdit={onAvatarEdit}
             editableAvatar={editableAvatar}
             onAvatarChange={onAvatarChange}
-            internalFirstName={internalFirstName}
-            internalFamilyName={internalFamilyName}
-            internalEmailPrefix={internalEmailPrefix}
-            handleFirstNameChange={handleFirstNameChange}
-            handleFamilyNameChange={handleFamilyNameChange}
-            handleEmailChange={handleEmailChange}
+            internalFirstName={fields.internalFirstName}
+            internalFamilyName={fields.internalFamilyName}
+            internalEmailPrefix={fields.internalEmailPrefix}
+            handleFirstNameChange={fields.handleFirstNameChange}
+            handleFamilyNameChange={fields.handleFamilyNameChange}
+            handleEmailChange={fields.handleEmailChange}
           />
         }
         backContent={<BackContent mrzData={mrzData} />}

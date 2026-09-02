@@ -39,6 +39,8 @@ export async function createInstitution(
     slug: string;
     type?: "academic" | "company";
     logoUrl?: string;
+    emailDomain?: string;
+    usernamePattern?: string;
     actorUserId?: string;
   },
 ) {
@@ -49,6 +51,8 @@ export async function createInstitution(
       slug: params.slug,
       type: params.type,
       logoUrl: params.logoUrl,
+      emailDomain: params.emailDomain,
+      usernamePattern: params.usernamePattern,
     })
     .returning();
 
@@ -72,6 +76,8 @@ export async function updateInstitution(
     slug?: string;
     type?: "academic" | "company";
     logoUrl?: string;
+    emailDomain?: string;
+    usernamePattern?: string;
     actorUserId?: string;
   },
 ) {
@@ -89,6 +95,14 @@ export async function updateInstitution(
       slug: params.slug ?? existing.slug,
       type: params.type ?? existing.type,
       logoUrl: params.logoUrl !== undefined ? params.logoUrl : existing.logoUrl,
+      emailDomain:
+        params.emailDomain !== undefined
+          ? params.emailDomain
+          : existing.emailDomain,
+      usernamePattern:
+        params.usernamePattern !== undefined
+          ? params.usernamePattern
+          : existing.usernamePattern,
       updatedAt: new Date(),
     })
     .where(eq(institutions.id, id))

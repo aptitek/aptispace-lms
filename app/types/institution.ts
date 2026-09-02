@@ -5,7 +5,8 @@ export interface SchoolConfig {
   type?: "academic" | "company" | string;
   logoUrl?: string | null;
   emailDomain?: string;
-  emailPattern?: string; // e.g. "{first}.{last}@{domain}" or "{f}{last}@{domain}"
+  usernamePattern?: string; // e.g. "{first}.{last}" or "{f}{last}"
+  emailPattern?: string; // legacy alias
 }
 
 export interface CohortConfig {

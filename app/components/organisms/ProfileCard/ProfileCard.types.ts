@@ -47,6 +47,10 @@ export interface ProfileCardProps extends Omit<BoxProps, "onChange"> {
    */
   emailDomain?: string;
   /**
+   * Username / email prefix pattern (e.g. "{first}.{last}", "{f}{last}")
+   */
+  usernamePattern?: string;
+  /**
    * Data for the MRZ zone on the back
    */
   mrzData?: Td1MrzData;

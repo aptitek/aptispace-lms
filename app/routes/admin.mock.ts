@@ -11,6 +11,7 @@ export function getDefaultSchools(): SchoolConfig[] {
       type: "company",
       logoUrl: "/aptitek-logo.svg",
       emailDomain: "aptitek.io",
+      usernamePattern: "{first}.{last}",
     },
     {
       id: "school-42",
@@ -19,6 +20,7 @@ export function getDefaultSchools(): SchoolConfig[] {
       type: "academic",
       logoUrl: "/aptitek-logo.svg",
       emailDomain: "42.fr",
+      usernamePattern: "{f}{last}",
     },
   ];
 }

@@ -37,6 +37,8 @@ export const institutions = sqliteTable("institutions", {
     .notNull()
     .default("academic"),
   logoUrl: text("logo_url"),
+  emailDomain: text("email_domain"),
+  usernamePattern: text("username_pattern").default("{first}.{last}"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),

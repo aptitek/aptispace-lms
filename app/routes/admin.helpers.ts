@@ -325,6 +325,8 @@ export async function handleCreateInstitutionAction(
   const type = (parseOptionalString(formData, "type") || "academic") as
     "academic" | "company";
   const logoUrl = parseOptionalString(formData, "logoUrl");
+  const emailDomain = parseOptionalString(formData, "emailDomain");
+  const usernamePattern = parseOptionalString(formData, "usernamePattern");
 
   if (!name || !slug) {
     return { success: false, error: "Missing required fields for institution" };
@@ -336,6 +338,8 @@ export async function handleCreateInstitutionAction(
       slug,
       type,
       logoUrl,
+      emailDomain,
+      usernamePattern,
       actorUserId,
     });
     return { success: true, institution };
@@ -360,6 +364,12 @@ export async function handleUpdateInstitutionAction(
   const logoUrl = formData.has("logoUrl")
     ? parseOptionalString(formData, "logoUrl")
     : undefined;
+  const emailDomain = formData.has("emailDomain")
+    ? parseOptionalString(formData, "emailDomain")
+    : undefined;
+  const usernamePattern = formData.has("usernamePattern")
+    ? parseOptionalString(formData, "usernamePattern")
+    : undefined;
 
   if (!id) {
     return { success: false, error: "Missing institution id" };
@@ -371,6 +381,8 @@ export async function handleUpdateInstitutionAction(
       slug,
       type,
       logoUrl,
+      emailDomain,
+      usernamePattern,
       actorUserId,
     });
     return { success: true, institution };

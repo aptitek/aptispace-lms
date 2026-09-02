@@ -53,4 +53,25 @@ describe("InstitutionInspector Organism", () => {
     expect(element.props.institution?.id).toBeUndefined();
     expect(element.props.isSubmitting).toBe(true);
   });
+
+  it("handles institution with emailDomain and usernamePattern", () => {
+    const customInstitution: SchoolConfig = {
+      id: "school-2",
+      name: "Custom School",
+      slug: "custom",
+      type: "company",
+      emailDomain: "custom.edu",
+      usernamePattern: "{f}{last}",
+    };
+
+    const element = React.createElement(InstitutionInspector, {
+      institution: customInstitution,
+      onClose: vi.fn(),
+      onSave: vi.fn(),
+    });
+
+    expect(element).toBeDefined();
+    expect(element.props.institution?.emailDomain).toBe("custom.edu");
+    expect(element.props.institution?.usernamePattern).toBe("{f}{last}");
+  });
 });

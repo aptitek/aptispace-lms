@@ -26,6 +26,7 @@ import {
   M3ExtendedFab,
 } from "./onboarding.styles";
 import { CADET_FIXED_DOMAIN, AVAILABLE_SCHOOLS } from "./onboarding.helpers";
+import type { SchoolConfig } from "~/types/institution";
 import {
   useOnboardingProfile,
   useOnboardingValidation,
@@ -237,13 +238,27 @@ function processFetcherFeedback(
   }
 }
 
+function resolveOnboardingCardProps(
+  school: SchoolConfig,
+  profileRole?: string,
+  profileGithub?: string,
+  userGithub?: string,
+) {
+  return {
+    role: resolveOnboardingRole(profileRole),
+    githubUsername: profileGithub || userGithub,
+    logoUrl: school.logoUrl || undefined,
+    usernamePattern: school.usernamePattern || school.emailPattern,
+  };
+}
+
 export default function OnboardingPage() {
   const { t } = useTranslation(["onboarding", "meta", "errors"]);
   const { notifyError } = useStatusCenter();
   const loaderData = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
 
-  const selectedSchool = loaderData?.school ?? AVAILABLE_SCHOOLS[0];
+  const selectedSchool = loaderData.school;
 
   const {
     profile,
@@ -289,9 +304,12 @@ export default function OnboardingPage() {
     void logout();
   };
 
-  const role = resolveOnboardingRole(profile.role);
-  const githubUsername =
-    profile.githubUsername || loaderData?.user?.githubUsername;
+  const cardProps = resolveOnboardingCardProps(
+    selectedSchool,
+    profile.role,
+    profile.githubUsername,
+    loaderData?.user?.githubUsername,
+  );
 
   return (
     <AuthLayout
@@ -302,17 +320,18 @@ export default function OnboardingPage() {
     >
       <CardWorkspaceContainer>
         <ProfileCard
-          schoolLogoUrl={selectedSchool.logoUrl || undefined}
+          schoolLogoUrl={cardProps.logoUrl}
           institutionName={selectedSchool.name}
           cohortName="Web Development"
           year="2026"
           avatarUrl={profile.avatarUrl}
-          role={role}
-          githubUsername={githubUsername}
+          role={cardProps.role}
+          githubUsername={cardProps.githubUsername}
           firstName={profile.firstName}
           familyName={profile.familyName}
           emailPrefix={emailPrefix}
           emailDomain={formattedEmailDomain}
+          usernamePattern={cardProps.usernamePattern}
           mrzData={mrzData}
           onChange={handleCardFieldChange}
           editableAvatar={true}

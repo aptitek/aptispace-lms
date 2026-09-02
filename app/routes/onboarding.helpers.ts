@@ -2,6 +2,7 @@ import type { SchoolConfig } from "~/types/institution";
 import type { OnboardingProfile } from "~/types/profile";
 import type { getUserWithAffiliations } from "~/services/userService";
 import type { Td1MrzData } from "~/components/atoms/MrzZone/MrzZone.types";
+import { generateEmailFromPattern } from "~/utils/emailFormat";
 
 export const DEFAULT_INSTITUTIONAL_DOMAIN = "aptitek.io";
 export const CADET_FIXED_DOMAIN = DEFAULT_INSTITUTIONAL_DOMAIN;
@@ -13,7 +14,7 @@ export const AVAILABLE_SCHOOLS: SchoolConfig[] = [
     slug: "aptitek",
     logoUrl: "/aptitek-logo.svg",
     emailDomain: "aptitek.io",
-    emailPattern: "{first}.{last}@{domain}",
+    usernamePattern: "{first}.{last}",
   },
 ];
 
@@ -24,18 +25,13 @@ export function formatInstitutionalEmail(
   family: string,
   school: SchoolConfig,
 ): string {
-  const cleanFirst = first
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, "");
-  const cleanLast = family
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, "");
-  if (!cleanFirst && !cleanLast) return "";
-
-  const domain = school.emailDomain || "aptitek.io";
-  return `${cleanFirst}.${cleanLast}@${domain}`;
+  if (!first.trim() && !family.trim()) return "";
+  return generateEmailFromPattern({
+    firstName: first,
+    lastName: family,
+    usernamePattern: school.usernamePattern || school.emailPattern,
+    domain: school.emailDomain,
+  });
 }
 
 export function resolveSchool(schoolId?: string): SchoolConfig {

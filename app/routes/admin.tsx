@@ -91,6 +91,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
           slug: inst.slug,
           type: inst.type,
           logoUrl: inst.logoUrl,
+          emailDomain: inst.emailDomain ?? undefined,
+          usernamePattern: inst.usernamePattern ?? undefined,
         }))
       : getDefaultSchools();
 
@@ -249,6 +251,8 @@ export default function AdminManagement() {
     slug: string;
     type?: string;
     logoUrl?: string;
+    emailDomain?: string;
+    usernamePattern?: string;
   }) => {
     const intent = payload.id ? "update-institution" : "create-institution";
     const data: Record<string, string> = {
@@ -259,6 +263,10 @@ export default function AdminManagement() {
     if (payload.id) data.id = payload.id;
     if (payload.type) data.type = payload.type;
     if (payload.logoUrl) data.logoUrl = payload.logoUrl;
+    if (payload.emailDomain !== undefined)
+      data.emailDomain = payload.emailDomain;
+    if (payload.usernamePattern !== undefined)
+      data.usernamePattern = payload.usernamePattern;
     fetcher.submit(data, { method: "post" });
     if (!payload.id) {
       setSelectedSchoolForEdit(null);
