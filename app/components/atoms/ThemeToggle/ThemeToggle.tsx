@@ -28,6 +28,7 @@ import {
   StateRippleLayer,
   IconFlexWrapper,
   ToggleWrapper,
+  DisabledTooltipWrapper,
 } from "./ThemeToggle.styles";
 
 export type { SwitchSize };
@@ -323,57 +324,65 @@ export const ZenithSwitch = forwardRef<HTMLButtonElement, ZenithSwitchProps>(
       ? t("theme.switchToLight", "Switch to Light Mode")
       : t("theme.switchToDark", "Switch to Dark Mode");
 
-    return (
-      <Tooltip title={labelText} placement="bottom">
-        <SwitchTrack
-          ref={ref}
-          type="button"
-          role="switch"
-          aria-checked={isDark}
-          aria-label={labelText}
-          disabled={isSwitchDisabled}
-          $cfg={cfg}
-          $isDark={isDark}
-          $disabled={isSwitchDisabled}
-          className={className ?? ""}
-          data-testid={dataTestId ?? "zenith-theme-switch"}
-          data-mode={isDark ? "dark" : "light"}
-          onClick={controller.handleClick}
-          onKeyDown={controller.handleKeyDown}
-          onMouseEnter={controller.handleMouseEnter}
-          onMouseLeave={controller.handleMouseLeave}
-          onMouseDown={controller.handleMouseDown}
-          onMouseUp={controller.handleMouseUp}
-          whileTap={isSwitchDisabled ? undefined : { scale: 0.96 }}
-          {...restProps}
-        >
-          <AnimatePresence>
-            <SwitchRippleIndicator
-              isHovered={controller.isHovered}
-              disabled={isSwitchDisabled}
-              cfg={cfg}
-              isDark={isDark}
-            />
-          </AnimatePresence>
-
-          <CelestialArcLine cfg={cfg} />
-
-          <AnimatePresence>
-            {!isSwitchDisabled && (
-              <HorizonPeekPreview
-                isHovered={controller.isHovered}
-                isDark={isDark}
-                cfg={cfg}
-              />
-            )}
-          </AnimatePresence>
-
-          <SwitchActiveThumb
+    const trackNode = (
+      <SwitchTrack
+        ref={ref}
+        type="button"
+        role="switch"
+        aria-checked={isDark}
+        aria-label={labelText}
+        disabled={isSwitchDisabled}
+        $cfg={cfg}
+        $isDark={isDark}
+        $disabled={isSwitchDisabled}
+        className={className ?? ""}
+        data-testid={dataTestId ?? "zenith-theme-switch"}
+        data-mode={isDark ? "dark" : "light"}
+        onClick={controller.handleClick}
+        onKeyDown={controller.handleKeyDown}
+        onMouseEnter={controller.handleMouseEnter}
+        onMouseLeave={controller.handleMouseLeave}
+        onMouseDown={controller.handleMouseDown}
+        onMouseUp={controller.handleMouseUp}
+        whileTap={isSwitchDisabled ? undefined : { scale: 0.96 }}
+        {...restProps}
+      >
+        <AnimatePresence>
+          <SwitchRippleIndicator
+            isHovered={controller.isHovered}
+            disabled={isSwitchDisabled}
             cfg={cfg}
             isDark={isDark}
-            isPressed={controller.isPressed}
           />
-        </SwitchTrack>
+        </AnimatePresence>
+
+        <CelestialArcLine cfg={cfg} />
+
+        <AnimatePresence>
+          {!isSwitchDisabled && (
+            <HorizonPeekPreview
+              isHovered={controller.isHovered}
+              isDark={isDark}
+              cfg={cfg}
+            />
+          )}
+        </AnimatePresence>
+
+        <SwitchActiveThumb
+          cfg={cfg}
+          isDark={isDark}
+          isPressed={controller.isPressed}
+        />
+      </SwitchTrack>
+    );
+
+    return (
+      <Tooltip title={labelText} placement="bottom">
+        {isSwitchDisabled ? (
+          <DisabledTooltipWrapper>{trackNode}</DisabledTooltipWrapper>
+        ) : (
+          trackNode
+        )}
       </Tooltip>
     );
   },

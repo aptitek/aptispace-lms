@@ -206,3 +206,7 @@ export const ToggleWrapper = styled("div")(({ theme }) => ({
   alignItems: "center",
   gap: theme.spacing(0.75),
 }));
+
+export const DisabledTooltipWrapper = styled("span")({
+  display: "inline-flex",
+});

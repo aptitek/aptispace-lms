@@ -32,6 +32,7 @@ import {
   FlightPuck,
   StateRippleLayer,
   ToggleWrapper,
+  DisabledTooltipWrapper,
   PeekingAirplane,
 } from "./LanguageToggle.styles";
 
@@ -54,6 +55,21 @@ export interface LanguageToggleProps {
   size?: MeridianSize;
   disabled?: boolean;
   "data-testid"?: string;
+}
+
+function resolveMeridianConfig(size?: MeridianSize) {
+  return (
+    MERIDIAN_SIZE_CONFIGS[size ?? "medium"] ?? MERIDIAN_SIZE_CONFIGS.medium
+  );
+}
+
+function getLanguageAriaLabel(
+  isFrench: boolean,
+  t: (k: string, f: string) => string,
+): string {
+  return isFrench
+    ? t("language.switchToEn", "Switch to English")
+    : t("language.switchToFr", "Switch to French");
 }
 
 function MeridianFlightTrajectory({
@@ -350,9 +366,7 @@ export const MeridianToggle = forwardRef<
   const { t, i18n } = useTranslation("common");
   const currentLang = resolveCurrentLanguage(language, i18n.language);
   const isFrench = currentLang === "fr";
-  const resolvedSize = size ?? "medium";
-  const cfg =
-    MERIDIAN_SIZE_CONFIGS[resolvedSize] ?? MERIDIAN_SIZE_CONFIGS.medium;
+  const cfg = resolveMeridianConfig(size);
   const isSwitchDisabled = Boolean(disabled);
 
   const controller = useMeridianController({
@@ -365,63 +379,69 @@ export const MeridianToggle = forwardRef<
     onMouseLeave,
   });
 
-  const ariaLabel = isFrench
-    ? t("language.switchToEn", "Switch to English")
-    : t("language.switchToFr", "Switch to French");
+  const ariaLabel = getLanguageAriaLabel(isFrench, t);
+
+  const trackNode = (
+    <MeridianTrack
+      ref={ref}
+      type="button"
+      role="button"
+      aria-label={ariaLabel}
+      disabled={isSwitchDisabled}
+      $cfg={cfg}
+      $disabled={isSwitchDisabled}
+      className={className ?? ""}
+      data-testid={dataTestId ?? "meridian-language-toggle"}
+      data-lang={currentLang}
+      onClick={controller.handleClick}
+      onKeyDown={controller.handleKeyDown}
+      onMouseEnter={controller.handleMouseEnter}
+      onMouseLeave={controller.handleMouseLeave}
+      whileTap={isSwitchDisabled ? undefined : { scale: 0.96 }}
+      {...restProps}
+    >
+      <AnimatePresence>
+        {controller.isHovered && !isSwitchDisabled && (
+          <StateRippleLayer
+            $cfg={cfg}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.2 }}
+          />
+        )}
+      </AnimatePresence>
+
+      <MeridianFlightTrajectory cfg={cfg} />
+
+      <CountrySilhouettes
+        cfg={cfg}
+        isFrench={isFrench}
+        isHovered={controller.isHovered}
+      />
+
+      <FlightAirplane
+        cfg={cfg}
+        isFrench={isFrench}
+        isHovered={controller.isHovered && !isSwitchDisabled}
+        flightState={controller.flightState}
+      />
+
+      <FlightPuckWithFlag
+        cfg={cfg}
+        isFrench={isFrench}
+        isFlying={controller.isFlying}
+      />
+    </MeridianTrack>
+  );
 
   return (
     <Tooltip title={ariaLabel} placement="bottom">
-      <MeridianTrack
-        ref={ref}
-        type="button"
-        role="button"
-        aria-label={ariaLabel}
-        disabled={isSwitchDisabled}
-        $cfg={cfg}
-        $disabled={isSwitchDisabled}
-        className={className ?? ""}
-        data-testid={dataTestId ?? "meridian-language-toggle"}
-        data-lang={currentLang}
-        onClick={controller.handleClick}
-        onKeyDown={controller.handleKeyDown}
-        onMouseEnter={controller.handleMouseEnter}
-        onMouseLeave={controller.handleMouseLeave}
-        whileTap={isSwitchDisabled ? undefined : { scale: 0.96 }}
-        {...restProps}
-      >
-        <AnimatePresence>
-          {controller.isHovered && !isSwitchDisabled && (
-            <StateRippleLayer
-              $cfg={cfg}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.2 }}
-            />
-          )}
-        </AnimatePresence>
-
-        <MeridianFlightTrajectory cfg={cfg} />
-
-        <CountrySilhouettes
-          cfg={cfg}
-          isFrench={isFrench}
-          isHovered={controller.isHovered}
-        />
-
-        <FlightAirplane
-          cfg={cfg}
-          isFrench={isFrench}
-          isHovered={controller.isHovered && !isSwitchDisabled}
-          flightState={controller.flightState}
-        />
-
-        <FlightPuckWithFlag
-          cfg={cfg}
-          isFrench={isFrench}
-          isFlying={controller.isFlying}
-        />
-      </MeridianTrack>
+      {isSwitchDisabled ? (
+        <DisabledTooltipWrapper>{trackNode}</DisabledTooltipWrapper>
+      ) : (
+        trackNode
+      )}
     </Tooltip>
   );
 });

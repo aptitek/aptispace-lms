@@ -37,9 +37,10 @@ const SheenLayer = styled(motion.div)({
   mixBlendMode: "overlay",
 });
 
-const HoloLayer = styled(motion.div)<{ $maskImage?: string }>(({
-  $maskImage,
-}) => {
+const HoloLayer = styled(motion.div, {
+  shouldForwardProp: (prop) =>
+    typeof prop === "string" && !prop.startsWith("$"),
+})<{ $maskImage?: string }>(({ $maskImage }) => {
   const isDirectCss =
     $maskImage?.includes("url(") || $maskImage?.includes("-gradient");
   const maskValue = isDirectCss ? $maskImage : `url("${$maskImage}")`;

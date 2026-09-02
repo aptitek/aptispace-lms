@@ -77,6 +77,9 @@
     },
     "test": {
       "command": "vitest run",
+      "env": {
+        "NODE_OPTIONS": "--no-deprecation"
+      },
       "files": [
         "app/**/*",
         "test/**/*",

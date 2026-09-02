@@ -75,8 +75,6 @@ export default defineConfig({
       "@emotion/react",
       "@emotion/styled",
       "@mui/material",
-      "aria-query",
-      "@testing-library/dom",
     ],
   },
   test: {
@@ -100,7 +98,6 @@ export default defineConfig({
         ],
         test: {
           name: "storybook",
-          include: ["stories/**/*.stories.{ts,tsx}"],
           browser: {
             enabled: true,
             headless: true,
