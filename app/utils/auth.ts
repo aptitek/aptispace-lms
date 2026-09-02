@@ -362,8 +362,15 @@ function resolveDbUserNames(dbUser: ResolveActiveUserDbParam) {
 function resolveDbUserAvatar(
   primaryAffil?: AffiliationItem,
   fallbackAvatar?: string | null,
+  githubId?: string | null,
 ): string | undefined {
-  return primaryAffil?.avatarUrl ?? fallbackAvatar ?? undefined;
+  return (
+    fallbackAvatar ||
+    primaryAffil?.avatarUrl ||
+    (githubId
+      ? `https://avatars.githubusercontent.com/u/${githubId}?v=4`
+      : undefined)
+  );
 }
 
 function mapDbUserToAuth(
@@ -379,7 +386,11 @@ function mapDbUserToAuth(
   const cohortYear = resolveDbCohortYear(primaryAffil?.cohort?.startDate);
   const instMeta = resolveDbInstitutionMetadata(primaryAffil);
   const names = resolveDbUserNames(dbUser);
-  const avatarUrl = resolveDbUserAvatar(primaryAffil, dbUser.avatarUrl);
+  const avatarUrl = resolveDbUserAvatar(
+    primaryAffil,
+    dbUser.avatarUrl,
+    dbUser.githubId,
+  );
 
   return {
     id: dbUser.id,

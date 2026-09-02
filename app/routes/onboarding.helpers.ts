@@ -53,26 +53,46 @@ type UserWithAffiliationsResult = Awaited<
   ReturnType<typeof getUserWithAffiliations>
 >;
 
+type UserWithAffilRecord = NonNullable<UserWithAffiliationsResult>;
+type AffilItem = UserWithAffilRecord["affiliations"][number];
+
+function resolveDbNames(dbUser: UserWithAffilRecord) {
+  return {
+    firstName: dbUser.firstName ? dbUser.firstName.trim() : "",
+    familyName: dbUser.lastName ? dbUser.lastName.trim().toUpperCase() : "",
+  };
+}
+
+function resolveAffilDetails(primary?: AffilItem) {
+  return {
+    email: primary?.email || "",
+    role: (primary?.role as OnboardingProfile["role"]) || "student",
+  };
+}
+
 function extractDbProfileData(dbUser?: UserWithAffiliationsResult) {
   if (!dbUser) {
     return {
       firstName: "",
       familyName: "",
       email: "",
+      avatarUrl: "",
       role: "student" as const,
       githubUsername: undefined,
     };
   }
 
-  const affiliations = dbUser.affiliations || [];
-  const primary = affiliations[0];
-  const firstName = dbUser.firstName ? dbUser.firstName.trim() : "";
-  const lastName = dbUser.lastName ? dbUser.lastName.trim().toUpperCase() : "";
-  const email = primary?.email || "";
-  const role = (primary?.role as OnboardingProfile["role"]) || "student";
-  const githubUsername = dbUser.githubId || undefined;
+  const names = resolveDbNames(dbUser);
+  const affil = resolveAffilDetails(dbUser.affiliations?.[0]);
 
-  return { firstName, familyName: lastName, email, role, githubUsername };
+  return {
+    firstName: names.firstName,
+    familyName: names.familyName,
+    email: affil.email,
+    avatarUrl: dbUser.avatarUrl || "",
+    role: affil.role,
+    githubUsername: dbUser.githubId || undefined,
+  };
 }
 
 export function buildInitialProfile(
@@ -83,7 +103,7 @@ export function buildInitialProfile(
     firstName: data.firstName,
     familyName: data.familyName,
     email: data.email,
-    avatarUrl: "",
+    avatarUrl: data.avatarUrl || "",
     role: data.role,
     githubUsername: data.githubUsername,
   };

@@ -65,6 +65,7 @@ export interface SaveUserEditsParams {
   userId?: string | null;
   firstName: string;
   familyName: string;
+  avatarUrl?: string;
   fullEmail?: string;
   schoolId: string;
   hasNameFields?: boolean;
@@ -113,6 +114,7 @@ interface SyncUserRecordParams {
   firstName: string;
   familyName: string;
   displayName: string;
+  avatarUrl?: string;
   hasNameFields?: boolean;
 }
 
@@ -122,17 +124,22 @@ async function updateExistingUser(
   existingUser: NonNullable<Awaited<ReturnType<typeof getUserById>>>,
   params: SyncUserRecordParams,
 ) {
+  const updates: Record<string, unknown> = {};
   if (params.hasNameFields || params.firstName || params.familyName) {
-    await updateUser(db, userId, {
-      firstName: params.firstName || existingUser.firstName,
-      lastName: params.familyName || existingUser.lastName,
-      displayName: params.displayName || null,
-    });
+    updates.firstName = params.firstName || existingUser.firstName;
+    updates.lastName = params.familyName || existingUser.lastName;
+    updates.displayName = params.displayName || null;
+  }
+  if (params.avatarUrl !== undefined) {
+    updates.avatarUrl = params.avatarUrl || null;
+  }
+  if (Object.keys(updates).length > 0) {
+    await updateUser(db, userId, updates);
   }
 }
 
 async function syncUserRecord(params: SyncUserRecordParams) {
-  const { db, userId, firstName, familyName, displayName } = params;
+  const { db, userId, firstName, familyName, displayName, avatarUrl } = params;
   const existingUser = await getUserById(db, userId);
 
   if (existingUser) {
@@ -147,6 +154,7 @@ async function syncUserRecord(params: SyncUserRecordParams) {
     firstName: fallbackFirst,
     lastName: fallbackFamily,
     displayName: displayName || `${fallbackFirst} ${fallbackFamily}`,
+    avatarUrl: avatarUrl || undefined,
   });
 }
 
@@ -156,6 +164,7 @@ export async function saveUserEdits(params: SaveUserEditsParams) {
     userId,
     firstName,
     familyName,
+    avatarUrl,
     fullEmail,
     schoolId,
     hasNameFields,
@@ -174,6 +183,7 @@ export async function saveUserEdits(params: SaveUserEditsParams) {
     firstName: trimmedFirst,
     familyName: trimmedFamily,
     displayName,
+    avatarUrl,
     hasNameFields,
   });
 
@@ -193,6 +203,7 @@ interface ActionFormData {
   rawEmail: string;
   school: SchoolConfig;
   hasNameFields: boolean;
+  avatarUrl?: string;
 }
 
 function parseActionFormData(formData: FormData): ActionFormData {
@@ -203,6 +214,9 @@ function parseActionFormData(formData: FormData): ActionFormData {
   const schoolId = String(formData.get("schoolId") || "");
   const school = resolveSchool(schoolId);
   const hasNameFields = formData.has("firstName") || formData.has("familyName");
+  const avatarUrl = formData.has("avatarUrl")
+    ? String(formData.get("avatarUrl") || "")
+    : undefined;
 
   return {
     actionType,
@@ -211,6 +225,7 @@ function parseActionFormData(formData: FormData): ActionFormData {
     rawEmail,
     school,
     hasNameFields,
+    avatarUrl,
   };
 }
 
@@ -245,6 +260,7 @@ async function saveUserEditsIfPresent(
       userId,
       firstName: payload.firstName,
       familyName: payload.familyName,
+      avatarUrl: payload.avatarUrl,
       fullEmail: validation.isValid ? validation.fullEmail : undefined,
       schoolId: payload.school.id,
       hasNameFields: payload.hasNameFields,

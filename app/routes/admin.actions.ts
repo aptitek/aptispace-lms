@@ -359,6 +359,30 @@ export async function handleUpdateCohortAction(
   }
 }
 
+function extractUserUpdates(formData: FormData) {
+  const updates: Parameters<typeof updateUser>[2] = {};
+  if (formData.has("githubId")) {
+    const raw = String(formData.get("githubId") ?? "").trim();
+    updates.githubId = raw || null;
+  }
+  if (formData.has("avatarUrl")) {
+    updates.avatarUrl = parseNullableString(formData, "avatarUrl");
+  }
+  return updates;
+}
+
+function resolveUpdateUserError(err: unknown) {
+  const message = getErrorMessage(err, "Failed to update user");
+  const isUniqueViolation =
+    message.includes("UNIQUE") || message.includes("constraint");
+  return {
+    success: false,
+    error: isUniqueViolation
+      ? "This GitHub ID is already assigned to another user."
+      : message,
+  };
+}
+
 export async function handleUpdateUserAction(
   formData: FormData,
   db: Database,
@@ -369,25 +393,12 @@ export async function handleUpdateUserAction(
     return { success: false, error: "Missing required studentId" };
   }
 
-  const rawGithubId = formData.has("githubId")
-    ? String(formData.get("githubId") ?? "").trim()
-    : undefined;
-
   try {
-    const updated = await updateUser(db, studentId, {
-      githubId: rawGithubId ? rawGithubId : null,
-    });
+    const updates = extractUserUpdates(formData);
+    const updated = await updateUser(db, studentId, updates);
     return { success: true, user: updated };
   } catch (err: unknown) {
-    const message = getErrorMessage(err, "Failed to update user");
-    const isUniqueViolation =
-      message.includes("UNIQUE") || message.includes("constraint");
-    return {
-      success: false,
-      error: isUniqueViolation
-        ? "This GitHub ID is already assigned to another user."
-        : message,
-    };
+    return resolveUpdateUserError(err);
   }
 }
 

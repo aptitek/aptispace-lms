@@ -18,6 +18,7 @@ export const users = sqliteTable("users", {
   displayName: text("display_name"), // Defaults to FirstName + ' ' + LastName if not set
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
+  avatarUrl: text("avatar_url"),
   githubId: text("github_id").unique(),
   githubEmail: text("github_email"),
   createdAt: integer("created_at", { mode: "timestamp" })

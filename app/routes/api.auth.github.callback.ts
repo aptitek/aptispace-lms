@@ -113,6 +113,7 @@ async function createNewGitHubUser(
     displayName: `${resolvedFirstName} ${resolvedLastName}`.trim(),
     githubId: profile.githubUserId,
     githubEmail: profile.userEmail,
+    avatarUrl: `https://avatars.githubusercontent.com/u/${profile.githubUserId}?v=4`,
   });
 
   const inst = await db.query.institutions.findFirst();

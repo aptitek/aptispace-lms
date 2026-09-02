@@ -1,8 +1,9 @@
 import type { ActionFunctionArgs } from "react-router";
 import { resolveR2Bucket, resolvePublicR2Url } from "~/utils/r2.server";
+import { authGuard } from "~/utils/session.server";
+import { updateUser } from "~/services/userService";
 
 const ALLOWED_MIME_TYPES = new Set(["image/webp", "image/png", "image/jpeg"]);
-
 const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB for client-processed avatars
 
 function validateUploadFile(candidate: unknown): {
@@ -35,6 +36,54 @@ function validateUploadFile(candidate: unknown): {
   return { validFile: candidate };
 }
 
+function generateUniqueKey(file: File): string {
+  const extension = file.type === "image/png" ? "png" : "webp";
+  return `avatars/avatar-${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${extension}`;
+}
+
+async function persistAuthAvatar(
+  auth: Awaited<ReturnType<typeof authGuard>>,
+  avatarUrl: string,
+) {
+  const userId = auth?.session?.userId ?? auth?.user?.id;
+  if (userId && auth?.db) {
+    await updateUser(auth.db, userId, { avatarUrl });
+  }
+}
+
+interface R2UploadParams {
+  r2Bucket: NonNullable<ReturnType<typeof resolveR2Bucket>>;
+  context: unknown;
+  key: string;
+  data: ArrayBuffer;
+  mimeType: string;
+}
+
+async function saveToR2Bucket(params: R2UploadParams): Promise<string> {
+  const { r2Bucket, context, key, data, mimeType } = params;
+  await r2Bucket.put(key, data, {
+    httpMetadata: { contentType: mimeType },
+  });
+  return resolvePublicR2Url(context, key);
+}
+
+function saveToDataUrlFallback(data: ArrayBuffer, mimeType: string): string {
+  const base64 = Buffer.from(data).toString("base64");
+  return `data:${mimeType};base64,${base64}`;
+}
+
+function handleUploadError(caughtError: unknown): Response {
+  const details =
+    caughtError instanceof Error ? caughtError.message : "Unknown upload error";
+  return Response.json(
+    {
+      error: `Upload processing failed: ${details}`,
+      errorCode: "UPLOAD_FAILED",
+    },
+    { status: 500 },
+  );
+}
+
 export async function action({ request, context }: ActionFunctionArgs) {
   if (request.method !== "POST") {
     return Response.json(
@@ -59,48 +108,34 @@ export async function action({ request, context }: ActionFunctionArgs) {
       );
     }
 
-    const extension = validFile.type === "image/png" ? "png" : "webp";
-    const uniqueKey = `avatars/avatar-${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${extension}`;
+    const uniqueKey = generateUniqueKey(validFile);
     const arrayBufferData = await validFile.arrayBuffer();
-
     const r2Bucket = resolveR2Bucket(context);
+    const isR2 = Boolean(r2Bucket);
 
-    if (r2Bucket) {
-      await r2Bucket.put(uniqueKey, arrayBufferData, {
-        httpMetadata: { contentType: validFile.type },
-      });
+    const publicUrl = r2Bucket
+      ? await saveToR2Bucket({
+          r2Bucket,
+          context,
+          key: uniqueKey,
+          data: arrayBufferData,
+          mimeType: validFile.type,
+        })
+      : saveToDataUrlFallback(arrayBufferData, validFile.type);
 
-      return Response.json({
-        success: true,
-        url: resolvePublicR2Url(context, uniqueKey),
-        storageKey: uniqueKey,
-        fileName: validFile.name,
-        fileSize: validFile.size,
-        mimeType: validFile.type,
-      });
-    }
+    const auth = await authGuard(request, context, { allowAnonymous: true });
+    await persistAuthAvatar(auth, publicUrl);
 
-    const base64Data = Buffer.from(arrayBufferData).toString("base64");
     return Response.json({
       success: true,
-      url: `data:${validFile.type};base64,${base64Data}`,
+      url: publicUrl,
       storageKey: uniqueKey,
       fileName: validFile.name,
       fileSize: validFile.size,
       mimeType: validFile.type,
-      fallbackMode: true,
+      ...(isR2 ? {} : { fallbackMode: true }),
     });
   } catch (caughtError) {
-    const details =
-      caughtError instanceof Error
-        ? caughtError.message
-        : "Unknown upload error";
-    return Response.json(
-      {
-        error: `Upload processing failed: ${details}`,
-        errorCode: "UPLOAD_FAILED",
-      },
-      { status: 500 },
-    );
+    return handleUploadError(caughtError);
   }
 }

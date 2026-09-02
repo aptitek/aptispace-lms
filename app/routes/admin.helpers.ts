@@ -137,6 +137,21 @@ function resolveStudentCohortDetails(
   };
 }
 
+function resolveStudentAvatar(dbUser: DbUserWithAffil): string | undefined {
+  if (dbUser.avatarUrl) return dbUser.avatarUrl;
+  if (dbUser.githubId) {
+    return `https://avatars.githubusercontent.com/u/${dbUser.githubId}?v=4`;
+  }
+  return undefined;
+}
+
+function resolveStudentEmail(
+  primaryAffil: AffilType,
+  githubEmail?: string | null,
+): string {
+  return primaryAffil?.email || githubEmail || "";
+}
+
 export function mapDbUserToStudent(dbUser: DbUserWithAffil): EntityCardData {
   const cohortAffils = getSortedCohortAffils(dbUser);
   const studentCohorts = buildStudentCohorts(cohortAffils);
@@ -154,11 +169,8 @@ export function mapDbUserToStudent(dbUser: DbUserWithAffil): EntityCardData {
     firstName: dbUser.firstName,
     familyName: dbUser.lastName,
     displayName: resolveUserDisplayName(dbUser),
-    email: primaryAffil?.email || dbUser.githubEmail || "",
-    role,
-    avatarUrl: dbUser.githubId
-      ? `https://avatars.githubusercontent.com/u/${dbUser.githubId}?v=4`
-      : undefined,
+    email: resolveStudentEmail(primaryAffil, dbUser.githubEmail),
+    avatarUrl: resolveStudentAvatar(dbUser),
     githubUsername: dbUser.githubId ?? undefined,
     isProfileComplete: checkProfileComplete(dbUser),
     institutionId: primaryAffil?.institutionId ?? undefined,
