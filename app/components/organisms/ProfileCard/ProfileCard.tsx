@@ -413,8 +413,8 @@ function BackContent({ mrzData }: BackContentProps) {
         </Box>
       </Box>
 
-      <Box sx={{ width: "100%", position: "relative", zIndex: 1 }}>
-        <MrzZone cardData={mrzData} fullWidth compact />
+      <Box sx={{ width: "100%", position: "relative", zIndex: 1, mt: "auto" }}>
+        <MrzZone cardData={mrzData} fullWidth darkOnLight />
       </Box>
     </Box>
   );

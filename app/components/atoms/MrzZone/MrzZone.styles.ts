@@ -7,38 +7,37 @@ export const MrzContainer = styled("div", {
   compact?: boolean;
   darkOnLight?: boolean;
   fullWidth?: boolean;
-}>(({ theme, compact, darkOnLight, fullWidth }) => ({
+}>(({ theme, compact, fullWidth }) => ({
   position: "relative",
+  containerType: "inline-size",
   width: fullWidth ? "100%" : "auto",
   fontFamily: '"OCR-B", "Courier New", Courier, monospace',
-  backgroundColor: darkOnLight
-    ? alpha(theme.palette.common.white, 0.96)
-    : alpha(theme.palette.background.paper, 0.95),
+  backgroundColor: alpha(theme.palette.common.white, 0.98),
   backdropFilter: "blur(12px)",
-  border: darkOnLight
-    ? `1.5px solid ${alpha(theme.palette.common.black, 0.24)}`
-    : `1.5px solid ${alpha(theme.palette.common.black, 0.18)}`,
-  borderRadius: "6px",
-  padding: compact ? "6px 8px" : "10px 14px",
-  color: darkOnLight ? theme.palette.common.black : theme.palette.text.primary,
-  boxShadow: darkOnLight
-    ? `0 2px 8px ${alpha(theme.palette.common.black, 0.12)}, inset 0 1px 1px ${alpha(theme.palette.common.white, 0.95)}`
-    : `0 2px 8px ${alpha(theme.palette.common.black, 0.1)}, inset 0 1px 1px ${alpha(theme.palette.common.white, 0.8)}`,
+  borderTop: `1.5px solid ${alpha(theme.palette.common.black, 0.15)}`,
+  borderLeft: fullWidth
+    ? "none"
+    : `1.5px solid ${alpha(theme.palette.common.black, 0.15)}`,
+  borderRight: fullWidth
+    ? "none"
+    : `1.5px solid ${alpha(theme.palette.common.black, 0.15)}`,
+  borderBottom: fullWidth
+    ? "none"
+    : `1.5px solid ${alpha(theme.palette.common.black, 0.15)}`,
+  borderRadius: fullWidth ? "0 0 16px 16px" : "8px",
+  padding: compact ? "10px 14px" : "12px 18px",
+  color: theme.palette.common.black,
+  boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.12)}, inset 0 1px 1px ${alpha(theme.palette.common.white, 0.95)}`,
   userSelect: "all",
   overflow: "hidden",
   zIndex: 2,
   boxSizing: "border-box",
 
   ...theme.applyStyles("dark", {
-    backgroundColor: darkOnLight
-      ? alpha(theme.palette.common.white, 0.96)
-      : alpha(theme.palette.background.default, 0.92),
-    border: darkOnLight
-      ? `1.5px solid ${alpha(theme.palette.common.black, 0.24)}`
-      : `1.5px solid ${alpha(theme.palette.text.secondary, 0.45)}`,
-    boxShadow: darkOnLight
-      ? `0 2px 8px ${alpha(theme.palette.common.black, 0.12)}, inset 0 1px 1px ${alpha(theme.palette.common.white, 0.95)}`
-      : `0 4px 16px ${alpha(theme.palette.common.black, 0.5)}, inset 0 0 0 1px ${alpha(theme.palette.common.white, 0.08)}`,
+    backgroundColor: alpha(theme.palette.common.white, 0.98),
+    borderTop: `1.5px solid ${alpha(theme.palette.common.black, 0.15)}`,
+    boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.12)}, inset 0 1px 1px ${alpha(theme.palette.common.white, 0.95)}`,
+    color: theme.palette.common.black,
   }),
 }));
 
@@ -49,39 +48,34 @@ export const MrzPre = styled("pre", {
   compact?: boolean;
   darkOnLight?: boolean;
   fullWidth?: boolean;
-}>(({ theme, compact, darkOnLight, fullWidth }) => ({
+}>(({ theme, compact, fullWidth }) => ({
   margin: 0,
   padding: 0,
   width: "100%",
   fontFamily: '"OCR-B", "Courier New", Courier, monospace',
   fontSize: compact
-    ? "clamp(7.8px, 2.05vw, 10.2px)"
-    : "clamp(9px, 2.4vw, 12px)",
-  lineHeight: 1.35,
-  letterSpacing: fullWidth ? "0.22em" : "0.16em",
-  fontWeight: 800,
+    ? "clamp(11px, 2.7cqw, 14px)"
+    : "clamp(12.5px, 3.25cqw, 16.5px)",
+  lineHeight: 1.45,
+  letterSpacing: fullWidth ? "clamp(0.22em, 0.72cqw, 0.4em)" : "0.22em",
+  fontWeight: 700,
   textTransform: "uppercase",
   whiteSpace: "pre",
   display: "block",
   textAlign: "justify",
-  color: darkOnLight ? theme.palette.common.black : theme.palette.text.primary,
-  textShadow: darkOnLight
-    ? "none"
-    : `0 0 1px ${alpha(theme.palette.primary.main, 0.4)}`,
+  color: theme.palette.common.black,
+  textShadow: "none",
 
   ...theme.applyStyles("dark", {
-    color: darkOnLight
-      ? theme.palette.common.black
-      : theme.palette.text.primary,
-    textShadow: darkOnLight
-      ? "none"
-      : `0 0 1px ${alpha(theme.palette.primary.light, 0.6)}`,
+    color: theme.palette.common.black,
+    textShadow: "none",
   }),
 
   "& code": {
     fontFamily: "inherit",
     display: "block",
     width: "100%",
+    letterSpacing: "inherit",
   },
 }));
 

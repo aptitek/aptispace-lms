@@ -60,7 +60,7 @@ export default function MrzZone({
   lines: customLines,
   showValidation = false,
   compact = false,
-  darkOnLight = false,
+  darkOnLight = true,
   fullWidth = false,
   className,
   testId = "mrz-zone",
