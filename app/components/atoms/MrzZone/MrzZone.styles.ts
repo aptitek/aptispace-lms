@@ -12,26 +12,33 @@ export const MrzContainer = styled("div", {
   width: fullWidth ? "100%" : "auto",
   fontFamily: '"OCR-B", "Courier New", Courier, monospace',
   backgroundColor: darkOnLight
-    ? alpha(theme.palette.common.white, 0.94)
-    : theme.palette.background.paper,
+    ? alpha(theme.palette.common.white, 0.96)
+    : alpha(theme.palette.background.paper, 0.95),
+  backdropFilter: "blur(12px)",
   border: darkOnLight
-    ? `1px solid ${alpha(theme.palette.common.black, 0.16)}`
-    : `1px solid ${theme.palette.divider}`,
+    ? `1.5px solid ${alpha(theme.palette.common.black, 0.24)}`
+    : `1.5px solid ${alpha(theme.palette.common.black, 0.18)}`,
   borderRadius: "6px",
   padding: compact ? "6px 8px" : "10px 14px",
   color: darkOnLight ? theme.palette.common.black : theme.palette.text.primary,
   boxShadow: darkOnLight
-    ? `0 2px 8px ${alpha(theme.palette.common.black, 0.1)}, inset 0 1px 1px ${alpha(theme.palette.common.white, 0.9)}`
-    : `inset 0 1px 3px ${alpha(theme.palette.common.black, 0.2)}`,
+    ? `0 2px 8px ${alpha(theme.palette.common.black, 0.12)}, inset 0 1px 1px ${alpha(theme.palette.common.white, 0.95)}`
+    : `0 2px 8px ${alpha(theme.palette.common.black, 0.1)}, inset 0 1px 1px ${alpha(theme.palette.common.white, 0.8)}`,
   userSelect: "all",
   overflow: "hidden",
   zIndex: 2,
   boxSizing: "border-box",
 
   ...theme.applyStyles("dark", {
+    backgroundColor: darkOnLight
+      ? alpha(theme.palette.common.white, 0.96)
+      : alpha(theme.palette.background.default, 0.92),
+    border: darkOnLight
+      ? `1.5px solid ${alpha(theme.palette.common.black, 0.24)}`
+      : `1.5px solid ${alpha(theme.palette.text.secondary, 0.45)}`,
     boxShadow: darkOnLight
-      ? `0 2px 8px ${alpha(theme.palette.common.black, 0.1)}, inset 0 1px 1px ${alpha(theme.palette.common.white, 0.9)}`
-      : `inset 0 1px 3px ${alpha(theme.palette.common.black, 0.5)}`,
+      ? `0 2px 8px ${alpha(theme.palette.common.black, 0.12)}, inset 0 1px 1px ${alpha(theme.palette.common.white, 0.95)}`
+      : `0 4px 16px ${alpha(theme.palette.common.black, 0.5)}, inset 0 0 0 1px ${alpha(theme.palette.common.white, 0.08)}`,
   }),
 }));
 
@@ -58,7 +65,18 @@ export const MrzPre = styled("pre", {
   display: "block",
   textAlign: "justify",
   color: darkOnLight ? theme.palette.common.black : theme.palette.text.primary,
-  textShadow: darkOnLight ? "none" : `0 0 2px ${theme.palette.primary.light}`,
+  textShadow: darkOnLight
+    ? "none"
+    : `0 0 1px ${alpha(theme.palette.primary.main, 0.4)}`,
+
+  ...theme.applyStyles("dark", {
+    color: darkOnLight
+      ? theme.palette.common.black
+      : theme.palette.text.primary,
+    textShadow: darkOnLight
+      ? "none"
+      : `0 0 1px ${alpha(theme.palette.primary.light, 0.6)}`,
+  }),
 
   "& code": {
     fontFamily: "inherit",
@@ -89,7 +107,14 @@ export const StatusPill = styled("span", {
   border: `1px solid ${
     isValidStatus ? theme.palette.success.main : theme.palette.error.main
   }`,
+  boxShadow: `0 1px 4px ${alpha(theme.palette.common.black, 0.3)}`,
   fontFamily: "monospace",
   letterSpacing: "0.5px",
   textTransform: "uppercase",
+
+  ...theme.applyStyles("dark", {
+    border: `1px solid ${
+      isValidStatus ? theme.palette.success.light : theme.palette.error.light
+    }`,
+  }),
 }));

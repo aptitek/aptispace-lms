@@ -8,7 +8,7 @@ import {
 } from "framer-motion";
 import Card, { type CardProps } from "@mui/material/Card";
 import Box from "@mui/material/Box";
-import { styled } from "@mui/material/styles";
+import { styled, useTheme, alpha } from "@mui/material/styles";
 import type { PhysicCardProps } from "./PhysicCard.types";
 import { holoGradient } from "../../../tokens/holo";
 
@@ -51,7 +51,7 @@ const HoloLayer = styled(motion.div, {
     inset: 0,
     pointerEvents: "none",
     mixBlendMode: "screen",
-    opacity: 0.8,
+    opacity: 0.55,
     backgroundImage: holoGradient,
     backgroundSize: "200% 200%",
     backgroundPosition: "center",
@@ -140,6 +140,8 @@ function PhysicCardFront({
   sheenX: MotionValue<string>;
   sheenY: MotionValue<string>;
 }) {
+  const theme = useTheme();
+
   return (
     <Card
       className={isFlipped ? "is-facing-away" : ""}
@@ -155,8 +157,15 @@ function PhysicCardFront({
         opacity: isTransparent && isFlipped ? 0.2 : 1,
         transition: "opacity 0.4s ease-in-out",
         ...(isTransparent && {
-          bgcolor: "action.hover",
-          backdropFilter: "blur(10px)",
+          bgcolor: alpha(theme.palette.background.paper, 0.45),
+          backdropFilter: "blur(20px) saturate(160%)",
+          border: `1px solid ${alpha(theme.palette.common.black, 0.14)}`,
+          boxShadow: `0 16px 40px -8px ${alpha(theme.palette.common.black, 0.16)}, inset 0 0 0 1px ${alpha(theme.palette.common.white, 0.7)}`,
+          ...theme.applyStyles("dark", {
+            bgcolor: alpha(theme.palette.background.default, 0.3),
+            border: `1px solid ${alpha(theme.palette.common.white, 0.16)}`,
+            boxShadow: `0 16px 40px -8px ${alpha(theme.palette.common.black, 0.5)}, inset 0 0 0 1px ${alpha(theme.palette.common.white, 0.1)}`,
+          }),
         }),
       }}
     >
@@ -204,6 +213,7 @@ function PhysicCardBack({
   sheenX: MotionValue<string>;
   sheenY: MotionValue<string>;
 }) {
+  const theme = useTheme();
   if (!backContent) return null;
   return (
     <Card
@@ -220,8 +230,15 @@ function PhysicCardBack({
         opacity: isTransparent && !isFlipped ? 0.2 : 1,
         transition: "opacity 0.4s ease-in-out",
         ...(isTransparent && {
-          bgcolor: "action.hover",
-          backdropFilter: "blur(10px)",
+          bgcolor: alpha(theme.palette.background.paper, 0.45),
+          backdropFilter: "blur(20px) saturate(160%)",
+          border: `1px solid ${alpha(theme.palette.common.black, 0.14)}`,
+          boxShadow: `0 16px 40px -8px ${alpha(theme.palette.common.black, 0.16)}, inset 0 0 0 1px ${alpha(theme.palette.common.white, 0.7)}`,
+          ...theme.applyStyles("dark", {
+            bgcolor: alpha(theme.palette.background.default, 0.3),
+            border: `1px solid ${alpha(theme.palette.common.white, 0.16)}`,
+            boxShadow: `0 16px 40px -8px ${alpha(theme.palette.common.black, 0.5)}, inset 0 0 0 1px ${alpha(theme.palette.common.white, 0.1)}`,
+          }),
         }),
       }}
     >

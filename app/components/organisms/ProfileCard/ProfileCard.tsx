@@ -11,7 +11,7 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import Typography from "@mui/material/Typography";
-import { alpha } from "@mui/material/styles";
+import { styled, alpha, useTheme } from "@mui/material/styles";
 
 import PhysicCard from "../../molecules/PhysicCard/PhysicCard";
 import HoloDecorator from "../../atoms/HoloDecorator/HoloDecorator";
@@ -19,6 +19,7 @@ import Chip from "../../atoms/Chip/Chip";
 import Logo from "../../atoms/Logo/Logo";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
 import Guilloche, { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche";
+import Electronics from "../../atoms/Electronics/Electronics";
 import type { ProfileCardProps } from "./ProfileCard.types";
 import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
 
@@ -40,6 +41,53 @@ interface FrontContentProps {
   handleEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+const ProfileTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: alpha(theme.palette.background.paper, 0.9),
+    backdropFilter: "blur(8px)",
+    borderRadius: "8px",
+    color: theme.palette.text.primary,
+    fontWeight: 500,
+    "& fieldset": {
+      borderColor: theme.palette.divider,
+      borderWidth: "1.5px",
+    },
+    "&:hover fieldset": {
+      borderColor: theme.palette.primary.main,
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: theme.palette.primary.main,
+      borderWidth: "2px",
+    },
+    ...theme.applyStyles("dark", {
+      backgroundColor: alpha(theme.palette.background.default, 0.85),
+      color: theme.palette.text.primary,
+      "& fieldset": {
+        borderColor: alpha(theme.palette.text.secondary, 0.45),
+      },
+      "&:hover fieldset": {
+        borderColor: theme.palette.primary.light,
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: theme.palette.primary.light,
+      },
+    }),
+  },
+  "& .MuiInputLabel-root": {
+    color: theme.palette.text.secondary,
+    fontWeight: 600,
+    "&.Mui-focused": {
+      color: theme.palette.primary.main,
+    },
+    ...theme.applyStyles("dark", {
+      color: theme.palette.text.secondary,
+      "&.Mui-focused": {
+        color: theme.palette.primary.light,
+      },
+    }),
+  },
+}));
+
 function FrontContent({
   schoolLogoUrl,
   institutionName,
@@ -57,6 +105,7 @@ function FrontContent({
   handleFamilyNameChange,
   handleEmailChange,
 }: FrontContentProps) {
+  const theme = useTheme();
   const guillocheMask = useMemo(
     () =>
       generateGuillocheMaskDataUrl({
@@ -73,9 +122,21 @@ function FrontContent({
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        bgcolor: (theme) => alpha(theme.palette.common.white, 0.05),
+        bgcolor: alpha(theme.palette.background.paper, 0.15),
+        ...theme.applyStyles("dark", {
+          bgcolor: alpha(theme.palette.background.default, 0.1),
+        }),
       }}
     >
+      <Electronics
+        side="front"
+        chipView="back"
+        finish="gold"
+        showNfcAntenna
+        showInnerCoil
+        showChip
+        opacity={0.65}
+      />
       <HoloDecorator
         type="image"
         maskUrl={guillocheMask}
@@ -125,7 +186,7 @@ function FrontContent({
         </Box>
       </Box>
 
-      <Divider sx={{ mb: 8, position: "relative", zIndex: 1 }} />
+      <Divider sx={{ mb: 4, position: "relative", zIndex: 1 }} />
 
       <Box
         sx={{
@@ -200,7 +261,7 @@ function FrontContent({
             sx={{ display: "flex", flexDirection: "column", gap: 2 }}
           >
             <ListItem disablePadding>
-              <TextField
+              <ProfileTextField
                 fullWidth
                 label="First Name"
                 variant="outlined"
@@ -210,7 +271,7 @@ function FrontContent({
               />
             </ListItem>
             <ListItem disablePadding>
-              <TextField
+              <ProfileTextField
                 fullWidth
                 label="Family Name"
                 variant="outlined"
@@ -223,7 +284,7 @@ function FrontContent({
               />
             </ListItem>
             <ListItem disablePadding>
-              <TextField
+              <ProfileTextField
                 fullWidth
                 label="Email"
                 variant="outlined"
@@ -233,7 +294,15 @@ function FrontContent({
                 slotProps={{
                   input: {
                     endAdornment: (
-                      <InputAdornment position="end">
+                      <InputAdornment
+                        position="end"
+                        sx={{
+                          "& .MuiTypography-root": {
+                            color: "text.secondary",
+                            fontWeight: 600,
+                          },
+                        }}
+                      >
                         {emailDomain}
                       </InputAdornment>
                     ),
@@ -253,6 +322,7 @@ interface BackContentProps {
 }
 
 function BackContent({ mrzData }: BackContentProps) {
+  const theme = useTheme();
   const guillocheMask = useMemo(
     () => generateGuillocheMaskDataUrl({ seed: "aptispace" }),
     [],
@@ -265,9 +335,21 @@ function BackContent({ mrzData }: BackContentProps) {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        bgcolor: (theme) => alpha(theme.palette.common.white, 0.05),
+        bgcolor: alpha(theme.palette.background.paper, 0.15),
+        ...theme.applyStyles("dark", {
+          bgcolor: alpha(theme.palette.background.default, 0.1),
+        }),
       }}
     >
+      <Electronics
+        side="back"
+        chipView="front"
+        finish="gold"
+        showNfcAntenna
+        showInnerCoil
+        showChip
+        opacity={0.65}
+      />
       <HoloDecorator
         type="image"
         maskUrl={guillocheMask}
@@ -295,7 +377,7 @@ function BackContent({ mrzData }: BackContentProps) {
         }}
       >
         <Box sx={{ height: 48, mb: 2 }} />
-        <Box sx={{ display: "flex", justifyContent: "center", mb: "auto" }}>
+        <Box sx={{ display: "flex", justifyContent: "flex-start", mb: "auto" }}>
           <Logo size="large" holo />
         </Box>
       </Box>

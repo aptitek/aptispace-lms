@@ -28,6 +28,7 @@ const ImageHoloWrapper = styled("span", {
       content: '""',
       position: "absolute",
       inset: 0,
+      opacity: 0.7,
       backgroundImage: holoGradient,
       backgroundSize:
         "calc(var(--holo-bg-size-x, 100%) * 2) calc(var(--holo-bg-size-y, 100%) * 2)",
