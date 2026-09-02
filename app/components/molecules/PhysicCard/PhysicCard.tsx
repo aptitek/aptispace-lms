@@ -142,6 +142,7 @@ function PhysicCardFront({
 }) {
   return (
     <Card
+      className={isFlipped ? "is-facing-away" : ""}
       {...cardProps}
       sx={{
         position: "absolute",
@@ -179,6 +180,7 @@ function PhysicCardFront({
   );
 }
 
+// eslint-disable-next-line complexity
 function PhysicCardBack({
   cardProps,
   backContent,
@@ -205,6 +207,7 @@ function PhysicCardBack({
   if (!backContent) return null;
   return (
     <Card
+      className={!isFlipped ? "is-facing-away" : ""}
       {...cardProps}
       sx={{
         position: "absolute",
@@ -325,6 +328,7 @@ export default function PhysicCard({
 
   return (
     <Box
+      className="physic-card"
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
