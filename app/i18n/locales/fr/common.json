@@ -197,5 +197,11 @@
       "cohorts": "Cohortes",
       "courses": "Cours"
     }
+  },
+  "institutions": {
+    "school": "École",
+    "company": "Entreprise",
+    "individual": "Individuel",
+    "all": "Toutes les institutions"
   }
 }

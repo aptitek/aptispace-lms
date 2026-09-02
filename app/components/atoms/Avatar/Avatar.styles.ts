@@ -31,6 +31,52 @@ export function resolveAvatarShapeRadius(
 
 export const resolveM3ShapeRadius = resolveAvatarShapeRadius;
 
+interface AvatarDimensionParams {
+  isBiometric: boolean;
+  isLandscape: boolean;
+  customHeight?: number | string;
+  customWidth?: number | string;
+  customRatio?: string;
+}
+
+function resolveDefaultRatio(isBiometric: boolean, isLandscape: boolean) {
+  if (isBiometric) return "35 / 45";
+  if (isLandscape) return "auto";
+  return "1 / 1";
+}
+
+function resolveAvatarDimensions({
+  isBiometric,
+  isLandscape,
+  customHeight,
+  customWidth,
+  customRatio,
+}: AvatarDimensionParams) {
+  const defaultHeight = isBiometric ? "140px" : "100%";
+  const defaultWidth = isLandscape ? "100%" : "auto";
+  const defaultRatio = resolveDefaultRatio(isBiometric, isLandscape);
+
+  return {
+    height: customHeight ?? defaultHeight,
+    width: customWidth ?? defaultWidth,
+    aspectRatio: customRatio ?? defaultRatio,
+  };
+}
+
+function resolveAvatarImageStyles(
+  isContain: boolean,
+  resolvedFit: "contain" | "cover" | "fill" | "none" | "scale-down",
+) {
+  return {
+    maxWidth: "100%",
+    maxHeight: "100%",
+    width: isContain ? "auto" : "100%",
+    height: isContain ? "auto" : "100%",
+    objectFit: resolvedFit,
+    display: "block",
+  };
+}
+
 export const AvatarRoot = styled(Box, {
   shouldForwardProp: (prop) =>
     prop !== "isPortrait" &&
@@ -60,17 +106,25 @@ export const AvatarRoot = styled(Box, {
 }) => {
   const shapeStyle = resolveM3ShapeStyle(shapePreset, customRadius);
   const isLandscape = shapePreset === "landscape";
-  const isBiometric =
-    shapePreset === "biometric" || (isPortrait && !shapePreset);
+  const isBiometric = Boolean(
+    shapePreset === "biometric" || (isPortrait && !shapePreset),
+  );
 
   const resolvedFit = customObjectFit ?? (isLandscape ? "contain" : "cover");
   const isContain = resolvedFit === "contain";
+  const dimensions = resolveAvatarDimensions({
+    isBiometric,
+    isLandscape,
+    customHeight,
+    customWidth,
+    customRatio,
+  });
 
   return {
     position: "relative",
-    height: customHeight ?? (isBiometric ? "140px" : "100%"),
-    width: customWidth ?? (isLandscape ? "100%" : "auto"),
-    aspectRatio: customRatio ?? (isBiometric ? "35 / 45" : isLandscape ? "auto" : "1 / 1"),
+    height: dimensions.height,
+    width: dimensions.width,
+    aspectRatio: dimensions.aspectRatio,
     borderRadius: shapeStyle.borderRadius,
     clipPath: shapeStyle.clipPath,
     WebkitClipPath: shapeStyle.clipPath,
@@ -83,14 +137,7 @@ export const AvatarRoot = styled(Box, {
     justifyContent: "center",
     boxSizing: "border-box",
     padding: isContain ? theme.spacing(0.75, 1.5) : 0,
-    "& img": {
-      maxWidth: "100%",
-      maxHeight: "100%",
-      width: isContain ? "auto" : "100%",
-      height: isContain ? "auto" : "100%",
-      objectFit: resolvedFit,
-      display: "block",
-    },
+    "& img": resolveAvatarImageStyles(isContain, resolvedFit),
   };
 });
 

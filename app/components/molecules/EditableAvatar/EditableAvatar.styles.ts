@@ -24,12 +24,37 @@ function calculateAvatarDimensions(
 
   const sizeMap: Record<
     EditableAvatarSize,
-    { biometric: string; standard: string; fontSize: string; landscapeHeight: string }
+    {
+      biometric: string;
+      standard: string;
+      fontSize: string;
+      landscapeHeight: string;
+    }
   > = {
-    sm: { biometric: "56px", standard: "40px", fontSize: "0.85rem", landscapeHeight: "36px" },
-    md: { biometric: "88px", standard: "56px", fontSize: "1.15rem", landscapeHeight: "56px" },
-    lg: { biometric: "120px", standard: "80px", fontSize: "1.6rem", landscapeHeight: "64px" },
-    xl: { biometric: "144px", standard: "104px", fontSize: "2rem", landscapeHeight: "80px" },
+    sm: {
+      biometric: "56px",
+      standard: "40px",
+      fontSize: "0.85rem",
+      landscapeHeight: "36px",
+    },
+    md: {
+      biometric: "88px",
+      standard: "56px",
+      fontSize: "1.15rem",
+      landscapeHeight: "56px",
+    },
+    lg: {
+      biometric: "120px",
+      standard: "80px",
+      fontSize: "1.6rem",
+      landscapeHeight: "64px",
+    },
+    xl: {
+      biometric: "144px",
+      standard: "104px",
+      fontSize: "2rem",
+      landscapeHeight: "80px",
+    },
   };
 
   const selectedDimension = isBiometric
@@ -96,6 +121,43 @@ export const MainContainer = styled(Box, {
   },
 }));
 
+function resolveContainerWidth(
+  avatarShape: EditableAvatarShape | undefined,
+  isLandscape: boolean,
+  dimension: number | string,
+  customWidth?: number | string,
+) {
+  if (customWidth !== undefined) return customWidth;
+  if (avatarShape === "biometric") return "auto";
+  if (isLandscape) return "100%";
+  return dimension;
+}
+
+function resolveContainerBorder(
+  clipPath: string | undefined,
+  isDragging: boolean | undefined,
+  primaryColor: string,
+  dividerColor: string,
+) {
+  if (clipPath) return "none";
+  const borderStyle = isDragging ? "dashed" : "solid";
+  const borderColor = isDragging ? primaryColor : dividerColor;
+  return `1px ${borderStyle} ${borderColor}`;
+}
+
+function resolveContainerHover(
+  isInteractive: boolean | undefined,
+  primaryColor: string,
+) {
+  if (!isInteractive) return {};
+  return {
+    borderColor: primaryColor,
+    "& .avatar-hover-overlay": {
+      opacity: 1,
+    },
+  };
+}
+
 export const MD3AvatarContainer = styled(Box, {
   shouldForwardProp: (prop) =>
     prop !== "avatarShape" &&
@@ -126,13 +188,23 @@ export const MD3AvatarContainer = styled(Box, {
   const { dimension, radius, clipPath, ratio, fontSize } =
     calculateAvatarDimensions(avatarSize, avatarShape, customRatio);
   const isLandscape = avatarShape === "landscape";
+  const width = resolveContainerWidth(
+    avatarShape,
+    isLandscape,
+    dimension,
+    customWidth,
+  );
+  const border = resolveContainerBorder(
+    clipPath,
+    isDragging,
+    theme.palette.primary.main,
+    theme.palette.divider,
+  );
 
   return {
     position: "relative",
     height: customHeight ?? dimension,
-    width:
-      customWidth ??
-      (avatarShape === "biometric" ? "auto" : isLandscape ? "100%" : dimension),
+    width,
     maxWidth: isLandscape ? "100%" : undefined,
     aspectRatio: ratio,
     borderRadius: radius,
@@ -144,20 +216,9 @@ export const MD3AvatarContainer = styled(Box, {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    border: clipPath
-      ? "none"
-      : `1px ${isDragging ? "dashed" : "solid"} ${
-          isDragging ? theme.palette.primary.main : theme.palette.divider
-        }`,
+    border,
     transition: theme.transitions.create(["border-color", "opacity"]),
-    "&:hover": isInteractive
-      ? {
-          borderColor: theme.palette.primary.main,
-          "& .avatar-hover-overlay": {
-            opacity: 1,
-          },
-        }
-      : {},
+    "&:hover": resolveContainerHover(isInteractive, theme.palette.primary.main),
     "& .MuiAvatar-root": {
       width: "100%",
       height: "100%",
@@ -174,9 +235,7 @@ export const MD3AvatarContainer = styled(Box, {
 
 export const AvatarHoverOverlay = styled(Box, {
   shouldForwardProp: (prop) =>
-    prop !== "avatarShape" &&
-    prop !== "avatarSize" &&
-    prop !== "customRatio",
+    prop !== "avatarShape" && prop !== "avatarSize" && prop !== "customRatio",
 })<{
   avatarShape?: EditableAvatarShape;
   avatarSize?: EditableAvatarSize;

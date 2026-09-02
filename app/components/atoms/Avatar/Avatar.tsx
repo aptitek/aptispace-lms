@@ -61,6 +61,26 @@ function renderAvatarContent(options: RenderAvatarContentOptions): ReactNode {
   );
 }
 
+function resolveAvatarShape(
+  shape?: AvatarProps["shape"],
+  role?: string | null,
+) {
+  if (shape !== undefined) return shape;
+  if (role) return getRoleAvatarShape(role);
+  return "medium";
+}
+
+function resolveAvatarInitials(
+  shape: AvatarProps["shape"],
+  name?: string,
+  alt?: string,
+) {
+  if (shape === "landscape" && name) {
+    return name;
+  }
+  return getAvatarInitials(name, alt);
+}
+
 export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
   function Avatar(props, ref) {
     const {
@@ -83,13 +103,9 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
       placeholderIcon,
     } = props;
 
-    const resolvedShape =
-      shape !== undefined ? shape : role ? getRoleAvatarShape(role) : "medium";
-
-    const initials =
-      resolvedShape === "landscape" && name
-        ? name
-        : getAvatarInitials(name, alt);
+    const resolvedShape = resolveAvatarShape(shape, role);
+    const initials = resolveAvatarInitials(resolvedShape, name, alt);
+    const resolvedTestId = testId ?? dataTestId ?? "avatar";
     const content = renderAvatarContent({
       src,
       alt,
@@ -111,7 +127,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
           shapePreset={resolvedShape}
           customObjectFit={objectFit}
           className={className}
-          data-testid={testId ?? dataTestId ?? "avatar"}
+          data-testid={resolvedTestId}
           data-shape={resolvedShape}
         >
           {content}
