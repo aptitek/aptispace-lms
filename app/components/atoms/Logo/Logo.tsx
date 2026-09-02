@@ -1,5 +1,5 @@
 import { styled, type SxProps, type Theme } from "@mui/material/styles";
-import { holoGradient } from "../../../tokens/holo";
+import HoloDecorator from "../HoloDecorator/HoloDecorator";
 
 export interface LogoProps {
   size?: "small" | "medium" | "large";
@@ -34,29 +34,6 @@ const LogoImage = styled("img", {
     display: "block",
     flexShrink: 0,
   };
-});
-
-const LogoImageHoloWrapper = styled("span")({
-  position: "relative",
-  display: "inline-flex",
-  "&::after": {
-    content: '""',
-    position: "absolute",
-    inset: 0,
-    backgroundImage: holoGradient,
-    backgroundSize: "200% 200%",
-    backgroundPosition: "center",
-    maskImage: 'url("/favicon.svg")',
-    WebkitMaskImage: 'url("/favicon.svg")',
-    maskSize: "contain",
-    WebkitMaskSize: "contain",
-    maskPosition: "center",
-    WebkitMaskPosition: "center",
-    maskRepeat: "no-repeat",
-    WebkitMaskRepeat: "no-repeat",
-    mixBlendMode: "screen",
-    pointerEvents: "none",
-  },
 });
 
 const TextContainer = styled("div", {
@@ -98,28 +75,19 @@ const SpaceSpan = styled("span")(({ theme }) => ({
   display: "inline-block",
 }));
 
-const textHoloStyles = {
-  background: `${holoGradient}, linear-gradient(currentColor, currentColor)`,
-  backgroundSize: "200% 200%, 100% 100%",
-  backgroundPosition: "center, center",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  backgroundBlendMode: "screen",
-};
-
 export default function Logo({ size = "medium", holo = false, sx }: LogoProps) {
   return (
     <LogoRoot logoSize={size} sx={sx}>
-      {holo ? (
-        <LogoImageHoloWrapper>
-          <LogoImage src="/favicon.svg" alt="AptiSpace Icon" logoSize={size} />
-        </LogoImageHoloWrapper>
-      ) : (
+      <HoloDecorator active={holo} type="image" maskUrl="/favicon.svg">
         <LogoImage src="/favicon.svg" alt="AptiSpace Icon" logoSize={size} />
-      )}
+      </HoloDecorator>
       <TextContainer logoSize={size}>
-        <AptiSpan sx={holo ? textHoloStyles : undefined}>Apti</AptiSpan>
-        <SpaceSpan sx={holo ? textHoloStyles : undefined}>Space</SpaceSpan>
+        <HoloDecorator active={holo}>
+          <AptiSpan>Apti</AptiSpan>
+        </HoloDecorator>
+        <HoloDecorator active={holo}>
+          <SpaceSpan>Space</SpaceSpan>
+        </HoloDecorator>
       </TextContainer>
     </LogoRoot>
   );

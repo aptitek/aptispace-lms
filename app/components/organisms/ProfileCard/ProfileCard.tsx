@@ -11,47 +11,15 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import Typography from "@mui/material/Typography";
-import { alpha, styled } from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 
 import PhysicCard from "../../molecules/PhysicCard/PhysicCard";
-import { holoGradient } from "../../../tokens/holo";
+import HoloDecorator from "../../atoms/HoloDecorator/HoloDecorator";
 import Chip from "../../atoms/Chip/Chip";
 import Logo from "../../atoms/Logo/Logo";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
 import type { ProfileCardProps } from "./ProfileCard.types";
 import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
-
-const textHoloStyles = {
-  background: `${holoGradient}, linear-gradient(currentColor, currentColor)`,
-  backgroundSize: "200% 200%, 100% 100%",
-  backgroundPosition: "center, center",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  backgroundBlendMode: "screen",
-};
-
-const ImageHoloWrapper = styled("span")<{ src: string }>(({ src }) => ({
-  position: "relative",
-  display: "inline-flex",
-  "&::after": {
-    content: '""',
-    position: "absolute",
-    inset: 0,
-    backgroundImage: holoGradient,
-    backgroundSize: "200% 200%",
-    backgroundPosition: "center",
-    maskImage: `url("${src}")`,
-    WebkitMaskImage: `url("${src}")`,
-    maskSize: "contain",
-    WebkitMaskSize: "contain",
-    maskPosition: "left",
-    WebkitMaskPosition: "left",
-    maskRepeat: "no-repeat",
-    WebkitMaskRepeat: "no-repeat",
-    mixBlendMode: "screen",
-    pointerEvents: "none",
-  },
-}));
 
 interface FrontContentProps {
   schoolLogoUrl?: string;
@@ -108,21 +76,20 @@ function FrontContent({
         }}
       >
         {schoolLogoUrl ? (
-          <ImageHoloWrapper src={schoolLogoUrl}>
+          <HoloDecorator type="image" maskUrl={schoolLogoUrl}>
             <Box
               component="img"
               src={schoolLogoUrl}
               alt={institutionName}
               sx={{ height: 40, objectFit: "contain", borderRadius: 1 }}
             />
-          </ImageHoloWrapper>
+          </HoloDecorator>
         ) : (
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: "bold", ...textHoloStyles }}
-          >
-            {institutionName}
-          </Typography>
+          <HoloDecorator>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              {institutionName}
+            </Typography>
+          </HoloDecorator>
         )}
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
           <Chip label={cohortName} size="small" variant="outlined" />
