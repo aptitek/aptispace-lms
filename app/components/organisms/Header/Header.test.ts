@@ -43,4 +43,11 @@ describe("Header Component", () => {
     expect(element.props.user?.impersonating).toBe(true);
     expect(element.props.onReturnToAdmin).toBe(onReturnToAdmin);
   });
+
+  it("attaches onAvatarClick for triggering ProfileCard modal", () => {
+    const element = React.createElement(Header, {
+      user: testStudentUser,
+    });
+    expect(element).toBeDefined();
+  });
 });

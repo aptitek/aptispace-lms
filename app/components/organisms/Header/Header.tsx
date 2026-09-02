@@ -1,3 +1,4 @@
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -7,8 +8,10 @@ import Logo from "../../atoms/Logo/Logo";
 import LanguageToggle from "../../atoms/LanguageToggle/LanguageToggle";
 import ThemeToggle from "../../atoms/ThemeToggle/ThemeToggle";
 import HeaderUserAvatar from "../../molecules/HeaderUserAvatar/HeaderUserAvatar";
+import FullScreenModal from "../../molecules/FullScreenModal/FullScreenModal";
+import ProfileCard from "../ProfileCard/ProfileCard";
+import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
 import { logout, stopImpersonation, type AuthUser } from "../../../utils/auth";
-import { type ReactNode } from "react";
 
 export type HeaderMode = "subtle" | "full";
 
@@ -104,6 +107,93 @@ const AdminHeaderButton = styled(Button)(({ theme }) => {
   };
 });
 
+interface HeaderProfileCardModalProps {
+  user: AuthUser;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+function parseUserNames(name?: string) {
+  if (!name) return { firstName: "USER", familyName: "" };
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return { firstName: parts[0], familyName: "" };
+  }
+  return {
+    firstName: parts.slice(0, -1).join(" "),
+    familyName: parts[parts.length - 1],
+  };
+}
+
+function parseUserEmail(email?: string) {
+  if (!email || !email.includes("@")) {
+    return { prefix: email || "user", domain: "@aptitek.io" };
+  }
+  const [prefix, domain] = email.split("@");
+  return { prefix, domain: `@${domain}` };
+}
+
+function HeaderProfileCardModal({
+  user,
+  isOpen,
+  onClose,
+}: HeaderProfileCardModalProps) {
+  const { firstName, familyName } = parseUserNames(user.name);
+  const { prefix: emailPrefix, domain: emailDomain } = parseUserEmail(
+    user.email,
+  );
+
+  const mrzData: Td1MrzData = {
+    documentNumber: user.id
+      ? user.id
+          .replace(/[^A-Za-z0-9]/g, "")
+          .slice(0, 9)
+          .toUpperCase() || "0942"
+      : "0942",
+    surname: (familyName || firstName || "USER").toUpperCase(),
+    givenNames: (firstName || "USER").toUpperCase(),
+    birthDate: "000101",
+    expiryDate: "300828",
+    sex: "M",
+    issuingState: "APT",
+    nationality: "APT",
+  };
+
+  return (
+    <FullScreenModal
+      isOpen={isOpen}
+      onClose={onClose}
+      maxWidth={620}
+      testId="header-profile-card-modal"
+    >
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: 580,
+          p: { xs: 1, sm: 2 },
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ProfileCard
+          firstName={firstName}
+          familyName={familyName}
+          emailPrefix={emailPrefix}
+          emailDomain={emailDomain}
+          avatarUrl={user.avatarUrl}
+          role={user.role}
+          githubUsername={user.githubUsername}
+          institutionName="AptiSpace Academy"
+          cohortName="Core Batch"
+          year="2026"
+          mrzData={mrzData}
+        />
+      </Box>
+    </FullScreenModal>
+  );
+}
+
 export default function Header({
   mode = "full",
   logoSize = "small",
@@ -115,6 +205,7 @@ export default function Header({
   "data-testid": dataTestId = "header",
 }: HeaderProps) {
   const { t } = useTranslation(["auth", "common"]);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const handleActionClick = () => {
     if (user?.impersonating) {
@@ -172,11 +263,20 @@ export default function Header({
               user={user}
               onLogout={handleActionClick}
               onReturnToAdmin={handleActionClick}
+              onAvatarClick={() => setIsProfileModalOpen(true)}
               data-testid="header-user-avatar"
             />
           )}
         </RightSlot>
       </HeaderRoot>
+
+      {user && (
+        <HeaderProfileCardModal
+          user={user}
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+        />
+      )}
     </>
   );
 }

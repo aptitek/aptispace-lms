@@ -471,7 +471,17 @@ export default function ProfileCard({
   };
 
   return (
-    <Box sx={{ ...sx }} {...props}>
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: 600,
+        aspectRatio: "85.6/53.98",
+        position: "relative",
+        boxSizing: "border-box",
+        ...sx,
+      }}
+      {...props}
+    >
       <PhysicCard
         isTransparent
         interactive
@@ -496,7 +506,7 @@ export default function ProfileCard({
           />
         }
         backContent={<BackContent mrzData={mrzData} />}
-        sx={{ width: "100%", maxWidth: 600 }}
+        sx={{ width: "100%", height: "100%", maxWidth: "100%" }}
       />
     </Box>
   );
