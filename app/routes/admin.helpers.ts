@@ -322,6 +322,8 @@ export async function handleCreateInstitutionAction(
 ) {
   const name = String(formData.get("name") || "");
   const slug = String(formData.get("slug") || "");
+  const type = (parseOptionalString(formData, "type") || "academic") as
+    "academic" | "company";
   const logoUrl = parseOptionalString(formData, "logoUrl");
 
   if (!name || !slug) {
@@ -332,6 +334,7 @@ export async function handleCreateInstitutionAction(
     const institution = await createInstitution(db, {
       name,
       slug,
+      type,
       logoUrl,
       actorUserId,
     });
@@ -352,6 +355,8 @@ export async function handleUpdateInstitutionAction(
   const id = String(formData.get("id") || "");
   const name = parseOptionalString(formData, "name");
   const slug = parseOptionalString(formData, "slug");
+  const type = parseOptionalString(formData, "type") as
+    "academic" | "company" | undefined;
   const logoUrl = formData.has("logoUrl")
     ? parseOptionalString(formData, "logoUrl")
     : undefined;
@@ -364,6 +369,7 @@ export async function handleUpdateInstitutionAction(
     const institution = await updateInstitution(db, id, {
       name,
       slug,
+      type,
       logoUrl,
       actorUserId,
     });

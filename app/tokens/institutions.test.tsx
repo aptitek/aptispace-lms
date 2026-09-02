@@ -15,38 +15,33 @@ describe("Institution Tokens & Configurations", () => {
     expect(config.icon).toBeDefined();
   });
 
-  it("defines company tokens as gray semicircle with Business icon", () => {
+  it("defines company tokens as yellow semicircle with Business icon", () => {
     const config = INSTITUTION_CONFIGS.company;
     expect(config.key).toBe("company");
-    expect(config.label).toBe("Company");
-    expect(config.chipColor).toBe("default");
+    expect(config.label).toBe("Institution");
+    expect(config.chipColor).toBe("warning");
     expect(config.chipShape).toBe("semicircle");
-    expect(config.icon).toBeDefined();
-  });
-
-  it("defines individual tokens as gray square with Person icon", () => {
-    const config = INSTITUTION_CONFIGS.individual;
-    expect(config.key).toBe("individual");
-    expect(config.label).toBe("Individual");
-    expect(config.chipColor).toBe("default");
-    expect(config.chipShape).toBe("square");
     expect(config.icon).toBeDefined();
   });
 
   it("normalizes institution type aliases properly", () => {
     expect(normalizeInstitutionType("school")).toBe("school");
+    expect(normalizeInstitutionType("academic")).toBe("school");
     expect(normalizeInstitutionType("academy")).toBe("school");
     expect(normalizeInstitutionType("university")).toBe("school");
 
     expect(normalizeInstitutionType("company")).toBe("company");
     expect(normalizeInstitutionType("companies")).toBe("company");
+    expect(normalizeInstitutionType("institution")).toBe("company");
+    expect(normalizeInstitutionType("institutions")).toBe("company");
     expect(normalizeInstitutionType("business")).toBe("company");
     expect(normalizeInstitutionType("corporate")).toBe("company");
 
-    expect(normalizeInstitutionType("individual")).toBe("individual");
-    expect(normalizeInstitutionType("individuals")).toBe("individual");
-    expect(normalizeInstitutionType("freelance")).toBe("individual");
-    expect(normalizeInstitutionType("solo")).toBe("individual");
+    // Individuals are attached to default school
+    expect(normalizeInstitutionType("individual")).toBe("school");
+    expect(normalizeInstitutionType("individuals")).toBe("school");
+    expect(normalizeInstitutionType("freelance")).toBe("school");
+    expect(normalizeInstitutionType("solo")).toBe("school");
 
     expect(normalizeInstitutionType(null)).toBe("school");
     expect(normalizeInstitutionType(undefined)).toBe("school");
@@ -54,7 +49,8 @@ describe("Institution Tokens & Configurations", () => {
 
   it("returns correct config via getInstitutionConfig", () => {
     expect(getInstitutionConfig("companies").key).toBe("company");
-    expect(getInstitutionConfig("individuals").key).toBe("individual");
+    expect(getInstitutionConfig("institution").key).toBe("company");
+    expect(getInstitutionConfig("individuals").key).toBe("school");
     expect(getInstitutionConfig("academy").key).toBe("school");
   });
 });

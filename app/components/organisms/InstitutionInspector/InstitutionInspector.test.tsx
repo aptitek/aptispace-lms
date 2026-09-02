@@ -8,6 +8,7 @@ describe("InstitutionInspector Organism", () => {
     id: "school-1",
     name: "Aptitek Institute",
     slug: "aptitek",
+    type: "academic",
     logoUrl: "/aptitek-logo.svg",
   };
 

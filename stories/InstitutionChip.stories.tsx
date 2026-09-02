@@ -12,14 +12,14 @@ const meta = {
     docs: {
       description: {
         component:
-          "InstitutionChip Atom Component with distinct MD3 expressive shapes and colors: Schools (Cyan clamshell), Companies (Gray semicircle), and Individuals (Gray square/rectangle).",
+          "InstitutionChip Atom Component with distinct MD3 expressive shapes and colors: Schools (Cyan clamshell) and Institutions (Yellow semicircle).",
       },
     },
   },
   argTypes: {
     institutionType: {
       control: "select",
-      options: ["school", "company", "individual", "all"],
+      options: ["school", "company", "all"],
       description: "Target institution type",
     },
     variant: {
@@ -51,18 +51,9 @@ export const DefaultSchool: Story = {
   },
 };
 
-export const Company: Story = {
+export const Institution: Story = {
   args: {
     institutionType: "company",
-    variant: "filled",
-    size: "medium",
-    showIcon: true,
-  },
-};
-
-export const Individual: Story = {
-  args: {
-    institutionType: "individual",
     variant: "filled",
     size: "medium",
     showIcon: true,
@@ -86,7 +77,6 @@ export const AllInstitutionTypes: Story = {
         >
           <InstitutionChip institutionType="school" variant="filled" />
           <InstitutionChip institutionType="company" variant="filled" />
-          <InstitutionChip institutionType="individual" variant="filled" />
         </Box>
       </Box>
 
@@ -104,7 +94,6 @@ export const AllInstitutionTypes: Story = {
         >
           <InstitutionChip institutionType="school" variant="outlined" />
           <InstitutionChip institutionType="company" variant="outlined" />
-          <InstitutionChip institutionType="individual" variant="outlined" />
         </Box>
       </Box>
 
@@ -122,7 +111,6 @@ export const AllInstitutionTypes: Story = {
         >
           <InstitutionChip institutionType="school" size="small" />
           <InstitutionChip institutionType="company" size="small" />
-          <InstitutionChip institutionType="individual" size="small" />
         </Box>
       </Box>
     </Box>

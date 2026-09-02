@@ -20,7 +20,7 @@ describe("InstitutionChip Atom Component", () => {
     expect(props.institutionType).toBe("school");
   });
 
-  it("creates React element for company with gray semicircle defaults", () => {
+  it("creates React element for company/institution with yellow semicircle defaults", () => {
     const element = React.createElement(InstitutionChip, {
       institutionType: "company",
     });
@@ -28,16 +28,6 @@ describe("InstitutionChip Atom Component", () => {
     expect(element).toBeDefined();
     const props = element.props as InstitutionChipProps;
     expect(props.institutionType).toBe("company");
-  });
-
-  it("creates React element for individual with gray square defaults", () => {
-    const element = React.createElement(InstitutionChip, {
-      institutionType: "individual",
-    });
-
-    expect(element).toBeDefined();
-    const props = element.props as InstitutionChipProps;
-    expect(props.institutionType).toBe("individual");
   });
 
   it("allows custom overrides for shape, color, label, and icon", () => {

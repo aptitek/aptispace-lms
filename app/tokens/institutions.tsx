@@ -1,10 +1,9 @@
 import type { ReactElement } from "react";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
-import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import type { ChipShape } from "../components/atoms/Chip/Chip.types";
 
-export type InstitutionType = "school" | "company" | "individual";
+export type InstitutionType = "school" | "company";
 
 export interface InstitutionConfig {
   key: InstitutionType;
@@ -31,21 +30,15 @@ export const INSTITUTION_CONFIGS: Record<InstitutionType, InstitutionConfig> = {
   },
   company: {
     key: "company",
-    label: "Company",
-    chipColor: "default", // Neutral gray in MD3 theme
+    label: "Institution",
+    chipColor: "warning", // Yellow in MD3 theme
     chipShape: "semicircle", // MD3 semicircle shape
     icon: <BusinessRoundedIcon data-testid="institution-icon-company" />,
-  },
-  individual: {
-    key: "individual",
-    label: "Individual",
-    chipColor: "default", // Neutral gray in MD3 theme
-    chipShape: "square", // MD3 square/rectangle shape
-    icon: <PersonRoundedIcon data-testid="institution-icon-individual" />,
   },
 };
 
 const INSTITUTION_TYPE_ALIASES: Record<string, InstitutionType> = {
+  academic: "school",
   school: "school",
   academy: "school",
   university: "school",
@@ -54,19 +47,21 @@ const INSTITUTION_TYPE_ALIASES: Record<string, InstitutionType> = {
   education: "school",
   company: "company",
   companies: "company",
+  institution: "company",
+  institutions: "company",
   corporate: "company",
   business: "company",
   enterprise: "company",
   organization: "company",
   org: "company",
-  individual: "individual",
-  individuals: "individual",
-  personal: "individual",
-  freelance: "individual",
-  independent: "individual",
-  solo: "individual",
-  self: "individual",
-  person: "individual",
+  individual: "school",
+  individuals: "school",
+  personal: "school",
+  freelance: "school",
+  independent: "school",
+  solo: "school",
+  self: "school",
+  person: "school",
 };
 
 export function normalizeInstitutionType(

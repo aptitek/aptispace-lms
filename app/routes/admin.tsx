@@ -89,6 +89,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
           id: inst.id,
           name: inst.name,
           slug: inst.slug,
+          type: inst.type,
           logoUrl: inst.logoUrl,
         }))
       : getDefaultSchools();
@@ -246,6 +247,7 @@ export default function AdminManagement() {
     id?: string;
     name: string;
     slug: string;
+    type?: string;
     logoUrl?: string;
   }) => {
     const intent = payload.id ? "update-institution" : "create-institution";
@@ -255,9 +257,12 @@ export default function AdminManagement() {
       slug: payload.slug,
     };
     if (payload.id) data.id = payload.id;
+    if (payload.type) data.type = payload.type;
     if (payload.logoUrl) data.logoUrl = payload.logoUrl;
     fetcher.submit(data, { method: "post" });
-    setSelectedSchoolForEdit(null);
+    if (!payload.id) {
+      setSelectedSchoolForEdit(null);
+    }
   };
 
   const handleSaveCohort = (payload: {

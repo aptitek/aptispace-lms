@@ -37,6 +37,7 @@ export async function createInstitution(
   params: {
     name: string;
     slug: string;
+    type?: "academic" | "company";
     logoUrl?: string;
     actorUserId?: string;
   },
@@ -46,6 +47,7 @@ export async function createInstitution(
     .values({
       name: params.name,
       slug: params.slug,
+      type: params.type,
       logoUrl: params.logoUrl,
     })
     .returning();
@@ -68,6 +70,7 @@ export async function updateInstitution(
   params: {
     name?: string;
     slug?: string;
+    type?: "academic" | "company";
     logoUrl?: string;
     actorUserId?: string;
   },
@@ -84,6 +87,7 @@ export async function updateInstitution(
     .set({
       name: params.name ?? existing.name,
       slug: params.slug ?? existing.slug,
+      type: params.type ?? existing.type,
       logoUrl: params.logoUrl !== undefined ? params.logoUrl : existing.logoUrl,
       updatedAt: new Date(),
     })

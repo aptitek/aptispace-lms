@@ -2,6 +2,7 @@ import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import Badge from "~/components/atoms/Badge/Badge";
 import InstitutionLogo from "~/components/atoms/InstitutionLogo/InstitutionLogo";
+import InstitutionChip from "~/components/atoms/InstitutionChip/InstitutionChip";
 import SchoolIcon from "@mui/icons-material/School";
 import Box from "@mui/material/Box";
 import type { SchoolConfig } from "~/types/institution";
@@ -77,6 +78,12 @@ export const SchoolCard = forwardRef<HTMLDivElement, SchoolCardProps>(
             />
           </LogoContainer>
           <SchoolName>{school.name}</SchoolName>
+          <InstitutionChip
+            institutionType={school.type || "academic"}
+            size="small"
+            variant="outlined"
+            testId={`school-card-chip-${school.id}`}
+          />
         </CardContainer>
       </Badge>
     );

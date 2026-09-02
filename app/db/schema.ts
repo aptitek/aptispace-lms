@@ -33,7 +33,7 @@ export const institutions = sqliteTable("institutions", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
-  type: text("type", { enum: ["academic", "company", "individual"] })
+  type: text("type", { enum: ["academic", "company"] })
     .notNull()
     .default("academic"),
   logoUrl: text("logo_url"),

@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -9,8 +10,10 @@ import SchoolCard, {
 import CohortCard, {
   CohortCardSkeleton,
 } from "~/components/molecules/CohortCard/CohortCard";
+import InstitutionFilterBar from "~/components/molecules/InstitutionFilterBar/InstitutionFilterBar";
 import InstitutionInspector from "~/components/organisms/InstitutionInspector/InstitutionInspector";
 import CohortInspector from "~/components/organisms/CohortInspector/CohortInspector";
+import { normalizeInstitutionType } from "~/tokens/institutions";
 import {
   TabPanelContainer,
   MainColumn,
@@ -36,6 +39,7 @@ export interface AdminCohortsTabPanelProps {
     id?: string;
     name: string;
     slug: string;
+    type?: string;
     logoUrl?: string;
   }) => void;
   onSaveCohort: (payload: {
@@ -67,9 +71,29 @@ export function AdminCohortsTabPanel({
   isSubmitting,
 }: AdminCohortsTabPanelProps) {
   const { t } = useTranslation("common");
+  const [institutionQuery, setInstitutionQuery] = useState("");
+  const [institutionTypeFilter, setInstitutionTypeFilter] = useState("all");
+
   const hasCohortsInspectorOpen = Boolean(
     selectedSchoolForEdit || selectedCohortForEdit,
   );
+
+  const filteredSchools = useMemo(() => {
+    return schools.filter((school) => {
+      if (institutionTypeFilter !== "all") {
+        const normType = normalizeInstitutionType(school.type);
+        const targetNorm = normalizeInstitutionType(institutionTypeFilter);
+        if (normType !== targetNorm) return false;
+      }
+      if (institutionQuery.trim()) {
+        const q = institutionQuery.toLowerCase().trim();
+        const nameMatch = school.name.toLowerCase().includes(q);
+        const slugMatch = school.slug?.toLowerCase().includes(q);
+        if (!nameMatch && !slugMatch) return false;
+      }
+      return true;
+    });
+  }, [schools, institutionQuery, institutionTypeFilter]);
 
   return (
     <TabPanelContainer
@@ -84,8 +108,16 @@ export function AdminCohortsTabPanel({
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
             {t("admin.schoolsTitle", "Schools & Institutions")}
           </Typography>
+
+          <InstitutionFilterBar
+            query={institutionQuery}
+            onQueryChange={setInstitutionQuery}
+            typeFilter={institutionTypeFilter}
+            onTypeFilterChange={setInstitutionTypeFilter}
+          />
+
           <MD3CollectionGrid data-testid="schools-zone">
-            {schools.map((school) => (
+            {filteredSchools.map((school) => (
               <SchoolCard
                 key={school.id || school.name}
                 school={school}

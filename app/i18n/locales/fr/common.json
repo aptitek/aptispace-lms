@@ -148,7 +148,9 @@
     "allSchools": "Tous les établissements",
     "cohort": "Cohorte",
     "allCohorts": "Toutes les cohortes",
-    "searchPlaceholder": "Rechercher des utilisateurs..."
+    "institutionType": "Type d'établissement",
+    "searchPlaceholder": "Rechercher des utilisateurs...",
+    "searchInstitutions": "Rechercher des établissements par nom ou identifiant..."
   },
   "profile": {
     "firstName": "Prénom",
@@ -200,8 +202,7 @@
   },
   "institutions": {
     "school": "École",
-    "company": "Entreprise",
-    "individual": "Individuel",
+    "company": "Institution",
     "all": "Toutes les institutions"
   }
 }

@@ -1,14 +1,47 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import EditableAvatar from "~/components/molecules/EditableAvatar/EditableAvatar";
+import InstitutionChip from "~/components/atoms/InstitutionChip/InstitutionChip";
 import type { SchoolConfig } from "~/types/institution";
+
+interface InstitutionFormValues {
+  name: string;
+  slug: string;
+  type: string;
+  logoUrl: string;
+}
+
+function resolveNextFormValues(
+  current: InstitutionFormValues,
+  updates?: Partial<InstitutionFormValues>,
+): InstitutionFormValues {
+  return {
+    name: (updates?.name ?? current.name).trim(),
+    slug: (updates?.slug ?? current.slug).trim(),
+    type: updates?.type ?? current.type,
+    logoUrl: (updates?.logoUrl ?? current.logoUrl).trim(),
+  };
+}
+
+function hasFormValuesChanged(
+  prev: InstitutionFormValues,
+  next: InstitutionFormValues,
+): boolean {
+  return (
+    prev.name !== next.name ||
+    prev.slug !== next.slug ||
+    prev.type !== next.type ||
+    prev.logoUrl !== next.logoUrl
+  );
+}
 
 interface InstitutionInspectorProps {
   institution: SchoolConfig | null;
@@ -17,6 +50,7 @@ interface InstitutionInspectorProps {
     id?: string;
     name: string;
     slug: string;
+    type?: string;
     logoUrl?: string;
   }) => void;
   isSubmitting?: boolean;
@@ -29,24 +63,61 @@ export default function InstitutionInspector({
   isSubmitting = false,
 }: InstitutionInspectorProps) {
   const { t } = useTranslation("common");
+  const isEditing = Boolean(institution?.id);
+
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const [type, setType] = useState("academic");
   const [logoUrl, setLogoUrl] = useState("");
+
+  const savedValuesRef = useRef<InstitutionFormValues>({
+    name: "",
+    slug: "",
+    type: "academic",
+    logoUrl: "",
+  });
 
   useEffect(() => {
     if (institution) {
-      setName(institution.name || "");
-      setSlug(institution.slug || "");
-      setLogoUrl(institution.logoUrl || "");
+      const initial: InstitutionFormValues = {
+        name: institution.name || "",
+        slug: institution.slug || "",
+        type: institution.type || "academic",
+        logoUrl: institution.logoUrl || "",
+      };
+
+      setName(initial.name);
+      setSlug(initial.slug);
+      setType(initial.type);
+      setLogoUrl(initial.logoUrl);
+      savedValuesRef.current = initial;
     }
   }, [institution]);
 
-  const handleSave = () => {
+  const triggerSave = (updates?: Partial<InstitutionFormValues>) => {
+    if (!isEditing || !institution?.id) return;
+    const current = { name, slug, type, logoUrl };
+    const next = resolveNextFormValues(current, updates);
+    if (!next.name || !next.slug) return;
+    if (!hasFormValuesChanged(savedValuesRef.current, next)) return;
+
+    savedValuesRef.current = next;
     onSave({
-      id: institution?.id,
-      name,
-      slug,
-      logoUrl,
+      id: institution.id,
+      name: next.name,
+      slug: next.slug,
+      type: next.type,
+      logoUrl: next.logoUrl || undefined,
+    });
+  };
+
+  const handleCreate = () => {
+    if (!name.trim() || !slug.trim()) return;
+    onSave({
+      name: name.trim(),
+      slug: slug.trim(),
+      type,
+      logoUrl: logoUrl.trim() || undefined,
     });
   };
 
@@ -66,6 +137,7 @@ export default function InstitutionInspector({
         top: 24,
       }}
       variant="outlined"
+      data-testid="institution-inspector-card"
     >
       <Box
         sx={{
@@ -75,7 +147,7 @@ export default function InstitutionInspector({
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          {institution.id
+          {isEditing
             ? t("inspector.editInstitution", "Edit Institution")
             : t("inspector.addInstitution", "Add Institution")}
         </Typography>
@@ -99,7 +171,10 @@ export default function InstitutionInspector({
         height={80}
         objectFit="contain"
         editable={!isSubmitting}
-        onChange={(newUrl) => setLogoUrl(newUrl)}
+        onChange={(newUrl) => {
+          setLogoUrl(newUrl);
+          triggerSave({ logoUrl: newUrl });
+        }}
         testId="inspector-institution-avatar"
       />
 
@@ -107,6 +182,7 @@ export default function InstitutionInspector({
         label={t("inspector.institutionName", "Name")}
         value={name}
         onChange={(e) => setName(e.target.value)}
+        onBlur={() => triggerSave({ name })}
         fullWidth
         disabled={isSubmitting}
         required
@@ -115,25 +191,62 @@ export default function InstitutionInspector({
         label={t("inspector.institutionSlug", "Slug")}
         value={slug}
         onChange={(e) => setSlug(e.target.value)}
+        onBlur={() => triggerSave({ slug })}
         fullWidth
         disabled={isSubmitting}
         required
       />
-
-      <Box
-        sx={{ mt: "auto", display: "flex", justifyContent: "flex-end", gap: 2 }}
+      <TextField
+        select
+        label={t("inspector.institutionType", "Type")}
+        value={type}
+        onChange={(e) => {
+          const newType = e.target.value;
+          setType(newType);
+          triggerSave({ type: newType });
+        }}
+        fullWidth
+        disabled={isSubmitting}
+        slotProps={{
+          select: {
+            renderValue: (selectedVal) => (
+              <InstitutionChip
+                institutionType={String(selectedVal)}
+                size="small"
+              />
+            ),
+          },
+        }}
       >
-        <Button onClick={onClose} disabled={isSubmitting}>
-          {t("inspector.cancel", "Cancel")}
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          disabled={isSubmitting || !name || !slug}
+        <MenuItem value="academic" sx={{ py: 0.75 }}>
+          <InstitutionChip institutionType="school" size="small" />
+        </MenuItem>
+        <MenuItem value="company" sx={{ py: 0.75 }}>
+          <InstitutionChip institutionType="company" size="small" />
+        </MenuItem>
+      </TextField>
+
+      {!isEditing && (
+        <Box
+          sx={{
+            mt: "auto",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: 2,
+          }}
         >
-          {t("inspector.save", "Save")}
-        </Button>
-      </Box>
+          <Button onClick={onClose} disabled={isSubmitting}>
+            {t("inspector.cancel", "Cancel")}
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleCreate}
+            disabled={isSubmitting || !name.trim() || !slug.trim()}
+          >
+            {t("inspector.create", "Create")}
+          </Button>
+        </Box>
+      )}
     </Card>
   );
 }

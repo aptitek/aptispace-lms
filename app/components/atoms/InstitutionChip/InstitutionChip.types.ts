@@ -5,7 +5,7 @@ export interface InstitutionChipProps extends Omit<
   ChipProps,
   "color" | "shape"
 > {
-  /** Target institution type ("school" | "company" | "individual" | string) */
+  /** Target institution type ("school" | "company" | string) */
   institutionType?: InstitutionType | string | null;
   /** Alias for institutionType */
   type?: InstitutionType | string;

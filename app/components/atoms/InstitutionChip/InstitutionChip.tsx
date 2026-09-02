@@ -67,8 +67,7 @@ function resolveInstitutionVisuals(
  *
  * Inherits and extends the Chip atom with institution category design tokens:
  * - Schools: Cyan clamshell shape with School icon
- * - Companies: Gray semicircle shape with Business icon
- * - Individuals: Gray square/rectangle shape with Person icon
+ * - Institutions / Companies: Yellow semicircle shape with Business icon
  * - Internationalized institution category labels
  */
 export const InstitutionChip = forwardRef<HTMLDivElement, InstitutionChipProps>(
