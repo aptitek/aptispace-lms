@@ -122,10 +122,10 @@ export function EntityCardSkeleton({
           <SkeletonAvatarContainer>
             <Skeleton
               variant="rectangular"
-              width={77}
-              height={99}
+              width={80}
+              height={80}
               animation={state.animation}
-              sx={{ borderRadius: "22px 22px 14px 14px" }}
+              sx={{ borderRadius: "16px" }}
             />
           </SkeletonAvatarContainer>
 

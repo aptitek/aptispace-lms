@@ -125,10 +125,10 @@ export const SkeletonBodyRow = styled("div")(({ theme }) => ({
 
 export const SkeletonAvatarContainer = styled("div")({
   position: "relative",
-  width: "77px",
-  height: "99px",
-  minWidth: "77px",
-  maxWidth: "77px",
+  width: "80px",
+  height: "80px",
+  minWidth: "80px",
+  maxWidth: "80px",
   flexShrink: 0,
   display: "flex",
   alignItems: "center",
@@ -139,7 +139,7 @@ export const SkeletonDetailsContainer = styled("div")({
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
-  minHeight: "99px",
+  minHeight: "80px",
   minWidth: 0,
   flex: 1,
   gap: "3px",

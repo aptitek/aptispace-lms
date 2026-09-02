@@ -214,10 +214,11 @@ function CompactAvatarSlot({
       <Avatar
         name={displayName}
         src={entity.avatarUrl}
-        width={77}
-        height={99}
-        shape="biometric"
-        isPortrait={true}
+        role={role}
+        shape={roleConfig.avatarShape}
+        width={80}
+        height={80}
+        isPortrait={false}
         testId="compact-avatar"
       />
       <Tooltip title={roleLabel} arrow placement="top">

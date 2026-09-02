@@ -119,21 +119,21 @@ export const CardBodyRow = styled("div")(({ theme }) => ({
 
 export const AvatarContainer = styled("div")({
   position: "relative",
-  width: "77px",
-  height: "99px",
-  minWidth: "77px",
-  maxWidth: "77px",
+  width: "80px",
+  height: "80px",
+  minWidth: "80px",
+  maxWidth: "80px",
   flexShrink: 0,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   "& > [data-testid='avatar'], & > [data-testid='compact-avatar'], & > .MuiBox-root":
     {
-      width: "77px !important",
-      height: "99px !important",
-      maxWidth: "77px !important",
-      maxHeight: "99px !important",
-      aspectRatio: "35 / 45",
+      width: "80px !important",
+      height: "80px !important",
+      maxWidth: "80px !important",
+      maxHeight: "80px !important",
+      aspectRatio: "1 / 1",
     },
 });
 
@@ -151,7 +151,7 @@ export const StudentDetails = styled("div")({
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
-  minHeight: "99px",
+  minHeight: "80px",
   minWidth: 0,
   flex: 1,
   gap: "3px",
