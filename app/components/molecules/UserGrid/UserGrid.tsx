@@ -228,6 +228,7 @@ function LoadingSkeletonZone({ count }: LoadingSkeletonZoneProps) {
 
 interface UserCardsZoneProps {
   students: EntityCardData[];
+  selectedStudentId?: string | null;
   school?: SchoolConfig;
   cohort?: CohortConfig;
   zoneId?: string;
@@ -240,6 +241,7 @@ interface UserCardsZoneProps {
 
 function UserCardsZone({
   students,
+  selectedStudentId,
   school,
   cohort,
   zoneId = "users-collection",
@@ -259,6 +261,9 @@ function UserCardsZone({
           entity={student}
           school={school}
           cohort={cohort}
+          isSelected={Boolean(
+            selectedStudentId && selectedStudentId === student.id,
+          )}
           onClick={onStudentClick}
           onImpersonate={onImpersonate}
           showImpersonate={showImpersonate}
@@ -275,6 +280,7 @@ function UserCardsZone({
 interface GridBodyProps {
   filteredStudents: EntityCardData[];
   displayedStudents: EntityCardData[];
+  selectedStudentId?: string | null;
   resolvedEmptyMessage: string;
   hasQuery: boolean;
   emptyPlaceholderCount: number;
@@ -295,6 +301,7 @@ interface GridBodyProps {
 function GridBody({
   filteredStudents,
   displayedStudents,
+  selectedStudentId,
   resolvedEmptyMessage,
   hasQuery,
   emptyPlaceholderCount,
@@ -328,6 +335,7 @@ function GridBody({
     <>
       <UserCardsZone
         students={displayedStudents}
+        selectedStudentId={selectedStudentId}
         school={school}
         cohort={cohort}
         zoneId={zoneId}
@@ -372,6 +380,7 @@ export function UserGrid(props: UserGridProps) {
         <GridBody
           filteredStudents={logic.filteredStudents}
           displayedStudents={logic.displayedStudents}
+          selectedStudentId={props.selectedStudentId}
           resolvedEmptyMessage={logic.resolvedEmptyMessage}
           hasQuery={Boolean(logic.activeQuery)}
           emptyPlaceholderCount={logic.emptyPlaceholderCount}

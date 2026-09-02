@@ -454,6 +454,7 @@ export default function AdminManagement() {
               />
               <UserGrid
                 students={filteredUsers}
+                selectedStudentId={selectedUser?.id}
                 onStudentClick={handleUserClick}
                 onImpersonate={handleImpersonate}
                 onDelete={handleDeleteUser}

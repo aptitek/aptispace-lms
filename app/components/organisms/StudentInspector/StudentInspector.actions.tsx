@@ -16,10 +16,7 @@ export function InspectorImpersonateButton({
   onImpersonate,
 }: InspectorImpersonateButtonProps) {
   const { t } = useTranslation(["common", "auth"]);
-  const isInstructor = targetStudent.role === "instructor";
-  const label = isInstructor
-    ? t("common:inspector.impersonateInstructor", "Impersonate Instructor")
-    : t("common:inspector.impersonate", "Impersonate Student");
+  const label = t("common:inspector.impersonate", "Impersonate");
 
   return (
     <Button
@@ -58,10 +55,7 @@ export function InspectorDeleteButton({
   onDelete,
 }: InspectorDeleteButtonProps) {
   const { t } = useTranslation(["common", "auth"]);
-  const isInstructor = targetStudent.role === "instructor";
-  const label = isInstructor
-    ? t("common:inspector.deleteInstructor", "Hold to Delete Instructor")
-    : t("common:inspector.deleteStudent", "Hold to Delete Student");
+  const label = t("common:inspector.delete", "Delete");
 
   return (
     <HoldButton
@@ -112,10 +106,9 @@ export function InspectorActionGroup({
   return (
     <Box
       sx={{
-        display: "grid",
-        gridTemplateColumns:
-          onImpersonate && onDelete ? "repeat(2, minmax(0, 1fr))" : "1fr",
-        gap: 2,
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
         mt: 2,
         width: "100%",
       }}

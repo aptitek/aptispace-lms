@@ -3,12 +3,25 @@ import { styled, alpha } from "@mui/material/styles";
 export const CardContainer = styled("div", {
   shouldForwardProp: (prop) =>
     prop !== "isInteractive" && prop !== "isSelected",
-})<{ isInteractive?: boolean; isSelected?: boolean }>(
-  ({ theme, isInteractive, isSelected }) => ({
+})<{ isInteractive?: boolean; isSelected?: boolean }>(({
+  theme,
+  isInteractive,
+  isSelected,
+}) => {
+  const primary = theme.palette.primary.main;
+  const bg = isSelected
+    ? alpha(primary, 0.08)
+    : alpha(theme.palette.background.paper, 0.9);
+  const border = `1px solid ${isSelected ? primary : alpha(theme.palette.divider, 0.2)}`;
+  const shadow = isSelected
+    ? `0 4px 20px -2px ${alpha(primary, 0.25)}, inset 0 0 0 1px ${alpha(primary, 0.2)}`
+    : `0 4px 16px -2px ${alpha(theme.palette.common.black, 0.06)}, inset 0 1px 0 rgba(255, 255, 255, 0.8)`;
+
+  return {
     position: "relative",
     width: "100%",
-    minWidth: "200px",
-    maxWidth: "350px",
+    minWidth: "260px",
+    maxWidth: "100%",
     borderRadius: "16px",
     padding: theme.spacing(3),
     boxSizing: "border-box",
@@ -17,15 +30,11 @@ export const CardContainer = styled("div", {
     alignItems: "center",
     justifyContent: "center",
     gap: theme.spacing(2),
-    backgroundColor: isSelected
-      ? alpha(theme.palette.primary.main, 0.08)
-      : alpha(theme.palette.background.paper, 0.9),
+    backgroundColor: bg,
     backdropFilter: "blur(12px)",
     WebkitBackdropFilter: "blur(12px)",
-    border: `1px solid ${isSelected ? theme.palette.primary.main : alpha(theme.palette.divider, 0.2)}`,
-    boxShadow: isSelected
-      ? `0 4px 16px -2px ${alpha(theme.palette.primary.main, 0.2)}, inset 0 1px 0 ${alpha(theme.palette.primary.main, 0.1)}`
-      : `0 4px 16px -2px ${alpha(theme.palette.common.black, 0.08)}, inset 0 1px 0 ${alpha(theme.palette.common.white, 0.8)}`,
+    border,
+    boxShadow: shadow,
     cursor: isInteractive ? "pointer" : "default",
     transition: theme.transitions.create(
       ["transform", "box-shadow", "border-color", "background-color"],
@@ -35,16 +44,26 @@ export const CardContainer = styled("div", {
     ...(isInteractive && {
       "&:hover": {
         transform: "translateY(-3px)",
-        borderColor: theme.palette.primary.main,
-        boxShadow: `0 10px 24px -4px ${alpha(theme.palette.primary.main, 0.2)}, 0 0 0 1px ${alpha(theme.palette.primary.main, 0.3)}`,
+        borderColor: isSelected ? primary : alpha(primary, 0.5),
+        boxShadow: isSelected
+          ? `0 10px 24px -4px ${alpha(primary, 0.3)}, 0 0 0 1px ${alpha(primary, 0.4)}`
+          : `0 10px 24px -4px ${alpha(theme.palette.common.black, 0.12)}, 0 0 0 1px ${alpha(primary, 0.2)}`,
       },
       "&:focus-visible": {
-        outline: `2px solid ${theme.palette.primary.main}`,
+        outline: `2px solid ${primary}`,
         outlineOffset: "2px",
       },
     }),
-  }),
-);
+    ...theme.applyStyles("dark", {
+      backgroundColor: isSelected
+        ? alpha(primary, 0.16)
+        : alpha(theme.palette.background.paper, 0.9),
+      boxShadow: isSelected
+        ? `0 4px 20px -2px ${alpha(primary, 0.25)}, inset 0 0 0 1px ${alpha(primary, 0.2)}`
+        : `0 4px 16px -2px ${alpha(theme.palette.common.black, 0.3)}, inset 0 1px 0 rgba(255, 255, 255, 0.05)`,
+    }),
+  };
+});
 
 export const LogoContainer = styled("div")({
   height: "60px",

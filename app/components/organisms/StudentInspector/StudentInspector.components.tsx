@@ -165,10 +165,9 @@ export function FacultyAccessPanel() {
         <Box sx={{ display: "flex", gap: 1 }}>
           <RoleChip
             userRole="instructor"
-            label={t("auth:roles.faculty", "Faculty")}
             size="small"
             sx={{ fontWeight: 700 }}
-            testId="inspector-faculty-chip"
+            testId="inspector-instructor-chip"
           />
           <Chip
             label={t("auth:roles.allCohorts", "All Cohorts")}
@@ -224,10 +223,9 @@ export function AdminAccessPanel() {
         <Box sx={{ display: "flex", gap: 1 }}>
           <RoleChip
             userRole="admin"
-            label={t("auth:roles.staff", "Staff")}
             size="small"
             sx={{ fontWeight: 700 }}
-            testId="inspector-staff-chip"
+            testId="inspector-admin-chip"
           />
           <Chip
             label={t("auth:roles.globalAccess", "Global Access")}

@@ -43,6 +43,7 @@ export interface EntityCardProps {
   onDelete?: (entity: EntityCardData) => void;
   showDelete?: boolean;
   interactive?: boolean;
+  isSelected?: boolean;
   className?: string;
   testId?: string;
   style?: React.CSSProperties;

@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import { alpha, useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import Chip from "../../atoms/Chip/Chip";
-import RoleChip from "../../atoms/RoleChip/RoleChip";
 import HoloDecorator from "../../atoms/HoloDecorator/HoloDecorator";
 import Logo from "../../atoms/Logo/Logo";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
@@ -47,20 +46,8 @@ export function ProfileHeaderChips({
     );
   }
 
-  const isInstructor = role === "instructor";
-  const roleLabel = isInstructor
-    ? t("auth:roles.faculty", "Faculty")
-    : t("auth:roles.staff", "Staff");
-  const testId = isInstructor ? "profile-faculty-chip" : "profile-staff-chip";
-
   return (
     <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-      <RoleChip
-        userRole={role}
-        label={roleLabel.toUpperCase()}
-        size="small"
-        testId={testId}
-      />
       <Chip
         label={t("auth:roles.allCohorts", "All Cohorts").toUpperCase()}
         size="small"

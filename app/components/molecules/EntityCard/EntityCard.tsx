@@ -158,64 +158,20 @@ function CompactHeaderSlot({
               data-testid="compact-year-chip"
             />
           </>
-        ) : role === "instructor" ? (
-          <>
-            <Chip
-              label={t("auth:roles.faculty", "Faculty")}
-              size="small"
-              color="info"
-              variant="outlined"
-              sx={{
-                height: 20,
-                fontSize: "0.65rem",
-                fontWeight: 700,
-                "& .MuiChip-label": { px: 0.75 },
-              }}
-              data-testid="compact-faculty-chip"
-            />
-            <Chip
-              label={t("auth:roles.allCohorts", "All Cohorts")}
-              size="small"
-              color="default"
-              variant="outlined"
-              sx={{
-                height: 20,
-                fontSize: "0.65rem",
-                fontWeight: 700,
-                "& .MuiChip-label": { px: 0.75 },
-              }}
-              data-testid="compact-all-cohorts-chip"
-            />
-          </>
         ) : (
-          <>
-            <Chip
-              label={t("auth:roles.staff", "Staff")}
-              size="small"
-              color="secondary"
-              variant="outlined"
-              sx={{
-                height: 20,
-                fontSize: "0.65rem",
-                fontWeight: 700,
-                "& .MuiChip-label": { px: 0.75 },
-              }}
-              data-testid="compact-staff-chip"
-            />
-            <Chip
-              label={t("auth:roles.allCohorts", "All Cohorts")}
-              size="small"
-              color="default"
-              variant="outlined"
-              sx={{
-                height: 20,
-                fontSize: "0.65rem",
-                fontWeight: 700,
-                "& .MuiChip-label": { px: 0.75 },
-              }}
-              data-testid="compact-all-cohorts-chip"
-            />
-          </>
+          <Chip
+            label={t("auth:roles.allCohorts", "All Cohorts")}
+            size="small"
+            color="default"
+            variant="outlined"
+            sx={{
+              height: 20,
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              "& .MuiChip-label": { px: 0.75 },
+            }}
+            data-testid="compact-all-cohorts-chip"
+          />
         )}
         {isProfileComplete === false && (
           <Chip
@@ -446,6 +402,19 @@ function useCardInteractivity(
   return { isInteractive, handleClick, handleKeyDown };
 }
 
+function resolveEntityCardLabels(
+  entity: EntityCardData,
+  school?: SchoolConfig,
+  cohort?: CohortConfig,
+) {
+  const role: UserRole = entity.role ?? "student";
+  const displayName = resolveDisplayName(entity);
+  const cohortLabel = resolveCohortLabel(entity, cohort);
+  const cohortYear = resolveCohortYear(entity, cohort);
+  const institutionLabel = resolveInstitutionLabel(entity, school);
+  return { role, displayName, cohortLabel, cohortYear, institutionLabel };
+}
+
 export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
   (props, ref) => {
     const {
@@ -459,6 +428,7 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
       onDelete,
       showDelete = true,
       interactive = true,
+      isSelected = false,
       className,
       testId = "entity-card",
       style,
@@ -469,22 +439,19 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
       onClick,
       entity,
     );
-    const role: UserRole = entity.role ?? "student";
-    const displayName = resolveDisplayName(entity);
-    const cohortLabel = resolveCohortLabel(entity, cohort);
-    const cohortYear = resolveCohortYear(entity, cohort);
-    const institutionLabel = resolveInstitutionLabel(entity, school);
+    const labels = resolveEntityCardLabels(entity, school, cohort);
 
     return (
       <StyledCard
         ref={ref}
         variant={variant}
         isInteractive={isInteractive}
+        isSelected={isSelected}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         tabIndex={isInteractive ? 0 : undefined}
         role={isInteractive ? "button" : "article"}
-        aria-label={`User card for ${displayName}`}
+        aria-label={`User card for ${labels.displayName}`}
         className={className}
         style={style}
         data-testid={testId}
@@ -493,22 +460,22 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
         <StyledCardContent>
           <CompactHeaderSlot
             school={school}
-            institutionLabel={institutionLabel}
-            cohortLabel={cohortLabel}
-            cohortYear={cohortYear}
+            institutionLabel={labels.institutionLabel}
+            cohortLabel={labels.cohortLabel}
+            cohortYear={labels.cohortYear}
             isProfileComplete={entity.isProfileComplete}
-            role={role}
+            role={labels.role}
           />
 
           <CardBodyRow>
             <CompactAvatarSlot
               entity={entity}
-              displayName={displayName}
-              role={role}
+              displayName={labels.displayName}
+              role={labels.role}
             />
             <CompactStudentDetailsSlot
               entity={entity}
-              displayName={displayName}
+              displayName={labels.displayName}
               showImpersonate={showImpersonate}
               onImpersonate={onImpersonate}
               showDelete={showDelete}
