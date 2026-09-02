@@ -355,7 +355,7 @@ interface BackContentProps {
 function BackContent({ mrzData }: BackContentProps) {
   const theme = useTheme();
   const guillocheMask = useMemo(
-    () => generateGuillocheMaskDataUrl({ seed: "aptispace" }),
+    () => generateGuillocheMaskDataUrl({ seed: "AptiSpace Academy" }),
     [],
   );
 
@@ -394,7 +394,7 @@ function BackContent({ mrzData }: BackContentProps) {
           zIndex: 0,
         }}
       >
-        <Guilloche seed="aptispace" opacity={0.3} />
+        <Guilloche seed="AptiSpace Academy" opacity={0.3} />
       </HoloDecorator>
 
       <Box
