@@ -5,8 +5,10 @@ import type { HoloDecoratorProps } from "./HoloDecorator.types";
 
 const textHoloStyles = {
   background: `${holoGradient}, linear-gradient(currentColor, currentColor)`,
-  backgroundSize: "calc(var(--holo-bg-size-x, 100%) * 2) calc(var(--holo-bg-size-y, 100%) * 2)",
-  backgroundPosition: "calc(-0.5 * var(--holo-bg-size-x, 100%) - var(--holo-offset-x, 0px)) calc(-0.5 * var(--holo-bg-size-y, 100%) - var(--holo-offset-y, 0px))",
+  backgroundSize:
+    "calc(var(--holo-bg-size-x, 100%) * 2) calc(var(--holo-bg-size-y, 100%) * 2)",
+  backgroundPosition:
+    "calc(-0.5 * var(--holo-bg-size-x, 100%) - var(--holo-offset-x, 0px)) calc(-0.5 * var(--holo-bg-size-y, 100%) - var(--holo-offset-y, 0px))",
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
   backgroundBlendMode: "screen",
@@ -17,8 +19,8 @@ const textHoloStyles = {
 };
 
 const ImageHoloWrapper = styled("span", {
-  shouldForwardProp: (prop) => prop !== "maskUrl",
-})<{ maskUrl: string }>(({ maskUrl }) => ({
+  shouldForwardProp: (prop) => prop !== "maskUrl" && prop !== "maskSize",
+})<{ maskUrl: string; maskSize?: string }>(({ maskUrl, maskSize = "contain" }) => ({
   position: "relative",
   display: "inline-flex",
   "&::after": {
@@ -26,12 +28,14 @@ const ImageHoloWrapper = styled("span", {
     position: "absolute",
     inset: 0,
     backgroundImage: holoGradient,
-    backgroundSize: "calc(var(--holo-bg-size-x, 100%) * 2) calc(var(--holo-bg-size-y, 100%) * 2)",
-    backgroundPosition: "calc(-0.5 * var(--holo-bg-size-x, 100%) - var(--holo-offset-x, 0px)) calc(-0.5 * var(--holo-bg-size-y, 100%) - var(--holo-offset-y, 0px))",
+    backgroundSize:
+      "calc(var(--holo-bg-size-x, 100%) * 2) calc(var(--holo-bg-size-y, 100%) * 2)",
+    backgroundPosition:
+      "calc(-0.5 * var(--holo-bg-size-x, 100%) - var(--holo-offset-x, 0px)) calc(-0.5 * var(--holo-bg-size-y, 100%) - var(--holo-offset-y, 0px))",
     maskImage: `url("${maskUrl}")`,
     WebkitMaskImage: `url("${maskUrl}")`,
-    maskSize: "contain",
-    WebkitMaskSize: "contain",
+    maskSize,
+    WebkitMaskSize: maskSize,
     maskPosition: "center",
     WebkitMaskPosition: "center",
     maskRepeat: "no-repeat",
@@ -50,13 +54,15 @@ export default function HoloDecorator({
   active = true,
   type = "text",
   maskUrl,
+  maskSize,
+  sx,
 }: HoloDecoratorProps) {
   const wrapperRef = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
     if (!active || !wrapperRef.current) return;
     const el = wrapperRef.current;
-    
+
     // Find the closest card
     const card = el.closest(".physic-card");
     if (!card) return;
@@ -64,11 +70,11 @@ export default function HoloDecorator({
     const updateOffsets = () => {
       const elRect = el.getBoundingClientRect();
       const cardRect = card.getBoundingClientRect();
-      
+
       // Calculate offset so the background perfectly aligns with the card
       const offsetX = elRect.left - cardRect.left;
       const offsetY = elRect.top - cardRect.top;
-      
+
       el.style.setProperty("--holo-bg-size-x", `${cardRect.width}px`);
       el.style.setProperty("--holo-bg-size-y", `${cardRect.height}px`);
       el.style.setProperty("--holo-offset-x", `${offsetX}px`);
@@ -94,7 +100,12 @@ export default function HoloDecorator({
       return children;
     }
     return (
-      <ImageHoloWrapper maskUrl={maskUrl} ref={wrapperRef}>
+      <ImageHoloWrapper
+        maskUrl={maskUrl}
+        maskSize={maskSize}
+        ref={wrapperRef}
+        sx={sx}
+      >
         {children}
       </ImageHoloWrapper>
     );
@@ -104,9 +115,9 @@ export default function HoloDecorator({
   const childElement = React.Children.only(children);
   const childProps = childElement.props as { sx?: object };
   const childSx = childProps.sx || {};
-  
+
   return React.cloneElement(childElement, {
     ref: wrapperRef,
-    sx: { ...childSx, ...textHoloStyles },
+    sx: { ...childSx, ...textHoloStyles, ...sx },
   } as Record<string, unknown>);
 }

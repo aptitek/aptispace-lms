@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Avatar from "@mui/material/Avatar";
@@ -18,6 +18,9 @@ import HoloDecorator from "../../atoms/HoloDecorator/HoloDecorator";
 import Chip from "../../atoms/Chip/Chip";
 import Logo from "../../atoms/Logo/Logo";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
+import Guilloche, {
+  generateGuillocheMaskDataUrl,
+} from "../../atoms/Guilloche";
 import type { ProfileCardProps } from "./ProfileCard.types";
 import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
 
@@ -56,9 +59,18 @@ function FrontContent({
   handleFamilyNameChange,
   handleEmailChange,
 }: FrontContentProps) {
+  const guillocheMask = useMemo(
+    () =>
+      generateGuillocheMaskDataUrl({
+        seed: institutionName || "Institution",
+      }),
+    [institutionName],
+  );
+
   return (
     <Box
       sx={{
+        position: "relative",
         p: 4,
         height: "100%",
         display: "flex",
@@ -66,8 +78,26 @@ function FrontContent({
         bgcolor: (theme) => alpha(theme.palette.common.white, 0.05),
       }}
     >
+      <HoloDecorator
+        type="image"
+        maskUrl={guillocheMask}
+        maskSize="100% 100%"
+        sx={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        <Guilloche seed={institutionName || "Institution"} opacity={0.3} />
+      </HoloDecorator>
+
       <Box
         sx={{
+          position: "relative",
+          zIndex: 1,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -97,9 +127,17 @@ function FrontContent({
         </Box>
       </Box>
 
-      <Divider sx={{ mb: 8 }} />
+      <Divider sx={{ mb: 8, position: "relative", zIndex: 1 }} />
 
-      <Box sx={{ display: "flex", gap: 4, flex: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 4,
+          flex: 1,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -217,23 +255,54 @@ interface BackContentProps {
 }
 
 function BackContent({ mrzData }: BackContentProps) {
+  const guillocheMask = useMemo(
+    () => generateGuillocheMaskDataUrl({ seed: "aptispace" }),
+    [],
+  );
+
   return (
     <Box
       sx={{
+        position: "relative",
         height: "100%",
         display: "flex",
         flexDirection: "column",
         bgcolor: (theme) => alpha(theme.palette.common.white, 0.05),
       }}
     >
-      <Box sx={{ p: 4, flex: 1, display: "flex", flexDirection: "column" }}>
+      <HoloDecorator
+        type="image"
+        maskUrl={guillocheMask}
+        maskSize="100% 100%"
+        sx={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        <Guilloche seed="aptispace" opacity={0.3} />
+      </HoloDecorator>
+
+      <Box
+        sx={{
+          position: "relative",
+          zIndex: 1,
+          p: 4,
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <Box sx={{ height: 48, mb: 2 }} />
         <Box sx={{ display: "flex", justifyContent: "center", mb: "auto" }}>
           <Logo size="large" holo />
         </Box>
       </Box>
 
-      <Box sx={{ width: "100%" }}>
+      <Box sx={{ width: "100%", position: "relative", zIndex: 1 }}>
         <MrzZone cardData={mrzData} fullWidth compact />
       </Box>
     </Box>
