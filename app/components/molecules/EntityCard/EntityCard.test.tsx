@@ -103,4 +103,27 @@ describe("EntityCard Molecule", () => {
     expect(instElement.props.entity.role).toBe("instructor");
     expect(admElement.props.entity.role).toBe("admin");
   });
+
+  it("passes structured cohort data to CohortChip for students", () => {
+    const studentWithStructuredCohort: EntityCardData = {
+      ...mockStudent,
+      cohorts: [
+        {
+          id: "cohort-m1",
+          name: "M1-IA-Dev",
+          diploma: "M",
+          year: 1,
+          tags: ["IA", "Dev"],
+        },
+      ],
+    };
+
+    const element = React.createElement(EntityCard, {
+      entity: studentWithStructuredCohort,
+    });
+    expect(element).toBeDefined();
+    expect(element.props.entity.cohorts?.[0]?.diploma).toBe("M");
+    expect(element.props.entity.cohorts?.[0]?.year).toBe(1);
+    expect(element.props.entity.cohorts?.[0]?.tags).toEqual(["IA", "Dev"]);
+  });
 });

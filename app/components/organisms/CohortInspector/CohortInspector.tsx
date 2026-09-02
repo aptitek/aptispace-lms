@@ -6,35 +6,72 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import type { CohortConfig } from "~/types/institution";
 import {
-  type AcademicPeriodType,
+  ACADEMIC_PERIODS,
   getAcademicYearDates,
   getAcademicYearOptions,
+  type AcademicPeriodType,
 } from "~/utils/academicYear";
-import {
-  CohortInspectorHeader,
-  CohortAcademicShortcuts,
-  CohortDurationBanner,
-  CohortDatePickerFields,
-  CohortInspectorActions,
-  CohortStructuredFields,
-} from "./CohortInspector.components";
 import { formatCohortName, parseCohortName } from "~/utils/cohortFormat";
 
-function formatDateForInput(dateInput?: string | Date | null): string {
-  if (!dateInput) return "";
-  const d = new Date(dateInput);
-  if (isNaN(d.getTime())) return "";
-  return d.toISOString().split("T")[0];
+function formatDateForInput(dateValue?: string | Date): string {
+  if (!dateValue) return "";
+  try {
+    const d = new Date(dateValue);
+    return isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
+  } catch {
+    return "";
+  }
 }
 
 function detectActiveYear(startDate?: string): number | null {
   if (!startDate) return null;
   const d = new Date(startDate);
-  if (isNaN(d.getTime())) return null;
-  const year = d.getFullYear();
-  const month = d.getMonth() + 1; // 1-12
-  // If month is before Sep (e.g. spring semester in Feb), start year was year - 1
-  return month < 8 ? year - 1 : year;
+  return isNaN(d.getTime()) ? null : d.getFullYear();
+}
+
+function detectPeriodFromDates(
+  startDate?: string,
+  endDate?: string,
+): AcademicPeriodSelection {
+  if (!startDate || !endDate) return "fullAcademic";
+  const startYear = new Date(startDate).getFullYear();
+  if (isNaN(startYear)) return "fullAcademic";
+  for (const candidateYear of [startYear - 1, startYear]) {
+    for (const key of Object.keys(ACADEMIC_PERIODS) as AcademicPeriodType[]) {
+      const dates = getAcademicYearDates(candidateYear, key);
+      if (dates.startDate === startDate && dates.endDate === endDate) {
+        return key;
+      }
+    }
+  }
+  return "custom";
+}
+
+import {
+  CohortInspectorHeader,
+  CohortStructuredFields,
+  CohortScheduleCard,
+  CohortInspectorActions,
+  type AcademicPeriodSelection,
+} from "./CohortInspector.components";
+
+export interface CohortSavePayload {
+  id?: string;
+  name?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  diploma?: string;
+  year?: number | null;
+  tags?: string[];
+  institutionId?: string;
+}
+
+export interface CohortInspectorProps {
+  cohort: CohortConfig | null;
+  onClose: () => void;
+  onSave: (payload: CohortSavePayload) => void;
+  isSubmitting?: boolean;
 }
 
 interface CohortFormValues {
@@ -59,20 +96,17 @@ function hasFormChanged(a: CohortFormValues, b: CohortFormValues): boolean {
   );
 }
 
-interface CohortInspectorProps {
-  cohort: CohortConfig | null;
-  onClose: () => void;
-  onSave: (payload: {
-    id?: string;
-    name: string;
-    description?: string;
-    startDate?: string;
-    endDate?: string;
-    diploma?: string;
-    year?: number | null;
-    tags?: string[];
-  }) => void;
-  isSubmitting?: boolean;
+function buildNextCohortFormValues(
+  current: CohortFormValues,
+  updates?: Partial<CohortFormValues>,
+): CohortFormValues {
+  const merged: CohortFormValues = Object.assign({}, current, updates);
+  merged.name = formatCohortName({
+    diploma: merged.diploma,
+    year: merged.year,
+    tags: merged.tags,
+  });
+  return merged;
 }
 
 export default function CohortInspector({
@@ -91,7 +125,10 @@ export default function CohortInspector({
   const [year, setYear] = useState<number>(0);
   const [tags, setTags] = useState<string[]>([]);
   const [selectedPeriod, setSelectedPeriod] =
-    useState<AcademicPeriodType>("fullAcademic");
+    useState<AcademicPeriodSelection>("fullAcademic");
+
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currentCohortIdRef = useRef<string | undefined>(cohort?.id);
 
   const savedValuesRef = useRef<CohortFormValues>({
     name: "",
@@ -104,65 +141,82 @@ export default function CohortInspector({
   });
 
   useEffect(() => {
-    if (cohort) {
-      // If fields are not explicitly set on cohort, attempt reverse-parse from name
-      const parsed = parseCohortName(cohort.name);
-      const initDiploma = cohort.diploma || parsed.diploma || "";
-      const initYear =
-        cohort.year !== undefined && cohort.year !== null
-          ? cohort.year
-          : parsed.year !== null
-            ? parsed.year
-            : 0;
-      const initTags =
-        cohort.tags && cohort.tags.length > 0 ? cohort.tags : parsed.tags;
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
-      const autoName = formatCohortName({
-        diploma: initDiploma,
-        year: initYear,
-        tags: initTags,
-      });
+  function computeInitialCohortFormValues(
+    cohort: CohortConfig,
+  ): CohortFormValues {
+    const parsed = parseCohortName(cohort.name);
+    const initDiploma = cohort.diploma || parsed.diploma || "";
+    const initYear =
+      cohort.year !== undefined && cohort.year !== null
+        ? cohort.year
+        : (parsed.year ?? 0);
+    const initTags =
+      cohort.tags && cohort.tags.length > 0 ? cohort.tags : parsed.tags;
 
-      const initial: CohortFormValues = {
-        name: autoName,
-        description: cohort.description || "",
-        startDate: formatDateForInput(cohort.startDate),
-        endDate: formatDateForInput(cohort.endDate),
-        diploma: initDiploma,
-        year: initYear,
-        tags: initTags,
-      };
+    const autoName = formatCohortName({
+      diploma: initDiploma,
+      year: initYear,
+      tags: initTags,
+    });
 
+    return {
+      name: autoName,
+      description: cohort.description || "",
+      startDate: formatDateForInput(cohort.startDate),
+      endDate: formatDateForInput(cohort.endDate),
+      diploma: initDiploma,
+      year: initYear,
+      tags: initTags,
+    };
+  }
+
+  useEffect(() => {
+    if (!cohort) return;
+    const isDifferentCohort = cohort.id !== currentCohortIdRef.current;
+    currentCohortIdRef.current = cohort.id;
+
+    const initial = computeInitialCohortFormValues(cohort);
+
+    if (isDifferentCohort) {
       setDescription(initial.description);
       setStartDate(initial.startDate);
       setEndDate(initial.endDate);
       setDiploma(initial.diploma);
       setYear(initial.year);
       setTags(initial.tags);
+      setSelectedPeriod(
+        detectPeriodFromDates(initial.startDate, initial.endDate),
+      );
       savedValuesRef.current = initial;
+    } else {
+      savedValuesRef.current = {
+        ...initial,
+        description: description || initial.description,
+      };
     }
-  }, [cohort]);
+  }, [cohort, description]);
 
   const activeYear = detectActiveYear(startDate);
 
   const triggerSave = (updates?: Partial<CohortFormValues>) => {
     if (!isEditing || !cohort?.id) return;
-    const next: CohortFormValues = {
-      name: formatCohortName({ diploma, year, tags }),
+    const current: CohortFormValues = {
+      name: "",
       description,
       startDate,
       endDate,
       diploma,
       year,
       tags,
-      ...updates,
     };
-    // Ensure computed name matches updated fields
-    next.name = formatCohortName({
-      diploma: next.diploma,
-      year: next.year,
-      tags: next.tags,
-    });
+    const next = buildNextCohortFormValues(current, updates);
 
     if (!hasFormChanged(savedValuesRef.current, next)) return;
 
@@ -170,13 +224,31 @@ export default function CohortInspector({
     onSave({
       id: cohort.id,
       name: next.name,
-      description: next.description.trim() || undefined,
+      description: next.description.trim(),
       startDate: next.startDate || undefined,
       endDate: next.endDate || undefined,
-      diploma: next.diploma || undefined,
+      diploma: next.diploma.trim(),
       year: next.year,
       tags: next.tags,
     });
+  };
+
+  const handleDescriptionChange = (newDescription: string) => {
+    setDescription(newDescription);
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      triggerSave({ description: newDescription });
+    }, 500);
+  };
+
+  const handleDescriptionBlur = () => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    triggerSave({ description });
   };
 
   const handleDiplomaChange = (newDiploma: string) => {
@@ -195,14 +267,20 @@ export default function CohortInspector({
   };
 
   const handleSelectYear = (selectedYr: number) => {
+    if (selectedPeriod === "custom") {
+      return;
+    }
     const dates = getAcademicYearDates(selectedYr, selectedPeriod);
     setStartDate(dates.startDate);
     setEndDate(dates.endDate);
     triggerSave({ startDate: dates.startDate, endDate: dates.endDate });
   };
 
-  const handleSelectPeriod = (period: AcademicPeriodType) => {
+  const handleSelectPeriod = (period: AcademicPeriodSelection) => {
     setSelectedPeriod(period);
+    if (period === "custom") {
+      return;
+    }
     const targetYear =
       activeYear || getAcademicYearOptions()[1] || new Date().getFullYear();
     const dates = getAcademicYearDates(targetYear, period);
@@ -216,7 +294,7 @@ export default function CohortInspector({
     const computedName = formatCohortName({ diploma, year, tags });
     onSave({
       name: computedName,
-      description: description.trim() || undefined,
+      description: description.trim(),
       startDate: startDate || undefined,
       endDate: endDate || undefined,
       diploma: diploma.trim(),
@@ -234,7 +312,7 @@ export default function CohortInspector({
           p: 3,
           display: "flex",
           flexDirection: "column",
-          gap: 2.5,
+          gap: 2,
           height: "calc(100vh - 200px)",
           maxHeight: "850px",
           overflowY: "auto",
@@ -259,8 +337,8 @@ export default function CohortInspector({
         <TextField
           label={t("inspector.description", "Description")}
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          onBlur={() => triggerSave({ description })}
+          onChange={(e) => handleDescriptionChange(e.target.value)}
+          onBlur={handleDescriptionBlur}
           fullWidth
           disabled={isSubmitting}
           multiline
@@ -268,28 +346,25 @@ export default function CohortInspector({
           data-testid="cohort-description-input"
         />
 
-        <CohortAcademicShortcuts
+        <CohortScheduleCard
           selectedPeriod={selectedPeriod}
           onSelectPeriod={handleSelectPeriod}
           onSelectYear={handleSelectYear}
           activeYear={activeYear}
-        />
-
-        <CohortDatePickerFields
           startDate={startDate}
           endDate={endDate}
           onStartDateChange={(newStart) => {
+            setSelectedPeriod("custom");
             setStartDate(newStart);
             triggerSave({ startDate: newStart });
           }}
           onEndDateChange={(newEnd) => {
+            setSelectedPeriod("custom");
             setEndDate(newEnd);
             triggerSave({ endDate: newEnd });
           }}
           disabled={isSubmitting}
         />
-
-        <CohortDurationBanner startDate={startDate} endDate={endDate} />
 
         <CohortInspectorActions
           onClose={onClose}

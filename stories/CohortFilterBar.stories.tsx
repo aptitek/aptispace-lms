@@ -44,6 +44,10 @@ export const Filtered: Story = {
     onYearFilterChange: () => {},
     tagFilter: "IA",
     onTagFilterChange: () => {},
+    startYearMin: 2025,
+    onStartYearMinChange: () => {},
+    startYearMax: 2027,
+    onStartYearMaxChange: () => {},
     availableTags: ["IA", "Dev", "Cyber", "IoT", "Network"],
   },
 };

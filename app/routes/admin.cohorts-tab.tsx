@@ -141,6 +141,19 @@ function matchesCohortFilter(
   return matchesCohortSearch(c, tags, options.cohortSearchQuery);
 }
 
+function isCohortCardSelected(
+  cohort: CohortWithInstitution,
+  selectedCohort: CohortWithInstitution | null,
+): boolean {
+  if (!selectedCohort) return false;
+  if (selectedCohort.id && cohort.id) {
+    return selectedCohort.id === cohort.id;
+  }
+  return Boolean(
+    selectedCohort.name && cohort.name && selectedCohort.name === cohort.name,
+  );
+}
+
 export function AdminCohortsTabPanel({
   schools,
   cohorts,
@@ -256,10 +269,6 @@ export function AdminCohortsTabPanel({
             onQueryChange={setInstitutionQuery}
             typeFilter={institutionTypeFilter}
             onTypeFilterChange={setInstitutionTypeFilter}
-            startYearMin={cohortStartYearMin}
-            onStartYearMinChange={setCohortStartYearMin}
-            startYearMax={cohortStartYearMax}
-            onStartYearMaxChange={setCohortStartYearMax}
           />
 
           <MD3CollectionGrid data-testid="schools-zone">
@@ -271,7 +280,9 @@ export function AdminCohortsTabPanel({
                   school.id ? schoolStudentCounts[school.id] || 0 : 0
                 }
                 isSelected={Boolean(
-                  selectedSchool?.id && selectedSchool.id === school.id,
+                  (selectedSchool?.id && selectedSchool.id === school.id) ||
+                  (selectedSchoolForEdit?.id &&
+                    selectedSchoolForEdit.id === school.id),
                 )}
                 onClick={onSchoolClick}
               />
@@ -298,6 +309,10 @@ export function AdminCohortsTabPanel({
               onYearFilterChange={setCohortYearFilter}
               tagFilter={cohortTagFilter}
               onTagFilterChange={setCohortTagFilter}
+              startYearMin={cohortStartYearMin}
+              onStartYearMinChange={setCohortStartYearMin}
+              startYearMax={cohortStartYearMax}
+              onStartYearMaxChange={setCohortStartYearMax}
               availableTags={availableSchoolTags}
             />
 
@@ -309,6 +324,10 @@ export function AdminCohortsTabPanel({
                   studentCount={
                     cohort.id ? cohortStudentCounts[cohort.id] || 0 : 0
                   }
+                  isSelected={isCohortCardSelected(
+                    cohort,
+                    selectedCohortForEdit,
+                  )}
                   onClick={onCohortClick}
                 />
               ))}

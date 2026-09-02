@@ -18,6 +18,13 @@ export interface ProfileHeaderChipsProps {
   cohort?: CohortConfig;
   cohortName?: string;
   year?: string;
+  cohortChipSize?: "small" | "medium" | "large";
+}
+
+function resolveChipHeight(size: "small" | "medium" | "large"): number {
+  if (size === "large") return 36;
+  if (size === "medium") return 28;
+  return 22;
 }
 
 export function ProfileHeaderChips({
@@ -25,27 +32,54 @@ export function ProfileHeaderChips({
   cohort,
   cohortName,
   year,
+  cohortChipSize = "medium",
 }: ProfileHeaderChipsProps) {
   const { t } = useTranslation(["auth", "common"]);
 
-  if (role === "student") {
-    const activeCohort =
-      cohort || (cohortName ? { name: cohortName } : undefined);
+  if (role === "admin") {
+    return null;
+  }
+
+  const activeCohort =
+    cohort || (cohortName ? { name: cohortName } : undefined);
+  const chipHeight = resolveChipHeight(cohortChipSize);
+  const chipSx = {
+    height: chipHeight,
+    fontWeight: 700,
+    fontSize: cohortChipSize === "large" ? "0.85rem" : "0.78rem",
+  };
+
+  if (activeCohort) {
     return (
       <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-        {activeCohort && (
-          <CohortChip
-            cohort={activeCohort}
-            size="small"
-            data-testid="profile-cohort-chip"
-          />
-        )}
+        <CohortChip
+          cohort={activeCohort}
+          size={cohortChipSize}
+          data-testid="profile-cohort-chip"
+        />
         {year && (
           <Chip
             label={year}
             size="small"
             color="secondary"
             data-testid="profile-year-chip"
+            sx={chipSx}
+          />
+        )}
+      </Box>
+    );
+  }
+
+  if (role === "student") {
+    return (
+      <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+        {year && (
+          <Chip
+            label={year}
+            size="small"
+            color="secondary"
+            data-testid="profile-year-chip"
+            sx={chipSx}
           />
         )}
       </Box>
@@ -59,6 +93,7 @@ export function ProfileHeaderChips({
         size="small"
         variant="outlined"
         data-testid="profile-all-cohorts-chip"
+        sx={chipSx}
       />
     </Box>
   );

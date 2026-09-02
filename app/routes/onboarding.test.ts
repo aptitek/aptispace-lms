@@ -19,40 +19,92 @@ function createActionArgs(request: Request) {
   } as unknown as Parameters<typeof action>[0];
 }
 
-describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
+describe("Onboarding Route Security - Domain Enforcement", () => {
   it("defines the secure institutional domain constant", () => {
     expect(CADET_FIXED_DOMAIN).toBe("aptitek.io");
   });
 
-  it("successfully accepts student emails matching the authorized fixed domain", async () => {
-    const formData = new FormData();
-    formData.set("email", "john.doe@aptitek.io");
+  describe("Free Domain (Aptitek)", () => {
+    it("successfully accepts personal emails with any valid domain", async () => {
+      const personalEmails = [
+        "john.doe@gmail.com",
+        "alex.rider@custom.org",
+        "dev@aptitek.io",
+      ];
 
-    const request = new Request("http://localhost:3000/onboarding", {
-      method: "POST",
-      body: formData,
+      for (const email of personalEmails) {
+        const formData = new FormData();
+        formData.set("email", email);
+        formData.set("schoolId", "school-aptitek");
+
+        const request = new Request("http://localhost:3000/onboarding", {
+          method: "POST",
+          body: formData,
+        });
+
+        const response = await action(createActionArgs(request));
+        expect(response.status).toBe(200);
+        const body = (await response.json()) as {
+          success: boolean;
+          email: string;
+        };
+        expect(body.success).toBe(true);
+        expect(body.email).toBe(email);
+      }
     });
 
-    const response = await action(createActionArgs(request));
+    it("rejects emails with invalid format or multiple @ symbols", async () => {
+      const invalidEmails = ["nodomain", "user@evil@attacker.com"];
 
-    expect(response.status).toBe(200);
-    const body = (await response.json()) as { success: boolean; email: string };
-    expect(body.success).toBe(true);
-    expect(body.email).toBe("john.doe@aptitek.io");
+      for (const email of invalidEmails) {
+        const formData = new FormData();
+        formData.set("email", email);
+        formData.set("schoolId", "school-aptitek");
+
+        const request = new Request("http://localhost:3000/onboarding", {
+          method: "POST",
+          body: formData,
+        });
+
+        const response = await action(createActionArgs(request));
+        expect(response.status).toBe(400);
+        const body = (await response.json()) as { code: string; error: string };
+        expect(body.code).toBe("UNAUTHORIZED_EMAIL_DOMAIN");
+      }
+    });
   });
 
-  it("strictly REJECTS submissions with unauthorized or tampered domains", async () => {
-    const maliciousDomains = [
-      "user@evil.com",
-      "hacker@attacker.org",
-      "user@gmail.com",
-      "user@aptispace.com",
-      "spoof@sub.aptitek.io",
-    ];
+  describe("Fixed Domain (school-42)", () => {
+    it("strictly REJECTS submissions with unauthorized domains for fixed-domain institutions", async () => {
+      const unauthorizedEmails = [
+        "user@evil.com",
+        "hacker@attacker.org",
+        "user@gmail.com",
+        "user@aptitek.io",
+      ];
 
-    for (const email of maliciousDomains) {
+      for (const email of unauthorizedEmails) {
+        const formData = new FormData();
+        formData.set("email", email);
+        formData.set("schoolId", "school-42");
+
+        const request = new Request("http://localhost:3000/onboarding", {
+          method: "POST",
+          body: formData,
+        });
+
+        const response = await action(createActionArgs(request));
+        expect(response.status).toBe(400);
+        const body = (await response.json()) as { code: string; error: string };
+        expect(body.code).toBe("UNAUTHORIZED_EMAIL_DOMAIN");
+        expect(body.error).toContain("Security Violation: Unauthorized domain");
+      }
+    });
+
+    it("accepts bare username prefix and formats it with the authorized fixed domain", async () => {
       const formData = new FormData();
-      formData.set("email", email);
+      formData.set("email", "john.doe");
+      formData.set("schoolId", "school-42");
 
       const request = new Request("http://localhost:3000/onboarding", {
         method: "POST",
@@ -60,29 +112,14 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
       });
 
       const response = await action(createActionArgs(request));
-
-      expect(response.status).toBe(400);
-      const body = (await response.json()) as { code: string; error: string };
-      expect(body.code).toBe("UNAUTHORIZED_EMAIL_DOMAIN");
-      expect(body.error).toContain("Security Violation: Unauthorized domain");
-    }
-  });
-
-  it("accepts bare username prefix and formats it with the authorized domain", async () => {
-    const formData = new FormData();
-    formData.set("email", "john.doe");
-
-    const request = new Request("http://localhost:3000/onboarding", {
-      method: "POST",
-      body: formData,
+      expect(response.status).toBe(200);
+      const body = (await response.json()) as {
+        success: boolean;
+        email: string;
+      };
+      expect(body.success).toBe(true);
+      expect(body.email).toBe("john.doe@42.fr");
     });
-
-    const response = await action(createActionArgs(request));
-
-    expect(response.status).toBe(200);
-    const body = (await response.json()) as { success: boolean; email: string };
-    expect(body.success).toBe(true);
-    expect(body.email).toBe("john.doe@aptitek.io");
   });
 
   it("handles real-time draft updates through action with update_draft type", async () => {
@@ -157,6 +194,7 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
       lastName: "SMITH",
       displayName: "Jane SMITH",
       githubId: null,
+      githubEmail: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -168,6 +206,7 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
         lastName: "SMITH",
         displayName: "Jane SMITH",
         githubId: null,
+        githubEmail: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -206,6 +245,7 @@ describe("Onboarding Route Security - Fixed Domain Enforcement", () => {
         lastName: "RIDER",
         displayName: "Alex RIDER",
         githubId: null,
+        githubEmail: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

@@ -51,6 +51,10 @@ export interface StudentInspectorProps {
    */
   onStudentUpdated?: (updatedUser: AuthUser) => void;
   /**
+   * Callback fired when student GitHub ID is updated
+   */
+  onUpdateGithub?: (studentId: string, githubId: string) => void;
+  /**
    * Whether a cohort action is currently submitting
    */
   isSubmitting?: boolean;

@@ -4,7 +4,6 @@ import type { OnboardingProfile } from "~/types/profile";
 import type { SchoolConfig } from "~/types/institution";
 import { validateFixedDomainEmail } from "~/utils/emailSecurity";
 import {
-  CADET_FIXED_DOMAIN,
   resolveDefaultProfile,
   formatEmailDomain,
   extractEmailPrefix,
@@ -24,7 +23,7 @@ export function useOnboardingProfile(options: UseOnboardingProfileOptions) {
   const { initialProfile, school, fetcher, userId, notifyError } = options;
 
   const [profile, setProfile] = useState<OnboardingProfile>(() =>
-    resolveDefaultProfile(initialProfile),
+    resolveDefaultProfile(initialProfile, school),
   );
 
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -48,11 +47,11 @@ export function useOnboardingProfile(options: UseOnboardingProfileOptions) {
     [fetcher, school.id],
   );
 
-  const emailDomain = school.emailDomain || CADET_FIXED_DOMAIN;
+  const emailDomain = school.emailDomain || "";
   const formattedEmailDomain = formatEmailDomain(emailDomain);
   const emailPrefix = useMemo(
-    () => extractEmailPrefix(profile.email),
-    [profile.email],
+    () => (emailDomain ? extractEmailPrefix(profile.email) : profile.email),
+    [emailDomain, profile.email],
   );
 
   const mrzData = useMemo(
@@ -69,10 +68,14 @@ export function useOnboardingProfile(options: UseOnboardingProfileOptions) {
           next.firstName = value;
         } else if (field === "familyName") {
           next.familyName = value.toUpperCase();
-        } else if (field === "emailPrefix") {
-          const cleanPrefix = value.trim();
-          const cleanDomain = emailDomain.replace(/^@+/, "");
-          next.email = cleanPrefix ? `${cleanPrefix}@${cleanDomain}` : "";
+        } else if (field === "emailPrefix" || field === "email") {
+          if (emailDomain) {
+            const cleanPrefix = value.trim();
+            const cleanDomain = emailDomain.replace(/^@+/, "");
+            next.email = cleanPrefix ? `${cleanPrefix}@${cleanDomain}` : "";
+          } else {
+            next.email = value.trim();
+          }
         }
         syncProfileToDb(next);
         return next;
@@ -144,11 +147,7 @@ export function useOnboardingValidation(
   const isFirstNameFilled = profile.firstName.trim().length > 0;
   const isFamilyNameFilled = profile.familyName.trim().length > 0;
   const emailValidation = useMemo(
-    () =>
-      validateFixedDomainEmail(
-        profile.email,
-        emailDomain || CADET_FIXED_DOMAIN,
-      ),
+    () => validateFixedDomainEmail(profile.email, emailDomain || undefined),
     [profile.email, emailDomain],
   );
   const isEmailFilled = emailValidation.isValid;

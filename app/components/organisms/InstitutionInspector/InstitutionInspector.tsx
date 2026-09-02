@@ -16,6 +16,7 @@ import {
   DEFAULT_EMAIL_DOMAIN,
 } from "~/utils/emailFormat";
 import type { SchoolConfig } from "~/types/institution";
+import { InstitutionEmailCard } from "./InstitutionInspector.components";
 
 interface InstitutionFormValues {
   name: string;
@@ -91,48 +92,6 @@ function buildInitialFormValues(
   };
 }
 
-function InstitutionEmailPreviewBox({
-  previewEmail,
-}: {
-  previewEmail: string;
-}) {
-  const { t } = useTranslation("common");
-  return (
-    <Box
-      sx={{
-        p: 1.5,
-        borderRadius: 1.5,
-        bgcolor: "action.hover",
-        border: "1px dashed",
-        borderColor: "divider",
-        display: "flex",
-        flexDirection: "column",
-        gap: 0.5,
-      }}
-      data-testid="inspector-email-preview-box"
-    >
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{ fontWeight: 600 }}
-      >
-        {t("inspector.emailPreview", "Generated Email Preview")}
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          fontFamily: "monospace",
-          fontWeight: 700,
-          color: "primary.main",
-          wordBreak: "break-all",
-        }}
-      >
-        {previewEmail}
-      </Typography>
-    </Box>
-  );
-}
-
 interface InstitutionInspectorProps {
   institution: SchoolConfig | null;
   onClose: () => void;
@@ -162,24 +121,53 @@ export default function InstitutionInspector({
     buildInitialFormValues(institution),
   );
 
+  const [isDomainConstrained, setIsDomainConstrained] = useState(() =>
+    Boolean(
+      institution?.emailDomain && institution.emailDomain.trim().length > 0,
+    ),
+  );
+
+  const currentInstitutionIdRef = useRef<string | undefined>(institution?.id);
   const savedValuesRef = useRef<InstitutionFormValues>(
     buildInitialFormValues(institution),
   );
 
   useEffect(() => {
-    if (institution) {
+    if (!institution) return;
+    const isDifferent = institution.id !== currentInstitutionIdRef.current;
+    currentInstitutionIdRef.current = institution.id;
+
+    if (isDifferent) {
       const initial = buildInitialFormValues(institution);
       setForm(initial);
       savedValuesRef.current = initial;
+      setIsDomainConstrained(Boolean(initial.emailDomain));
+    } else {
+      savedValuesRef.current = buildInitialFormValues(institution);
     }
   }, [institution]);
 
   const preview = useMemo(() => {
+    const domain = form.emailDomain.trim();
     return formatUsernameSamplePreview(
       form.usernamePattern || DEFAULT_USERNAME_PATTERN,
-      form.emailDomain || institution?.emailDomain || DEFAULT_EMAIL_DOMAIN,
+      domain || DEFAULT_EMAIL_DOMAIN,
     );
-  }, [form.usernamePattern, form.emailDomain, institution?.emailDomain]);
+  }, [form.usernamePattern, form.emailDomain]);
+
+  const handleToggleConstraint = (constrained: boolean) => {
+    setIsDomainConstrained(constrained);
+    if (!constrained) {
+      handleFieldChange("emailDomain", "");
+      triggerSave({ emailDomain: "" });
+    } else {
+      const nextDomain =
+        form.emailDomain.trim() ||
+        (form.slug ? `${form.slug}.edu` : "institution.edu");
+      handleFieldChange("emailDomain", nextDomain);
+      triggerSave({ emailDomain: nextDomain });
+    }
+  };
 
   const triggerSave = (updates?: Partial<InstitutionFormValues>) => {
     if (!isEditing || !institution?.id) return;
@@ -194,7 +182,7 @@ export default function InstitutionInspector({
       slug: next.slug,
       type: next.type,
       logoUrl: next.logoUrl || undefined,
-      emailDomain: next.emailDomain || undefined,
+      emailDomain: next.emailDomain,
       usernamePattern: next.usernamePattern || undefined,
     });
   };
@@ -322,33 +310,16 @@ export default function InstitutionInspector({
         </MenuItem>
       </TextField>
 
-      <TextField
-        label={t("inspector.emailDomain", "Email Domain")}
-        placeholder="e.g. aptitek.io"
-        value={form.emailDomain}
-        onChange={(e) => handleFieldChange("emailDomain", e.target.value)}
-        onBlur={() => triggerSave({ emailDomain: form.emailDomain })}
-        fullWidth
+      <InstitutionEmailCard
+        emailDomain={form.emailDomain}
+        usernamePattern={form.usernamePattern}
+        previewEmail={preview.email}
         disabled={disabled}
-        data-testid="inspector-institution-domain"
+        isConstrained={isDomainConstrained}
+        onToggleConstraint={handleToggleConstraint}
+        onFieldChange={handleFieldChange}
+        onBlur={(field) => triggerSave({ [field]: form[field] })}
       />
-
-      <TextField
-        label={t("inspector.usernamePattern", "Username Format")}
-        placeholder="e.g. {first}.{last} or {f}{last}"
-        value={form.usernamePattern}
-        onChange={(e) => handleFieldChange("usernamePattern", e.target.value)}
-        onBlur={() => triggerSave({ usernamePattern: form.usernamePattern })}
-        helperText={t(
-          "inspector.usernamePatternHelper",
-          "Tokens: {first}, {last}, {first:N}, {last:N}, {f}",
-        )}
-        fullWidth
-        disabled={disabled}
-        data-testid="inspector-institution-pattern"
-      />
-
-      <InstitutionEmailPreviewBox previewEmail={preview.email} />
 
       {!isEditing && (
         <Box

@@ -13,8 +13,16 @@ export const AVAILABLE_SCHOOLS: SchoolConfig[] = [
     name: "Aptitek",
     slug: "aptitek",
     logoUrl: "/aptitek-logo.svg",
-    emailDomain: "aptitek.io",
+    emailDomain: "",
     usernamePattern: "{first}.{last}",
+  },
+  {
+    id: "school-42",
+    name: "42 Paris",
+    slug: "42paris",
+    logoUrl: "/aptitek-logo.svg",
+    emailDomain: "42.fr",
+    usernamePattern: "{f}{last}",
   },
 ];
 
@@ -25,6 +33,7 @@ export function formatInstitutionalEmail(
   family: string,
   school: SchoolConfig,
 ): string {
+  if (!school.emailDomain) return "";
   if (!first.trim() && !family.trim()) return "";
   return generateEmailFromPattern({
     firstName: first,
@@ -84,16 +93,18 @@ function resolveProfileEmail(
   first: string,
   family: string,
   providedEmail?: string,
+  school?: SchoolConfig,
 ): string {
   if (providedEmail) return providedEmail;
-  if (first || family) {
-    return formatInstitutionalEmail(first, family, AVAILABLE_SCHOOLS[0]);
+  if (school?.emailDomain && (first || family)) {
+    return formatInstitutionalEmail(first, family, school);
   }
   return "";
 }
 
 export function resolveDefaultProfile(
   loaderProfile?: OnboardingProfile,
+  school?: SchoolConfig,
 ): OnboardingProfile {
   if (!loaderProfile) {
     return {
@@ -110,7 +121,12 @@ export function resolveDefaultProfile(
   const family = loaderProfile.familyName
     ? loaderProfile.familyName.trim().toUpperCase()
     : "";
-  const email = resolveProfileEmail(first, family, loaderProfile.email);
+  const email = resolveProfileEmail(
+    first,
+    family,
+    loaderProfile.email,
+    school ?? AVAILABLE_SCHOOLS[0],
+  );
 
   return {
     firstName: first,
@@ -142,8 +158,8 @@ export function extractEmailPrefix(email?: string): string {
 }
 
 export function formatEmailDomain(domain?: string): string {
-  const effective = domain || CADET_FIXED_DOMAIN;
-  return effective.startsWith("@") ? effective : `@${effective}`;
+  if (!domain) return "";
+  return domain.startsWith("@") ? domain : `@${domain}`;
 }
 
 export function buildMrzData(

@@ -1,4 +1,29 @@
-import { styled, alpha } from "@mui/material/styles";
+import { styled, alpha, type Theme } from "@mui/material/styles";
+
+function resolveCardThemeTokens(theme: Theme, isSelected?: boolean) {
+  const primary = theme.palette.primary.main;
+  const bg = isSelected
+    ? alpha(primary, 0.1)
+    : alpha(theme.palette.background.paper, 0.9);
+  const border = `1.5px solid ${isSelected ? primary : alpha(theme.palette.divider, 0.2)}`;
+  const shadow = isSelected
+    ? `0 4px 20px -2px ${alpha(primary, 0.3)}, inset 0 0 0 1px ${alpha(primary, 0.3)}`
+    : `0 4px 16px -2px ${alpha(theme.palette.common.black, 0.06)}, inset 0 1px 0 rgba(255, 255, 255, 0.8)`;
+  return { primary, bg, border, shadow };
+}
+
+function resolveDarkSelectionTokens(theme: Theme, isSelected?: boolean) {
+  const primary = theme.palette.primary.main;
+  return {
+    backgroundColor: isSelected
+      ? alpha(primary, 0.18)
+      : alpha(theme.palette.background.paper, 0.9),
+    borderColor: isSelected ? primary : alpha(theme.palette.divider, 0.2),
+    boxShadow: isSelected
+      ? `0 4px 20px -2px ${alpha(primary, 0.35)}, inset 0 0 0 1px ${alpha(primary, 0.35)}`
+      : `0 4px 16px -2px ${alpha(theme.palette.common.black, 0.3)}, inset 0 1px 0 rgba(255, 255, 255, 0.05)`,
+  };
+}
 
 export const CardContainer = styled("div", {
   shouldForwardProp: (prop) =>
@@ -8,14 +33,10 @@ export const CardContainer = styled("div", {
   isInteractive,
   isSelected,
 }) => {
-  const primary = theme.palette.primary.main;
-  const bg = isSelected
-    ? alpha(primary, 0.08)
-    : alpha(theme.palette.background.paper, 0.9);
-  const border = `1px solid ${isSelected ? primary : alpha(theme.palette.divider, 0.2)}`;
-  const shadow = isSelected
-    ? `0 4px 20px -2px ${alpha(primary, 0.25)}, inset 0 0 0 1px ${alpha(primary, 0.2)}`
-    : `0 4px 16px -2px ${alpha(theme.palette.common.black, 0.06)}, inset 0 1px 0 rgba(255, 255, 255, 0.8)`;
+  const { primary, bg, border, shadow } = resolveCardThemeTokens(
+    theme,
+    isSelected,
+  );
 
   return {
     position: "relative",
@@ -44,7 +65,7 @@ export const CardContainer = styled("div", {
         transform: "translateY(-3px)",
         borderColor: isSelected ? primary : alpha(primary, 0.5),
         boxShadow: isSelected
-          ? `0 10px 24px -4px ${alpha(primary, 0.3)}, 0 0 0 1px ${alpha(primary, 0.4)}`
+          ? `0 10px 24px -4px ${alpha(primary, 0.35)}, 0 0 0 1px ${alpha(primary, 0.4)}`
           : `0 10px 24px -4px ${alpha(theme.palette.common.black, 0.12)}, 0 0 0 1px ${alpha(primary, 0.2)}`,
       },
       "&:focus-visible": {
@@ -52,14 +73,7 @@ export const CardContainer = styled("div", {
         outlineOffset: "2px",
       },
     }),
-    ...theme.applyStyles("dark", {
-      backgroundColor: isSelected
-        ? alpha(primary, 0.16)
-        : alpha(theme.palette.background.paper, 0.9),
-      boxShadow: isSelected
-        ? `0 4px 20px -2px ${alpha(primary, 0.25)}, inset 0 0 0 1px ${alpha(primary, 0.2)}`
-        : `0 4px 16px -2px ${alpha(theme.palette.common.black, 0.3)}, inset 0 1px 0 rgba(255, 255, 255, 0.05)`,
-    }),
+    ...theme.applyStyles("dark", resolveDarkSelectionTokens(theme, isSelected)),
   };
 });
 

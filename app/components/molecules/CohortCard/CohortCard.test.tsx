@@ -67,4 +67,18 @@ describe("CohortCard Molecule", () => {
     expect(element).toBeDefined();
     expect(element.props.cohort.name).toBe("Legacy Cohort");
   });
+
+  it("handles isSelected false and true states properly", () => {
+    const unselectedElement = React.createElement(CohortCard, {
+      cohort: mockCohortWithDate,
+      isSelected: false,
+    });
+    expect(unselectedElement.props.isSelected).toBe(false);
+
+    const selectedElement = React.createElement(CohortCard, {
+      cohort: mockCohortWithDate,
+      isSelected: true,
+    });
+    expect(selectedElement.props.isSelected).toBe(true);
+  });
 });

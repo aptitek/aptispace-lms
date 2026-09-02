@@ -10,7 +10,7 @@ export function getDefaultSchools(): SchoolConfig[] {
       slug: "aptitek",
       type: "company",
       logoUrl: "/aptitek-logo.svg",
-      emailDomain: "aptitek.io",
+      emailDomain: "",
       usernamePattern: "{first}.{last}",
     },
     {

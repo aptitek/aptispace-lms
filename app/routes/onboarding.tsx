@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useLoaderData,
@@ -311,10 +311,52 @@ export default function OnboardingPage() {
     loaderData?.user?.githubUsername,
   );
 
+  const isUserAdmin = cardProps.role === "admin";
+
+  const activeCohort = useMemo(() => {
+    if (isUserAdmin) return undefined;
+    return (
+      loaderData?.cohort || {
+        diploma: "M",
+        year: 1,
+        tags: ["IA", "Dev"],
+      }
+    );
+  }, [loaderData?.cohort, isUserAdmin]);
+
+  const headerUser = useMemo(() => {
+    if (!loaderData?.user) return null;
+    return {
+      ...loaderData.user,
+      firstName: profile.firstName,
+      familyName: profile.familyName,
+      name:
+        `${profile.firstName} ${profile.familyName}`.trim() ||
+        loaderData.user.name,
+      email: profile.email || loaderData.user.email,
+      avatarUrl: profile.avatarUrl || loaderData.user.avatarUrl,
+      role: cardProps.role,
+      githubUsername: cardProps.githubUsername,
+      institutionName: selectedSchool.name,
+      schoolLogoUrl: cardProps.logoUrl,
+      emailDomain: selectedSchool.emailDomain,
+      usernamePattern: cardProps.usernamePattern,
+      cohort: isUserAdmin ? undefined : activeCohort,
+      cohortYear: isUserAdmin ? undefined : "2026",
+    };
+  }, [
+    loaderData?.user,
+    activeCohort,
+    profile,
+    selectedSchool,
+    cardProps,
+    isUserAdmin,
+  ]);
+
   return (
     <AuthLayout
       headerMode="full"
-      user={loaderData.user}
+      user={headerUser}
       onLogout={handleLogout}
       showGalaxy={false}
     >
@@ -322,8 +364,8 @@ export default function OnboardingPage() {
         <ProfileCard
           schoolLogoUrl={cardProps.logoUrl}
           institutionName={selectedSchool.name}
-          cohort={{ diploma: "M", year: 1, tags: ["IA", "Dev"] }}
-          year="2026"
+          cohort={isUserAdmin ? undefined : activeCohort}
+          year={isUserAdmin ? undefined : "2026"}
           avatarUrl={profile.avatarUrl}
           role={cardProps.role}
           githubUsername={cardProps.githubUsername}

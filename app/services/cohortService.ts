@@ -85,9 +85,9 @@ export async function updateInstitution(
     name?: string;
     slug?: string;
     type?: "academic" | "company";
-    logoUrl?: string;
-    emailDomain?: string;
-    usernamePattern?: string;
+    logoUrl?: string | null;
+    emailDomain?: string | null;
+    usernamePattern?: string | null;
     actorUserId?: string;
   },
 ) {

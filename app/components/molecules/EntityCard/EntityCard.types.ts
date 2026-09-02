@@ -5,6 +5,9 @@ import type { SchoolConfig, CohortConfig } from "~/types/institution";
 export interface CompactCohortItem {
   id: string;
   name: string;
+  diploma?: string | null;
+  year?: number | null;
+  tags?: string[] | null;
   startDate?: string | Date | null;
   startYear?: string | number | null;
   institutionId?: string;

@@ -1,5 +1,9 @@
 import type { Database } from "~/db/index";
-import { getUserWithAffiliations, deleteUser } from "~/services/userService";
+import {
+  getUserWithAffiliations,
+  deleteUser,
+  updateUser,
+} from "~/services/userService";
 import { logImpersonatedAudit } from "~/services/assessmentService";
 import {
   addStudentToCohort,
@@ -21,6 +25,16 @@ function parseOptionalString(
 ): string | undefined {
   const entry = formData.get(key);
   return entry ? String(entry) : undefined;
+}
+
+function parseNullableString(
+  formData: FormData,
+  key: string,
+): string | null | undefined {
+  if (!formData.has(key)) return undefined;
+  const entry = formData.get(key);
+  if (entry === null || String(entry).trim() === "") return null;
+  return String(entry).trim();
 }
 
 function parseOptionalDate(formData: FormData, key: string): Date | undefined {
@@ -121,7 +135,7 @@ async function auditUserDeletion({
       firstName: existingUser.firstName,
       lastName: existingUser.lastName,
       displayName: existingUser.displayName,
-      email: primaryAffil?.email,
+      email: primaryAffil?.email || existingUser.githubEmail || undefined,
       githubId: existingUser.githubId,
       role: primaryAffil?.role,
       affiliations: existingUser.affiliations,
@@ -212,15 +226,9 @@ export async function handleUpdateInstitutionAction(
   const slug = parseOptionalString(formData, "slug");
   const type = parseOptionalString(formData, "type") as
     "academic" | "company" | undefined;
-  const logoUrl = formData.has("logoUrl")
-    ? parseOptionalString(formData, "logoUrl")
-    : undefined;
-  const emailDomain = formData.has("emailDomain")
-    ? parseOptionalString(formData, "emailDomain")
-    : undefined;
-  const usernamePattern = formData.has("usernamePattern")
-    ? parseOptionalString(formData, "usernamePattern")
-    : undefined;
+  const logoUrl = parseNullableString(formData, "logoUrl");
+  const emailDomain = parseNullableString(formData, "emailDomain");
+  const usernamePattern = parseNullableString(formData, "usernamePattern");
 
   if (!id) {
     return { success: false, error: "Missing institution id" };
@@ -322,7 +330,7 @@ export async function handleUpdateCohortAction(
   }
 
   const description = formData.has("description")
-    ? parseOptionalString(formData, "description")
+    ? String(formData.get("description") ?? "")
     : undefined;
   const startDate = parseNullableDate(formData, "startDate");
   const endDate = parseNullableDate(formData, "endDate");
@@ -351,6 +359,38 @@ export async function handleUpdateCohortAction(
   }
 }
 
+export async function handleUpdateUserAction(
+  formData: FormData,
+  db: Database,
+  _actorUserId: string,
+) {
+  const studentId = String(formData.get("studentId") || "");
+  if (!studentId) {
+    return { success: false, error: "Missing required studentId" };
+  }
+
+  const rawGithubId = formData.has("githubId")
+    ? String(formData.get("githubId") ?? "").trim()
+    : undefined;
+
+  try {
+    const updated = await updateUser(db, studentId, {
+      githubId: rawGithubId ? rawGithubId : null,
+    });
+    return { success: true, user: updated };
+  } catch (err: unknown) {
+    const message = getErrorMessage(err, "Failed to update user");
+    const isUniqueViolation =
+      message.includes("UNIQUE") || message.includes("constraint");
+    return {
+      success: false,
+      error: isUniqueViolation
+        ? "This GitHub ID is already assigned to another user."
+        : message,
+    };
+  }
+}
+
 export interface DispatchAdminActionParams {
   intent: string | null;
   formData: FormData;
@@ -373,6 +413,8 @@ export async function dispatchAdminAction({
       return handleRemoveCohortAction(formData, db, actorUserId);
     case "delete-user":
       return handleDeleteUserAction(formData, db, actorUserId, session);
+    case "update-user":
+      return handleUpdateUserAction(formData, db, actorUserId);
     case "create-institution":
       return handleCreateInstitutionAction(formData, db, actorUserId);
     case "update-institution":

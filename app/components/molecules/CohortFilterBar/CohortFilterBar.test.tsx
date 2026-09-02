@@ -61,4 +61,30 @@ describe("CohortFilterBar Molecule", () => {
 
     expect(elementZero.props.yearFilter).toBe(0);
   });
+
+  it("handles startYearMin and startYearMax range props correctly", () => {
+    const onStartYearMinChange = vi.fn();
+    const onStartYearMaxChange = vi.fn();
+
+    const element = React.createElement(CohortFilterBar, {
+      query: "",
+      onQueryChange: vi.fn(),
+      diplomaFilter: "all",
+      onDiplomaFilterChange: vi.fn(),
+      yearFilter: "all",
+      onYearFilterChange: vi.fn(),
+      tagFilter: "all",
+      onTagFilterChange: vi.fn(),
+      startYearMin: 2025,
+      onStartYearMinChange,
+      startYearMax: 2027,
+      onStartYearMaxChange,
+    });
+
+    expect(element).toBeDefined();
+    expect(element.props.startYearMin).toBe(2025);
+    expect(element.props.startYearMax).toBe(2027);
+    expect(element.props.onStartYearMinChange).toBe(onStartYearMinChange);
+    expect(element.props.onStartYearMaxChange).toBe(onStartYearMaxChange);
+  });
 });

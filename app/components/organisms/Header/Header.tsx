@@ -11,6 +11,7 @@ import HeaderUserAvatar from "../../molecules/HeaderUserAvatar/HeaderUserAvatar"
 import FullScreenModal from "../../molecules/FullScreenModal/FullScreenModal";
 import ProfileCard from "../ProfileCard/ProfileCard";
 import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
+import type { CohortConfig } from "../../../types/institution";
 import { logout, stopImpersonation, type AuthUser } from "../../../utils/auth";
 
 export type HeaderMode = "subtle" | "full";
@@ -126,12 +127,57 @@ function parseUserNames(name?: string) {
   };
 }
 
-function parseUserEmail(email?: string) {
-  if (!email || !email.includes("@")) {
-    return { prefix: email || "user", domain: "@aptitek.io" };
+function resolveModalEmail(email?: string, domain?: string) {
+  const hasFixedDomain = Boolean(domain && domain.trim().length > 0);
+  if (!hasFixedDomain) {
+    return { emailPrefix: email, emailDomain: undefined };
   }
-  const [prefix, domain] = email.split("@");
-  return { prefix, domain: `@${domain}` };
+  const emailPrefix = email?.includes("@") ? email.split("@")[0] : email;
+  const emailDomain = domain?.startsWith("@") ? domain : `@${domain}`;
+  return { emailPrefix, emailDomain };
+}
+
+function resolveModalDocNumber(id?: string): string {
+  if (!id) return "0942";
+  const cleaned = id
+    .replace(/[^A-Za-z0-9]/g, "")
+    .slice(0, 9)
+    .toUpperCase();
+  return cleaned || "0942";
+}
+
+function resolveModalMrzData(
+  user: AuthUser,
+  firstName: string,
+  familyName: string,
+): Td1MrzData {
+  return {
+    documentNumber: resolveModalDocNumber(user.id),
+    surname: (familyName || firstName || "USER").toUpperCase(),
+    givenNames: (firstName || "USER").toUpperCase(),
+    birthDate: "000101",
+    expiryDate: "300828",
+    sex: "M",
+    issuingState: "APT",
+    nationality: "APT",
+  };
+}
+
+const DEFAULT_MODAL_COHORT: CohortConfig = {
+  diploma: "M",
+  year: 1,
+  tags: ["IA", "Dev"],
+};
+
+function resolveModalCohort(cohort?: CohortConfig): CohortConfig {
+  if (!cohort) return DEFAULT_MODAL_COHORT;
+  return {
+    id: cohort.id,
+    name: cohort.name ?? undefined,
+    diploma: cohort.diploma ?? undefined,
+    year: cohort.year ?? undefined,
+    tags: cohort.tags ?? undefined,
+  };
 }
 
 function HeaderProfileCardModal({
@@ -148,31 +194,19 @@ function HeaderProfileCardModal({
 
   const handleAvatarChange = (newUrl: string) => {
     setAvatarUrl(newUrl);
-    if (onUserUpdated) {
-      onUserUpdated({ ...user, avatarUrl: newUrl });
-    }
+    onUserUpdated?.({ ...user, avatarUrl: newUrl });
   };
 
-  const { firstName, familyName } = parseUserNames(user.name);
-  const { prefix: emailPrefix, domain: emailDomain } = parseUserEmail(
+  const parsed = parseUserNames(user.name);
+  const firstName = user.firstName ?? parsed.firstName;
+  const familyName = user.familyName ?? parsed.familyName;
+
+  const { emailPrefix, emailDomain } = resolveModalEmail(
     user.email,
+    user.emailDomain,
   );
-
-  const mrzData: Td1MrzData = {
-    documentNumber: user.id
-      ? user.id
-          .replace(/[^A-Za-z0-9]/g, "")
-          .slice(0, 9)
-          .toUpperCase() || "0942"
-      : "0942",
-    surname: (familyName || firstName || "USER").toUpperCase(),
-    givenNames: (firstName || "USER").toUpperCase(),
-    birthDate: "000101",
-    expiryDate: "300828",
-    sex: "M",
-    issuingState: "APT",
-    nationality: "APT",
-  };
+  const mrzData = resolveModalMrzData(user, firstName, familyName);
+  const cohort = resolveModalCohort(user.cohort);
 
   return (
     <FullScreenModal
@@ -184,7 +218,7 @@ function HeaderProfileCardModal({
       <Box
         sx={{
           width: "100%",
-          maxWidth: 580,
+          maxWidth: 600,
           p: { xs: 1, sm: 2 },
           display: "flex",
           justifyContent: "center",
@@ -192,19 +226,28 @@ function HeaderProfileCardModal({
         }}
       >
         <ProfileCard
+          schoolLogoUrl={user.schoolLogoUrl || "/aptitek-logo.svg"}
+          institutionName={user.institutionName || "Aptitek"}
+          cohort={user.role === "admin" ? undefined : cohort}
+          year={user.role === "admin" ? undefined : user.cohortYear || "2026"}
+          avatarUrl={avatarUrl}
+          role={user.role}
+          githubUsername={user.githubUsername}
           firstName={firstName}
           familyName={familyName}
           emailPrefix={emailPrefix}
           emailDomain={emailDomain}
-          avatarUrl={avatarUrl}
-          role={user.role}
-          githubUsername={user.githubUsername}
-          institutionName="AptiSpace Academy"
-          cohortName={user.role === "student" ? "Core Batch" : undefined}
-          year={user.role === "student" ? "2026" : undefined}
+          usernamePattern={user.usernamePattern || "{first}.{last}"}
           mrzData={mrzData}
           editableAvatar={true}
           onAvatarChange={handleAvatarChange}
+          sx={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            maxWidth: 600,
+          }}
         />
       </Box>
     </FullScreenModal>

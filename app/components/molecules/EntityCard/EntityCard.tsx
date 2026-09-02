@@ -6,6 +6,7 @@ import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import Avatar from "../../atoms/Avatar/Avatar";
 import Chip from "../../atoms/Chip/Chip";
+import CohortChip from "../../atoms/CohortChip/CohortChip";
 import Badge from "../../atoms/Badge/Badge";
 import Tooltip from "../../atoms/Tooltip/Tooltip";
 import { HoldButton } from "../../atoms/HoldButton";
@@ -13,6 +14,12 @@ import type { EntityCardProps, EntityCardData } from "./EntityCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import { loginAsAccount, type UserRole } from "~/utils/auth";
 import { getRoleConfig } from "~/tokens/roles";
+import {
+  DEFAULT_SCHOOL,
+  formatGithubHandle,
+  resolveEntityCardLabels,
+  useCardInteractivity,
+} from "./EntityCard.helpers";
 import {
   StyledCard,
   StyledCardContent,
@@ -35,77 +42,17 @@ import {
   deleteHoldButtonSx,
 } from "./EntityCard.styles";
 
-function formatGithubHandle(username?: string | null): string {
-  if (!username) return "@cadet";
-  const trimmed = username.trim();
-  if (!trimmed) return "@cadet";
-  return trimmed.startsWith("@") ? trimmed : `@${trimmed}`;
-}
-
-function resolveDisplayName(entity: EntityCardData): string {
-  if (entity.displayName) return entity.displayName;
-  const fullName = `${entity.firstName} ${entity.familyName}`.trim();
-  return fullName || "User";
-}
-
-function resolveCohortLabel(
-  entity: EntityCardData,
-  cohort?: CohortConfig,
-): string {
-  if (cohort?.name) return cohort.name;
-  if (entity.cohortName) return entity.cohortName;
-  return "Cohort 2026";
-}
-
-function parseDateYear(dateInput?: string | Date | null): string | null {
-  if (!dateInput) return null;
-  const d = new Date(dateInput);
-  const yr = d.getFullYear();
-  return isNaN(yr) ? null : String(yr);
-}
-
-function resolveCohortYear(
-  entity: EntityCardData,
-  cohort?: CohortConfig,
-): string {
-  if (cohort?.startYear) return String(cohort.startYear);
-  const cohortDateYear = parseDateYear(cohort?.startDate);
-  if (cohortDateYear) return cohortDateYear;
-
-  if (entity.cohortStartYear) return String(entity.cohortStartYear);
-  const studentDateYear = parseDateYear(entity.cohortStartDate);
-  if (studentDateYear) return studentDateYear;
-
-  const match = entity.cohortName?.match(/\b(20\d{2})\b/);
-  return match ? match[1] : "2026";
-}
-
-function resolveInstitutionLabel(
-  entity: EntityCardData,
-  school?: SchoolConfig,
-): string {
-  if (school?.name) return school.name;
-  if (entity.institutionName) return entity.institutionName;
-  return "Aptitek";
-}
-
-const DEFAULT_SCHOOL: SchoolConfig = {
-  id: "default-school",
-  name: "Aptitek",
-  logoUrl: "/aptitek-logo.svg",
-};
-
 function CompactHeaderSlot({
   school,
   institutionLabel,
-  cohortLabel,
+  cohortConfig,
   cohortYear,
   isProfileComplete,
   role = "student",
 }: {
   school: SchoolConfig;
   institutionLabel: string;
-  cohortLabel: string;
+  cohortConfig: CohortConfig;
   cohortYear: string;
   isProfileComplete?: boolean;
   role?: UserRole;
@@ -131,32 +78,26 @@ function CompactHeaderSlot({
       <HeaderBadges>
         {role === "student" ? (
           <>
-            <Chip
-              label={cohortLabel}
+            <CohortChip
+              cohort={cohortConfig}
               size="small"
-              color="primary"
-              variant="outlined"
-              sx={{
-                height: 20,
-                fontSize: "0.65rem",
-                fontWeight: 700,
-                "& .MuiChip-label": { px: 0.75 },
-              }}
               data-testid="compact-cohort-chip"
             />
-            <Chip
-              label={cohortYear}
-              size="small"
-              color="secondary"
-              variant="filled"
-              sx={{
-                height: 20,
-                fontSize: "0.65rem",
-                fontWeight: 800,
-                "& .MuiChip-label": { px: 0.75 },
-              }}
-              data-testid="compact-year-chip"
-            />
+            {cohortYear && (
+              <Chip
+                label={cohortYear}
+                size="small"
+                color="secondary"
+                variant="filled"
+                sx={{
+                  height: 20,
+                  fontSize: "0.65rem",
+                  fontWeight: 800,
+                  "& .MuiChip-label": { px: 0.75 },
+                }}
+                data-testid="compact-year-chip"
+              />
+            )}
           </>
         ) : (
           <Chip
@@ -384,38 +325,6 @@ function CompactStudentDetailsSlot({
   );
 }
 
-function useCardInteractivity(
-  interactive: boolean,
-  onClick: ((entity: EntityCardData) => void) | undefined,
-  entity: EntityCardData,
-) {
-  const isInteractive = Boolean(interactive && onClick);
-  const handleClick = () => {
-    if (isInteractive && onClick) onClick(entity);
-  };
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    const isActivationKey = event.key === "Enter" || event.key === " ";
-    if (isInteractive && isActivationKey) {
-      event.preventDefault();
-      onClick?.(entity);
-    }
-  };
-  return { isInteractive, handleClick, handleKeyDown };
-}
-
-function resolveEntityCardLabels(
-  entity: EntityCardData,
-  school?: SchoolConfig,
-  cohort?: CohortConfig,
-) {
-  const role: UserRole = entity.role ?? "student";
-  const displayName = resolveDisplayName(entity);
-  const cohortLabel = resolveCohortLabel(entity, cohort);
-  const cohortYear = resolveCohortYear(entity, cohort);
-  const institutionLabel = resolveInstitutionLabel(entity, school);
-  return { role, displayName, cohortLabel, cohortYear, institutionLabel };
-}
-
 export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
   (props, ref) => {
     const {
@@ -462,7 +371,7 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
           <CompactHeaderSlot
             school={school}
             institutionLabel={labels.institutionLabel}
-            cohortLabel={labels.cohortLabel}
+            cohortConfig={labels.cohortConfig}
             cohortYear={labels.cohortYear}
             isProfileComplete={entity.isProfileComplete}
             role={labels.role}

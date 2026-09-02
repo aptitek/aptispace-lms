@@ -26,7 +26,13 @@ import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import type { CohortWithInstitution } from "~/components/organisms/StudentInspector/StudentInspector.types";
 import { loadAdminDashboardData } from "./admin.loader";
 import { dispatchAdminAction } from "./admin.actions";
-import { matchesUserFilters } from "./admin.helpers";
+import {
+  matchesUserFilters,
+  buildCohortSubmitData,
+  buildInstitutionSubmitData,
+  mergeUpdatedUser,
+  type CohortSavePayload,
+} from "./admin.helpers";
 import AdminTabsSection from "./admin.tabs";
 import AdminCohortsTabPanel from "./admin.cohorts-tab";
 import {
@@ -83,47 +89,6 @@ export function meta(_args: Route.MetaArgs) {
         "Administrative dashboard for student roster management, credentials, and institutional oversight.",
     },
   ];
-}
-
-interface CohortSavePayload {
-  id?: string;
-  name?: string;
-  description?: string;
-  startDate?: string;
-  endDate?: string;
-  diploma?: string;
-  year?: number | null;
-  tags?: string[];
-}
-
-function buildCohortSubmitData(
-  institutionId: string,
-  payload: CohortSavePayload,
-): Record<string, string> {
-  const intent = payload.id ? "update-cohort" : "create-cohort";
-  const data: Record<string, string> = { intent, institutionId };
-
-  const stringFields: Array<[keyof CohortSavePayload, string]> = [
-    ["id", "id"],
-    ["name", "name"],
-    ["description", "description"],
-    ["startDate", "startDate"],
-    ["endDate", "endDate"],
-    ["diploma", "diploma"],
-  ];
-
-  for (const [prop, key] of stringFields) {
-    const fieldVal = payload[prop];
-    if (typeof fieldVal === "string") data[key] = fieldVal;
-  }
-
-  if (payload.year !== undefined) {
-    data.year = payload.year === null ? "" : String(payload.year);
-  }
-  if (payload.tags !== undefined) {
-    data.tags = JSON.stringify(payload.tags);
-  }
-  return data;
 }
 
 export default function AdminManagement() {
@@ -240,34 +205,38 @@ export default function AdminManagement() {
     emailDomain?: string;
     usernamePattern?: string;
   }) => {
-    const intent = payload.id ? "update-institution" : "create-institution";
-    const data: Record<string, string> = {
-      intent,
-      name: payload.name,
-      slug: payload.slug,
-    };
-    if (payload.id) data.id = payload.id;
-    if (payload.type) data.type = payload.type;
-    if (payload.logoUrl) data.logoUrl = payload.logoUrl;
-    if (payload.emailDomain !== undefined)
-      data.emailDomain = payload.emailDomain;
-    if (payload.usernamePattern !== undefined)
-      data.usernamePattern = payload.usernamePattern;
+    const data = buildInstitutionSubmitData(payload);
     fetcher.submit(data, { method: "post" });
     if (!payload.id) {
       setSelectedSchoolForEdit(null);
+    } else if (selectedSchoolForEdit) {
+      setSelectedSchoolForEdit((prev) =>
+        prev ? { ...prev, ...payload } : null,
+      );
     }
   };
 
   const handleSaveCohort = (payload: CohortSavePayload) => {
-    if (!selectedSchool?.id) {
+    const institutionId =
+      selectedSchool?.id || selectedCohortForEdit?.institutionId;
+    if (!institutionId) {
       notifyError(new Error("No institution selected"));
       return;
     }
-    const data = buildCohortSubmitData(selectedSchool.id, payload);
+    const data = buildCohortSubmitData(institutionId, payload);
     fetcher.submit(data, { method: "post" });
     if (!payload.id) {
       setSelectedCohortForEdit(null);
+    } else if (selectedCohortForEdit) {
+      setSelectedCohortForEdit((prev) =>
+        prev
+          ? {
+              ...prev,
+              ...payload,
+              description: payload.description ?? "",
+            }
+          : null,
+      );
     }
   };
 
@@ -300,26 +269,34 @@ export default function AdminManagement() {
     );
   };
 
-  const handleStudentUpdated = (updatedUser: AuthUser) => {
+  const handleUpdateStudentGithub = (studentId: string, githubId: string) => {
+    const trimmed = githubId.trim();
     setSelectedUser((prev) => {
-      if (!prev || prev.id !== updatedUser.id) return prev;
-      const parts = (updatedUser.name || "").trim().split(/\s+/);
-      const firstName =
-        parts.length > 1 ? parts.slice(0, -1).join(" ") : parts[0] || "";
-      const familyName =
-        parts.length > 1 ? parts[parts.length - 1].toUpperCase() : "";
+      if (!prev || prev.id !== studentId) return prev;
       return {
         ...prev,
-        firstName,
-        familyName,
-        displayName: updatedUser.name,
-        email: updatedUser.email,
-        avatarUrl: updatedUser.avatarUrl,
-        role: updatedUser.role,
-        githubUsername: updatedUser.githubUsername,
-        isProfileComplete: updatedUser.isProfileComplete,
+        githubUsername: trimmed || undefined,
+        avatarUrl: trimmed
+          ? `https://avatars.githubusercontent.com/u/${trimmed}?v=4`
+          : prev.avatarUrl,
       };
     });
+    fetcher.submit(
+      {
+        intent: "update-user",
+        studentId,
+        githubId: trimmed,
+      },
+      { method: "post" },
+    );
+  };
+
+  const handleStudentUpdated = (updatedUser: AuthUser) => {
+    setSelectedUser((prev) =>
+      prev && prev.id === updatedUser.id
+        ? mergeUpdatedUser(prev, updatedUser)
+        : prev,
+    );
     revalidator.revalidate();
   };
 
@@ -480,6 +457,7 @@ export default function AdminManagement() {
                   onAddCohort={handleAddCohort}
                   onRemoveCohort={handleRemoveCohort}
                   onStudentUpdated={handleStudentUpdated}
+                  onUpdateGithub={handleUpdateStudentGithub}
                   onImpersonate={handleImpersonate}
                   onDelete={handleDeleteUser}
                   isSubmitting={fetcher.state !== "idle"}

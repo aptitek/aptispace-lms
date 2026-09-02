@@ -5,6 +5,7 @@ import {
   createUser,
   createAffiliation,
   getUserWithAffiliations,
+  updateUser,
 } from "~/services/userService";
 import { fetchGitHubUserProfile } from "~/services/githubService.server";
 import {
@@ -30,36 +31,30 @@ function parseCookie(request: Request, name: string): string | null {
 }
 
 function clearStateCookieHeader(): string {
-  return `${OAUTH_STATE_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  return `${OAUTH_STATE_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
 }
 
 async function exchangeGitHubCode(code: string): Promise<string | null> {
-  const clientId = process.env.GITHUB_CLIENT_ID || "";
-  const clientSecret = process.env.GITHUB_CLIENT_SECRET || "";
+  const clientId = process.env.GITHUB_CLIENT_ID;
+  const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+  if (!clientId || !clientSecret) return null;
 
-  if (!clientId || !clientSecret) {
-    return null;
-  }
-
-  const tokenResponse = await fetch(
-    "https://github.com/login/oauth/access_token",
-    {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code,
-      }),
+  const res = await fetch("https://github.com/login/oauth/access_token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
     },
-  );
+    body: JSON.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      code,
+    }),
+  });
 
-  if (!tokenResponse.ok) return null;
-  const tokenJson = (await tokenResponse.json()) as { access_token?: string };
-  return tokenJson.access_token ?? null;
+  if (!res.ok) return null;
+  const data = (await res.json()) as { access_token?: string };
+  return data.access_token ?? null;
 }
 
 async function resolveUserProfile(code: string | null) {
@@ -117,6 +112,7 @@ async function createNewGitHubUser(
     lastName: resolvedLastName,
     displayName: `${resolvedFirstName} ${resolvedLastName}`.trim(),
     githubId: profile.githubUserId,
+    githubEmail: profile.userEmail,
   });
 
   const inst = await db.query.institutions.findFirst();
@@ -147,6 +143,8 @@ async function syncUserWithDatabase(
   let user = await getUserByGithubId(db, profile.githubUserId);
   if (!user) {
     user = await createNewGitHubUser(db, profile, defaultRole);
+  } else if (!user.githubEmail && profile.userEmail) {
+    await updateUser(db, user.id, { githubEmail: profile.userEmail });
   }
 
   const fullUser = await getUserWithAffiliations(db, user.id);

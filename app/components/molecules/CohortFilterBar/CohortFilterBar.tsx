@@ -10,6 +10,7 @@ import Button from "@mui/material/Button";
 import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
+import YearRangePicker from "~/components/molecules/YearRangePicker/YearRangePicker";
 import {
   DIPLOMA_OPTIONS,
   COMMON_SPECIALTY_TAGS,
@@ -25,8 +26,50 @@ export interface CohortFilterBarProps {
   onYearFilterChange: (year: string | number) => void;
   tagFilter: string;
   onTagFilterChange: (tag: string) => void;
+  startYearMin?: number | null;
+  onStartYearMinChange?: (year: number | null) => void;
+  startYearMax?: number | null;
+  onStartYearMaxChange?: (year: number | null) => void;
   availableTags?: string[];
   testId?: string;
+}
+
+interface ActiveFilterCriteria {
+  query: string;
+  diplomaFilter: string;
+  yearFilter: string | number;
+  tagFilter: string;
+  startYearMin: number | null;
+  startYearMax: number | null;
+}
+
+function checkHasActiveFilters(criteria: ActiveFilterCriteria): boolean {
+  if (criteria.query.trim().length > 0) return true;
+  if (criteria.diplomaFilter !== "all") return true;
+  if (criteria.yearFilter !== "all" && criteria.yearFilter !== "") return true;
+  if (criteria.tagFilter !== "all") return true;
+  return criteria.startYearMin !== null || criteria.startYearMax !== null;
+}
+
+function computeNextIncrementYear(yearFilter: string | number): number {
+  if (yearFilter === "all" || yearFilter === "") return 1;
+  const current = Number(yearFilter);
+  return current < 20 ? current + 1 : current;
+}
+
+function computeNextDecrementYear(
+  yearFilter: string | number,
+): string | number {
+  if (yearFilter === "all" || yearFilter === "") return 0;
+  const current = Number(yearFilter);
+  return current > 0 ? current - 1 : "all";
+}
+
+function parseCohortYearFilterInput(text: string): string | number {
+  const raw = text.trim();
+  if (raw === "" || raw.toLowerCase() === "all") return "all";
+  const num = parseInt(raw, 10);
+  return !isNaN(num) && num >= 0 && num <= 20 ? num : "all";
 }
 
 export function CohortFilterBar({
@@ -38,6 +81,10 @@ export function CohortFilterBar({
   onYearFilterChange,
   tagFilter,
   onTagFilterChange,
+  startYearMin = null,
+  onStartYearMinChange,
+  startYearMax = null,
+  onStartYearMaxChange,
   availableTags,
   testId = "cohort-filter-bar",
 }: CohortFilterBarProps) {
@@ -48,41 +95,22 @@ export function CohortFilterBar({
     new Set([...(availableTags || []), ...COMMON_SPECIALTY_TAGS]),
   );
 
-  const hasActiveFilters =
-    query.trim().length > 0 ||
-    diplomaFilter !== "all" ||
-    (yearFilter !== "all" && yearFilter !== "") ||
-    tagFilter !== "all";
+  const hasActiveFilters = checkHasActiveFilters({
+    query,
+    diplomaFilter,
+    yearFilter,
+    tagFilter,
+    startYearMin,
+    startYearMax,
+  });
 
   const handleClearFilters = () => {
     onQueryChange("");
     onDiplomaFilterChange("all");
     onYearFilterChange("all");
     onTagFilterChange("all");
-  };
-
-  const handleIncrementYear = () => {
-    if (yearFilter === "all" || yearFilter === "") {
-      onYearFilterChange(1);
-    } else {
-      const current = Number(yearFilter);
-      if (current < 20) {
-        onYearFilterChange(current + 1);
-      }
-    }
-  };
-
-  const handleDecrementYear = () => {
-    if (yearFilter === "all" || yearFilter === "") {
-      onYearFilterChange(0);
-    } else {
-      const current = Number(yearFilter);
-      if (current > 0) {
-        onYearFilterChange(current - 1);
-      } else {
-        onYearFilterChange("all");
-      }
-    }
+    if (onStartYearMinChange) onStartYearMinChange(null);
+    if (onStartYearMaxChange) onStartYearMaxChange(null);
   };
 
   const endAdornment = query ? (
@@ -140,24 +168,18 @@ export function CohortFilterBar({
         label={t("cohortYear.title", "Year")}
         placeholder={t("cohortYear.all", "All")}
         value={yearFilter === "all" ? "" : yearFilter}
-        onChange={(e) => {
-          const rawValue = e.target.value.trim();
-          if (rawValue === "" || rawValue.toLowerCase() === "all") {
-            onYearFilterChange("all");
-          } else {
-            const num = parseInt(rawValue, 10);
-            if (!isNaN(num) && num >= 0 && num <= 20) {
-              onYearFilterChange(num);
-            }
-          }
-        }}
+        onChange={(e) =>
+          onYearFilterChange(parseCohortYearFilterInput(e.target.value))
+        }
         slotProps={{
           input: {
             startAdornment: (
               <InputAdornment position="start">
                 <IconButton
                   size="small"
-                  onClick={handleDecrementYear}
+                  onClick={() =>
+                    onYearFilterChange(computeNextDecrementYear(yearFilter))
+                  }
                   aria-label={t("cohortYear.decrease", "Decrease year")}
                   sx={{ p: 0.5 }}
                   data-testid="cohort-year-decrement"
@@ -170,7 +192,9 @@ export function CohortFilterBar({
               <InputAdornment position="end">
                 <IconButton
                   size="small"
-                  onClick={handleIncrementYear}
+                  onClick={() =>
+                    onYearFilterChange(computeNextIncrementYear(yearFilter))
+                  }
                   aria-label={t("cohortYear.increase", "Increase year")}
                   sx={{ p: 0.5 }}
                   data-testid="cohort-year-increment"
@@ -193,6 +217,17 @@ export function CohortFilterBar({
         }}
         data-testid="cohort-year-filter-container"
       />
+
+      {/* Start Year Range Filter */}
+      {onStartYearMinChange && onStartYearMaxChange && (
+        <YearRangePicker
+          startYearMin={startYearMin}
+          startYearMax={startYearMax}
+          onStartYearMinChange={onStartYearMinChange}
+          onStartYearMaxChange={onStartYearMaxChange}
+          testId="cohort-start-year-range-picker"
+        />
+      )}
 
       {/* Specialty / Tag Filter */}
       <TextField

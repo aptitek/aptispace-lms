@@ -108,8 +108,8 @@ export const CohortDiplomaSegment = styled("span", {
 });
 
 export const CohortDivider = styled(Divider)(({ theme }) => ({
-  height: "55%",
-  alignSelf: "center",
+  height: "100%",
+  alignSelf: "stretch",
   borderColor: alpha(theme.palette.divider, 0.6),
   flexShrink: 0,
 }));
@@ -146,6 +146,7 @@ export const CohortDeleteIconContainer = styled("span")(({ theme }) => ({
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
+  height: "100%",
   paddingRight: 6,
   paddingLeft: 2,
   cursor: "pointer",

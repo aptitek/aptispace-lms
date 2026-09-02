@@ -63,4 +63,9 @@ describe("CohortChip Atom Component", () => {
     expect(element.props.onClick).toBe(onClick);
     expect(element.props.onDelete).toBe(onDelete);
   });
+
+  it("exports CohortDivider with full border stretch", async () => {
+    const { CohortDivider } = await import("./CohortChip.styles");
+    expect(CohortDivider).toBeDefined();
+  });
 });

@@ -65,7 +65,7 @@ export async function seedDatabase(db: Database) {
         slug: "aptitek",
         type: "academic",
         logoUrl: "/aptitek-logo.svg",
-        emailDomain: "aptitek.io",
+        emailDomain: null,
         usernamePattern: "{first}.{last}",
         createdAt: now,
         updatedAt: now,

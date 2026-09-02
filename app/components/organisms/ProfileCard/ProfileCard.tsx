@@ -39,10 +39,11 @@ interface FrontContentProps {
   avatarUrl?: string;
   role: "student" | "instructor" | "admin";
   githubUsername?: string;
-  emailDomain: string;
+  emailDomain?: string;
   onAvatarEdit?: () => void;
   editableAvatar?: boolean;
   onAvatarChange?: (avatarUrl: string) => void;
+  cohortChipSize?: "small" | "medium" | "large";
   internalFirstName: string;
   internalFamilyName: string;
   internalEmailPrefix: string;
@@ -64,6 +65,7 @@ function FrontContent({
   onAvatarEdit,
   editableAvatar,
   onAvatarChange,
+  cohortChipSize,
   internalFirstName,
   internalFamilyName,
   internalEmailPrefix,
@@ -144,6 +146,7 @@ function FrontContent({
           cohort={cohort}
           cohortName={cohortName}
           year={year}
+          cohortChipSize={cohortChipSize}
         />
       </Box>
 
@@ -301,7 +304,7 @@ function FrontContent({
                 onChange={handleEmailChange}
                 slotProps={{
                   input: {
-                    endAdornment: (
+                    endAdornment: emailDomain ? (
                       <InputAdornment
                         position="end"
                         sx={{
@@ -313,7 +316,7 @@ function FrontContent({
                       >
                         {emailDomain}
                       </InputAdornment>
-                    ),
+                    ) : undefined,
                   },
                 }}
               />
@@ -329,6 +332,7 @@ interface ProfileCardFieldsOptions {
   firstName?: string;
   familyName?: string;
   emailPrefix?: string;
+  emailDomain?: string;
   usernamePattern?: string;
   onChange?: (field: string, value: string) => void;
 }
@@ -338,6 +342,7 @@ function useProfileCardFields(options: ProfileCardFieldsOptions) {
     firstName = "",
     familyName = "",
     emailPrefix = "",
+    emailDomain,
     usernamePattern = DEFAULT_USERNAME_PATTERN,
     onChange,
   } = options;
@@ -367,7 +372,7 @@ function useProfileCardFields(options: ProfileCardFieldsOptions) {
     setInternalFirstName(newFirst);
     onChange?.("firstName", newFirst);
 
-    if (!isEmailManuallyEdited.current) {
+    if (!isEmailManuallyEdited.current && emailDomain) {
       const autoPrefix = generateUsernameFromPattern({
         firstName: newFirst,
         lastName: internalFamilyName,
@@ -383,7 +388,7 @@ function useProfileCardFields(options: ProfileCardFieldsOptions) {
     setInternalFamilyName(uppercaseValue);
     onChange?.("familyName", uppercaseValue);
 
-    if (!isEmailManuallyEdited.current) {
+    if (!isEmailManuallyEdited.current && emailDomain) {
       const autoPrefix = generateUsernameFromPattern({
         firstName: internalFirstName,
         lastName: uppercaseValue,
@@ -423,27 +428,29 @@ export default function ProfileCard(props: ProfileCardProps) {
     firstName,
     familyName,
     emailPrefix,
-    emailDomain = "@aptispace.com",
+    emailDomain,
     usernamePattern,
     mrzData,
     onChange,
     onAvatarEdit,
     editableAvatar,
     onAvatarChange,
+    cohortChipSize = "medium",
     sx,
     ...restProps
   } = props;
+
+  const cleanDomain = cleanDomainName(emailDomain);
+  const formattedEmailDomain = cleanDomain ? `@${cleanDomain}` : undefined;
 
   const fields = useProfileCardFields({
     firstName,
     familyName,
     emailPrefix,
+    emailDomain: formattedEmailDomain,
     usernamePattern,
     onChange,
   });
-
-  const cleanDomain = cleanDomainName(emailDomain) || "aptispace.com";
-  const formattedEmailDomain = `@${cleanDomain}`;
 
   return (
     <Box
@@ -475,6 +482,7 @@ export default function ProfileCard(props: ProfileCardProps) {
             onAvatarEdit={onAvatarEdit}
             editableAvatar={editableAvatar}
             onAvatarChange={onAvatarChange}
+            cohortChipSize={cohortChipSize}
             internalFirstName={fields.internalFirstName}
             internalFamilyName={fields.internalFamilyName}
             internalEmailPrefix={fields.internalEmailPrefix}

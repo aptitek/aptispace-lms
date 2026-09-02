@@ -239,6 +239,7 @@ describe("Backend Database & Service Architecture", () => {
         lastName: "MERCER",
         displayName: "Alex MERCER",
         githubId: null,
+        githubEmail: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         affiliations: [
@@ -266,6 +267,7 @@ describe("Backend Database & Service Architecture", () => {
         lastName: "MERCER",
         displayName: "Alex MERCER",
         githubId: null,
+        githubEmail: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         affiliations: [],

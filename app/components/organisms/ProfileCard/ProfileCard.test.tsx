@@ -96,4 +96,22 @@ describe("ProfileCard Organism", () => {
     expect(props.usernamePattern).toBe("{f}{last}");
     expect(props.emailDomain).toBe("aptitek.io");
   });
+
+  it("creates React element with structured cohort prop", () => {
+    const element = React.createElement(ProfileCard, {
+      firstName: "Neo",
+      familyName: "ANDERSON",
+      role: "admin",
+      cohort: { diploma: "M", year: 1, tags: ["IA", "Dev"] },
+      year: "2026",
+    });
+
+    expect(element).toBeDefined();
+    const props = element.props as ProfileCardProps;
+    expect(props.cohort).toEqual({
+      diploma: "M",
+      year: 1,
+      tags: ["IA", "Dev"],
+    });
+  });
 });

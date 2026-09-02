@@ -1,8 +1,12 @@
+import type { CohortConfig } from "../types/institution";
+
 export type UserRole = "admin" | "student" | "instructor";
 
 export interface AuthUser {
   id: string;
   name: string;
+  firstName?: string;
+  familyName?: string;
   email: string;
   role: UserRole;
   avatarUrl?: string;
@@ -11,6 +15,13 @@ export interface AuthUser {
   affiliations?: unknown[];
   isProfileComplete?: boolean;
   githubUsername?: string;
+  githubEmail?: string;
+  institutionName?: string;
+  schoolLogoUrl?: string;
+  emailDomain?: string;
+  usernamePattern?: string;
+  cohort?: CohortConfig;
+  cohortYear?: string;
 }
 
 export interface PersonaDefinition {
@@ -258,10 +269,27 @@ export interface ResolveActiveUserDbParam {
   role?: UserRole;
   avatarUrl?: string | null;
   githubId?: string | null;
+  githubEmail?: string | null;
   affiliations?: Array<{
     email?: string | null;
     role?: UserRole;
     avatarUrl?: string | null;
+    institution?: {
+      id?: string;
+      name?: string;
+      slug?: string;
+      logoUrl?: string | null;
+      emailDomain?: string | null;
+      usernamePattern?: string | null;
+    } | null;
+    cohort?: {
+      id: string;
+      diploma?: string | null;
+      year?: number | null;
+      tags?: string[] | null;
+      name?: string | null;
+      startDate?: Date | number | string | null;
+    } | null;
   }>;
 }
 
@@ -283,7 +311,59 @@ function resolveDbUserRole(
 }
 
 function resolveDbUserEmail(dbUser: ResolveActiveUserDbParam): string {
-  return dbUser.affiliations?.[0]?.email ?? dbUser.email ?? "";
+  return (
+    dbUser.affiliations?.[0]?.email || dbUser.githubEmail || dbUser.email || ""
+  );
+}
+
+type AffiliationItem = NonNullable<
+  ResolveActiveUserDbParam["affiliations"]
+>[number];
+
+function resolveDbCohortYear(
+  startDate?: Date | number | string | null,
+): string {
+  if (!startDate) return "2026";
+  return String(new Date(startDate).getFullYear());
+}
+
+function resolveDbAffilCohort(
+  primaryAffil?: AffiliationItem,
+): CohortConfig | undefined {
+  const cohort = primaryAffil?.cohort;
+  if (!cohort) return undefined;
+  return {
+    id: cohort.id,
+    name: cohort.name ?? undefined,
+    diploma: cohort.diploma ?? undefined,
+    year: cohort.year ?? undefined,
+    tags: cohort.tags ?? undefined,
+  };
+}
+
+function resolveDbInstitutionMetadata(primaryAffil?: AffiliationItem) {
+  const institution = primaryAffil?.institution;
+  return {
+    institutionName: institution?.name,
+    schoolLogoUrl: institution?.logoUrl || undefined,
+    emailDomain: institution?.emailDomain || "",
+    usernamePattern: institution?.usernamePattern || undefined,
+  };
+}
+
+function resolveDbUserNames(dbUser: ResolveActiveUserDbParam) {
+  const firstName = dbUser.firstName ? dbUser.firstName.trim() : undefined;
+  const familyName = dbUser.lastName
+    ? dbUser.lastName.trim().toUpperCase()
+    : undefined;
+  return { firstName, familyName };
+}
+
+function resolveDbUserAvatar(
+  primaryAffil?: AffiliationItem,
+  fallbackAvatar?: string | null,
+): string | undefined {
+  return primaryAffil?.avatarUrl ?? fallbackAvatar ?? undefined;
 }
 
 function mapDbUserToAuth(
@@ -295,15 +375,27 @@ function mapDbUserToAuth(
   } | null,
 ): AuthUser {
   const primaryAffil = dbUser.affiliations?.[0];
+  const cohort = resolveDbAffilCohort(primaryAffil);
+  const cohortYear = resolveDbCohortYear(primaryAffil?.cohort?.startDate);
+  const instMeta = resolveDbInstitutionMetadata(primaryAffil);
+  const names = resolveDbUserNames(dbUser);
+  const avatarUrl = resolveDbUserAvatar(primaryAffil, dbUser.avatarUrl);
+
   return {
     id: dbUser.id,
     name: resolveDbUserName(dbUser),
+    firstName: names.firstName,
+    familyName: names.familyName,
     email: resolveDbUserEmail(dbUser),
     role: resolveDbUserRole(dbUser, session?.role),
-    avatarUrl: primaryAffil?.avatarUrl ?? dbUser.avatarUrl ?? undefined,
+    avatarUrl,
     impersonating: session?.impersonating,
     originalUserId: session?.originalUserId,
     githubUsername: dbUser.githubId ?? undefined,
+    githubEmail: dbUser.githubEmail ?? undefined,
+    ...instMeta,
+    cohort,
+    cohortYear,
   };
 }
 

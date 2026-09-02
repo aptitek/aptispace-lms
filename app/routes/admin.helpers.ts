@@ -154,12 +154,12 @@ export function mapDbUserToStudent(dbUser: DbUserWithAffil): EntityCardData {
     firstName: dbUser.firstName,
     familyName: dbUser.lastName,
     displayName: resolveUserDisplayName(dbUser),
-    email: primaryAffil?.email || "",
+    email: primaryAffil?.email || dbUser.githubEmail || "",
     role,
     avatarUrl: dbUser.githubId
       ? `https://avatars.githubusercontent.com/u/${dbUser.githubId}?v=4`
       : undefined,
-    githubUsername: undefined,
+    githubUsername: dbUser.githubId ?? undefined,
     isProfileComplete: checkProfileComplete(dbUser),
     institutionId: primaryAffil?.institutionId ?? undefined,
     institutionName: resolveInstitution(primaryAffil),
@@ -259,4 +259,95 @@ export function matchesUserFilters(
     matchesQuery(user, filters.query) &&
     matchesYear(user, filters.startYearMin, filters.startYearMax)
   );
+}
+
+export interface CohortSavePayload {
+  id?: string;
+  name?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  diploma?: string;
+  year?: number | null;
+  tags?: string[];
+}
+
+export function buildCohortSubmitData(
+  institutionId: string,
+  payload: CohortSavePayload,
+): Record<string, string> {
+  const intent = payload.id ? "update-cohort" : "create-cohort";
+  const data: Record<string, string> = { intent, institutionId };
+
+  const stringFields: Array<[keyof CohortSavePayload, string]> = [
+    ["id", "id"],
+    ["name", "name"],
+    ["description", "description"],
+    ["startDate", "startDate"],
+    ["endDate", "endDate"],
+    ["diploma", "diploma"],
+  ];
+
+  for (const [prop, key] of stringFields) {
+    const fieldValue = payload[prop];
+    if (typeof fieldValue === "string") data[key] = fieldValue;
+  }
+
+  if (payload.year !== undefined) {
+    data.year = payload.year === null ? "" : String(payload.year);
+  }
+  if (payload.tags !== undefined) {
+    data.tags = JSON.stringify(payload.tags);
+  }
+  return data;
+}
+
+export interface InstitutionSavePayload {
+  id?: string;
+  name: string;
+  slug: string;
+  type?: string;
+  logoUrl?: string;
+  emailDomain?: string;
+  usernamePattern?: string;
+}
+
+export function buildInstitutionSubmitData(
+  payload: InstitutionSavePayload,
+): Record<string, string> {
+  const intent = payload.id ? "update-institution" : "create-institution";
+  const data: Record<string, string> = {
+    intent,
+    name: payload.name,
+    slug: payload.slug,
+  };
+  if (payload.id) data.id = payload.id;
+  if (payload.type) data.type = payload.type;
+  if (payload.logoUrl) data.logoUrl = payload.logoUrl;
+  if (payload.emailDomain !== undefined) data.emailDomain = payload.emailDomain;
+  if (payload.usernamePattern !== undefined)
+    data.usernamePattern = payload.usernamePattern;
+  return data;
+}
+
+export function mergeUpdatedUser(
+  prev: EntityCardData,
+  updatedUser: AuthUser,
+): EntityCardData {
+  const parts = (updatedUser.name || "").trim().split(/\s+/);
+  const firstName =
+    parts.length > 1 ? parts.slice(0, -1).join(" ") : parts[0] || "";
+  const familyName =
+    parts.length > 1 ? parts[parts.length - 1].toUpperCase() : "";
+  return {
+    ...prev,
+    firstName,
+    familyName,
+    displayName: updatedUser.name,
+    email: updatedUser.email,
+    avatarUrl: updatedUser.avatarUrl,
+    role: updatedUser.role,
+    githubUsername: updatedUser.githubUsername,
+    isProfileComplete: updatedUser.isProfileComplete,
+  };
 }

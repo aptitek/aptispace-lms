@@ -1,12 +1,16 @@
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import Collapse from "@mui/material/Collapse";
+import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import InputAdornment from "@mui/material/InputAdornment";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import ToggleButton from "@mui/material/ToggleButton";
 import CloseIcon from "@mui/icons-material/Close";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DateRangeRoundedIcon from "@mui/icons-material/DateRangeRounded";
@@ -19,169 +23,15 @@ import {
   type AcademicPeriodType,
   calculateDurationMonths,
 } from "~/utils/academicYear";
-import Chip from "@mui/material/Chip";
-import Autocomplete from "@mui/material/Autocomplete";
-import {
-  DIPLOMA_OPTIONS,
-  YEAR_OPTIONS,
-  COMMON_SPECIALTY_TAGS,
-  getSpecialtySlug,
-} from "~/utils/cohortFormat";
 
-import CohortChip from "../../atoms/CohortChip/CohortChip";
+export {
+  CohortStructuredFields,
+  type CohortStructuredFieldsProps,
+} from "./CohortStructuredFields";
 
-export interface CohortStructuredFieldsProps {
-  diploma: string;
-  onDiplomaChange: (newDiploma: string) => void;
-  year: number;
-  onYearChange: (newYear: number) => void;
-  tags: string[];
-  onTagsChange: (newTags: string[]) => void;
-  disabled?: boolean;
-}
+export type AcademicPeriodSelection = AcademicPeriodType | "custom";
 
-export function CohortStructuredFields({
-  diploma,
-  onDiplomaChange,
-  year,
-  onYearChange,
-  tags,
-  onTagsChange,
-  disabled,
-}: CohortStructuredFieldsProps) {
-  const { t } = useTranslation("common");
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        p: 2,
-        borderRadius: 2,
-        bgcolor: "background.paper",
-        border: "1px solid",
-        borderColor: "divider",
-      }}
-      data-testid="cohort-structured-fields"
-    >
-      {/* Live CohortChip Badge Preview */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          p: 2,
-          borderRadius: 2,
-          bgcolor: "action.hover",
-          border: "1px dashed",
-          borderColor: "divider",
-          gap: 1,
-        }}
-        data-testid="cohort-inspector-preview-box"
-      >
-        <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-          }}
-        >
-          {t("cohortNaming.preview", "Cohort Badge Preview")}
-        </Typography>
-        <CohortChip
-          cohort={{ diploma, year, tags }}
-          size="large"
-          data-testid="cohort-inspector-preview-chip"
-        />
-      </Box>
-
-      <Box sx={{ display: "flex", gap: 1.5 }}>
-        {/* Diploma Select */}
-        <TextField
-          select
-          label={t("diplomas.title", "Diploma")}
-          value={diploma}
-          onChange={(e) => onDiplomaChange(e.target.value)}
-          disabled={disabled}
-          fullWidth
-          size="small"
-          data-testid="cohort-diploma-input"
-        >
-          <MenuItem value="">
-            <em>{t("diplomas.none", "No Diploma")}</em>
-          </MenuItem>
-          {DIPLOMA_OPTIONS.map((opt) => (
-            <MenuItem key={opt.code} value={opt.code}>
-              {opt.code} – {t(opt.labelKey, opt.defaultLabel)}
-            </MenuItem>
-          ))}
-        </TextField>
-
-        {/* Year Select */}
-        <TextField
-          select
-          label={t("cohortYear.title", "Year")}
-          value={year}
-          onChange={(e) => onYearChange(Number(e.target.value))}
-          disabled={disabled}
-          fullWidth
-          size="small"
-          data-testid="cohort-year-input"
-        >
-          {YEAR_OPTIONS.map((opt) => (
-            <MenuItem key={opt.value} value={opt.value}>
-              {t(opt.labelKey, opt.defaultLabel)}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Box>
-
-      {/* Specialty / Major Tags */}
-      <Autocomplete
-        multiple
-        freeSolo
-        options={COMMON_SPECIALTY_TAGS as unknown as string[]}
-        value={tags}
-        onChange={(_, newTags) => onTagsChange(newTags)}
-        disabled={disabled}
-        renderValue={(value, getItemProps) =>
-          value.map((tag: string, index: number) => {
-            const { key, ...itemProps } = getItemProps({ index });
-            const slug = getSpecialtySlug(tag);
-            const localized = t(`specialties.${slug}`, tag);
-            const chipLabel = localized !== tag ? `${tag} (${localized})` : tag;
-            return (
-              <Chip
-                key={key}
-                variant="filled"
-                size="small"
-                label={chipLabel}
-                color="primary"
-                {...itemProps}
-              />
-            );
-          })
-        }
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            size="small"
-            label={t("specialties.title", "Subject / Specialty")}
-            placeholder={t(
-              "specialties.addTagPlaceholder",
-              "Add specialty tag (e.g. AI, Dev, Cyber...)",
-            )}
-            data-testid="cohort-tags-input"
-          />
-        )}
-      />
-    </Box>
-  );
-}
+export type CohortDateMode = "shortcut" | "picker";
 
 export function CohortInspectorHeader({
   isEditing,
@@ -215,16 +65,76 @@ export function CohortInspectorHeader({
   );
 }
 
+export function CohortDateModeToggle({
+  mode,
+  onModeChange,
+}: {
+  mode: CohortDateMode;
+  onModeChange: (nextMode: CohortDateMode) => void;
+}) {
+  const { t } = useTranslation("common");
+
+  return (
+    <ToggleButtonGroup
+      value={mode}
+      exclusive
+      onChange={(_, nextMode) => {
+        if (nextMode) onModeChange(nextMode);
+      }}
+      fullWidth
+      size="small"
+      aria-label={t("inspector.dateModeAria", "Date selection mode")}
+      sx={{
+        p: 0.5,
+        borderRadius: 2,
+        bgcolor: "action.hover",
+        border: "1px solid",
+        borderColor: "divider",
+        "& .MuiToggleButtonGroup-grouped": {
+          border: 0,
+          borderRadius: 1.5,
+          fontWeight: 600,
+          fontSize: "0.8rem",
+          textTransform: "none",
+          gap: 0.75,
+          py: 0.6,
+          color: "text.secondary",
+          "&.Mui-selected": {
+            bgcolor: "background.paper",
+            color: "primary.main",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+            "&:hover": {
+              bgcolor: "background.paper",
+            },
+          },
+        },
+      }}
+      data-testid="cohort-date-mode-toggle"
+    >
+      <ToggleButton value="shortcut" data-testid="cohort-date-mode-shortcut">
+        <CalendarMonthRoundedIcon sx={{ fontSize: 16 }} />
+        {t("inspector.academicShortcuts", "Academic Year")}
+      </ToggleButton>
+      <ToggleButton value="picker" data-testid="cohort-date-mode-picker">
+        <DateRangeRoundedIcon sx={{ fontSize: 16 }} />
+        {t("inspector.customDates", "Custom Range")}
+      </ToggleButton>
+    </ToggleButtonGroup>
+  );
+}
+
 export function CohortAcademicShortcuts({
   selectedPeriod,
   onSelectPeriod,
   onSelectYear,
   activeYear,
+  disabled = false,
 }: {
-  selectedPeriod: AcademicPeriodType;
-  onSelectPeriod: (period: AcademicPeriodType) => void;
+  selectedPeriod: AcademicPeriodSelection;
+  onSelectPeriod: (period: AcademicPeriodSelection) => void;
   onSelectYear: (year: number) => void;
   activeYear: number | null;
+  disabled?: boolean;
 }) {
   const { t } = useTranslation("common");
   const currentYear = activeYear || new Date().getFullYear();
@@ -232,31 +142,17 @@ export function CohortAcademicShortcuts({
   return (
     <Box
       sx={{
-        p: 2,
-        borderRadius: 2,
-        bgcolor: "action.hover",
-        border: "1px solid",
-        borderColor: "divider",
         display: "flex",
-        flexDirection: "column",
-        gap: 2,
+        gap: 1.5,
       }}
       data-testid="academic-year-shortcuts"
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <CalendarMonthRoundedIcon
-          fontSize="small"
-          sx={{ color: "primary.main" }}
-        />
-        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-          {t("inspector.academicShortcuts", "Academic Year Shortcuts")}
-        </Typography>
-      </Box>
-
       <TextField
         label={t("inspector.academicYear", "Academic Year")}
         type="number"
+        size="small"
         value={currentYear}
+        disabled={disabled}
         onChange={(e) => {
           const num = parseInt(e.target.value, 10);
           if (!isNaN(num) && num >= 1900 && num <= 2100) {
@@ -274,8 +170,10 @@ export function CohortAcademicShortcuts({
                   onClick={() => onSelectYear(currentYear - 1)}
                   aria-label="Previous academic year"
                   edge="start"
+                  disabled={disabled}
+                  sx={{ p: 0.5 }}
                 >
-                  <RemoveRoundedIcon fontSize="small" />
+                  <RemoveRoundedIcon sx={{ fontSize: 16 }} />
                 </IconButton>
               </InputAdornment>
             ),
@@ -286,11 +184,29 @@ export function CohortAcademicShortcuts({
                   onClick={() => onSelectYear(currentYear + 1)}
                   aria-label="Next academic year"
                   edge="end"
+                  disabled={disabled}
+                  sx={{ p: 0.5 }}
                 >
-                  <AddRoundedIcon fontSize="small" />
+                  <AddRoundedIcon sx={{ fontSize: 16 }} />
                 </IconButton>
               </InputAdornment>
             ),
+          },
+          htmlInput: {
+            min: 1900,
+            max: 2100,
+            style: { textAlign: "center" },
+          },
+        }}
+        sx={{
+          flex: 1,
+          "& input": { textAlign: "center" },
+          "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
+            {
+              display: "none",
+            },
+          "& input[type=number]": {
+            MozAppearance: "textfield",
           },
         }}
         data-testid="academic-year-number-picker"
@@ -298,10 +214,14 @@ export function CohortAcademicShortcuts({
 
       <TextField
         select
+        size="small"
         label={t("inspector.academicPeriod", "Academic Period")}
         value={selectedPeriod}
-        onChange={(e) => onSelectPeriod(e.target.value as AcademicPeriodType)}
-        fullWidth
+        disabled={disabled}
+        onChange={(e) =>
+          onSelectPeriod(e.target.value as AcademicPeriodSelection)
+        }
+        sx={{ flex: 1 }}
         data-testid="academic-period-select"
       >
         {(Object.keys(ACADEMIC_PERIODS) as AcademicPeriodType[]).map(
@@ -314,8 +234,93 @@ export function CohortAcademicShortcuts({
             );
           },
         )}
+        <Divider sx={{ my: 0.5 }} />
+        <MenuItem value="custom" data-testid="academic-period-custom">
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <DateRangeRoundedIcon
+              sx={{ fontSize: 16, color: "primary.main" }}
+            />
+            {t("inspector.periodCustom", "Custom Range...")}
+          </Box>
+        </MenuItem>
       </TextField>
     </Box>
+  );
+}
+
+export interface CohortScheduleCardProps {
+  selectedPeriod: AcademicPeriodSelection;
+  onSelectPeriod: (period: AcademicPeriodSelection) => void;
+  onSelectYear: (year: number) => void;
+  activeYear: number | null;
+  startDate: string;
+  endDate: string;
+  onStartDateChange: (newDateString: string) => void;
+  onEndDateChange: (newDateString: string) => void;
+  disabled?: boolean;
+}
+
+export function CohortScheduleCard({
+  selectedPeriod,
+  onSelectPeriod,
+  onSelectYear,
+  activeYear,
+  startDate,
+  endDate,
+  onStartDateChange,
+  onEndDateChange,
+  disabled = false,
+}: CohortScheduleCardProps) {
+  const { t } = useTranslation("common");
+
+  return (
+    <Card
+      variant="outlined"
+      sx={{
+        p: 2,
+        borderRadius: 2,
+        borderColor: "divider",
+        bgcolor: "action.hover",
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
+      }}
+      data-testid="cohort-year-card"
+    >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <CalendarMonthRoundedIcon
+          sx={{ fontSize: 18, color: "primary.main" }}
+        />
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 600, color: "text.primary" }}
+        >
+          {t("inspector.academicSchedule", "Academic Schedule")}
+        </Typography>
+      </Box>
+
+      <CohortAcademicShortcuts
+        selectedPeriod={selectedPeriod}
+        onSelectPeriod={onSelectPeriod}
+        onSelectYear={onSelectYear}
+        activeYear={activeYear}
+        disabled={disabled}
+      />
+
+      <Collapse in={selectedPeriod === "custom"}>
+        <Box sx={{ pt: 0.5 }}>
+          <CohortDatePickerFields
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={onStartDateChange}
+            onEndDateChange={onEndDateChange}
+            disabled={disabled}
+          />
+        </Box>
+      </Collapse>
+
+      <CohortDurationBanner startDate={startDate} endDate={endDate} />
+    </Card>
   );
 }
 
@@ -337,7 +342,7 @@ export function CohortDurationBanner({
     <Box
       sx={{
         px: 1.5,
-        py: 1,
+        py: 0.75,
         borderRadius: 1.5,
         bgcolor: "action.selected",
         display: "flex",
@@ -383,8 +388,14 @@ export function CohortDatePickerFields({
   const endDayjs = endDate ? dayjs(endDate) : null;
 
   return (
-    <Stack direction="column" spacing={2}>
-      <Box data-testid="cohort-start-date-container">
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+        gap: 1.5,
+      }}
+    >
+      <Box sx={{ minWidth: 0 }} data-testid="cohort-start-date-container">
         <DatePicker
           label={t("inspector.startDate", "Start Date")}
           value={startDayjs}
@@ -399,12 +410,12 @@ export function CohortDatePickerFields({
           slotProps={{
             textField: {
               fullWidth: true,
-              size: "medium",
+              size: "small",
             },
           }}
         />
       </Box>
-      <Box data-testid="cohort-end-date-container">
+      <Box sx={{ minWidth: 0 }} data-testid="cohort-end-date-container">
         <DatePicker
           label={t("inspector.endDate", "End Date")}
           value={endDayjs}
@@ -420,12 +431,12 @@ export function CohortDatePickerFields({
           slotProps={{
             textField: {
               fullWidth: true,
-              size: "medium",
+              size: "small",
             },
           }}
         />
       </Box>
-    </Stack>
+    </Box>
   );
 }
 

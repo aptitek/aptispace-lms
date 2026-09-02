@@ -43,6 +43,7 @@ describe("Admin Route", () => {
           lastName: "",
           displayName: null,
           githubId: null,
+          githubEmail: null,
           createdAt: new Date(),
           updatedAt: new Date(),
           affiliations: [],
@@ -84,6 +85,7 @@ describe("Admin Route", () => {
           lastName: "ADMIN",
           displayName: "System Admin",
           githubId: "admin",
+          githubEmail: "admin@aptitek.io",
           createdAt: new Date(),
           updatedAt: new Date(),
           affiliations: [
@@ -157,6 +159,7 @@ describe("Admin Route", () => {
           lastName: "USER",
           displayName: "Admin User",
           githubId: "admin",
+          githubEmail: "admin@aptitek.io",
           createdAt: new Date(),
           updatedAt: new Date(),
           affiliations: [],
@@ -209,6 +212,7 @@ describe("Admin Route", () => {
           lastName: "USER",
           displayName: "Admin User",
           githubId: "admin",
+          githubEmail: "admin@aptitek.io",
           createdAt: new Date(),
           updatedAt: new Date(),
           affiliations: [],
@@ -244,6 +248,61 @@ describe("Admin Route", () => {
       });
     });
 
+    it("handles update-user intent and updates githubId", async () => {
+      const mockDb = {} as never;
+      vi.spyOn(sessionServer, "authGuard").mockResolvedValue({
+        session: {
+          userId: "admin-1",
+          role: "admin",
+          issuedAt: Date.now(),
+          expiresAt: Date.now() + 10000,
+        },
+        actorUserId: "admin-1",
+        db: mockDb,
+        user: {
+          id: "admin-1",
+          firstName: "Admin",
+          lastName: "ONE",
+          displayName: "Admin ONE",
+          githubId: "admin",
+          githubEmail: "admin@aptitek.io",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          affiliations: [],
+        },
+      });
+
+      const updateSpy = vi.spyOn(userService, "updateUser").mockResolvedValue({
+        id: "std-123",
+        githubId: "mariecurie-science",
+      } as never);
+
+      const formData = new FormData();
+      formData.append("intent", "update-user");
+      formData.append("studentId", "std-123");
+      formData.append("githubId", "mariecurie-science");
+
+      const request = new Request("http://localhost:3000/admin", {
+        method: "POST",
+        body: formData,
+      });
+
+      const args = {
+        request,
+        context: {},
+        params: {},
+      } as unknown as Parameters<typeof action>[0];
+
+      const res = await action(args);
+      expect(res).toEqual({
+        success: true,
+        user: { id: "std-123", githubId: "mariecurie-science" },
+      });
+      expect(updateSpy).toHaveBeenCalledWith(mockDb, "std-123", {
+        githubId: "mariecurie-science",
+      });
+    });
+
     it("handles delete-user intent correctly and preserves audit information", async () => {
       const mockDb = {} as never;
       vi.spyOn(sessionServer, "authGuard").mockResolvedValue({
@@ -263,6 +322,7 @@ describe("Admin Route", () => {
           lastName: "USER",
           displayName: "Admin User",
           githubId: "admin",
+          githubEmail: "admin@aptitek.io",
           createdAt: new Date(),
           updatedAt: new Date(),
           affiliations: [],
@@ -277,6 +337,7 @@ describe("Admin Route", () => {
           lastName: "DOE",
           displayName: "John DOE",
           githubId: "johndoe",
+          githubEmail: "john.doe@aptitek.io",
           createdAt: new Date(),
           updatedAt: new Date(),
           affiliations: [

@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
+import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
@@ -11,6 +12,7 @@ import {
   FacultyAccessPanel,
   AdminAccessPanel,
   InspectorActionGroup,
+  InspectorAccountSection,
 } from "./StudentInspector.components";
 import { useInspectorCohortsState } from "./StudentInspector.hooks";
 
@@ -23,6 +25,7 @@ export default function StudentInspector({
   onRemoveCohort,
   onImpersonate,
   onDelete,
+  onUpdateGithub,
   isSubmitting = false,
   className,
   "data-testid": dataTestId = "student-inspector",
@@ -57,7 +60,16 @@ export default function StudentInspector({
       className={className}
       data-testid={dataTestId}
     >
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+          {t("common:inspector.editProfile", "Edit Profile")}
+        </Typography>
         <IconButton
           onClick={onClose}
           size="small"
@@ -68,6 +80,12 @@ export default function StudentInspector({
       </Box>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        <InspectorAccountSection
+          targetStudent={targetStudent}
+          onUpdateGithub={onUpdateGithub}
+          isSubmitting={isSubmitting}
+        />
+
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <AssignmentSection data-testid="inspector-assignment-section">
             {!targetStudent.role || targetStudent.role === "student" ? (

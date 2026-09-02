@@ -68,7 +68,7 @@ export const TabPanelContainer = styled("div", {
 })<{ hasSidePanel?: boolean }>(({ theme, hasSidePanel }) => ({
   width: "100%",
   display: "grid",
-  gridTemplateColumns: hasSidePanel ? "1fr 350px" : "1fr",
+  gridTemplateColumns: hasSidePanel ? "1fr 380px" : "1fr",
   gap: theme.spacing(3),
   alignItems: "start",
   [theme.breakpoints.down("md")]: {

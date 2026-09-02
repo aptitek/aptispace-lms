@@ -41,7 +41,8 @@ function formatDbUserResult(
 ) {
   const primaryAffiliation = user.affiliations[0];
   const fullName = extractUserFullName(user);
-  const email = primaryAffiliation?.email || "user@aptitek.io";
+  const email =
+    primaryAffiliation?.email || user.githubEmail || "user@aptitek.io";
   const role = (primaryAffiliation?.role as UserRole) || fallbackRole;
 
   return {

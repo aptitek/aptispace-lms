@@ -108,7 +108,7 @@ function formatAccountFromDb(
     name: resolveAccountName(user, affil.role),
     firstName: names.firstName,
     lastName: names.lastName,
-    email: affil.email,
+    email: affil.email || user.githubEmail || "",
     role: affil.role,
     isProfileComplete: isComplete,
     createdAt: user.createdAt,
@@ -129,7 +129,7 @@ function formatPersona(
   return {
     id: user.id,
     name: user.displayName || names.fullName || fallback.name,
-    email: affil.email || fallback.email,
+    email: affil.email || user.githubEmail || fallback.email,
     role: affil.role || fallback.role,
     title: fallback.title,
     badge: fallback.badge,

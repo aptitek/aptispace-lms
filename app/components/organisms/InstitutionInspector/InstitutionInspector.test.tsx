@@ -1,6 +1,12 @@
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import InstitutionInspector from "./InstitutionInspector";
+import {
+  InstitutionEmailCard,
+  InstitutionEmailCardHeader,
+  InstitutionFreeDomainNotice,
+  InstitutionConstrainedDomainFields,
+} from "./InstitutionInspector.components";
 import type { SchoolConfig } from "~/types/institution";
 
 describe("InstitutionInspector Organism", () => {
@@ -73,5 +79,88 @@ describe("InstitutionInspector Organism", () => {
     expect(element).toBeDefined();
     expect(element.props.institution?.emailDomain).toBe("custom.edu");
     expect(element.props.institution?.usernamePattern).toBe("{f}{last}");
+  });
+
+  it("handles institution without emailDomain (free personal email)", () => {
+    const aptitekInstitution: SchoolConfig = {
+      id: "school-aptitek",
+      name: "Aptitek",
+      slug: "aptitek",
+      type: "company",
+      emailDomain: "",
+    };
+
+    const element = React.createElement(InstitutionInspector, {
+      institution: aptitekInstitution,
+      onClose: vi.fn(),
+      onSave: vi.fn(),
+    });
+
+    expect(element).toBeDefined();
+    expect(element.props.institution?.emailDomain).toBe("");
+  });
+
+  describe("InstitutionEmailCard component", () => {
+    it("exports InstitutionEmailCard and subcomponents", () => {
+      expect(InstitutionEmailCard).toBeDefined();
+      expect(InstitutionFreeDomainNotice).toBeDefined();
+      expect(InstitutionConstrainedDomainFields).toBeDefined();
+    });
+
+    it("renders with domain constraint enabled", () => {
+      const onToggle = vi.fn();
+      const onChange = vi.fn();
+      const onBlur = vi.fn();
+
+      const element = React.createElement(InstitutionEmailCard, {
+        emailDomain: "42.fr",
+        usernamePattern: "{first}.{last}",
+        previewEmail: "john.doe@42.fr",
+        disabled: false,
+        isConstrained: true,
+        onToggleConstraint: onToggle,
+        onFieldChange: onChange,
+        onBlur,
+      });
+
+      expect(element).toBeDefined();
+      expect(element.props.isConstrained).toBe(true);
+      expect(element.props.emailDomain).toBe("42.fr");
+    });
+
+    it("renders with domain constraint disabled (empty = any email)", () => {
+      const onToggle = vi.fn();
+      const onChange = vi.fn();
+      const onBlur = vi.fn();
+
+      const element = React.createElement(InstitutionEmailCard, {
+        emailDomain: "",
+        usernamePattern: "{first}.{last}",
+        previewEmail: "user@any-domain.com",
+        disabled: false,
+        isConstrained: false,
+        onToggleConstraint: onToggle,
+        onFieldChange: onChange,
+        onBlur,
+      });
+
+      expect(element).toBeDefined();
+      expect(element.props.isConstrained).toBe(false);
+      expect(element.props.emailDomain).toBe("");
+    });
+
+    it("renders InstitutionEmailCardHeader with MUI toggle props", () => {
+      const onToggle = vi.fn();
+      const headerElement = React.createElement(InstitutionEmailCardHeader, {
+        isConstrained: true,
+        disabled: false,
+        onToggleConstraint: onToggle,
+      });
+
+      expect(headerElement).toBeDefined();
+      expect(headerElement.props.isConstrained).toBe(true);
+      expect(headerElement.props.disabled).toBe(false);
+      expect(headerElement.props.onToggleConstraint).toBe(onToggle);
+    });
   });
 });

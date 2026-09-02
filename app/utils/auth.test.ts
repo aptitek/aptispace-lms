@@ -45,4 +45,29 @@ describe("Authentication Utilities", () => {
     expect(stopImpersonation).toBeDefined();
     expect(typeof stopImpersonation).toBe("function");
   });
+
+  it("resolves active user with githubEmail as fallback when affiliation email is empty", () => {
+    const user = resolveActiveUser(
+      {
+        id: "test-user-2",
+        firstName: "Linus",
+        lastName: "TORVALDS",
+        displayName: "Linus Torvalds",
+        githubId: "torvalds",
+        githubEmail: "torvalds@kernel.org",
+        affiliations: [
+          {
+            email: "",
+            role: "student",
+          },
+        ],
+      },
+      {
+        userId: "test-user-2",
+        role: "student",
+      },
+    );
+    expect(user?.email).toBe("torvalds@kernel.org");
+    expect(user?.githubEmail).toBe("torvalds@kernel.org");
+  });
 });

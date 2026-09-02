@@ -75,4 +75,8 @@ export interface ProfileCardProps extends Omit<BoxProps, "onChange"> {
    * Callback fired when the avatar image URL is updated
    */
   onAvatarChange?: (avatarUrl: string) => void;
+  /**
+   * Size of the cohort chip in the card header (defaults to "medium")
+   */
+  cohortChipSize?: "small" | "medium" | "large";
 }

@@ -428,3 +428,4 @@ export function StudentCohortAssignmentSection({
 }
 
 export * from "./StudentInspector.actions";
+export * from "./StudentInspector.account";

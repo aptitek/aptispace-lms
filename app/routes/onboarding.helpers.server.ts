@@ -13,11 +13,7 @@ import {
   createUser,
   isUserProfileComplete,
 } from "~/services/userService";
-import {
-  CADET_FIXED_DOMAIN,
-  resolveSchool,
-  buildInitialProfile,
-} from "./onboarding.helpers";
+import { resolveSchool, buildInitialProfile } from "./onboarding.helpers";
 
 export interface ValidateActionParams {
   actionType: string;
@@ -323,7 +319,7 @@ export async function handleOnboardingAction(
     const formData = await request.formData().catch(() => new FormData());
     const payload = parseActionFormData(formData);
 
-    const domain = payload.school.emailDomain || CADET_FIXED_DOMAIN;
+    const domain = payload.school.emailDomain || undefined;
     const validation = validateFixedDomainEmail(payload.rawEmail, domain);
 
     const validationError = validateActionInputs({
@@ -355,20 +351,106 @@ function resolveAuthUserId(
 }
 
 function resolveUserSchool(
-  user: { affiliations?: Array<{ institutionId?: string }> } | null | undefined,
+  user:
+    | {
+        affiliations?: Array<{
+          institutionId?: string;
+          institution?: {
+            id: string;
+            name: string;
+            slug: string;
+            logoUrl?: string | null;
+            emailDomain?: string | null;
+            usernamePattern?: string | null;
+          } | null;
+        }>;
+      }
+    | null
+    | undefined,
 ) {
   const primaryAffil = user?.affiliations?.[0];
+  if (primaryAffil?.institution) {
+    return {
+      id: primaryAffil.institution.id,
+      name: primaryAffil.institution.name,
+      slug: primaryAffil.institution.slug,
+      logoUrl: primaryAffil.institution.logoUrl || undefined,
+      emailDomain: primaryAffil.institution.emailDomain || "",
+      usernamePattern:
+        primaryAffil.institution.usernamePattern || "{first}.{last}",
+    };
+  }
   return resolveSchool(primaryAffil?.institutionId);
+}
+
+function formatCohortPayload(cohort: {
+  id: string;
+  diploma?: string | null;
+  year?: number | null;
+  tags?: string[] | null;
+  name?: string | null;
+}) {
+  return {
+    id: cohort.id,
+    name: cohort.name ?? undefined,
+    diploma: cohort.diploma ?? undefined,
+    year: cohort.year ?? undefined,
+    tags: cohort.tags ?? undefined,
+  };
+}
+
+function resolveUserCohort(
+  user:
+    | {
+        role?: string | null;
+        affiliations?: Array<{
+          cohort?: {
+            id: string;
+            diploma?: string | null;
+            year?: number | null;
+            tags?: string[] | null;
+            name?: string | null;
+          } | null;
+        }>;
+      }
+    | null
+    | undefined,
+) {
+  if (user?.role === "admin") return undefined;
+  const primaryCohort = user?.affiliations?.[0]?.cohort;
+  return primaryCohort ? formatCohortPayload(primaryCohort) : undefined;
+}
+
+function enrichActiveUser(
+  activeUser: ReturnType<typeof resolveActiveUser>,
+  school: ReturnType<typeof resolveUserSchool>,
+  cohort: ReturnType<typeof resolveUserCohort>,
+) {
+  if (!activeUser) return;
+  activeUser.schoolLogoUrl ??= school.logoUrl || undefined;
+  activeUser.institutionName ??= school.name;
+  activeUser.emailDomain ??= school.emailDomain || "";
+  activeUser.usernamePattern ??= school.usernamePattern;
+  if (activeUser.role !== "admin") {
+    activeUser.cohort ??= cohort;
+  }
 }
 
 function extractLoaderData(auth: Awaited<ReturnType<typeof authGuard>>) {
   const user = auth?.user ?? null;
+  const school = resolveUserSchool(user);
+  const cohort = resolveUserCohort(user);
+  const activeUser = resolveActiveUser(user, auth?.session);
+
+  enrichActiveUser(activeUser, school, cohort);
+
   return {
     userId: resolveAuthUserId(auth),
-    user: resolveActiveUser(user, auth?.session),
+    user: activeUser,
     profile: buildInitialProfile(user ?? undefined),
     isComplete: isUserProfileComplete(user),
-    school: resolveUserSchool(user),
+    school,
+    cohort,
   };
 }
 

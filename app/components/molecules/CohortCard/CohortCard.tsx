@@ -24,6 +24,34 @@ export interface CohortCardProps {
   onClick?: (cohort: CohortConfig) => void;
 }
 
+function formatCohortDate(dateString?: string | Date): string {
+  if (!dateString) return "";
+  const d = new Date(dateString);
+  return d.toLocaleDateString(undefined, {
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function resolveStartYear(dateString?: string | Date): number | null {
+  if (!dateString) return null;
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return null;
+  return d.getFullYear();
+}
+
+function resolveCohortDateRange(
+  start?: string | Date,
+  end?: string | Date,
+): string {
+  const startDate = formatCohortDate(start);
+  const endDate = formatCohortDate(end);
+  if (startDate && endDate) {
+    return `${startDate} - ${endDate}`;
+  }
+  return startDate || endDate || "No dates set";
+}
+
 export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
   ({ cohort, studentCount = 0, isSelected, onClick }, ref) => {
     const isInteractive = Boolean(onClick);
@@ -39,29 +67,8 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
       }
     };
 
-    const formatDate = (dateString?: string | Date) => {
-      if (!dateString) return "";
-      const d = new Date(dateString);
-      return d.toLocaleDateString(undefined, {
-        month: "short",
-        year: "numeric",
-      });
-    };
-
-    const getStartYear = (dateString?: string | Date) => {
-      if (!dateString) return null;
-      const d = new Date(dateString);
-      if (isNaN(d.getTime())) return null;
-      return d.getFullYear();
-    };
-
-    const startDate = formatDate(cohort.startDate);
-    const endDate = formatDate(cohort.endDate);
-    const startYear = getStartYear(cohort.startDate);
-    const dateRange =
-      startDate && endDate
-        ? `${startDate} - ${endDate}`
-        : startDate || endDate || "No dates set";
+    const startYear = resolveStartYear(cohort.startDate);
+    const dateRange = resolveCohortDateRange(cohort.startDate, cohort.endDate);
 
     return (
       <Badge
@@ -86,6 +93,8 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
           onKeyDown={handleKeyDown}
           tabIndex={isInteractive ? 0 : undefined}
           role={isInteractive ? "button" : "article"}
+          aria-selected={isInteractive ? Boolean(isSelected) : undefined}
+          data-selected={isSelected ? "true" : undefined}
           data-testid={`cohort-card-${cohort.id}`}
         >
           <Box
