@@ -36,19 +36,25 @@ describe("CohortInspector Organism", () => {
     expect(element.props.onSave).toBe(onSaveMock);
   });
 
-  it("creates React element for new cohort (no id)", () => {
-    const newCohort: CohortConfig = {
-      name: "",
+  it("creates React element for cohort with diploma, year, and tags", () => {
+    const formattedCohort: CohortConfig = {
+      id: "cohort-m1",
+      name: "M1-IA-Dev",
+      diploma: "M",
+      year: 1,
+      tags: ["IA", "Dev"],
       institutionId: "school-aptitek",
     };
 
     const element = React.createElement(CohortInspector, {
-      cohort: newCohort,
+      cohort: formattedCohort,
       onClose: vi.fn(),
       onSave: vi.fn(),
     });
 
     expect(element).toBeDefined();
-    expect(element.props.cohort?.id).toBeUndefined();
+    expect(element.props.cohort?.diploma).toBe("M");
+    expect(element.props.cohort?.year).toBe(1);
+    expect(element.props.cohort?.tags).toEqual(["IA", "Dev"]);
   });
 });

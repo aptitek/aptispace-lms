@@ -19,6 +19,169 @@ import {
   type AcademicPeriodType,
   calculateDurationMonths,
 } from "~/utils/academicYear";
+import Chip from "@mui/material/Chip";
+import Autocomplete from "@mui/material/Autocomplete";
+import {
+  DIPLOMA_OPTIONS,
+  YEAR_OPTIONS,
+  COMMON_SPECIALTY_TAGS,
+  getSpecialtySlug,
+} from "~/utils/cohortFormat";
+
+import CohortChip from "../../atoms/CohortChip/CohortChip";
+
+export interface CohortStructuredFieldsProps {
+  diploma: string;
+  onDiplomaChange: (newDiploma: string) => void;
+  year: number;
+  onYearChange: (newYear: number) => void;
+  tags: string[];
+  onTagsChange: (newTags: string[]) => void;
+  disabled?: boolean;
+}
+
+export function CohortStructuredFields({
+  diploma,
+  onDiplomaChange,
+  year,
+  onYearChange,
+  tags,
+  onTagsChange,
+  disabled,
+}: CohortStructuredFieldsProps) {
+  const { t } = useTranslation("common");
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        p: 2,
+        borderRadius: 2,
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
+      }}
+      data-testid="cohort-structured-fields"
+    >
+      {/* Live CohortChip Badge Preview */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          p: 2,
+          borderRadius: 2,
+          bgcolor: "action.hover",
+          border: "1px dashed",
+          borderColor: "divider",
+          gap: 1,
+        }}
+        data-testid="cohort-inspector-preview-box"
+      >
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+          }}
+        >
+          {t("cohortNaming.preview", "Cohort Badge Preview")}
+        </Typography>
+        <CohortChip
+          cohort={{ diploma, year, tags }}
+          size="large"
+          data-testid="cohort-inspector-preview-chip"
+        />
+      </Box>
+
+      <Box sx={{ display: "flex", gap: 1.5 }}>
+        {/* Diploma Select */}
+        <TextField
+          select
+          label={t("diplomas.title", "Diploma")}
+          value={diploma}
+          onChange={(e) => onDiplomaChange(e.target.value)}
+          disabled={disabled}
+          fullWidth
+          size="small"
+          data-testid="cohort-diploma-input"
+        >
+          <MenuItem value="">
+            <em>{t("diplomas.none", "No Diploma")}</em>
+          </MenuItem>
+          {DIPLOMA_OPTIONS.map((opt) => (
+            <MenuItem key={opt.code} value={opt.code}>
+              {opt.code} – {t(opt.labelKey, opt.defaultLabel)}
+            </MenuItem>
+          ))}
+        </TextField>
+
+        {/* Year Select */}
+        <TextField
+          select
+          label={t("cohortYear.title", "Year")}
+          value={year}
+          onChange={(e) => onYearChange(Number(e.target.value))}
+          disabled={disabled}
+          fullWidth
+          size="small"
+          data-testid="cohort-year-input"
+        >
+          {YEAR_OPTIONS.map((opt) => (
+            <MenuItem key={opt.value} value={opt.value}>
+              {t(opt.labelKey, opt.defaultLabel)}
+            </MenuItem>
+          ))}
+        </TextField>
+      </Box>
+
+      {/* Specialty / Major Tags */}
+      <Autocomplete
+        multiple
+        freeSolo
+        options={COMMON_SPECIALTY_TAGS as unknown as string[]}
+        value={tags}
+        onChange={(_, newTags) => onTagsChange(newTags)}
+        disabled={disabled}
+        renderValue={(value, getItemProps) =>
+          value.map((tag: string, index: number) => {
+            const { key, ...itemProps } = getItemProps({ index });
+            const slug = getSpecialtySlug(tag);
+            const localized = t(`specialties.${slug}`, tag);
+            const chipLabel = localized !== tag ? `${tag} (${localized})` : tag;
+            return (
+              <Chip
+                key={key}
+                variant="filled"
+                size="small"
+                label={chipLabel}
+                color="primary"
+                {...itemProps}
+              />
+            );
+          })
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            size="small"
+            label={t("specialties.title", "Subject / Specialty")}
+            placeholder={t(
+              "specialties.addTagPlaceholder",
+              "Add specialty tag (e.g. AI, Dev, Cyber...)",
+            )}
+            data-testid="cohort-tags-input"
+          />
+        )}
+      />
+    </Box>
+  );
+}
 
 export function CohortInspectorHeader({
   isEditing,

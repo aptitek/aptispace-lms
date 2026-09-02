@@ -28,11 +28,13 @@ import {
 import { ProfileTextField } from "./ProfileCard.styles";
 import { ProfileHeaderChips, BackContent } from "./ProfileCard.components";
 import type { ProfileCardProps } from "./ProfileCard.types";
+import type { CohortConfig } from "~/types/institution";
 
 interface FrontContentProps {
   schoolLogoUrl?: string;
   institutionName: string;
-  cohortName: string;
+  cohort?: CohortConfig;
+  cohortName?: string;
   year: string;
   avatarUrl?: string;
   role: "student" | "instructor" | "admin";
@@ -52,6 +54,7 @@ interface FrontContentProps {
 function FrontContent({
   schoolLogoUrl,
   institutionName,
+  cohort,
   cohortName,
   year,
   avatarUrl,
@@ -136,7 +139,12 @@ function FrontContent({
           height={40}
           testId="profile-institution-logo"
         />
-        <ProfileHeaderChips role={role} cohortName={cohortName} year={year} />
+        <ProfileHeaderChips
+          role={role}
+          cohort={cohort}
+          cohortName={cohortName}
+          year={year}
+        />
       </Box>
 
       <Divider sx={{ mb: 4, position: "relative", zIndex: 1 }} />
@@ -406,7 +414,8 @@ export default function ProfileCard(props: ProfileCardProps) {
   const {
     schoolLogoUrl,
     institutionName = "Institution",
-    cohortName = "Cohort",
+    cohort,
+    cohortName,
     year = "2026",
     avatarUrl,
     role = "student",
@@ -456,6 +465,7 @@ export default function ProfileCard(props: ProfileCardProps) {
           <FrontContent
             schoolLogoUrl={schoolLogoUrl}
             institutionName={institutionName}
+            cohort={cohort}
             cohortName={cohortName}
             year={year}
             avatarUrl={avatarUrl}

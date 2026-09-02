@@ -19,13 +19,13 @@ function parseOptionalString(
   formData: FormData,
   key: string,
 ): string | undefined {
-  const val = formData.get(key);
-  return val ? String(val) : undefined;
+  const entry = formData.get(key);
+  return entry ? String(entry) : undefined;
 }
 
 function parseOptionalDate(formData: FormData, key: string): Date | undefined {
-  const val = formData.get(key);
-  return val ? new Date(String(val)) : undefined;
+  const entry = formData.get(key);
+  return entry ? new Date(String(entry)) : undefined;
 }
 
 function parseNullableDate(
@@ -33,8 +33,8 @@ function parseNullableDate(
   key: string,
 ): Date | null | undefined {
   if (!formData.has(key)) return undefined;
-  const val = formData.get(key);
-  return val ? new Date(String(val)) : null;
+  const entry = formData.get(key);
+  return entry ? new Date(String(entry)) : null;
 }
 
 export async function handleAddCohortAction(
@@ -245,25 +245,58 @@ export async function handleUpdateInstitutionAction(
   }
 }
 
+function parseCohortYear(
+  formData: FormData,
+  isRequired = false,
+): number | null | undefined {
+  if (!formData.has("year") && !isRequired) return undefined;
+  const raw = formData.get("year");
+  if (raw === null || raw === "") return null;
+  const num = parseInt(String(raw), 10);
+  return isNaN(num) ? null : num;
+}
+
+function parseCohortTags(formData: FormData): string[] | undefined {
+  const raw = formData.get("tags");
+  if (typeof raw !== "string" || !raw.trim()) return undefined;
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+  } catch {
+    return raw
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return undefined;
+}
+
 export async function handleCreateCohortAction(
   formData: FormData,
   db: Database,
   actorUserId: string,
 ) {
   const institutionId = String(formData.get("institutionId") || "");
-  const name = String(formData.get("name") || "");
+  const diploma = parseOptionalString(formData, "diploma");
+  if (!institutionId || !diploma) {
+    return {
+      success: false,
+      error: "Missing required fields for cohort (institution, diploma)",
+    };
+  }
+
+  const year = parseCohortYear(formData, true) ?? null;
+  const tags = parseCohortTags(formData);
   const description = parseOptionalString(formData, "description");
   const startDate = parseOptionalDate(formData, "startDate");
   const endDate = parseOptionalDate(formData, "endDate");
 
-  if (!institutionId || !name) {
-    return { success: false, error: "Missing required fields for cohort" };
-  }
-
   try {
     const cohort = await createCohort(db, {
       institutionId,
-      name,
+      diploma,
+      year,
+      tags,
       description,
       startDate,
       endDate,
@@ -284,20 +317,26 @@ export async function handleUpdateCohortAction(
   actorUserId: string,
 ) {
   const id = String(formData.get("id") || "");
-  const name = parseOptionalString(formData, "name");
+  if (!id) {
+    return { success: false, error: "Missing cohort id" };
+  }
+
   const description = formData.has("description")
     ? parseOptionalString(formData, "description")
     : undefined;
   const startDate = parseNullableDate(formData, "startDate");
   const endDate = parseNullableDate(formData, "endDate");
-
-  if (!id) {
-    return { success: false, error: "Missing cohort id" };
-  }
+  const diploma = formData.has("diploma")
+    ? parseOptionalString(formData, "diploma")
+    : undefined;
+  const year = parseCohortYear(formData);
+  const tags = parseCohortTags(formData);
 
   try {
     const cohort = await updateCohort(db, id, {
-      name,
+      diploma,
+      year,
+      tags,
       description,
       startDate,
       endDate,

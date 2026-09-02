@@ -4,6 +4,7 @@ import type {
 } from "~/components/molecules/EntityCard/EntityCard.types";
 import type { AuthUser, UserRole } from "~/utils/auth";
 import type { getAllUsersWithAffiliations } from "~/services/userService";
+import { getCohortDisplayName } from "~/utils/cohortFormat";
 import {
   getDefaultStudents,
   getDefaultInstructors,
@@ -23,13 +24,17 @@ export type DbUserWithAffil = Awaited<
 >[number];
 type AffilType = DbUserWithAffil["affiliations"][number] | undefined;
 
+function resolveRole(affils: DbUserWithAffil["affiliations"]): UserRole {
+  const primary = affils[0]?.role;
+  if (primary) return primary;
+  return "student";
+}
+
 export function resolveUserGlobalRole(dbUser: DbUserWithAffil): UserRole {
   const affils = dbUser.affiliations || [];
   if (affils.some((a) => a.role === "admin")) return "admin";
   if (affils.some((a) => a.role === "instructor")) return "instructor";
-  const primary = affils[0]?.role;
-  if (primary) return primary;
-  return "student";
+  return resolveRole(affils);
 }
 
 function resolveUserDisplayName(dbUser: DbUserWithAffil): string {
@@ -38,8 +43,8 @@ function resolveUserDisplayName(dbUser: DbUserWithAffil): string {
 }
 
 function resolveCohort(affil: AffilType): string {
-  if (affil?.cohort?.name) return affil.cohort.name;
-  return "Cohort 2026";
+  if (affil?.cohort) return getCohortDisplayName(affil.cohort);
+  return "M1-IA-Dev";
 }
 
 function resolveCohortStartDate(affil: AffilType): Date | undefined {
@@ -54,10 +59,6 @@ function resolveCohortYear(affil: AffilType): string {
     const d = new Date(affil.cohort.startDate);
     const yr = d.getFullYear();
     if (!isNaN(yr)) return String(yr);
-  }
-  if (affil?.cohort?.name) {
-    const match = affil.cohort.name.match(/\b(20\d{2})\b/);
-    if (match) return match[1];
   }
   return "2026";
 }
@@ -93,7 +94,10 @@ function buildStudentCohorts(
 ) {
   return cohortAffils.map((a) => ({
     id: a.cohort!.id,
-    name: a.cohort!.name,
+    name: getCohortDisplayName(a.cohort!),
+    diploma: a.cohort?.diploma,
+    year: a.cohort?.year,
+    tags: a.cohort?.tags,
     startDate: a.cohort?.startDate,
     startYear: resolveCohortYear(a),
     institutionId: a.institutionId,

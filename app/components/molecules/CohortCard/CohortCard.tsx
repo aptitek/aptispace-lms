@@ -7,7 +7,6 @@ import Skeleton from "@mui/material/Skeleton";
 import { GhostActionButton } from "~/components/atoms/GhostActionButton";
 import {
   CardContainer,
-  CohortName,
   CohortDescription,
   CohortDates,
   SkeletonContainer,
@@ -15,6 +14,8 @@ import {
 } from "./CohortCard.styles";
 
 import Chip from "@mui/material/Chip";
+
+import CohortChip from "~/components/atoms/CohortChip/CohortChip";
 
 export interface CohortCardProps {
   cohort: CohortConfig;
@@ -93,9 +94,14 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
               alignItems: "center",
               justifyContent: "space-between",
               gap: 1,
+              mb: 0.5,
             }}
           >
-            <CohortName sx={{ flex: 1, minWidth: 0 }}>{cohort.name}</CohortName>
+            <CohortChip
+              cohort={cohort}
+              size="medium"
+              data-testid={`cohort-card-chip-${cohort.id}`}
+            />
             {startYear && (
               <Chip
                 label={startYear}
@@ -113,6 +119,7 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
               />
             )}
           </Box>
+
           <CohortDescription>
             {cohort.description || "No description provided."}
           </CohortDescription>

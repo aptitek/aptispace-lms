@@ -10,27 +10,33 @@ import Guilloche, { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche";
 import Electronics from "../../atoms/Electronics/Electronics";
 import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
 
+import CohortChip from "../../atoms/CohortChip/CohortChip";
+import type { CohortConfig } from "~/types/institution";
+
 export interface ProfileHeaderChipsProps {
   role: "student" | "instructor" | "admin";
+  cohort?: CohortConfig;
   cohortName?: string;
   year?: string;
 }
 
 export function ProfileHeaderChips({
   role,
+  cohort,
   cohortName,
   year,
 }: ProfileHeaderChipsProps) {
   const { t } = useTranslation(["auth", "common"]);
 
   if (role === "student") {
+    const activeCohort =
+      cohort || (cohortName ? { name: cohortName } : undefined);
     return (
       <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-        {cohortName && (
-          <Chip
-            label={cohortName}
+        {activeCohort && (
+          <CohortChip
+            cohort={activeCohort}
             size="small"
-            variant="outlined"
             data-testid="profile-cohort-chip"
           />
         )}

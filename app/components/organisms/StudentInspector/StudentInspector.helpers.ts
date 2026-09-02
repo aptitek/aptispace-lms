@@ -61,7 +61,7 @@ export function compareCohorts(
   const timeB = parseCohortTimestamp(b.startDate);
   if (timeA !== timeB) return timeB - timeA;
 
-  return a.name.localeCompare(b.name);
+  return (a.name || "").localeCompare(b.name || "");
 }
 
 export function sortCohortsBySchoolAndDate(

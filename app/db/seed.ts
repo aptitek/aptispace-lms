@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import type { Database } from "./index";
 import {
   institutions,
@@ -78,7 +78,7 @@ export async function seedDatabase(db: Database) {
   const existingCohort = await db
     .select()
     .from(cohorts)
-    .where(eq(cohorts.name, "Cohort 2026"))
+    .where(and(eq(cohorts.diploma, "M"), eq(cohorts.year, 1)))
     .limit(1);
 
   let cohortId: string;
@@ -94,7 +94,9 @@ export async function seedDatabase(db: Database) {
       .insert(cohorts)
       .values({
         institutionId,
-        name: "Cohort 2026",
+        diploma: "M",
+        year: 1,
+        tags: ["IA", "Dev"],
         description: "Primary software engineering cohort.",
         startDate,
         endDate,
@@ -108,14 +110,16 @@ export async function seedDatabase(db: Database) {
   const cohort2025 = await db
     .select()
     .from(cohorts)
-    .where(eq(cohorts.name, "Cohort 2025"))
+    .where(and(eq(cohorts.diploma, "L"), eq(cohorts.year, 2)))
     .limit(1);
   if (cohort2025.length === 0) {
     const d2025 = new Date("2025-09-01");
     const end2025 = new Date("2026-06-30");
     await db.insert(cohorts).values({
       institutionId,
-      name: "Cohort 2025",
+      diploma: "L",
+      year: 2,
+      tags: ["Data"],
       description: "Alumni software engineering cohort.",
       startDate: d2025,
       endDate: end2025,
@@ -127,14 +131,16 @@ export async function seedDatabase(db: Database) {
   const cohort2027 = await db
     .select()
     .from(cohorts)
-    .where(eq(cohorts.name, "Cohort 2027"))
+    .where(and(eq(cohorts.diploma, "B"), eq(cohorts.year, 3)))
     .limit(1);
   if (cohort2027.length === 0) {
     const d2027 = new Date("2027-09-01");
     const end2027 = new Date("2028-06-30");
     await db.insert(cohorts).values({
       institutionId,
-      name: "Cohort 2027",
+      diploma: "B",
+      year: 3,
+      tags: ["Cyber"],
       description: "Upcoming software engineering cohort.",
       startDate: d2027,
       endDate: end2027,

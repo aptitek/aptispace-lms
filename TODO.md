@@ -15,6 +15,7 @@
 [x] Remove server.hmr.overlay and catch the errors with our status center if possible instead
 [x] In status center remove the mention of REALTIME and BPM
 [x] Dev impersonation should not logout to another user but normal logout
+[ ] Remove ALL code that has to do with the fallback when there is no D1 connection and mock data, just show proper error in Status Center.
 
 --- MANUAL TASKS ---
 

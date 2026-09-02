@@ -16,7 +16,9 @@ import {
   CohortDurationBanner,
   CohortDatePickerFields,
   CohortInspectorActions,
+  CohortStructuredFields,
 } from "./CohortInspector.components";
+import { formatCohortName, parseCohortName } from "~/utils/cohortFormat";
 
 function formatDateForInput(dateInput?: string | Date | null): string {
   if (!dateInput) return "";
@@ -40,6 +42,9 @@ interface CohortFormValues {
   description: string;
   startDate: string;
   endDate: string;
+  diploma: string;
+  year: number;
+  tags: string[];
 }
 
 function hasFormChanged(a: CohortFormValues, b: CohortFormValues): boolean {
@@ -47,7 +52,10 @@ function hasFormChanged(a: CohortFormValues, b: CohortFormValues): boolean {
     a.name !== b.name ||
     a.description !== b.description ||
     a.startDate !== b.startDate ||
-    a.endDate !== b.endDate
+    a.endDate !== b.endDate ||
+    a.diploma !== b.diploma ||
+    a.year !== b.year ||
+    JSON.stringify(a.tags) !== JSON.stringify(b.tags)
   );
 }
 
@@ -60,6 +68,9 @@ interface CohortInspectorProps {
     description?: string;
     startDate?: string;
     endDate?: string;
+    diploma?: string;
+    year?: number | null;
+    tags?: string[];
   }) => void;
   isSubmitting?: boolean;
 }
@@ -73,10 +84,12 @@ export default function CohortInspector({
   const { t } = useTranslation("common");
   const isEditing = Boolean(cohort?.id);
 
-  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [diploma, setDiploma] = useState("");
+  const [year, setYear] = useState<number>(0);
+  const [tags, setTags] = useState<string[]>([]);
   const [selectedPeriod, setSelectedPeriod] =
     useState<AcademicPeriodType>("fullAcademic");
 
@@ -85,20 +98,47 @@ export default function CohortInspector({
     description: "",
     startDate: "",
     endDate: "",
+    diploma: "",
+    year: 0,
+    tags: [],
   });
 
   useEffect(() => {
     if (cohort) {
+      // If fields are not explicitly set on cohort, attempt reverse-parse from name
+      const parsed = parseCohortName(cohort.name);
+      const initDiploma = cohort.diploma || parsed.diploma || "";
+      const initYear =
+        cohort.year !== undefined && cohort.year !== null
+          ? cohort.year
+          : parsed.year !== null
+            ? parsed.year
+            : 0;
+      const initTags =
+        cohort.tags && cohort.tags.length > 0 ? cohort.tags : parsed.tags;
+
+      const autoName = formatCohortName({
+        diploma: initDiploma,
+        year: initYear,
+        tags: initTags,
+      });
+
       const initial: CohortFormValues = {
-        name: cohort.name || "",
+        name: autoName,
         description: cohort.description || "",
         startDate: formatDateForInput(cohort.startDate),
         endDate: formatDateForInput(cohort.endDate),
+        diploma: initDiploma,
+        year: initYear,
+        tags: initTags,
       };
-      setName(initial.name);
+
       setDescription(initial.description);
       setStartDate(initial.startDate);
       setEndDate(initial.endDate);
+      setDiploma(initial.diploma);
+      setYear(initial.year);
+      setTags(initial.tags);
       savedValuesRef.current = initial;
     }
   }, [cohort]);
@@ -108,27 +148,54 @@ export default function CohortInspector({
   const triggerSave = (updates?: Partial<CohortFormValues>) => {
     if (!isEditing || !cohort?.id) return;
     const next: CohortFormValues = {
-      name,
+      name: formatCohortName({ diploma, year, tags }),
       description,
       startDate,
       endDate,
+      diploma,
+      year,
+      tags,
       ...updates,
     };
-    if (!next.name.trim()) return;
+    // Ensure computed name matches updated fields
+    next.name = formatCohortName({
+      diploma: next.diploma,
+      year: next.year,
+      tags: next.tags,
+    });
+
     if (!hasFormChanged(savedValuesRef.current, next)) return;
 
     savedValuesRef.current = next;
     onSave({
       id: cohort.id,
-      name: next.name.trim(),
+      name: next.name,
       description: next.description.trim() || undefined,
       startDate: next.startDate || undefined,
       endDate: next.endDate || undefined,
+      diploma: next.diploma || undefined,
+      year: next.year,
+      tags: next.tags,
     });
   };
 
-  const handleSelectYear = (year: number) => {
-    const dates = getAcademicYearDates(year, selectedPeriod);
+  const handleDiplomaChange = (newDiploma: string) => {
+    setDiploma(newDiploma);
+    triggerSave({ diploma: newDiploma });
+  };
+
+  const handleYearChange = (newYear: number) => {
+    setYear(newYear);
+    triggerSave({ year: newYear });
+  };
+
+  const handleTagsChange = (newTags: string[]) => {
+    setTags(newTags);
+    triggerSave({ tags: newTags });
+  };
+
+  const handleSelectYear = (selectedYr: number) => {
+    const dates = getAcademicYearDates(selectedYr, selectedPeriod);
     setStartDate(dates.startDate);
     setEndDate(dates.endDate);
     triggerSave({ startDate: dates.startDate, endDate: dates.endDate });
@@ -145,12 +212,16 @@ export default function CohortInspector({
   };
 
   const handleCreate = () => {
-    if (!name.trim()) return;
+    if (!diploma.trim()) return;
+    const computedName = formatCohortName({ diploma, year, tags });
     onSave({
-      name: name.trim(),
+      name: computedName,
       description: description.trim() || undefined,
       startDate: startDate || undefined,
       endDate: endDate || undefined,
+      diploma: diploma.trim(),
+      year,
+      tags,
     });
   };
 
@@ -175,15 +246,14 @@ export default function CohortInspector({
       >
         <CohortInspectorHeader isEditing={isEditing} onClose={onClose} />
 
-        <TextField
-          label={t("inspector.institutionName", "Name")}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onBlur={() => triggerSave({ name })}
-          fullWidth
+        <CohortStructuredFields
+          diploma={diploma}
+          onDiplomaChange={handleDiplomaChange}
+          year={year}
+          onYearChange={handleYearChange}
+          tags={tags}
+          onTagsChange={handleTagsChange}
           disabled={isSubmitting}
-          required
-          data-testid="cohort-name-input"
         />
 
         <TextField
@@ -226,7 +296,7 @@ export default function CohortInspector({
           onCreate={handleCreate}
           isEditing={isEditing}
           disabled={isSubmitting}
-          isSaveDisabled={!name.trim()}
+          isSaveDisabled={!diploma.trim()}
         />
       </Card>
     </LocalizationProvider>

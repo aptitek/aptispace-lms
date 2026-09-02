@@ -12,7 +12,10 @@ export interface SchoolConfig {
 export interface CohortConfig {
   id?: string;
   institutionId?: string;
-  name: string;
+  name?: string; // computed / display name (e.g. "M1-IA-Dev")
+  diploma?: string | null;
+  year?: number | null;
+  tags?: string[] | null;
   description?: string;
   startDate?: string | Date;
   endDate?: string | Date;

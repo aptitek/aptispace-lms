@@ -11,6 +11,7 @@ import {
   getDefaultCohorts,
   type DbUserWithAffil,
 } from "./admin.helpers";
+import { getCohortDisplayName } from "~/utils/cohortFormat";
 import type { AuthUser } from "~/utils/auth";
 
 export async function loadAdminDashboardData(
@@ -56,8 +57,11 @@ export async function loadAdminDashboardData(
     dbCohorts.length > 0
       ? dbCohorts.map((c) => ({
           id: c.id,
-          name: c.name,
+          name: getCohortDisplayName(c),
           institutionId: c.institutionId,
+          diploma: c.diploma,
+          year: c.year,
+          tags: c.tags,
           description: c.description ?? undefined,
           startDate: c.startDate ? c.startDate.toISOString() : undefined,
           endDate: c.endDate ? c.endDate.toISOString() : undefined,

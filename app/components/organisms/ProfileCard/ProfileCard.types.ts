@@ -1,5 +1,6 @@
 import type { BoxProps } from "@mui/material/Box";
 import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
+import type { CohortConfig } from "~/types/institution";
 
 export interface ProfileCardProps extends Omit<BoxProps, "onChange"> {
   /**
@@ -11,7 +12,11 @@ export interface ProfileCardProps extends Omit<BoxProps, "onChange"> {
    */
   institutionName?: string;
   /**
-   * Cohort name to display in the badge
+   * Structured cohort or cohort config to display with CohortChip
+   */
+  cohort?: CohortConfig;
+  /**
+   * Cohort name to display in the badge (legacy fallback)
    */
   cohortName?: string;
   /**

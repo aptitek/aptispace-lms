@@ -303,8 +303,10 @@ describe("Admin Route", () => {
               },
               cohort: {
                 id: "cohort-2026",
-                name: "Cohort 2026",
                 institutionId: "school-1",
+                diploma: "M",
+                year: 1,
+                tags: ["Dev"],
                 description: null,
                 startDate: new Date(),
                 endDate: null,

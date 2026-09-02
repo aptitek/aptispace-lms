@@ -18,7 +18,12 @@ export async function getAllCohorts(db: Database): Promise<Cohort[]> {
   return db
     .select()
     .from(cohorts)
-    .orderBy(desc(cohorts.startDate), desc(cohorts.createdAt), cohorts.name);
+    .orderBy(
+      desc(cohorts.startDate),
+      desc(cohorts.createdAt),
+      cohorts.diploma,
+      cohorts.year,
+    );
 }
 
 export async function getCohortsByInstitution(
@@ -29,7 +34,12 @@ export async function getCohortsByInstitution(
     .select()
     .from(cohorts)
     .where(eq(cohorts.institutionId, institutionId))
-    .orderBy(desc(cohorts.startDate), desc(cohorts.createdAt), cohorts.name);
+    .orderBy(
+      desc(cohorts.startDate),
+      desc(cohorts.createdAt),
+      cohorts.diploma,
+      cohorts.year,
+    );
 }
 
 export async function createInstitution(
@@ -151,10 +161,12 @@ export async function createCohort(
   db: Database,
   params: {
     institutionId: string;
-    name: string;
     description?: string;
     startDate?: Date;
     endDate?: Date;
+    diploma?: string | null;
+    year?: number | null;
+    tags?: string[] | null;
     actorUserId?: string;
   },
 ) {
@@ -162,7 +174,9 @@ export async function createCohort(
     .insert(cohorts)
     .values({
       institutionId: params.institutionId,
-      name: params.name,
+      diploma: params.diploma,
+      year: params.year,
+      tags: params.tags,
       description: params.description,
       startDate: params.startDate,
       endDate: params.endDate,
@@ -185,10 +199,12 @@ export async function updateCohort(
   db: Database,
   id: string,
   params: {
-    name?: string;
     description?: string;
     startDate?: Date | null;
     endDate?: Date | null;
+    diploma?: string | null;
+    year?: number | null;
+    tags?: string[] | null;
     actorUserId?: string;
   },
 ) {
@@ -202,7 +218,9 @@ export async function updateCohort(
   const [updated] = await db
     .update(cohorts)
     .set({
-      name: params.name ?? existing.name,
+      diploma: params.diploma !== undefined ? params.diploma : existing.diploma,
+      year: params.year !== undefined ? params.year : existing.year,
+      tags: params.tags !== undefined ? params.tags : existing.tags,
       description:
         params.description !== undefined
           ? params.description

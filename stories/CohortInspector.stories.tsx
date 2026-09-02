@@ -49,3 +49,20 @@ export const AddCohort: Story = {
     onSave: () => {},
   },
 };
+
+export const StructuredCohort: Story = {
+  args: {
+    cohort: {
+      id: "cohort-structured-1",
+      name: "M1-IA-Dev",
+      diploma: "M",
+      year: 1,
+      tags: ["IA", "Dev"],
+      institutionId: "school-aptitek",
+      startDate: "2026-09-01",
+      endDate: "2027-06-30",
+    },
+    onClose: () => {},
+    onSave: () => {},
+  },
+};

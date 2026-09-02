@@ -85,6 +85,47 @@ export function meta(_args: Route.MetaArgs) {
   ];
 }
 
+interface CohortSavePayload {
+  id?: string;
+  name?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  diploma?: string;
+  year?: number | null;
+  tags?: string[];
+}
+
+function buildCohortSubmitData(
+  institutionId: string,
+  payload: CohortSavePayload,
+): Record<string, string> {
+  const intent = payload.id ? "update-cohort" : "create-cohort";
+  const data: Record<string, string> = { intent, institutionId };
+
+  const stringFields: Array<[keyof CohortSavePayload, string]> = [
+    ["id", "id"],
+    ["name", "name"],
+    ["description", "description"],
+    ["startDate", "startDate"],
+    ["endDate", "endDate"],
+    ["diploma", "diploma"],
+  ];
+
+  for (const [prop, key] of stringFields) {
+    const fieldVal = payload[prop];
+    if (typeof fieldVal === "string") data[key] = fieldVal;
+  }
+
+  if (payload.year !== undefined) {
+    data.year = payload.year === null ? "" : String(payload.year);
+  }
+  if (payload.tags !== undefined) {
+    data.tags = JSON.stringify(payload.tags);
+  }
+  return data;
+}
+
 export default function AdminManagement() {
   const loaderData = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
@@ -218,27 +259,12 @@ export default function AdminManagement() {
     }
   };
 
-  const handleSaveCohort = (payload: {
-    id?: string;
-    name: string;
-    description?: string;
-    startDate?: string;
-    endDate?: string;
-  }) => {
+  const handleSaveCohort = (payload: CohortSavePayload) => {
     if (!selectedSchool?.id) {
       notifyError(new Error("No institution selected"));
       return;
     }
-    const intent = payload.id ? "update-cohort" : "create-cohort";
-    const data: Record<string, string> = {
-      intent,
-      institutionId: selectedSchool.id,
-      name: payload.name,
-    };
-    if (payload.id) data.id = payload.id;
-    if (payload.description) data.description = payload.description;
-    if (payload.startDate) data.startDate = payload.startDate;
-    if (payload.endDate) data.endDate = payload.endDate;
+    const data = buildCohortSubmitData(selectedSchool.id, payload);
     fetcher.submit(data, { method: "post" });
     if (!payload.id) {
       setSelectedCohortForEdit(null);

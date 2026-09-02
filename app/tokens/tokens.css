@@ -37,6 +37,15 @@
   --color-role-admin: var(--color-solarized-magenta);
   --color-role-guest: var(--color-solarized-base01);
 
+  /* Named Diploma Color Tokens */
+  --color-diploma-c: var(--color-solarized-cyan);
+  --color-diploma-f: var(--color-solarized-orange);
+  --color-diploma-l: var(--color-solarized-green);
+  --color-diploma-b: var(--color-solarized-blue);
+  --color-diploma-m: var(--color-solarized-violet);
+  --color-diploma-d: var(--color-solarized-red);
+  --color-diploma-default: var(--color-solarized-blue);
+
   /* Named Celestial / Astronomy Tokens */
   --color-celestial-sun-main: var(--color-solarized-yellow);
   --color-celestial-sun-glow: #d4a400;

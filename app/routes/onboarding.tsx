@@ -322,7 +322,7 @@ export default function OnboardingPage() {
         <ProfileCard
           schoolLogoUrl={cardProps.logoUrl}
           institutionName={selectedSchool.name}
-          cohortName="Web Development"
+          cohort={{ diploma: "M", year: 1, tags: ["IA", "Dev"] }}
           year="2026"
           avatarUrl={profile.avatarUrl}
           role={cardProps.role}

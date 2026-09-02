@@ -54,7 +54,9 @@ export const cohorts = sqliteTable("cohorts", {
   institutionId: text("institution_id")
     .notNull()
     .references(() => institutions.id, { onDelete: "cascade" }),
-  name: text("name").notNull(), // ex: "M1 IA", "Formation Docker Équipe A"
+  diploma: text("diploma"), // "C", "F", "L", "B", "M", "D"
+  year: integer("year"), // 0 / null = no year, 1 = 1st year, etc.
+  tags: text("tags", { mode: "json" }).$type<string[]>(), // JSON array e.g. ["AI", "Dev"]
   description: text("description"),
   startDate: integer("start_date", { mode: "timestamp" }),
   endDate: integer("end_date", { mode: "timestamp" }),

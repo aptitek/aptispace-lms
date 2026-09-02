@@ -13,6 +13,8 @@ import CohortCard, {
 import InstitutionFilterBar from "~/components/molecules/InstitutionFilterBar/InstitutionFilterBar";
 import InstitutionInspector from "~/components/organisms/InstitutionInspector/InstitutionInspector";
 import CohortInspector from "~/components/organisms/CohortInspector/CohortInspector";
+import CohortFilterBar from "~/components/molecules/CohortFilterBar/CohortFilterBar";
+import { parseCohortName } from "~/utils/cohortFormat";
 import { normalizeInstitutionType } from "~/tokens/institutions";
 import {
   TabPanelContainer,
@@ -46,12 +48,97 @@ export interface AdminCohortsTabPanelProps {
   }) => void;
   onSaveCohort: (payload: {
     id?: string;
-    name: string;
+    name?: string;
     description?: string;
     startDate?: string;
     endDate?: string;
+    diploma?: string;
+    year?: number | null;
+    tags?: string[];
   }) => void;
   isSubmitting: boolean;
+}
+
+interface CohortFilterOptions {
+  cohortStartYearMin: number | null;
+  cohortStartYearMax: number | null;
+  cohortDiplomaFilter: string;
+  cohortYearFilter: string | number;
+  cohortTagFilter: string;
+  cohortSearchQuery: string;
+}
+
+function matchesCohortDateRange(
+  startDate?: string | Date | null,
+  minYear?: number | null,
+  maxYear?: number | null,
+): boolean {
+  if (minYear == null && maxYear == null) return true;
+  if (!startDate) return false;
+  const yr = new Date(startDate).getFullYear();
+  if (isNaN(yr)) return false;
+  if (minYear != null && yr < minYear) return false;
+  if (maxYear != null && yr > maxYear) return false;
+  return true;
+}
+
+function matchesCohortSearch(
+  c: CohortWithInstitution,
+  tags: string[],
+  query: string,
+): boolean {
+  if (!query.trim()) return true;
+  const q = query.toLowerCase().trim();
+  const nameMatch = (c.name || "").toLowerCase().includes(q);
+  const descMatch = Boolean(c.description?.toLowerCase().includes(q));
+  const tagMatch = tags.some((t) => t.toLowerCase().includes(q));
+  return nameMatch || descMatch || tagMatch;
+}
+
+function matchesCohortDiploma(diploma: string, filter: string): boolean {
+  if (filter === "all") return true;
+  return diploma === filter.toUpperCase();
+}
+
+function matchesCohortYear(year: number, filter: string | number): boolean {
+  if (filter === "all" || filter === "") return true;
+  return year === Number(filter);
+}
+
+function matchesCohortTag(tags: string[], filter: string): boolean {
+  if (filter === "all") return true;
+  const lowerFilter = filter.toLowerCase();
+  return tags.some((t) => t.toLowerCase() === lowerFilter);
+}
+
+function extractCohortFilterAttributes(c: CohortWithInstitution) {
+  const parsed = parseCohortName(c.name);
+  const diploma = (c.diploma || parsed.diploma || "").trim().toUpperCase();
+  const year = c.year ?? parsed.year ?? 0;
+  const tags = c.tags && c.tags.length > 0 ? c.tags : parsed.tags;
+  return { diploma, year, tags };
+}
+
+function matchesCohortFilter(
+  c: CohortWithInstitution,
+  options: CohortFilterOptions,
+): boolean {
+  if (
+    !matchesCohortDateRange(
+      c.startDate,
+      options.cohortStartYearMin,
+      options.cohortStartYearMax,
+    )
+  ) {
+    return false;
+  }
+
+  const { diploma, year, tags } = extractCohortFilterAttributes(c);
+
+  if (!matchesCohortDiploma(diploma, options.cohortDiplomaFilter)) return false;
+  if (!matchesCohortYear(year, options.cohortYearFilter)) return false;
+  if (!matchesCohortTag(tags, options.cohortTagFilter)) return false;
+  return matchesCohortSearch(c, tags, options.cohortSearchQuery);
 }
 
 export function AdminCohortsTabPanel({
@@ -83,6 +170,14 @@ export function AdminCohortsTabPanel({
     null,
   );
 
+  // Cohort Grid Filter State
+  const [cohortDiplomaFilter, setCohortDiplomaFilter] = useState<string>("all");
+  const [cohortYearFilter, setCohortYearFilter] = useState<string | number>(
+    "all",
+  );
+  const [cohortTagFilter, setCohortTagFilter] = useState<string>("all");
+  const [cohortSearchQuery, setCohortSearchQuery] = useState<string>("");
+
   const hasCohortsInspectorOpen = Boolean(
     selectedSchoolForEdit || selectedCohortForEdit,
   );
@@ -104,21 +199,43 @@ export function AdminCohortsTabPanel({
     });
   }, [schools, institutionQuery, institutionTypeFilter]);
 
+  const schoolCohorts = useMemo(() => {
+    if (!selectedSchool) return [];
+    return cohorts.filter((c) => c.institutionId === selectedSchool.id);
+  }, [cohorts, selectedSchool]);
+
+  const availableSchoolTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    schoolCohorts.forEach((c) => {
+      const parsed = parseCohortName(c.name);
+      const tags = c.tags && c.tags.length > 0 ? c.tags : parsed.tags;
+      tags.forEach((tag) => tagSet.add(tag));
+    });
+    return Array.from(tagSet);
+  }, [schoolCohorts]);
+
   const filteredCohorts = useMemo(() => {
     if (!selectedSchool) return [];
-    return cohorts
-      .filter((c) => c.institutionId === selectedSchool.id)
-      .filter((c) => {
-        if (cohortStartYearMin == null && cohortStartYearMax == null)
-          return true;
-        if (!c.startDate) return false;
-        const yr = new Date(c.startDate).getFullYear();
-        if (isNaN(yr)) return false;
-        if (cohortStartYearMin != null && yr < cohortStartYearMin) return false;
-        if (cohortStartYearMax != null && yr > cohortStartYearMax) return false;
-        return true;
-      });
-  }, [cohorts, selectedSchool, cohortStartYearMin, cohortStartYearMax]);
+    return schoolCohorts.filter((c) =>
+      matchesCohortFilter(c, {
+        cohortStartYearMin,
+        cohortStartYearMax,
+        cohortDiplomaFilter,
+        cohortYearFilter,
+        cohortTagFilter,
+        cohortSearchQuery,
+      }),
+    );
+  }, [
+    schoolCohorts,
+    selectedSchool,
+    cohortStartYearMin,
+    cohortStartYearMax,
+    cohortDiplomaFilter,
+    cohortYearFilter,
+    cohortTagFilter,
+    cohortSearchQuery,
+  ]);
 
   return (
     <TabPanelContainer
@@ -171,6 +288,19 @@ export function AdminCohortsTabPanel({
                 defaultValue: `Cohorts for ${selectedSchool.name}`,
               })}
             </Typography>
+
+            <CohortFilterBar
+              query={cohortSearchQuery}
+              onQueryChange={setCohortSearchQuery}
+              diplomaFilter={cohortDiplomaFilter}
+              onDiplomaFilterChange={setCohortDiplomaFilter}
+              yearFilter={cohortYearFilter}
+              onYearFilterChange={setCohortYearFilter}
+              tagFilter={cohortTagFilter}
+              onTagFilterChange={setCohortTagFilter}
+              availableTags={availableSchoolTags}
+            />
+
             <MD3CollectionGrid data-testid="cohorts-zone">
               {filteredCohorts.map((cohort) => (
                 <CohortCard

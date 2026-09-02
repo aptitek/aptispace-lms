@@ -248,14 +248,16 @@ async function ensureDefaultInstitutionAndCohort(db: Database) {
   }
 
   let cohort = await db.query.cohorts.findFirst({
-    where: (c, { eq }) => eq(c.name, "Cohort 2026"),
+    where: (c, { eq, and }) => and(eq(c.diploma, "M"), eq(c.year, 1)),
   });
   if (!cohort) {
     const [createdCohort] = await db
       .insert(cohorts)
       .values({
         institutionId: inst.id,
-        name: "Cohort 2026",
+        diploma: "M",
+        year: 1,
+        tags: ["AI", "Dev"],
         description: "Primary software engineering cohort.",
       })
       .returning();
