@@ -18,9 +18,7 @@ import HoloDecorator from "../../atoms/HoloDecorator/HoloDecorator";
 import Chip from "../../atoms/Chip/Chip";
 import Logo from "../../atoms/Logo/Logo";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
-import Guilloche, {
-  generateGuillocheMaskDataUrl,
-} from "../../atoms/Guilloche";
+import Guilloche, { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche";
 import type { ProfileCardProps } from "./ProfileCard.types";
 import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
 

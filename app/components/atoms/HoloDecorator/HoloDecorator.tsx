@@ -20,34 +20,36 @@ const textHoloStyles = {
 
 const ImageHoloWrapper = styled("span", {
   shouldForwardProp: (prop) => prop !== "maskUrl" && prop !== "maskSize",
-})<{ maskUrl: string; maskSize?: string }>(({ maskUrl, maskSize = "contain" }) => ({
-  position: "relative",
-  display: "inline-flex",
-  "&::after": {
-    content: '""',
-    position: "absolute",
-    inset: 0,
-    backgroundImage: holoGradient,
-    backgroundSize:
-      "calc(var(--holo-bg-size-x, 100%) * 2) calc(var(--holo-bg-size-y, 100%) * 2)",
-    backgroundPosition:
-      "calc(-0.5 * var(--holo-bg-size-x, 100%) - var(--holo-offset-x, 0px)) calc(-0.5 * var(--holo-bg-size-y, 100%) - var(--holo-offset-y, 0px))",
-    maskImage: `url("${maskUrl}")`,
-    WebkitMaskImage: `url("${maskUrl}")`,
-    maskSize,
-    WebkitMaskSize: maskSize,
-    maskPosition: "center",
-    WebkitMaskPosition: "center",
-    maskRepeat: "no-repeat",
-    WebkitMaskRepeat: "no-repeat",
-    mixBlendMode: "screen",
-    pointerEvents: "none",
-    transition: "opacity 0.4s ease-in-out",
-    ".is-facing-away &": {
-      opacity: 0,
+})<{ maskUrl: string; maskSize?: string }>(
+  ({ maskUrl, maskSize = "contain" }) => ({
+    position: "relative",
+    display: "inline-flex",
+    "&::after": {
+      content: '""',
+      position: "absolute",
+      inset: 0,
+      backgroundImage: holoGradient,
+      backgroundSize:
+        "calc(var(--holo-bg-size-x, 100%) * 2) calc(var(--holo-bg-size-y, 100%) * 2)",
+      backgroundPosition:
+        "calc(-0.5 * var(--holo-bg-size-x, 100%) - var(--holo-offset-x, 0px)) calc(-0.5 * var(--holo-bg-size-y, 100%) - var(--holo-offset-y, 0px))",
+      maskImage: `url("${maskUrl}")`,
+      WebkitMaskImage: `url("${maskUrl}")`,
+      maskSize,
+      WebkitMaskSize: maskSize,
+      maskPosition: "center",
+      WebkitMaskPosition: "center",
+      maskRepeat: "no-repeat",
+      WebkitMaskRepeat: "no-repeat",
+      mixBlendMode: "screen",
+      pointerEvents: "none",
+      transition: "opacity 0.4s ease-in-out",
+      ".is-facing-away &": {
+        opacity: 0,
+      },
     },
-  },
-}));
+  }),
+);
 
 export default function HoloDecorator({
   children,
