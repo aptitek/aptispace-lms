@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
-import Chip from "@mui/material/Chip";
+import Chip from "~/components/atoms/Chip/Chip";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import InputLabel from "@mui/material/InputLabel";

@@ -8,6 +8,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useTranslation } from "react-i18next";
+import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -20,6 +21,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import { LoadingIndicator } from "react-material-expressive";
 import Tooltip from "@mui/material/Tooltip";
 import Avatar from "../../atoms/Avatar";
+import Badge from "../../atoms/Badge/Badge";
 import type {
   EditableAvatarProps,
   EditableAvatarShape,
@@ -32,7 +34,6 @@ import {
   MainContainer,
   MD3AvatarContainer,
   AvatarHoverOverlay,
-  AvatarResetBadge,
   UnifiedDropInputArea,
   InputPrefixIconHolder,
   TextInput,
@@ -42,26 +43,6 @@ import {
   DragBadgeHint,
   HelperMessage,
 } from "./EditableAvatar.styles";
-
-interface AvatarContentProps {
-  url: string;
-  name?: string;
-  shape?: EditableAvatarShape;
-}
-
-function AvatarInner({ url, name, shape }: AvatarContentProps) {
-  return (
-    <Avatar
-      src={url}
-      alt={name || "Avatar"}
-      name={name}
-      showReticle={shape === "biometric"}
-      shape={shape}
-      height="100%"
-      width="100%"
-    />
-  );
-}
 
 interface MD3AvatarProps {
   url: string;
@@ -76,102 +57,113 @@ interface MD3AvatarProps {
   onResetClick: (e: MouseEvent) => void;
 }
 
-interface ResetBadgeProps {
+function AvatarResetActionButton({
+  onResetClick,
+}: {
   onResetClick: (e: MouseEvent) => void;
-}
-
-function AvatarResetActionButton({ onResetClick }: ResetBadgeProps) {
+}) {
   const { t } = useTranslation("common");
   const label = t("avatar.resetToDefault", "Reset avatar to default");
   return (
     <Tooltip title={label}>
-      <AvatarResetBadge type="button" onClick={onResetClick} aria-label={label}>
-        <RestartAltIcon sx={{ fontSize: "14px" }} />
-      </AvatarResetBadge>
+      <Box
+        component="button"
+        type="button"
+        onClick={onResetClick}
+        aria-label={label}
+        data-testid="avatar-reset-button"
+        sx={{
+          position: "absolute",
+          top: -4,
+          right: -4,
+          zIndex: 10,
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          outline: "none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "50%",
+          transition: "transform 0.2s cubic-bezier(0.2, 0, 0, 1)",
+          "&:hover": { transform: "scale(1.15)" },
+        }}
+      >
+        <Badge
+          color="error"
+          shape="circle"
+          size="small"
+          icon={<RestartAltIcon sx={{ fontSize: 13 }} />}
+          standalone
+          testId="avatar-reset-badge"
+        />
+      </Box>
     </Tooltip>
   );
 }
 
-interface HoverOverlayProps {
-  shape?: EditableAvatarShape;
-  size?: EditableAvatarSize;
-}
-
-function AvatarHoverActionOverlay({ shape, size }: HoverOverlayProps) {
-  const { t } = useTranslation("common");
-  return (
-    <AvatarHoverOverlay
-      className="avatar-hover-overlay"
-      avatarShape={shape}
-      avatarSize={size}
-    >
-      <EditIcon sx={{ fontSize: "1.1rem" }} />
-      <span>{t("avatar.edit", "EDIT")}</span>
-    </AvatarHoverOverlay>
-  );
-}
-
-function handleAvatarKeyDown(
-  event: KeyboardEvent<HTMLDivElement>,
-  isInteractive: boolean,
-  onAvatarClick: () => void,
-) {
-  if (isInteractive && (event.key === "Enter" || event.key === " ")) {
-    onAvatarClick();
-  }
-}
-
-function resolveAvatarDisplayConfig(
+function getAvatarTooltipConfig(
   props: MD3AvatarProps,
-  t: (key: string, fallback: string) => string,
+  t: (k: string, f: string) => string,
 ) {
   const isInteractive = props.editable !== false;
   const tooltipText = isInteractive
     ? t("avatar.clickToEdit", "Click to edit avatar")
     : props.name || "";
-  const shouldShowTooltip = !props.disableTooltip && Boolean(tooltipText);
-
-  return {
-    isInteractive,
-    tooltipText,
-    shouldShowTooltip,
-    role: isInteractive ? ("button" as const) : undefined,
-    tabIndex: isInteractive ? 0 : undefined,
-    onClick: isInteractive ? props.onAvatarClick : undefined,
-  };
+  const showTooltip = !props.disableTooltip && Boolean(tooltipText);
+  return { isInteractive, tooltipText, showTooltip };
 }
 
 function MD3AvatarDisplay(props: MD3AvatarProps) {
   const { t } = useTranslation("common");
-  const config = resolveAvatarDisplayConfig(props, t);
+  const { isInteractive, tooltipText, showTooltip } = getAvatarTooltipConfig(
+    props,
+    t,
+  );
 
   return (
     <Tooltip
-      title={config.tooltipText}
+      title={tooltipText}
       arrow
       placement="top"
-      disableHoverListener={!config.shouldShowTooltip}
+      disableHoverListener={!showTooltip}
     >
       <MD3AvatarContainer
         avatarShape={props.shape}
         avatarSize={props.size}
-        isInteractive={config.isInteractive}
+        isInteractive={isInteractive}
         isDragging={props.isDragging}
-        onClick={config.onClick}
-        role={config.role}
-        tabIndex={config.tabIndex}
-        aria-label={config.tooltipText || undefined}
-        onKeyDown={(event) =>
-          handleAvatarKeyDown(event, config.isInteractive, props.onAvatarClick)
-        }
+        onClick={isInteractive ? props.onAvatarClick : undefined}
+        role={isInteractive ? "button" : undefined}
+        tabIndex={isInteractive ? 0 : undefined}
+        aria-label={tooltipText || undefined}
+        onKeyDown={(e) => {
+          if (isInteractive && (e.key === "Enter" || e.key === " ")) {
+            props.onAvatarClick();
+          }
+        }}
       >
-        <AvatarInner url={props.url} name={props.name} shape={props.shape} />
-
-        {config.isInteractive ? (
-          <AvatarHoverActionOverlay shape={props.shape} size={props.size} />
+        <Avatar
+          src={props.url}
+          alt={props.name || "Avatar"}
+          name={props.name}
+          showReticle={props.shape === "biometric"}
+          shape={props.shape}
+          height="100%"
+          width="100%"
+        />
+        {isInteractive ? (
+          <AvatarHoverOverlay
+            className="avatar-hover-overlay"
+            avatarShape={props.shape}
+            avatarSize={props.size}
+          >
+            <EditIcon sx={{ fontSize: "1.1rem" }} />
+            <span>{t("avatar.edit", "EDIT")}</span>
+          </AvatarHoverOverlay>
         ) : null}
-
-        {config.isInteractive && props.isModified ? (
+        {isInteractive && props.isModified ? (
           <AvatarResetActionButton onResetClick={props.onResetClick} />
         ) : null}
       </MD3AvatarContainer>
@@ -282,13 +274,15 @@ function AvatarInputBar(props: AvatarInputBarProps) {
   );
 }
 
-interface SimpleModalProps {
+function SimpleEditModal({
+  isOpen,
+  onClose,
+  children,
+}: {
   isOpen: boolean;
   onClose: () => void;
   children: ReactNode;
-}
-
-function SimpleEditModal({ isOpen, onClose, children }: SimpleModalProps) {
+}) {
   const { t } = useTranslation("common");
 
   return (
@@ -339,17 +333,15 @@ function SimpleEditModal({ isOpen, onClose, children }: SimpleModalProps) {
   );
 }
 
-interface FilePickerProps {
-  fileInputRef: RefObject<HTMLInputElement | null>;
-  isUploading: boolean;
-  onProcessFile: (file: File) => void;
-}
-
 function HiddenPicker({
   fileInputRef,
   isUploading,
   onProcessFile,
-}: FilePickerProps) {
+}: {
+  fileInputRef: RefObject<HTMLInputElement | null>;
+  isUploading: boolean;
+  onProcessFile: (file: File) => void;
+}) {
   return (
     <HiddenFileInput
       ref={fileInputRef}
@@ -369,24 +361,37 @@ function HiddenPicker({
   );
 }
 
-interface InlineLayoutProps {
-  hasPreview?: boolean;
-  isEditable?: boolean;
-  avatarElement: ReactNode;
-  inputBarElement: ReactNode;
-}
-
-function InlineLayout({
-  hasPreview,
-  isEditable,
-  avatarElement,
-  inputBarElement,
-}: InlineLayoutProps) {
+function EditableAvatarModals({
+  isModalOpen,
+  isImageOnly,
+  onClose,
+  inputBar,
+  helperContent,
+  errorMessage,
+}: {
+  isModalOpen: boolean;
+  isImageOnly: boolean;
+  onClose: () => void;
+  inputBar: ReactNode;
+  helperContent?: ReactNode;
+  errorMessage?: string | null;
+}) {
   return (
-    <MainContainer hasPreview={hasPreview}>
-      {hasPreview ? avatarElement : null}
-      {isEditable ? inputBarElement : null}
-    </MainContainer>
+    <>
+      <SimpleEditModal isOpen={isModalOpen && isImageOnly} onClose={onClose}>
+        {inputBar}
+        {helperContent ? (
+          <HelperMessage isError={Boolean(errorMessage)}>
+            {helperContent}
+          </HelperMessage>
+        ) : null}
+      </SimpleEditModal>
+      {!isImageOnly && helperContent ? (
+        <HelperMessage isError={Boolean(errorMessage)}>
+          {helperContent}
+        </HelperMessage>
+      ) : null}
+    </>
   );
 }
 
@@ -460,7 +465,7 @@ export function EditableAvatar(props: EditableAvatarProps) {
     />
   );
 
-  const helperContent = errorMessage || props.helperText;
+  const helperContent = (errorMessage || props.helperText) ?? undefined;
 
   return (
     <EditableAvatarRoot
@@ -478,37 +483,26 @@ export function EditableAvatar(props: EditableAvatarProps) {
       {isImageOnly ? (
         avatarDisplay
       ) : (
-        <InlineLayout
-          hasPreview={hasPreview}
-          isEditable={isEditable}
-          avatarElement={avatarDisplay}
-          inputBarElement={inputBar}
-        />
+        <MainContainer hasPreview={hasPreview}>
+          {hasPreview ? avatarDisplay : null}
+          {isEditable ? inputBar : null}
+        </MainContainer>
       )}
 
-      <SimpleEditModal
-        isOpen={isModalOpen && isImageOnly}
+      <EditableAvatarModals
+        isModalOpen={isModalOpen}
+        isImageOnly={isImageOnly}
         onClose={() => setIsModalOpen(false)}
-      >
-        {inputBar}
-        {helperContent ? (
-          <HelperMessage isError={Boolean(errorMessage)}>
-            {helperContent}
-          </HelperMessage>
-        ) : null}
-      </SimpleEditModal>
+        inputBar={inputBar}
+        helperContent={helperContent}
+        errorMessage={errorMessage}
+      />
 
       <HiddenPicker
         fileInputRef={fileInputRef}
         isUploading={isUploading}
         onProcessFile={handleProcessFile}
       />
-
-      {!isImageOnly && helperContent ? (
-        <HelperMessage isError={Boolean(errorMessage)}>
-          {helperContent}
-        </HelperMessage>
-      ) : null}
     </EditableAvatarRoot>
   );
 }

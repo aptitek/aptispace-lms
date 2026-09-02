@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import Chip from "@mui/material/Chip";
+import Chip from "~/components/atoms/Chip/Chip";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import InputAdornment from "@mui/material/InputAdornment";

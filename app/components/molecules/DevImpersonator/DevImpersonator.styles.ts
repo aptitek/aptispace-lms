@@ -3,7 +3,7 @@ import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import ButtonBase from "@mui/material/ButtonBase";
-import Chip from "@mui/material/Chip";
+import Chip from "~/components/atoms/Chip/Chip";
 import TextField from "@mui/material/TextField";
 import { M3_MOTION } from "~/tokens/theme";
 import type { UserRole } from "~/utils/auth";

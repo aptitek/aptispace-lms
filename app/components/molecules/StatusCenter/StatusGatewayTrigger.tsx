@@ -2,7 +2,7 @@ import React from "react";
 import { styled, keyframes, useTheme, type Theme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import Tooltip from "@mui/material/Tooltip";
-import Badge from "@mui/material/Badge";
+import Badge from "~/components/atoms/Badge/Badge";
 import MonitorHeartRoundedIcon from "@mui/icons-material/MonitorHeartRounded";
 import {
   useStatusCenter,

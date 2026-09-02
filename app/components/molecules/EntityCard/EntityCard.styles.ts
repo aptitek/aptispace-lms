@@ -1,4 +1,4 @@
-import { styled, alpha } from "@mui/material/styles";
+import { styled, alpha, type Theme } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import IconButton from "@mui/material/IconButton";
@@ -198,3 +198,35 @@ export const ImpersonateIconButton = styled(IconButton)(({ theme }) => ({
     },
   }),
 }));
+
+export const DeleteHoldWrapper = styled("span")({
+  display: "inline-flex",
+  width: "24px",
+  height: "24px",
+  flexShrink: 0,
+});
+
+export const deleteHoldButtonSx = {
+  width: "24px",
+  height: "24px",
+  minWidth: "24px",
+  maxWidth: "24px",
+  minHeight: "24px",
+  maxHeight: "24px",
+  p: 0,
+  padding: "3px",
+  borderRadius: "6px",
+  boxSizing: "border-box" as const,
+  color: "error.main",
+  backgroundColor: (theme: Theme) => alpha(theme.palette.error.main, 0.1),
+  border: (theme: Theme) => `1px solid ${alpha(theme.palette.error.main, 0.3)}`,
+  "&:hover": {
+    backgroundColor: (theme: Theme) => alpha(theme.palette.error.main, 0.2),
+    borderColor: "error.main",
+    color: "error.main",
+    transform: "scale(1.08)",
+  },
+  "& .MuiSvgIcon-root": {
+    fontSize: "14px",
+  },
+};

@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import Badge from "@mui/material/Badge";
+import Badge from "~/components/atoms/Badge/Badge";
 import AddIcon from "@mui/icons-material/Add";
 import Box from "@mui/material/Box";
 import type { CohortConfig } from "~/types/institution";

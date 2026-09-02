@@ -2,7 +2,7 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import Chip from "@mui/material/Chip";
+import Chip from "~/components/atoms/Chip/Chip";
 import Tooltip from "@mui/material/Tooltip";
 import Collapse from "@mui/material/Collapse";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";

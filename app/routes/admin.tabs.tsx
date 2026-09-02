@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
-import Chip from "@mui/material/Chip";
+import Chip from "~/components/atoms/Chip/Chip";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import ClassIcon from "@mui/icons-material/Class";
 import MenuBookIcon from "@mui/icons-material/MenuBook";

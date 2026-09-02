@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
-import Chip from "@mui/material/Chip";
+import Chip from "~/components/atoms/Chip/Chip";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import StorageRoundedIcon from "@mui/icons-material/StorageRounded";
 import CloudQueueRoundedIcon from "@mui/icons-material/CloudQueueRounded";

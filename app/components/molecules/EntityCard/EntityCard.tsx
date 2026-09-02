@@ -1,13 +1,15 @@
-import { forwardRef } from "react";
+import React, { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
-import { alpha } from "@mui/material/styles";
-import Chip from "@mui/material/Chip";
 import LoginIcon from "@mui/icons-material/Login";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
+import SupervisorAccountRoundedIcon from "@mui/icons-material/SupervisorAccountRounded";
+import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import Avatar from "../../atoms/Avatar/Avatar";
-import RoleBadge from "../../atoms/RoleBadge/RoleBadge";
-import GithubHandle from "../../atoms/GithubHandle/GithubHandle";
+import Chip from "../../atoms/Chip/Chip";
+import Badge from "../../atoms/Badge/Badge";
 import Tooltip from "../../atoms/Tooltip/Tooltip";
 import { HoldButton } from "../../atoms/HoldButton";
 import type { EntityCardProps, EntityCardData } from "./EntityCard.types";
@@ -31,7 +33,50 @@ import {
   StudentEmail,
   CardFooterRow,
   ImpersonateIconButton,
+  DeleteHoldWrapper,
+  deleteHoldButtonSx,
 } from "./EntityCard.styles";
+
+function formatGithubHandle(username?: string | null): string {
+  if (!username) return "@cadet";
+  const trimmed = username.trim();
+  if (!trimmed) return "@cadet";
+  return trimmed.startsWith("@") ? trimmed : `@${trimmed}`;
+}
+
+function getRoleBadgeConfig(role?: UserRole | string) {
+  const norm = (role || "").toLowerCase().trim();
+  switch (norm) {
+    case "admin":
+    case "administrator":
+      return {
+        shape: "9-sided-cookie" as const,
+        color: "secondary" as const,
+        icon: <AdminPanelSettingsRoundedIcon data-testid="role-icon-admin" />,
+        label: "Admin",
+      };
+    case "instructor":
+    case "teacher":
+    case "editingteacher":
+    case "faculty":
+      return {
+        shape: "ghost-ish" as const,
+        color: "info" as const,
+        icon: (
+          <SupervisorAccountRoundedIcon data-testid="role-icon-instructor" />
+        ),
+        label: "Instructor",
+      };
+    case "student":
+    default:
+      return {
+        shape: "pill" as const,
+        color: "success" as const,
+        icon: <SchoolRoundedIcon data-testid="role-icon-student" />,
+        label: "Student",
+      };
+  }
+}
 
 function resolveDisplayName(entity: EntityCardData): string {
   if (entity.displayName) return entity.displayName;
@@ -86,49 +131,35 @@ const DEFAULT_SCHOOL: SchoolConfig = {
   logoUrl: "/aptitek-logo.svg",
 };
 
-interface InstitutionBrandProps {
-  school: SchoolConfig;
-  label: string;
-}
-
-function InstitutionBrand({ school, label }: InstitutionBrandProps) {
-  if (school.logoUrl) {
-    return (
-      <InstitutionLogo
-        src={school.logoUrl}
-        alt={label}
-        data-testid="compact-institution-logo"
-      />
-    );
-  }
-  return (
-    <InstitutionName data-testid="compact-institution-name">
-      {label}
-    </InstitutionName>
-  );
-}
-
-interface CompactHeaderRowProps {
-  school: SchoolConfig;
-  institutionLabel: string;
-  cohortLabel: string;
-  cohortYear: string;
-  isProfileComplete?: boolean;
-}
-
 function CompactHeaderSlot({
   school,
   institutionLabel,
   cohortLabel,
   cohortYear,
   isProfileComplete,
-}: CompactHeaderRowProps) {
+}: {
+  school: SchoolConfig;
+  institutionLabel: string;
+  cohortLabel: string;
+  cohortYear: string;
+  isProfileComplete?: boolean;
+}) {
   const { t } = useTranslation(["auth", "common"]);
 
   return (
     <CardHeaderRow>
       <InstitutionBadge data-testid="compact-institution">
-        <InstitutionBrand school={school} label={institutionLabel} />
+        {school.logoUrl ? (
+          <InstitutionLogo
+            src={school.logoUrl}
+            alt={institutionLabel}
+            data-testid="compact-institution-logo"
+          />
+        ) : (
+          <InstitutionName data-testid="compact-institution-name">
+            {institutionLabel}
+          </InstitutionName>
+        )}
       </InstitutionBadge>
 
       <HeaderBadges>
@@ -178,17 +209,22 @@ function CompactHeaderSlot({
   );
 }
 
-interface CompactAvatarSlotProps {
-  entity: EntityCardData;
-  displayName: string;
-  role: UserRole;
-}
-
 function CompactAvatarSlot({
   entity,
   displayName,
   role,
-}: CompactAvatarSlotProps) {
+}: {
+  entity: EntityCardData;
+  displayName: string;
+  role: UserRole;
+}) {
+  const { t } = useTranslation(["auth", "common"]);
+  const roleConfig = getRoleBadgeConfig(role);
+  const roleLabel = t(
+    `auth:devTool.roles.${roleConfig.label.toLowerCase()}`,
+    roleConfig.label,
+  );
+
   return (
     <AvatarContainer data-testid="compact-avatar-container">
       <Avatar
@@ -200,9 +236,18 @@ function CompactAvatarSlot({
         isPortrait={true}
         testId="compact-avatar"
       />
-      <FloatingBadge data-testid="compact-role-badge">
-        <RoleBadge role={role} size="small" variant="icon-only" />
-      </FloatingBadge>
+      <Tooltip title={roleLabel} arrow placement="top">
+        <FloatingBadge data-testid="compact-role-badge">
+          <Badge
+            shape={roleConfig.shape}
+            color={roleConfig.color}
+            icon={roleConfig.icon}
+            size="small"
+            standalone
+            testId="compact-role-badge-inner"
+          />
+        </FloatingBadge>
+      </Tooltip>
     </AvatarContainer>
   );
 }
@@ -260,8 +305,6 @@ function CompactStudentDetailsSlot({
     }
   };
 
-  const shouldRenderDelete = Boolean(showDelete && onDelete);
-
   return (
     <StudentDetails>
       <StudentNameBlock data-testid="compact-student-name">
@@ -278,10 +321,23 @@ function CompactStudentDetailsSlot({
       </StudentEmail>
 
       <CardFooterRow>
-        <GithubHandle
-          username={entity.githubUsername}
+        <Chip
+          icon={<GitHubIcon sx={{ fontSize: 15 }} data-testid="octocat-icon" />}
+          label={formatGithubHandle(entity.githubUsername)}
           size="small"
+          variant="outlined"
+          mono
           testId="compact-github-handle"
+          sx={{
+            height: 24,
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            backgroundColor: "background.paper",
+            border: (theme: { palette: { divider: string } }) =>
+              `1px solid ${theme.palette.divider}`,
+            "& .MuiChip-label": { px: 0.8 },
+            "&:hover": { borderColor: "primary.main" },
+          }}
         />
 
         <Box
@@ -305,18 +361,11 @@ function CompactStudentDetailsSlot({
             </Tooltip>
           )}
 
-          {shouldRenderDelete && (
+          {showDelete && onDelete && (
             <Tooltip title={deleteLabel} arrow placement="top">
-              <Box
-                component="span"
+              <DeleteHoldWrapper
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
                 onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
-                sx={{
-                  display: "inline-flex",
-                  width: "24px",
-                  height: "24px",
-                  flexShrink: 0,
-                }}
               >
                 <HoldButton
                   color="error"
@@ -324,60 +373,24 @@ function CompactStudentDetailsSlot({
                   holdTime={1000}
                   borderThickness={1.5}
                   outlineGap={2}
-                  onHoldComplete={() => onDelete?.(entity)}
+                  onHoldComplete={() => onDelete(entity)}
                   aria-label={deleteLabel}
                   data-testid="compact-delete-btn"
                   wrapperSx={{
-                    width: "24px",
-                    height: "24px",
-                    minWidth: "24px",
-                    maxWidth: "24px",
-                    minHeight: "24px",
-                    maxHeight: "24px",
+                    width: 24,
+                    height: 24,
+                    minWidth: 24,
+                    maxWidth: 24,
+                    minHeight: 24,
+                    maxHeight: 24,
                     flexShrink: 0,
                     display: "inline-flex",
                   }}
-                  sx={{
-                    width: "24px",
-                    height: "24px",
-                    minWidth: "24px",
-                    maxWidth: "24px",
-                    minHeight: "24px",
-                    maxHeight: "24px",
-                    p: 0,
-                    padding: "3px",
-                    borderRadius: "6px",
-                    boxSizing: "border-box",
-                    color: "error.main",
-                    backgroundColor: (theme) =>
-                      alpha(theme.palette.error.main, 0.1),
-                    border: (theme) =>
-                      `1px solid ${alpha(theme.palette.error.main, 0.3)}`,
-                    transition: (theme) =>
-                      theme.transitions.create(
-                        [
-                          "background-color",
-                          "border-color",
-                          "transform",
-                          "color",
-                        ],
-                        { duration: theme.transitions.duration.shorter },
-                      ),
-                    "&:hover": {
-                      backgroundColor: (theme) =>
-                        alpha(theme.palette.error.main, 0.2),
-                      borderColor: "error.main",
-                      color: "error.main",
-                      transform: "scale(1.08)",
-                    },
-                    "& .MuiSvgIcon-root": {
-                      fontSize: "14px",
-                    },
-                  }}
+                  sx={deleteHoldButtonSx}
                 >
                   <DeleteOutlineRoundedIcon sx={{ fontSize: 14 }} />
                 </HoldButton>
-              </Box>
+              </DeleteHoldWrapper>
             </Tooltip>
           )}
         </Box>
@@ -393,9 +406,7 @@ function useCardInteractivity(
 ) {
   const isInteractive = Boolean(interactive && onClick);
   const handleClick = () => {
-    if (isInteractive && onClick) {
-      onClick(entity);
-    }
+    if (isInteractive && onClick) onClick(entity);
   };
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const isActivationKey = event.key === "Enter" || event.key === " ";
@@ -466,7 +477,6 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
               displayName={displayName}
               role={role}
             />
-
             <CompactStudentDetailsSlot
               entity={entity}
               displayName={displayName}
@@ -483,5 +493,4 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
 );
 
 EntityCard.displayName = "EntityCard";
-
 export default EntityCard;

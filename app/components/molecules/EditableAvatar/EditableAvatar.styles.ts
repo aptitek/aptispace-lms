@@ -175,23 +175,6 @@ export const AvatarHoverOverlay = styled(Box, {
   };
 });
 
-export const AvatarResetBadge = styled(IconButton)(({ theme }) => ({
-  position: "absolute",
-  top: -4,
-  right: -4,
-  width: 20,
-  height: 20,
-  backgroundColor: theme.palette.background.paper,
-  border: `1px solid ${theme.palette.divider}`,
-  color: theme.palette.text.secondary,
-  padding: 0,
-  zIndex: 4,
-  "&:hover": {
-    backgroundColor: theme.palette.error.main,
-    color: theme.palette.error.contrastText,
-  },
-}));
-
 export const UnifiedDropInputArea = styled(Box, {
   shouldForwardProp: (prop) => prop !== "isDragging" && prop !== "hasError",
 })<{
