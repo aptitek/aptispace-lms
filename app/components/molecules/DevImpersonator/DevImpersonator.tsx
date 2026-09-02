@@ -17,10 +17,7 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Avatar from "~/components/atoms/Avatar/Avatar";
-import {
-  getRoleAvatarShape,
-  type ExpressiveShapeName,
-} from "~/components/atoms/Avatar/shapes";
+import { getRoleConfig } from "~/tokens/roles";
 import {
   type AccountDefinition,
   type UserRole,
@@ -58,25 +55,6 @@ import {
   StatusPill,
 } from "./DevImpersonator.styles";
 
-function resolveAvatarShape(role: UserRole): ExpressiveShapeName {
-  return getRoleAvatarShape(role);
-}
-
-function resolveRoleChipColor(
-  role: UserRole,
-): "secondary" | "info" | "success" | "default" {
-  switch (role) {
-    case "admin":
-      return "secondary";
-    case "instructor":
-      return "info";
-    case "student":
-      return "success";
-    default:
-      return "default";
-  }
-}
-
 function matchesFilter(
   account: AccountDefinition,
   filterRole: RoleFilterOption,
@@ -111,8 +89,7 @@ function DevAccountItem({
   onSelect,
 }: DevAccountItemProps) {
   const { t } = useTranslation("auth");
-  const avatarShape = resolveAvatarShape(account.role);
-  const chipColor = resolveRoleChipColor(account.role);
+  const roleConfig = getRoleConfig(account.role);
   const roleLabel = t(`devTool.roles.${account.role}` as const, {
     defaultValue: account.role,
   });
@@ -132,7 +109,7 @@ function DevAccountItem({
         <AccountAvatarWrapper>
           <Avatar
             name={account.name}
-            shape={avatarShape}
+            shape={roleConfig.avatarShape}
             role={account.role}
             width={34}
             height={34}
@@ -145,7 +122,8 @@ function DevAccountItem({
             <AccountName variant="body2">{account.name}</AccountName>
 
             <Chip
-              color={chipColor}
+              color={roleConfig.chipColor}
+              shape={roleConfig.statusChipShape}
               variant={isSelected ? "filled" : "outlined"}
               label={roleLabel}
               size="small"

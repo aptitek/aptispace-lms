@@ -4,9 +4,6 @@ import Box from "@mui/material/Box";
 import LoginIcon from "@mui/icons-material/Login";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
-import SupervisorAccountRoundedIcon from "@mui/icons-material/SupervisorAccountRounded";
-import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import Avatar from "../../atoms/Avatar/Avatar";
 import Chip from "../../atoms/Chip/Chip";
 import Badge from "../../atoms/Badge/Badge";
@@ -15,6 +12,7 @@ import { HoldButton } from "../../atoms/HoldButton";
 import type { EntityCardProps, EntityCardData } from "./EntityCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import { loginAsAccount, type UserRole } from "~/utils/auth";
+import { getRoleConfig } from "~/tokens/roles";
 import {
   StyledCard,
   StyledCardContent,
@@ -42,40 +40,6 @@ function formatGithubHandle(username?: string | null): string {
   const trimmed = username.trim();
   if (!trimmed) return "@cadet";
   return trimmed.startsWith("@") ? trimmed : `@${trimmed}`;
-}
-
-function getRoleBadgeConfig(role?: UserRole | string) {
-  const norm = (role || "").toLowerCase().trim();
-  switch (norm) {
-    case "admin":
-    case "administrator":
-      return {
-        shape: "9-sided-cookie" as const,
-        color: "secondary" as const,
-        icon: <AdminPanelSettingsRoundedIcon data-testid="role-icon-admin" />,
-        label: "Admin",
-      };
-    case "instructor":
-    case "teacher":
-    case "editingteacher":
-    case "faculty":
-      return {
-        shape: "ghost-ish" as const,
-        color: "info" as const,
-        icon: (
-          <SupervisorAccountRoundedIcon data-testid="role-icon-instructor" />
-        ),
-        label: "Instructor",
-      };
-    case "student":
-    default:
-      return {
-        shape: "pill" as const,
-        color: "success" as const,
-        icon: <SchoolRoundedIcon data-testid="role-icon-student" />,
-        label: "Student",
-      };
-  }
 }
 
 function resolveDisplayName(entity: EntityCardData): string {
@@ -219,7 +183,7 @@ function CompactAvatarSlot({
   role: UserRole;
 }) {
   const { t } = useTranslation(["auth", "common"]);
-  const roleConfig = getRoleBadgeConfig(role);
+  const roleConfig = getRoleConfig(role);
   const roleLabel = t(
     `auth:devTool.roles.${roleConfig.label.toLowerCase()}`,
     roleConfig.label,
@@ -239,8 +203,8 @@ function CompactAvatarSlot({
       <Tooltip title={roleLabel} arrow placement="top">
         <FloatingBadge data-testid="compact-role-badge">
           <Badge
-            shape={roleConfig.shape}
-            color={roleConfig.color}
+            shape={roleConfig.badgeShape}
+            color={roleConfig.badgeColor}
             icon={roleConfig.icon}
             size="small"
             standalone

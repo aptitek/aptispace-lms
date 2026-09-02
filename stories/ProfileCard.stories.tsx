@@ -78,3 +78,25 @@ export const Instructor: Story = {
     },
   },
 };
+
+export const Admin: Story = {
+  args: {
+    ...Default.args,
+    role: "admin",
+    firstName: "Ada",
+    familyName: "Lovelace",
+    emailPrefix: "ada.lovelace",
+    githubUsername: "adalovelace",
+    mrzData: {
+      documentCode: "I",
+      issuingState: "APT",
+      documentNumber: "0001",
+      birthDate: "151210",
+      sex: "F",
+      expiryDate: "300828",
+      nationality: "APT",
+      surname: "LOVELACE",
+      givenNames: "ADA",
+    },
+  },
+};

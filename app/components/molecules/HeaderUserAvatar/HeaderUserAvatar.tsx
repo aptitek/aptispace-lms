@@ -19,6 +19,7 @@ import {
 } from "material-shapes-ts";
 import Tooltip from "../../atoms/Tooltip/Tooltip";
 import { isUnnamedUser } from "../../atoms/Avatar/Avatar";
+import { getRoleConfig } from "~/tokens/roles";
 import { type HeaderUserAvatarProps } from "./HeaderUserAvatar.types";
 import {
   HeaderAvatarContainer,
@@ -30,15 +31,7 @@ import {
 } from "./HeaderUserAvatar.styles";
 
 function getRolePolygonShape(role?: string | null) {
-  switch (role) {
-    case "admin":
-      return MaterialShapes.Cookie9Sided;
-    case "instructor":
-      return MaterialShapes.Ghostish;
-    case "student":
-    default:
-      return MaterialShapes.Pill;
-  }
+  return getRoleConfig(role).polygonShape;
 }
 
 function computeUserInitials(name?: string): string | null {

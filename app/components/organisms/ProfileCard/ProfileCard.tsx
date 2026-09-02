@@ -1,8 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
-import Avatar from "@mui/material/Avatar";
-import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import List from "@mui/material/List";
@@ -15,11 +13,13 @@ import { styled, alpha, useTheme } from "@mui/material/styles";
 
 import PhysicCard from "../../molecules/PhysicCard/PhysicCard";
 import HoloDecorator from "../../atoms/HoloDecorator/HoloDecorator";
+import Avatar from "../../atoms/Avatar/Avatar";
 import Chip from "../../atoms/Chip/Chip";
 import Logo from "../../atoms/Logo/Logo";
 import MrzZone from "../../atoms/MrzZone/MrzZone";
 import Guilloche, { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche";
 import Electronics from "../../atoms/Electronics/Electronics";
+import { getRoleConfig } from "../../../tokens/roles";
 import type { ProfileCardProps } from "./ProfileCard.types";
 import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
 
@@ -106,6 +106,7 @@ function FrontContent({
   handleEmailChange,
 }: FrontContentProps) {
   const theme = useTheme();
+  const roleConfig = getRoleConfig(role);
   const guillocheMask = useMemo(
     () =>
       generateGuillocheMaskDataUrl({
@@ -201,19 +202,44 @@ function FrontContent({
           sx={{
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
+            alignItems: "flex-start",
             gap: 2,
             width: 120,
+            flexShrink: 0,
           }}
         >
-          <Badge
-            overlap="circular"
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            badgeContent={
+          <Box
+            sx={{
+              position: "relative",
+              display: "inline-flex",
+              alignSelf: "center",
+            }}
+          >
+            <Avatar
+              src={avatarUrl}
+              name={internalFirstName}
+              role={role}
+              shape={roleConfig.avatarShape}
+              width={96}
+              height={96}
+              isPortrait={false}
+              placeholderIcon={internalFirstName?.[0] || "U"}
+            />
+
+            {onAvatarEdit && (
               <IconButton
                 size="small"
-                onClick={onAvatarEdit}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAvatarEdit();
+                }}
+                data-no-flip="true"
+                aria-label="Edit avatar"
                 sx={{
+                  position: "absolute",
+                  top: -6,
+                  right: -6,
+                  zIndex: 3,
                   bgcolor: "background.paper",
                   boxShadow: 1,
                   "&:hover": { bgcolor: "action.hover" },
@@ -221,26 +247,15 @@ function FrontContent({
               >
                 <EditRoundedIcon fontSize="small" />
               </IconButton>
-            }
-          >
-            <Avatar
-              src={avatarUrl}
-              sx={{ width: 96, height: 96, fontSize: "2.5rem" }}
-            >
-              {!avatarUrl && (internalFirstName?.[0] || "U")}
-            </Avatar>
-          </Badge>
+            )}
+          </Box>
 
           <Chip
+            icon={roleConfig.icon}
             label={role.toUpperCase()}
             size="small"
-            color={
-              role === "admin"
-                ? "error"
-                : role === "instructor"
-                  ? "secondary"
-                  : "primary"
-            }
+            color={roleConfig.chipColor}
+            shape={roleConfig.statusChipShape}
             sx={{ width: "100%", fontWeight: "bold" }}
           />
 
@@ -250,12 +265,28 @@ function FrontContent({
               label={githubUsername}
               size="small"
               variant="outlined"
-              sx={{ width: "100%", mt: "auto" }}
+              sx={{
+                width: "max-content",
+                minWidth: "100%",
+                maxWidth: 220,
+                alignSelf: "flex-start",
+                justifyContent: "flex-start",
+                mt: "auto",
+                zIndex: 2,
+                "& .MuiChip-label": {
+                  px: 1,
+                  whiteSpace: "nowrap",
+                },
+              }}
             />
           )}
         </Box>
 
-        <Box sx={{ flex: 1 }}>
+        <Box
+          sx={{ flex: 1 }}
+          onClick={(e) => e.stopPropagation()}
+          data-no-flip="true"
+        >
           <List
             disablePadding
             sx={{ display: "flex", flexDirection: "column", gap: 2 }}
@@ -410,6 +441,18 @@ export default function ProfileCard({
   const [internalFirstName, setInternalFirstName] = useState(firstName);
   const [internalFamilyName, setInternalFamilyName] = useState(familyName);
   const [internalEmailPrefix, setInternalEmailPrefix] = useState(emailPrefix);
+
+  useEffect(() => {
+    setInternalFirstName(firstName);
+  }, [firstName]);
+
+  useEffect(() => {
+    setInternalFamilyName(familyName);
+  }, [familyName]);
+
+  useEffect(() => {
+    setInternalEmailPrefix(emailPrefix);
+  }, [emailPrefix]);
 
   const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInternalFirstName(e.target.value);

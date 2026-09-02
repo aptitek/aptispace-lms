@@ -282,7 +282,15 @@ function useCardFlip({
   const isFlipped = isControlled ? controlledIsFlipped : uncontrolledIsFlipped;
   const canFlip = Boolean(interactive && backContent);
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement | null;
+    if (
+      target?.closest(
+        "input, textarea, select, button, a, [role='button'], [data-no-flip]",
+      )
+    ) {
+      return;
+    }
     if (canFlip) {
       const newState = !isFlipped;
       if (!isControlled) {

@@ -1,6 +1,7 @@
 import type { SchoolConfig } from "~/types/institution";
 import type { OnboardingProfile } from "~/types/profile";
 import type { getUserWithAffiliations } from "~/services/userService";
+import type { Td1MrzData } from "~/components/atoms/MrzZone/MrzZone.types";
 
 export const DEFAULT_INSTITUTIONAL_DOMAIN = "aptitek.io";
 export const CADET_FIXED_DOMAIN = DEFAULT_INSTITUTIONAL_DOMAIN;
@@ -137,4 +138,33 @@ export function computeMissingFields(
   if (!isFamily) missing.push("familyName");
   if (!isEmail) missing.push("email");
   return missing;
+}
+
+export function extractEmailPrefix(email?: string): string {
+  if (!email) return "";
+  return email.includes("@") ? email.split("@")[0] : email;
+}
+
+export function formatEmailDomain(domain?: string): string {
+  const effective = domain || CADET_FIXED_DOMAIN;
+  return effective.startsWith("@") ? effective : `@${effective}`;
+}
+
+export function buildMrzData(
+  schoolId?: string,
+  userId?: number | string,
+  firstName?: string,
+  familyName?: string,
+): Td1MrzData {
+  return {
+    documentCode: "I",
+    issuingState: schoolId?.slice(0, 3).toUpperCase() || "APT",
+    documentNumber: String(userId || 942).padStart(4, "0"),
+    birthDate: "000101",
+    sex: "X",
+    expiryDate: "300828",
+    nationality: "APT",
+    surname: (familyName || "CADET").trim().toUpperCase(),
+    givenNames: (firstName || "STUDENT").trim().toUpperCase(),
+  };
 }
