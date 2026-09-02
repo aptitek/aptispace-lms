@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import Badge from "~/components/atoms/Badge/Badge";
+import InstitutionLogo from "~/components/atoms/InstitutionLogo/InstitutionLogo";
 import SchoolIcon from "@mui/icons-material/School";
 import AddIcon from "@mui/icons-material/Add";
 import Box from "@mui/material/Box";
@@ -8,7 +9,6 @@ import type { SchoolConfig } from "~/types/institution";
 import {
   CardContainer,
   LogoContainer,
-  LogoImage,
   SchoolName,
   SkeletonContainer,
 } from "./SchoolCard.styles";
@@ -61,13 +61,18 @@ export const SchoolCard = forwardRef<HTMLDivElement, SchoolCardProps>(
           data-testid={`school-card-${school.id}`}
         >
           <LogoContainer>
-            {school.logoUrl ? (
-              <LogoImage src={school.logoUrl} alt={school.name} />
-            ) : (
-              <SchoolIcon
-                sx={{ fontSize: 40, color: "text.secondary", opacity: 0.5 }}
-              />
-            )}
+            <InstitutionLogo
+              logoUrl={school.logoUrl}
+              name={school.name}
+              height={40}
+              maxWidth={140}
+              testId={`school-card-logo-${school.id}`}
+              fallback={
+                <SchoolIcon
+                  sx={{ fontSize: 40, color: "text.secondary", opacity: 0.5 }}
+                />
+              }
+            />
           </LogoContainer>
           <SchoolName>{school.name}</SchoolName>
         </CardContainer>

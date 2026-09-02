@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -8,6 +9,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import IconButton from "@mui/material/IconButton";
 import RoleChip from "~/components/atoms/RoleChip/RoleChip";
+import InstitutionLogo from "~/components/atoms/InstitutionLogo/InstitutionLogo";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 
 export interface FilterBarProps {
@@ -24,6 +26,33 @@ export interface FilterBarProps {
   cohortFilter: string;
   onCohortFilterChange: (cohortId: string) => void;
   cohorts: CohortConfig[];
+}
+
+function SchoolOptionItem({
+  school,
+  allLabel,
+}: {
+  school?: SchoolConfig;
+  allLabel: string;
+}) {
+  if (!school) {
+    return <Typography variant="body2">{allLabel}</Typography>;
+  }
+
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      {school.logoUrl && (
+        <InstitutionLogo
+          logoUrl={school.logoUrl}
+          name={school.name}
+          height={18}
+          maxWidth={80}
+          fallback={null}
+        />
+      )}
+      <Typography variant="body2">{school.name}</Typography>
+    </Box>
+  );
 }
 
 export function FilterBar({
@@ -103,6 +132,22 @@ export function FilterBar({
         label={t("common:filterBar.school", "School")}
         value={schoolFilter}
         onChange={(e) => onSchoolFilterChange(e.target.value)}
+        slotProps={{
+          select: {
+            renderValue: (selectedId) => {
+              if (selectedId === "all") {
+                return t("common:filterBar.allSchools", "All Schools");
+              }
+              const found = schools.find((s) => s.id === selectedId);
+              return (
+                <SchoolOptionItem
+                  school={found}
+                  allLabel={t("common:filterBar.allSchools", "All Schools")}
+                />
+              );
+            },
+          },
+        }}
         sx={{ minWidth: 200 }}
       >
         <MenuItem value="all">
@@ -110,7 +155,10 @@ export function FilterBar({
         </MenuItem>
         {schools.map((school) => (
           <MenuItem key={school.id} value={school.id}>
-            {school.name}
+            <SchoolOptionItem
+              school={school}
+              allLabel={t("common:filterBar.allSchools", "All Schools")}
+            />
           </MenuItem>
         ))}
       </TextField>

@@ -7,7 +7,6 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import InputAdornment from "@mui/material/InputAdornment";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import Typography from "@mui/material/Typography";
 import { alpha, useTheme } from "@mui/material/styles";
 
 import { useTranslation } from "react-i18next";
@@ -16,6 +15,7 @@ import HoloDecorator from "../../atoms/HoloDecorator/HoloDecorator";
 import Avatar from "../../atoms/Avatar/Avatar";
 import Chip from "../../atoms/Chip/Chip";
 import RoleChip from "../../atoms/RoleChip/RoleChip";
+import InstitutionLogo from "../../atoms/InstitutionLogo/InstitutionLogo";
 import Guilloche, { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche";
 import Electronics from "../../atoms/Electronics/Electronics";
 import { getRoleConfig } from "../../../tokens/roles";
@@ -119,22 +119,13 @@ function FrontContent({
           height: 48,
         }}
       >
-        {schoolLogoUrl ? (
-          <HoloDecorator type="image" maskUrl={schoolLogoUrl}>
-            <Box
-              component="img"
-              src={schoolLogoUrl}
-              alt={institutionName}
-              sx={{ height: 40, objectFit: "contain", borderRadius: 1 }}
-            />
-          </HoloDecorator>
-        ) : (
-          <HoloDecorator>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              {institutionName}
-            </Typography>
-          </HoloDecorator>
-        )}
+        <InstitutionLogo
+          logoUrl={schoolLogoUrl}
+          name={institutionName}
+          holo
+          height={40}
+          testId="profile-institution-logo"
+        />
         <ProfileHeaderChips role={role} cohortName={cohortName} year={year} />
       </Box>
 

@@ -7,6 +7,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import InstitutionLogo from "~/components/atoms/InstitutionLogo/InstitutionLogo";
 import type { SchoolConfig } from "~/types/institution";
 
 interface InstitutionInspectorProps {
@@ -85,6 +86,29 @@ export default function InstitutionInspector({
         >
           <CloseIcon />
         </IconButton>
+      </Box>
+
+      <Box
+        sx={{
+          p: 2,
+          borderRadius: 2,
+          bgcolor: "action.hover",
+          border: "1px dashed",
+          borderColor: "divider",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: 72,
+        }}
+      >
+        <InstitutionLogo
+          logoUrl={logoUrl}
+          name={name || t("inspector.institutionName", "Institution Name")}
+          height={48}
+          maxWidth={200}
+          testId="inspector-institution-preview"
+        />
       </Box>
 
       <TextField
