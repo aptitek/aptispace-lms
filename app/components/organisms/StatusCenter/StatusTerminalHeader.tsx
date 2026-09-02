@@ -14,7 +14,7 @@ import type { SystemHealthStatus } from "~/utils/statusCenter.types";
 
 interface StatusTerminalHeaderProps {
   systemStatus: SystemHealthStatus;
-  bpm: number;
+  bpm?: number;
   onClose: () => void;
   onSimulate: (
     simulationType:
@@ -30,7 +30,7 @@ interface StatusTerminalHeaderProps {
 
 export function StatusTerminalHeader({
   systemStatus,
-  bpm,
+  bpm: _bpm,
   onClose,
   onSimulate,
 }: StatusTerminalHeaderProps) {
@@ -110,7 +110,7 @@ export function StatusTerminalHeader({
               gap: 0.5,
             }}
           >
-            {statusLabel} • {bpm} BPM
+            {statusLabel}
           </Typography>
         </Box>
       </Box>

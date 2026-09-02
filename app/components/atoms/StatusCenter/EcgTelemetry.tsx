@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import { styled, useTheme, type Theme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
 import type { SystemHealthStatus } from "~/utils/statusCenterContext";
 
 export interface EcgTelemetryProps {
@@ -413,16 +412,6 @@ export function EcgTelemetry({
           <MetricTag color={statusConfig.color}>
             <StatusDot color={statusConfig.color} />
             <span>{statusConfig.label}</span>
-          </MetricTag>
-          <MetricTag>
-            <span>
-              {status === "offline"
-                ? "--- BPM"
-                : `${statusConfig.targetBpm} BPM`}
-            </span>
-            <Box component="span" sx={{ opacity: 0.6 }}>
-              • REAL-TIME
-            </Box>
           </MetricTag>
         </TelemetryMetrics>
       )}

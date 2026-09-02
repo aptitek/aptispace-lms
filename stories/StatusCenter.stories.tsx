@@ -219,7 +219,7 @@ export const EcgTelemetryOscilloscope: Story = {
             variant="caption"
             sx={{ fontFamily: "monospace", display: "block", mb: 1 }}
           >
-            NOMINAL (68 BPM • CALM SPACING)
+            NOMINAL (CALM SPACING)
           </Typography>
           <EcgTelemetry status="nominal" bpm={68} height={90} />
         </Box>
@@ -228,7 +228,7 @@ export const EcgTelemetryOscilloscope: Story = {
             variant="caption"
             sx={{ fontFamily: "monospace", display: "block", mb: 1 }}
           >
-            DEGRADED (98 BPM • ELEVATED FREQUENCY)
+            DEGRADED (ELEVATED FREQUENCY)
           </Typography>
           <EcgTelemetry status="degraded" bpm={98} height={90} />
         </Box>
@@ -237,7 +237,7 @@ export const EcgTelemetryOscilloscope: Story = {
             variant="caption"
             sx={{ fontFamily: "monospace", display: "block", mb: 1 }}
           >
-            403 SECURITY INFRACTION (132 BPM • ALERT FREQUENCY)
+            403 SECURITY INFRACTION (ALERT FREQUENCY)
           </Typography>
           <EcgTelemetry status="security_breach" bpm={132} height={90} />
         </Box>
@@ -246,7 +246,7 @@ export const EcgTelemetryOscilloscope: Story = {
             variant="caption"
             sx={{ fontFamily: "monospace", display: "block", mb: 1 }}
           >
-            CRITICAL EMERGENCY FAULT (156 BPM • HIGH DENSITY)
+            CRITICAL EMERGENCY FAULT (HIGH DENSITY)
           </Typography>
           <EcgTelemetry status="critical" bpm={156} height={90} />
         </Box>
@@ -255,7 +255,7 @@ export const EcgTelemetryOscilloscope: Story = {
             variant="caption"
             sx={{ fontFamily: "monospace", display: "block", mb: 1 }}
           >
-            LOST CONNECTION (0 BPM • FLATLINE)
+            LOST CONNECTION (FLATLINE)
           </Typography>
           <EcgTelemetry status="offline" bpm={0} height={90} />
         </Box>

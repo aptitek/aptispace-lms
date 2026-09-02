@@ -153,16 +153,6 @@ export function StatusTerminalCard() {
               defaultValue: "LIVE SYSTEM ACTIVITY MONITOR",
             })}
           </Typography>
-          <Typography
-            variant="caption"
-            sx={{
-              fontFamily: "monospace",
-              fontSize: "0.7rem",
-              color: "text.disabled",
-            }}
-          >
-            REAL-TIME • {bpm} BPM
-          </Typography>
         </Box>
 
         <EcgTelemetry status={systemStatus} bpm={bpm} height={84} />
