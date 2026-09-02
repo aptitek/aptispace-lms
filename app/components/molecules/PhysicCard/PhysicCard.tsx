@@ -10,6 +10,7 @@ import Card, { type CardProps } from "@mui/material/Card";
 import Box from "@mui/material/Box";
 import { styled } from "@mui/material/styles";
 import type { PhysicCardProps } from "./PhysicCard.types";
+import { holoGradient } from "../../../tokens/holo";
 
 const TiltContainer = styled(motion.div)({
   width: "100%",
@@ -51,20 +52,7 @@ const HoloLayer = styled(motion.div, {
     pointerEvents: "none",
     mixBlendMode: "screen",
     opacity: 0.8,
-    backgroundImage: `radial-gradient(
-      circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      rgba(255, 0, 0, 0) 0%,
-      rgba(255, 0, 0, 0) 10%,
-      rgba(255, 0, 0, 0.6) 20%,
-      rgba(255, 165, 0, 0.6) 30%,
-      rgba(255, 255, 0, 0.6) 40%,
-      rgba(0, 128, 0, 0.6) 50%,
-      rgba(0, 255, 255, 0.6) 60%,
-      rgba(0, 0, 255, 0.6) 70%,
-      rgba(138, 43, 226, 0.6) 80%,
-      rgba(138, 43, 226, 0) 90%,
-      rgba(138, 43, 226, 0) 100%
-    )`,
+    backgroundImage: holoGradient,
     backgroundSize: "200% 200%",
     backgroundPosition: "center",
     ...($maskImage && {
@@ -194,13 +182,25 @@ function PhysicCardFront({
 function PhysicCardBack({
   cardProps,
   backContent,
+  isTiltingEnabled,
+  showHoloBack,
+  holoMaskImageBack,
+  showSheen,
   isTransparent,
   isFlipped,
+  sheenX,
+  sheenY,
 }: {
   cardProps: CardProps;
   backContent?: React.ReactNode;
+  isTiltingEnabled: boolean;
+  showHoloBack: boolean;
+  holoMaskImageBack?: string;
+  showSheen: boolean;
   isTransparent: boolean;
   isFlipped: boolean;
+  sheenX: MotionValue<string>;
+  sheenY: MotionValue<string>;
 }) {
   if (!backContent) return null;
   return (
@@ -223,6 +223,21 @@ function PhysicCardBack({
       }}
     >
       {backContent}
+      {isTiltingEnabled && showSheen ? (
+        /* eslint-disable-next-line no-restricted-syntax */
+        <SheenLayer style={{ left: sheenX, top: sheenY }} />
+      ) : null}
+      {showHoloBack ? (
+        <HoloLayer
+          $maskImage={holoMaskImageBack}
+          style={
+            {
+              "--mouse-x": sheenX,
+              "--mouse-y": sheenY,
+            } as unknown as React.CSSProperties
+          }
+        />
+      ) : null}
     </Card>
   );
 }
@@ -262,6 +277,7 @@ function useCardFlip({
   return { isFlipped, canFlip, handleClick };
 }
 
+// eslint-disable-next-line complexity
 export default function PhysicCard({
   frontContent,
   backContent,
@@ -273,6 +289,8 @@ export default function PhysicCard({
   interactive = true,
   showHolo = false,
   holoMaskImage,
+  showHoloBack = false,
+  holoMaskImageBack,
   showSheen = true,
   isTransparent = false,
   sx,
@@ -320,8 +338,16 @@ export default function PhysicCard({
         ...sx,
       }}
     >
-      {/* eslint-disable-next-line no-restricted-syntax */}
-      <TiltContainer style={{ rotateX, rotateY }}>
+      <TiltContainer
+        style={
+          {
+            rotateX,
+            rotateY,
+            "--mouse-x": sheenX,
+            "--mouse-y": sheenY,
+          } as unknown as React.CSSProperties
+        }
+      >
         <FlipContainer
           animate={{ rotateY: isFlipped ? 180 : 0 }}
           transition={flipTransition}
@@ -341,8 +367,14 @@ export default function PhysicCard({
           <PhysicCardBack
             cardProps={cardProps}
             backContent={backContent}
+            isTiltingEnabled={isTiltingEnabled}
+            showHoloBack={showHoloBack}
+            holoMaskImageBack={holoMaskImageBack}
+            showSheen={showSheen}
             isTransparent={isTransparent}
             isFlipped={isFlipped}
+            sheenX={sheenX}
+            sheenY={sheenY}
           />
         </FlipContainer>
       </TiltContainer>

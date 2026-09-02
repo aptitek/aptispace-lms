@@ -61,6 +61,15 @@ export interface PhysicCardProps extends Omit<CardProps, "children"> {
    */
   showSheen?: boolean;
   /**
+   * Whether to show the holographic foil effect on the back of the card.
+   * @default false
+   */
+  showHoloBack?: boolean;
+  /**
+   * Optional image URL to use as a CSS mask for the holo foil effect on the back.
+   */
+  holoMaskImageBack?: string;
+  /**
    * If true, enables transparent glass mode where the opposite face
    * is faintly visible as a mirrored ghost.
    * @default false

@@ -1,7 +1,10 @@
-import { styled } from "@mui/material/styles";
+import { styled, type SxProps, type Theme } from "@mui/material/styles";
+import { holoGradient } from "../../../tokens/holo";
 
 export interface LogoProps {
   size?: "small" | "medium" | "large";
+  holo?: boolean;
+  sx?: SxProps<Theme>;
 }
 
 const LogoRoot = styled("div", {
@@ -31,6 +34,29 @@ const LogoImage = styled("img", {
     display: "block",
     flexShrink: 0,
   };
+});
+
+const LogoImageHoloWrapper = styled("span")({
+  position: "relative",
+  display: "inline-flex",
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    inset: 0,
+    backgroundImage: holoGradient,
+    backgroundSize: "200% 200%",
+    backgroundPosition: "center",
+    maskImage: 'url("/favicon.svg")',
+    WebkitMaskImage: 'url("/favicon.svg")',
+    maskSize: "contain",
+    WebkitMaskSize: "contain",
+    maskPosition: "center",
+    WebkitMaskPosition: "center",
+    maskRepeat: "no-repeat",
+    WebkitMaskRepeat: "no-repeat",
+    mixBlendMode: "screen",
+    pointerEvents: "none",
+  },
 });
 
 const TextContainer = styled("div", {
@@ -72,13 +98,28 @@ const SpaceSpan = styled("span")(({ theme }) => ({
   display: "inline-block",
 }));
 
-export default function Logo({ size = "medium" }: LogoProps) {
+const textHoloStyles = {
+  background: `${holoGradient}, linear-gradient(currentColor, currentColor)`,
+  backgroundSize: "200% 200%, 100% 100%",
+  backgroundPosition: "center, center",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  backgroundBlendMode: "screen",
+};
+
+export default function Logo({ size = "medium", holo = false, sx }: LogoProps) {
   return (
-    <LogoRoot logoSize={size}>
-      <LogoImage src="/favicon.svg" alt="AptiSpace Icon" logoSize={size} />
+    <LogoRoot logoSize={size} sx={sx}>
+      {holo ? (
+        <LogoImageHoloWrapper>
+          <LogoImage src="/favicon.svg" alt="AptiSpace Icon" logoSize={size} />
+        </LogoImageHoloWrapper>
+      ) : (
+        <LogoImage src="/favicon.svg" alt="AptiSpace Icon" logoSize={size} />
+      )}
       <TextContainer logoSize={size}>
-        <AptiSpan>Apti</AptiSpan>
-        <SpaceSpan>Space</SpaceSpan>
+        <AptiSpan sx={holo ? textHoloStyles : undefined}>Apti</AptiSpan>
+        <SpaceSpan sx={holo ? textHoloStyles : undefined}>Space</SpaceSpan>
       </TextContainer>
     </LogoRoot>
   );
