@@ -7,12 +7,17 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import IconButton from "@mui/material/IconButton";
 import InstitutionChip from "~/components/atoms/InstitutionChip/InstitutionChip";
+import YearRangePicker from "~/components/molecules/YearRangePicker/YearRangePicker";
 
 export interface InstitutionFilterBarProps {
   query: string;
   onQueryChange: (q: string) => void;
   typeFilter: string;
   onTypeFilterChange: (type: string) => void;
+  startYearMin?: number | null;
+  onStartYearMinChange?: (year: number | null) => void;
+  startYearMax?: number | null;
+  onStartYearMaxChange?: (year: number | null) => void;
   testId?: string;
 }
 
@@ -21,6 +26,10 @@ export function InstitutionFilterBar({
   onQueryChange,
   typeFilter,
   onTypeFilterChange,
+  startYearMin = null,
+  onStartYearMinChange,
+  startYearMax = null,
+  onStartYearMaxChange,
   testId = "institution-filter-bar",
 }: InstitutionFilterBarProps) {
   const { t } = useTranslation("common");
@@ -83,6 +92,15 @@ export function InstitutionFilterBar({
           <InstitutionChip institutionType="company" size="small" />
         </MenuItem>
       </TextField>
+
+      {onStartYearMinChange && onStartYearMaxChange && (
+        <YearRangePicker
+          startYearMin={startYearMin}
+          startYearMax={startYearMax}
+          onStartYearMinChange={onStartYearMinChange}
+          onStartYearMaxChange={onStartYearMaxChange}
+        />
+      )}
 
       <TextField
         size="small"

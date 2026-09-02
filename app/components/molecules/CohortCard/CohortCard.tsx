@@ -14,6 +14,8 @@ import {
   GhostFabOverlay,
 } from "./CohortCard.styles";
 
+import Chip from "@mui/material/Chip";
+
 export interface CohortCardProps {
   cohort: CohortConfig;
   studentCount?: number;
@@ -45,8 +47,16 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
       });
     };
 
+    const getStartYear = (dateString?: string | Date) => {
+      if (!dateString) return null;
+      const d = new Date(dateString);
+      if (isNaN(d.getTime())) return null;
+      return d.getFullYear();
+    };
+
     const startDate = formatDate(cohort.startDate);
     const endDate = formatDate(cohort.endDate);
+    const startYear = getStartYear(cohort.startDate);
     const dateRange =
       startDate && endDate
         ? `${startDate} - ${endDate}`
@@ -77,7 +87,32 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
           role={isInteractive ? "button" : "article"}
           data-testid={`cohort-card-${cohort.id}`}
         >
-          <CohortName>{cohort.name}</CohortName>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 1,
+            }}
+          >
+            <CohortName sx={{ flex: 1, minWidth: 0 }}>{cohort.name}</CohortName>
+            {startYear && (
+              <Chip
+                label={startYear}
+                size="small"
+                variant="outlined"
+                color="primary"
+                sx={{
+                  fontWeight: 700,
+                  borderRadius: 1.5,
+                  height: 22,
+                  fontSize: "0.75rem",
+                  flexShrink: 0,
+                }}
+                data-testid={`cohort-start-year-chip-${cohort.id}`}
+              />
+            )}
+          </Box>
           <CohortDescription>
             {cohort.description || "No description provided."}
           </CohortDescription>

@@ -19,25 +19,14 @@ import {
   resolveActiveUser,
   type AuthUser,
 } from "~/utils/auth";
-import {
-  getAllUsersWithAffiliations,
-  isUserProfileComplete,
-} from "~/services/userService";
-import { getAllInstitutions, getAllCohorts } from "~/services/cohortService";
+import { isUserProfileComplete } from "~/services/userService";
+import { useStatusCenter } from "~/utils/statusCenterContext";
 import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import type { CohortWithInstitution } from "~/components/organisms/StudentInspector/StudentInspector.types";
-import { useStatusCenter } from "~/utils/statusCenterContext";
-import {
-  mapDbUserToStudent,
-  getDefaultStudents,
-  getDefaultInstructors,
-  getDefaultSchools,
-  getDefaultCohorts,
-  dispatchAdminAction,
-  matchesUserFilters,
-  type DbUserWithAffil,
-} from "./admin.helpers";
+import { loadAdminDashboardData } from "./admin.loader";
+import { dispatchAdminAction } from "./admin.actions";
+import { matchesUserFilters } from "./admin.helpers";
 import AdminTabsSection from "./admin.tabs";
 import AdminCohortsTabPanel from "./admin.cohorts-tab";
 import {
@@ -59,77 +48,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   }
 
   const activeUser = resolveActiveUser(auth.user, auth.session);
-  const db = auth.db;
-
-  let dbUsers: DbUserWithAffil[] = [];
-  let dbInstitutions: Awaited<ReturnType<typeof getAllInstitutions>> = [];
-  let dbCohorts: Awaited<ReturnType<typeof getAllCohorts>> = [];
-
-  if (db) {
-    try {
-      [dbUsers, dbInstitutions, dbCohorts] = await Promise.all([
-        getAllUsersWithAffiliations(db),
-        getAllInstitutions(db),
-        getAllCohorts(db),
-      ]);
-    } catch {
-      dbUsers = [];
-    }
-  }
-
-  let mappedUsers = dbUsers.map(mapDbUserToStudent);
-
-  if (mappedUsers.length === 0) {
-    mappedUsers = [...getDefaultStudents(), ...getDefaultInstructors()];
-  }
-
-  const schools: SchoolConfig[] =
-    dbInstitutions.length > 0
-      ? dbInstitutions.map((inst) => ({
-          id: inst.id,
-          name: inst.name,
-          slug: inst.slug,
-          type: inst.type,
-          logoUrl: inst.logoUrl,
-          emailDomain: inst.emailDomain ?? undefined,
-          usernamePattern: inst.usernamePattern ?? undefined,
-        }))
-      : getDefaultSchools();
-
-  const cohorts: CohortWithInstitution[] =
-    dbCohorts.length > 0
-      ? dbCohorts.map((c) => ({
-          id: c.id,
-          name: c.name,
-          institutionId: c.institutionId,
-          description: c.description ?? undefined,
-          startDate: c.startDate ? c.startDate.toISOString() : undefined,
-          endDate: c.endDate ? c.endDate.toISOString() : undefined,
-        }))
-      : getDefaultCohorts();
-
-  const schoolStudentCounts: Record<string, number> = {};
-  const cohortStudentCounts: Record<string, number> = {};
-
-  mappedUsers.forEach((s) => {
-    if (s.institutionId) {
-      schoolStudentCounts[s.institutionId] =
-        (schoolStudentCounts[s.institutionId] || 0) + 1;
-    }
-    s.cohorts?.forEach((c) => {
-      cohortStudentCounts[c.id] = (cohortStudentCounts[c.id] || 0) + 1;
-    });
-  });
-
-  return {
-    user: activeUser,
-    users: mappedUsers,
-    totalUsers: mappedUsers.length,
-    schools,
-    cohorts,
-    schoolStudentCounts,
-    cohortStudentCounts,
-  };
+  return loadAdminDashboardData(auth.db, activeUser);
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -180,6 +99,8 @@ export default function AdminManagement() {
   const [schoolFilter, setSchoolFilter] = useState<string>("all");
   const [cohortFilter, setCohortFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [startYearMin, setStartYearMin] = useState<number | null>(null);
+  const [startYearMax, setStartYearMax] = useState<number | null>(null);
 
   const [selectedSchool, setSelectedSchool] = useState<SchoolConfig | null>(
     null,
@@ -198,6 +119,30 @@ export default function AdminManagement() {
       }
     }
   }, [loaderData.users, selectedUserId]);
+
+  const selectedCohortEditId = selectedCohortForEdit?.id;
+  useEffect(() => {
+    if (selectedCohortEditId) {
+      const fresh = loaderData.cohorts.find(
+        (c) => c.id === selectedCohortEditId,
+      );
+      if (fresh) {
+        setSelectedCohortForEdit(fresh);
+      }
+    }
+  }, [loaderData.cohorts, selectedCohortEditId]);
+
+  const selectedSchoolEditId = selectedSchoolForEdit?.id;
+  useEffect(() => {
+    if (selectedSchoolEditId) {
+      const fresh = loaderData.schools.find(
+        (s) => s.id === selectedSchoolEditId,
+      );
+      if (fresh) {
+        setSelectedSchoolForEdit(fresh);
+      }
+    }
+  }, [loaderData.schools, selectedSchoolEditId]);
 
   const handleLogout = () => {
     void logout();
@@ -295,7 +240,9 @@ export default function AdminManagement() {
     if (payload.startDate) data.startDate = payload.startDate;
     if (payload.endDate) data.endDate = payload.endDate;
     fetcher.submit(data, { method: "post" });
-    setSelectedCohortForEdit(null);
+    if (!payload.id) {
+      setSelectedCohortForEdit(null);
+    }
   };
 
   const handleCloseInspector = () => {
@@ -428,9 +375,19 @@ export default function AdminManagement() {
         school: schoolFilter,
         cohort: cohortFilter,
         query: searchQuery,
+        startYearMin,
+        startYearMax,
       }),
     );
-  }, [loaderData.users, roleFilter, schoolFilter, cohortFilter, searchQuery]);
+  }, [
+    loaderData.users,
+    roleFilter,
+    schoolFilter,
+    cohortFilter,
+    searchQuery,
+    startYearMin,
+    startYearMax,
+  ]);
 
   const hasInspectorOpen = Boolean(selectedUser);
 
@@ -470,6 +427,10 @@ export default function AdminManagement() {
                 cohortFilter={cohortFilter}
                 onCohortFilterChange={setCohortFilter}
                 cohorts={loaderData.cohorts}
+                startYearMin={startYearMin}
+                onStartYearMinChange={setStartYearMin}
+                startYearMax={startYearMax}
+                onStartYearMaxChange={setStartYearMax}
               />
               <UserGrid
                 students={filteredUsers}

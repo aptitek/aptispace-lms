@@ -8,6 +8,8 @@ import {
   ScrollRestoration,
 } from "react-router";
 import { ThemeProvider } from "@mui/material/styles";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -54,11 +56,13 @@ function AppThemeContainer({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <ShapeDefs />
-      {children}
-      <StatusSnackbar />
-      <StatusTerminalCard />
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <CssBaseline />
+        <ShapeDefs />
+        {children}
+        <StatusSnackbar />
+        <StatusTerminalCard />
+      </LocalizationProvider>
     </ThemeProvider>
   );
 }

@@ -1,13 +1,55 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Card from "@mui/material/Card";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import type { CohortConfig } from "~/types/institution";
+import {
+  type AcademicPeriodType,
+  getAcademicYearDates,
+  getAcademicYearOptions,
+} from "~/utils/academicYear";
+import {
+  CohortInspectorHeader,
+  CohortAcademicShortcuts,
+  CohortDurationBanner,
+  CohortDatePickerFields,
+  CohortInspectorActions,
+} from "./CohortInspector.components";
+
+function formatDateForInput(dateInput?: string | Date | null): string {
+  if (!dateInput) return "";
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return "";
+  return d.toISOString().split("T")[0];
+}
+
+function detectActiveYear(startDate?: string): number | null {
+  if (!startDate) return null;
+  const d = new Date(startDate);
+  if (isNaN(d.getTime())) return null;
+  const year = d.getFullYear();
+  const month = d.getMonth() + 1; // 1-12
+  // If month is before Sep (e.g. spring semester in Feb), start year was year - 1
+  return month < 8 ? year - 1 : year;
+}
+
+interface CohortFormValues {
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+}
+
+function hasFormChanged(a: CohortFormValues, b: CohortFormValues): boolean {
+  return (
+    a.name !== b.name ||
+    a.description !== b.description ||
+    a.startDate !== b.startDate ||
+    a.endDate !== b.endDate
+  );
+}
 
 interface CohortInspectorProps {
   cohort: CohortConfig | null;
@@ -29,32 +71,84 @@ export default function CohortInspector({
   isSubmitting = false,
 }: CohortInspectorProps) {
   const { t } = useTranslation("common");
+  const isEditing = Boolean(cohort?.id);
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [selectedPeriod, setSelectedPeriod] =
+    useState<AcademicPeriodType>("fullAcademic");
 
-  const formatDateForInput = (dateInput?: string | Date) => {
-    if (!dateInput) return "";
-    const d = new Date(dateInput);
-    if (isNaN(d.getTime())) return "";
-    return d.toISOString().split("T")[0];
-  };
+  const savedValuesRef = useRef<CohortFormValues>({
+    name: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+  });
 
   useEffect(() => {
     if (cohort) {
-      setName(cohort.name || "");
-      setDescription(cohort.description || "");
-      setStartDate(formatDateForInput(cohort.startDate));
-      setEndDate(formatDateForInput(cohort.endDate));
+      const initial: CohortFormValues = {
+        name: cohort.name || "",
+        description: cohort.description || "",
+        startDate: formatDateForInput(cohort.startDate),
+        endDate: formatDateForInput(cohort.endDate),
+      };
+      setName(initial.name);
+      setDescription(initial.description);
+      setStartDate(initial.startDate);
+      setEndDate(initial.endDate);
+      savedValuesRef.current = initial;
     }
   }, [cohort]);
 
-  const handleSave = () => {
-    onSave({
-      id: cohort?.id,
+  const activeYear = detectActiveYear(startDate);
+
+  const triggerSave = (updates?: Partial<CohortFormValues>) => {
+    if (!isEditing || !cohort?.id) return;
+    const next: CohortFormValues = {
       name,
       description,
+      startDate,
+      endDate,
+      ...updates,
+    };
+    if (!next.name.trim()) return;
+    if (!hasFormChanged(savedValuesRef.current, next)) return;
+
+    savedValuesRef.current = next;
+    onSave({
+      id: cohort.id,
+      name: next.name.trim(),
+      description: next.description.trim() || undefined,
+      startDate: next.startDate || undefined,
+      endDate: next.endDate || undefined,
+    });
+  };
+
+  const handleSelectYear = (year: number) => {
+    const dates = getAcademicYearDates(year, selectedPeriod);
+    setStartDate(dates.startDate);
+    setEndDate(dates.endDate);
+    triggerSave({ startDate: dates.startDate, endDate: dates.endDate });
+  };
+
+  const handleSelectPeriod = (period: AcademicPeriodType) => {
+    setSelectedPeriod(period);
+    const targetYear =
+      activeYear || getAcademicYearOptions()[1] || new Date().getFullYear();
+    const dates = getAcademicYearDates(targetYear, period);
+    setStartDate(dates.startDate);
+    setEndDate(dates.endDate);
+    triggerSave({ startDate: dates.startDate, endDate: dates.endDate });
+  };
+
+  const handleCreate = () => {
+    if (!name.trim()) return;
+    onSave({
+      name: name.trim(),
+      description: description.trim() || undefined,
       startDate: startDate || undefined,
       endDate: endDate || undefined,
     });
@@ -63,91 +157,78 @@ export default function CohortInspector({
   if (!cohort) return null;
 
   return (
-    <Card
-      sx={{
-        p: 3,
-        display: "flex",
-        flexDirection: "column",
-        gap: 3,
-        height: "calc(100vh - 200px)",
-        maxHeight: "800px",
-        overflowY: "auto",
-        position: "sticky",
-        top: 24,
-      }}
-      variant="outlined"
-    >
-      <Box
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Card
         sx={{
+          p: 3,
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          flexDirection: "column",
+          gap: 2.5,
+          height: "calc(100vh - 200px)",
+          maxHeight: "850px",
+          overflowY: "auto",
+          position: "sticky",
+          top: 24,
         }}
+        variant="outlined"
+        data-testid="cohort-inspector-card"
       >
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          {cohort.id
-            ? t("inspector.editCohort", "Edit Cohort")
-            : t("inspector.addCohortTitle", "Add Cohort")}
-        </Typography>
-        <IconButton
-          onClick={onClose}
-          size="small"
-          aria-label={t("inspector.closeAria", "Close inspector")}
-        >
-          <CloseIcon />
-        </IconButton>
-      </Box>
+        <CohortInspectorHeader isEditing={isEditing} onClose={onClose} />
 
-      <TextField
-        label={t("inspector.institutionName", "Name")}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        fullWidth
-        disabled={isSubmitting}
-        required
-      />
-      <TextField
-        label={t("inspector.description", "Description")}
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        fullWidth
-        disabled={isSubmitting}
-        multiline
-        rows={4}
-      />
-      <TextField
-        label={t("inspector.startDate", "Start Date")}
-        type="date"
-        value={startDate}
-        onChange={(e) => setStartDate(e.target.value)}
-        fullWidth
-        disabled={isSubmitting}
-        slotProps={{ inputLabel: { shrink: true } }}
-      />
-      <TextField
-        label={t("inspector.endDate", "End Date")}
-        type="date"
-        value={endDate}
-        onChange={(e) => setEndDate(e.target.value)}
-        fullWidth
-        disabled={isSubmitting}
-        slotProps={{ inputLabel: { shrink: true } }}
-      />
+        <TextField
+          label={t("inspector.institutionName", "Name")}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={() => triggerSave({ name })}
+          fullWidth
+          disabled={isSubmitting}
+          required
+          data-testid="cohort-name-input"
+        />
 
-      <Box
-        sx={{ mt: "auto", display: "flex", justifyContent: "flex-end", gap: 2 }}
-      >
-        <Button onClick={onClose} disabled={isSubmitting}>
-          {t("inspector.cancel", "Cancel")}
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          disabled={isSubmitting || !name}
-        >
-          {t("inspector.save", "Save")}
-        </Button>
-      </Box>
-    </Card>
+        <TextField
+          label={t("inspector.description", "Description")}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          onBlur={() => triggerSave({ description })}
+          fullWidth
+          disabled={isSubmitting}
+          multiline
+          rows={3}
+          data-testid="cohort-description-input"
+        />
+
+        <CohortAcademicShortcuts
+          selectedPeriod={selectedPeriod}
+          onSelectPeriod={handleSelectPeriod}
+          onSelectYear={handleSelectYear}
+          activeYear={activeYear}
+        />
+
+        <CohortDatePickerFields
+          startDate={startDate}
+          endDate={endDate}
+          onStartDateChange={(newStart) => {
+            setStartDate(newStart);
+            triggerSave({ startDate: newStart });
+          }}
+          onEndDateChange={(newEnd) => {
+            setEndDate(newEnd);
+            triggerSave({ endDate: newEnd });
+          }}
+          disabled={isSubmitting}
+        />
+
+        <CohortDurationBanner startDate={startDate} endDate={endDate} />
+
+        <CohortInspectorActions
+          onClose={onClose}
+          onCreate={handleCreate}
+          isEditing={isEditing}
+          disabled={isSubmitting}
+          isSaveDisabled={!name.trim()}
+        />
+      </Card>
+    </LocalizationProvider>
   );
 }

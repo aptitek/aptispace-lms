@@ -1,24 +1,22 @@
-import {
-  getUserWithAffiliations,
-  deleteUser,
-  type getAllUsersWithAffiliations,
-} from "~/services/userService";
-import { logImpersonatedAudit } from "~/services/assessmentService";
 import type {
   EntityCardData,
   CompactCohortItem,
 } from "~/components/molecules/EntityCard/EntityCard.types";
 import type { AuthUser, UserRole } from "~/utils/auth";
-import type { Database } from "~/db/index";
-
+import type { getAllUsersWithAffiliations } from "~/services/userService";
 import {
-  addStudentToCohort,
-  removeStudentFromCohort,
-  createInstitution,
-  updateInstitution,
-  createCohort,
-  updateCohort,
-} from "~/services/cohortService";
+  getDefaultStudents,
+  getDefaultInstructors,
+  getDefaultSchools,
+  getDefaultCohorts,
+} from "./admin.mock";
+
+export {
+  getDefaultStudents,
+  getDefaultInstructors,
+  getDefaultSchools,
+  getDefaultCohorts,
+};
 
 export type DbUserWithAffil = Awaited<
   ReturnType<typeof getAllUsersWithAffiliations>
@@ -36,8 +34,7 @@ export function resolveUserGlobalRole(dbUser: DbUserWithAffil): UserRole {
 
 function resolveUserDisplayName(dbUser: DbUserWithAffil): string {
   if (dbUser.displayName) return dbUser.displayName;
-  const fullName = `${dbUser.firstName} ${dbUser.lastName}`.trim();
-  return fullName;
+  return `${dbUser.firstName} ${dbUser.lastName}`.trim();
 }
 
 function resolveCohort(affil: AffilType): string {
@@ -153,151 +150,17 @@ export function mapDbUserToStudent(dbUser: DbUserWithAffil): EntityCardData {
     firstName: dbUser.firstName,
     familyName: dbUser.lastName,
     displayName: resolveUserDisplayName(dbUser),
-    email: primaryAffil?.email ?? "",
+    email: primaryAffil?.email || "",
     role,
-    avatarUrl: undefined,
-    githubUsername: dbUser.githubId ?? undefined,
-    ...cohortDetails,
-    institutionName: resolveInstitution(primaryAffil),
-    institutionId: primaryAffil?.institutionId ?? undefined,
+    avatarUrl: dbUser.githubId
+      ? `https://avatars.githubusercontent.com/u/${dbUser.githubId}?v=4`
+      : undefined,
+    githubUsername: undefined,
     isProfileComplete: checkProfileComplete(dbUser),
+    institutionId: primaryAffil?.institutionId ?? undefined,
+    institutionName: resolveInstitution(primaryAffil),
+    ...cohortDetails,
   };
-}
-
-export {
-  getDefaultSchools,
-  getDefaultCohorts,
-  getDefaultStudents,
-  getDefaultInstructors,
-} from "./admin.mock";
-
-export async function handleAddCohortAction(
-  formData: FormData,
-  db: Database,
-  actorUserId: string,
-) {
-  const studentId = String(formData.get("studentId") || "");
-  const cohortId = String(formData.get("cohortId") || "");
-
-  if (!studentId || !cohortId) {
-    return { success: false, error: "Missing studentId or cohortId" };
-  }
-
-  try {
-    await addStudentToCohort(db, {
-      userId: studentId,
-      cohortId,
-      actorUserId,
-    });
-    return { success: true };
-  } catch {
-    return { success: false, error: "Failed to add student to cohort" };
-  }
-}
-
-export async function handleRemoveCohortAction(
-  formData: FormData,
-  db: Database,
-  actorUserId: string,
-) {
-  const studentId = String(formData.get("studentId") || "");
-  const cohortId = String(formData.get("cohortId") || "");
-
-  if (!studentId || !cohortId) {
-    return { success: false, error: "Missing studentId or cohortId" };
-  }
-
-  try {
-    await removeStudentFromCohort(db, {
-      userId: studentId,
-      cohortId,
-      actorUserId,
-    });
-    return { success: true };
-  } catch {
-    return { success: false, error: "Failed to remove student from cohort" };
-  }
-}
-
-export async function handleDeleteUserAction(
-  formData: FormData,
-  db: Database,
-  actorUserId: string,
-  session?: {
-    userId?: string;
-    originalUserId?: string;
-    impersonating?: boolean;
-  } | null,
-) {
-  const studentId = String(formData.get("studentId") || "");
-
-  if (!studentId) {
-    return { success: false, error: "Missing studentId" };
-  }
-
-  try {
-    const existingUser = await getUserWithAffiliations(db, studentId);
-    if (existingUser) {
-      const primaryAffil = existingUser.affiliations?.[0];
-      await logImpersonatedAudit(db, session, {
-        tableName: "users",
-        recordId: studentId,
-        action: "DELETE",
-        targetUserId: studentId,
-        oldValues: JSON.stringify({
-          id: existingUser.id,
-          firstName: existingUser.firstName,
-          lastName: existingUser.lastName,
-          displayName: existingUser.displayName,
-          email: primaryAffil?.email,
-          githubId: existingUser.githubId,
-          role: primaryAffil?.role,
-          affiliations: existingUser.affiliations,
-        }),
-        newValues: JSON.stringify({
-          deletedBy: actorUserId,
-          deletedAt: new Date().toISOString(),
-          reason: "User deletion confirmed via admin hold button",
-        }),
-      });
-    }
-
-    const deleted = await deleteUser(db, studentId);
-    if (!deleted) {
-      return { success: false, error: "User not found or already deleted" };
-    }
-    return { success: true };
-  } catch (err) {
-    console.error("[DeleteUser Error]:", err);
-    return { success: false, error: "Failed to delete user" };
-  }
-}
-
-function getErrorMessage(err: unknown, fallback: string): string {
-  if (err instanceof Error) return err.message;
-  return fallback;
-}
-
-function parseOptionalString(
-  formData: FormData,
-  key: string,
-): string | undefined {
-  const val = formData.get(key);
-  return val ? String(val) : undefined;
-}
-
-function parseOptionalDate(formData: FormData, key: string): Date | undefined {
-  const val = formData.get(key);
-  return val ? new Date(String(val)) : undefined;
-}
-
-function parseNullableDate(
-  formData: FormData,
-  key: string,
-): Date | null | undefined {
-  if (!formData.has(key)) return undefined;
-  const val = formData.get(key);
-  return val ? new Date(String(val)) : null;
 }
 
 export function resolveModalUser(
@@ -313,191 +176,6 @@ export function resolveModalUser(
     githubUsername: selectedStudent.githubUsername,
     isProfileComplete: selectedStudent.isProfileComplete,
   };
-}
-
-export async function handleCreateInstitutionAction(
-  formData: FormData,
-  db: Database,
-  actorUserId: string,
-) {
-  const name = String(formData.get("name") || "");
-  const slug = String(formData.get("slug") || "");
-  const type = (parseOptionalString(formData, "type") || "academic") as
-    "academic" | "company";
-  const logoUrl = parseOptionalString(formData, "logoUrl");
-  const emailDomain = parseOptionalString(formData, "emailDomain");
-  const usernamePattern = parseOptionalString(formData, "usernamePattern");
-
-  if (!name || !slug) {
-    return { success: false, error: "Missing required fields for institution" };
-  }
-
-  try {
-    const institution = await createInstitution(db, {
-      name,
-      slug,
-      type,
-      logoUrl,
-      emailDomain,
-      usernamePattern,
-      actorUserId,
-    });
-    return { success: true, institution };
-  } catch (err: unknown) {
-    return {
-      success: false,
-      error: getErrorMessage(err, "Failed to create institution"),
-    };
-  }
-}
-
-export async function handleUpdateInstitutionAction(
-  formData: FormData,
-  db: Database,
-  actorUserId: string,
-) {
-  const id = String(formData.get("id") || "");
-  const name = parseOptionalString(formData, "name");
-  const slug = parseOptionalString(formData, "slug");
-  const type = parseOptionalString(formData, "type") as
-    "academic" | "company" | undefined;
-  const logoUrl = formData.has("logoUrl")
-    ? parseOptionalString(formData, "logoUrl")
-    : undefined;
-  const emailDomain = formData.has("emailDomain")
-    ? parseOptionalString(formData, "emailDomain")
-    : undefined;
-  const usernamePattern = formData.has("usernamePattern")
-    ? parseOptionalString(formData, "usernamePattern")
-    : undefined;
-
-  if (!id) {
-    return { success: false, error: "Missing institution id" };
-  }
-
-  try {
-    const institution = await updateInstitution(db, id, {
-      name,
-      slug,
-      type,
-      logoUrl,
-      emailDomain,
-      usernamePattern,
-      actorUserId,
-    });
-    return { success: true, institution };
-  } catch (err: unknown) {
-    return {
-      success: false,
-      error: getErrorMessage(err, "Failed to update institution"),
-    };
-  }
-}
-
-export async function handleCreateCohortAction(
-  formData: FormData,
-  db: Database,
-  actorUserId: string,
-) {
-  const institutionId = String(formData.get("institutionId") || "");
-  const name = String(formData.get("name") || "");
-  const description = parseOptionalString(formData, "description");
-  const startDate = parseOptionalDate(formData, "startDate");
-  const endDate = parseOptionalDate(formData, "endDate");
-
-  if (!institutionId || !name) {
-    return { success: false, error: "Missing required fields for cohort" };
-  }
-
-  try {
-    const cohort = await createCohort(db, {
-      institutionId,
-      name,
-      description,
-      startDate,
-      endDate,
-      actorUserId,
-    });
-    return { success: true, cohort };
-  } catch (err: unknown) {
-    return {
-      success: false,
-      error: getErrorMessage(err, "Failed to create cohort"),
-    };
-  }
-}
-
-export async function handleUpdateCohortAction(
-  formData: FormData,
-  db: Database,
-  actorUserId: string,
-) {
-  const id = String(formData.get("id") || "");
-  const name = parseOptionalString(formData, "name");
-  const description = formData.has("description")
-    ? parseOptionalString(formData, "description")
-    : undefined;
-  const startDate = parseNullableDate(formData, "startDate");
-  const endDate = parseNullableDate(formData, "endDate");
-
-  if (!id) {
-    return { success: false, error: "Missing cohort id" };
-  }
-
-  try {
-    const cohort = await updateCohort(db, id, {
-      name,
-      description,
-      startDate,
-      endDate,
-      actorUserId,
-    });
-    return { success: true, cohort };
-  } catch (err: unknown) {
-    return {
-      success: false,
-      error: getErrorMessage(err, "Failed to update cohort"),
-    };
-  }
-}
-
-export interface DispatchAdminActionParams {
-  intent: string | null;
-  formData: FormData;
-  db: Database;
-  actorUserId: string;
-  session?: {
-    userId?: string;
-    originalUserId?: string;
-    impersonating?: boolean;
-  } | null;
-}
-
-export async function dispatchAdminAction({
-  intent,
-  formData,
-  db,
-  actorUserId,
-  session,
-}: DispatchAdminActionParams) {
-  switch (intent) {
-    case "add-cohort":
-      return handleAddCohortAction(formData, db, actorUserId);
-    case "remove-cohort":
-      return handleRemoveCohortAction(formData, db, actorUserId);
-    case "delete-user":
-      return handleDeleteUserAction(formData, db, actorUserId, session);
-    case "create-institution":
-      return handleCreateInstitutionAction(formData, db, actorUserId);
-    case "update-institution":
-      return handleUpdateInstitutionAction(formData, db, actorUserId);
-    case "create-cohort":
-      return handleCreateCohortAction(formData, db, actorUserId);
-    case "update-cohort":
-      return handleUpdateCohortAction(formData, db, actorUserId);
-    default:
-      return { success: false, error: "Unknown action" };
-  }
 }
 
 function matchesRole(user: EntityCardData, roleFilter: string): boolean {
@@ -523,11 +201,47 @@ function matchesQuery(user: EntityCardData, query: string): boolean {
   return searchStr.includes(q);
 }
 
+function matchesYear(
+  user: EntityCardData,
+  min?: number | null,
+  max?: number | null,
+): boolean {
+  if (min == null && max == null) return true;
+  const userYears: number[] = [];
+  if (user.cohortStartDate) {
+    const y = new Date(user.cohortStartDate).getFullYear();
+    if (!isNaN(y)) userYears.push(y);
+  }
+  if (user.cohortStartYear) {
+    const y = Number(user.cohortStartYear);
+    if (!isNaN(y)) userYears.push(y);
+  }
+  if (user.cohorts) {
+    user.cohorts.forEach((c) => {
+      if (c.startDate) {
+        const y = new Date(c.startDate).getFullYear();
+        if (!isNaN(y)) userYears.push(y);
+      } else if (c.startYear) {
+        const y = Number(c.startYear);
+        if (!isNaN(y)) userYears.push(y);
+      }
+    });
+  }
+  if (userYears.length === 0) return false;
+  return userYears.some((yr) => {
+    if (min != null && yr < min) return false;
+    if (max != null && yr > max) return false;
+    return true;
+  });
+}
+
 export interface UserFilterCriteria {
   role: string;
   school: string;
   cohort: string;
   query: string;
+  startYearMin?: number | null;
+  startYearMax?: number | null;
 }
 
 export function matchesUserFilters(
@@ -538,6 +252,7 @@ export function matchesUserFilters(
     matchesRole(user, filters.role) &&
     matchesSchool(user, filters.school) &&
     matchesCohort(user, filters.cohort) &&
-    matchesQuery(user, filters.query)
+    matchesQuery(user, filters.query) &&
+    matchesYear(user, filters.startYearMin, filters.startYearMax)
   );
 }

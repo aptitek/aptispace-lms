@@ -99,47 +99,12 @@ export const M3_MOTION = {
   },
 } as const;
 
-const m3TooltipDarkOverrides = {
-  popper: {
-    zIndex: 1500,
-  },
-  tooltip: {
-    backgroundColor: "#eee8d5",
-    color: "#002b36",
-    fontSize: "0.75rem",
-    fontWeight: 500,
-    lineHeight: "1rem",
-    borderRadius: 8,
-    padding: "6px 10px",
-    boxShadow: "0 4px 14px rgba(0, 0, 0, 0.35)",
-    border: `1px solid rgba(88, 110, 117, 0.3)`,
-    backdropFilter: "blur(8px)",
-  },
-  arrow: {
-    color: "#eee8d5",
-  },
-};
-
-const m3TooltipLightOverrides = {
-  popper: {
-    zIndex: 1500,
-  },
-  tooltip: {
-    backgroundColor: "#073642",
-    color: "#fdf6e3",
-    fontSize: "0.75rem",
-    fontWeight: 500,
-    lineHeight: "1rem",
-    borderRadius: 8,
-    padding: "6px 10px",
-    boxShadow: "0 4px 14px rgba(0, 0, 0, 0.2)",
-    border: `1px solid rgba(88, 110, 117, 0.2)`,
-    backdropFilter: "blur(8px)",
-  },
-  arrow: {
-    color: "#073642",
-  },
-};
+import {
+  m3TooltipDarkOverrides,
+  m3TooltipLightOverrides,
+  m3DatePickerDarkComponents,
+  m3DatePickerLightComponents,
+} from "./themeComponents";
 
 export const darkThemeOptions: ThemeOptions = {
   palette: {
@@ -305,6 +270,7 @@ export const darkThemeOptions: ThemeOptions = {
         },
       },
     },
+    ...m3DatePickerDarkComponents,
   },
 };
 
@@ -472,6 +438,7 @@ export const lightThemeOptions: ThemeOptions = {
         },
       },
     },
+    ...m3DatePickerLightComponents,
   },
 };
 

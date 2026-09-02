@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 import AdminManagement, { meta, loader, action } from "./admin";
+import { matchesUserFilters } from "./admin.helpers";
 import * as sessionServer from "~/utils/session.server";
 import * as cohortService from "~/services/cohortService";
 import * as userService from "~/services/userService";
@@ -248,6 +249,8 @@ describe("Admin Route", () => {
       vi.spyOn(sessionServer, "authGuard").mockResolvedValue({
         session: {
           userId: "admin-1",
+          originalUserId: "super-admin-id",
+          impersonating: true,
           role: "admin",
           issuedAt: Date.now(),
           expiresAt: Date.now() + 10000,
@@ -361,6 +364,68 @@ describe("Admin Route", () => {
     it("creates React element properly", () => {
       const element = React.createElement(AdminManagement);
       expect(element).toBeDefined();
+    });
+  });
+
+  describe("matchesUserFilters with year range", () => {
+    const sampleUser = {
+      id: "u1",
+      firstName: "Jean",
+      familyName: "DUPONT",
+      email: "jean.dupont@aptitek.io",
+      role: "student" as const,
+      cohortId: "c1",
+      cohortName: "Cohort 2026",
+      cohortStartYear: 2026,
+      cohortStartDate: "2026-09-01",
+      institutionId: "school-1",
+      cohorts: [
+        {
+          id: "c1",
+          name: "Cohort 2026",
+          startDate: "2026-09-01",
+          startYear: 2026,
+        },
+      ],
+    };
+
+    it("matches when no year filter is provided", () => {
+      expect(
+        matchesUserFilters(sampleUser, {
+          role: "all",
+          school: "all",
+          cohort: "all",
+          query: "",
+          startYearMin: null,
+          startYearMax: null,
+        }),
+      ).toBe(true);
+    });
+
+    it("matches when user start year is within range", () => {
+      expect(
+        matchesUserFilters(sampleUser, {
+          role: "all",
+          school: "all",
+          cohort: "all",
+          query: "",
+          startYearMin: 2025,
+          startYearMax: 2027,
+        }),
+      ).toBe(true);
+    });
+
+    it("does not match when user start year is outside range", () => {
+      expect(
+        matchesUserFilters(sampleUser, {
+          role: "all",
+          school: "all",
+          cohort: "all",
+          query: "",
+          startYearMin: 2027,
+          startYearMax: 2029,
+        }),
+      ).toBe(false);
     });
   });
 });

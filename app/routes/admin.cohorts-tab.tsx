@@ -76,6 +76,13 @@ export function AdminCohortsTabPanel({
   const [institutionQuery, setInstitutionQuery] = useState("");
   const [institutionTypeFilter, setInstitutionTypeFilter] = useState("all");
 
+  const [cohortStartYearMin, setCohortStartYearMin] = useState<number | null>(
+    null,
+  );
+  const [cohortStartYearMax, setCohortStartYearMax] = useState<number | null>(
+    null,
+  );
+
   const hasCohortsInspectorOpen = Boolean(
     selectedSchoolForEdit || selectedCohortForEdit,
   );
@@ -97,6 +104,22 @@ export function AdminCohortsTabPanel({
     });
   }, [schools, institutionQuery, institutionTypeFilter]);
 
+  const filteredCohorts = useMemo(() => {
+    if (!selectedSchool) return [];
+    return cohorts
+      .filter((c) => c.institutionId === selectedSchool.id)
+      .filter((c) => {
+        if (cohortStartYearMin == null && cohortStartYearMax == null)
+          return true;
+        if (!c.startDate) return false;
+        const yr = new Date(c.startDate).getFullYear();
+        if (isNaN(yr)) return false;
+        if (cohortStartYearMin != null && yr < cohortStartYearMin) return false;
+        if (cohortStartYearMax != null && yr > cohortStartYearMax) return false;
+        return true;
+      });
+  }, [cohorts, selectedSchool, cohortStartYearMin, cohortStartYearMax]);
+
   return (
     <TabPanelContainer
       hasSidePanel={hasCohortsInspectorOpen}
@@ -116,6 +139,10 @@ export function AdminCohortsTabPanel({
             onQueryChange={setInstitutionQuery}
             typeFilter={institutionTypeFilter}
             onTypeFilterChange={setInstitutionTypeFilter}
+            startYearMin={cohortStartYearMin}
+            onStartYearMinChange={setCohortStartYearMin}
+            startYearMax={cohortStartYearMax}
+            onStartYearMaxChange={setCohortStartYearMax}
           />
 
           <MD3CollectionGrid data-testid="schools-zone">
@@ -145,18 +172,16 @@ export function AdminCohortsTabPanel({
               })}
             </Typography>
             <MD3CollectionGrid data-testid="cohorts-zone">
-              {cohorts
-                .filter((c) => c.institutionId === selectedSchool.id)
-                .map((cohort) => (
-                  <CohortCard
-                    key={cohort.id || cohort.name}
-                    cohort={cohort}
-                    studentCount={
-                      cohort.id ? cohortStudentCounts[cohort.id] || 0 : 0
-                    }
-                    onClick={onCohortClick}
-                  />
-                ))}
+              {filteredCohorts.map((cohort) => (
+                <CohortCard
+                  key={cohort.id || cohort.name}
+                  cohort={cohort}
+                  studentCount={
+                    cohort.id ? cohortStudentCounts[cohort.id] || 0 : 0
+                  }
+                  onClick={onCohortClick}
+                />
+              ))}
               <CohortCardSkeleton onClick={onCreateNewCohort} />
             </MD3CollectionGrid>
           </Box>

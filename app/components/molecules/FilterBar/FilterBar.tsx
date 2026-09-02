@@ -10,6 +10,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import IconButton from "@mui/material/IconButton";
 import RoleChip from "~/components/atoms/RoleChip/RoleChip";
 import InstitutionLogo from "~/components/atoms/InstitutionLogo/InstitutionLogo";
+import YearRangePicker from "~/components/molecules/YearRangePicker/YearRangePicker";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 
 export interface FilterBarProps {
@@ -26,6 +27,11 @@ export interface FilterBarProps {
   cohortFilter: string;
   onCohortFilterChange: (cohortId: string) => void;
   cohorts: CohortConfig[];
+
+  startYearMin?: number | null;
+  onStartYearMinChange?: (year: number | null) => void;
+  startYearMax?: number | null;
+  onStartYearMaxChange?: (year: number | null) => void;
 }
 
 function SchoolOptionItem({
@@ -66,6 +72,10 @@ export function FilterBar({
   cohortFilter,
   onCohortFilterChange,
   cohorts,
+  startYearMin = null,
+  onStartYearMinChange,
+  startYearMax = null,
+  onStartYearMaxChange,
 }: FilterBarProps) {
   const { t } = useTranslation(["common", "admin", "auth"]);
 
@@ -184,6 +194,15 @@ export function FilterBar({
             </MenuItem>
           ))}
       </TextField>
+
+      {onStartYearMinChange && onStartYearMaxChange && (
+        <YearRangePicker
+          startYearMin={startYearMin}
+          startYearMax={startYearMax}
+          onStartYearMinChange={onStartYearMinChange}
+          onStartYearMaxChange={onStartYearMaxChange}
+        />
+      )}
 
       <Box sx={{ flexGrow: 1 }} />
 
