@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "~/components/atoms/Chip/Chip";
+import RoleChip from "~/components/atoms/RoleChip/RoleChip";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -121,9 +122,8 @@ function DevAccountItem({
           <AccountNameRow>
             <AccountName variant="body2">{account.name}</AccountName>
 
-            <Chip
-              color={roleConfig.chipColor}
-              shape={roleConfig.statusChipShape}
+            <RoleChip
+              userRole={account.role}
               variant={isSelected ? "filled" : "outlined"}
               label={roleLabel}
               size="small"

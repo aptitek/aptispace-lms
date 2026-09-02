@@ -77,9 +77,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     }
   }
 
-  let mappedUsers = dbUsers
-    .filter((u) => u.id !== auth.user?.id)
-    .map(mapDbUserToStudent);
+  let mappedUsers = dbUsers.map(mapDbUserToStudent);
 
   if (mappedUsers.length === 0) {
     mappedUsers = [...getDefaultStudents(), ...getDefaultInstructors()];

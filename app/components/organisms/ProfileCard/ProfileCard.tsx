@@ -15,6 +15,7 @@ import PhysicCard from "../../molecules/PhysicCard/PhysicCard";
 import HoloDecorator from "../../atoms/HoloDecorator/HoloDecorator";
 import Avatar from "../../atoms/Avatar/Avatar";
 import Chip from "../../atoms/Chip/Chip";
+import RoleChip from "../../atoms/RoleChip/RoleChip";
 import Guilloche, { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche";
 import Electronics from "../../atoms/Electronics/Electronics";
 import { getRoleConfig } from "../../../tokens/roles";
@@ -200,12 +201,9 @@ function FrontContent({
             )}
           </Box>
 
-          <Chip
-            icon={roleConfig.icon}
-            label={role.toUpperCase()}
+          <RoleChip
+            userRole={role}
             size="small"
-            color={roleConfig.chipColor}
-            shape={roleConfig.statusChipShape}
             sx={{ width: "100%", fontWeight: "bold" }}
           />
 

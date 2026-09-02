@@ -7,6 +7,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import IconButton from "@mui/material/IconButton";
+import RoleChip from "~/components/atoms/RoleChip/RoleChip";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 
 export interface FilterBarProps {
@@ -37,7 +38,7 @@ export function FilterBar({
   onCohortFilterChange,
   cohorts,
 }: FilterBarProps) {
-  const { t } = useTranslation(["common", "admin"]);
+  const { t } = useTranslation(["common", "admin", "auth"]);
 
   const endAdornment = query ? (
     <InputAdornment position="end">
@@ -73,19 +74,26 @@ export function FilterBar({
         label={t("common:filterBar.role", "Role")}
         value={roleFilter}
         onChange={(e) => onRoleFilterChange(e.target.value)}
-        sx={{ minWidth: 150 }}
+        slotProps={{
+          select: {
+            renderValue: (selectedRole) => (
+              <RoleChip userRole={String(selectedRole)} size="small" />
+            ),
+          },
+        }}
+        sx={{ minWidth: 170 }}
       >
-        <MenuItem value="all">
-          {t("common:filterBar.allRoles", "All Roles")}
+        <MenuItem value="all" sx={{ py: 0.75 }}>
+          <RoleChip userRole="all" size="small" />
         </MenuItem>
-        <MenuItem value="student">
-          {t("common:admin.tabs.students", "Students")}
+        <MenuItem value="student" sx={{ py: 0.75 }}>
+          <RoleChip userRole="student" size="small" />
         </MenuItem>
-        <MenuItem value="instructor">
-          {t("common:admin.tabs.instructors", "Instructors")}
+        <MenuItem value="instructor" sx={{ py: 0.75 }}>
+          <RoleChip userRole="instructor" size="small" />
         </MenuItem>
-        <MenuItem value="admin">
-          {t("auth:devTool.roles.admin", "Admins")}
+        <MenuItem value="admin" sx={{ py: 0.75 }}>
+          <RoleChip userRole="admin" size="small" />
         </MenuItem>
       </TextField>
 

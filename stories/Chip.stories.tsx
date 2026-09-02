@@ -8,6 +8,7 @@ import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import CodeRoundedIcon from "@mui/icons-material/CodeRounded";
 import VerifiedRoundedIcon from "@mui/icons-material/VerifiedRounded";
 import Chip from "../app/components/atoms/Chip/Chip";
+import RoleChip from "../app/components/atoms/RoleChip/RoleChip";
 
 const meta = {
   title: "Atoms/Chip",
@@ -275,6 +276,30 @@ export const ColorVariants: Story = {
       <Chip label="Error" color="error" />
       <Chip label="Info" color="info" />
       <Chip label="Outlined" variant="outlined" color="primary" />
+    </Box>
+  ),
+};
+
+export const RoleChips: Story = {
+  render: () => (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Typography variant="subtitle2" sx={{ color: "text.secondary" }}>
+        RoleChip Atom (Shaped + Colored + Icon)
+      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 1.5,
+          alignItems: "center",
+        }}
+      >
+        <RoleChip userRole="student" size="small" />
+        <RoleChip userRole="instructor" size="small" />
+        <RoleChip userRole="admin" size="small" />
+        <RoleChip userRole="all" size="small" />
+        <RoleChip userRole="admin" variant="outlined" size="small" />
+      </Box>
     </Box>
   ),
 };

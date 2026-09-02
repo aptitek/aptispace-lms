@@ -5,6 +5,7 @@ import Tooltip from "@mui/material/Tooltip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import Chip from "~/components/atoms/Chip/Chip";
+import RoleChip from "~/components/atoms/RoleChip/RoleChip";
 import InputLabel from "@mui/material/InputLabel";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -162,13 +163,12 @@ export function FacultyAccessPanel() {
         }}
       >
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Chip
+          <RoleChip
+            userRole="instructor"
             label={t("auth:roles.faculty", "Faculty")}
             size="small"
-            color="info"
-            variant="outlined"
             sx={{ fontWeight: 700 }}
-            data-testid="inspector-faculty-chip"
+            testId="inspector-faculty-chip"
           />
           <Chip
             label={t("auth:roles.allCohorts", "All Cohorts")}
@@ -222,13 +222,12 @@ export function AdminAccessPanel() {
         }}
       >
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Chip
+          <RoleChip
+            userRole="admin"
             label={t("auth:roles.staff", "Staff")}
             size="small"
-            color="secondary"
-            variant="outlined"
             sx={{ fontWeight: 700 }}
-            data-testid="inspector-staff-chip"
+            testId="inspector-staff-chip"
           />
           <Chip
             label={t("auth:roles.globalAccess", "Global Access")}
