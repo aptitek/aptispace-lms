@@ -472,11 +472,13 @@ export default function LanguageToggle({
     }
   };
 
+  const { t } = useTranslation("common");
+
   return (
     <ToggleWrapper
       className={className}
       role="region"
-      aria-label="Language Selector"
+      aria-label={t("language.toggleLabel", "Select language")}
     >
       <MeridianToggle
         size={size}

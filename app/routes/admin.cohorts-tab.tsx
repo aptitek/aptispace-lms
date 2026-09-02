@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
@@ -65,6 +66,7 @@ export function AdminCohortsTabPanel({
   onSaveCohort,
   isSubmitting,
 }: AdminCohortsTabPanelProps) {
+  const { t } = useTranslation("common");
   const hasCohortsInspectorOpen = Boolean(
     selectedSchoolForEdit || selectedCohortForEdit,
   );
@@ -80,7 +82,7 @@ export function AdminCohortsTabPanel({
       <MainColumn>
         <Box>
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
-            Schools & Institutions
+            {t("admin.schoolsTitle", "Schools & Institutions")}
           </Typography>
           <MD3CollectionGrid data-testid="schools-zone">
             {schools.map((school) => (
@@ -103,7 +105,10 @@ export function AdminCohortsTabPanel({
         {selectedSchool && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
-              Cohorts for {selectedSchool.name}
+              {t("admin.cohortsForSchool", {
+                school: selectedSchool.name,
+                defaultValue: `Cohorts for ${selectedSchool.name}`,
+              })}
             </Typography>
             <MD3CollectionGrid data-testid="cohorts-zone">
               {cohorts

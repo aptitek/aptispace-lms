@@ -75,4 +75,32 @@ describe("EntityCard Molecule", () => {
     expect(props.cohort?.name).toBe("Cohort 2026 Alpha");
     expect(props.cohort?.startYear).toBe(2026);
   });
+
+  it("handles instructor and admin entities without requiring student cohort chips", () => {
+    const instructor: EntityCardData = {
+      id: "inst-1",
+      firstName: "Sarah",
+      familyName: "CONNOR",
+      email: "sarah.connor@aptitek.io",
+      role: "instructor",
+      isProfileComplete: true,
+    };
+
+    const admin: EntityCardData = {
+      id: "adm-1",
+      firstName: "Ada",
+      familyName: "LOVELACE",
+      email: "ada.lovelace@aptitek.io",
+      role: "admin",
+      isProfileComplete: true,
+    };
+
+    const instElement = React.createElement(EntityCard, { entity: instructor });
+    const admElement = React.createElement(EntityCard, { entity: admin });
+
+    expect(instElement).toBeDefined();
+    expect(admElement).toBeDefined();
+    expect(instElement.props.entity.role).toBe("instructor");
+    expect(admElement.props.entity.role).toBe("admin");
+  });
 });

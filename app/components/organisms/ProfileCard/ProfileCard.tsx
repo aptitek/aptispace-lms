@@ -5,23 +5,22 @@ import IconButton from "@mui/material/IconButton";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import Typography from "@mui/material/Typography";
-import { styled, alpha, useTheme } from "@mui/material/styles";
+import { alpha, useTheme } from "@mui/material/styles";
 
+import { useTranslation } from "react-i18next";
 import PhysicCard from "../../molecules/PhysicCard/PhysicCard";
 import HoloDecorator from "../../atoms/HoloDecorator/HoloDecorator";
 import Avatar from "../../atoms/Avatar/Avatar";
 import Chip from "../../atoms/Chip/Chip";
-import Logo from "../../atoms/Logo/Logo";
-import MrzZone from "../../atoms/MrzZone/MrzZone";
 import Guilloche, { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche";
 import Electronics from "../../atoms/Electronics/Electronics";
 import { getRoleConfig } from "../../../tokens/roles";
+import { ProfileTextField } from "./ProfileCard.styles";
+import { ProfileHeaderChips, BackContent } from "./ProfileCard.components";
 import type { ProfileCardProps } from "./ProfileCard.types";
-import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
 
 interface FrontContentProps {
   schoolLogoUrl?: string;
@@ -41,53 +40,6 @@ interface FrontContentProps {
   handleEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const ProfileTextField = styled(TextField)(({ theme }) => ({
-  "& .MuiOutlinedInput-root": {
-    backgroundColor: alpha(theme.palette.background.paper, 0.9),
-    backdropFilter: "blur(8px)",
-    borderRadius: "8px",
-    color: theme.palette.text.primary,
-    fontWeight: 500,
-    "& fieldset": {
-      borderColor: theme.palette.divider,
-      borderWidth: "1.5px",
-    },
-    "&:hover fieldset": {
-      borderColor: theme.palette.primary.main,
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: theme.palette.primary.main,
-      borderWidth: "2px",
-    },
-    ...theme.applyStyles("dark", {
-      backgroundColor: alpha(theme.palette.background.default, 0.85),
-      color: theme.palette.text.primary,
-      "& fieldset": {
-        borderColor: alpha(theme.palette.text.secondary, 0.45),
-      },
-      "&:hover fieldset": {
-        borderColor: theme.palette.primary.light,
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: theme.palette.primary.light,
-      },
-    }),
-  },
-  "& .MuiInputLabel-root": {
-    color: theme.palette.text.secondary,
-    fontWeight: 600,
-    "&.Mui-focused": {
-      color: theme.palette.primary.main,
-    },
-    ...theme.applyStyles("dark", {
-      color: theme.palette.text.secondary,
-      "&.Mui-focused": {
-        color: theme.palette.primary.light,
-      },
-    }),
-  },
-}));
-
 function FrontContent({
   schoolLogoUrl,
   institutionName,
@@ -105,6 +57,7 @@ function FrontContent({
   handleFamilyNameChange,
   handleEmailChange,
 }: FrontContentProps) {
+  const { t } = useTranslation(["auth", "common"]);
   const theme = useTheme();
   const roleConfig = getRoleConfig(role);
   const guillocheMask = useMemo(
@@ -181,10 +134,7 @@ function FrontContent({
             </Typography>
           </HoloDecorator>
         )}
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-          <Chip label={cohortName} size="small" variant="outlined" />
-          <Chip label={year} size="small" color="secondary" />
-        </Box>
+        <ProfileHeaderChips role={role} cohortName={cohortName} year={year} />
       </Box>
 
       <Divider sx={{ mb: 4, position: "relative", zIndex: 1 }} />
@@ -234,7 +184,7 @@ function FrontContent({
                   onAvatarEdit();
                 }}
                 data-no-flip="true"
-                aria-label="Edit avatar"
+                aria-label={t("common:profile.editAvatar", "Edit avatar")}
                 sx={{
                   position: "absolute",
                   top: -6,
@@ -294,7 +244,7 @@ function FrontContent({
             <ListItem disablePadding>
               <ProfileTextField
                 fullWidth
-                label="First Name"
+                label={t("common:profile.firstName", "First Name")}
                 variant="outlined"
                 size="small"
                 value={internalFirstName}
@@ -304,7 +254,7 @@ function FrontContent({
             <ListItem disablePadding>
               <ProfileTextField
                 fullWidth
-                label="Family Name"
+                label={t("common:profile.familyName", "Family Name")}
                 variant="outlined"
                 size="small"
                 value={internalFamilyName}
@@ -317,7 +267,7 @@ function FrontContent({
             <ListItem disablePadding>
               <ProfileTextField
                 fullWidth
-                label="Email"
+                label={t("common:profile.email", "Email")}
                 variant="outlined"
                 size="small"
                 value={internalEmailPrefix}
@@ -343,78 +293,6 @@ function FrontContent({
             </ListItem>
           </List>
         </Box>
-      </Box>
-    </Box>
-  );
-}
-
-interface BackContentProps {
-  mrzData?: Td1MrzData;
-}
-
-function BackContent({ mrzData }: BackContentProps) {
-  const theme = useTheme();
-  const guillocheMask = useMemo(
-    () => generateGuillocheMaskDataUrl({ seed: "AptiSpace Academy" }),
-    [],
-  );
-
-  return (
-    <Box
-      sx={{
-        position: "relative",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        bgcolor: alpha(theme.palette.background.paper, 0.15),
-        ...theme.applyStyles("dark", {
-          bgcolor: alpha(theme.palette.background.default, 0.1),
-        }),
-      }}
-    >
-      <Electronics
-        side="back"
-        chipView="front"
-        finish="gold"
-        showNfcAntenna
-        showInnerCoil
-        showChip
-        opacity={0.65}
-      />
-      <HoloDecorator
-        type="image"
-        maskUrl={guillocheMask}
-        maskSize="100% 100%"
-        sx={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      >
-        <Guilloche seed="AptiSpace Academy" opacity={0.3} />
-      </HoloDecorator>
-
-      <Box
-        sx={{
-          position: "relative",
-          zIndex: 1,
-          p: 4,
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <Box sx={{ height: 48, mb: 2 }} />
-        <Box sx={{ display: "flex", justifyContent: "flex-start", mb: "auto" }}>
-          <Logo size="large" holo />
-        </Box>
-      </Box>
-
-      <Box sx={{ width: "100%", position: "relative", zIndex: 1, mt: "auto" }}>
-        <MrzZone cardData={mrzData} fullWidth darkOnLight />
       </Box>
     </Box>
   );

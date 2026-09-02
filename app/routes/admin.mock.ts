@@ -215,25 +215,6 @@ export function getDefaultInstructors(): EntityCardData[] {
       avatarUrl:
         "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
       githubUsername: "sconnor",
-      cohortName: "Cohort 2026",
-      cohortId: "cohort-2026",
-      cohortStartYear: "2026",
-      cohorts: [
-        {
-          id: "cohort-2026",
-          name: "Cohort 2026",
-          startYear: "2026",
-          institutionId: "school-aptitek",
-          institutionName: "Aptitek",
-        },
-        {
-          id: "cohort-2027",
-          name: "Cohort 2027",
-          startYear: "2027",
-          institutionId: "school-aptitek",
-          institutionName: "Aptitek",
-        },
-      ],
       institutionId: "school-aptitek",
       institutionName: "Aptitek",
       isProfileComplete: true,
@@ -248,18 +229,6 @@ export function getDefaultInstructors(): EntityCardData[] {
       avatarUrl:
         "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
       githubUsername: "maurelius",
-      cohortName: "42 Common Core 2026",
-      cohortId: "cohort-42-2026",
-      cohortStartYear: "2026",
-      cohorts: [
-        {
-          id: "cohort-42-2026",
-          name: "42 Common Core 2026",
-          startYear: "2026",
-          institutionId: "school-42",
-          institutionName: "42 Paris",
-        },
-      ],
       institutionId: "school-42",
       institutionName: "42 Paris",
       isProfileComplete: true,
@@ -272,18 +241,6 @@ export function getDefaultInstructors(): EntityCardData[] {
       email: "elena.rostova@aptitek.io",
       role: "instructor",
       githubUsername: "erostova",
-      cohortName: "Cohort 2025",
-      cohortId: "cohort-2025",
-      cohortStartYear: "2025",
-      cohorts: [
-        {
-          id: "cohort-2025",
-          name: "Cohort 2025",
-          startYear: "2025",
-          institutionId: "school-aptitek",
-          institutionName: "Aptitek",
-        },
-      ],
       institutionId: "school-aptitek",
       institutionName: "Aptitek",
       isProfileComplete: true,

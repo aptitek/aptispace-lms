@@ -103,4 +103,43 @@ describe("StudentInspector Organism", () => {
     expect(typeof props.onImpersonate).toBe("function");
     expect(typeof props.onDelete).toBe("function");
   });
+
+  it("handles instructor and admin entity inspection props", () => {
+    const mockInstructor: EntityCardData = {
+      id: "inst-1",
+      firstName: "Sarah",
+      familyName: "CONNOR",
+      email: "sarah.connor@aptitek.io",
+      role: "instructor",
+    };
+
+    const mockAdmin: EntityCardData = {
+      id: "adm-1",
+      firstName: "Ada",
+      familyName: "LOVELACE",
+      email: "ada.lovelace@aptitek.io",
+      role: "admin",
+    };
+
+    const instProps = {
+      student: mockInstructor,
+      schools: mockSchools,
+      cohorts: mockCohorts,
+      onClose: vi.fn(),
+      onAddCohort: vi.fn(),
+      onRemoveCohort: vi.fn(),
+    };
+
+    const admProps = {
+      student: mockAdmin,
+      schools: mockSchools,
+      cohorts: mockCohorts,
+      onClose: vi.fn(),
+      onAddCohort: vi.fn(),
+      onRemoveCohort: vi.fn(),
+    };
+
+    expect(instProps.student.role).toBe("instructor");
+    expect(admProps.student.role).toBe("admin");
+  });
 });

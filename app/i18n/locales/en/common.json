@@ -2,6 +2,7 @@
   "copyright": "© {{year}} AptiSpace LMS. All rights reserved.",
   "craftedBy": "Crafted by",
   "craftedByAria": "Crafted by Aptitek",
+  "logoAlt": "AptiSpace Icon",
   "systemStatus": {
     "gateway": "SYSTEM STATUS: OPERATIONAL",
     "nominal": "ALL SYSTEMS OPERATIONAL",
@@ -122,7 +123,37 @@
     "deleteStudent": "Hold to Delete Student",
     "deleteInstructor": "Hold to Delete Instructor",
     "deleteUser": "Hold to Delete User",
-    "editProfile": "Edit Student Profile"
+    "editProfile": "Edit Student Profile",
+    "saveError": "Failed to save profile changes",
+    "editInstitution": "Edit Institution",
+    "addInstitution": "Add Institution",
+    "institutionName": "Name",
+    "institutionSlug": "Slug",
+    "logoUrl": "Logo URL",
+    "editCohort": "Edit Cohort",
+    "addCohortTitle": "Add Cohort",
+    "description": "Description",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "cancel": "Cancel",
+    "save": "Save",
+    "instructorCohortScope": "Instructors have teaching, mentoring, and grading access across all active cohorts.",
+    "adminCohortScope": "Administrators have full administrative authority across all institutions and cohorts."
+  },
+  "filterBar": {
+    "role": "Role",
+    "allRoles": "All Roles",
+    "school": "School",
+    "allSchools": "All Schools",
+    "cohort": "Cohort",
+    "allCohorts": "All Cohorts",
+    "searchPlaceholder": "Search users..."
+  },
+  "profile": {
+    "firstName": "First Name",
+    "familyName": "Family Name",
+    "email": "Email",
+    "editAvatar": "Edit avatar"
   },
   "deleteUser": "Hold to delete {{name}}",
   "userDeleted": "{{name}} has been deleted successfully.",
@@ -150,8 +181,13 @@
   "admin": {
     "title": "AptiSpace LMS • Admin Management",
     "description": "Administrative dashboard for student roster management, credentials, and institutional oversight.",
+    "schoolsTitle": "Schools & Institutions",
+    "cohortsForSchool": "Cohorts for {{school}}",
+    "addInstitution": "Add Institution",
+    "addCohort": "Add Cohort",
     "tabs": {
       "aria": "Admin management navigation tabs",
+      "users": "Users",
       "students": "Students",
       "instructors": "Instructors",
       "cohorts": "Cohorts",

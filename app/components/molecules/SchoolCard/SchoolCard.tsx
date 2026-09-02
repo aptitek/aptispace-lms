@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import { useTranslation } from "react-i18next";
 import Badge from "~/components/atoms/Badge/Badge";
 import SchoolIcon from "@mui/icons-material/School";
 import AddIcon from "@mui/icons-material/Add";
@@ -77,6 +78,7 @@ export const SchoolCard = forwardRef<HTMLDivElement, SchoolCardProps>(
 SchoolCard.displayName = "SchoolCard";
 
 export function SchoolCardSkeleton({ onClick }: { onClick?: () => void }) {
+  const { t } = useTranslation("common");
   const isInteractive = Boolean(onClick);
 
   return (
@@ -97,7 +99,9 @@ export function SchoolCardSkeleton({ onClick }: { onClick?: () => void }) {
         }}
       >
         <AddIcon sx={{ fontSize: 32 }} />
-        <SchoolName sx={{ fontSize: "0.9rem" }}>Add Institution</SchoolName>
+        <SchoolName sx={{ fontSize: "0.9rem" }}>
+          {t("admin.addInstitution", "Add Institution")}
+        </SchoolName>
       </Box>
     </SkeletonContainer>
   );

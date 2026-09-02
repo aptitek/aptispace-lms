@@ -81,8 +81,20 @@ export const InstructorRole: Story = {
       email: "marc.bertrand@aptitek.io",
       role: "instructor",
       githubUsername: "mbertrand",
-      cohortName: "Staff Faculty",
-      cohortStartYear: "2024",
+      isProfileComplete: true,
+    },
+  },
+};
+
+export const AdminRole: Story = {
+  args: {
+    entity: {
+      id: "adm-001",
+      firstName: "Ada",
+      familyName: "LOVELACE",
+      email: "ada.lovelace@aptitek.io",
+      role: "admin",
+      githubUsername: "adalovelace",
       isProfileComplete: true,
     },
   },

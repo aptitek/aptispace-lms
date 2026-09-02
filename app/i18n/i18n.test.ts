@@ -32,7 +32,7 @@ describe("i18n Internationalization", () => {
     expect(i18n.t("common:systemStatus.terminalTitle")).toBe(
       "STATUT DU SYSTÈME ET DIAGNOSTICS",
     );
-    expect(i18n.t("common:craftedBy")).toBe("Créé par");
+    expect(i18n.t("common:craftedBy")).toBe("Conçu par");
   });
 
   it("translates auth loginCard strings correctly in English and French", async () => {
@@ -66,19 +66,28 @@ describe("i18n Internationalization", () => {
     );
     expect(i18n.t("auth:devTool.modeBadge")).toBe("DEV UNIQUEMENT");
     expect(i18n.t("auth:devTool.roles.student")).toBe("Étudiant");
+    expect(i18n.t("auth:roles.faculty")).toBe("Corps professoral");
+    expect(i18n.t("auth:roles.staff")).toBe("Personnel");
 
     await i18n.changeLanguage("en");
     expect(i18n.t("auth:devTool.title")).toBe("Dev Impersonation Tool");
     expect(i18n.t("auth:devTool.modeBadge")).toBe("DEV ONLY");
     expect(i18n.t("auth:devTool.roles.student")).toBe("Student");
+    expect(i18n.t("auth:roles.faculty")).toBe("Faculty");
+    expect(i18n.t("auth:roles.staff")).toBe("Staff");
   });
 
-  it("translates inspector, studentGrid, and admin management strings in English and French", async () => {
+  it("translates inspector, studentGrid, filterBar, and admin management strings in English and French", async () => {
     await i18n.changeLanguage("en");
     expect(i18n.t("common:inspector.title")).toBe("Student Inspector");
     expect(i18n.t("common:inspector.assignmentTitle")).toBe(
       "Institution & Cohort Assignment",
     );
+    expect(i18n.t("common:filterBar.role")).toBe("Role");
+    expect(i18n.t("common:filterBar.searchPlaceholder")).toBe(
+      "Search users...",
+    );
+    expect(i18n.t("common:admin.schoolsTitle")).toBe("Schools & Institutions");
     expect(i18n.t("common:studentGrid.title")).toBe("Registered Students");
     expect(i18n.t("common:studentGrid.clearFilter")).toBe("Clear filter");
     expect(i18n.t("common:admin.tabs.students")).toBe("Students");
@@ -89,6 +98,11 @@ describe("i18n Internationalization", () => {
     expect(i18n.t("common:inspector.assignmentTitle")).toBe(
       "Affectation Établissement & Cohorte",
     );
+    expect(i18n.t("common:filterBar.role")).toBe("Rôle");
+    expect(i18n.t("common:filterBar.searchPlaceholder")).toBe(
+      "Rechercher des utilisateurs...",
+    );
+    expect(i18n.t("common:admin.schoolsTitle")).toBe("Écoles & Établissements");
     expect(i18n.t("common:inspector.addButton")).toBe("Ajouter");
     expect(i18n.t("common:studentGrid.title")).toBe("Étudiants Inscrits");
     expect(i18n.t("common:studentGrid.clearFilter")).toBe("Effacer le filtre");

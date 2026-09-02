@@ -101,12 +101,14 @@ function CompactHeaderSlot({
   cohortLabel,
   cohortYear,
   isProfileComplete,
+  role = "student",
 }: {
   school: SchoolConfig;
   institutionLabel: string;
   cohortLabel: string;
   cohortYear: string;
   isProfileComplete?: boolean;
+  role?: UserRole;
 }) {
   const { t } = useTranslation(["auth", "common"]);
 
@@ -127,32 +129,94 @@ function CompactHeaderSlot({
       </InstitutionBadge>
 
       <HeaderBadges>
-        <Chip
-          label={cohortLabel}
-          size="small"
-          color="primary"
-          variant="outlined"
-          sx={{
-            height: 20,
-            fontSize: "0.65rem",
-            fontWeight: 700,
-            "& .MuiChip-label": { px: 0.75 },
-          }}
-          data-testid="compact-cohort-chip"
-        />
-        <Chip
-          label={cohortYear}
-          size="small"
-          color="secondary"
-          variant="filled"
-          sx={{
-            height: 20,
-            fontSize: "0.65rem",
-            fontWeight: 800,
-            "& .MuiChip-label": { px: 0.75 },
-          }}
-          data-testid="compact-year-chip"
-        />
+        {role === "student" ? (
+          <>
+            <Chip
+              label={cohortLabel}
+              size="small"
+              color="primary"
+              variant="outlined"
+              sx={{
+                height: 20,
+                fontSize: "0.65rem",
+                fontWeight: 700,
+                "& .MuiChip-label": { px: 0.75 },
+              }}
+              data-testid="compact-cohort-chip"
+            />
+            <Chip
+              label={cohortYear}
+              size="small"
+              color="secondary"
+              variant="filled"
+              sx={{
+                height: 20,
+                fontSize: "0.65rem",
+                fontWeight: 800,
+                "& .MuiChip-label": { px: 0.75 },
+              }}
+              data-testid="compact-year-chip"
+            />
+          </>
+        ) : role === "instructor" ? (
+          <>
+            <Chip
+              label={t("auth:roles.faculty", "Faculty")}
+              size="small"
+              color="info"
+              variant="outlined"
+              sx={{
+                height: 20,
+                fontSize: "0.65rem",
+                fontWeight: 700,
+                "& .MuiChip-label": { px: 0.75 },
+              }}
+              data-testid="compact-faculty-chip"
+            />
+            <Chip
+              label={t("auth:roles.allCohorts", "All Cohorts")}
+              size="small"
+              color="default"
+              variant="outlined"
+              sx={{
+                height: 20,
+                fontSize: "0.65rem",
+                fontWeight: 700,
+                "& .MuiChip-label": { px: 0.75 },
+              }}
+              data-testid="compact-all-cohorts-chip"
+            />
+          </>
+        ) : (
+          <>
+            <Chip
+              label={t("auth:roles.staff", "Staff")}
+              size="small"
+              color="secondary"
+              variant="outlined"
+              sx={{
+                height: 20,
+                fontSize: "0.65rem",
+                fontWeight: 700,
+                "& .MuiChip-label": { px: 0.75 },
+              }}
+              data-testid="compact-staff-chip"
+            />
+            <Chip
+              label={t("auth:roles.allCohorts", "All Cohorts")}
+              size="small"
+              color="default"
+              variant="outlined"
+              sx={{
+                height: 20,
+                fontSize: "0.65rem",
+                fontWeight: 700,
+                "& .MuiChip-label": { px: 0.75 },
+              }}
+              data-testid="compact-all-cohorts-chip"
+            />
+          </>
+        )}
         {isProfileComplete === false && (
           <Chip
             label={t("auth:pending", "Pending")}
@@ -433,6 +497,7 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
             cohortLabel={cohortLabel}
             cohortYear={cohortYear}
             isProfileComplete={entity.isProfileComplete}
+            role={role}
           />
 
           <CardBodyRow>

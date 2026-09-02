@@ -287,7 +287,10 @@ function DevFilterSection({
 
   return (
     <FilterBar>
-      <SegmentedFilter role="tablist" aria-label="Filter accounts by role">
+      <SegmentedFilter
+        role="tablist"
+        aria-label={t("devTool.filterAria", "Filter accounts by role")}
+      >
         {(["all", "student", "instructor", "admin"] as const).map((role) => {
           const isActive = filterRole === role;
           const label =

@@ -59,11 +59,12 @@ export const Default: Story = {
 
 export const Instructor: Story = {
   args: {
-    ...Default.args,
+    institutionName: "AptiSpace Academy",
     role: "instructor",
     firstName: "Sarah",
     familyName: "Connor",
     emailPrefix: "sarah.connor",
+    emailDomain: "@aptispace.com",
     githubUsername: "sconnor_apti",
     mrzData: {
       documentCode: "I",
@@ -76,16 +77,18 @@ export const Instructor: Story = {
       surname: "CONNOR",
       givenNames: "SARAH",
     },
+    sx: { width: 540 },
   },
 };
 
 export const Admin: Story = {
   args: {
-    ...Default.args,
+    institutionName: "AptiSpace Academy",
     role: "admin",
     firstName: "Ada",
     familyName: "Lovelace",
     emailPrefix: "ada.lovelace",
+    emailDomain: "@aptispace.com",
     githubUsername: "adalovelace",
     mrzData: {
       documentCode: "I",
@@ -98,5 +101,6 @@ export const Admin: Story = {
       surname: "LOVELACE",
       givenNames: "ADA",
     },
+    sx: { width: 540 },
   },
 };

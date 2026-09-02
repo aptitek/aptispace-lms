@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { styled, type SxProps, type Theme } from "@mui/material/styles";
 import HoloDecorator from "../HoloDecorator/HoloDecorator";
 
@@ -20,39 +21,42 @@ const LogoRoot = styled("div", {
       : logoSize === "large"
         ? theme.spacing(2)
         : theme.spacing(1.5),
+  textDecoration: "none",
   userSelect: "none",
 }));
 
 const LogoImage = styled("img", {
   shouldForwardProp: (prop) => prop !== "logoSize",
 })<{ logoSize: "small" | "medium" | "large" }>(({ logoSize }) => {
-  const dim = logoSize === "small" ? 36 : logoSize === "large" ? 64 : 48;
+  const sizeMap = {
+    small: 28,
+    medium: 40,
+    large: 56,
+  };
+  const dimension = sizeMap[logoSize];
+
   return {
-    width: dim,
-    height: dim,
+    width: dimension,
+    height: dimension,
     objectFit: "contain",
-    display: "block",
-    flexShrink: 0,
   };
 });
 
 const TextContainer = styled("div", {
   shouldForwardProp: (prop) => prop !== "logoSize",
-})<{
-  logoSize: "small" | "medium" | "large";
-}>(({ logoSize }) => {
-  const fontSize =
-    logoSize === "small"
-      ? "1.75rem"
-      : logoSize === "large"
-        ? "3rem"
-        : "2.35rem";
+})<{ logoSize: "small" | "medium" | "large" }>(({ logoSize }) => {
+  const fontSizes = {
+    small: "1.25rem",
+    medium: "1.75rem",
+    large: "2.5rem",
+  };
 
   return {
-    display: "inline-flex",
-    alignItems: "baseline",
-    fontSize,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
     lineHeight: 1,
+    fontSize: fontSizes[logoSize],
   };
 });
 
@@ -76,10 +80,16 @@ const SpaceSpan = styled("span")(({ theme }) => ({
 }));
 
 export default function Logo({ size = "medium", holo = false, sx }: LogoProps) {
+  const { t } = useTranslation("common");
+
   return (
     <LogoRoot logoSize={size} sx={sx}>
       <HoloDecorator active={holo} type="image" maskUrl="/favicon.svg">
-        <LogoImage src="/favicon.svg" alt="AptiSpace Icon" logoSize={size} />
+        <LogoImage
+          src="/favicon.svg"
+          alt={t("logoAlt", "AptiSpace Icon")}
+          logoSize={size}
+        />
       </HoloDecorator>
       <TextContainer logoSize={size}>
         <HoloDecorator active={holo}>

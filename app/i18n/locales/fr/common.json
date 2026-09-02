@@ -1,7 +1,8 @@
 {
   "copyright": "© {{year}} AptiSpace LMS. Tous droits réservés.",
-  "craftedBy": "Créé par",
-  "craftedByAria": "Créé par Aptitek",
+  "craftedBy": "Conçu par",
+  "craftedByAria": "Conçu par Aptitek",
+  "logoAlt": "Icône AptiSpace",
   "systemStatus": {
     "gateway": "STATUT SYSTÈME : EN LIGNE",
     "nominal": "TOUS LES SYSTÈMES SONT OPÉRATIONNELS",
@@ -122,7 +123,37 @@
     "deleteStudent": "Maintenir pour supprimer l'étudiant",
     "deleteInstructor": "Maintenir pour supprimer l'instructeur",
     "deleteUser": "Maintenir pour supprimer l'utilisateur",
-    "editProfile": "Modifier le profil étudiant"
+    "editProfile": "Modifier le profil étudiant",
+    "saveError": "Échec de l'enregistrement des modifications du profil",
+    "editInstitution": "Modifier l'établissement",
+    "addInstitution": "Ajouter un établissement",
+    "institutionName": "Nom",
+    "institutionSlug": "Identifiant (Slug)",
+    "logoUrl": "URL du Logo",
+    "editCohort": "Modifier la promotion",
+    "addCohortTitle": "Ajouter une promotion",
+    "description": "Description",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "instructorCohortScope": "Les instructeurs ont un accès pédagogique, de mentorat et d'évaluation sur toutes les cohortes actives.",
+    "adminCohortScope": "Les administrateurs ont une autorité administrative complète sur tous les établissements et cohortes."
+  },
+  "filterBar": {
+    "role": "Rôle",
+    "allRoles": "Tous les rôles",
+    "school": "Établissement",
+    "allSchools": "Tous les établissements",
+    "cohort": "Cohorte",
+    "allCohorts": "Toutes les cohortes",
+    "searchPlaceholder": "Rechercher des utilisateurs..."
+  },
+  "profile": {
+    "firstName": "Prénom",
+    "familyName": "Nom de famille",
+    "email": "Email",
+    "editAvatar": "Modifier l'avatar"
   },
   "deleteUser": "Maintenir pour supprimer {{name}}",
   "userDeleted": "{{name}} a été supprimé avec succès.",
@@ -150,8 +181,13 @@
   "admin": {
     "title": "AptiSpace LMS • Gestion Administrative",
     "description": "Tableau de bord administratif pour la gestion de la liste des étudiants, des identifiants et de la supervision institutionnelle.",
+    "schoolsTitle": "Écoles & Établissements",
+    "cohortsForSchool": "Promotions pour {{school}}",
+    "addInstitution": "Ajouter un établissement",
+    "addCohort": "Ajouter une promotion",
     "tabs": {
       "aria": "Onglets de navigation de la gestion administrative",
+      "users": "Utilisateurs",
       "students": "Étudiants",
       "instructors": "Instructeurs",
       "cohorts": "Cohortes",

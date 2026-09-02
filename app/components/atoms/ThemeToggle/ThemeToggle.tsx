@@ -400,10 +400,15 @@ export default function ThemeToggle({
   disabled = false,
   "data-testid": dataTestId = "theme-toggle",
 }: ThemeToggleProps) {
+  const { t } = useTranslation("common");
   const { mode, toggleColorMode } = useThemeMode();
 
   return (
-    <ToggleWrapper className={className} role="region" aria-label="Theme Mode">
+    <ToggleWrapper
+      className={className}
+      role="region"
+      aria-label={t("theme.toggleLabel", "Select color mode")}
+    >
       <ZenithSwitch
         mode={mode}
         size={size}

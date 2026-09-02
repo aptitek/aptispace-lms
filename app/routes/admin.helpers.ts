@@ -4,7 +4,10 @@ import {
   type getAllUsersWithAffiliations,
 } from "~/services/userService";
 import { logImpersonatedAudit } from "~/services/assessmentService";
-import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
+import type {
+  EntityCardData,
+  CompactCohortItem,
+} from "~/components/molecules/EntityCard/EntityCard.types";
 import type { AuthUser, UserRole } from "~/utils/auth";
 import type { Database } from "~/db/index";
 
@@ -101,11 +104,49 @@ function buildStudentCohorts(
   }));
 }
 
+interface StudentCohortData {
+  cohortName?: string;
+  cohortId: string | null;
+  cohortStartDate?: Date | string | null;
+  cohortStartYear?: string | number | null;
+  cohorts?: CompactCohortItem[];
+}
+
+function resolveStudentCohortDetails(
+  primaryAffil: AffilType,
+  isStudent: boolean,
+  studentCohorts: CompactCohortItem[],
+): StudentCohortData {
+  if (!isStudent) {
+    return {
+      cohortName: undefined,
+      cohortId: null,
+      cohortStartDate: undefined,
+      cohortStartYear: undefined,
+      cohorts: undefined,
+    };
+  }
+
+  return {
+    cohortName: resolveCohort(primaryAffil),
+    cohortId: primaryAffil?.cohortId ?? null,
+    cohortStartDate: resolveCohortStartDate(primaryAffil),
+    cohortStartYear: resolveCohortYear(primaryAffil),
+    cohorts: studentCohorts,
+  };
+}
+
 export function mapDbUserToStudent(dbUser: DbUserWithAffil): EntityCardData {
   const cohortAffils = getSortedCohortAffils(dbUser);
   const studentCohorts = buildStudentCohorts(cohortAffils);
   const primaryAffil = cohortAffils[0] || dbUser.affiliations?.[0];
   const role = resolveUserGlobalRole(dbUser);
+  const isStudent = role === "student";
+  const cohortDetails = resolveStudentCohortDetails(
+    primaryAffil,
+    isStudent,
+    studentCohorts,
+  );
 
   return {
     id: dbUser.id,
@@ -116,11 +157,7 @@ export function mapDbUserToStudent(dbUser: DbUserWithAffil): EntityCardData {
     role,
     avatarUrl: undefined,
     githubUsername: dbUser.githubId ?? undefined,
-    cohortName: resolveCohort(primaryAffil),
-    cohortId: primaryAffil?.cohortId ?? null,
-    cohortStartDate: resolveCohortStartDate(primaryAffil),
-    cohortStartYear: resolveCohortYear(primaryAffil),
-    cohorts: studentCohorts,
+    ...cohortDetails,
     institutionName: resolveInstitution(primaryAffil),
     institutionId: primaryAffil?.institutionId ?? undefined,
     isProfileComplete: checkProfileComplete(dbUser),

@@ -70,26 +70,36 @@ export function FilterBar({
       <TextField
         select
         size="small"
-        label="Role"
+        label={t("common:filterBar.role", "Role")}
         value={roleFilter}
         onChange={(e) => onRoleFilterChange(e.target.value)}
         sx={{ minWidth: 150 }}
       >
-        <MenuItem value="all">All Roles</MenuItem>
-        <MenuItem value="student">Students</MenuItem>
-        <MenuItem value="instructor">Instructors</MenuItem>
-        <MenuItem value="admin">Admins</MenuItem>
+        <MenuItem value="all">
+          {t("common:filterBar.allRoles", "All Roles")}
+        </MenuItem>
+        <MenuItem value="student">
+          {t("common:admin.tabs.students", "Students")}
+        </MenuItem>
+        <MenuItem value="instructor">
+          {t("common:admin.tabs.instructors", "Instructors")}
+        </MenuItem>
+        <MenuItem value="admin">
+          {t("auth:devTool.roles.admin", "Admins")}
+        </MenuItem>
       </TextField>
 
       <TextField
         select
         size="small"
-        label="School"
+        label={t("common:filterBar.school", "School")}
         value={schoolFilter}
         onChange={(e) => onSchoolFilterChange(e.target.value)}
         sx={{ minWidth: 200 }}
       >
-        <MenuItem value="all">All Schools</MenuItem>
+        <MenuItem value="all">
+          {t("common:filterBar.allSchools", "All Schools")}
+        </MenuItem>
         {schools.map((school) => (
           <MenuItem key={school.id} value={school.id}>
             {school.name}
@@ -100,12 +110,14 @@ export function FilterBar({
       <TextField
         select
         size="small"
-        label="Cohort"
+        label={t("common:filterBar.cohort", "Cohort")}
         value={cohortFilter}
         onChange={(e) => onCohortFilterChange(e.target.value)}
         sx={{ minWidth: 200 }}
       >
-        <MenuItem value="all">All Cohorts</MenuItem>
+        <MenuItem value="all">
+          {t("common:filterBar.allCohorts", "All Cohorts")}
+        </MenuItem>
         {cohorts
           .filter(
             (c) => schoolFilter === "all" || c.institutionId === schoolFilter,
@@ -121,7 +133,7 @@ export function FilterBar({
 
       <TextField
         size="small"
-        placeholder="Search users..."
+        placeholder={t("common:filterBar.searchPlaceholder", "Search users...")}
         value={query}
         onChange={(e) => onQueryChange(e.target.value)}
         sx={{ minWidth: 250 }}

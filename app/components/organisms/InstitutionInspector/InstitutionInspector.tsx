@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -26,6 +27,7 @@ export default function InstitutionInspector({
   onSave,
   isSubmitting = false,
 }: InstitutionInspectorProps) {
+  const { t } = useTranslation("common");
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
@@ -72,15 +74,21 @@ export default function InstitutionInspector({
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          {institution.id ? "Edit Institution" : "Add Institution"}
+          {institution.id
+            ? t("inspector.editInstitution", "Edit Institution")
+            : t("inspector.addInstitution", "Add Institution")}
         </Typography>
-        <IconButton onClick={onClose} size="small">
+        <IconButton
+          onClick={onClose}
+          size="small"
+          aria-label={t("inspector.closeAria", "Close inspector")}
+        >
           <CloseIcon />
         </IconButton>
       </Box>
 
       <TextField
-        label="Name"
+        label={t("inspector.institutionName", "Name")}
         value={name}
         onChange={(e) => setName(e.target.value)}
         fullWidth
@@ -88,7 +96,7 @@ export default function InstitutionInspector({
         required
       />
       <TextField
-        label="Slug"
+        label={t("inspector.institutionSlug", "Slug")}
         value={slug}
         onChange={(e) => setSlug(e.target.value)}
         fullWidth
@@ -96,7 +104,7 @@ export default function InstitutionInspector({
         required
       />
       <TextField
-        label="Logo URL"
+        label={t("inspector.logoUrl", "Logo URL")}
         value={logoUrl}
         onChange={(e) => setLogoUrl(e.target.value)}
         fullWidth
@@ -107,14 +115,14 @@ export default function InstitutionInspector({
         sx={{ mt: "auto", display: "flex", justifyContent: "flex-end", gap: 2 }}
       >
         <Button onClick={onClose} disabled={isSubmitting}>
-          Cancel
+          {t("inspector.cancel", "Cancel")}
         </Button>
         <Button
           variant="contained"
           onClick={handleSave}
           disabled={isSubmitting || !name || !slug}
         >
-          Save
+          {t("inspector.save", "Save")}
         </Button>
       </Box>
     </Card>

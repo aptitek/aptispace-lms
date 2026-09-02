@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -27,6 +28,7 @@ export default function CohortInspector({
   onSave,
   isSubmitting = false,
 }: CohortInspectorProps) {
+  const { t } = useTranslation("common");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -83,15 +85,21 @@ export default function CohortInspector({
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          {cohort.id ? "Edit Cohort" : "Add Cohort"}
+          {cohort.id
+            ? t("inspector.editCohort", "Edit Cohort")
+            : t("inspector.addCohortTitle", "Add Cohort")}
         </Typography>
-        <IconButton onClick={onClose} size="small">
+        <IconButton
+          onClick={onClose}
+          size="small"
+          aria-label={t("inspector.closeAria", "Close inspector")}
+        >
           <CloseIcon />
         </IconButton>
       </Box>
 
       <TextField
-        label="Name"
+        label={t("inspector.institutionName", "Name")}
         value={name}
         onChange={(e) => setName(e.target.value)}
         fullWidth
@@ -99,7 +107,7 @@ export default function CohortInspector({
         required
       />
       <TextField
-        label="Description"
+        label={t("inspector.description", "Description")}
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         fullWidth
@@ -108,7 +116,7 @@ export default function CohortInspector({
         rows={4}
       />
       <TextField
-        label="Start Date"
+        label={t("inspector.startDate", "Start Date")}
         type="date"
         value={startDate}
         onChange={(e) => setStartDate(e.target.value)}
@@ -117,7 +125,7 @@ export default function CohortInspector({
         slotProps={{ inputLabel: { shrink: true } }}
       />
       <TextField
-        label="End Date"
+        label={t("inspector.endDate", "End Date")}
         type="date"
         value={endDate}
         onChange={(e) => setEndDate(e.target.value)}
@@ -130,14 +138,14 @@ export default function CohortInspector({
         sx={{ mt: "auto", display: "flex", justifyContent: "flex-end", gap: 2 }}
       >
         <Button onClick={onClose} disabled={isSubmitting}>
-          Cancel
+          {t("inspector.cancel", "Cancel")}
         </Button>
         <Button
           variant="contained"
           onClick={handleSave}
           disabled={isSubmitting || !name}
         >
-          Save
+          {t("inspector.save", "Save")}
         </Button>
       </Box>
     </Card>

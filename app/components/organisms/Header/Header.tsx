@@ -185,8 +185,8 @@ function HeaderProfileCardModal({
           role={user.role}
           githubUsername={user.githubUsername}
           institutionName="AptiSpace Academy"
-          cohortName="Core Batch"
-          year="2026"
+          cohortName={user.role === "student" ? "Core Batch" : undefined}
+          year={user.role === "student" ? "2026" : undefined}
           mrzData={mrzData}
         />
       </Box>

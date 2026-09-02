@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import { useTranslation } from "react-i18next";
 import Badge from "~/components/atoms/Badge/Badge";
 import AddIcon from "@mui/icons-material/Add";
 import Box from "@mui/material/Box";
@@ -87,6 +88,7 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
 CohortCard.displayName = "CohortCard";
 
 export function CohortCardSkeleton({ onClick }: { onClick?: () => void }) {
+  const { t } = useTranslation("common");
   const isInteractive = Boolean(onClick);
 
   return (
@@ -107,7 +109,9 @@ export function CohortCardSkeleton({ onClick }: { onClick?: () => void }) {
         }}
       >
         <AddIcon sx={{ fontSize: 32 }} />
-        <CohortName sx={{ fontSize: "0.9rem" }}>Add Cohort</CohortName>
+        <CohortName sx={{ fontSize: "0.9rem" }}>
+          {t("admin.addCohort", "Add Cohort")}
+        </CohortName>
       </Box>
     </SkeletonContainer>
   );
