@@ -173,6 +173,27 @@ describe("MissionCenter Organism", () => {
     expect(el).toBeDefined();
   });
 
+  it("renders MissionCenterAuditTab with empty logs", () => {
+    const el = React.createElement(MissionCenterAuditTab, {
+      auditLogs: [],
+    });
+    expect(el).toBeDefined();
+  });
+
+  it("renders MissionCenterErrorsTab with empty error reports", () => {
+    const el = React.createElement(MissionCenterErrorsTab, {
+      errorReports: [],
+    });
+    expect(el).toBeDefined();
+  });
+
+  it("renders MissionCenterSecurityTab with empty security incidents", () => {
+    const el = React.createElement(MissionCenterSecurityTab, {
+      securityIncidents: [],
+    });
+    expect(el).toBeDefined();
+  });
+
   it("renders MissionCenterUserProfileCard for anonymous visitor", () => {
     const el = React.createElement(MissionCenterUserProfileCard, {
       user: null,

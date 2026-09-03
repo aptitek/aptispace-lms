@@ -104,6 +104,8 @@ import {
   m3TooltipLightOverrides,
   m3DatePickerDarkComponents,
   m3DatePickerLightComponents,
+  m3DataGridDarkComponents,
+  m3DataGridLightComponents,
 } from "./themeComponents";
 
 export const darkThemeOptions: ThemeOptions = {
@@ -271,6 +273,7 @@ export const darkThemeOptions: ThemeOptions = {
       },
     },
     ...m3DatePickerDarkComponents,
+    ...m3DataGridDarkComponents,
   },
 };
 
@@ -439,6 +442,7 @@ export const lightThemeOptions: ThemeOptions = {
       },
     },
     ...m3DatePickerLightComponents,
+    ...m3DataGridLightComponents,
   },
 };
 

@@ -1,12 +1,6 @@
 import { useState, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -18,6 +12,11 @@ import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
+import {
+  DataGrid,
+  type GridColDef,
+  type GridRowSelectionModel,
+} from "@mui/x-data-grid";
 
 import type { SecurityIncidentItem } from "~/types/missionCenter";
 import { MissionCenterUserProfileCard } from "./MissionCenterUserProfileCard";
@@ -78,7 +77,7 @@ function SecurityThreatPanel({ incident, onInspectPayload }: ThreatPanelProps) {
         />
       </Box>
 
-      {/* ProfileCard of Bad User / Target User */}
+      {/* User Grid Card of Bad User / Target User */}
       <MissionCenterUserProfileCard
         user={targetUser}
         ipAddress={incident.ipAddress}
@@ -163,97 +162,175 @@ function SecurityIncidentTable({
   const theme = useTheme();
   const { t } = useTranslation(["common"]);
 
+  const rowSelectionModel: GridRowSelectionModel = useMemo(
+    () => ({
+      type: "include",
+      ids: new Set(selectedIncidentId ? [selectedIncidentId] : []),
+    }),
+    [selectedIncidentId],
+  );
+
+  const columns = useMemo<GridColDef<SecurityIncidentItem>[]>(
+    () => [
+      {
+        field: "type",
+        headerName: t("common:admin.missionCenter.type", "Type"),
+        width: 140,
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <Chip
+              label={params.value.replace("_", " ").toUpperCase()}
+              size="small"
+              color={params.row.severity === "security" ? "error" : "warning"}
+              sx={{ fontWeight: 700, fontSize: "0.68rem" }}
+            />
+          </Box>
+        ),
+      },
+      {
+        field: "title",
+        headerName: t(
+          "common:admin.missionCenter.incidentTitle",
+          "Incident Title",
+        ),
+        flex: 1.5,
+        minWidth: 180,
+        renderCell: (params) => {
+          const isSelected = params.row.id === selectedIncidentId;
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                height: "100%",
+                minWidth: 0,
+              }}
+            >
+              <Typography
+                variant="body2"
+                noWrap
+                sx={{
+                  fontWeight: isSelected ? 700 : 500,
+                }}
+              >
+                {params.value}
+              </Typography>
+            </Box>
+          );
+        },
+      },
+      {
+        field: "user",
+        headerName: t(
+          "common:admin.missionCenter.attributedUser",
+          "Attributed User / Target",
+        ),
+        flex: 1.2,
+        minWidth: 150,
+        valueGetter: (_value, row) => resolveUserDisplay(row),
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <Typography variant="body2" noWrap sx={{ fontSize: "0.85rem" }}>
+              {resolveUserDisplay(params.row)}
+            </Typography>
+          </Box>
+        ),
+      },
+      {
+        field: "ipAddress",
+        headerName: t("common:admin.missionCenter.ipOrigin", "IP Origin"),
+        flex: 0.9,
+        minWidth: 110,
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <Typography
+              variant="body2"
+              sx={{ fontFamily: "monospace", fontSize: "0.8rem" }}
+            >
+              {params.value || "Unknown"}
+            </Typography>
+          </Box>
+        ),
+      },
+      {
+        field: "timestamp",
+        headerName: t("common:admin.missionCenter.time", "Time"),
+        width: 100,
+        valueFormatter: (value: string) =>
+          value
+            ? new Date(value).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              })
+            : "",
+        renderCell: (params) => {
+          const dateStr = params.value
+            ? new Date(params.value).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              })
+            : "";
+          return (
+            <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", fontSize: "0.78rem" }}
+              >
+                {dateStr}
+              </Typography>
+            </Box>
+          );
+        },
+      },
+    ],
+    [t, selectedIncidentId],
+  );
+
   return (
-    <TableContainer
+    <Box
       sx={{
+        width: "100%",
+        height: 520,
         borderRadius: 3,
-        border: `1px solid ${theme.palette.divider}`,
         backgroundColor: theme.palette.background.paper,
       }}
+      data-testid="security-incidents-table"
     >
-      <Table size="small" data-testid="security-incidents-table">
-        <TableHead>
-          <TableRow sx={{ backgroundColor: theme.palette.action.hover }}>
-            <TableCell sx={{ fontWeight: 700 }}>Type</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Incident Title</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>
-              Attributed User / Target
-            </TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>IP Origin</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Timestamp</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {securityIncidents.length === 0 ? (
-            <TableRow>
-              <TableCell
-                colSpan={5}
-                sx={{ textAlign: "center", py: 4, color: "text.secondary" }}
-              >
-                {t(
-                  "common:admin.missionCenter.noSecurityIncidents",
-                  "No security incidents or 403 infractions recorded.",
-                )}
-              </TableCell>
-            </TableRow>
-          ) : (
-            securityIncidents.map((incident) => {
-              const isSelected = incident.id === selectedIncidentId;
-              const dateStr = new Date(incident.timestamp).toLocaleTimeString(
-                [],
-                {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                },
-              );
-              const userDisplay = resolveUserDisplay(incident);
-
-              return (
-                <TableRow
-                  key={incident.id}
-                  hover
-                  selected={isSelected}
-                  onClick={() => onSelectIncident(incident.id)}
-                  sx={{
-                    cursor: "pointer",
-                    backgroundColor: isSelected
-                      ? theme.palette.action.selected
-                      : undefined,
-                  }}
-                  data-testid={`security-row-${incident.id}`}
-                >
-                  <TableCell>
-                    <Chip
-                      label={incident.type.replace("_", " ").toUpperCase()}
-                      size="small"
-                      color={
-                        incident.severity === "security" ? "error" : "warning"
-                      }
-                      sx={{ fontWeight: 700, fontSize: "0.68rem" }}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: isSelected ? 700 : 500 }}>
-                    {incident.title}
-                  </TableCell>
-                  <TableCell>{userDisplay}</TableCell>
-                  <TableCell
-                    sx={{ fontFamily: "monospace", fontSize: "0.8rem" }}
-                  >
-                    {incident.ipAddress || "Unknown"}
-                  </TableCell>
-                  <TableCell
-                    sx={{ color: "text.secondary", fontSize: "0.78rem" }}
-                  >
-                    {dateStr}
-                  </TableCell>
-                </TableRow>
-              );
-            })
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
+      <DataGrid
+        rows={securityIncidents}
+        columns={columns}
+        rowSelectionModel={rowSelectionModel}
+        onRowSelectionModelChange={(newSelection) => {
+          if (newSelection.type === "include") {
+            const first = Array.from(newSelection.ids)[0];
+            if (first !== undefined) {
+              onSelectIncident(String(first));
+            }
+          }
+        }}
+        onRowClick={(params) => onSelectIncident(String(params.row.id))}
+        disableMultipleRowSelection
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 8, page: 0 },
+          },
+        }}
+        pageSizeOptions={[5, 8, 15, 30]}
+        localeText={{
+          noRowsLabel: t(
+            "common:admin.missionCenter.noSecurityIncidents",
+            "No security incidents or 403 infractions recorded.",
+          ),
+        }}
+        sx={{
+          borderRadius: 3,
+          border: `1px solid ${theme.palette.divider}`,
+          cursor: "pointer",
+        }}
+      />
+    </Box>
   );
 }
 

@@ -1,3 +1,5 @@
+import type {} from "@mui/x-data-grid/themeAugmentation";
+
 export const m3TooltipDarkOverrides = {
   popper: {
     zIndex: 1500,
@@ -200,6 +202,80 @@ export const m3DatePickerLightComponents = {
             color: "#fdf6e3 !important",
             fontWeight: 700,
           },
+        },
+      },
+    },
+  },
+};
+
+export const m3DataGridDarkComponents = {
+  MuiDataGrid: {
+    styleOverrides: {
+      root: {
+        border: "1px solid rgba(88, 110, 117, 0.3)",
+        borderRadius: 12,
+        backgroundColor: "#002b36",
+        color: "#839496",
+        "& .MuiDataGrid-columnHeaders": {
+          backgroundColor: "#073642",
+          borderBottom: "1px solid rgba(88, 110, 117, 0.3)",
+          fontWeight: 700,
+        },
+        "& .MuiDataGrid-columnHeaderTitle": {
+          fontWeight: 700,
+        },
+        "& .MuiDataGrid-row:hover": {
+          backgroundColor: "rgba(38, 139, 210, 0.08)",
+        },
+        "& .MuiDataGrid-row.Mui-selected": {
+          backgroundColor: "rgba(38, 139, 210, 0.18)",
+          "&:hover": {
+            backgroundColor: "rgba(38, 139, 210, 0.25)",
+          },
+        },
+        "& .MuiDataGrid-cell": {
+          borderBottom: "1px solid rgba(88, 110, 117, 0.2)",
+        },
+        "& .MuiDataGrid-footerContainer": {
+          borderTop: "1px solid rgba(88, 110, 117, 0.3)",
+          backgroundColor: "#073642",
+        },
+      },
+    },
+  },
+};
+
+export const m3DataGridLightComponents = {
+  MuiDataGrid: {
+    styleOverrides: {
+      root: {
+        border: "1px solid rgba(88, 110, 117, 0.2)",
+        borderRadius: 12,
+        backgroundColor: "#fffdf8",
+        color: "#586e75",
+        "& .MuiDataGrid-columnHeaders": {
+          backgroundColor: "#eee8d5",
+          borderBottom: "1px solid rgba(88, 110, 117, 0.2)",
+          fontWeight: 700,
+        },
+        "& .MuiDataGrid-columnHeaderTitle": {
+          fontWeight: 700,
+        },
+        "& .MuiDataGrid-row:hover": {
+          backgroundColor: "rgba(38, 139, 210, 0.05)",
+        },
+        "& .MuiDataGrid-row.Mui-selected": {
+          backgroundColor: "rgba(38, 139, 210, 0.12)",
+          "&:hover": {
+            backgroundColor: "rgba(38, 139, 210, 0.18)",
+          },
+        },
+        "& .MuiDataGrid-cell": {
+          borderBottom: "1px solid rgba(88, 110, 117, 0.15)",
+        },
+        "& .MuiDataGrid-footerContainer": {
+          borderTop: "1px solid rgba(88, 110, 117, 0.2)",
+          backgroundColor: "#eee8d5",
         },
       },
     },

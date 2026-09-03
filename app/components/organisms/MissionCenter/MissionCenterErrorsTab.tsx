@@ -1,13 +1,6 @@
 import { useState, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import TablePagination from "@mui/material/TablePagination";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -18,6 +11,11 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import CleaningServicesRoundedIcon from "@mui/icons-material/CleaningServicesRounded";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
+import {
+  DataGrid,
+  type GridColDef,
+  type GridRowSelectionModel,
+} from "@mui/x-data-grid";
 
 import type {
   AdminErrorReportItem,
@@ -105,8 +103,6 @@ export function MissionCenterErrorsTab({
   const [selectedReportId, setSelectedReportId] = useState<string | null>(
     errorReports[0]?.id || null,
   );
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(8);
 
   const selectedReport = useMemo(
     () => errorReports.find((r) => r.id === selectedReportId) || null,
@@ -119,10 +115,158 @@ export function MissionCenterErrorsTab({
     );
   }, [errorReports, severityFilter, statusFilter, search]);
 
-  const pagedReports = useMemo(() => {
-    const start = page * rowsPerPage;
-    return filteredReports.slice(start, start + rowsPerPage);
-  }, [filteredReports, page, rowsPerPage]);
+  const rowSelectionModel: GridRowSelectionModel = useMemo(
+    () => ({
+      type: "include",
+      ids: new Set(selectedReportId ? [selectedReportId] : []),
+    }),
+    [selectedReportId],
+  );
+
+  const columns = useMemo<GridColDef<AdminErrorReportItem>[]>(
+    () => [
+      {
+        field: "severity",
+        headerName: t("common:admin.missionCenter.severity", "Severity"),
+        width: 110,
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <Chip
+              label={params.value.toUpperCase()}
+              size="small"
+              color={resolveSeverityColor(params.value)}
+              sx={{ fontWeight: 800, fontSize: "0.68rem" }}
+            />
+          </Box>
+        ),
+      },
+      {
+        field: "message",
+        headerName: t(
+          "common:admin.missionCenter.errorMessage",
+          "Error Message",
+        ),
+        flex: 1.5,
+        minWidth: 200,
+        renderCell: (params) => {
+          const isSelected = params.row.id === selectedReportId;
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                height: "100%",
+                overflow: "hidden",
+                minWidth: 0,
+              }}
+            >
+              <Typography
+                variant="body2"
+                noWrap
+                sx={{
+                  fontWeight: isSelected ? 700 : 500,
+                }}
+              >
+                {params.value}
+              </Typography>
+              <Typography
+                variant="caption"
+                noWrap
+                sx={{ color: "text.secondary" }}
+              >
+                {params.row.path || params.row.url || "Internal"}
+              </Typography>
+            </Box>
+          );
+        },
+      },
+      {
+        field: "status",
+        headerName: t("common:admin.missionCenter.status", "Status"),
+        width: 120,
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <Chip
+              label={params.value.toUpperCase()}
+              size="small"
+              color={resolveStatusColor(params.value)}
+              variant={params.value === "resolved" ? "outlined" : "filled"}
+              sx={{ fontWeight: 700, fontSize: "0.68rem" }}
+            />
+          </Box>
+        ),
+      },
+      {
+        field: "user",
+        headerName: t("common:admin.missionCenter.user", "User"),
+        flex: 1,
+        minWidth: 130,
+        valueGetter: (_value, row) =>
+          row.user
+            ? `${row.user.firstName} ${row.user.familyName}`
+            : row.ipAddress || "Guest",
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+            {params.row.user ? (
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {params.row.user.firstName} {params.row.user.familyName}
+              </Typography>
+            ) : (
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontStyle: "italic",
+                }}
+              >
+                {params.row.ipAddress || "Guest"}
+              </Typography>
+            )}
+          </Box>
+        ),
+      },
+      {
+        field: "createdAt",
+        headerName: t("common:admin.missionCenter.time", "Time"),
+        width: 100,
+        valueFormatter: (value: string) =>
+          value
+            ? new Date(value).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              })
+            : "",
+        renderCell: (params) => {
+          const dateStr = params.value
+            ? new Date(params.value).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              })
+            : "";
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                height: "100%",
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", fontSize: "0.78rem" }}
+              >
+                {dateStr}
+              </Typography>
+            </Box>
+          );
+        },
+      },
+    ],
+    [t, selectedReportId],
+  );
 
   return (
     <Box
@@ -148,7 +292,6 @@ export function MissionCenterErrorsTab({
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
-            setPage(0);
           }}
           sx={{ minWidth: { xs: "100%", sm: 300 } }}
           slotProps={{
@@ -177,7 +320,6 @@ export function MissionCenterErrorsTab({
             value={severityFilter}
             onChange={(e) => {
               setSeverityFilter(e.target.value);
-              setPage(0);
             }}
             sx={{ minWidth: 130 }}
             data-testid="errors-severity-filter"
@@ -197,7 +339,6 @@ export function MissionCenterErrorsTab({
             value={statusFilter}
             onChange={(e) => {
               setStatusFilter(e.target.value);
-              setPage(0);
             }}
             sx={{ minWidth: 130 }}
             data-testid="errors-status-filter"
@@ -226,7 +367,7 @@ export function MissionCenterErrorsTab({
         </Stack>
       </Box>
 
-      {/* Main Split-Screen: Table of Incidents (Left) + Inspector with User ProfileCard (Right) */}
+      {/* Main Split-Screen: DataGrid of Incidents (Left) + Inspector with User ProfileCard (Right) */}
       <Box
         sx={{
           display: "grid",
@@ -237,149 +378,49 @@ export function MissionCenterErrorsTab({
           alignItems: "start",
         }}
       >
-        {/* Left Table */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          <TableContainer
+        {/* Left Table / DataGrid */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            width: "100%",
+            height: 520,
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: 3,
+          }}
+          data-testid="errors-table"
+        >
+          <DataGrid
+            rows={filteredReports}
+            columns={columns}
+            rowSelectionModel={rowSelectionModel}
+            onRowSelectionModelChange={(newSelection) => {
+              if (newSelection.type === "include") {
+                const first = Array.from(newSelection.ids)[0];
+                if (first !== undefined) {
+                  setSelectedReportId(String(first));
+                }
+              }
+            }}
+            onRowClick={(params) => setSelectedReportId(String(params.row.id))}
+            disableMultipleRowSelection
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 8, page: 0 },
+              },
+            }}
+            pageSizeOptions={[5, 8, 15, 30]}
+            localeText={{
+              noRowsLabel: t(
+                "common:admin.missionCenter.noErrorsFound",
+                "No matching error incidents.",
+              ),
+            }}
             sx={{
               borderRadius: 3,
               border: `1px solid ${theme.palette.divider}`,
-              backgroundColor: theme.palette.background.paper,
-            }}
-          >
-            <Table size="small" data-testid="errors-table">
-              <TableHead>
-                <TableRow sx={{ backgroundColor: theme.palette.action.hover }}>
-                  <TableCell sx={{ fontWeight: 700 }}>Severity</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Error Message</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>User</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Time</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredReports.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      sx={{
-                        textAlign: "center",
-                        py: 4,
-                        color: "text.secondary",
-                      }}
-                    >
-                      {t(
-                        "common:admin.missionCenter.noErrorsFound",
-                        "No matching error incidents.",
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  pagedReports.map((rep) => {
-                    const isSelected = rep.id === selectedReportId;
-                    const dateStr = new Date(rep.createdAt).toLocaleTimeString(
-                      [],
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                      },
-                    );
-
-                    return (
-                      <TableRow
-                        key={rep.id}
-                        hover
-                        selected={isSelected}
-                        onClick={() => setSelectedReportId(rep.id)}
-                        sx={{
-                          cursor: "pointer",
-                          backgroundColor: isSelected
-                            ? theme.palette.action.selected
-                            : undefined,
-                        }}
-                        data-testid={`error-row-${rep.id}`}
-                      >
-                        <TableCell>
-                          <Chip
-                            label={rep.severity.toUpperCase()}
-                            size="small"
-                            color={resolveSeverityColor(rep.severity)}
-                            sx={{ fontWeight: 800, fontSize: "0.68rem" }}
-                          />
-                        </TableCell>
-                        <TableCell sx={{ maxWidth: 260 }}>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: isSelected ? 700 : 500,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {rep.message}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            sx={{ color: "text.secondary" }}
-                          >
-                            {rep.path || rep.url || "Internal"}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={rep.status.toUpperCase()}
-                            size="small"
-                            color={resolveStatusColor(rep.status)}
-                            variant={
-                              rep.status === "resolved" ? "outlined" : "filled"
-                            }
-                            sx={{ fontWeight: 700, fontSize: "0.68rem" }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {rep.user ? (
-                            <Typography
-                              variant="body2"
-                              sx={{ fontWeight: 600 }}
-                            >
-                              {rep.user.firstName} {rep.user.familyName}
-                            </Typography>
-                          ) : (
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                color: "text.secondary",
-                                fontStyle: "italic",
-                              }}
-                            >
-                              {rep.ipAddress || "Guest"}
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell
-                          sx={{ color: "text.secondary", fontSize: "0.78rem" }}
-                        >
-                          {dateStr}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          <TablePagination
-            component="div"
-            count={filteredReports.length}
-            page={page}
-            rowsPerPage={rowsPerPage}
-            rowsPerPageOptions={[5, 8, 15, 30]}
-            onPageChange={(_e, newPage) => setPage(newPage)}
-            onRowsPerPageChange={(e) => {
-              setRowsPerPage(parseInt(e.target.value, 10));
-              setPage(0);
+              cursor: "pointer",
             }}
           />
         </Box>

@@ -1,13 +1,6 @@
 import { useState, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import TablePagination from "@mui/material/TablePagination";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -20,6 +13,7 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
+import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 
 import type { AdminAuditLogItem, AuditActionType } from "~/types/missionCenter";
 import { MissionCenterJsonModal } from "./MissionCenterJsonModal";
@@ -76,8 +70,6 @@ export function MissionCenterAuditTab({
   const [search, setSearch] = useState("");
   const [actionFilter, setActionFilter] = useState<string>("ALL");
   const [tableFilter, setTableFilter] = useState<string>("ALL");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedAuditForModal, setSelectedAuditForModal] =
     useState<AdminAuditLogItem | null>(null);
 
@@ -93,10 +85,185 @@ export function MissionCenterAuditTab({
     );
   }, [auditLogs, actionFilter, tableFilter, search]);
 
-  const pagedLogs = useMemo(() => {
-    const start = page * rowsPerPage;
-    return filteredLogs.slice(start, start + rowsPerPage);
-  }, [filteredLogs, page, rowsPerPage]);
+  const columns = useMemo<GridColDef<AdminAuditLogItem>[]>(
+    () => [
+      {
+        field: "createdAt",
+        headerName: t("common:admin.missionCenter.timestamp", "Timestamp"),
+        minWidth: 190,
+        flex: 1,
+        valueFormatter: (value: string) =>
+          value ? new Date(value).toLocaleString() : "",
+        renderCell: (params) => {
+          const dateStr = params.value
+            ? new Date(params.value).toLocaleString()
+            : "";
+          return (
+            <Tooltip title={dateStr}>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontFamily: "monospace",
+                  fontSize: "0.75rem",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {dateStr}
+              </Typography>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        field: "actor",
+        headerName: t("common:admin.missionCenter.actor", "Actor"),
+        minWidth: 200,
+        flex: 1.2,
+        valueGetter: (_value, row) =>
+          row.actor
+            ? `${row.actor.firstName || ""} ${row.actor.familyName || ""}`.trim()
+            : row.userId || "System",
+        renderCell: (params) => {
+          const actorName = params.row.actor
+            ? `${params.row.actor.firstName || ""} ${params.row.actor.familyName || ""}`.trim()
+            : params.row.userId || "System";
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                height: "100%",
+              }}
+            >
+              <Avatar
+                src={params.row.actor?.avatarUrl || undefined}
+                sx={{ width: 24, height: 24, fontSize: "0.7rem" }}
+              >
+                {actorName.charAt(0)}
+              </Avatar>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography
+                  variant="body2"
+                  noWrap
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: "0.8rem",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {actorName}
+                </Typography>
+                {params.row.actor?.role && (
+                  <Typography
+                    variant="caption"
+                    noWrap
+                    sx={{
+                      color: "text.secondary",
+                      fontSize: "0.65rem",
+                      display: "block",
+                    }}
+                  >
+                    {params.row.actor.role}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          );
+        },
+      },
+      {
+        field: "action",
+        headerName: t("common:admin.missionCenter.action", "Action"),
+        width: 120,
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <Chip
+              label={params.value}
+              size="small"
+              color={resolveActionColor(params.value)}
+              sx={{
+                fontWeight: 800,
+                fontSize: "0.65rem",
+                height: 20,
+              }}
+            />
+          </Box>
+        ),
+      },
+      {
+        field: "tableName",
+        headerName: t("common:admin.missionCenter.targetTable", "Target Table"),
+        minWidth: 140,
+        flex: 0.9,
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontFamily: "monospace",
+                fontSize: "0.8rem",
+                fontWeight: 600,
+              }}
+            >
+              {params.value}
+            </Typography>
+          </Box>
+        ),
+      },
+      {
+        field: "recordId",
+        headerName: t("common:admin.missionCenter.recordId", "Record ID"),
+        minWidth: 130,
+        flex: 0.9,
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <Typography
+              variant="body2"
+              noWrap
+              sx={{
+                fontFamily: "monospace",
+                fontSize: "0.75rem",
+                color: "text.secondary",
+              }}
+            >
+              {params.value}
+            </Typography>
+          </Box>
+        ),
+      },
+      {
+        field: "payload",
+        headerName: t("common:admin.missionCenter.payload", "Payload"),
+        width: 110,
+        sortable: false,
+        filterable: false,
+        renderCell: (params) => (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              height: "100%",
+            }}
+          >
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<VisibilityRoundedIcon sx={{ fontSize: 16 }} />}
+              onClick={() => setSelectedAuditForModal(params.row)}
+              sx={{ fontSize: "0.75rem", py: 0.25, px: 1 }}
+              data-testid={`inspect-audit-${params.row.id}`}
+            >
+              {t("common:admin.missionCenter.inspect", "Diff")}
+            </Button>
+          </Box>
+        ),
+      },
+    ],
+    [t],
+  );
 
   return (
     <Box
@@ -122,7 +289,6 @@ export function MissionCenterAuditTab({
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
-            setPage(0);
           }}
           sx={{ minWidth: { xs: "100%", sm: 320 } }}
           slotProps={{
@@ -147,7 +313,6 @@ export function MissionCenterAuditTab({
             value={actionFilter}
             onChange={(e) => {
               setActionFilter(e.target.value);
-              setPage(0);
             }}
             sx={{ minWidth: 120 }}
             data-testid="audit-action-filter"
@@ -165,7 +330,6 @@ export function MissionCenterAuditTab({
             value={tableFilter}
             onChange={(e) => {
               setTableFilter(e.target.value);
-              setPage(0);
             }}
             sx={{ minWidth: 140 }}
             data-testid="audit-table-filter"
@@ -180,169 +344,39 @@ export function MissionCenterAuditTab({
         </Stack>
       </Box>
 
-      {/* Audit Logs Table */}
-      <TableContainer
+      {/* Audit Logs DataGrid */}
+      <Box
         sx={{
+          width: "100%",
+          height: 520,
+          backgroundColor: theme.palette.background.paper,
           borderRadius: 2,
-          border: `1px solid ${theme.palette.divider}`,
-          overflowX: "auto",
         }}
+        data-testid="audit-logs-datagrid"
       >
-        <Table size="small" aria-label="audit logs table">
-          <TableHead sx={{ backgroundColor: theme.palette.action.hover }}>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Timestamp</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Actor</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Action</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Target Table</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Record ID</TableCell>
-              <TableCell sx={{ fontWeight: 700, textAlign: "right" }}>
-                Payload
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {pagedLogs.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  sx={{ textAlign: "center", py: 4, color: "text.secondary" }}
-                >
-                  {t(
-                    "common:admin.missionCenter.noAuditLogs",
-                    "No audit log records match the current filters.",
-                  )}
-                </TableCell>
-              </TableRow>
-            ) : (
-              pagedLogs.map((log) => {
-                const dateStr = new Date(log.createdAt).toLocaleString();
-                const actorName = log.actor
-                  ? `${log.actor.firstName || ""} ${log.actor.familyName || ""}`.trim()
-                  : log.userId || "System";
-
-                return (
-                  <TableRow
-                    key={log.id}
-                    hover
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell
-                      sx={{
-                        fontFamily: "monospace",
-                        fontSize: "0.75rem",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      <Tooltip title={dateStr}>
-                        <span>{dateStr}</span>
-                      </Tooltip>
-                    </TableCell>
-
-                    <TableCell>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <Avatar
-                          src={log.actor?.avatarUrl || undefined}
-                          sx={{ width: 24, height: 24, fontSize: "0.7rem" }}
-                        >
-                          {actorName.charAt(0)}
-                        </Avatar>
-                        <Box>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: 600,
-                              fontSize: "0.8rem",
-                              lineHeight: 1.1,
-                            }}
-                          >
-                            {actorName}
-                          </Typography>
-                          {log.actor?.role && (
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                color: "text.secondary",
-                                fontSize: "0.65rem",
-                              }}
-                            >
-                              {log.actor.role}
-                            </Typography>
-                          )}
-                        </Box>
-                      </Box>
-                    </TableCell>
-
-                    <TableCell>
-                      <Chip
-                        label={log.action}
-                        size="small"
-                        color={resolveActionColor(log.action)}
-                        sx={{
-                          fontWeight: 800,
-                          fontSize: "0.65rem",
-                          height: 20,
-                        }}
-                      />
-                    </TableCell>
-
-                    <TableCell
-                      sx={{
-                        fontFamily: "monospace",
-                        fontSize: "0.8rem",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {log.tableName}
-                    </TableCell>
-
-                    <TableCell
-                      sx={{
-                        fontFamily: "monospace",
-                        fontSize: "0.75rem",
-                        color: "text.secondary",
-                      }}
-                    >
-                      {log.recordId}
-                    </TableCell>
-
-                    <TableCell sx={{ textAlign: "right" }}>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={
-                          <VisibilityRoundedIcon sx={{ fontSize: 16 }} />
-                        }
-                        onClick={() => setSelectedAuditForModal(log)}
-                        sx={{ fontSize: "0.75rem", py: 0.25, px: 1 }}
-                        data-testid={`inspect-audit-${log.id}`}
-                      >
-                        {t("common:admin.missionCenter.inspect", "Diff")}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* Pagination */}
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25, 50]}
-        component="div"
-        count={filteredLogs.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={(_e, newPage) => setPage(newPage)}
-        onRowsPerPageChange={(e) => {
-          setRowsPerPage(parseInt(e.target.value, 10));
-          setPage(0);
-        }}
-      />
+        <DataGrid
+          rows={filteredLogs}
+          columns={columns}
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 10, page: 0 },
+            },
+          }}
+          pageSizeOptions={[5, 10, 25, 50]}
+          disableRowSelectionOnClick
+          aria-label="audit logs table"
+          localeText={{
+            noRowsLabel: t(
+              "common:admin.missionCenter.noAuditLogs",
+              "No audit log records match the current filters.",
+            ),
+          }}
+          sx={{
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 2,
+          }}
+        />
+      </Box>
 
       {/* JSON / Diff Modal */}
       {selectedAuditForModal && (

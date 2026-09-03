@@ -75,6 +75,7 @@ export default defineConfig({
       "@emotion/react",
       "@emotion/styled",
       "@mui/material",
+      "@mui/x-data-grid",
     ],
   },
   test: {

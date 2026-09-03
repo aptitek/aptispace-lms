@@ -155,7 +155,7 @@ export function MissionCenterErrorInspector({
         </Box>
       </Box>
 
-      {/* User Profile Card (Reporting User) */}
+      {/* User Grid Card (Reporting User) */}
       <MissionCenterUserProfileCard
         user={report.user}
         ipAddress={report.ipAddress}

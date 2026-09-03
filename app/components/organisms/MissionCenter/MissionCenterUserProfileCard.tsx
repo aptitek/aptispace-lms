@@ -6,8 +6,8 @@ import DevicesRoundedIcon from "@mui/icons-material/DevicesRounded";
 import PersonOffRoundedIcon from "@mui/icons-material/PersonOffRounded";
 import { useTranslation } from "react-i18next";
 import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
-import type { CohortConfig } from "~/types/institution";
-import ProfileCard from "~/components/organisms/ProfileCard/ProfileCard";
+import type { SchoolConfig, CohortConfig } from "~/types/institution";
+import EntityCard from "~/components/molecules/EntityCard/EntityCard";
 import { NetworkMetaCard } from "./MissionCenter.styles";
 
 export interface MissionCenterUserProfileCardProps {
@@ -16,59 +16,6 @@ export interface MissionCenterUserProfileCardProps {
   userAgent?: string | null;
   title?: string;
   isSecurityInfraction?: boolean;
-}
-
-function resolveUserDocNumber(id?: string): string {
-  if (!id) return "0942";
-  const cleaned = id
-    .replace(/[^A-Za-z0-9]/g, "")
-    .slice(0, 9)
-    .toUpperCase();
-  return cleaned || "0942";
-}
-
-function buildEmailParts(email?: string) {
-  const safeEmail = email || "";
-  if (safeEmail.includes("@")) {
-    const [prefix, domain] = safeEmail.split("@");
-    return {
-      prefix: prefix || "unauthenticated",
-      domain: domain || "guest.aptispace.io",
-    };
-  }
-  return {
-    prefix: safeEmail || "unauthenticated",
-    domain: "guest.aptispace.io",
-  };
-}
-
-function buildMrzData(user?: EntityCardData | null) {
-  const firstName = user?.firstName || (user ? "USER" : "ANONYMOUS");
-  const familyName = user?.familyName || (user ? "" : "VISITOR");
-  return {
-    documentNumber: resolveUserDocNumber(user?.id),
-    surname: (familyName || firstName).toUpperCase(),
-    givenNames: (firstName || "USER").toUpperCase(),
-    birthDate: "000101",
-    expiryDate: "300828",
-    sex: "M" as const,
-    issuingState: "APT",
-    nationality: "APT",
-  };
-}
-
-function buildCohortConfig(
-  user?: EntityCardData | null,
-): CohortConfig | undefined {
-  const primaryCohort = user?.cohorts?.[0];
-  if (!primaryCohort) return undefined;
-  return {
-    id: primaryCohort.id,
-    name: primaryCohort.name,
-    diploma: primaryCohort.diploma ?? undefined,
-    year: primaryCohort.year ?? undefined,
-    tags: primaryCohort.tags ?? undefined,
-  };
 }
 
 interface NetworkInfoProps {
@@ -176,23 +123,42 @@ function NetworkOriginCard({
   );
 }
 
-function resolveProfileCardAttributes(user?: EntityCardData | null) {
-  if (!user) {
-    return {
-      firstName: "ANONYMOUS",
-      familyName: "VISITOR",
-      cohortName: "Public Web",
-      institutionName: "AptiSpace Platform",
-      role: "student" as const,
-    };
-  }
+const anonymousEntity: EntityCardData = {
+  id: "anonymous",
+  firstName: "Anonymous",
+  familyName: "Visitor",
+  displayName: "Anonymous Visitor",
+  email: "unauthenticated@guest.aptispace.io",
+  role: "student",
+  institutionName: "AptiSpace Platform",
+  cohortName: "Public Web",
+};
+
+function resolveSchoolConfig(user?: EntityCardData | null): SchoolConfig {
   return {
-    firstName: user.firstName || "USER",
-    familyName: user.familyName || "",
-    cohortName: user.cohorts?.[0]?.name || user.cohortName || "Global",
-    institutionName: user.institutionName || "AptiSpace Platform",
-    role: user.role || "student",
+    id: user?.institutionId || "aptispace",
+    name: user?.institutionName || "AptiSpace Platform",
+    logoUrl: "/aptitek-logo.svg",
   };
+}
+
+function resolveCohortConfig(
+  user?: EntityCardData | null,
+): CohortConfig | undefined {
+  const primaryCohort = user?.cohorts?.[0];
+  if (!primaryCohort) return undefined;
+  return {
+    id: primaryCohort.id,
+    name: primaryCohort.name,
+    diploma: primaryCohort.diploma ?? undefined,
+    year: primaryCohort.year ?? undefined,
+    tags: primaryCohort.tags ?? undefined,
+  };
+}
+
+function canImpersonateUser(user?: EntityCardData | null): boolean {
+  if (!user || !user.id) return false;
+  return user.id !== "anonymous";
 }
 
 export function MissionCenterUserProfileCard({
@@ -202,11 +168,12 @@ export function MissionCenterUserProfileCard({
   title,
   isSecurityInfraction = false,
 }: MissionCenterUserProfileCardProps) {
-  const attrs = resolveProfileCardAttributes(user);
-  const { prefix, domain } = buildEmailParts(user?.email);
-  const mrzData = buildMrzData(user);
-  const cohortConfig = buildCohortConfig(user);
   const titleColor = isSecurityInfraction ? "error.main" : "text.primary";
+  const entity = user || anonymousEntity;
+  const school = resolveSchoolConfig(user);
+  const cohort = resolveCohortConfig(user);
+  const showImpersonate = canImpersonateUser(user);
+  const hasNetworkData = Boolean(ipAddress || userAgent);
 
   return (
     <Box
@@ -222,25 +189,21 @@ export function MissionCenterUserProfileCard({
         </Typography>
       )}
 
-      {/* Profile Card Render */}
-      <Box sx={{ maxWidth: 360, mx: "auto", width: "100%" }}>
-        <ProfileCard
-          schoolLogoUrl="/aptitek-logo.svg"
-          institutionName={attrs.institutionName}
-          cohort={cohortConfig}
-          cohortName={attrs.cohortName}
-          avatarUrl={user?.avatarUrl}
-          role={attrs.role}
-          githubUsername={user?.githubUsername}
-          firstName={attrs.firstName}
-          familyName={attrs.familyName}
-          emailPrefix={prefix}
-          emailDomain={domain}
-          mrzData={mrzData}
+      {/* User Grid Card (EntityCard) Render */}
+      <Box sx={{ width: "100%" }}>
+        <EntityCard
+          entity={entity}
+          school={school}
+          cohort={cohort}
+          interactive={false}
+          showDelete={false}
+          showImpersonate={showImpersonate}
+          variant="outlined"
+          testId="mission-center-entity-card"
         />
       </Box>
 
-      {(ipAddress || userAgent) && (
+      {hasNetworkData && (
         <NetworkOriginCard
           ipAddress={ipAddress}
           userAgent={userAgent}
@@ -251,3 +214,5 @@ export function MissionCenterUserProfileCard({
     </Box>
   );
 }
+
+export const MissionCenterUserGridCard = MissionCenterUserProfileCard;
