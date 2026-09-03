@@ -9,9 +9,6 @@ import {
 } from "react-router";
 import Header from "~/components/organisms/Header/Header";
 import Footer from "~/components/organisms/Footer/Footer";
-import UserGrid from "~/components/molecules/UserGrid/UserGrid";
-import StudentInspector from "~/components/organisms/StudentInspector/StudentInspector";
-import FilterBar from "~/components/molecules/FilterBar/FilterBar";
 import { authGuard } from "~/utils/session.server";
 import {
   logout,
@@ -35,13 +32,9 @@ import {
 } from "./admin.helpers";
 import AdminTabsSection from "./admin.tabs";
 import AdminCohortsTabPanel from "./admin.cohorts-tab";
-import {
-  PageRoot,
-  AdminMainWorkspace,
-  TabPanelContainer,
-  MainColumn,
-  SideColumn,
-} from "./admin.styles";
+import { AdminMissionCenterTabPanel } from "./admin.mission-tab";
+import { AdminUsersTabPanel } from "./admin.users-tab";
+import { PageRoot, AdminMainWorkspace } from "./admin.styles";
 import type { Route } from "./+types/admin";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -54,7 +47,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   }
 
   const activeUser = resolveActiveUser(auth.user, auth.session);
-  return loadAdminDashboardData(auth.db, activeUser);
+  return loadAdminDashboardData(auth.db, activeUser, context);
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -407,65 +400,40 @@ export default function AdminManagement() {
         <AdminTabsSection
           activeTab={activeTab}
           totalUsers={loaderData.totalUsers}
+          openIssuesCount={loaderData.missionCenter?.openIssuesCount}
           onChange={handleTabChange}
         />
 
         {activeTab === 0 && (
-          <TabPanelContainer
-            hasSidePanel={hasInspectorOpen}
-            role="tabpanel"
-            id="admin-tabpanel-0"
-            aria-labelledby="admin-tab-0"
-            data-testid="admin-tabpanel-users"
-          >
-            <MainColumn>
-              <FilterBar
-                query={searchQuery}
-                onQueryChange={setSearchQuery}
-                roleFilter={roleFilter}
-                onRoleFilterChange={setRoleFilter}
-                schoolFilter={schoolFilter}
-                onSchoolFilterChange={setSchoolFilter}
-                schools={loaderData.schools}
-                cohortFilter={cohortFilter}
-                onCohortFilterChange={setCohortFilter}
-                cohorts={loaderData.cohorts}
-                startYearMin={startYearMin}
-                onStartYearMinChange={setStartYearMin}
-                startYearMax={startYearMax}
-                onStartYearMaxChange={setStartYearMax}
-              />
-              <UserGrid
-                students={filteredUsers}
-                selectedStudentId={selectedUser?.id}
-                onStudentClick={handleUserClick}
-                onAddUser={handleCreateNewUser}
-                onImpersonate={handleImpersonate}
-                onDelete={handleDeleteUser}
-                testId="admin-user-grid"
-                showHeader={false}
-              />
-            </MainColumn>
-
-            {hasInspectorOpen && (
-              <SideColumn>
-                <StudentInspector
-                  student={selectedUser}
-                  schools={loaderData.schools}
-                  cohorts={loaderData.cohorts}
-                  onClose={handleCloseInspector}
-                  onAddCohort={handleAddCohort}
-                  onRemoveCohort={handleRemoveCohort}
-                  onStudentUpdated={handleStudentUpdated}
-                  onUpdateGithub={handleUpdateStudentGithub}
-                  onImpersonate={handleImpersonate}
-                  onDelete={handleDeleteUser}
-                  isSubmitting={fetcher.state !== "idle"}
-                  data-testid="admin-student-inspector"
-                />
-              </SideColumn>
-            )}
-          </TabPanelContainer>
+          <AdminUsersTabPanel
+            searchQuery={searchQuery}
+            onQueryChange={setSearchQuery}
+            roleFilter={roleFilter}
+            onRoleFilterChange={setRoleFilter}
+            schoolFilter={schoolFilter}
+            onSchoolFilterChange={setSchoolFilter}
+            schools={loaderData.schools}
+            cohortFilter={cohortFilter}
+            onCohortFilterChange={setCohortFilter}
+            cohorts={loaderData.cohorts}
+            startYearMin={startYearMin}
+            onStartYearMinChange={setStartYearMin}
+            startYearMax={startYearMax}
+            onStartYearMaxChange={setStartYearMax}
+            filteredUsers={filteredUsers}
+            selectedUser={selectedUser}
+            onUserClick={handleUserClick}
+            onCreateNewUser={handleCreateNewUser}
+            onImpersonate={handleImpersonate}
+            onDeleteUser={handleDeleteUser}
+            hasInspectorOpen={hasInspectorOpen}
+            onCloseInspector={handleCloseInspector}
+            onAddCohort={handleAddCohort}
+            onRemoveCohort={handleRemoveCohort}
+            onStudentUpdated={handleStudentUpdated}
+            onUpdateGithub={handleUpdateStudentGithub}
+            isSubmitting={fetcher.state !== "idle"}
+          />
         )}
 
         {activeTab === 1 && (
@@ -486,6 +454,21 @@ export default function AdminManagement() {
             onSaveInstitution={handleSaveInstitution}
             onSaveCohort={handleSaveCohort}
             isSubmitting={fetcher.state !== "idle"}
+          />
+        )}
+
+        {activeTab === 2 && loaderData.missionCenter && (
+          <AdminMissionCenterTabPanel
+            missionCenter={loaderData.missionCenter}
+            onRefresh={() => {
+              revalidator.revalidate();
+              notifySuccess(
+                t("common:admin.missionCenter.diagnosticsRefreshed", {
+                  defaultValue: "Diagnostic telemetry refreshed",
+                }),
+              );
+            }}
+            fetcher={fetcher}
           />
         )}
       </AdminMainWorkspace>

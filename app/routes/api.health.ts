@@ -11,7 +11,9 @@ import type {
 
 const LATENCY_DEGRADED_THRESHOLD_MS = 500;
 
-async function probeD1(db: Database | null): Promise<ServiceHealthReport> {
+export async function probeD1(
+  db: Database | null,
+): Promise<ServiceHealthReport> {
   const serviceName = "Cloudflare D1 (Database)";
   if (!db) {
     return {
@@ -50,7 +52,7 @@ async function probeD1(db: Database | null): Promise<ServiceHealthReport> {
   }
 }
 
-async function probeR2(
+export async function probeR2(
   bucket: R2Bucket | undefined,
 ): Promise<ServiceHealthReport> {
   const serviceName = "Cloudflare R2 (Avatars Bucket)";
@@ -91,7 +93,7 @@ async function probeR2(
   }
 }
 
-function resolveOverallStatus(
+export function resolveOverallStatus(
   d1Report: ServiceHealthReport,
   r2Report: ServiceHealthReport,
 ): SystemHealthStatus {

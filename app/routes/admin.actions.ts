@@ -13,6 +13,13 @@ import {
   createCohort,
   updateCohort,
 } from "~/services/cohortService";
+import {
+  updateErrorReportStatus,
+  deleteErrorReport,
+  clearResolvedErrorReports,
+  logAdminAudit,
+} from "~/services/missionCenterService";
+import type { ErrorStatusType } from "~/types/missionCenter";
 
 function getErrorMessage(err: unknown, fallback: string): string {
   if (err instanceof Error) return err.message;
@@ -402,6 +409,85 @@ export async function handleUpdateUserAction(
   }
 }
 
+export async function handleUpdateErrorStatusAction(
+  formData: FormData,
+  db: Database,
+  actorUserId: string,
+) {
+  const reportId = String(formData.get("reportId") || "");
+  const status = String(formData.get("status") || "open") as ErrorStatusType;
+  if (!reportId) {
+    return { success: false, error: "Missing reportId" };
+  }
+
+  try {
+    await updateErrorReportStatus(db, reportId, status);
+    await logAdminAudit(db, {
+      tableName: "error_reports",
+      recordId: reportId,
+      action: "UPDATE",
+      actorUserId,
+      newValues: { status },
+    });
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: getErrorMessage(err, "Failed to update error status"),
+    };
+  }
+}
+
+export async function handleDeleteErrorReportAction(
+  formData: FormData,
+  db: Database,
+  actorUserId: string,
+) {
+  const reportId = String(formData.get("reportId") || "");
+  if (!reportId) {
+    return { success: false, error: "Missing reportId" };
+  }
+
+  try {
+    await deleteErrorReport(db, reportId);
+    await logAdminAudit(db, {
+      tableName: "error_reports",
+      recordId: reportId,
+      action: "DELETE",
+      actorUserId,
+    });
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: getErrorMessage(err, "Failed to delete error report"),
+    };
+  }
+}
+
+export async function handleClearResolvedErrorsAction(
+  _formData: FormData,
+  db: Database,
+  actorUserId: string,
+) {
+  try {
+    const cleared = await clearResolvedErrorReports(db);
+    await logAdminAudit(db, {
+      tableName: "error_reports",
+      recordId: "bulk",
+      action: "DELETE",
+      actorUserId,
+      newValues: { count: cleared.length },
+    });
+    return { success: true, count: cleared.length };
+  } catch (err) {
+    return {
+      success: false,
+      error: getErrorMessage(err, "Failed to clear error reports"),
+    };
+  }
+}
+
 export interface DispatchAdminActionParams {
   intent: string | null;
   formData: FormData;
@@ -410,6 +496,33 @@ export interface DispatchAdminActionParams {
   session?: AdminSession;
 }
 
+type ActionHandler = (
+  formData: FormData,
+  db: Database,
+  actorUserId: string,
+  session?: AdminSession,
+) => Promise<unknown>;
+
+const ADMIN_ACTION_MAP: Record<string, ActionHandler> = {
+  "add-cohort": (fd, db, actor) => handleAddCohortAction(fd, db, actor),
+  "remove-cohort": (fd, db, actor) => handleRemoveCohortAction(fd, db, actor),
+  "delete-user": (fd, db, actor, sess) =>
+    handleDeleteUserAction(fd, db, actor, sess),
+  "update-user": (fd, db, actor) => handleUpdateUserAction(fd, db, actor),
+  "create-institution": (fd, db, actor) =>
+    handleCreateInstitutionAction(fd, db, actor),
+  "update-institution": (fd, db, actor) =>
+    handleUpdateInstitutionAction(fd, db, actor),
+  "create-cohort": (fd, db, actor) => handleCreateCohortAction(fd, db, actor),
+  "update-cohort": (fd, db, actor) => handleUpdateCohortAction(fd, db, actor),
+  "update-error-status": (fd, db, actor) =>
+    handleUpdateErrorStatusAction(fd, db, actor),
+  "delete-error-report": (fd, db, actor) =>
+    handleDeleteErrorReportAction(fd, db, actor),
+  "clear-resolved-errors": (fd, db, actor) =>
+    handleClearResolvedErrorsAction(fd, db, actor),
+};
+
 export async function dispatchAdminAction({
   intent,
   formData,
@@ -417,24 +530,9 @@ export async function dispatchAdminAction({
   actorUserId,
   session,
 }: DispatchAdminActionParams) {
-  switch (intent) {
-    case "add-cohort":
-      return handleAddCohortAction(formData, db, actorUserId);
-    case "remove-cohort":
-      return handleRemoveCohortAction(formData, db, actorUserId);
-    case "delete-user":
-      return handleDeleteUserAction(formData, db, actorUserId, session);
-    case "update-user":
-      return handleUpdateUserAction(formData, db, actorUserId);
-    case "create-institution":
-      return handleCreateInstitutionAction(formData, db, actorUserId);
-    case "update-institution":
-      return handleUpdateInstitutionAction(formData, db, actorUserId);
-    case "create-cohort":
-      return handleCreateCohortAction(formData, db, actorUserId);
-    case "update-cohort":
-      return handleUpdateCohortAction(formData, db, actorUserId);
-    default:
-      return { success: false, error: "Unknown action" };
+  const handler = intent ? ADMIN_ACTION_MAP[intent] : undefined;
+  if (handler) {
+    return handler(formData, db, actorUserId, session);
   }
+  return { success: false, error: "Unknown action" };
 }

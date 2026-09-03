@@ -232,7 +232,57 @@
       "students": "Étudiants",
       "instructors": "Instructeurs",
       "cohorts": "Cohortes",
+      "missionCenter": "Centre de Contrôle",
       "courses": "Cours"
+    },
+    "missionCenter": {
+      "title": "CENTRE DE CONTRÔLE",
+      "subtitle": "Télémétrie applicative, suivi des incidents, sentinelle de sécurité & métriques Cloudflare",
+      "runDiagnostics": "Lancer un diagnostic",
+      "diagnosticsRefreshed": "Télémétrie de diagnostic actualisée avec succès",
+      "tabs": {
+        "audit": "Journal d'Audit",
+        "errors": "Erreurs & Incidents",
+        "security": "Sentinelle de Sécurité",
+        "metrics": "Infrastructure & Métriques"
+      },
+      "kpi": {
+        "infrastructure": "Infrastructure Cloud",
+        "errors": "Incidents Actifs",
+        "security": "Sentinelle de Sécurité",
+        "activity": "Activité Plateforme"
+      },
+      "tooltips": {
+        "viewErrors": "Consulter les incidents signalés"
+      },
+      "searchLogs": "Rechercher dans l'audit (tables, enregistrements, JSON)...",
+      "actionFilter": "Action",
+      "tableFilter": "Table",
+      "noAuditLogs": "Aucun journal d'audit ne correspond aux filtres.",
+      "inspect": "Diff",
+      "searchErrors": "Rechercher des erreurs (message, route, utilisateur, IP)...",
+      "severityFilter": "Gravité",
+      "statusFilter": "Statut",
+      "clearResolved": "Purger résolues",
+      "noErrorsFound": "Aucun incident d'erreur correspondant.",
+      "incidentDetails": "Inspection de l'Incident",
+      "reportingUserCard": "Profil de l'Utilisateur Signalant",
+      "diagnosticMessage": "Message de Diagnostic",
+      "securityAlertTitle": "Sentinelle Active : {{count}} Incidents Audités",
+      "securityCleanTitle": "Sentinelle de Sécurité : Aucune Vulnérabilité ou Intrusion",
+      "securityAlertDesc": "Les infractions de contrôle d'accès, pics 403 et opérations administratives sont suivis avec attribution d'origine.",
+      "securityCleanDesc": "Tous les contrôles d'accès et vérifications d'intégrité sont nominaux.",
+      "noSecurityIncidents": "Aucun incident de sécurité ou infraction 403 enregistré.",
+      "securityThreatIntel": "Utilisateur & Origine Réseau Attribués",
+      "badUserCardTitle": "Carte d'Identité de l'Utilisateur Attribué",
+      "incidentDescription": "Résumé de l'Infraction",
+      "inspectRawPayload": "Inspecter l'Événement Brut",
+      "platformVolume": "Démographie des Utilisateurs",
+      "tableInventoryTitle": "Inventaire des Tables D1 & Comptage de Lignes",
+      "network": {
+        "ipAddress": "Origine Réseau (IP)"
+      },
+      "unauthenticated": "Requête Anonyme / Non Authentifiée"
     }
   },
   "institutions": {

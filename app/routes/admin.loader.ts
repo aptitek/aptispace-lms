@@ -14,14 +14,18 @@ import {
 } from "./admin.helpers";
 import { getCohortDisplayName } from "~/utils/cohortFormat";
 import type { AuthUser } from "~/utils/auth";
+import { getMissionCenterData } from "~/services/missionCenterService";
 
 export async function loadAdminDashboardData(
   db: Database | null,
   activeUser: AuthUser | null,
+  context?: unknown,
 ) {
   let dbUsers: DbUserWithAffil[] = [];
   let dbInstitutions: Awaited<ReturnType<typeof getAllInstitutions>> = [];
   let dbCohorts: Awaited<ReturnType<typeof getAllCohorts>> = [];
+
+  const missionCenterPromise = getMissionCenterData(db, activeUser, context);
 
   if (db) {
     try {
@@ -34,6 +38,8 @@ export async function loadAdminDashboardData(
       dbUsers = [];
     }
   }
+
+  const missionCenter = await missionCenterPromise;
 
   let mappedUsers = dbUsers.map(mapDbUserToStudent);
 
@@ -94,5 +100,6 @@ export async function loadAdminDashboardData(
     cohorts,
     schoolStudentCounts,
     cohortStudentCounts,
+    missionCenter,
   };
 }

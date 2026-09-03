@@ -232,7 +232,57 @@
       "students": "Students",
       "instructors": "Instructors",
       "cohorts": "Cohorts",
+      "missionCenter": "Mission Center",
       "courses": "Courses"
+    },
+    "missionCenter": {
+      "title": "MISSION CENTER",
+      "subtitle": "Application Telemetry, Error Incident Tracking, Security Sentinel & Infrastructure Metrics",
+      "runDiagnostics": "Run Diagnostics Probe",
+      "diagnosticsRefreshed": "Diagnostic telemetry refreshed successfully",
+      "tabs": {
+        "audit": "Audit Trail",
+        "errors": "Errors & Incidents",
+        "security": "Security Sentinel",
+        "metrics": "Infrastructure & Metrics"
+      },
+      "kpi": {
+        "infrastructure": "Cloud Infrastructure",
+        "errors": "Active Incidents",
+        "security": "Security Sentinel",
+        "activity": "Platform Activity"
+      },
+      "tooltips": {
+        "viewErrors": "View reported error issues"
+      },
+      "searchLogs": "Search audit trail (tables, records, users, JSON)...",
+      "actionFilter": "Action",
+      "tableFilter": "Table",
+      "noAuditLogs": "No audit log records match the current filters.",
+      "inspect": "Diff",
+      "searchErrors": "Search errors (message, route, user, IP)...",
+      "severityFilter": "Severity",
+      "statusFilter": "Status",
+      "clearResolved": "Clear Resolved",
+      "noErrorsFound": "No error incidents found matching criteria.",
+      "incidentDetails": "Incident Inspection",
+      "reportingUserCard": "Reporting User Profile",
+      "diagnosticMessage": "Diagnostic Message",
+      "securityAlertTitle": "Security Sentinel Active: {{count}} Incidents Audited",
+      "securityCleanTitle": "Security Sentinel: Zero Active Vulnerabilities or Breaches",
+      "securityAlertDesc": "Access control infractions, 403 Forbidden spikes, and sensitive administrative operations are tracked with full origin attribution.",
+      "securityCleanDesc": "All access controls, role guards, and credentials integrity checks are nominal.",
+      "noSecurityIncidents": "No security incidents or 403 infractions recorded.",
+      "securityThreatIntel": "Attributed User & Origin",
+      "badUserCardTitle": "Attributed User Identity Card",
+      "incidentDescription": "Infraction Summary",
+      "inspectRawPayload": "Inspect Security Raw Event",
+      "platformVolume": "Platform User Demographics",
+      "tableInventoryTitle": "D1 Database Table Inventory & Row Counts",
+      "network": {
+        "ipAddress": "Network Origin (IP)"
+      },
+      "unauthenticated": "Unauthenticated / Anonymous Request"
     }
   },
   "institutions": {
