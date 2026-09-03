@@ -39,6 +39,18 @@ const sampleInstructors: EntityCardData[] = [
   },
 ];
 
+const sampleAdmins: EntityCardData[] = [
+  {
+    id: "admin-1",
+    firstName: "Arthur",
+    familyName: "DENT",
+    email: "arthur.dent@aptitek.io",
+    role: "admin",
+    githubUsername: "adent",
+    isProfileComplete: true,
+  },
+];
+
 describe("UserGrid Molecule", () => {
   it("exports UserGrid component properly", () => {
     expect(UserGrid).toBeDefined();
@@ -93,6 +105,18 @@ describe("UserGrid Molecule", () => {
     expect(element.props.emptyPlaceholderCount).toBe(4);
     expect(element.props.lazy).toBe(true);
     expect(element.props.pageSize).toBe(3);
+  });
+
+  it("supports admin userType configuration", () => {
+    const element = React.createElement(UserGrid, {
+      students: sampleAdmins,
+      userType: "admin",
+      title: "Registered Administrators",
+    });
+
+    expect(element.props.userType).toBe("admin");
+    expect(element.props.title).toBe("Registered Administrators");
+    expect(element.props.students[0].role).toBe("admin");
   });
 
   it("supports skeleton loading state configuration", () => {

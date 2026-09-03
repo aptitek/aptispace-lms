@@ -88,30 +88,66 @@ export function useLazySentinel(options: LazySentinelOptions) {
 }
 
 export function resolveGridMeta(
-  isInstructor: boolean,
+  userTypeOrIsInstructor: string | boolean,
   filteredCount: number,
   t: TFunction,
 ) {
-  const defaultEmptyMsg = isInstructor
-    ? t(
+  const isInstructor =
+    userTypeOrIsInstructor === true || userTypeOrIsInstructor === "instructor";
+  const isAdmin = userTypeOrIsInstructor === "admin";
+  const isGenericUser = userTypeOrIsInstructor === "user";
+
+  if (isAdmin) {
+    return {
+      defaultEmptyMsg: t(
+        "common:adminGrid.emptyMessage",
+        "No administrators found in directory",
+      ),
+      defaultTitle: t("common:adminGrid.title", "Registered Administrators"),
+      countBadge: t("common:adminGrid.countBadge", {
+        count: filteredCount,
+        defaultValue: `${filteredCount} administrators`,
+      }),
+    };
+  }
+
+  if (isInstructor) {
+    return {
+      defaultEmptyMsg: t(
         "common:instructorGrid.emptyMessage",
         "No instructors found in directory",
-      )
-    : t("common:studentGrid.emptyMessage", "No users found in directory");
-
-  const defaultTitle = isInstructor
-    ? t("common:instructorGrid.title", "Registered Instructors")
-    : t("common:studentGrid.title", "Registered Students");
-
-  const countBadge = isInstructor
-    ? t("common:instructorGrid.countBadge", {
+      ),
+      defaultTitle: t("common:instructorGrid.title", "Registered Instructors"),
+      countBadge: t("common:instructorGrid.countBadge", {
         count: filteredCount,
         defaultValue: `${filteredCount} instructors`,
-      })
-    : t("common:studentGrid.countBadge", {
+      }),
+    };
+  }
+
+  if (isGenericUser) {
+    return {
+      defaultEmptyMsg: t(
+        "common:userGrid.emptyMessage",
+        "No users found in directory",
+      ),
+      defaultTitle: t("common:userGrid.title", "Registered Users"),
+      countBadge: t("common:userGrid.countBadge", {
         count: filteredCount,
-        defaultValue: `${filteredCount} students`,
-      });
+        defaultValue: `${filteredCount} users`,
+      }),
+    };
+  }
+
+  const defaultEmptyMsg = t(
+    "common:studentGrid.emptyMessage",
+    "No users found in directory",
+  );
+  const defaultTitle = t("common:studentGrid.title", "Registered Students");
+  const countBadge = t("common:studentGrid.countBadge", {
+    count: filteredCount,
+    defaultValue: `${filteredCount} students`,
+  });
 
   return { defaultEmptyMsg, defaultTitle, countBadge };
 }
@@ -171,7 +207,7 @@ export function useUserGridLogic(props: UserGridProps) {
 
   const isInstructor = options.userType === "instructor";
   const { defaultEmptyMsg, defaultTitle, countBadge } = resolveGridMeta(
-    isInstructor,
+    options.userType,
     filteredStudents.length,
     t,
   );

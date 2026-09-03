@@ -28,7 +28,7 @@ export interface UserGridProps {
   showHeader?: boolean;
   searchPlaceholder?: string;
   searchAriaLabel?: string;
-  userType?: "student" | "instructor" | "user";
+  userType?: "student" | "instructor" | "admin" | "user";
   isLoading?: boolean;
   skeletonCount?: number;
   lazy?: boolean;

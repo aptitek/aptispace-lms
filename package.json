@@ -25,6 +25,7 @@
   "wireit": {
     "db:generate": {
       "command": "drizzle-kit generate",
+      "clean": false,
       "files": [
         "app/db/schema.ts",
         "drizzle.config.ts"

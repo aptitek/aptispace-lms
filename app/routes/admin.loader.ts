@@ -5,6 +5,7 @@ import type { SchoolConfig } from "~/types/institution";
 import type { CohortWithInstitution } from "~/components/organisms/StudentInspector/StudentInspector.types";
 import {
   mapDbUserToStudent,
+  getDefaultAdmins,
   getDefaultStudents,
   getDefaultInstructors,
   getDefaultSchools,
@@ -37,7 +38,11 @@ export async function loadAdminDashboardData(
   let mappedUsers = dbUsers.map(mapDbUserToStudent);
 
   if (mappedUsers.length === 0) {
-    mappedUsers = [...getDefaultStudents(), ...getDefaultInstructors()];
+    mappedUsers = [
+      ...getDefaultAdmins(),
+      ...getDefaultInstructors(),
+      ...getDefaultStudents(),
+    ];
   }
 
   const schools: SchoolConfig[] =

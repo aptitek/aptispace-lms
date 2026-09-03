@@ -6,6 +6,7 @@ import type { AuthUser, UserRole } from "~/utils/auth";
 import type { getAllUsersWithAffiliations } from "~/services/userService";
 import { getCohortDisplayName } from "~/utils/cohortFormat";
 import {
+  getDefaultAdmins,
   getDefaultStudents,
   getDefaultInstructors,
   getDefaultSchools,
@@ -13,6 +14,7 @@ import {
 } from "./admin.mock";
 
 export {
+  getDefaultAdmins,
   getDefaultStudents,
   getDefaultInstructors,
   getDefaultSchools,
@@ -166,6 +168,7 @@ export function mapDbUserToStudent(dbUser: DbUserWithAffil): EntityCardData {
 
   return {
     id: dbUser.id,
+    role,
     firstName: dbUser.firstName,
     familyName: dbUser.lastName,
     displayName: resolveUserDisplayName(dbUser),

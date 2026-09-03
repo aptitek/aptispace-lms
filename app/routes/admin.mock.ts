@@ -263,3 +263,22 @@ export function getDefaultInstructors(): EntityCardData[] {
     },
   ];
 }
+
+export function getDefaultAdmins(): EntityCardData[] {
+  return [
+    {
+      id: "admin-001",
+      firstName: "Arthur",
+      familyName: "DENT",
+      displayName: "Arthur DENT",
+      email: "arthur.dent@aptitek.io",
+      role: "admin",
+      avatarUrl:
+        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+      githubUsername: "adent",
+      institutionId: "school-aptitek",
+      institutionName: "Aptitek",
+      isProfileComplete: true,
+    },
+  ];
+}
