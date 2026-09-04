@@ -366,7 +366,9 @@
     "tooltips": {
       "collapseSidebar": "Réduire la barre latérale",
       "expandSidebar": "Développer la barre latérale",
-      "settings": "Paramètres du calendrier"
+      "settings": "Paramètres du calendrier",
+      "remoteBadge": "Cours à distance (En ligne)",
+      "inPersonBadge": "Cours en présentiel"
     },
     "states": {
       "loadingCalendar": "Chargement du calendrier interactif...",

@@ -146,32 +146,42 @@ function ClassDetailsHeader({ isRemote, onClose }: ClassDetailsHeaderProps) {
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Box
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 0.5,
-            px: 1.25,
-            py: 0.35,
-            borderRadius: "8px",
-            fontSize: "0.75rem",
-            fontWeight: 800,
-            backgroundColor: (theme) =>
-              isRemote
-                ? alpha(theme.palette.primary.main, 0.12)
-                : alpha(theme.palette.success.main, 0.12),
-            color: isRemote ? "primary.main" : "success.main",
-          }}
+        <Tooltip
+          arrow
+          title={
+            isRemote
+              ? t("planning.tooltips.remoteBadge", "Remote Class")
+              : t("planning.tooltips.inPersonBadge", "In-Person Class")
+          }
         >
-          {isRemote ? (
-            <DevicesRoundedIcon sx={{ fontSize: "0.95rem" }} />
-          ) : (
-            <LocationOnRoundedIcon sx={{ fontSize: "0.95rem" }} />
-          )}
-          {isRemote
-            ? t("planning.details.remoteBadge", "Remote")
-            : t("planning.details.inPersonBadge", "In-Person")}
-        </Box>
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              cursor: "help",
+              gap: 0.5,
+              px: 1.25,
+              py: 0.35,
+              borderRadius: "8px",
+              fontSize: "0.75rem",
+              fontWeight: 800,
+              backgroundColor: (theme) =>
+                isRemote
+                  ? alpha(theme.palette.primary.main, 0.12)
+                  : alpha(theme.palette.success.main, 0.12),
+              color: isRemote ? "primary.main" : "success.main",
+            }}
+          >
+            {isRemote ? (
+              <DevicesRoundedIcon sx={{ fontSize: "0.95rem" }} />
+            ) : (
+              <LocationOnRoundedIcon sx={{ fontSize: "0.95rem" }} />
+            )}
+            {isRemote
+              ? t("planning.details.remoteBadge", "Remote")
+              : t("planning.details.inPersonBadge", "In-Person")}
+          </Box>
+        </Tooltip>
         <Typography variant="h6" sx={{ fontWeight: 800 }}>
           {t("planning.details.title")}
         </Typography>

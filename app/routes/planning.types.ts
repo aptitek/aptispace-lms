@@ -1,4 +1,7 @@
-import type { SchedulerEventColor } from "@mui/x-scheduler/models";
+import type {
+  SchedulerEvent,
+  SchedulerEventColor,
+} from "@mui/x-scheduler/models";
 import type { ClassWithDetails } from "~/services/classService";
 import type { AuthUser } from "~/utils/auth";
 
@@ -29,7 +32,26 @@ export interface PlanningLoaderData {
 }
 
 export function getSchedulerColor(isRemote: boolean): SchedulerEventColor {
-  return isRemote ? "indigo" : "teal";
+  return isRemote ? "blue" : "green";
+}
+
+export function mapClassToSchedulerEvent(c: {
+  id: string;
+  title: string;
+  startTime: Date | string;
+  endTime: Date | string;
+  isRemote: boolean;
+  description?: string | null;
+}): SchedulerEvent {
+  return {
+    id: c.id,
+    title: c.title,
+    start: new Date(c.startTime).toISOString(),
+    end: new Date(c.endTime).toISOString(),
+    color: getSchedulerColor(c.isRemote),
+    description: c.description ?? undefined,
+    className: c.isRemote ? "event-remote" : "event-in-person",
+  };
 }
 
 export function formatTimeRange(start: Date, end: Date): string {

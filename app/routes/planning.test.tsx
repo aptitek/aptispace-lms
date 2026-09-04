@@ -12,6 +12,12 @@ import {
   CalendarErrorState,
   CalendarEmptyState,
 } from "./planning.states";
+import { mapClassToSchedulerEvent } from "./planning.types";
+import {
+  createSvgDataUri,
+  DEVICES_ICON_PATH,
+  LOCATION_ICON_PATH,
+} from "./planning.styles";
 import * as sessionServer from "~/utils/session.server";
 import * as classService from "~/services/classService";
 import * as dbModule from "~/db";
@@ -161,5 +167,58 @@ describe("Planning Route", () => {
     });
     expect(element).toBeDefined();
     expect(element.props.isAdmin).toBe(true);
+  });
+
+  describe("mapClassToSchedulerEvent", () => {
+    it("maps remote class without [Remote] prefix in title and with event-remote className", () => {
+      const remoteClass = {
+        id: "class-remote-1",
+        title: "Distributed Architecture",
+        startTime: new Date("2026-09-08T09:00:00.000Z"),
+        endTime: new Date("2026-09-08T11:00:00.000Z"),
+        isRemote: true,
+        description: "Zoom lecture on distributed databases",
+      };
+
+      const event = mapClassToSchedulerEvent(remoteClass);
+
+      expect(event.id).toBe("class-remote-1");
+      expect(event.title).toBe("Distributed Architecture");
+      expect(event.title).not.toContain("[Remote]");
+      expect(event.className).toBe("event-remote");
+      expect(event.color).toBe("blue");
+      expect(event.start).toBe("2026-09-08T09:00:00.000Z");
+      expect(event.end).toBe("2026-09-08T11:00:00.000Z");
+    });
+
+    it("maps in-person class with clean title and with event-in-person className", () => {
+      const inPersonClass = {
+        id: "class-inperson-2",
+        title: "Microservices Workshop",
+        startTime: new Date("2026-09-09T14:00:00.000Z"),
+        endTime: new Date("2026-09-09T17:00:00.000Z"),
+        isRemote: false,
+        description: "Room 402 lab session",
+      };
+
+      const event = mapClassToSchedulerEvent(inPersonClass);
+
+      expect(event.id).toBe("class-inperson-2");
+      expect(event.title).toBe("Microservices Workshop");
+      expect(event.className).toBe("event-in-person");
+      expect(event.color).toBe("green");
+    });
+  });
+
+  describe("Badge SVG Utilities", () => {
+    it("generates valid data URIs for DevicesRounded and LocationOnRounded icons", () => {
+      const devicesUri = createSvgDataUri(DEVICES_ICON_PATH, "#ffffff");
+      const locationUri = createSvgDataUri(LOCATION_ICON_PATH, "#ffffff");
+
+      expect(devicesUri).toContain('url("data:image/svg+xml,');
+      expect(devicesUri).toContain("%23ffffff");
+      expect(locationUri).toContain('url("data:image/svg+xml,');
+      expect(locationUri).toContain("%23ffffff");
+    });
   });
 });

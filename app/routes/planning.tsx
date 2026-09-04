@@ -40,7 +40,7 @@ import {
 import Tooltip from "~/components/atoms/Tooltip/Tooltip";
 import { RootContainer, CalendarFrame } from "./planning.styles";
 import {
-  getSchedulerColor,
+  mapClassToSchedulerEvent,
   type PlanningLoaderData,
   type InstructorOption,
   type SessionOption,
@@ -170,14 +170,7 @@ export default function Planning() {
   }, [loadScheduler]);
 
   const schedulerEvents: SchedulerEvent[] = useMemo(() => {
-    return classesState.map((c) => ({
-      id: c.id,
-      title: c.isRemote ? `[Remote] ${c.title}` : c.title,
-      start: new Date(c.startTime).toISOString(),
-      end: new Date(c.endTime).toISOString(),
-      color: getSchedulerColor(c.isRemote),
-      description: c.description ?? undefined,
-    }));
+    return classesState.map(mapClassToSchedulerEvent);
   }, [classesState]);
 
   const handleEventsChange = useCallback(
@@ -343,12 +336,6 @@ export default function Planning() {
             sx={{
               height: "760px",
               fontFamily: "inherit",
-              "& .MuiEventCalendar-timeGridEvent": {
-                borderRadius: "8px",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                transition: "transform 0.15s ease",
-                "&:hover": { transform: "scale(1.01)" },
-              },
             }}
           />
         )}

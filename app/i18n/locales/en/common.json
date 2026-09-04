@@ -366,7 +366,9 @@
     "tooltips": {
       "collapseSidebar": "Collapse sidebar",
       "expandSidebar": "Expand sidebar",
-      "settings": "Calendar settings"
+      "settings": "Calendar settings",
+      "remoteBadge": "Remote Class",
+      "inPersonBadge": "In-Person Class"
     },
     "states": {
       "loadingCalendar": "Loading interactive calendar...",
