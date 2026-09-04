@@ -21,6 +21,9 @@ export const users = sqliteTable("users", {
   avatarUrl: text("avatar_url"),
   githubId: text("github_id").unique(),
   githubEmail: text("github_email"),
+  calendarFeedToken: text("calendar_feed_token")
+    .unique()
+    .$defaultFn(() => crypto.randomUUID()),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -179,13 +182,23 @@ export const sessions = sqliteTable("sessions", {
     .$defaultFn(() => new Date()),
 });
 
-export const seances = sqliteTable("seances", {
+export const classes = sqliteTable("classes", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   sessionId: text("session_id")
     .notNull()
     .references(() => sessions.id, { onDelete: "cascade" }),
+  instructorId: text("instructor_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  title: text("title").notNull(),
+  description: text("description"),
+  type: text("type", {
+    enum: ["lecture", "lab", "workshop", "exam"],
+  })
+    .notNull()
+    .default("lecture"),
   startTime: integer("start_time", { mode: "timestamp" }).notNull(),
   endTime: integer("end_time", { mode: "timestamp" }).notNull(),
   location: text("location"),
@@ -352,6 +365,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   affiliations: many(affiliations),
   groupMemberships: many(groupMembers),
   submissions: many(submissions),
+  instructedClasses: many(classes),
   auditLogs: many(auditLogs),
   errorReports: many(errorReports),
 }));
@@ -418,14 +432,18 @@ export const sessionsRelations = relations(sessions, ({ one, many }) => ({
     fields: [sessions.cohortId],
     references: [cohorts.id],
   }),
-  seances: many(seances),
+  classes: many(classes),
   groups: many(groups),
 }));
 
-export const seancesRelations = relations(seances, ({ one }) => ({
+export const classesRelations = relations(classes, ({ one }) => ({
   session: one(sessions, {
-    fields: [seances.sessionId],
+    fields: [classes.sessionId],
     references: [sessions.id],
+  }),
+  instructor: one(users, {
+    fields: [classes.instructorId],
+    references: [users.id],
   }),
 }));
 
@@ -490,7 +508,9 @@ export const errorReportsRelations = relations(errorReports, ({ one }) => ({
  * Inferred Types
  * ========================================================================= */
 
-export type User = typeof users.$inferSelect;
+export type User = Omit<typeof users.$inferSelect, "calendarFeedToken"> & {
+  calendarFeedToken?: string | null;
+};
 export type NewUser = typeof users.$inferInsert;
 
 export type Institution = typeof institutions.$inferSelect;
@@ -517,8 +537,8 @@ export type NewModuleTag = typeof moduleTags.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
 
-export type Seance = typeof seances.$inferSelect;
-export type NewSeance = typeof seances.$inferInsert;
+export type Class = typeof classes.$inferSelect;
+export type NewClass = typeof classes.$inferInsert;
 
 export type Group = typeof groups.$inferSelect;
 export type NewGroup = typeof groups.$inferInsert;

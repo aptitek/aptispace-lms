@@ -7,7 +7,16 @@ import {
   type NewUser,
   type Affiliation,
   type NewAffiliation,
+  type Institution,
+  type Cohort,
 } from "../db/schema";
+
+export type UserWithAffiliations = User & {
+  affiliations: (Affiliation & {
+    institution?: Institution | null;
+    cohort?: Cohort | null;
+  })[];
+};
 
 export async function getUsers(db: Database): Promise<User[]> {
   return db.select().from(users);
@@ -33,7 +42,10 @@ export async function getUserByGithubId(
   return result[0] ?? null;
 }
 
-export async function getUserWithAffiliations(db: Database, id: string) {
+export async function getUserWithAffiliations(
+  db: Database,
+  id: string,
+): Promise<UserWithAffiliations | null> {
   const user = await db.query.users.findFirst({
     where: eq(users.id, id),
     with: {
@@ -45,11 +57,13 @@ export async function getUserWithAffiliations(db: Database, id: string) {
       },
     },
   });
-  return user ?? null;
+  return (user as unknown as UserWithAffiliations) ?? null;
 }
 
-export async function getAllUsersWithAffiliations(db: Database) {
-  return db.query.users.findMany({
+export async function getAllUsersWithAffiliations(
+  db: Database,
+): Promise<UserWithAffiliations[]> {
+  const userList = await db.query.users.findMany({
     with: {
       affiliations: {
         with: {
@@ -60,6 +74,7 @@ export async function getAllUsersWithAffiliations(db: Database) {
     },
     orderBy: (users, { desc }) => [desc(users.createdAt)],
   });
+  return userList as unknown as UserWithAffiliations[];
 }
 
 export async function createUser(
@@ -176,7 +191,11 @@ export async function deleteUser(db: Database, id: string): Promise<boolean> {
 }
 
 export function isUserProfileComplete(
-  user: Awaited<ReturnType<typeof getUserWithAffiliations>> | null,
+  user: {
+    firstName?: string | null;
+    lastName?: string | null;
+    [key: string]: unknown;
+  } | null,
 ): boolean {
   if (!user) return false;
   const hasFirstName = Boolean(

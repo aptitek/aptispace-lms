@@ -36,6 +36,13 @@
       "when": 1788417821343,
       "tag": "0004_add_avatar_url",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1788503875927,
+      "tag": "0005_short_swordsman",
+      "breakpoints": true
     }
   ]
 }

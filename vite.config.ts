@@ -76,7 +76,11 @@ export default defineConfig({
       "@emotion/styled",
       "@mui/material",
       "@mui/x-data-grid",
+      "@mui/x-scheduler/event-calendar",
     ],
+  },
+  ssr: {
+    noExternal: [/@mui\/x-scheduler/, /@atlaskit/],
   },
   test: {
     projects: [

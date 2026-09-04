@@ -6,6 +6,7 @@ import {
   createUser,
   createAffiliation,
   isUserProfileComplete,
+  type UserWithAffiliations,
 } from "~/services/userService";
 import { institutions, cohorts } from "~/db/schema";
 import { getDatabaseFromContext, type Database } from "~/db";
@@ -55,9 +56,7 @@ function resolveRoleTitle(role: UserRole, isComplete: boolean): string {
   }
 }
 
-export type UserWithAffiliationsResult = NonNullable<
-  Awaited<ReturnType<typeof getUserWithAffiliations>>
->;
+export type UserWithAffiliationsResult = UserWithAffiliations;
 
 function resolveDisplayName(user: {
   displayName?: string | null;

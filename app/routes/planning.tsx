@@ -1,23 +1,65 @@
-import React, { useState } from "react";
-import { styled, alpha } from "@mui/material/styles";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useLoaderData, type LoaderFunctionArgs } from "react-router";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
-import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
-import LocationOnRoundedIcon from "@mui/icons-material/LocationOnRounded";
-import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
-import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
-import Chip from "~/components/atoms/Chip/Chip";
+import Alert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
+
+// MUI X Scheduler Types
+import type { EventCalendar } from "@mui/x-scheduler/event-calendar";
+import type {
+  SchedulerEvent,
+  SchedulerChangeEventDetails,
+  SchedulerEventEditingStartEventDetails,
+  SchedulerRenderableEventOccurrence,
+} from "@mui/x-scheduler/models";
+
+type EventCalendarComponentType = typeof EventCalendar;
+
+// Domain & Auth
 import { authGuard } from "~/utils/session.server";
 import { resolveActiveUser } from "~/utils/auth";
 import { isUserProfileComplete } from "~/services/userService";
-import { getCourses } from "~/services/courseService";
+import { getDatabaseFromContext } from "~/db";
+import {
+  getClassesForUser,
+  getEligibleInstructors,
+  ensureCalendarFeedToken,
+  type ClassWithDetails,
+} from "~/services/classService";
+
+// Shared submodules
+import { RootContainer, CalendarFrame } from "./planning.styles";
+import {
+  getSchedulerColorForType,
+  type PlanningLoaderData,
+  type InstructorOption,
+  type SessionOption,
+} from "./planning.types";
+import { PlanningHero } from "./planning.hero";
+import { PlanningFilter } from "./planning.filter";
+import {
+  CalendarSkeleton,
+  CalendarErrorState,
+  CalendarEmptyState,
+} from "./planning.states";
+import { ClassDetailsDialog } from "./planning.details-dialog";
+import { ClassFormDialog } from "./planning.form-dialog";
+import { CalendarExportDialog } from "./planning.export-dialog";
+
+export function meta() {
+  return [
+    { title: "AptiSpace LMS • Planning & Timetable" },
+    {
+      name: "description",
+      content:
+        "Interactive academic planning, lectures, labs, and cohort timetables with live iCal subscription.",
+    },
+  ];
+}
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const auth = await authGuard(request, context);
-  if (!auth || !auth.user || !isUserProfileComplete(auth.user)) {
+  if (!auth?.user || !isUserProfileComplete(auth.user)) {
     throw new Response(null, {
       status: 302,
       headers: { Location: "/onboarding" },
@@ -31,304 +73,363 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       headers: { Location: "/onboarding" },
     });
   }
-  const coursesList = auth.db ? await getCourses(auth.db).catch(() => []) : [];
+
+  const db = getDatabaseFromContext(context) || auth.db;
+  if (!db) {
+    throw new Response("Database unavailable", { status: 503 });
+  }
+
+  const classesList = await getClassesForUser(db, activeUser);
+  const feedToken = await ensureCalendarFeedToken(db, activeUser.id);
+
+  let eligibleInstructors: InstructorOption[] = [];
+  let availableSessions: SessionOption[] = [];
+
+  if (activeUser.role === "admin") {
+    const rawInstructors = await getEligibleInstructors(db);
+    eligibleInstructors = rawInstructors.map((inst) => ({
+      id: inst.id,
+      name: inst.name,
+      email: inst.email,
+      role: inst.role,
+    }));
+
+    const rawSessions = await db.query.sessions.findMany({
+      with: {
+        course: true,
+        cohort: true,
+      },
+    });
+
+    availableSessions = rawSessions.map((s) => ({
+      id: s.id,
+      courseTitle: s.course.title,
+      cohortName: `${s.cohort.diploma} Year ${s.cohort.year}`,
+    }));
+  }
 
   return {
     user: activeUser,
-    coursesCount: coursesList.length,
+    classes: classesList,
+    feedToken,
+    instructors: eligibleInstructors,
+    sessions: availableSessions,
   };
 }
 
-export function meta() {
-  return [
-    { title: "AptiSpace LMS • Planning & Timetable" },
-    {
-      name: "description",
-      content:
-        "Interactive academic planning, lectures, labs, and cohort timetables.",
-    },
-  ];
-}
-
-const PlanningContainer = styled(Box)(({ theme }) => ({
-  width: "100%",
-  maxWidth: "1280px",
-  margin: "0 auto",
-  padding: theme.spacing(4, 3),
-  boxSizing: "border-box",
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(4),
-  [theme.breakpoints.down("sm")]: {
-    padding: theme.spacing(2.5, 2),
-    gap: theme.spacing(2.5),
-  },
-}));
-
-const HeroCard = styled(Box)(({ theme }) => ({
-  position: "relative",
-  padding: theme.spacing(3.5, 4),
-  borderRadius: "24px",
-  backgroundColor: alpha(theme.palette.primary.main, 0.04),
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.16)}`,
-  backdropFilter: "blur(16px)",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  flexWrap: "wrap",
-  gap: theme.spacing(2),
-  ...theme.applyStyles("dark", {
-    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-    border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`,
-  }),
-}));
-
-const FilterRow = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  flexWrap: "wrap",
-}));
-
-const TimetableGrid = styled(Box)(({ theme }) => ({
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-  gap: theme.spacing(2.5),
-}));
-
-const SeanceCard = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "$isNext",
-})<{ $isNext?: boolean }>(({ theme, $isNext }) => ({
-  padding: theme.spacing(2.5),
-  borderRadius: "18px",
-  backgroundColor: theme.palette.background.paper,
-  border: `1px solid ${
-    $isNext
-      ? alpha(theme.palette.primary.main, 0.4)
-      : alpha(theme.palette.divider, 0.8)
-  }`,
-  boxShadow: $isNext
-    ? `0 4px 20px ${alpha(theme.palette.primary.main, 0.12)}`
-    : "none",
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(1.5),
-  transition: theme.transitions.create(
-    ["border-color", "box-shadow", "transform"],
-    {
-      duration: theme.transitions.duration.shorter,
-    },
-  ),
-  "&:hover": {
-    transform: "translateY(-2px)",
-    borderColor: theme.palette.primary.main,
-  },
-}));
-
-interface MockSeance {
-  id: string;
-  courseTitle: string;
-  moduleCode: string;
-  type: "lecture" | "lab" | "workshop";
-  startTime: string;
-  endTime: string;
-  location: string;
-  isNext?: boolean;
-}
-
-const SAMPLE_SEANCES: MockSeance[] = [
-  {
-    id: "s-1",
-    courseTitle: "Cloud Infrastructure & Edge Computing",
-    moduleCode: "INFRA-401",
-    type: "lecture",
-    startTime: "09:00",
-    endTime: "11:30",
-    location: "Amphitheater Turing",
-    isNext: true,
-  },
-  {
-    id: "s-2",
-    courseTitle: "Microservices & Distributed Systems",
-    moduleCode: "ARCH-502",
-    type: "lab",
-    startTime: "13:00",
-    endTime: "16:00",
-    location: "Lab Room Kepler-12",
-  },
-  {
-    id: "s-3",
-    courseTitle: "Fullstack Architecture & GraphQL",
-    moduleCode: "DEV-301",
-    type: "workshop",
-    startTime: "16:30",
-    endTime: "18:30",
-    location: "Studio Ada Lovelace",
-  },
-];
-
-function resolveTypeColor(
-  type: MockSeance["type"],
-): "primary" | "secondary" | "default" {
-  if (type === "lecture") return "primary";
-  if (type === "lab") return "secondary";
-  return "default";
-}
-
 export default function Planning() {
-  const loaderData = useLoaderData<typeof loader>();
-  const [filterType, setFilterType] = useState<string>("all");
+  const { t } = useTranslation("common");
+  const loaderData = useLoaderData<PlanningLoaderData>();
+  const [classesState, setClassesState] = useState<ClassWithDetails[]>(
+    loaderData.classes,
+  );
+  const [feedTokenState, setFeedTokenState] = useState<string>(
+    loaderData.feedToken,
+  );
+  const [selectedType, setSelectedType] = useState<string>("all");
+  const [loadError, setLoadError] = useState<boolean>(false);
+  const [showEmptyGrid, setShowEmptyGrid] = useState<boolean>(false);
+  const [CalendarComponent, setCalendarComponent] =
+    useState<EventCalendarComponentType | null>(null);
 
-  const filtered = SAMPLE_SEANCES.filter((item) => {
-    if (filterType === "all") return true;
-    return item.type === filterType;
-  });
+  const [selectedClass, setSelectedClass] = useState<ClassWithDetails | null>(
+    null,
+  );
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState<boolean>(false);
+  const [editingClass, setEditingClass] = useState<ClassWithDetails | null>(
+    null,
+  );
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+
+  const isAdmin = loaderData.user.role === "admin";
+
+  const loadScheduler = useCallback(() => {
+    setLoadError(false);
+    import("@mui/x-scheduler/event-calendar")
+      .then((mod) => {
+        setCalendarComponent(() => mod.EventCalendar);
+      })
+      .catch(() => {
+        setLoadError(true);
+      });
+  }, []);
+
+  useEffect(() => {
+    loadScheduler();
+  }, [loadScheduler]);
+
+  const filteredClasses = useMemo(() => {
+    if (selectedType === "all") return classesState;
+    return classesState.filter((c) => c.type === selectedType);
+  }, [classesState, selectedType]);
+
+  const schedulerEvents: SchedulerEvent[] = useMemo(() => {
+    return filteredClasses.map((c) => ({
+      id: c.id,
+      title: `[${c.type.toUpperCase()}] ${c.title}`,
+      start: new Date(c.startTime).toISOString(),
+      end: new Date(c.endTime).toISOString(),
+      color: getSchedulerColorForType(c.type),
+      description: c.description ?? undefined,
+    }));
+  }, [filteredClasses]);
+
+  const handleEventsChange = useCallback(
+    async (
+      newEvents: SchedulerEvent[],
+      _eventDetails: SchedulerChangeEventDetails,
+    ) => {
+      if (!isAdmin) return;
+
+      for (const ne of newEvents) {
+        const orig = classesState.find((c) => c.id === ne.id);
+        if (!orig) continue;
+
+        const origStartIso = new Date(orig.startTime).toISOString();
+        const origEndIso = new Date(orig.endTime).toISOString();
+
+        if (origStartIso !== ne.start || origEndIso !== ne.end) {
+          setClassesState((prev) =>
+            prev.map((c) =>
+              c.id === ne.id
+                ? {
+                    ...c,
+                    startTime: new Date(ne.start),
+                    endTime: new Date(ne.end),
+                  }
+                : c,
+            ),
+          );
+
+          try {
+            const res = await fetch("/api/classes", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                id: ne.id,
+                startTime: ne.start,
+                endTime: ne.end,
+              }),
+            });
+            if (!res.ok) {
+              setClassesState((prev) =>
+                prev.map((c) => (c.id === orig.id ? orig : c)),
+              );
+              setSnackbarMessage(t("planning.messages.updateFailed"));
+            } else {
+              setSnackbarMessage(t("planning.messages.updated"));
+            }
+          } catch {
+            setClassesState((prev) =>
+              prev.map((c) => (c.id === orig.id ? orig : c)),
+            );
+            setSnackbarMessage(t("planning.messages.updateError"));
+          }
+          break;
+        }
+      }
+    },
+    [isAdmin, classesState, t],
+  );
+
+  const handleEventEditingStart = useCallback(
+    (
+      occurrence: SchedulerRenderableEventOccurrence,
+      eventDetails: SchedulerEventEditingStartEventDetails,
+    ) => {
+      eventDetails.cancel();
+      if (eventDetails.reason === "creation") {
+        if (isAdmin) {
+          setEditingClass(null);
+          setIsFormModalOpen(true);
+        }
+      } else {
+        const found = classesState.find((c) => c.id === occurrence.id);
+        if (found) setSelectedClass(found);
+      }
+    },
+    [isAdmin, classesState],
+  );
+
+  const handleDeleteClass = async (id: string) => {
+    if (!isAdmin || !window.confirm(t("planning.messages.confirmDelete"))) {
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/classes", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (res.ok) {
+        setClassesState((prev) => prev.filter((c) => c.id !== id));
+        setSelectedClass(null);
+        setSnackbarMessage(t("planning.messages.deleted"));
+      } else {
+        setSnackbarMessage(t("planning.messages.deleteFailed"));
+      }
+    } catch {
+      setSnackbarMessage(t("planning.messages.deleteError"));
+    }
+  };
+
+  const handleRegenerateToken = async () => {
+    if (!isAdmin || !window.confirm(t("planning.messages.confirmRegenerate"))) {
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/classes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent: "REGENERATE_TOKEN" }),
+      });
+      const resPayload = (await res.json()) as { feedToken?: string };
+      if (res.ok && resPayload.feedToken) {
+        setFeedTokenState(resPayload.feedToken);
+        setSnackbarMessage(t("planning.messages.tokenRotated"));
+      } else {
+        setSnackbarMessage(t("planning.messages.tokenRotateFailed"));
+      }
+    } catch {
+      setSnackbarMessage(t("planning.messages.tokenRotateError"));
+    }
+  };
 
   return (
-    <PlanningContainer data-testid="planning-page-container">
-      <HeroCard>
-        <Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-            <CalendarMonthRoundedIcon color="primary" sx={{ fontSize: 24 }} />
-            <Typography
-              variant="h5"
-              sx={{ fontWeight: 800, letterSpacing: "-0.02em" }}
-            >
-              Academic Planning & Timetable
-            </Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary">
-            Welcome back, {loaderData.user.name}. View your scheduled lectures,
-            laboratories, and cohort sessions.
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Chip
-            icon={<SchoolRoundedIcon sx={{ fontSize: 16 }} />}
-            label={loaderData.user.cohort?.name || "Master's Degree"}
-            color="primary"
-            variant="filled"
-          />
-          <Chip
-            icon={<EventAvailableRoundedIcon sx={{ fontSize: 16 }} />}
-            label="Spring 2026"
-            variant="outlined"
-          />
-        </Box>
-      </HeroCard>
-
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 2,
+    <RootContainer>
+      <PlanningHero
+        userRole={loaderData.user.role}
+        isAdmin={isAdmin}
+        onOpenExport={() => setIsExportModalOpen(true)}
+        onAddClass={() => {
+          setEditingClass(null);
+          setIsFormModalOpen(true);
         }}
+      />
+
+      <PlanningFilter
+        selectedType={selectedType}
+        onSelectType={(newType) => {
+          setSelectedType(newType);
+          setShowEmptyGrid(false);
+        }}
+        classes={classesState}
+      />
+
+      <CalendarFrame>
+        {loadError ? (
+          <CalendarErrorState
+            onRetry={loadScheduler}
+            feedToken={feedTokenState}
+            userId={loaderData.user.id}
+          />
+        ) : !CalendarComponent ? (
+          <CalendarSkeleton />
+        ) : filteredClasses.length === 0 && !showEmptyGrid ? (
+          <CalendarEmptyState
+            isFiltered={selectedType !== "all"}
+            selectedType={selectedType}
+            isAdmin={isAdmin}
+            onResetFilter={() => {
+              setSelectedType("all");
+              setShowEmptyGrid(false);
+            }}
+            onAddClass={() => {
+              setEditingClass(null);
+              setIsFormModalOpen(true);
+            }}
+            onShowGrid={() => setShowEmptyGrid(true)}
+          />
+        ) : (
+          <CalendarComponent
+            events={schedulerEvents}
+            onEventsChange={handleEventsChange}
+            onEventEditingStart={handleEventEditingStart}
+            views={["day", "week", "month", "agenda"]}
+            defaultView="week"
+            readOnly={!isAdmin}
+            areEventsDraggable={isAdmin}
+            areEventsResizable={isAdmin}
+            sx={{
+              height: "760px",
+              fontFamily: "inherit",
+              "& .MuiEventCalendar-timeGridEvent": {
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                transition: "transform 0.15s ease",
+                "&:hover": { transform: "scale(1.01)" },
+              },
+            }}
+          />
+        )}
+      </CalendarFrame>
+
+      {selectedClass && (
+        <ClassDetailsDialog
+          classItem={selectedClass}
+          isAdmin={isAdmin}
+          onClose={() => setSelectedClass(null)}
+          onEdit={() => {
+            setEditingClass(selectedClass);
+            setSelectedClass(null);
+            setIsFormModalOpen(true);
+          }}
+          onDelete={() => handleDeleteClass(selectedClass.id)}
+        />
+      )}
+
+      {isAdmin && isFormModalOpen && (
+        <ClassFormDialog
+          editingClass={editingClass}
+          sessions={loaderData.sessions}
+          instructors={loaderData.instructors}
+          onClose={() => {
+            setIsFormModalOpen(false);
+            setEditingClass(null);
+          }}
+          onSaved={(savedClass) => {
+            if (editingClass) {
+              setClassesState((prev) =>
+                prev.map((c) => (c.id === savedClass.id ? savedClass : c)),
+              );
+              setSnackbarMessage(t("planning.messages.updated"));
+            } else {
+              setClassesState((prev) => [...prev, savedClass]);
+              setSnackbarMessage(t("planning.messages.created"));
+            }
+            setIsFormModalOpen(false);
+            setEditingClass(null);
+          }}
+        />
+      )}
+
+      <CalendarExportDialog
+        open={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        feedToken={feedTokenState}
+        isAdmin={isAdmin}
+        userId={loaderData.user.id}
+        onRegenerateToken={handleRegenerateToken}
+        onNotify={(msg) => setSnackbarMessage(msg)}
+      />
+
+      <Snackbar
+        open={Boolean(snackbarMessage)}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarMessage(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          Today's Schedule
-        </Typography>
-
-        <FilterRow>
-          {["all", "lecture", "lab", "workshop"].map((ft) => (
-            <Button
-              key={ft}
-              size="small"
-              variant={filterType === ft ? "contained" : "text"}
-              onClick={() => setFilterType(ft)}
-              sx={{
-                borderRadius: "16px",
-                textTransform: "capitalize",
-                px: 2,
-                fontSize: "0.75rem",
-                fontWeight: filterType === ft ? 700 : 500,
-              }}
-            >
-              {ft}
-            </Button>
-          ))}
-        </FilterRow>
-      </Box>
-
-      <TimetableGrid data-testid="timetable-grid">
-        {filtered.map((seance) => (
-          <SeanceCard
-            key={seance.id}
-            $isNext={seance.isNext}
-            data-testid={`seance-card-${seance.id}`}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Chip
-                label={seance.moduleCode}
-                size="small"
-                color={resolveTypeColor(seance.type)}
-                sx={{ fontWeight: 700, fontSize: "0.7rem" }}
-              />
-              {seance.isNext && (
-                <Chip
-                  label="NEXT UP"
-                  size="small"
-                  color="primary"
-                  sx={{ fontWeight: 800, fontSize: "0.65rem" }}
-                />
-              )}
-            </Box>
-
-            <Typography
-              variant="subtitle1"
-              sx={{ fontWeight: 700, lineHeight: 1.3 }}
-            >
-              {seance.courseTitle}
-            </Typography>
-
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 0.75,
-                mt: "auto",
-                pt: 1,
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  color: "text.secondary",
-                  fontSize: "0.8rem",
-                }}
-              >
-                <AccessTimeRoundedIcon sx={{ fontSize: 16 }} />
-                <span>
-                  {seance.startTime} - {seance.endTime}
-                </span>
-              </Box>
-
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  color: "text.secondary",
-                  fontSize: "0.8rem",
-                }}
-              >
-                <LocationOnRoundedIcon sx={{ fontSize: 16 }} />
-                <span>{seance.location}</span>
-              </Box>
-            </Box>
-          </SeanceCard>
-        ))}
-      </TimetableGrid>
-    </PlanningContainer>
+        <Alert
+          onClose={() => setSnackbarMessage(null)}
+          severity="success"
+          sx={{ borderRadius: "14px", fontWeight: 600 }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </RootContainer>
   );
 }

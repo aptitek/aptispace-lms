@@ -10,5 +10,9 @@
   "onboarding": {
     "title": "AptiSpace LMS • Student Onboarding",
     "description": "Configure your ISO/IEC 7810 ID-1 official identification card and begin your learning journey."
+  },
+  "planning": {
+    "title": "AptiSpace LMS • Planning & Timetable",
+    "description": "Interactive academic planning, lectures, labs, and cohort timetables with live iCal subscription."
   }
 }

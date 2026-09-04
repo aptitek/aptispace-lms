@@ -10,5 +10,9 @@
   "onboarding": {
     "title": "AptiSpace LMS • Intégration Étudiant",
     "description": "Configurez votre carte d'identification officielle ISO/IEC 7810 ID-1 et commencez votre formation."
+  },
+  "planning": {
+    "title": "AptiSpace LMS • Planning & Emploi du Temps",
+    "description": "Planning académique interactif, cours magistraux, TP, ateliers et emplois du temps de cohortes avec abonnement iCal en direct."
   }
 }

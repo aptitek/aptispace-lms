@@ -16,7 +16,7 @@ import {
 } from "./courseService";
 import {
   createSession,
-  createSeance,
+  createClass,
   createGroup,
   addUserToGroup,
 } from "./sessionService";
@@ -96,7 +96,7 @@ describe("Backend Database & Service Architecture", () => {
     expect(schema.tags).toBeDefined();
     expect(schema.moduleTags).toBeDefined();
     expect(schema.sessions).toBeDefined();
-    expect(schema.seances).toBeDefined();
+    expect(schema.classes).toBeDefined();
     expect(schema.groups).toBeDefined();
     expect(schema.groupMembers).toBeDefined();
     expect(schema.submissions).toBeDefined();
@@ -327,7 +327,7 @@ describe("Backend Database & Service Architecture", () => {
     expect(criteriaList).toHaveLength(1);
   });
 
-  it("executes session, seance, and group domain operations", async () => {
+  it("executes session, class, and group domain operations", async () => {
     const mockDb = {
       insert: () => ({
         values: (recordValues: Record<string, unknown>) => ({
@@ -345,13 +345,15 @@ describe("Backend Database & Service Architecture", () => {
     });
     expect(session.id).toBe("session-1");
 
-    const seance = await createSeance(mockDb, {
+    const classItem = await createClass(mockDb, {
       sessionId: "session-1",
+      title: "Distributed Systems Lecture",
+      type: "lecture",
       startTime: new Date(),
       endTime: new Date(),
       location: "Room 1",
     });
-    expect(seance.id).toBe("session-1");
+    expect(classItem.id).toBe("session-1");
 
     const group = await createGroup(
       mockDb,

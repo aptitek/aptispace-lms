@@ -2,13 +2,13 @@ import { eq } from "drizzle-orm";
 import type { Database } from "../db/index";
 import {
   sessions,
-  seances,
+  classes,
   groups,
   groupMembers,
   type Session,
   type NewSession,
-  type Seance,
-  type NewSeance,
+  type Class,
+  type NewClass,
   type Group,
   type NewGroup,
 } from "../db/schema";
@@ -18,7 +18,7 @@ export async function getSessionsForCohort(db: Database, cohortId: string) {
     where: eq(sessions.cohortId, cohortId),
     with: {
       course: true,
-      seances: true,
+      classes: true,
       groups: {
         with: {
           members: {
@@ -46,7 +46,7 @@ export async function getSessionDetails(db: Database, sessionId: string) {
           institution: true,
         },
       },
-      seances: true,
+      classes: true,
       groups: {
         with: {
           members: {
@@ -76,15 +76,15 @@ export async function createSession(
   return created;
 }
 
-export async function createSeance(
+export async function createClass(
   db: Database,
-  seanceFields: Omit<NewSeance, "createdAt" | "updatedAt">,
-): Promise<Seance> {
+  classFields: Omit<NewClass, "createdAt" | "updatedAt">,
+): Promise<Class> {
   const now = new Date();
   const [created] = await db
-    .insert(seances)
+    .insert(classes)
     .values({
-      ...seanceFields,
+      ...classFields,
       createdAt: now,
       updatedAt: now,
     })
