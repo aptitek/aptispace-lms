@@ -1,13 +1,21 @@
-import { type RouteConfig, index, route } from "@react-router/dev/routes";
+import {
+  type RouteConfig,
+  index,
+  route,
+  layout,
+} from "@react-router/dev/routes";
 
 export default [
-  // Core Application Routes
-  index("routes/home.tsx"),
+  // Application Shell (Persistent Header & Extensible Navigation)
+  layout("routes/_app.tsx", [
+    index("routes/home.tsx"),
+    route("planning", "routes/planning.tsx"),
+    route("admin/:tab?", "routes/admin.tsx"),
+  ]),
+
+  // Standalone Flow (No primary app shell)
   route("login", "routes/login.tsx"),
   route("onboarding", "routes/onboarding.tsx"),
-
-  // Admin Section with canonical tab navigation (/admin, /admin/users, /admin/cohorts, /admin/mission-center, /admin/courses)
-  route("admin/:tab?", "routes/admin.tsx"),
 
   // Public Asset Delivery (R2 Storage CDN)
   route("avatars/*", "routes/avatars.$.ts"),

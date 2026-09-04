@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
-import { authGuard } from "~/utils/session.server";
+import { authGuard, type SessionPayload } from "~/utils/session.server";
 import {
   getAllUsersWithAffiliations,
   getUserWithAffiliations,
@@ -8,7 +8,7 @@ import {
   isUserProfileComplete,
 } from "~/services/userService";
 import { institutions, cohorts } from "~/db/schema";
-import type { Database } from "~/db";
+import { getDatabaseFromContext, type Database } from "~/db";
 import type { UserRole } from "~/utils/auth";
 import { logImpersonatedAudit } from "~/services/assessmentService";
 
@@ -55,7 +55,7 @@ function resolveRoleTitle(role: UserRole, isComplete: boolean): string {
   }
 }
 
-type UserWithAffiliationsResult = NonNullable<
+export type UserWithAffiliationsResult = NonNullable<
   Awaited<ReturnType<typeof getUserWithAffiliations>>
 >;
 
@@ -77,7 +77,7 @@ function resolveAccountEmail(
   return githubEmail ?? "";
 }
 
-function formatAccountFromDb(
+export function formatAccountFromDb(
   user: UserWithAffiliationsResult,
 ): FormattedAccount {
   const affil = user.affiliations[0];
@@ -101,7 +101,7 @@ function formatAccountFromDb(
   };
 }
 
-async function ensureDefaultInstitutionAndCohort(db: Database) {
+export async function ensureDefaultInstitutionAndCohort(db: Database) {
   let inst = await db.query.institutions.findFirst({
     where: (i, { eq }) => eq(i.slug, "aptitek"),
   });
@@ -138,10 +138,17 @@ async function ensureDefaultInstitutionAndCohort(db: Database) {
   return { institutionId: inst.id, cohortId: cohort.id };
 }
 
-// GET /api/users - List accounts (Admin only)
+// GET /api/users - List accounts (Admin only in production, dev-accessible locally)
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const auth = await authGuard(request, context, { requiredRole: "admin" });
-  if (!auth?.db) {
+  const isDev =
+    typeof process !== "undefined" && process.env.NODE_ENV !== "production";
+  const auth = await authGuard(
+    request,
+    context,
+    isDev ? { allowAnonymous: true } : { requiredRole: "admin" },
+  );
+  const db = auth?.db ?? getDatabaseFromContext(context);
+  if (!db) {
     return Response.json(
       { error: "Database binding unavailable", code: "DATABASE_UNAVAILABLE" },
       { status: 503 },
@@ -152,7 +159,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const roleFilter = url.searchParams.get("role");
   const cohortFilter = url.searchParams.get("cohortId");
 
-  const rawUsers = await getAllUsersWithAffiliations(auth.db);
+  const rawUsers = await getAllUsersWithAffiliations(db);
   let accounts = rawUsers.map(formatAccountFromDb);
 
   if (roleFilter) {
@@ -169,7 +176,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   });
 }
 
-interface CreateUserBody {
+export interface CreateUserBody {
   role?: UserRole;
   firstName?: string;
   lastName?: string;
@@ -178,9 +185,9 @@ interface CreateUserBody {
   cohortId?: string;
 }
 
-async function handleCreateUser(
+export async function handleCreateUser(
   db: Database,
-  session: NonNullable<Awaited<ReturnType<typeof authGuard>>>["session"],
+  session: SessionPayload | null | undefined,
   body: CreateUserBody,
 ) {
   const targetRole = body.role ?? "student";
@@ -220,7 +227,7 @@ async function handleCreateUser(
   );
 }
 
-// POST /api/users - Create user account (Admin only)
+// POST /api/users - Create user account (Admin only in production, dev-accessible locally)
 export async function action({ request, context }: ActionFunctionArgs) {
   if (request.method !== "POST") {
     return Response.json(
@@ -229,8 +236,15 @@ export async function action({ request, context }: ActionFunctionArgs) {
     );
   }
 
-  const auth = await authGuard(request, context, { requiredRole: "admin" });
-  if (!auth?.db) {
+  const isDev =
+    typeof process !== "undefined" && process.env.NODE_ENV !== "production";
+  const auth = await authGuard(
+    request,
+    context,
+    isDev ? { allowAnonymous: true } : { requiredRole: "admin" },
+  );
+  const db = auth?.db ?? getDatabaseFromContext(context);
+  if (!db) {
     return Response.json(
       { error: "Database binding unavailable", code: "DATABASE_UNAVAILABLE" },
       { status: 503 },
@@ -238,5 +252,5 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   const body = (await request.json().catch(() => ({}))) as CreateUserBody;
-  return handleCreateUser(auth.db, auth.session, body);
+  return handleCreateUser(db, auth?.session, body);
 }

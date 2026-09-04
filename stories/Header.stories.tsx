@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Header from "~/components/organisms/Header/Header";
-import Button from "@mui/material/Button";
-import Avatar from "@mui/material/Avatar";
 
 const meta = {
   title: "Organisms/Header",
@@ -57,39 +55,28 @@ export const AuthenticatedWithLogout: Story = {
   },
 };
 
-export const FullWithUserActions: Story = {
+export const AdminWithTabs: Story = {
+  args: {
+    mode: "full",
+    logoSize: "small",
+    user: {
+      id: "persona-admin",
+      name: "Dr. Eleanor Vance",
+      email: "admin@aptispace.internal",
+      role: "admin",
+    },
+  },
+};
+
+export const StudentWithPlanningTab: Story = {
   args: {
     mode: "full",
     logoSize: "small",
     user: {
       id: "persona-student",
-      name: "Alex Mercer",
-      email: "alex.mercer@aptitek.io",
+      name: "Arthur Dent",
+      email: "arthur@galaxy.org",
       role: "student",
     },
-    children: (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          marginRight: "8px",
-        }}
-      >
-        <Button variant="outlined" size="small" color="primary">
-          Courses
-        </Button>
-        <Avatar
-          sx={{
-            width: 32,
-            height: 32,
-            bgcolor: "secondary.main",
-            fontSize: "0.85rem",
-          }}
-        >
-          AM
-        </Avatar>
-      </div>
-    ),
   },
 };

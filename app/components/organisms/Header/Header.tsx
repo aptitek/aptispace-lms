@@ -3,13 +3,14 @@ import { useTranslation } from "react-i18next";
 import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import Logo from "../../atoms/Logo/Logo";
 import LanguageToggle from "../../atoms/LanguageToggle/LanguageToggle";
 import ThemeToggle from "../../atoms/ThemeToggle/ThemeToggle";
 import HeaderUserAvatar from "../../molecules/HeaderUserAvatar/HeaderUserAvatar";
 import FullScreenModal from "../../molecules/FullScreenModal/FullScreenModal";
 import ProfileCard from "../ProfileCard/ProfileCard";
+import HeaderTabs from "../../molecules/HeaderTabs/HeaderTabs";
+import type { HeaderTabItem } from "../../molecules/HeaderTabs/HeaderTabs.types";
 import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
 import type { CohortConfig } from "../../../types/institution";
 import { logout, stopImpersonation, type AuthUser } from "../../../utils/auth";
@@ -20,6 +21,8 @@ export interface HeaderProps {
   mode?: HeaderMode;
   logoSize?: "small" | "medium";
   user?: AuthUser | null;
+  tabs?: HeaderTabItem[];
+  showTabs?: boolean;
   onLogout?: () => void;
   onReturnToAdmin?: () => void;
   onUserUpdated?: (updatedUser: AuthUser) => void;
@@ -71,6 +74,19 @@ const LeftSlot = styled(Box)({
   alignItems: "center",
   gap: "1rem",
 });
+
+const CenterSlot = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flex: 1,
+  padding: theme.spacing(0, 2),
+  [theme.breakpoints.down("md")]: {
+    order: 3,
+    width: "100%",
+    padding: theme.spacing(1, 0, 0),
+  },
+}));
 
 const RightSlot = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -277,14 +293,14 @@ function createHeaderActionHandler(
   };
 }
 
-function AdminNavButton({
+function ReturnToAdminButton({
   user,
   onReturnToAdmin,
 }: {
   user: AuthUser;
   onReturnToAdmin?: () => void;
 }) {
-  const { t } = useTranslation(["auth", "common"]);
+  const { t } = useTranslation(["auth"]);
 
   if (user.impersonating && onReturnToAdmin) {
     return (
@@ -299,31 +315,66 @@ function AdminNavButton({
     );
   }
 
-  if (user.role === "admin" && !user.impersonating) {
-    return (
-      <AdminHeaderButton
-        href="/admin"
-        size="small"
-        variant="outlined"
-        startIcon={<AdminPanelSettingsIcon sx={{ fontSize: 16 }} />}
-        aria-label={t(
-          "auth:adminButtonAria",
-          "Access administration management",
-        )}
-        data-testid="header-admin-link"
-      >
-        {t("auth:adminButton", "Admin")}
-      </AdminHeaderButton>
-    );
-  }
-
   return null;
+}
+
+function HeaderCenterNav({
+  mode,
+  showTabs,
+  user,
+  tabs,
+}: {
+  mode: HeaderMode;
+  showTabs: boolean;
+  user?: AuthUser | null;
+  tabs?: HeaderTabItem[];
+}) {
+  if (mode === "subtle" || !showTabs || !user) {
+    return null;
+  }
+  return (
+    <CenterSlot>
+      <HeaderTabs
+        tabs={tabs}
+        user={user}
+        data-testid="header-navigation-tabs"
+      />
+    </CenterSlot>
+  );
+}
+
+function HeaderUserSection({
+  user,
+  onReturnToAdmin,
+  onActionClick,
+  onOpenProfile,
+}: {
+  user?: AuthUser | null;
+  onReturnToAdmin?: () => void;
+  onActionClick: () => void;
+  onOpenProfile: () => void;
+}) {
+  if (!user) return null;
+  return (
+    <>
+      <ReturnToAdminButton user={user} onReturnToAdmin={onReturnToAdmin} />
+      <HeaderUserAvatar
+        user={user}
+        onLogout={onActionClick}
+        onReturnToAdmin={onActionClick}
+        onAvatarClick={onOpenProfile}
+        data-testid="header-user-avatar"
+      />
+    </>
+  );
 }
 
 export default function Header({
   mode = "full",
   logoSize = "small",
   user,
+  tabs,
+  showTabs = true,
   onLogout,
   onReturnToAdmin,
   onUserUpdated,
@@ -352,25 +403,25 @@ export default function Header({
           </LeftSlot>
         )}
 
+        <HeaderCenterNav
+          mode={mode}
+          showTabs={showTabs}
+          user={user}
+          tabs={tabs}
+        />
+
         <RightSlot>
           {children}
 
-          {user && (
-            <AdminNavButton user={user} onReturnToAdmin={onReturnToAdmin} />
-          )}
+          <HeaderUserSection
+            user={user}
+            onReturnToAdmin={onReturnToAdmin}
+            onActionClick={handleActionClick}
+            onOpenProfile={() => setIsProfileModalOpen(true)}
+          />
 
           <ThemeToggle data-testid="header-theme-toggle" />
           <LanguageToggle data-testid="header-language-toggle" />
-
-          {user && (
-            <HeaderUserAvatar
-              user={user}
-              onLogout={handleActionClick}
-              onReturnToAdmin={handleActionClick}
-              onAvatarClick={() => setIsProfileModalOpen(true)}
-              data-testid="header-user-avatar"
-            />
-          )}
         </RightSlot>
       </HeaderRoot>
 

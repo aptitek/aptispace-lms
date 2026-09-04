@@ -6,6 +6,7 @@ import {
   useRevalidator,
   useLocation,
   useNavigate,
+  useOutletContext,
   type LoaderFunctionArgs,
   type ActionFunctionArgs,
 } from "react-router";
@@ -92,6 +93,31 @@ function resolveTabFromPath(pathname: string): AdminTabKey {
   if (pathname.includes("/admin/mission-center")) return "mission-center";
   if (pathname.includes("/admin/courses")) return "courses";
   return "users";
+}
+
+interface AdminTabContentProps {
+  activeTab: AdminTabKey;
+  usersProps: React.ComponentProps<typeof AdminUsersTabPanel>;
+  cohortsProps: React.ComponentProps<typeof AdminCohortsTabPanel>;
+  missionCenterProps?: React.ComponentProps<typeof AdminMissionCenterTabPanel>;
+}
+
+function AdminTabContent({
+  activeTab,
+  usersProps,
+  cohortsProps,
+  missionCenterProps,
+}: AdminTabContentProps) {
+  if (activeTab === "cohorts") {
+    return <AdminCohortsTabPanel {...cohortsProps} />;
+  }
+  if (activeTab === "mission-center" && missionCenterProps) {
+    return <AdminMissionCenterTabPanel {...missionCenterProps} />;
+  }
+  if (activeTab === "courses") {
+    return <AdminCoursesTabPanel />;
+  }
+  return <AdminUsersTabPanel {...usersProps} />;
 }
 
 export default function AdminManagement() {
@@ -401,7 +427,90 @@ export default function AdminManagement() {
     startYearMax,
   ]);
 
+  const outletContext = useOutletContext<{ user?: AuthUser } | null>();
+  const isNestedInShell = Boolean(outletContext);
   const hasInspectorOpen = Boolean(selectedUser);
+
+  const workspaceContent = (
+    <AdminMainWorkspace>
+      <AdminTabsSection
+        activeTab={activeTab}
+        totalUsers={loaderData.totalUsers}
+        openIssuesCount={loaderData.missionCenter?.openIssuesCount}
+        onChange={handleTabChange}
+      />
+      <AdminTabContent
+        activeTab={activeTab}
+        usersProps={{
+          searchQuery,
+          onQueryChange: setSearchQuery,
+          roleFilter,
+          onRoleFilterChange: setRoleFilter,
+          schoolFilter,
+          onSchoolFilterChange: setSchoolFilter,
+          schools: loaderData.schools,
+          cohortFilter,
+          onCohortFilterChange: setCohortFilter,
+          cohorts: loaderData.cohorts,
+          startYearMin,
+          onStartYearMinChange: setStartYearMin,
+          startYearMax,
+          onStartYearMaxChange: setStartYearMax,
+          filteredUsers,
+          selectedUser,
+          onUserClick: handleUserClick,
+          onCreateNewUser: handleCreateNewUser,
+          onImpersonate: handleImpersonate,
+          onDeleteUser: handleDeleteUser,
+          hasInspectorOpen,
+          onCloseInspector: handleCloseInspector,
+          onAddCohort: handleAddCohort,
+          onRemoveCohort: handleRemoveCohort,
+          onStudentUpdated: handleStudentUpdated,
+          onUpdateGithub: handleUpdateStudentGithub,
+          isSubmitting: fetcher.state !== "idle",
+        }}
+        cohortsProps={{
+          schools: loaderData.schools,
+          cohorts: loaderData.cohorts,
+          schoolStudentCounts: loaderData.schoolStudentCounts,
+          cohortStudentCounts: loaderData.cohortStudentCounts,
+          selectedSchool,
+          selectedSchoolForEdit,
+          selectedCohortForEdit,
+          onSchoolClick: handleSchoolClick,
+          onCohortClick: handleCohortClick,
+          onCreateNewSchool: handleCreateNewSchool,
+          onCreateNewCohort: handleCreateNewCohort,
+          onCloseSchoolEdit: () => setSelectedSchoolForEdit(null),
+          onCloseCohortEdit: () => setSelectedCohortForEdit(null),
+          onSaveInstitution: handleSaveInstitution,
+          onSaveCohort: handleSaveCohort,
+          isSubmitting: fetcher.state !== "idle",
+        }}
+        missionCenterProps={
+          loaderData.missionCenter
+            ? {
+                missionCenter: loaderData.missionCenter,
+                onRefresh: () => {
+                  revalidator.revalidate();
+                  notifySuccess(
+                    t("common:admin.missionCenter.diagnosticsRefreshed", {
+                      defaultValue: "Diagnostic telemetry refreshed",
+                    }),
+                  );
+                },
+                fetcher,
+              }
+            : undefined
+        }
+      />
+    </AdminMainWorkspace>
+  );
+
+  if (isNestedInShell) {
+    return workspaceContent;
+  }
 
   return (
     <PageRoot>
@@ -411,86 +520,7 @@ export default function AdminManagement() {
         onLogout={handleLogout}
         data-testid="admin-header"
       />
-
-      <AdminMainWorkspace>
-        <AdminTabsSection
-          activeTab={activeTab}
-          totalUsers={loaderData.totalUsers}
-          openIssuesCount={loaderData.missionCenter?.openIssuesCount}
-          onChange={handleTabChange}
-        />
-
-        {activeTab === "users" && (
-          <AdminUsersTabPanel
-            searchQuery={searchQuery}
-            onQueryChange={setSearchQuery}
-            roleFilter={roleFilter}
-            onRoleFilterChange={setRoleFilter}
-            schoolFilter={schoolFilter}
-            onSchoolFilterChange={setSchoolFilter}
-            schools={loaderData.schools}
-            cohortFilter={cohortFilter}
-            onCohortFilterChange={setCohortFilter}
-            cohorts={loaderData.cohorts}
-            startYearMin={startYearMin}
-            onStartYearMinChange={setStartYearMin}
-            startYearMax={startYearMax}
-            onStartYearMaxChange={setStartYearMax}
-            filteredUsers={filteredUsers}
-            selectedUser={selectedUser}
-            onUserClick={handleUserClick}
-            onCreateNewUser={handleCreateNewUser}
-            onImpersonate={handleImpersonate}
-            onDeleteUser={handleDeleteUser}
-            hasInspectorOpen={hasInspectorOpen}
-            onCloseInspector={handleCloseInspector}
-            onAddCohort={handleAddCohort}
-            onRemoveCohort={handleRemoveCohort}
-            onStudentUpdated={handleStudentUpdated}
-            onUpdateGithub={handleUpdateStudentGithub}
-            isSubmitting={fetcher.state !== "idle"}
-          />
-        )}
-
-        {activeTab === "cohorts" && (
-          <AdminCohortsTabPanel
-            schools={loaderData.schools}
-            cohorts={loaderData.cohorts}
-            schoolStudentCounts={loaderData.schoolStudentCounts}
-            cohortStudentCounts={loaderData.cohortStudentCounts}
-            selectedSchool={selectedSchool}
-            selectedSchoolForEdit={selectedSchoolForEdit}
-            selectedCohortForEdit={selectedCohortForEdit}
-            onSchoolClick={handleSchoolClick}
-            onCohortClick={handleCohortClick}
-            onCreateNewSchool={handleCreateNewSchool}
-            onCreateNewCohort={handleCreateNewCohort}
-            onCloseSchoolEdit={() => setSelectedSchoolForEdit(null)}
-            onCloseCohortEdit={() => setSelectedCohortForEdit(null)}
-            onSaveInstitution={handleSaveInstitution}
-            onSaveCohort={handleSaveCohort}
-            isSubmitting={fetcher.state !== "idle"}
-          />
-        )}
-
-        {activeTab === "mission-center" && loaderData.missionCenter && (
-          <AdminMissionCenterTabPanel
-            missionCenter={loaderData.missionCenter}
-            onRefresh={() => {
-              revalidator.revalidate();
-              notifySuccess(
-                t("common:admin.missionCenter.diagnosticsRefreshed", {
-                  defaultValue: "Diagnostic telemetry refreshed",
-                }),
-              );
-            }}
-            fetcher={fetcher}
-          />
-        )}
-
-        {activeTab === "courses" && <AdminCoursesTabPanel />}
-      </AdminMainWorkspace>
-
+      {workspaceContent}
       <Footer />
     </PageRoot>
   );

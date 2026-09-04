@@ -65,52 +65,73 @@ export function getRoleTitle(role: UserRole, isComplete: boolean): string {
   return "Student";
 }
 
-export async function fetchAccountsFromDb(): Promise<AccountDefinition[]> {
-  if (typeof fetch !== "undefined") {
-    try {
-      const res = await fetch("/api/users");
-      if (res.ok) {
-        const accountsResponse = (await res.json()) as {
-          accounts?: AccountDefinition[];
-          users?: AccountDefinition[];
-        };
-        const list = accountsResponse.accounts || accountsResponse.users;
-        if (list && Array.isArray(list)) {
-          return list;
-        }
-      }
-    } catch {
-      // Network or offline error
-    }
+async function tryFetchAccounts(
+  url: string,
+): Promise<AccountDefinition[] | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const responsePayload = (await res.json()) as {
+      accounts?: AccountDefinition[];
+      users?: AccountDefinition[];
+      personas?: AccountDefinition[];
+    };
+    const list =
+      responsePayload.accounts ||
+      responsePayload.users ||
+      responsePayload.personas;
+    return Array.isArray(list) ? list : null;
+  } catch {
+    return null;
   }
-  return [];
+}
+
+export async function fetchAccountsFromDb(): Promise<AccountDefinition[]> {
+  if (typeof fetch === "undefined") return [];
+
+  const devAccounts = await tryFetchAccounts("/api/dev/personas");
+  if (devAccounts) return devAccounts;
+
+  const usersAccounts = await tryFetchAccounts("/api/users");
+  return usersAccounts ?? [];
+}
+
+async function tryCreateAccount(
+  url: string,
+  role: UserRole,
+): Promise<AccountDefinition | null> {
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role }),
+    });
+    if (!res.ok) return null;
+    const responsePayload = (await res.json()) as {
+      account?: AccountDefinition;
+      user?: AccountDefinition;
+      persona?: AccountDefinition;
+    };
+    return (
+      responsePayload.account ||
+      responsePayload.user ||
+      responsePayload.persona ||
+      null
+    );
+  } catch {
+    return null;
+  }
 }
 
 export async function createAccountInDb(
   role: UserRole,
 ): Promise<AccountDefinition | null> {
-  if (typeof fetch !== "undefined") {
-    try {
-      const res = await fetch("/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
-      });
-      if (res.ok) {
-        const createResponse = (await res.json()) as {
-          account?: AccountDefinition;
-          user?: AccountDefinition;
-        };
-        const acc = createResponse.account || createResponse.user;
-        if (acc) {
-          return acc;
-        }
-      }
-    } catch {
-      // Network or offline error
-    }
-  }
-  return null;
+  if (typeof fetch === "undefined") return null;
+
+  const devCreated = await tryCreateAccount("/api/dev/personas", role);
+  if (devCreated) return devCreated;
+
+  return tryCreateAccount("/api/users", role);
 }
 
 export function loginWithGitHub(redirectTarget = "/"): void {

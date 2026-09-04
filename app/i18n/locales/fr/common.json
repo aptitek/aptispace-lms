@@ -3,6 +3,11 @@
   "craftedBy": "Conçu par",
   "craftedByAria": "Conçu par Aptitek",
   "logoAlt": "Icône AptiSpace",
+  "nav": {
+    "planning": "Planning",
+    "admin": "Admin",
+    "ariaLabel": "Navigation principale de l'application"
+  },
   "systemStatus": {
     "gateway": "STATUT SYSTÈME : EN LIGNE",
     "nominal": "TOUS LES SYSTÈMES SONT OPÉRATIONNELS",
