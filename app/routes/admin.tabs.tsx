@@ -9,11 +9,20 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import HubRoundedIcon from "@mui/icons-material/HubRounded";
 import { StyledTabsContainer, StyledTab } from "./admin.styles";
 
+export type AdminTabKey = "users" | "cohorts" | "mission-center" | "courses";
+
+const TAB_INDEX_TO_KEY: Record<number, AdminTabKey> = {
+  0: "users",
+  1: "cohorts",
+  2: "mission-center",
+  3: "courses",
+};
+
 export interface AdminTabsSectionProps {
-  activeTab: number;
+  activeTab: AdminTabKey | string | number;
   totalUsers: number;
   openIssuesCount?: number;
-  onChange: (event: React.SyntheticEvent, newValue: number) => void;
+  onChange?: (event: React.SyntheticEvent, newValue: AdminTabKey) => void;
 }
 
 export function AdminTabsSection({
@@ -24,11 +33,23 @@ export function AdminTabsSection({
 }: AdminTabsSectionProps) {
   const { t } = useTranslation(["common", "auth"]);
 
+  // Normalize string / number activeTab value
+  const normalizedValue: AdminTabKey =
+    typeof activeTab === "number"
+      ? (TAB_INDEX_TO_KEY[activeTab] ?? "users")
+      : (activeTab as AdminTabKey) || "users";
+
+  const handleChange = (event: React.SyntheticEvent, val: AdminTabKey) => {
+    if (onChange) {
+      onChange(event, val);
+    }
+  };
+
   return (
     <StyledTabsContainer>
       <Tabs
-        value={activeTab}
-        onChange={onChange}
+        value={normalizedValue}
+        onChange={handleChange}
         aria-label={t(
           "common:admin.tabs.aria",
           "Admin management navigation tabs",
@@ -36,6 +57,7 @@ export function AdminTabsSection({
         data-testid="admin-tabs"
       >
         <StyledTab
+          value="users"
           icon={<SupervisorAccountIcon sx={{ fontSize: 18, mr: 0.5 }} />}
           iconPosition="start"
           label={
@@ -50,21 +72,23 @@ export function AdminTabsSection({
               />
             </Box>
           }
-          id="admin-tab-0"
-          aria-controls="admin-tabpanel-0"
+          id="admin-tab-users"
+          aria-controls="admin-tabpanel-users"
           data-testid="tab-users"
         />
 
         <StyledTab
+          value="cohorts"
           icon={<ClassIcon sx={{ fontSize: 18, mr: 0.5 }} />}
           iconPosition="start"
           label={t("common:admin.tabs.cohorts", "Cohorts")}
-          id="admin-tab-1"
-          aria-controls="admin-tabpanel-1"
+          id="admin-tab-cohorts"
+          aria-controls="admin-tabpanel-cohorts"
           data-testid="tab-cohorts"
         />
 
         <StyledTab
+          value="mission-center"
           icon={<HubRoundedIcon sx={{ fontSize: 18, mr: 0.5 }} />}
           iconPosition="start"
           label={
@@ -91,18 +115,18 @@ export function AdminTabsSection({
               )}
             </Box>
           }
-          id="admin-tab-2"
-          aria-controls="admin-tabpanel-2"
+          id="admin-tab-mission-center"
+          aria-controls="admin-tabpanel-mission-center"
           data-testid="tab-mission-center"
         />
 
         <StyledTab
+          value="courses"
           icon={<MenuBookIcon sx={{ fontSize: 18, mr: 0.5 }} />}
           iconPosition="start"
           label={t("common:admin.tabs.courses", "Courses")}
-          id="admin-tab-3"
-          aria-controls="admin-tabpanel-3"
-          disabled
+          id="admin-tab-courses"
+          aria-controls="admin-tabpanel-courses"
           data-testid="tab-courses"
         />
       </Tabs>

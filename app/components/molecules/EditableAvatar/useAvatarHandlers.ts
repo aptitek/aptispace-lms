@@ -69,7 +69,7 @@ export function useAvatarHandlers(options: UseAvatarHandlersOptions) {
     onChange,
     onReset,
     onUpload,
-    uploadEndpoint = "/api/avatar/upload",
+    uploadEndpoint = "/api/avatars/upload",
     editable = true,
   } = options;
 

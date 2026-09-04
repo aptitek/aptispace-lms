@@ -4,6 +4,8 @@ import {
   useLoaderData,
   useFetcher,
   useRevalidator,
+  useLocation,
+  useNavigate,
   type LoaderFunctionArgs,
   type ActionFunctionArgs,
 } from "react-router";
@@ -30,10 +32,11 @@ import {
   mergeUpdatedUser,
   type CohortSavePayload,
 } from "./admin.helpers";
-import AdminTabsSection from "./admin.tabs";
+import AdminTabsSection, { type AdminTabKey } from "./admin.tabs";
 import AdminCohortsTabPanel from "./admin.cohorts-tab";
 import { AdminMissionCenterTabPanel } from "./admin.mission-tab";
 import { AdminUsersTabPanel } from "./admin.users-tab";
+import { AdminCoursesTabPanel } from "./admin.courses-tab";
 import { PageRoot, AdminMainWorkspace } from "./admin.styles";
 import type { Route } from "./+types/admin";
 
@@ -84,13 +87,23 @@ export function meta(_args: Route.MetaArgs) {
   ];
 }
 
+function resolveTabFromPath(pathname: string): AdminTabKey {
+  if (pathname.includes("/admin/cohorts")) return "cohorts";
+  if (pathname.includes("/admin/mission-center")) return "mission-center";
+  if (pathname.includes("/admin/courses")) return "courses";
+  return "users";
+}
+
 export default function AdminManagement() {
   const loaderData = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation(["common", "auth", "errors"]);
   const { notifyError, notifySuccess } = useStatusCenter();
-  const [activeTab, setActiveTab] = useState<number>(0);
+
+  const activeTab = resolveTabFromPath(location.pathname);
   const [selectedUser, setSelectedUser] = useState<EntityCardData | null>(null);
 
   // Filters
@@ -147,8 +160,11 @@ export default function AdminManagement() {
     void logout();
   };
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
+  const handleTabChange = (
+    _event: React.SyntheticEvent,
+    newTabKey: AdminTabKey,
+  ) => {
+    navigate(`/admin/${newTabKey}`);
   };
 
   const handleUserClick = (user: EntityCardData) => {
@@ -404,7 +420,7 @@ export default function AdminManagement() {
           onChange={handleTabChange}
         />
 
-        {activeTab === 0 && (
+        {activeTab === "users" && (
           <AdminUsersTabPanel
             searchQuery={searchQuery}
             onQueryChange={setSearchQuery}
@@ -436,7 +452,7 @@ export default function AdminManagement() {
           />
         )}
 
-        {activeTab === 1 && (
+        {activeTab === "cohorts" && (
           <AdminCohortsTabPanel
             schools={loaderData.schools}
             cohorts={loaderData.cohorts}
@@ -457,7 +473,7 @@ export default function AdminManagement() {
           />
         )}
 
-        {activeTab === 2 && loaderData.missionCenter && (
+        {activeTab === "mission-center" && loaderData.missionCenter && (
           <AdminMissionCenterTabPanel
             missionCenter={loaderData.missionCenter}
             onRefresh={() => {
@@ -471,6 +487,8 @@ export default function AdminManagement() {
             fetcher={fetcher}
           />
         )}
+
+        {activeTab === "courses" && <AdminCoursesTabPanel />}
       </AdminMainWorkspace>
 
       <Footer />

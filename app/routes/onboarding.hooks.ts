@@ -109,7 +109,7 @@ export function useOnboardingProfile(options: UseOnboardingProfileOptions) {
     const formData = new FormData();
     formData.set("file", file);
     try {
-      const res = await fetch("/api/avatar/upload", {
+      const res = await fetch("/api/avatars/upload", {
         method: "POST",
         body: formData,
       });

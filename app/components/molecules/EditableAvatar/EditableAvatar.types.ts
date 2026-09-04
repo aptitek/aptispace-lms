@@ -33,7 +33,7 @@ export interface EditableAvatarProps {
    */
   onUpload?: (avatarFile: File) => Promise<string>;
   /**
-   * API endpoint to handle avatar uploads (default: "/api/avatar/upload")
+   * API endpoint to handle avatar uploads (default: "/api/avatars/upload")
    */
   uploadEndpoint?: string;
   /**

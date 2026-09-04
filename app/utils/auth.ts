@@ -68,16 +68,15 @@ export function getRoleTitle(role: UserRole, isComplete: boolean): string {
 export async function fetchAccountsFromDb(): Promise<AccountDefinition[]> {
   if (typeof fetch !== "undefined") {
     try {
-      const res = await fetch("/api/auth?action=accounts");
+      const res = await fetch("/api/users");
       if (res.ok) {
         const accountsResponse = (await res.json()) as {
           accounts?: AccountDefinition[];
+          users?: AccountDefinition[];
         };
-        if (
-          accountsResponse.accounts &&
-          Array.isArray(accountsResponse.accounts)
-        ) {
-          return accountsResponse.accounts;
+        const list = accountsResponse.accounts || accountsResponse.users;
+        if (list && Array.isArray(list)) {
+          return list;
         }
       }
     } catch {
@@ -92,17 +91,19 @@ export async function createAccountInDb(
 ): Promise<AccountDefinition | null> {
   if (typeof fetch !== "undefined") {
     try {
-      const res = await fetch("/api/auth", {
+      const res = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "createAccount", role }),
+        body: JSON.stringify({ role }),
       });
       if (res.ok) {
         const createResponse = (await res.json()) as {
           account?: AccountDefinition;
+          user?: AccountDefinition;
         };
-        if (createResponse.account) {
-          return createResponse.account;
+        const acc = createResponse.account || createResponse.user;
+        if (acc) {
+          return acc;
         }
       }
     } catch {
@@ -129,7 +130,7 @@ export async function loginAsAccount(
   };
 
   if (typeof window !== "undefined" && typeof fetch !== "undefined") {
-    const res = await fetch("/api/auth/impersonate", {
+    const res = await fetch("/api/dev/impersonate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -167,10 +168,9 @@ export async function loginAsAccount(
 export async function stopImpersonation(): Promise<AuthUser | null> {
   let resolvedUser: AuthUser | null = null;
   if (typeof window !== "undefined" && typeof fetch !== "undefined") {
-    const res = await fetch("/api/auth/impersonate", {
-      method: "POST",
+    const res = await fetch("/api/dev/impersonate", {
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "stop" }),
     });
 
     if (res.ok) {
@@ -243,7 +243,7 @@ export async function getStoredUser(): Promise<AuthUser | null> {
     }
 
     // Try fetching from server session
-    const res = await fetch("/api/auth?action=me");
+    const res = await fetch("/api/session");
     if (res.ok) {
       const responseBody = (await res.json()) as { user?: AuthUser };
       if (responseBody.user) {
