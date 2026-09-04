@@ -150,20 +150,16 @@ describe("Planning Route", () => {
     expect(element.props.feedToken).toBe("test-token");
   });
 
-  it("renders CalendarEmptyState with filter and admin controls", () => {
-    const onResetFilter = vi.fn();
+  it("renders CalendarEmptyState with admin controls", () => {
     const onAddClass = vi.fn();
     const onShowGrid = vi.fn();
 
     const element = React.createElement(CalendarEmptyState, {
-      isFiltered: true,
-      selectedFilter: "remote",
       isAdmin: true,
-      onResetFilter,
       onAddClass,
       onShowGrid,
     });
     expect(element).toBeDefined();
-    expect(element.props.selectedFilter).toBe("remote");
+    expect(element.props.isAdmin).toBe(true);
   });
 });

@@ -1,8 +1,17 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useLoaderData, type LoaderFunctionArgs } from "react-router";
+import { alpha } from "@mui/material/styles";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
+import Fab from "@mui/material/Fab";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 
 // MUI X Scheduler Types
 import type { EventCalendar } from "@mui/x-scheduler/event-calendar";
@@ -28,6 +37,7 @@ import {
 } from "~/services/classService";
 
 // Shared submodules
+import Tooltip from "~/components/atoms/Tooltip/Tooltip";
 import { RootContainer, CalendarFrame } from "./planning.styles";
 import {
   getSchedulerColor,
@@ -36,7 +46,7 @@ import {
   type SessionOption,
 } from "./planning.types";
 import { PlanningHero } from "./planning.hero";
-import { PlanningFilter, type AttendanceFilter } from "./planning.filter";
+import { CalendarHeaderTooltips } from "./planning.tooltips";
 import {
   CalendarSkeleton,
   CalendarErrorState,
@@ -126,7 +136,7 @@ export default function Planning() {
   const [feedTokenState, setFeedTokenState] = useState<string>(
     loaderData.feedToken,
   );
-  const [selectedFilter, setSelectedFilter] = useState<AttendanceFilter>("all");
+  const calendarFrameRef = useRef<HTMLDivElement>(null);
   const [loadError, setLoadError] = useState<boolean>(false);
   const [showEmptyGrid, setShowEmptyGrid] = useState<boolean>(false);
   const [CalendarComponent, setCalendarComponent] =
@@ -159,15 +169,8 @@ export default function Planning() {
     loadScheduler();
   }, [loadScheduler]);
 
-  const filteredClasses = useMemo(() => {
-    if (selectedFilter === "all") return classesState;
-    if (selectedFilter === "in_person")
-      return classesState.filter((c) => !c.isRemote);
-    return classesState.filter((c) => c.isRemote);
-  }, [classesState, selectedFilter]);
-
   const schedulerEvents: SchedulerEvent[] = useMemo(() => {
-    return filteredClasses.map((c) => ({
+    return classesState.map((c) => ({
       id: c.id,
       title: c.isRemote ? `[Remote] ${c.title}` : c.title,
       start: new Date(c.startTime).toISOString(),
@@ -175,7 +178,7 @@ export default function Planning() {
       color: getSchedulerColor(c.isRemote),
       description: c.description ?? undefined,
     }));
-  }, [filteredClasses]);
+  }, [classesState]);
 
   const handleEventsChange = useCallback(
     async (
@@ -306,22 +309,10 @@ export default function Planning() {
         userRole={loaderData.user.role}
         isAdmin={isAdmin}
         onOpenExport={() => setIsExportModalOpen(true)}
-        onAddClass={() => {
-          setEditingClass(null);
-          setIsFormModalOpen(true);
-        }}
       />
 
-      <PlanningFilter
-        selectedFilter={selectedFilter}
-        onSelectFilter={(newFilter) => {
-          setSelectedFilter(newFilter);
-          setShowEmptyGrid(false);
-        }}
-        classes={classesState}
-      />
-
-      <CalendarFrame>
+      <CalendarFrame ref={calendarFrameRef}>
+        <CalendarHeaderTooltips containerRef={calendarFrameRef} />
         {loadError ? (
           <CalendarErrorState
             onRetry={loadScheduler}
@@ -330,15 +321,9 @@ export default function Planning() {
           />
         ) : !CalendarComponent ? (
           <CalendarSkeleton />
-        ) : filteredClasses.length === 0 && !showEmptyGrid ? (
+        ) : classesState.length === 0 && !showEmptyGrid ? (
           <CalendarEmptyState
-            isFiltered={selectedFilter !== "all"}
-            selectedFilter={selectedFilter}
             isAdmin={isAdmin}
-            onResetFilter={() => {
-              setSelectedFilter("all");
-              setShowEmptyGrid(false);
-            }}
             onAddClass={() => {
               setEditingClass(null);
               setIsFormModalOpen(true);
@@ -366,6 +351,45 @@ export default function Planning() {
               },
             }}
           />
+        )}
+        {isAdmin && (
+          <Tooltip
+            title={t("planning.addClass", "Add Class")}
+            placement="left"
+            arrow
+          >
+            <Fab
+              color="primary"
+              aria-label={t("planning.addClass", "Add Class")}
+              data-testid="planning-add-class-fab"
+              onClick={() => {
+                setEditingClass(null);
+                setIsFormModalOpen(true);
+              }}
+              sx={{
+                position: "absolute",
+                bottom: { xs: 20, sm: 24 },
+                right: { xs: 20, sm: 24 },
+                zIndex: 20,
+                width: 64,
+                height: 64,
+                borderRadius: "20px",
+                boxShadow: (theme) =>
+                  `0 10px 28px -4px ${alpha(theme.palette.primary.main, 0.45)}, 0 4px 12px rgba(0,0,0,0.15)`,
+                transition: "all 0.2s cubic-bezier(0.2, 0, 0, 1)",
+                "&:hover": {
+                  transform: "scale(1.08)",
+                  boxShadow: (theme) =>
+                    `0 14px 32px -4px ${alpha(theme.palette.primary.main, 0.6)}, 0 6px 16px rgba(0,0,0,0.2)`,
+                },
+                "&:active": {
+                  transform: "scale(0.96)",
+                },
+              }}
+            >
+              <AddRoundedIcon sx={{ fontSize: "2.25rem" }} />
+            </Fab>
+          </Tooltip>
         )}
       </CalendarFrame>
 

@@ -363,6 +363,11 @@
       "remote": "Remote"
     },
     "loadingCalendar": "Loading interactive calendar...",
+    "tooltips": {
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar",
+      "settings": "Calendar settings"
+    },
     "states": {
       "loadingCalendar": "Loading interactive calendar...",
       "loadingDescription": "Initializing scheduler engine and rendering time grid...",

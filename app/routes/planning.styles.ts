@@ -38,6 +38,7 @@ export const HeroCard = styled(Box)(({ theme }) => ({
 }));
 
 export const CalendarFrame = styled(Box)(({ theme }) => ({
+  position: "relative",
   borderRadius: "24px",
   backgroundColor: alpha(theme.palette.background.paper, 0.85),
   border: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
@@ -48,6 +49,56 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
   "& .MuiEventCalendar-root": {
     borderRadius: "24px",
     border: "none",
+  },
+  "& .MuiEventCalendar-headerToolbarSidePanelToggle svg, & .MuiEventCalendar-preferencesMenuButton svg":
+    {
+      pointerEvents: "none",
+    },
+  "& .MuiEventCalendar-headerToolbar": {
+    position: "relative",
+    zIndex: 10,
+    overflow: "visible !important",
+  },
+  "& .MuiEventCalendar-headerToolbarActions": {
+    position: "relative",
+    overflow: "visible !important",
+  },
+  "& .MuiEventCalendar-preferencesMenu": {
+    position: "relative",
+    overflow: "visible !important",
+  },
+  "& .MuiEventCalendar-preferencesMenuList": {
+    position: "absolute !important",
+    inset: "auto !important",
+    top: "100% !important",
+    right: "0 !important",
+    left: "auto !important",
+    bottom: "auto !important",
+    width: "0 !important",
+    height: "0 !important",
+    overflow: "visible !important",
+    zIndex: 1300,
+  },
+  "& .MuiEventCalendar-preferencesMenuList .MuiBackdrop-root": {
+    position: "fixed !important",
+    top: "-100vh !important",
+    left: "-100vw !important",
+    width: "300vw !important",
+    height: "300vh !important",
+  },
+  "& .MuiEventCalendar-preferencesMenuList .MuiPopover-paper": {
+    position: "absolute !important",
+    top: "8px !important",
+    right: "0 !important",
+    left: "auto !important",
+    bottom: "auto !important",
+    transform: "none !important",
+    margin: "0 !important",
+    maxHeight: "none !important",
+    maxWidth: "none !important",
+    height: "auto !important",
+    borderRadius: "16px",
+    boxShadow: "0 12px 32px -4px rgba(0, 0, 0, 0.3)",
   },
   ...theme.applyStyles("dark", {
     backgroundColor: alpha(theme.palette.background.paper, 0.6),

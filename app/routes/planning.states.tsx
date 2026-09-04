@@ -11,7 +11,6 @@ import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import FilterAltOffRoundedIcon from "@mui/icons-material/FilterAltOffRounded";
 import ViewWeekRoundedIcon from "@mui/icons-material/ViewWeekRounded";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 
@@ -342,81 +341,31 @@ export function CalendarErrorState({
 }
 
 export interface CalendarEmptyStateProps {
-  isFiltered: boolean;
-  selectedFilter: string;
   isAdmin: boolean;
-  onResetFilter: () => void;
   onAddClass: () => void;
   onShowGrid: () => void;
-}
-
-function resolveFilterMeta(selectedFilter: string): {
-  key: string;
-  fallback: string;
-} {
-  if (selectedFilter === "remote") return { key: "remote", fallback: "Remote" };
-  if (selectedFilter === "in_person")
-    return { key: "inPerson", fallback: "In-Person" };
-  return { key: "all", fallback: "All" };
-}
-
-interface EmptyCopyLabels {
-  title: string;
-  description: string;
-}
-
-function resolveEmptyStateCopy(
-  t: ReturnType<typeof useTranslation>["t"],
-  isFiltered: boolean,
-  filterLabel: string,
-  isAdmin: boolean,
-): EmptyCopyLabels {
-  if (isFiltered) {
-    return {
-      title: t(
-        "planning.states.noFilteredClassesTitle",
-        `No ${filterLabel} Classes Found`,
-        { filter: filterLabel },
-      ),
-      description: t(
-        "planning.states.noFilteredClassesDesc",
-        `There are no classes matching the '${filterLabel}' filter.`,
-        { filter: filterLabel },
-      ),
-    };
-  }
-
-  return {
-    title: t("planning.states.noClassesTitle", "No Classes Scheduled"),
-    description: isAdmin
-      ? t(
-          "planning.states.noClassesAdminDesc",
-          "No classes have been scheduled yet. Click 'Add Class' to create your first class.",
-        )
-      : t(
-          "planning.states.noClassesDesc",
-          "There are no academic classes scheduled for your account at this time.",
-        ),
-  };
+  isFiltered?: boolean;
+  selectedFilter?: string;
+  onResetFilter?: () => void;
 }
 
 export function CalendarEmptyState({
-  isFiltered,
-  selectedFilter,
   isAdmin,
-  onResetFilter,
   onAddClass,
   onShowGrid,
 }: CalendarEmptyStateProps) {
   const { t } = useTranslation("common");
-  const meta = resolveFilterMeta(selectedFilter);
-  const filterLabel = t(`planning.filter.${meta.key}`, meta.fallback);
-  const { title, description } = resolveEmptyStateCopy(
-    t,
-    isFiltered,
-    filterLabel,
-    isAdmin,
-  );
+
+  const title = t("planning.states.noClassesTitle", "No Classes Scheduled");
+  const description = isAdmin
+    ? t(
+        "planning.states.noClassesAdminDesc",
+        "No classes have been scheduled yet. Click 'Add Class' to schedule your first class.",
+      )
+    : t(
+        "planning.states.noClassesDesc",
+        "There are no academic classes scheduled for your account at this time.",
+      );
 
   return (
     <Box
@@ -470,27 +419,9 @@ export function CalendarEmptyState({
           pt: 1,
         }}
       >
-        {isFiltered && (
-          <Button
-            variant="contained"
-            size="medium"
-            startIcon={<FilterAltOffRoundedIcon />}
-            onClick={onResetFilter}
-            sx={{
-              borderRadius: "12px",
-              textTransform: "none",
-              fontWeight: 700,
-              px: 2.5,
-              py: 1,
-            }}
-          >
-            {t("planning.states.showAllClasses", "Show All Classes")}
-          </Button>
-        )}
-
         {isAdmin && (
           <Button
-            variant={isFiltered ? "outlined" : "contained"}
+            variant="contained"
             size="medium"
             startIcon={<AddRoundedIcon />}
             onClick={onAddClass}

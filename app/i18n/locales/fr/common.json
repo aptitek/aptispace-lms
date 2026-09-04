@@ -363,6 +363,11 @@
       "remote": "À distance"
     },
     "loadingCalendar": "Chargement du calendrier interactif...",
+    "tooltips": {
+      "collapseSidebar": "Réduire la barre latérale",
+      "expandSidebar": "Développer la barre latérale",
+      "settings": "Paramètres du calendrier"
+    },
     "states": {
       "loadingCalendar": "Chargement du calendrier interactif...",
       "loadingDescription": "Initialisation du moteur de planification et affichage de la grille...",

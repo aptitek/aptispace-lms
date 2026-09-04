@@ -5,7 +5,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import LinkRoundedIcon from "@mui/icons-material/LinkRounded";
 
 import { HeroCard } from "./planning.styles";
@@ -14,14 +13,12 @@ export interface PlanningHeroProps {
   userRole: "admin" | "instructor" | "student";
   isAdmin: boolean;
   onOpenExport: () => void;
-  onAddClass: () => void;
 }
 
 export function PlanningHero({
   userRole,
-  isAdmin,
+  isAdmin: _isAdmin,
   onOpenExport,
-  onAddClass,
 }: PlanningHeroProps) {
   const { t } = useTranslation("common");
 
@@ -95,26 +92,6 @@ export function PlanningHero({
         >
           {t("planning.subscribeExport")}
         </Button>
-
-        {isAdmin && (
-          <Button
-            variant="contained"
-            size="medium"
-            startIcon={<AddRoundedIcon />}
-            onClick={onAddClass}
-            sx={{
-              borderRadius: "14px",
-              textTransform: "none",
-              fontWeight: 700,
-              px: 2.5,
-              py: 1,
-              boxShadow: (theme) =>
-                `0 8px 20px -6px ${alpha(theme.palette.primary.main, 0.5)}`,
-            }}
-          >
-            {t("planning.addClass")}
-          </Button>
-        )}
       </Box>
     </HeroCard>
   );
