@@ -48,8 +48,10 @@ export function createSvgDataUri(path: string, fill = "#ffffff"): string {
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 }
 
-export const CalendarFrame = styled(Box)(({ theme }) => ({
-  position: "relative",
+export const CalendarFrame = styled(Box)(({ theme }) => {
+  const isDark = theme.palette.mode === "dark";
+  return {
+    position: "relative",
   borderRadius: "24px",
   backgroundColor: alpha(theme.palette.background.paper, 0.85),
   border: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
@@ -120,32 +122,38 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
       position: "relative",
     },
   "& .MuiEventCalendar-timeGridEvent": {
-    borderRadius: "10px !important",
-    boxShadow: `0 3px 12px -2px ${alpha(theme.palette.common.black, 0.14)}, 0 1px 4px 0 ${alpha(theme.palette.common.black, 0.08)} !important`,
+    borderRadius: "8px !important",
+    boxShadow: isDark
+      ? `0 4px 16px -2px ${alpha(theme.palette.common.black, 0.5)}, 0 1px 4px 0 ${alpha(theme.palette.common.black, 0.35)} !important`
+      : `0 3px 12px -2px ${alpha(theme.palette.common.black, 0.14)}, 0 1px 4px 0 ${alpha(theme.palette.common.black, 0.08)} !important`,
     backdropFilter: "blur(8px)",
     overflow: "hidden !important",
     transition: "transform 0.18s ease, box-shadow 0.18s ease !important",
     "&:hover": {
       transform: "translateY(-1px) scale(1.008)",
-      boxShadow: `0 8px 24px -4px ${alpha(theme.palette.common.black, 0.22)}, 0 2px 6px 0 ${alpha(theme.palette.common.black, 0.12)} !important`,
+      boxShadow: isDark
+        ? `0 10px 28px -4px ${alpha(theme.palette.common.black, 0.7)}, 0 3px 8px 0 ${alpha(theme.palette.common.black, 0.45)} !important`
+        : `0 8px 24px -4px ${alpha(theme.palette.common.black, 0.22)}, 0 2px 6px 0 ${alpha(theme.palette.common.black, 0.12)} !important`,
       zIndex: 5,
     },
   },
   "& .MuiEventCalendar-timeGridEvent::before": {
-    top: "4px !important",
-    bottom: "4px !important",
-    left: "4px !important",
-    width: "3.5px !important",
-    borderRadius: "3px !important",
-    boxShadow: "none !important",
+    top: "0 !important",
+    bottom: "0 !important",
+    left: "0 !important",
+    width: "8px !important",
+    borderRadius: "0 !important",
+    boxShadow: isDark
+      ? `1px 0 0 0 ${alpha(theme.palette.common.black, 0.35)} !important`
+      : `1px 0 0 0 ${alpha(theme.palette.common.black, 0.18)} !important`,
   },
   "& .MuiEventCalendar-timeGridEvent[data-under-hour='true']::before, & .MuiEventCalendar-timeGridEvent[data-under-fifteen-minutes='true']::before":
     {
-      top: "3px !important",
-      bottom: "3px !important",
-      left: "3px !important",
-      width: "3px !important",
-      borderRadius: "2px !important",
+      top: "0 !important",
+      bottom: "0 !important",
+      left: "0 !important",
+      width: "8px !important",
+      borderRadius: "0 !important",
     },
   "& .event-remote, & [data-palette='blue']": {
     "--event-main": theme.palette.primary.main,
@@ -256,16 +264,16 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
     },
   "& .MuiEventCalendar-timeGridEvent.event-remote, & .MuiEventCalendar-timeGridEvent.event-in-person, & .MuiEventCalendar-timeGridEvent[data-palette='blue'], & .MuiEventCalendar-timeGridEvent[data-palette='green']":
     {
-      padding: "6px 6px 6px 14px !important",
+      padding: "6px 6px 6px 16px !important",
       "&[data-under-hour='true']": {
         paddingTop: "2px !important",
         paddingBottom: "2px !important",
-        paddingLeft: "12px !important",
+        paddingLeft: "14px !important",
       },
       "&[data-under-fifteen-minutes='true']": {
         paddingTop: "0 !important",
         paddingBottom: "0 !important",
-        paddingLeft: "10px !important",
+        paddingLeft: "12px !important",
       },
     },
   "& .MuiEventCalendar-dayGridEvent.event-remote, & .MuiEventCalendar-dayGridEvent.event-in-person, & .MuiEventCalendar-dayGridEvent[data-palette='blue'], & .MuiEventCalendar-dayGridEvent[data-palette='green']":
@@ -360,12 +368,6 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
     backgroundColor: alpha(theme.palette.background.paper, 0.6),
     border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
     boxShadow: "0 20px 48px -12px rgba(0, 0, 0, 0.4)",
-    "& .MuiEventCalendar-timeGridEvent": {
-      boxShadow: `0 4px 16px -2px ${alpha(theme.palette.common.black, 0.5)}, 0 1px 4px 0 ${alpha(theme.palette.common.black, 0.35)} !important`,
-      "&:hover": {
-        boxShadow: `0 10px 28px -4px ${alpha(theme.palette.common.black, 0.7)}, 0 3px 8px 0 ${alpha(theme.palette.common.black, 0.45)} !important`,
-      },
-    },
     "& .event-remote, & [data-palette='blue']": {
       "--event-main": theme.palette.primary.light,
       "--event-surface-bold": theme.palette.primary.main,
@@ -433,7 +435,8 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
         borderWidth: "1px",
       },
   }),
-}));
+  };
+});
 
 export const FilterBar = styled(Box)(({ theme }) => ({
   display: "flex",
