@@ -7,17 +7,19 @@ import Button from "@mui/material/Button";
 import { FilterBar } from "./planning.styles";
 import type { ClassWithDetails } from "~/services/classService";
 
+export type AttendanceFilter = "all" | "in_person" | "remote";
+
 export interface PlanningFilterProps {
-  selectedType: string;
-  onSelectType: (type: string) => void;
+  selectedFilter: AttendanceFilter;
+  onSelectFilter: (filter: AttendanceFilter) => void;
   classes: ClassWithDetails[];
 }
 
-const FILTER_TYPES = ["all", "lecture", "lab", "workshop", "exam"] as const;
+const FILTERS: readonly AttendanceFilter[] = ["all", "in_person", "remote"];
 
 export function PlanningFilter({
-  selectedType,
-  onSelectType,
+  selectedFilter,
+  onSelectFilter,
   classes,
 }: PlanningFilterProps) {
   const { t } = useTranslation("common");
@@ -28,21 +30,32 @@ export function PlanningFilter({
         variant="caption"
         sx={{ fontWeight: 700, color: "text.secondary", px: 1 }}
       >
-        {t("planning.filterLabel")}
+        {t("planning.filterLabel", "Filter:")}
       </Typography>
-      {FILTER_TYPES.map((type) => {
-        const isSelected = selectedType === type;
-        const count =
-          type === "all"
-            ? classes.length
-            : classes.filter((c) => c.type === type).length;
-        const label = t(`planning.types.${type}`);
+      {FILTERS.map((f) => {
+        const isSelected = selectedFilter === f;
+        let count = classes.length;
+        if (f === "in_person") {
+          count = classes.filter((c) => !c.isRemote).length;
+        } else if (f === "remote") {
+          count = classes.filter((c) => c.isRemote).length;
+        }
+
+        const fallbackMap: Record<AttendanceFilter, string> = {
+          all: "All",
+          in_person: "In-Person",
+          remote: "Remote",
+        };
+
+        const labelKey =
+          f === "all" ? "all" : f === "in_person" ? "inPerson" : "remote";
+        const label = t(`planning.filter.${labelKey}`, fallbackMap[f]);
 
         return (
           <Button
-            key={type}
+            key={f}
             size="small"
-            onClick={() => onSelectType(type)}
+            onClick={() => onSelectFilter(f)}
             sx={{
               borderRadius: "12px",
               textTransform: "capitalize",

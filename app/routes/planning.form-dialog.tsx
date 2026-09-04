@@ -8,6 +8,11 @@ import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
+import Switch from "@mui/material/Switch";
+import Typography from "@mui/material/Typography";
+import { alpha } from "@mui/material/styles";
+import DevicesRoundedIcon from "@mui/icons-material/DevicesRounded";
+import LocationOnRoundedIcon from "@mui/icons-material/LocationOnRounded";
 
 import type { ClassWithDetails } from "~/services/classService";
 import { SoftDialog } from "./planning.styles";
@@ -28,7 +33,7 @@ export interface ClassFormDialogProps {
 interface FormState {
   sessionId: string;
   title: string;
-  type: string;
+  isRemote: boolean;
   instructorId: string;
   startTime: string;
   endTime: string;
@@ -60,7 +65,7 @@ function getInitialFormState(
     return {
       sessionId: editingClass.sessionId,
       title: editingClass.title,
-      type: editingClass.type,
+      isRemote: editingClass.isRemote ?? false,
       instructorId: editingClass.instructorId ?? "",
       location: editingClass.location ?? "",
       description: editingClass.description ?? "",
@@ -71,7 +76,7 @@ function getInitialFormState(
   return {
     sessionId: firstSessionId,
     title: "",
-    type: "lecture",
+    isRemote: false,
     instructorId: firstInstructorId,
     location: "",
     description: "",
@@ -89,7 +94,7 @@ async function submitClassForm(
     id: editingId,
     sessionId: formState.sessionId,
     title: formState.title,
-    type: formState.type,
+    isRemote: formState.isRemote,
     instructorId: formState.instructorId || null,
     startTime: new Date(formState.startTime).toISOString(),
     endTime: new Date(formState.endTime).toISOString(),
@@ -108,7 +113,7 @@ async function submitClassForm(
 
 interface FormFieldsProps {
   formState: FormState;
-  updateField: (key: keyof FormState, val: string) => void;
+  updateField: <K extends keyof FormState>(key: K, val: FormState[K]) => void;
   sessions: SessionOption[];
   instructors: InstructorOption[];
 }
@@ -151,39 +156,66 @@ function FormFields({
         sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
       />
 
-      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-        <TextField
-          select
-          label={t("planning.form.formatType")}
-          value={formState.type}
-          onChange={(e) => updateField("type", e.target.value)}
-          required
-          fullWidth
-          size="small"
-          sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
-        >
-          <MenuItem value="lecture">{t("planning.types.lecture")}</MenuItem>
-          <MenuItem value="lab">{t("planning.types.lab")}</MenuItem>
-          <MenuItem value="workshop">{t("planning.types.workshop")}</MenuItem>
-          <MenuItem value="exam">{t("planning.types.exam")}</MenuItem>
-        </TextField>
+      <TextField
+        select
+        label={t("planning.form.instructorLabel")}
+        value={formState.instructorId}
+        onChange={(e) => updateField("instructorId", e.target.value)}
+        fullWidth
+        size="small"
+        sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
+      >
+        <MenuItem value="">{t("planning.form.unassigned")}</MenuItem>
+        {instructors.map((inst) => (
+          <MenuItem key={inst.id} value={inst.id}>
+            {inst.name} ({inst.role})
+          </MenuItem>
+        ))}
+      </TextField>
 
-        <TextField
-          select
-          label={t("planning.form.instructorLabel")}
-          value={formState.instructorId}
-          onChange={(e) => updateField("instructorId", e.target.value)}
-          fullWidth
-          size="small"
-          sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
-        >
-          <MenuItem value="">{t("planning.form.unassigned")}</MenuItem>
-          {instructors.map((inst) => (
-            <MenuItem key={inst.id} value={inst.id}>
-              {inst.name} ({inst.role})
-            </MenuItem>
-          ))}
-        </TextField>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: 2,
+          py: 1.25,
+          borderRadius: "12px",
+          border: (theme) => `1px solid ${theme.palette.divider}`,
+          backgroundColor: (theme) =>
+            formState.isRemote
+              ? alpha(theme.palette.primary.main, 0.08)
+              : alpha(theme.palette.action.hover, 0.04),
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          {formState.isRemote ? (
+            <DevicesRoundedIcon color="primary" fontSize="small" />
+          ) : (
+            <LocationOnRoundedIcon color="action" fontSize="small" />
+          )}
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              {t("planning.form.isRemote", "Remote Class (Online)")}
+            </Typography>
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              {formState.isRemote
+                ? t(
+                    "planning.form.remoteHint",
+                    "Virtual session (e.g. Teams, Zoom link)",
+                  )
+                : t(
+                    "planning.form.inPersonHint",
+                    "Physical on-campus room or lecture hall",
+                  )}
+            </Typography>
+          </Box>
+        </Box>
+        <Switch
+          checked={formState.isRemote}
+          onChange={(e) => updateField("isRemote", e.target.checked)}
+          color="primary"
+        />
       </Box>
 
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
@@ -213,10 +245,18 @@ function FormFields({
       </Box>
 
       <TextField
-        label={t("planning.form.locationLabel")}
+        label={
+          formState.isRemote
+            ? t("planning.form.meetingLinkLabel", "Meeting Link / Virtual Room")
+            : t("planning.form.locationLabel")
+        }
         value={formState.location}
         onChange={(e) => updateField("location", e.target.value)}
-        placeholder={t("planning.form.locationPlaceholder")}
+        placeholder={
+          formState.isRemote
+            ? t("planning.form.linkPlaceholder", "e.g. Teams / Zoom link")
+            : t("planning.form.locationPlaceholder")
+        }
         fullWidth
         size="small"
         sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
@@ -257,7 +297,10 @@ export function ClassFormDialog({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const updateField = (key: keyof FormState, val: string) => {
+  const updateField = <K extends keyof FormState>(
+    key: K,
+    val: FormState[K],
+  ) => {
     setFormState((prev) => ({ ...prev, [key]: val }));
   };
 

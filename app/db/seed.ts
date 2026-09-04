@@ -205,7 +205,7 @@ async function seedClassesForSession(
       title: "Cloud Infrastructure & Edge Computing",
       description:
         "Core architectures, Cloudflare Workers, edge caching, and KV/D1 databases.",
-      type: "lecture",
+      isRemote: false,
       startTime: d1.startTime,
       endTime: d1.endTime,
       location: "Amphitheater Turing",
@@ -218,7 +218,7 @@ async function seedClassesForSession(
       title: "Microservices & Distributed Systems Lab",
       description:
         "Hands-on lab deploying decoupled microservices and event queues.",
-      type: "lab",
+      isRemote: false,
       startTime: d2.startTime,
       endTime: d2.endTime,
       location: "Lab Room Kepler-12",
@@ -231,10 +231,10 @@ async function seedClassesForSession(
       title: "Fullstack Architecture & GraphQL Workshop",
       description:
         "Interactive session on schema design, resolvers, and subscriptions.",
-      type: "workshop",
+      isRemote: true,
       startTime: d3.startTime,
       endTime: d3.endTime,
-      location: "Studio Ada Lovelace",
+      location: "Online (Teams / Virtual Campus)",
       createdAt: now,
       updatedAt: now,
     },
@@ -244,7 +244,7 @@ async function seedClassesForSession(
       title: "Database Indexing & Query Tuning Lab",
       description:
         "Optimizing SQL query plans, SQLite internal B-Trees, and indexes.",
-      type: "lab",
+      isRemote: false,
       startTime: d4.startTime,
       endTime: d4.endTime,
       location: "Lab Room Kepler-12",
@@ -257,10 +257,10 @@ async function seedClassesForSession(
       title: "Midterm Architectural Assessment",
       description:
         "Individual oral presentation and evaluation of system designs.",
-      type: "exam",
+      isRemote: true,
       startTime: d5.startTime,
       endTime: d5.endTime,
-      location: "Hall Hopper-01",
+      location: "Online (Oral Examination)",
       createdAt: now,
       updatedAt: now,
     },

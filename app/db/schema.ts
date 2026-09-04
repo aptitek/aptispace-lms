@@ -194,11 +194,7 @@ export const classes = sqliteTable("classes", {
   }),
   title: text("title").notNull(),
   description: text("description"),
-  type: text("type", {
-    enum: ["lecture", "lab", "workshop", "exam"],
-  })
-    .notNull()
-    .default("lecture"),
+  isRemote: integer("is_remote", { mode: "boolean" }).notNull().default(false),
   startTime: integer("start_time", { mode: "timestamp" }).notNull(),
   endTime: integer("end_time", { mode: "timestamp" }).notNull(),
   location: text("location"),

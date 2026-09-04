@@ -34,6 +34,13 @@ if (!i18n.isInitialized) {
       useSuspense: false,
     },
   });
+} else {
+  for (const lng of supportedLngs) {
+    const lngResources = resources[lng];
+    for (const [ns, bundle] of Object.entries(lngResources)) {
+      i18n.addResourceBundle(lng, ns, bundle, true, true);
+    }
+  }
 }
 
 export default i18n;

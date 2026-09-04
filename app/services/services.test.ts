@@ -347,8 +347,8 @@ describe("Backend Database & Service Architecture", () => {
 
     const classItem = await createClass(mockDb, {
       sessionId: "session-1",
-      title: "Distributed Systems Lecture",
-      type: "lecture",
+      title: "Distributed Systems Class",
+      isRemote: false,
       startTime: new Date(),
       endTime: new Date(),
       location: "Room 1",

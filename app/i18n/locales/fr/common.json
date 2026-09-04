@@ -357,12 +357,10 @@
     "subscribeExport": "S'abonner / Exporter iCal",
     "addClass": "Ajouter un cours",
     "filterLabel": "Filtrer :",
-    "types": {
+    "filter": {
       "all": "Tous",
-      "lecture": "Cours",
-      "lab": "TP",
-      "workshop": "Atelier",
-      "exam": "Examen"
+      "inPerson": "En présentiel",
+      "remote": "À distance"
     },
     "loadingCalendar": "Chargement du calendrier interactif...",
     "states": {
@@ -374,9 +372,9 @@
       "downloadIcs": "Télécharger .ics",
       "noClassesTitle": "Aucun cours programmé",
       "noClassesDesc": "Aucun cours académique n'est programmé pour votre compte pour le moment.",
-      "noClassesAdminDesc": "Aucun cours n'a encore été programmé. Cliquez sur « Ajouter un cours » pour créer votre premier cours magistral, TP ou atelier.",
-      "noFilteredClassesTitle": "Aucun cours de type {{type}} trouvé",
-      "noFilteredClassesDesc": "Il n'y a aucun cours correspondant au filtre « {{type}} ».",
+      "noClassesAdminDesc": "Aucun cours n'a encore été programmé. Cliquez sur « Ajouter un cours » pour créer votre premier cours.",
+      "noFilteredClassesTitle": "Aucun cours {{filter}} trouvé",
+      "noFilteredClassesDesc": "Il n'y a aucun cours correspondant au filtre « {{filter}} ».",
       "showAllClasses": "Afficher tous les cours",
       "viewCalendarGrid": "Ouvrir la grille du calendrier"
     },
@@ -409,7 +407,10 @@
       "delete": "Supprimer",
       "edit": "Modifier",
       "close": "Fermer",
-      "virtualCampus": "Campus Virtuel AptiSpace"
+      "virtualCampus": "Campus Virtuel AptiSpace",
+      "remoteBadge": "À distance",
+      "inPersonBadge": "En présentiel",
+      "onCampus": "Campus AptiSpace"
     },
     "form": {
       "createTitle": "Créer un nouveau cours",
@@ -417,7 +418,11 @@
       "sessionLabel": "Session académique (Cours & Cohorte)",
       "classTitle": "Titre du cours",
       "titlePlaceholder": "ex: Systèmes distribués & RPC",
-      "formatType": "Format / Type",
+      "isRemote": "Cours à distance (En ligne)",
+      "remoteHint": "Session virtuelle (ex: lien Teams, Zoom)",
+      "inPersonHint": "Salle ou amphithéâtre sur le campus physique",
+      "meetingLinkLabel": "Lien de visioconférence / Salle virtuelle",
+      "linkPlaceholder": "ex: lien Teams / Zoom",
       "instructorLabel": "Instructeur assigné",
       "unassigned": "Non assigné",
       "startTime": "Heure de début",

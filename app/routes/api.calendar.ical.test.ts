@@ -57,7 +57,7 @@ describe("api.calendar.$token[.]ics route", () => {
       sessionId: "session-1",
       instructorId: "user-1",
       title: "Cloud Edge Computing",
-      type: "lecture",
+      isRemote: false,
       startTime: new Date("2026-09-08T10:00:00Z"),
       endTime: new Date("2026-09-08T12:00:00Z"),
       location: "Room Turing",
@@ -105,11 +105,13 @@ describe("api.calendar.$token[.]ics route", () => {
     expect(res.headers.get("Content-Disposition")).toContain("inline");
 
     const icsContent = await res.text();
-    expect(icsContent).toContain("BEGIN:VCALENDAR");
-    expect(icsContent).toContain("BEGIN:VEVENT");
-    expect(icsContent).toContain("SUMMARY:[LECTURE] Cloud Edge Computing");
-    expect(icsContent).toContain("LOCATION:Room Turing");
-    expect(icsContent).toContain("Alex Mercer");
-    expect(icsContent).toContain("END:VCALENDAR");
+    const unfoldedIcs = icsContent.replace(/\r?\n[ \t]/g, "");
+    expect(unfoldedIcs).toContain("BEGIN:VCALENDAR");
+    expect(unfoldedIcs).toContain("BEGIN:VEVENT");
+    expect(unfoldedIcs).toContain("SUMMARY:Cloud Edge Computing");
+    expect(unfoldedIcs).toContain("Format: In-Person");
+    expect(unfoldedIcs).toContain("LOCATION:Room Turing");
+    expect(unfoldedIcs).toContain("Alex Mercer");
+    expect(unfoldedIcs).toContain("END:VCALENDAR");
   });
 });

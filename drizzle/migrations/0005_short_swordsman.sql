@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS `classes` (
 	`instructor_id` text,
 	`title` text NOT NULL,
 	`description` text,
-	`type` text DEFAULT 'lecture' NOT NULL,
+	`is_remote` integer DEFAULT false NOT NULL,
 	`start_time` integer NOT NULL,
 	`end_time` integer NOT NULL,
 	`location` text,

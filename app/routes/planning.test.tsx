@@ -28,7 +28,7 @@ describe("Planning Route", () => {
       {
         name: "description",
         content:
-          "Interactive academic planning, lectures, labs, and cohort timetables with live iCal subscription.",
+          "Interactive academic planning, scheduled classes, and cohort timetables with live iCal subscription.",
       },
     ]);
   });
@@ -157,13 +157,13 @@ describe("Planning Route", () => {
 
     const element = React.createElement(CalendarEmptyState, {
       isFiltered: true,
-      selectedType: "exam",
+      selectedFilter: "remote",
       isAdmin: true,
       onResetFilter,
       onAddClass,
       onShowGrid,
     });
     expect(element).toBeDefined();
-    expect(element.props.selectedType).toBe("exam");
+    expect(element.props.selectedFilter).toBe("remote");
   });
 });

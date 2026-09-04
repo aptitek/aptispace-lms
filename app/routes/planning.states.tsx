@@ -343,47 +343,80 @@ export function CalendarErrorState({
 
 export interface CalendarEmptyStateProps {
   isFiltered: boolean;
-  selectedType: string;
+  selectedFilter: string;
   isAdmin: boolean;
   onResetFilter: () => void;
   onAddClass: () => void;
   onShowGrid: () => void;
 }
 
+function resolveFilterMeta(selectedFilter: string): {
+  key: string;
+  fallback: string;
+} {
+  if (selectedFilter === "remote") return { key: "remote", fallback: "Remote" };
+  if (selectedFilter === "in_person")
+    return { key: "inPerson", fallback: "In-Person" };
+  return { key: "all", fallback: "All" };
+}
+
+interface EmptyCopyLabels {
+  title: string;
+  description: string;
+}
+
+function resolveEmptyStateCopy(
+  t: ReturnType<typeof useTranslation>["t"],
+  isFiltered: boolean,
+  filterLabel: string,
+  isAdmin: boolean,
+): EmptyCopyLabels {
+  if (isFiltered) {
+    return {
+      title: t(
+        "planning.states.noFilteredClassesTitle",
+        `No ${filterLabel} Classes Found`,
+        { filter: filterLabel },
+      ),
+      description: t(
+        "planning.states.noFilteredClassesDesc",
+        `There are no classes matching the '${filterLabel}' filter.`,
+        { filter: filterLabel },
+      ),
+    };
+  }
+
+  return {
+    title: t("planning.states.noClassesTitle", "No Classes Scheduled"),
+    description: isAdmin
+      ? t(
+          "planning.states.noClassesAdminDesc",
+          "No classes have been scheduled yet. Click 'Add Class' to create your first class.",
+        )
+      : t(
+          "planning.states.noClassesDesc",
+          "There are no academic classes scheduled for your account at this time.",
+        ),
+  };
+}
+
 export function CalendarEmptyState({
   isFiltered,
-  selectedType,
+  selectedFilter,
   isAdmin,
   onResetFilter,
   onAddClass,
   onShowGrid,
 }: CalendarEmptyStateProps) {
   const { t } = useTranslation("common");
-
-  const typeLabel = t(`planning.types.${selectedType}`, selectedType);
-  const title = isFiltered
-    ? t(
-        "planning.states.noFilteredClassesTitle",
-        `No ${typeLabel} Classes Found`,
-        { type: typeLabel },
-      )
-    : t("planning.states.noClassesTitle", "No Classes Scheduled");
-
-  const description = isFiltered
-    ? t(
-        "planning.states.noFilteredClassesDesc",
-        `There are no classes matching the '${typeLabel}' format filter.`,
-        { type: typeLabel },
-      )
-    : isAdmin
-      ? t(
-          "planning.states.noClassesAdminDesc",
-          "No classes have been scheduled yet. Click 'Add Class' to create your first lecture, lab, or workshop.",
-        )
-      : t(
-          "planning.states.noClassesDesc",
-          "There are no academic classes scheduled for your account at this time.",
-        );
+  const meta = resolveFilterMeta(selectedFilter);
+  const filterLabel = t(`planning.filter.${meta.key}`, meta.fallback);
+  const { title, description } = resolveEmptyStateCopy(
+    t,
+    isFiltered,
+    filterLabel,
+    isAdmin,
+  );
 
   return (
     <Box

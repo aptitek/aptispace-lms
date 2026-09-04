@@ -30,13 +30,13 @@ import {
 // Shared submodules
 import { RootContainer, CalendarFrame } from "./planning.styles";
 import {
-  getSchedulerColorForType,
+  getSchedulerColor,
   type PlanningLoaderData,
   type InstructorOption,
   type SessionOption,
 } from "./planning.types";
 import { PlanningHero } from "./planning.hero";
-import { PlanningFilter } from "./planning.filter";
+import { PlanningFilter, type AttendanceFilter } from "./planning.filter";
 import {
   CalendarSkeleton,
   CalendarErrorState,
@@ -52,7 +52,7 @@ export function meta() {
     {
       name: "description",
       content:
-        "Interactive academic planning, lectures, labs, and cohort timetables with live iCal subscription.",
+        "Interactive academic planning, scheduled classes, and cohort timetables with live iCal subscription.",
     },
   ];
 }
@@ -126,7 +126,7 @@ export default function Planning() {
   const [feedTokenState, setFeedTokenState] = useState<string>(
     loaderData.feedToken,
   );
-  const [selectedType, setSelectedType] = useState<string>("all");
+  const [selectedFilter, setSelectedFilter] = useState<AttendanceFilter>("all");
   const [loadError, setLoadError] = useState<boolean>(false);
   const [showEmptyGrid, setShowEmptyGrid] = useState<boolean>(false);
   const [CalendarComponent, setCalendarComponent] =
@@ -160,17 +160,19 @@ export default function Planning() {
   }, [loadScheduler]);
 
   const filteredClasses = useMemo(() => {
-    if (selectedType === "all") return classesState;
-    return classesState.filter((c) => c.type === selectedType);
-  }, [classesState, selectedType]);
+    if (selectedFilter === "all") return classesState;
+    if (selectedFilter === "in_person")
+      return classesState.filter((c) => !c.isRemote);
+    return classesState.filter((c) => c.isRemote);
+  }, [classesState, selectedFilter]);
 
   const schedulerEvents: SchedulerEvent[] = useMemo(() => {
     return filteredClasses.map((c) => ({
       id: c.id,
-      title: `[${c.type.toUpperCase()}] ${c.title}`,
+      title: c.isRemote ? `[Remote] ${c.title}` : c.title,
       start: new Date(c.startTime).toISOString(),
       end: new Date(c.endTime).toISOString(),
-      color: getSchedulerColorForType(c.type),
+      color: getSchedulerColor(c.isRemote),
       description: c.description ?? undefined,
     }));
   }, [filteredClasses]);
@@ -311,9 +313,9 @@ export default function Planning() {
       />
 
       <PlanningFilter
-        selectedType={selectedType}
-        onSelectType={(newType) => {
-          setSelectedType(newType);
+        selectedFilter={selectedFilter}
+        onSelectFilter={(newFilter) => {
+          setSelectedFilter(newFilter);
           setShowEmptyGrid(false);
         }}
         classes={classesState}
@@ -330,11 +332,11 @@ export default function Planning() {
           <CalendarSkeleton />
         ) : filteredClasses.length === 0 && !showEmptyGrid ? (
           <CalendarEmptyState
-            isFiltered={selectedType !== "all"}
-            selectedType={selectedType}
+            isFiltered={selectedFilter !== "all"}
+            selectedFilter={selectedFilter}
             isAdmin={isAdmin}
             onResetFilter={() => {
-              setSelectedType("all");
+              setSelectedFilter("all");
               setShowEmptyGrid(false);
             }}
             onAddClass={() => {

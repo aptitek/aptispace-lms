@@ -14,7 +14,7 @@ import type { UserRole } from "../utils/auth";
 /**
  * Domain Invariant:
  * Calendar events in AptiSpace LMS model exclusively timetabled classes
- * (lectures, labs, workshops, exams) linked to an academic session and assigned instructor.
+ * linked to an academic session and assigned instructor.
  * Asynchronous pedagogical activities (modules, homework, projects) are NOT calendar events.
  */
 export interface ClassWithDetails extends Class {

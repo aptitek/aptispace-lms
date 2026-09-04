@@ -13,6 +13,7 @@ import IconButton from "@mui/material/IconButton";
 
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import LocationOnRoundedIcon from "@mui/icons-material/LocationOnRounded";
+import DevicesRoundedIcon from "@mui/icons-material/DevicesRounded";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
@@ -36,48 +37,66 @@ interface InstructorInfoProps {
 }
 
 function InstructorInfo({ instructor, instructorLabel }: InstructorInfoProps) {
-  const initial = instructor.displayName?.[0] || instructor.firstName?.[0];
-  const name =
-    instructor.displayName ||
-    `${instructor.firstName} ${instructor.lastName}`.trim();
-
   return (
     <Box
       sx={{
-        p: 2,
-        borderRadius: "16px",
-        backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.05),
-        border: (theme) =>
-          `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
         display: "flex",
         alignItems: "center",
-        gap: 2,
+        justifyContent: "space-between",
+        p: 2,
+        borderRadius: "16px",
+        backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.04),
+        border: (theme) =>
+          `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
       }}
     >
-      <Avatar
-        src={instructor.avatarUrl || undefined}
-        sx={{ width: 44, height: 44, bgcolor: "primary.main" }}
-      >
-        {initial || <PersonRoundedIcon />}
-      </Avatar>
-      <Box sx={{ flex: 1 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        <Avatar
+          src={instructor.avatarUrl || undefined}
+          sx={{
+            width: 44,
+            height: 44,
+            fontWeight: 800,
+            fontSize: "1rem",
+            backgroundColor: "primary.main",
+          }}
+        >
+          {instructor.firstName?.[0] || instructor.displayName?.[0] || "I"}
+        </Avatar>
+        <Box>
           <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-            {name}
+            {instructor.displayName ||
+              `${instructor.firstName} ${instructor.lastName}`}
           </Typography>
           <Box
-            sx={{
-              fontSize: "0.7rem",
-              fontWeight: 700,
-              px: 1,
-              py: 0.2,
-              borderRadius: "6px",
-              bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.1),
-              color: "secondary.main",
-            }}
+            sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.25 }}
           >
-            {instructorLabel}
+            <PersonRoundedIcon
+              fontSize="inherit"
+              sx={{ color: "text.secondary" }}
+            />
+            <Typography
+              variant="caption"
+              sx={{ fontWeight: 600, color: "text.secondary" }}
+            >
+              {instructorLabel}
+            </Typography>
           </Box>
+        </Box>
+      </Box>
+
+      <Box sx={{ textAlign: "right" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <EmailRoundedIcon
+            fontSize="inherit"
+            sx={{ color: "text.secondary" }}
+          />
+          <Typography
+            variant="caption"
+            sx={{ fontWeight: 700, color: "text.primary" }}
+          >
+            {instructor.role === "admin" ? "Admin Faculty" : "Course Faculty"}
+          </Typography>
         </Box>
         <Typography variant="caption" sx={{ color: "text.secondary" }}>
           {instructor.email || "faculty@aptispace.io"}
@@ -99,14 +118,133 @@ function formatClassSnippet(
     virtualCampus: string;
   },
 ): string {
+  const formatLabel = classItem.isRemote ? "Remote / Online" : "In-Person";
   const parts = [
-    `${classItem.title} (${classItem.type.toUpperCase()})`,
+    `${classItem.title}${classItem.isRemote ? " (Remote)" : ""}`,
+    `Format: ${formatLabel}`,
     `${labels.course}: ${classItem.session.course.title}`,
     `${labels.date}: ${formatTimeRange(start, end)}`,
     `${labels.location}: ${classItem.location || labels.virtualCampus}`,
     `${labels.instructor}: ${classItem.instructor?.displayName || labels.instructor}`,
   ];
   return parts.join("\n");
+}
+
+interface ClassDetailsHeaderProps {
+  isRemote: boolean;
+  onClose: () => void;
+}
+
+function ClassDetailsHeader({ isRemote, onClose }: ClassDetailsHeaderProps) {
+  const { t } = useTranslation("common");
+  return (
+    <DialogTitle
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.5,
+            px: 1.25,
+            py: 0.35,
+            borderRadius: "8px",
+            fontSize: "0.75rem",
+            fontWeight: 800,
+            backgroundColor: (theme) =>
+              isRemote
+                ? alpha(theme.palette.primary.main, 0.12)
+                : alpha(theme.palette.success.main, 0.12),
+            color: isRemote ? "primary.main" : "success.main",
+          }}
+        >
+          {isRemote ? (
+            <DevicesRoundedIcon sx={{ fontSize: "0.95rem" }} />
+          ) : (
+            <LocationOnRoundedIcon sx={{ fontSize: "0.95rem" }} />
+          )}
+          {isRemote
+            ? t("planning.details.remoteBadge", "Remote")
+            : t("planning.details.inPersonBadge", "In-Person")}
+        </Box>
+        <Typography variant="h6" sx={{ fontWeight: 800 }}>
+          {t("planning.details.title")}
+        </Typography>
+      </Box>
+      <IconButton
+        size="small"
+        onClick={onClose}
+        aria-label={t("planning.details.close")}
+      >
+        <CloseRoundedIcon fontSize="small" />
+      </IconButton>
+    </DialogTitle>
+  );
+}
+
+interface ClassScheduleCardProps {
+  start: Date;
+  end: Date;
+  isRemote: boolean;
+  location?: string | null;
+}
+
+function ClassScheduleCard({
+  start,
+  end,
+  isRemote,
+  location,
+}: ClassScheduleCardProps) {
+  const { t } = useTranslation("common");
+  const virtualLabel = t(
+    "planning.details.virtualCampus",
+    "Online (Virtual Campus)",
+  );
+  const campusLabel = t("planning.details.onCampus", "AptiSpace Campus");
+  const displayLocation = location || (isRemote ? virtualLabel : campusLabel);
+
+  return (
+    <Box
+      sx={{
+        p: 2,
+        borderRadius: "16px",
+        backgroundColor: (theme) => alpha(theme.palette.action.hover, 0.5),
+        border: (theme) => `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.25,
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        <AccessTimeRoundedIcon
+          fontSize="small"
+          sx={{ color: "primary.main" }}
+        />
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {formatTimeRange(start, end)} ({calculateDurationHours(start, end)})
+        </Typography>
+      </Box>
+
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        {isRemote ? (
+          <DevicesRoundedIcon fontSize="small" sx={{ color: "primary.main" }} />
+        ) : (
+          <LocationOnRoundedIcon
+            fontSize="small"
+            sx={{ color: "primary.main" }}
+          />
+        )}
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {displayLocation}
+        </Typography>
+      </Box>
+    </Box>
+  );
 }
 
 export interface ClassDetailsDialogProps {
@@ -147,94 +285,32 @@ export function ClassDetailsDialog({
     ? ` • ${classItem.session.cohort.diploma} (${t("cohortYear.title")} ${classItem.session.cohort.year})`
     : "";
 
-  const typeLabel = t(`planning.types.${classItem.type}`);
-
   return (
     <SoftDialog open onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Box
-            sx={{
-              px: 1.25,
-              py: 0.35,
-              borderRadius: "8px",
-              fontSize: "0.75rem",
-              fontWeight: 800,
-              textTransform: "uppercase",
-              backgroundColor: (theme) =>
-                alpha(theme.palette.primary.main, 0.12),
-              color: "primary.main",
-            }}
-          >
-            {typeLabel}
-          </Box>
-          <Typography variant="h6" sx={{ fontWeight: 800 }}>
-            {t("planning.details.title")}
-          </Typography>
-        </Box>
-        <IconButton
-          size="small"
-          onClick={onClose}
-          aria-label={t("planning.details.close")}
-        >
-          <CloseRoundedIcon />
-        </IconButton>
-      </DialogTitle>
+      <ClassDetailsHeader isRemote={classItem.isRemote} onClose={onClose} />
 
       <DialogContent
-        sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}
+        sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
       >
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.5 }}>
+          <Typography variant="h5" sx={{ fontWeight: 900, mb: 0.5 }}>
             {classItem.title}
           </Typography>
           <Typography
             variant="body2"
-            sx={{ color: "text.secondary", fontWeight: 600 }}
+            sx={{ fontWeight: 700, color: "primary.main" }}
           >
             {classItem.session.course.title}
             {cohortSubtitle}
           </Typography>
         </Box>
 
-        <Box
-          sx={{
-            p: 2,
-            borderRadius: "16px",
-            backgroundColor: (theme) => alpha(theme.palette.action.hover, 0.5),
-            border: (theme) => `1px solid ${alpha(theme.palette.divider, 0.5)}`,
-            display: "flex",
-            flexDirection: "column",
-            gap: 1.25,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <AccessTimeRoundedIcon
-              fontSize="small"
-              sx={{ color: "primary.main" }}
-            />
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {formatTimeRange(start, end)} (
-              {calculateDurationHours(start, end)})
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <LocationOnRoundedIcon
-              fontSize="small"
-              sx={{ color: "primary.main" }}
-            />
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {classItem.location || t("planning.details.virtualCampus")}
-            </Typography>
-          </Box>
-        </Box>
+        <ClassScheduleCard
+          start={start}
+          end={end}
+          isRemote={classItem.isRemote}
+          location={classItem.location}
+        />
 
         {classItem.instructor && (
           <InstructorInfo

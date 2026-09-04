@@ -357,12 +357,10 @@
     "subscribeExport": "Subscribe / Export iCal",
     "addClass": "Add Class",
     "filterLabel": "Filter:",
-    "types": {
+    "filter": {
       "all": "All",
-      "lecture": "Lecture",
-      "lab": "Lab",
-      "workshop": "Workshop",
-      "exam": "Exam"
+      "inPerson": "In-Person",
+      "remote": "Remote"
     },
     "loadingCalendar": "Loading interactive calendar...",
     "states": {
@@ -374,9 +372,9 @@
       "downloadIcs": "Download .ics",
       "noClassesTitle": "No Classes Scheduled",
       "noClassesDesc": "There are no academic classes scheduled for your account at this time.",
-      "noClassesAdminDesc": "No classes have been scheduled yet. Click 'Add Class' to create your first lecture, lab, or workshop.",
-      "noFilteredClassesTitle": "No {{type}} Classes Found",
-      "noFilteredClassesDesc": "There are no classes matching the '{{type}}' format filter.",
+      "noClassesAdminDesc": "No classes have been scheduled yet. Click 'Add Class' to schedule your first class.",
+      "noFilteredClassesTitle": "No {{filter}} Classes Found",
+      "noFilteredClassesDesc": "There are no classes matching the '{{filter}}' filter.",
       "showAllClasses": "Show All Classes",
       "viewCalendarGrid": "Open Calendar Grid"
     },
@@ -409,7 +407,10 @@
       "delete": "Delete",
       "edit": "Edit",
       "close": "Close",
-      "virtualCampus": "AptiSpace Virtual Campus"
+      "virtualCampus": "AptiSpace Virtual Campus",
+      "remoteBadge": "Remote",
+      "inPersonBadge": "In-Person",
+      "onCampus": "AptiSpace Campus"
     },
     "form": {
       "createTitle": "Create New Class",
@@ -417,7 +418,11 @@
       "sessionLabel": "Academic Session (Course & Cohort)",
       "classTitle": "Class Title",
       "titlePlaceholder": "e.g. Distributed Systems & RPC",
-      "formatType": "Format / Type",
+      "isRemote": "Remote Class (Online)",
+      "remoteHint": "Virtual session (e.g. Teams, Zoom link)",
+      "inPersonHint": "Physical on-campus room or lecture hall",
+      "meetingLinkLabel": "Meeting Link / Virtual Room",
+      "linkPlaceholder": "e.g. Teams / Zoom link",
       "instructorLabel": "Assigned Instructor",
       "unassigned": "Unassigned",
       "startTime": "Start Time",

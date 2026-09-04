@@ -88,7 +88,7 @@ function buildClassPatch(
   if (typeof body.title === "string") patch.title = body.title;
   if (typeof body.description === "string")
     patch.description = body.description;
-  if (typeof body.type === "string") patch.type = body.type as NewClass["type"];
+  if (typeof body.isRemote === "boolean") patch.isRemote = body.isRemote;
   if (typeof body.location === "string") patch.location = body.location;
   if ("instructorId" in body) {
     patch.instructorId =
@@ -134,7 +134,7 @@ function parseNewClassInput(
   return {
     sessionId,
     title,
-    type: (asString(body.type) || "lecture") as NewClass["type"],
+    isRemote: Boolean(body.isRemote),
     startTime: new Date(startTime),
     endTime: new Date(endTime),
     location: asString(body.location),

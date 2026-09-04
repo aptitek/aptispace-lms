@@ -4,7 +4,7 @@ import type { AuthUser } from "~/utils/auth";
 
 /**
  * Domain Invariant:
- * The planning timetable is strictly scoped to scheduled classes (lecture, lab, workshop, exam).
+ * The planning timetable is strictly scoped to scheduled classes.
  * Asynchronous course activities/modules are non-calendar items and are excluded.
  */
 export interface InstructorOption {
@@ -28,12 +28,8 @@ export interface PlanningLoaderData {
   sessions: SessionOption[];
 }
 
-export function getSchedulerColorForType(type: string): SchedulerEventColor {
-  if (type === "lecture") return "indigo";
-  if (type === "lab") return "teal";
-  if (type === "workshop") return "amber";
-  if (type === "exam") return "red";
-  return "blue";
+export function getSchedulerColor(isRemote: boolean): SchedulerEventColor {
+  return isRemote ? "indigo" : "teal";
 }
 
 export function formatTimeRange(start: Date, end: Date): string {
@@ -70,9 +66,11 @@ export function buildMailtoUrl(classItem: ClassWithDetails): string {
     classItem.instructor?.displayName || "AptiSpace Faculty";
   const startStr = new Date(classItem.startTime).toLocaleString();
   const endStr = new Date(classItem.endTime).toLocaleString();
+  const formatLabel = classItem.isRemote ? "Remote / Online" : "In-Person";
 
   const lines = [
-    `Class: ${classItem.title} (${classItem.type.toUpperCase()})`,
+    `Class: ${classItem.title}${classItem.isRemote ? " (Remote)" : ""}`,
+    `Format: ${formatLabel}`,
     `Course: ${classItem.session.course.title}`,
     `Instructor: ${instructorName}`,
     `Date & Time: ${startStr} to ${endStr}`,

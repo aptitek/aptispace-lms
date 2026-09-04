@@ -221,13 +221,13 @@
           "notNull": false,
           "autoincrement": false
         },
-        "type": {
-          "name": "type",
-          "type": "text",
+        "is_remote": {
+          "name": "is_remote",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'lecture'"
+          "default": false
         },
         "start_time": {
           "name": "start_time",

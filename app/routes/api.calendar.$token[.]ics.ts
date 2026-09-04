@@ -23,7 +23,7 @@ function buildEventDescription(
     c.session.cohort
       ? `Cohort: ${c.session.cohort.diploma ?? ""} Year ${c.session.cohort.year ?? ""}`.trim()
       : "",
-    `Type: ${c.type.toUpperCase()}`,
+    `Format: ${c.isRemote ? "Remote / Online" : "In-Person"}`,
     `Instructor: ${instructorName} <${instructorEmail}>`,
     c.location ? `Location: ${c.location}` : "",
     c.description ? `\nNotes:\n${c.description}` : "",
@@ -44,9 +44,11 @@ function addEventsToCalendar(
       id: c.id,
       start: new Date(c.startTime),
       end: new Date(c.endTime),
-      summary: `[${c.type.toUpperCase()}] ${c.title}`,
+      summary: c.isRemote ? `[Remote] ${c.title}` : c.title,
       description: buildEventDescription(c, instructorName, instructorEmail),
-      location: c.location || "AptiSpace Virtual Campus",
+      location: c.isRemote
+        ? c.location || "Remote / Online"
+        : c.location || "AptiSpace Virtual Campus",
       status: ICalEventStatus.CONFIRMED,
       organizer: {
         name: instructorName,
