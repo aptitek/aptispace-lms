@@ -66,11 +66,7 @@ function useTimeSheetCalculations(
   );
 
   const wavyArcPath = useMemo(
-    () =>
-      buildWavyArc(
-        intervalInfo.startHourAngle,
-        intervalInfo.sweepAngle,
-      ),
+    () => buildWavyArc(intervalInfo.startHourAngle, intervalInfo.sweepAngle),
     [intervalInfo.startHourAngle, intervalInfo.sweepAngle],
   );
 
@@ -134,11 +130,7 @@ function DetailsSectionContent({
           $progressColor={activeProgressColor}
           data-testid="time-sheet-wavy-progress"
         >
-          <Progress
-            wavy
-            value={intervalInfo.elapsedPercent}
-            thickness={4}
-          />
+          <Progress wavy value={intervalInfo.elapsedPercent} thickness={4} />
         </ProgressContainer>
       )}
     </>
@@ -214,10 +206,7 @@ export const TimeSheet = forwardRef<HTMLDivElement, TimeSheetProps>(
             data-testid="time-sheet-clock"
           >
             {/* Opaque Base Cookie Face (masks the connected card underneath) */}
-            <path
-              d={cookiePath}
-              fill={theme.palette.background.paper}
-            />
+            <path d={cookiePath} fill={theme.palette.background.paper} />
 
             {/* 12-sided Scalloped Cookie Clock Face (Material You) */}
             <path
@@ -300,12 +289,7 @@ export const TimeSheet = forwardRef<HTMLDivElement, TimeSheetProps>(
             </MotionHandGroup>
 
             {/* Center Pivot Hub (matching Material You widget) */}
-            <circle
-              cx="50"
-              cy="50"
-              r="4.2"
-              fill={activeColor}
-            />
+            <circle cx="50" cy="50" r="4.2" fill={activeColor} />
             <circle
               cx="50"
               cy="50"

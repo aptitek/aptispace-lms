@@ -42,13 +42,21 @@ describe("TimeSheet Molecule", () => {
     const end = dayjs("2026-09-05T16:30:00");
 
     it("formats 24h interval correctly", () => {
-      expect(formatDigitalInterval(start, end, "fr", "24h")).toBe("14:00 – 16:30");
-      expect(formatDigitalInterval(start, end, "fr", "auto")).toBe("14:00 – 16:30");
+      expect(formatDigitalInterval(start, end, "fr", "24h")).toBe(
+        "14:00 – 16:30",
+      );
+      expect(formatDigitalInterval(start, end, "fr", "auto")).toBe(
+        "14:00 – 16:30",
+      );
     });
 
     it("formats 12h interval correctly", () => {
-      expect(formatDigitalInterval(start, end, "en", "12h")).toBe("2:00 PM – 4:30 PM");
-      expect(formatDigitalInterval(start, end, "en", "auto")).toBe("2:00 PM – 4:30 PM");
+      expect(formatDigitalInterval(start, end, "en", "12h")).toBe(
+        "2:00 PM – 4:30 PM",
+      );
+      expect(formatDigitalInterval(start, end, "en", "auto")).toBe(
+        "2:00 PM – 4:30 PM",
+      );
     });
   });
 

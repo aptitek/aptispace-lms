@@ -2,10 +2,7 @@ import { styled, alpha, keyframes } from "@mui/material/styles";
 import { motion, type Transition } from "framer-motion";
 import Chip from "../../atoms/Chip";
 import { getContrastTextColor } from "./TimeSheet.utils";
-import type {
-  TimeSheetSize,
-  TimeSheetOrientation,
-} from "./TimeSheet.types";
+import type { TimeSheetSize, TimeSheetOrientation } from "./TimeSheet.types";
 
 interface StyledCardProps {
   $size: TimeSheetSize;
@@ -114,10 +111,9 @@ export const SheetCard = styled("div", {
     width: "fit-content",
     cursor: $isInteractive ? "pointer" : "default",
     userSelect: "none",
-    transition: theme.transitions.create(
-      ["transform", "filter"],
-      { duration: theme.transitions.duration.shorter },
-    ),
+    transition: theme.transitions.create(["transform", "filter"], {
+      duration: theme.transitions.duration.shorter,
+    }),
     ...($isInteractive && {
       "&:hover": {
         transform: "translateY(-3px)",
@@ -169,41 +165,43 @@ export const MotionHandGroup = styled(motion.g)(() => ({
 
 export const ConnectedCard = styled("div", {
   shouldForwardProp: (prop) => prop !== "$size" && prop !== "$orientation",
-})<{ $size: TimeSheetSize; $orientation: TimeSheetOrientation }>(
-  ({ theme, $size, $orientation }) => {
-    const isHorizontal = $orientation === "horizontal";
-    const cfg = SIZE_CONFIG[$size];
-    const layout = getConnectedCardLayout(cfg, isHorizontal);
+})<{ $size: TimeSheetSize; $orientation: TimeSheetOrientation }>(({
+  theme,
+  $size,
+  $orientation,
+}) => {
+  const isHorizontal = $orientation === "horizontal";
+  const cfg = SIZE_CONFIG[$size];
+  const layout = getConnectedCardLayout(cfg, isHorizontal);
 
-    return {
-      position: "relative",
-      zIndex: 1,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "flex-start",
-      justifyContent: "center",
-      ...layout,
-      gap: cfg.detailsGap,
-      borderRadius: "18px",
-      backgroundColor: alpha(theme.palette.background.paper, 0.95),
-      border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
-      boxShadow:
-        "0 6px 18px -4px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)",
-      backdropFilter: "blur(12px)",
-      WebkitBackdropFilter: "blur(12px)",
-      boxSizing: "border-box",
-      ...theme.applyStyles("dark", {
-        boxShadow: `0 6px 20px -4px rgba(0, 0, 0, 0.45), 0 0 0 1px ${alpha(theme.palette.divider, 0.2)}`,
-      }),
-      "& .MuiChip-root": {
-        fontWeight: 700,
-        height: cfg.chipHeight,
-        fontSize: cfg.chipFontSize,
-        borderRadius: "9999px",
-      },
-    };
-  },
-);
+  return {
+    position: "relative",
+    zIndex: 1,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    ...layout,
+    gap: cfg.detailsGap,
+    borderRadius: "18px",
+    backgroundColor: alpha(theme.palette.background.paper, 0.95),
+    border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+    boxShadow:
+      "0 6px 18px -4px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)",
+    backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)",
+    boxSizing: "border-box",
+    ...theme.applyStyles("dark", {
+      boxShadow: `0 6px 20px -4px rgba(0, 0, 0, 0.45), 0 0 0 1px ${alpha(theme.palette.divider, 0.2)}`,
+    }),
+    "& .MuiChip-root": {
+      fontWeight: 700,
+      height: cfg.chipHeight,
+      fontSize: cfg.chipFontSize,
+      borderRadius: "9999px",
+    },
+  };
+});
 
 export const DigitalIntervalRow = styled("div")({
   display: "flex",

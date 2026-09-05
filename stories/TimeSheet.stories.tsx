@@ -115,19 +115,28 @@ export const SizeComparison: Story = {
     return (
       <Box sx={{ display: "flex", gap: 3, alignItems: "flex-end" }}>
         <Box sx={{ textAlign: "center" }}>
-          <Typography variant="caption" sx={{ display: "block", mb: 1, fontWeight: 700 }}>
+          <Typography
+            variant="caption"
+            sx={{ display: "block", mb: 1, fontWeight: 700 }}
+          >
             Small
           </Typography>
           <TimeSheet startTime={s} endTime={e} size="small" />
         </Box>
         <Box sx={{ textAlign: "center" }}>
-          <Typography variant="caption" sx={{ display: "block", mb: 1, fontWeight: 700 }}>
+          <Typography
+            variant="caption"
+            sx={{ display: "block", mb: 1, fontWeight: 700 }}
+          >
             Medium
           </Typography>
           <TimeSheet startTime={s} endTime={e} size="medium" />
         </Box>
         <Box sx={{ textAlign: "center" }}>
-          <Typography variant="caption" sx={{ display: "block", mb: 1, fontWeight: 700 }}>
+          <Typography
+            variant="caption"
+            sx={{ display: "block", mb: 1, fontWeight: 700 }}
+          >
             Large
           </Typography>
           <TimeSheet startTime={s} endTime={e} size="large" />
@@ -166,12 +175,25 @@ export const ProgressThemeSpectrum: Story = {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3, p: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          Progress Theme Color Progression (Purple → Blue → Cyan → Green → Yellow → Orange → Red → Magenta)
+          Progress Theme Color Progression (Purple → Blue → Cyan → Green →
+          Yellow → Orange → Red → Magenta)
         </Typography>
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 3 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            gap: 3,
+          }}
+        >
           {spectrumSamples.map((sample) => (
-            <Box key={sample.elapsed} sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <Typography variant="caption" sx={{ fontWeight: 700, opacity: 0.85 }}>
+            <Box
+              key={sample.elapsed}
+              sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+            >
+              <Typography
+                variant="caption"
+                sx={{ fontWeight: 700, opacity: 0.85 }}
+              >
                 {sample.label}
               </Typography>
               <TimeSheet

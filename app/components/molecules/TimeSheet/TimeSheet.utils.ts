@@ -1,10 +1,7 @@
 import dayjs, { type Dayjs } from "dayjs";
 import "dayjs/locale/fr";
 import { PROGRESS_THEME_COLORS } from "~/tokens/theme";
-import type {
-  TimeIntervalInfo,
-  HourFormat,
-} from "./TimeSheet.types";
+import type { TimeIntervalInfo, HourFormat } from "./TimeSheet.types";
 
 export interface ComputeTimeIntervalOptions {
   referenceTime?: Date | string | number | Dayjs;
@@ -12,7 +9,9 @@ export interface ComputeTimeIntervalOptions {
   hourFormat?: HourFormat;
 }
 
-export function computeNeedleAngle(date: Date | string | number | Dayjs): number {
+export function computeNeedleAngle(
+  date: Date | string | number | Dayjs,
+): number {
   const d = dayjs(date);
   const hour = d.hour() % 12;
   const minute = d.minute();
@@ -26,7 +25,8 @@ export function formatDigitalInterval(
   hourFormat: HourFormat = "auto",
 ): string {
   const is12Hour =
-    hourFormat === "12h" || (hourFormat === "auto" && normLocale.startsWith("en"));
+    hourFormat === "12h" ||
+    (hourFormat === "auto" && normLocale.startsWith("en"));
 
   if (is12Hour) {
     const startStr = start.format("h:mm A");
@@ -38,7 +38,6 @@ export function formatDigitalInterval(
   const endStr = end.format("HH:mm");
   return `${startStr} – ${endStr}`;
 }
-
 
 function toClosedPath(points: [number, number][]): string {
   if (points.length === 0) return "";
@@ -147,9 +146,7 @@ function resolveRemainingText(remainingMins: number, isFr: boolean): string {
       ? `En cours • ${hours}h restantes`
       : `Now • ${hours}h remaining`;
   }
-  return isFr
-    ? `En cours • ${mins} min restantes`
-    : `Now • ${mins}m remaining`;
+  return isFr ? `En cours • ${mins} min restantes` : `Now • ${mins}m remaining`;
 }
 
 function resolveEndedText(endedMins: number, isFr: boolean): string {
@@ -211,7 +208,9 @@ function resolveChipState(params: ChipResolutionParams): {
 function checkIntervalTiming(startD: Dayjs, endD: Dayjs, refD: Dayjs) {
   const isToday = startD.startOf("day").isSame(refD.startOf("day"));
   const isHappeningNow =
-    isToday && (refD.isAfter(startD) || refD.isSame(startD)) && refD.isBefore(endD);
+    isToday &&
+    (refD.isAfter(startD) || refD.isSame(startD)) &&
+    refD.isBefore(endD);
   const isUpcomingToday = isToday && refD.isBefore(startD);
   const isPastToday = isToday && (refD.isAfter(endD) || refD.isSame(endD));
 
