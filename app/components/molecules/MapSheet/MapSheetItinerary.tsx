@@ -31,6 +31,7 @@ import {
   RoomPill,
   BottomActionsBar,
   AddressTextWrapper,
+  ChipsDeckWrapper,
   ChipsDeckRow,
   WayfindingChip,
   NavigationM3Fab,
@@ -65,7 +66,10 @@ export interface MapSheetItineraryProps {
   labels: MapSheetLabels;
 }
 
-import { ExtendedStepperItinerary } from "./MapSheetStepper";
+import {
+  ExtendedStepperItinerary,
+  HorizontalTransitTrackLine,
+} from "./MapSheetStepper";
 
 interface ActionsSectionProps {
   address: string;
@@ -228,9 +232,11 @@ export interface CompactChipsItineraryProps {
   building: string;
   roomInfo: ParsedRoomInfo;
   size?: MapSheetSize;
+  orientation?: MapSheetOrientation;
   floorPrefix?: string;
   doorCode?: string;
   instructions?: string;
+  accessType?: AccessType;
   isCodeCopied: boolean;
   onCopyDoorCode: () => void;
   labels: MapSheetLabels;
@@ -241,93 +247,108 @@ export function CompactChipsItinerary({
   building,
   roomInfo,
   size = "medium",
+  orientation = "horizontal",
   doorCode,
   instructions,
+  accessType,
   isCodeCopied,
   onCopyDoorCode,
   labels,
 }: CompactChipsItineraryProps) {
   const cleanCampus = cleanCampusName(campus);
   const cleanBuilding = cleanBuildingName(building);
+  const isVertical = orientation === "vertical";
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1, minWidth: 0 }}>
-      <ChipsDeckRow data-testid="chips-deck-row">
-        {/* Campus Chip */}
-        <Tooltip arrow title={`${labels.campus}: ${campus}`}>
-          <WayfindingChip
-            $variant="campus"
-            aria-label={`${labels.campus}: ${campus}`}
-            data-testid="chip-campus"
-          >
-            <SchoolRoundedIcon
-              sx={{ fontSize: "0.85rem", color: "success.main" }}
-            />
-            <span>{cleanCampus}</span>
-          </WayfindingChip>
-        </Tooltip>
-
-        {/* Building Chip */}
-        <Tooltip arrow title={`${labels.building}: ${building}`}>
-          <WayfindingChip
-            $variant="building"
-            aria-label={`${labels.building}: ${building}`}
-            data-testid="chip-building"
-          >
-            <ApartmentRoundedIcon
-              sx={{ fontSize: "0.85rem", color: "primary.main" }}
-            />
-            <span>{cleanBuilding}</span>
-          </WayfindingChip>
-        </Tooltip>
-
-        {/* Optional Room Name Chip */}
-        {roomInfo.roomName ? (
-          <Tooltip arrow title={roomInfo.roomName}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+        minWidth: 0,
+        width: "100%",
+      }}
+    >
+      <ChipsDeckWrapper>
+        {isVertical ? <HorizontalTransitTrackLine /> : null}
+        <ChipsDeckRow data-testid="chips-deck-row">
+          {/* Campus Chip */}
+          <Tooltip arrow title={`${labels.campus}: ${campus}`}>
             <WayfindingChip
-              $variant="room"
-              aria-label={roomInfo.roomName}
-              data-testid="chip-room-name"
-              sx={{ fontWeight: 800 }}
+              $variant="campus"
+              aria-label={`${labels.campus}: ${campus}`}
+              data-testid="chip-campus"
             >
-              <MeetingRoomRoundedIcon sx={{ fontSize: "0.85rem" }} />
-              <span>{roomInfo.roomName}</span>
+              <SchoolRoundedIcon
+                sx={{ fontSize: "0.85rem", color: "success.main" }}
+              />
+              <span>{cleanCampus}</span>
             </WayfindingChip>
           </Tooltip>
-        ) : null}
 
-        {/* Room & Floor Chip: (3 | 02) - Prominently sized! */}
-        <RoomChipContainer
-          $size={size}
-          tabIndex={0}
-          role="note"
-          aria-label={roomInfo.tooltipText}
-          data-testid="room-floor-chip"
-        >
-          <Tooltip arrow title={roomInfo.floorLabel}>
-            <FloorPill data-testid="floor-pill">
-              <LayersRoundedIcon />
-              <span>{roomInfo.floor}</span>
-            </FloorPill>
+          {/* Building Chip */}
+          <Tooltip arrow title={`${labels.building}: ${building}`}>
+            <WayfindingChip
+              $variant="building"
+              aria-label={`${labels.building}: ${building}`}
+              data-testid="chip-building"
+            >
+              <ApartmentRoundedIcon
+                sx={{ fontSize: "0.85rem", color: "primary.main" }}
+              />
+              <span>{cleanBuilding}</span>
+            </WayfindingChip>
           </Tooltip>
-          <ChipDivider aria-hidden="true">|</ChipDivider>
-          <Tooltip arrow title={roomInfo.roomLabel}>
-            <RoomPill data-testid="room-pill">
-              <MeetingRoomRoundedIcon />
-              <span>{roomInfo.roomNumber}</span>
-            </RoomPill>
-          </Tooltip>
-        </RoomChipContainer>
 
-        {/* Access Code & Instructions in the same chip */}
-        <AccessCodeChip
-          doorCode={doorCode}
-          instructions={instructions}
-          isCodeCopied={isCodeCopied}
-          onCopyDoorCode={onCopyDoorCode}
-          labels={labels}
-        />
-      </ChipsDeckRow>
+          {/* Optional Room Name Chip */}
+          {roomInfo.roomName ? (
+            <Tooltip arrow title={roomInfo.roomName}>
+              <WayfindingChip
+                $variant="room"
+                aria-label={roomInfo.roomName}
+                data-testid="chip-room-name"
+                sx={{ fontWeight: 800 }}
+              >
+                <MeetingRoomRoundedIcon sx={{ fontSize: "0.85rem" }} />
+                <span>{roomInfo.roomName}</span>
+              </WayfindingChip>
+            </Tooltip>
+          ) : null}
+
+          {/* Room & Floor Chip: (3 | 02) - Prominently sized! */}
+          <RoomChipContainer
+            $size={size}
+            tabIndex={0}
+            role="note"
+            aria-label={roomInfo.tooltipText}
+            data-testid="room-floor-chip"
+          >
+            <Tooltip arrow title={roomInfo.floorLabel}>
+              <FloorPill data-testid="floor-pill">
+                <LayersRoundedIcon />
+                <span>{roomInfo.floor}</span>
+              </FloorPill>
+            </Tooltip>
+            <ChipDivider aria-hidden="true">|</ChipDivider>
+            <Tooltip arrow title={roomInfo.roomLabel}>
+              <RoomPill data-testid="room-pill">
+                <MeetingRoomRoundedIcon />
+                <span>{roomInfo.roomNumber}</span>
+              </RoomPill>
+            </Tooltip>
+          </RoomChipContainer>
+
+          {/* Access Code & Instructions in the same chip */}
+          <AccessCodeChip
+            doorCode={doorCode}
+            instructions={instructions}
+            accessType={accessType}
+            isCodeCopied={isCodeCopied}
+            onCopyDoorCode={onCopyDoorCode}
+            labels={labels}
+          />
+        </ChipsDeckRow>
+      </ChipsDeckWrapper>
     </Box>
   );
 }
@@ -356,8 +377,10 @@ export function MapSheetItinerary({
           building={building}
           roomInfo={roomInfo}
           size={size}
+          orientation={orientation}
           doorCode={doorCode}
           instructions={instructions}
+          accessType={accessType}
           isCodeCopied={copiedField === "code"}
           onCopyDoorCode={onCopyDoorCode}
           labels={labels}
@@ -367,6 +390,7 @@ export function MapSheetItinerary({
           campus={campus}
           building={building}
           roomInfo={roomInfo}
+          orientation={orientation}
           doorCode={doorCode}
           instructions={instructions}
           accessType={accessType}

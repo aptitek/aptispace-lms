@@ -3,6 +3,7 @@ import Fab from "@mui/material/Fab";
 import { Progress } from "react-material-expressive";
 export {
   DoorCodePill,
+  ChipsDeckWrapper,
   ChipsDeckRow,
   WayfindingChip,
   AddressTextWrapper,
@@ -165,6 +166,7 @@ export const ItineraryContainer = styled("section", {
     flexDirection: "column",
     justifyContent: isExtended ? "space-between" : "center",
     padding: metrics.padding,
+    paddingBottom: isExtended ? 24 : undefined,
     gap: isExtended ? 10 : 8,
     boxSizing: "border-box",
     minWidth: 0,
@@ -238,6 +240,63 @@ export const TransitTrackProgress = styled(Progress)(({ theme }) => ({
   },
   "& span.rounded-full": {
     display: "none !important",
+  },
+  "& .wavePhase": {
+    animationDirection: "reverse !important",
+  },
+  "@media (prefers-reduced-motion: reduce)": {
+    "& .wavePhase": {
+      animation: "none !important",
+    },
+  },
+  ...theme.applyStyles("dark", {
+    color: theme.palette.primary.light || theme.palette.primary.main,
+    filter: `drop-shadow(0 0 6px ${alpha(theme.palette.primary.main, 0.65)})`,
+  }),
+}));
+
+/**
+ * Container wrapping the horizontal wavy connector line linking chips in vertical view
+ */
+export const HorizontalTransitTrackWrapper = styled("div")({
+  position: "absolute",
+  left: 0,
+  right: 0,
+  top: "50%",
+  transform: "translateY(-50%)",
+  height: 20,
+  overflow: "hidden",
+  pointerEvents: "none",
+  zIndex: 0,
+  maxWidth: "100%",
+});
+
+/**
+ * MD3 Expressive wavy progress indicator running horizontally from left to right
+ */
+export const HorizontalTransitTrackProgress = styled(Progress)(({ theme }) => ({
+  position: "absolute",
+  left: 0,
+  top: "50%",
+  transform: "translateY(-50%)",
+  width: "100% !important",
+  color: theme.palette.primary.main,
+  opacity: 0.85,
+  filter: `drop-shadow(0 0 4px ${alpha(theme.palette.primary.main, 0.45)})`,
+  "& .linearDeterminate": {
+    overflow: "visible !important",
+  },
+  "& .text-primary": {
+    color: "inherit !important",
+  },
+  "& .bg-secondary-container": {
+    display: "none !important",
+  },
+  "& span.rounded-full": {
+    display: "none !important",
+  },
+  "& .wavePhase": {
+    animationDirection: "reverse !important",
   },
   "@media (prefers-reduced-motion: reduce)": {
     "& .wavePhase": {
@@ -330,12 +389,14 @@ export const RoomChipContainer = styled("div", {
     ROOM_CHIP_SIZE_METRICS[$size] ?? ROOM_CHIP_SIZE_METRICS.medium;
 
   return {
+    position: "relative",
+    zIndex: 1,
     display: "inline-flex",
     alignItems: "center",
     gap: metrics.gap,
     padding: metrics.padding,
     borderRadius: metrics.borderRadius,
-    backgroundColor: alpha(color, 0.1),
+    backgroundColor: alpha(theme.palette.background.paper, 0.92),
     border: `1.5px solid ${alpha(color, 0.42)}`,
     color: theme.palette.secondary.dark || color,
     fontSize: metrics.fontSize,
@@ -346,6 +407,8 @@ export const RoomChipContainer = styled("div", {
     lineHeight: 1.25,
     userSelect: "none",
     letterSpacing: "0.02em",
+    backdropFilter: "blur(6px)",
+    WebkitBackdropFilter: "blur(6px)",
     transition:
       "transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease",
     "&:hover": {
@@ -354,7 +417,7 @@ export const RoomChipContainer = styled("div", {
       boxShadow: `0 4px 14px ${alpha(color, 0.3)}`,
     },
     ...theme.applyStyles("dark", {
-      backgroundColor: alpha(color, 0.18),
+      backgroundColor: alpha(theme.palette.background.paper, 0.94),
       borderColor: alpha(color, 0.55),
       color: theme.palette.secondary.light || color,
       boxShadow: `0 2px 10px ${alpha(color, 0.3)}`,

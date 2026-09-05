@@ -5,14 +5,21 @@ import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import ApartmentRoundedIcon from "@mui/icons-material/ApartmentRounded";
 import MeetingRoomRoundedIcon from "@mui/icons-material/MeetingRoomRounded";
 import LayersRoundedIcon from "@mui/icons-material/LayersRounded";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import Tooltip from "../../atoms/Tooltip";
-import type { ParsedRoomInfo, AccessType } from "./MapSheet.types";
+import type {
+  ParsedRoomInfo,
+  AccessType,
+  MapSheetOrientation,
+} from "./MapSheet.types";
 import AccessCodeChip, { resolveAccessIcon } from "./MapSheetAccessChip";
 import {
   TransitLineWrapper,
   TransitTrackWrapper,
   TransitTrackProgress,
+  HorizontalTransitTrackWrapper,
+  HorizontalTransitTrackProgress,
   ItineraryStep,
   StepIconBadge,
   StepContent,
@@ -30,6 +37,26 @@ export function TransitTrackLine({ className }: TransitTrackLineProps) {
     <TransitTrackWrapper className={className} data-testid="transit-track-line">
       <TransitTrackProgress wavy value={100} thickness={4} />
     </TransitTrackWrapper>
+  );
+}
+
+export interface HorizontalTransitTrackLineProps {
+  className?: string;
+}
+
+/**
+ * Animated horizontal wavy connector line running from left to right behind chips in vertical view
+ */
+export function HorizontalTransitTrackLine({
+  className,
+}: HorizontalTransitTrackLineProps) {
+  return (
+    <HorizontalTransitTrackWrapper
+      className={className}
+      data-testid="horizontal-transit-track-line"
+    >
+      <HorizontalTransitTrackProgress wavy value={100} thickness={4} />
+    </HorizontalTransitTrackWrapper>
   );
 }
 
@@ -68,22 +95,31 @@ export function InstructionSection({
 }: InstructionSectionProps) {
   if (!doorCode && !instructions) return null;
 
+  const badgeIcon = doorCode ? (
+    resolveAccessIcon(accessType, "1.15rem")
+  ) : (
+    <InfoOutlinedIcon sx={{ fontSize: "1.15rem" }} />
+  );
+
   return (
     <ItineraryStep data-testid="step-instructions">
       <Tooltip arrow title={labels.instructions}>
         <StepIconBadge $variant="instruction" aria-label={labels.instructions}>
-          {resolveAccessIcon(accessType)}
+          {badgeIcon}
         </StepIconBadge>
       </Tooltip>
       <StepContent>
-        <AccessCodeChip
-          doorCode={doorCode}
-          instructions={instructions}
-          accessType={accessType}
-          isCodeCopied={isCopied}
-          onCopyDoorCode={onCopyDoorCode}
-          labels={labels}
-        />
+        <Box sx={{ display: "flex", alignItems: "center", minWidth: 0 }}>
+          <AccessCodeChip
+            doorCode={doorCode}
+            instructions={instructions}
+            accessType={accessType}
+            showIcon={false}
+            isCodeCopied={isCopied}
+            onCopyDoorCode={onCopyDoorCode}
+            labels={labels}
+          />
+        </Box>
       </StepContent>
     </ItineraryStep>
   );
@@ -93,6 +129,7 @@ export interface ExtendedStepperItineraryProps {
   campus: string;
   building: string;
   roomInfo: ParsedRoomInfo;
+  orientation?: MapSheetOrientation;
   floorPrefix?: string;
   doorCode?: string;
   instructions?: string;

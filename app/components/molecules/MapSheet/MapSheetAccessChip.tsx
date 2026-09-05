@@ -15,14 +15,17 @@ import type { AccessType } from "./MapSheet.types";
 import type { MapSheetLabels } from "./MapSheetItinerary";
 import { DoorCodePill, WayfindingChip } from "./MapSheet.styles";
 
-export function resolveAccessIcon(accessType?: AccessType) {
+export function resolveAccessIcon(
+  accessType?: AccessType,
+  fontSize: string = "0.95rem",
+) {
   if (accessType === "badge") {
-    return <BadgeRoundedIcon sx={{ fontSize: "0.95rem" }} />;
+    return <BadgeRoundedIcon sx={{ fontSize }} />;
   }
   if (accessType === "key") {
-    return <VpnKeyRoundedIcon sx={{ fontSize: "0.95rem" }} />;
+    return <VpnKeyRoundedIcon sx={{ fontSize }} />;
   }
-  return <DialpadRoundedIcon sx={{ fontSize: "0.95rem" }} />;
+  return <DialpadRoundedIcon sx={{ fontSize }} />;
 }
 
 interface InstructionsCardProps {
@@ -108,111 +111,160 @@ export interface AccessCodeChipProps {
   doorCode?: string;
   instructions?: string;
   accessType?: AccessType;
+  showIcon?: boolean;
   isCodeCopied?: boolean;
   onCopyDoorCode?: () => void;
   labels: MapSheetLabels;
 }
 
-export function AccessCodeChip({
+interface CopyDoorCodeButtonProps {
+  doorCode: string;
+  isCodeCopied: boolean;
+  onCopyDoorCode: () => void;
+  labels: MapSheetLabels;
+}
+
+function CopyDoorCodeButton({
+  isCodeCopied,
+  onCopyDoorCode,
+  labels,
+}: CopyDoorCodeButtonProps) {
+  return (
+    <Tooltip arrow title={isCodeCopied ? labels.copiedDoorCode : labels.copy}>
+      <IconButton
+        size="small"
+        onClick={onCopyDoorCode}
+        aria-label={labels.doorCode}
+        data-testid="copy-door-code-button"
+        sx={{
+          p: 0.25,
+          color: isCodeCopied ? "success.main" : "inherit",
+        }}
+      >
+        {isCodeCopied ? (
+          <CheckRoundedIcon sx={{ fontSize: "0.85rem" }} />
+        ) : (
+          <ContentCopyRoundedIcon sx={{ fontSize: "0.85rem" }} />
+        )}
+      </IconButton>
+    </Tooltip>
+  );
+}
+
+interface InstructionTooltipTriggerProps {
+  instructions: string;
+  label: string;
+}
+
+function InstructionTooltipTrigger({
+  instructions,
+  label,
+}: InstructionTooltipTriggerProps) {
+  return (
+    <>
+      <Box
+        component="span"
+        aria-hidden="true"
+        sx={{
+          width: "1px",
+          height: "14px",
+          backgroundColor: "currentColor",
+          opacity: 0.35,
+          mx: 0.25,
+        }}
+      />
+      <Tooltip
+        arrow
+        disableInteractive={false}
+        placement="top"
+        enterDelay={100}
+        leaveDelay={200}
+        slotProps={instructionTooltipSlotProps}
+        title={<InstructionsCard instructions={instructions} label={label} />}
+      >
+        <Box
+          component="span"
+          role="button"
+          tabIndex={0}
+          aria-label={label}
+          data-testid="instructions-menu-trigger"
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            cursor: "pointer",
+            p: 0.25,
+            borderRadius: "4px",
+            color: "warning.main",
+            transition: "color 0.15s ease, transform 0.15s ease",
+            "&:hover": {
+              transform: "scale(1.15)",
+              color: "warning.dark",
+            },
+          }}
+        >
+          <InfoOutlinedIcon sx={{ fontSize: "0.95rem" }} />
+        </Box>
+      </Tooltip>
+    </>
+  );
+}
+
+interface DoorCodePillViewProps {
+  doorCode: string;
+  instructions?: string;
+  accessType?: AccessType;
+  showIcon: boolean;
+  isCodeCopied: boolean;
+  onCopyDoorCode?: () => void;
+  labels: MapSheetLabels;
+}
+
+function DoorCodePillView({
   doorCode,
   instructions,
   accessType,
-  isCodeCopied = false,
+  showIcon,
+  isCodeCopied,
   onCopyDoorCode,
   labels,
-}: AccessCodeChipProps) {
-  if (!doorCode && !instructions) return null;
+}: DoorCodePillViewProps) {
+  return (
+    <DoorCodePill data-testid="door-code-pill">
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+        {showIcon ? resolveAccessIcon(accessType) : null}
+        <span>{doorCode}</span>
+      </Box>
 
-  // Case 1: Door code is present (combines door code and instruction trigger in ONE single chip)
-  if (doorCode) {
-    return (
-      <DoorCodePill data-testid="door-code-pill">
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          {resolveAccessIcon(accessType)}
-          <span>{doorCode}</span>
-        </Box>
+      {onCopyDoorCode ? (
+        <CopyDoorCodeButton
+          doorCode={doorCode}
+          isCodeCopied={isCodeCopied}
+          onCopyDoorCode={onCopyDoorCode}
+          labels={labels}
+        />
+      ) : null}
 
-        {onCopyDoorCode ? (
-          <Tooltip
-            arrow
-            title={isCodeCopied ? labels.copiedDoorCode : labels.copy}
-          >
-            <IconButton
-              size="small"
-              onClick={onCopyDoorCode}
-              aria-label={labels.doorCode}
-              data-testid="copy-door-code-button"
-              sx={{
-                p: 0.25,
-                color: isCodeCopied ? "success.main" : "inherit",
-              }}
-            >
-              {isCodeCopied ? (
-                <CheckRoundedIcon sx={{ fontSize: "0.85rem" }} />
-              ) : (
-                <ContentCopyRoundedIcon sx={{ fontSize: "0.85rem" }} />
-              )}
-            </IconButton>
-          </Tooltip>
-        ) : null}
+      {instructions ? (
+        <InstructionTooltipTrigger
+          instructions={instructions}
+          label={labels.instructions}
+        />
+      ) : null}
+    </DoorCodePill>
+  );
+}
 
-        {instructions ? (
-          <>
-            <Box
-              component="span"
-              aria-hidden="true"
-              sx={{
-                width: "1px",
-                height: "14px",
-                backgroundColor: "currentColor",
-                opacity: 0.35,
-                mx: 0.25,
-              }}
-            />
-            <Tooltip
-              arrow
-              disableInteractive={false}
-              placement="top"
-              enterDelay={100}
-              leaveDelay={200}
-              slotProps={instructionTooltipSlotProps}
-              title={
-                <InstructionsCard
-                  instructions={instructions}
-                  label={labels.instructions}
-                />
-              }
-            >
-              <Box
-                component="span"
-                role="button"
-                tabIndex={0}
-                aria-label={labels.instructions}
-                data-testid="instructions-menu-trigger"
-                sx={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  p: 0.25,
-                  borderRadius: "4px",
-                  color: "warning.main",
-                  transition: "color 0.15s ease, transform 0.15s ease",
-                  "&:hover": {
-                    transform: "scale(1.15)",
-                    color: "warning.dark",
-                  },
-                }}
-              >
-                <InfoOutlinedIcon sx={{ fontSize: "0.95rem" }} />
-              </Box>
-            </Tooltip>
-          </>
-        ) : null}
-      </DoorCodePill>
-    );
-  }
+interface InstructionsChipViewProps {
+  instructions: string;
+  showIcon: boolean;
+  label: string;
+}
 
-  // Case 2: Only instructions are present (renders as a chip, instructions card on hover)
+function InstructionsChipView({
+  instructions,
+  showIcon,
+  label,
+}: InstructionsChipViewProps) {
   return (
     <Tooltip
       arrow
@@ -221,26 +273,61 @@ export function AccessCodeChip({
       enterDelay={100}
       leaveDelay={200}
       slotProps={instructionTooltipSlotProps}
-      title={
-        <InstructionsCard
-          instructions={instructions!}
-          label={labels.instructions}
-        />
-      }
+      title={<InstructionsCard instructions={instructions} label={label} />}
     >
       <WayfindingChip
         $variant="instruction"
         role="button"
         tabIndex={0}
-        aria-label={labels.instructions}
+        aria-label={label}
         data-testid="instructions-menu-trigger"
         sx={{ cursor: "pointer" }}
       >
-        <InfoOutlinedIcon sx={{ fontSize: "0.85rem", color: "warning.main" }} />
-        <span>{labels.instructions}</span>
+        {showIcon ? (
+          <InfoOutlinedIcon
+            sx={{ fontSize: "0.85rem", color: "warning.main" }}
+          />
+        ) : null}
+        <span>{label}</span>
       </WayfindingChip>
     </Tooltip>
   );
+}
+
+export function AccessCodeChip({
+  doorCode,
+  instructions,
+  accessType,
+  showIcon = true,
+  isCodeCopied = false,
+  onCopyDoorCode,
+  labels,
+}: AccessCodeChipProps) {
+  if (doorCode) {
+    return (
+      <DoorCodePillView
+        doorCode={doorCode}
+        instructions={instructions}
+        accessType={accessType}
+        showIcon={showIcon}
+        isCodeCopied={isCodeCopied}
+        onCopyDoorCode={onCopyDoorCode}
+        labels={labels}
+      />
+    );
+  }
+
+  if (instructions) {
+    return (
+      <InstructionsChipView
+        instructions={instructions}
+        showIcon={showIcon}
+        label={labels.instructions}
+      />
+    );
+  }
+
+  return null;
 }
 
 export default AccessCodeChip;

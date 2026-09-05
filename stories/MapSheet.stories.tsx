@@ -192,6 +192,21 @@ export const CompactVertical: Story = {
   },
 };
 
+export const VerticalViewWithHorizontalTrack: Story = {
+  args: {
+    address: "4 Place Jussieu, 75005 Paris, France",
+    campusName: "Campus Pierre et Marie Curie",
+    buildingName: "Barre 14-15",
+    room: "305",
+    doorCode: "*2048#",
+    instructions: "Interphone direct avec l'accueil au rez-de-chaussée.",
+    accessType: "intercom",
+    orientation: "vertical",
+    size: "medium",
+    coordinates: { lat: 48.8465, lon: 2.355 },
+  },
+};
+
 export const FrenchLocalized: Story = {
   args: {
     address: "Campus Universitaire, 91400 Orsay, France",

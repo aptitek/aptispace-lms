@@ -359,13 +359,14 @@ describe("MapSheet Molecule", () => {
       expect(html).toContain('data-testid="copy-door-code-button"');
     });
 
-    it("removes static text instruction in extended mode while keeping instruction trigger", () => {
+    it("renders instructions in extended stepper mode with instruction card trigger without repeating icons or text", () => {
+      const testInstructions = "Sonner au digicode puis monter au 3eme";
       const html = renderWithTheme(
         React.createElement(MapSheet, {
           address: defaultAddress,
           room: "302",
           doorCode: "4920#",
-          instructions: "Sonner à l'interphone puis monter au 3ème",
+          instructions: testInstructions,
           mode: "extended",
           extendedView: "split",
         }),
@@ -375,6 +376,125 @@ describe("MapSheet Molecule", () => {
       expect(html).toContain('data-testid="door-code-pill"');
       expect(html).toContain("4920#");
       expect(html).toContain('data-testid="instructions-menu-trigger"');
+      expect(html).not.toContain('data-testid="step-instruction-text"');
+    });
+
+    it("renders horizontal wavy transit line behind chips in vertical view and omits it in horizontal view", () => {
+      const verticalHtml = renderWithTheme(
+        React.createElement(MapSheet, {
+          address: defaultAddress,
+          room: "302",
+          orientation: "vertical",
+          mode: "compact",
+        }),
+      );
+      expect(verticalHtml).toContain(
+        'data-testid="horizontal-transit-track-line"',
+      );
+
+      const horizontalHtml = renderWithTheme(
+        React.createElement(MapSheet, {
+          address: defaultAddress,
+          room: "302",
+          orientation: "horizontal",
+          mode: "compact",
+        }),
+      );
+      expect(horizontalHtml).not.toContain(
+        'data-testid="horizontal-transit-track-line"',
+      );
+    });
+
+    it("renders vertical wavy transit line in extended stepper itinerary view", () => {
+      const html = renderWithTheme(
+        React.createElement(MapSheet, {
+          address: defaultAddress,
+          room: "302",
+          mode: "extended",
+          extendedView: "split",
+        }),
+      );
+
+      expect(html).toContain('data-testid="transit-track-line"');
+    });
+
+    it("renders wayfinding instructions across all views", () => {
+      const customInstructions = "Prendre ascenseur B jusqu au 3eme etage.";
+
+      // 1. Compact Horizontal View
+      const compactH = renderWithTheme(
+        React.createElement(MapSheet, {
+          address: defaultAddress,
+          room: "302",
+          instructions: customInstructions,
+          orientation: "horizontal",
+          mode: "compact",
+        }),
+      );
+      expect(compactH).toContain('data-testid="instructions-menu-trigger"');
+
+      // 2. Compact Vertical View
+      const compactV = renderWithTheme(
+        React.createElement(MapSheet, {
+          address: defaultAddress,
+          room: "302",
+          instructions: customInstructions,
+          orientation: "vertical",
+          mode: "compact",
+        }),
+      );
+      expect(compactV).toContain('data-testid="instructions-menu-trigger"');
+      expect(compactV).toContain('data-testid="horizontal-transit-track-line"');
+
+      // 3. Extended Split Itinerary View
+      const extendedSplit = renderWithTheme(
+        React.createElement(MapSheet, {
+          address: defaultAddress,
+          room: "302",
+          instructions: customInstructions,
+          mode: "extended",
+          extendedView: "split",
+        }),
+      );
+      expect(extendedSplit).toContain('data-testid="step-instructions"');
+      expect(extendedSplit).toContain(
+        'data-testid="instructions-menu-trigger"',
+      );
+
+      // 4. Extended Full Map View
+      const extendedFull = renderWithTheme(
+        React.createElement(MapSheet, {
+          address: defaultAddress,
+          room: "302",
+          instructions: customInstructions,
+          mode: "extended",
+          extendedView: "full",
+        }),
+      );
+      expect(extendedFull).toContain(
+        'data-testid="floating-wayfinding-overlay"',
+      );
+      expect(extendedFull).toContain('data-testid="instructions-menu-trigger"');
+    });
+
+    it("does not repeat access icon or instructions in extended stepper mode", () => {
+      const html = renderWithTheme(
+        React.createElement(MapSheet, {
+          address: defaultAddress,
+          room: "302",
+          doorCode: "4920#",
+          accessType: "code",
+          instructions: "Sonner à l'accueil",
+          mode: "extended",
+          extendedView: "split",
+        }),
+      );
+
+      expect(html).toContain('data-testid="step-instructions"');
+      expect(html).toContain('data-testid="door-code-pill"');
+      expect(html).toContain('data-testid="instructions-menu-trigger"');
+      // Verify instructions text is not repeated in static layout
+      expect(html).not.toContain('data-testid="step-instruction-text"');
     });
   });
 

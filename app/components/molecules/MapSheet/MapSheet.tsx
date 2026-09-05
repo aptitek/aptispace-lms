@@ -79,8 +79,10 @@ interface FloatingOverlayDeckProps {
   building: string;
   roomInfo: ReturnType<typeof parseRoomCode>;
   size?: MapSheetProps["size"];
+  orientation?: MapSheetProps["orientation"];
   doorCode?: string;
   instructions?: string;
+  accessType?: MapSheetProps["accessType"];
   isCodeCopied: boolean;
   onCopyDoorCode: () => void;
   labels: {
@@ -113,8 +115,10 @@ function FloatingOverlayDeck(props: FloatingOverlayDeckProps) {
         building={props.building}
         roomInfo={props.roomInfo}
         size={props.size}
+        orientation={props.orientation}
         doorCode={props.doorCode}
         instructions={props.instructions}
+        accessType={props.accessType}
         isCodeCopied={props.isCodeCopied}
         onCopyDoorCode={props.onCopyDoorCode}
         labels={props.labels}
@@ -291,8 +295,10 @@ export const MapSheet = forwardRef<HTMLElement, MapSheetProps>(
         building={sheetTexts.building}
         roomInfo={roomInfo}
         size={config.size}
+        orientation={config.orientation}
         doorCode={config.doorCode}
         instructions={sheetTexts.instructions}
+        accessType={config.accessType}
         isCodeCopied={copiedField === "code"}
         onCopyDoorCode={handleCopyDoorCode}
         labels={labels}
