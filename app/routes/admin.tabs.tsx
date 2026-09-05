@@ -39,9 +39,9 @@ export function AdminTabsSection({
       ? (TAB_INDEX_TO_KEY[activeTab] ?? "users")
       : (activeTab as AdminTabKey) || "users";
 
-  const handleChange = (event: React.SyntheticEvent, val: AdminTabKey) => {
+  const handleChange = (event: React.SyntheticEvent, nextTab: AdminTabKey) => {
     if (onChange) {
-      onChange(event, val);
+      onChange(event, nextTab);
     }
   };
 

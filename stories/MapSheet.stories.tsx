@@ -3,12 +3,12 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
-import MapSheet from "~/components/molecules/MapSheet/MapSheet";
-import CalendarSheet from "~/components/molecules/CalendarSheet/CalendarSheet";
-import TimeSheet from "~/components/molecules/TimeSheet/TimeSheet";
+import MapSheet from "~/components/organisms/MapSheet/MapSheet";
+import CalendarSheet from "~/components/organisms/CalendarSheet/CalendarSheet";
+import TimeSheet from "~/components/organisms/TimeSheet/TimeSheet";
 
 const meta: Meta<typeof MapSheet> = {
-  title: "Molecules/MapSheet",
+  title: "Organisms/MapSheet",
   component: MapSheet,
   tags: ["autodocs"],
   parameters: {

@@ -8,7 +8,7 @@ import {
   FallbackAvatarHolder,
 } from "./Avatar.styles";
 import ShapeDefs from "./ShapeDefs";
-import { getRoleAvatarShape } from "./shapes";
+import { getRoleAvatarShape } from "~/tokens/shapes";
 
 export function isUnnamedUser(name?: string): boolean {
   if (!name) return true;

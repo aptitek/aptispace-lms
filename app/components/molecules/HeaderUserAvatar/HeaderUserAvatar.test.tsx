@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { HeaderUserAvatar } from "./HeaderUserAvatar";
 import { getHeaderRoleColor } from "./HeaderUserAvatar.styles";
 import type { AuthUser } from "../../../utils/auth";
-import { resolveShapeStyle } from "../../atoms/Avatar/shapes";
+import { resolveShapeStyle } from "~/tokens/shapes";
 
 import { darkTheme } from "../../../tokens/theme";
 

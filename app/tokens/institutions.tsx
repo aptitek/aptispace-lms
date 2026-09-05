@@ -1,7 +1,9 @@
 import type { ReactElement } from "react";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
-import type { ChipShape } from "../components/atoms/Chip/Chip.types";
+import type { ExpressiveShapeName } from "./shapes";
+
+export type ChipShape = ExpressiveShapeName | string | number;
 
 export type InstitutionType = "school" | "company";
 

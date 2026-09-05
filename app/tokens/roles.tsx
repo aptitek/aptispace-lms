@@ -4,9 +4,18 @@ import SupervisorAccountRoundedIcon from "@mui/icons-material/SupervisorAccountR
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import { MaterialShapes, type RoundedPolygon } from "material-shapes-ts";
 import { ROLE_COLORS } from "./namedColors";
-import type { ExpressiveShapeName } from "../components/atoms/Avatar/shapes";
-import type { BadgeColor } from "../components/atoms/Badge/Badge.types";
-import type { ChipShape } from "../components/atoms/Chip/Chip.types";
+import type { ExpressiveShapeName } from "./shapes";
+
+export type BadgeColor =
+  | "primary"
+  | "secondary"
+  | "success"
+  | "error"
+  | "info"
+  | "warning"
+  | "default";
+
+export type ChipShape = ExpressiveShapeName | string | number;
 
 export type RoleType = "student" | "instructor" | "admin";
 

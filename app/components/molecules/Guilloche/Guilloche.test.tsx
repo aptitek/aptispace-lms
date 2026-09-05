@@ -1,4 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { render, cleanup } from "@testing-library/react";
+import { ThemeProvider } from "@mui/material/styles";
+import { appTheme } from "~/tokens/theme";
 import Guilloche from "./Guilloche";
 import {
   hashString,
@@ -9,6 +12,38 @@ import {
   calculateProceduralPaths,
   generateGuillocheMaskDataUrl,
 } from "./guillocheMath";
+
+describe("Guilloche Component", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("renders without crashing with default props", () => {
+    const { container } = render(
+      <ThemeProvider theme={appTheme}>
+        <Guilloche />
+      </ThemeProvider>,
+    );
+    const svgElement = container.querySelector("svg");
+    expect(svgElement).not.toBeNull();
+  });
+
+  it("renders with custom seed, density, and opacity", () => {
+    const { container } = render(
+      <ThemeProvider theme={appTheme}>
+        <Guilloche
+          seed="APTI-SECURE-99"
+          density="high"
+          opacity={0.8}
+          noiseIntensity={0.6}
+        />
+      </ThemeProvider>,
+    );
+    const svgElement = container.querySelector("svg");
+    expect(svgElement).not.toBeNull();
+    expect(svgElement?.getAttribute("viewBox")).toBe("0 0 856 540");
+  });
+});
 
 describe("Guilloche Math & Procedural Generator", () => {
   it("exports Guilloche component", () => {

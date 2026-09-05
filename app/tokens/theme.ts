@@ -3,7 +3,7 @@ import {
   M3_EXPRESSIVE_CATALOG,
   M3_SCALE_RADIUS_MAP,
   resolveM3ShapeStyle,
-} from "../components/atoms/Avatar/shapes";
+} from "./shapes";
 
 import {
   ROLE_COLORS,
@@ -42,11 +42,27 @@ declare module "@mui/material/styles" {
     roles: typeof ROLE_COLORS;
     celestial: typeof CELESTIAL_COLORS;
     flags: typeof FLAG_COLORS;
+    surfaceContainerLowest: string;
+    surfaceContainerLow: string;
+    surfaceContainer: string;
+    surfaceContainerHigh: string;
+    surfaceContainerHighest: string;
+    surfaceDim: string;
+    surfaceBright: string;
+    outlineVariant: string;
   }
   interface PaletteOptions {
     roles?: typeof ROLE_COLORS;
     celestial?: typeof CELESTIAL_COLORS;
     flags?: typeof FLAG_COLORS;
+    surfaceContainerLowest?: string;
+    surfaceContainerLow?: string;
+    surfaceContainer?: string;
+    surfaceContainerHigh?: string;
+    surfaceContainerHighest?: string;
+    surfaceDim?: string;
+    surfaceBright?: string;
+    outlineVariant?: string;
   }
   interface Theme {
     named: typeof NAMED_COLORS;
@@ -162,6 +178,14 @@ export const darkThemeOptions: ThemeOptions = {
       disabled: "#073642",
     },
     divider: "rgba(88, 110, 117, 0.25)",
+    surfaceContainerLowest: "#001f27",
+    surfaceContainerLow: "#002b36",
+    surfaceContainer: "#073642",
+    surfaceContainerHigh: "#0a4351",
+    surfaceContainerHighest: "#0d5162",
+    surfaceDim: "#002129",
+    surfaceBright: "#073642",
+    outlineVariant: "rgba(88, 110, 117, 0.3)",
     roles: ROLE_COLORS,
     celestial: CELESTIAL_COLORS,
     flags: FLAG_COLORS,
@@ -178,7 +202,7 @@ export const darkThemeOptions: ThemeOptions = {
 
   typography: {
     fontFamily:
-      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      '"Recursive", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     h1: { fontWeight: 700, letterSpacing: "-0.02em" },
     h2: { fontWeight: 700, letterSpacing: "-0.015em" },
     h3: { fontWeight: 600, letterSpacing: "-0.01em" },
@@ -333,6 +357,14 @@ export const lightThemeOptions: ThemeOptions = {
       disabled: "#a0b0b5",
     },
     divider: "rgba(88, 110, 117, 0.2)",
+    surfaceContainerLowest: "#ffffff",
+    surfaceContainerLow: "#fdf6e3",
+    surfaceContainer: "#eee8d5",
+    surfaceContainerHigh: "#e3ddca",
+    surfaceContainerHighest: "#d8d1bc",
+    surfaceDim: "#dfd8c4",
+    surfaceBright: "#fffdf6",
+    outlineVariant: "rgba(88, 110, 117, 0.2)",
     roles: ROLE_COLORS,
     celestial: CELESTIAL_COLORS,
     flags: FLAG_COLORS,
@@ -347,7 +379,7 @@ export const lightThemeOptions: ThemeOptions = {
 
   typography: {
     fontFamily:
-      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      '"Recursive", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     h1: { fontWeight: 700, letterSpacing: "-0.02em" },
     h2: { fontWeight: 700, letterSpacing: "-0.015em" },
     h3: { fontWeight: 600, letterSpacing: "-0.01em" },

@@ -1,6 +1,5 @@
 /// <reference types="vitest/config" />
 import { reactRouter } from "@react-router/dev/vite";
-import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import path from "node:path";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
@@ -49,7 +48,6 @@ function cloudflareDevPlugin() {
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   plugins: [
-    tailwindcss(),
     !isTestOrStorybook && cloudflareDevPlugin(),
     !isTestOrStorybook && reactRouter(),
   ].filter(Boolean),
@@ -104,8 +102,18 @@ export default defineConfig({
       {
         extends: true,
         test: {
-          name: "unit",
-          include: ["app/**/*.{test,spec}.{ts,tsx}"],
+          name: "components",
+          include: ["app/components/**/*.{test,spec}.{ts,tsx}"],
+          environment: "happy-dom",
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "server-and-utils",
+          include: [
+            "app/{routes,utils,services,db,i18n,tokens}/**/*.{test,spec}.{ts,tsx}",
+          ],
           environment: "node",
         },
       },

@@ -10,7 +10,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import { HoldButton } from "~/components/atoms/HoldButton";
-import { ALL_35_M3_SHAPES } from "~/components/atoms/Avatar/shapes";
+import { ALL_35_M3_SHAPES } from "~/tokens/shapes";
 
 const meta = {
   title: "Atoms/HoldButton",

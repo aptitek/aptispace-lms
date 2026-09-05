@@ -10,7 +10,7 @@ import {
   M3_EXPRESSIVE_CATALOG,
   ALL_EXPRESSIVE_SHAPES,
   ALL_35_M3_SHAPES,
-} from "./shapes";
+} from "~/tokens/shapes";
 
 export {
   EXPRESSIVE_SHAPE_CATALOG,

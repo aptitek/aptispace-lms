@@ -1,2 +1,3 @@
-export { default } from "./PhysicCard";
-export type { PhysicCardProps } from "./PhysicCard.types";
+/* eslint-disable id-denylist */
+export { default, PhysicsCard, PhysicCard } from "../PhysicsCard";
+export type { PhysicsCardProps, PhysicCardProps } from "../PhysicsCard";

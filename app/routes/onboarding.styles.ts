@@ -99,7 +99,7 @@ export const M3ExtendedFab = styled(Button, {
     ? theme.palette.primary.main
     : alpha(theme.palette.action.disabledBackground, 0.2),
   color: isReady
-    ? theme.palette.primary.contrastText || "#ffffff"
+    ? theme.palette.primary.contrastText || theme.palette.common.white
     : theme.palette.text.disabled,
   cursor: isReady ? "pointer" : "not-allowed",
   pointerEvents: "auto",

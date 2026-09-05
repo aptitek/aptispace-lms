@@ -1,10 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Avatar, {
-  ALL_35_M3_SHAPES,
-  M3_EXPRESSIVE_CATALOG,
-} from "../app/components/atoms/Avatar";
+import Avatar from "../app/components/atoms/Avatar";
+import { ALL_35_M3_SHAPES, M3_EXPRESSIVE_CATALOG } from "../app/tokens/shapes";
 
 const meta: Meta<typeof Avatar> = {
   title: "Atoms/Avatar",
@@ -102,7 +100,7 @@ export const Complete35ExpressiveShapesCatalog: Story = {
           borderRadius: 4,
         }}
       >
-        {ALL_35_M3_SHAPES.map((shapeKey) => {
+        {ALL_35_M3_SHAPES.map((shapeKey: string) => {
           const def = M3_EXPRESSIVE_CATALOG[shapeKey];
           const label = def?.label ?? shapeKey;
 

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ExpressiveShapeName } from "./shapes";
+import type { ExpressiveShapeName } from "~/tokens/shapes";
 
 export const ISO_19794_5_CONSTANTS = {
   standard: "ISO/IEC 19794-5:2011",

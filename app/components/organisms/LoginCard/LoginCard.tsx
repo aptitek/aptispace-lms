@@ -3,7 +3,7 @@ import { styled } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import Button from "@mui/material/Button";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import { LoadingIndicator } from "react-material-expressive";
+import LoadingIndicator from "~/components/atoms/LoadingIndicator";
 import Logo from "~/components/molecules/Logo/Logo";
 import DevImpersonator from "~/components/molecules/DevImpersonator/DevImpersonator";
 import {
@@ -166,13 +166,7 @@ export default function LoginCard({
           disabled={loading}
           aria-busy={loading}
           onClick={handleGitHubLogin}
-          startIcon={
-            loading ? (
-              <LoadingIndicator className="!size-5 [&>svg]:!size-5" />
-            ) : (
-              <GitHubIcon />
-            )
-          }
+          startIcon={loading ? <LoadingIndicator size={20} /> : <GitHubIcon />}
         >
           {loading
             ? t("loginCard.authenticating")

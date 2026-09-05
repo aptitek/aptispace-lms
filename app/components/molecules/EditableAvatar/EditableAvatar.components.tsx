@@ -16,7 +16,7 @@ import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import LinkIcon from "@mui/icons-material/Link";
-import { LoadingIndicator } from "react-material-expressive";
+import LoadingIndicator from "../../atoms/LoadingIndicator";
 import Tooltip from "@mui/material/Tooltip";
 import Avatar from "../../atoms/Avatar";
 import Badge from "../../atoms/Badge/Badge";
@@ -249,7 +249,7 @@ export function AvatarInputBar(props: AvatarInputBarProps) {
 
       <InputPrefixIconHolder>
         {props.isUploading ? (
-          <LoadingIndicator className="!size-4 [&>svg]:!size-4" />
+          <LoadingIndicator size={16} />
         ) : (
           <LinkIcon sx={{ fontSize: "18px" }} />
         )}

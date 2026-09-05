@@ -109,14 +109,14 @@ export function useOnboardingProfile(options: UseOnboardingProfileOptions) {
     const formData = new FormData();
     formData.set("file", file);
     try {
-      const res = await fetch("/api/avatars/upload", {
+      const uploadResponse = await fetch("/api/avatars/upload", {
         method: "POST",
         body: formData,
       });
-      if (res.ok) {
-        const data = (await res.json()) as { url?: string };
-        if (data.url) {
-          handleAvatarChange(data.url);
+      if (uploadResponse.ok) {
+        const uploadResult = (await uploadResponse.json()) as { url?: string };
+        if (uploadResult.url) {
+          handleAvatarChange(uploadResult.url);
         }
       }
     } catch (err) {

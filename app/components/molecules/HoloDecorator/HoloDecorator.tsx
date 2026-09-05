@@ -64,31 +64,31 @@ export default function HoloDecorator({
 
   useLayoutEffect(() => {
     if (!active || !wrapperRef.current) return;
-    const el = wrapperRef.current;
+    const element = wrapperRef.current;
 
     // Find the closest card
-    const card = el.closest(".physic-card");
+    const card = element.closest(".physics-card, .physic-card");
     if (!card) return;
 
     const updateOffsets = () => {
-      const elRect = el.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
       const cardRect = card.getBoundingClientRect();
 
       // Calculate offset so the background perfectly aligns with the card
-      const offsetX = elRect.left - cardRect.left;
-      const offsetY = elRect.top - cardRect.top;
+      const offsetX = elementRect.left - cardRect.left;
+      const offsetY = elementRect.top - cardRect.top;
 
-      el.style.setProperty("--holo-bg-size-x", `${cardRect.width}px`);
-      el.style.setProperty("--holo-bg-size-y", `${cardRect.height}px`);
-      el.style.setProperty("--holo-offset-x", `${offsetX}px`);
-      el.style.setProperty("--holo-offset-y", `${offsetY}px`);
+      element.style.setProperty("--holo-bg-size-x", `${cardRect.width}px`);
+      element.style.setProperty("--holo-bg-size-y", `${cardRect.height}px`);
+      element.style.setProperty("--holo-offset-x", `${offsetX}px`);
+      element.style.setProperty("--holo-offset-y", `${offsetY}px`);
     };
 
     updateOffsets();
 
     const observer = new ResizeObserver(() => updateOffsets());
     observer.observe(card);
-    observer.observe(el);
+    observer.observe(element);
 
     return () => observer.disconnect();
   }, [active]);

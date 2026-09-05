@@ -39,22 +39,27 @@ async function exchangeGitHubCode(code: string): Promise<string | null> {
   const clientSecret = process.env.GITHUB_CLIENT_SECRET;
   if (!clientId || !clientSecret) return null;
 
-  const res = await fetch("https://github.com/login/oauth/access_token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
+  const oauthResponse = await fetch(
+    "https://github.com/login/oauth/access_token",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        client_id: clientId,
+        client_secret: clientSecret,
+        code,
+      }),
     },
-    body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      code,
-    }),
-  });
+  );
 
-  if (!res.ok) return null;
-  const data = (await res.json()) as { access_token?: string };
-  return data.access_token ?? null;
+  if (!oauthResponse.ok) return null;
+  const tokenPayload = (await oauthResponse.json()) as {
+    access_token?: string;
+  };
+  return tokenPayload.access_token ?? null;
 }
 
 async function resolveUserProfile(code: string | null) {

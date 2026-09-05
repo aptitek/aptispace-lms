@@ -28,7 +28,7 @@ import {
   type ExpressiveShapeName,
   type ShapeDefinition,
   type ResolvedShapeStyle,
-} from "../Avatar/shapes";
+} from "~/tokens/shapes";
 
 export interface HoldButtonProps extends Omit<
   ButtonProps,
@@ -169,14 +169,17 @@ function useButtonMeasure(elementRef: React.RefObject<HTMLElement | null>) {
 
   const measure = useCallback(() => {
     if (!elementRef.current) return;
-    const el = elementRef.current;
-    const width = el.offsetWidth || el.getBoundingClientRect().width;
-    const height = el.offsetHeight || el.getBoundingClientRect().height;
-    const style = window.getComputedStyle(el);
-    const rad = parseFloat(style.borderRadius) || 8;
+    const buttonElement = elementRef.current;
+    const width =
+      buttonElement.offsetWidth || buttonElement.getBoundingClientRect().width;
+    const height =
+      buttonElement.offsetHeight ||
+      buttonElement.getBoundingClientRect().height;
+    const style = window.getComputedStyle(buttonElement);
+    const borderRadiusValue = parseFloat(style.borderRadius) || 8;
     if (width > 0 && height > 0) {
       setDimensions({ width, height });
-      setComputedBorderRadius(rad);
+      setComputedBorderRadius(borderRadiusValue);
     }
   }, [elementRef]);
 

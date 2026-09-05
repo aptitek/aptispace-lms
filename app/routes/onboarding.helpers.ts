@@ -98,14 +98,14 @@ function extractDbProfileData(dbUser?: UserWithAffiliationsResult) {
 export function buildInitialProfile(
   dbUser?: UserWithAffiliationsResult,
 ): OnboardingProfile {
-  const data = extractDbProfileData(dbUser);
+  const extractedProfile = extractDbProfileData(dbUser);
   return {
-    firstName: data.firstName,
-    familyName: data.familyName,
-    email: data.email,
-    avatarUrl: data.avatarUrl || "",
-    role: data.role,
-    githubUsername: data.githubUsername,
+    firstName: extractedProfile.firstName,
+    familyName: extractedProfile.familyName,
+    email: extractedProfile.email,
+    avatarUrl: extractedProfile.avatarUrl || "",
+    role: extractedProfile.role,
+    githubUsername: extractedProfile.githubUsername,
   };
 }
 

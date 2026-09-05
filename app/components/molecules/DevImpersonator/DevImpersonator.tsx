@@ -7,7 +7,7 @@ import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import { useTranslation } from "react-i18next";
-import { LoadingIndicator } from "react-material-expressive";
+import LoadingIndicator from "~/components/atoms/LoadingIndicator";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -187,7 +187,7 @@ function DevQuickCreateSection({
         {isCreatingRole && (
           <Chip
             size="small"
-            icon={<LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />}
+            icon={<LoadingIndicator size={14} />}
             label={t("devTool.creatingAccount", "Creating account...")}
             variant="outlined"
             color="warning"
@@ -253,7 +253,7 @@ function DevQuickCreateSection({
                   data-testid={`create-${role}-btn`}
                 >
                   {isCreatingRole === role ? (
-                    <LoadingIndicator className="!size-3.5 [&>svg]:!size-3.5" />
+                    <LoadingIndicator size={14} />
                   ) : (
                     <Icon />
                   )}
@@ -456,7 +456,7 @@ export default function DevImpersonator({
                 sx={{ color: "text.secondary" }}
               >
                 {isFetching ? (
-                  <LoadingIndicator className="!size-4 [&>svg]:!size-4" />
+                  <LoadingIndicator size={16} />
                 ) : (
                   <RefreshIcon fontSize="small" />
                 )}

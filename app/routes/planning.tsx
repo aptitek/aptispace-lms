@@ -38,7 +38,8 @@ import {
 
 // Shared submodules
 import Tooltip from "~/components/atoms/Tooltip/Tooltip";
-import { RootContainer, CalendarFrame } from "./planning.styles";
+import { PlanningLayout } from "~/components/templates/PlanningLayout";
+import { CalendarFrame } from "./planning.styles";
 import {
   mapClassToSchedulerEvent,
   type PlanningLoaderData,
@@ -201,7 +202,7 @@ export default function Planning() {
           );
 
           try {
-            const res = await fetch("/api/classes", {
+            const apiResponse = await fetch("/api/classes", {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -210,7 +211,7 @@ export default function Planning() {
                 endTime: ne.end,
               }),
             });
-            if (!res.ok) {
+            if (!apiResponse.ok) {
               setClassesState((prev) =>
                 prev.map((c) => (c.id === orig.id ? orig : c)),
               );
@@ -256,12 +257,12 @@ export default function Planning() {
     }
 
     try {
-      const res = await fetch("/api/classes", {
+      const apiResponse = await fetch("/api/classes", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
-      if (res.ok) {
+      if (apiResponse.ok) {
         setClassesState((prev) => prev.filter((c) => c.id !== id));
         setSelectedClass(null);
         setSnackbarMessage(t("planning.messages.deleted"));
@@ -279,13 +280,13 @@ export default function Planning() {
     }
 
     try {
-      const res = await fetch("/api/classes", {
+      const apiResponse = await fetch("/api/classes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ intent: "REGENERATE_TOKEN" }),
       });
-      const resPayload = (await res.json()) as { feedToken?: string };
-      if (res.ok && resPayload.feedToken) {
+      const resPayload = (await apiResponse.json()) as { feedToken?: string };
+      if (apiResponse.ok && resPayload.feedToken) {
         setFeedTokenState(resPayload.feedToken);
         setSnackbarMessage(t("planning.messages.tokenRotated"));
       } else {
@@ -297,152 +298,159 @@ export default function Planning() {
   };
 
   return (
-    <RootContainer>
-      <PlanningHero
-        userRole={loaderData.user.role}
-        isAdmin={isAdmin}
-        onOpenExport={() => setIsExportModalOpen(true)}
-      />
-
-      <CalendarFrame ref={calendarFrameRef}>
-        <CalendarHeaderTooltips containerRef={calendarFrameRef} />
-        {loadError ? (
-          <CalendarErrorState
-            onRetry={loadScheduler}
-            feedToken={feedTokenState}
-            userId={loaderData.user.id}
-          />
-        ) : !CalendarComponent ? (
-          <CalendarSkeleton />
-        ) : classesState.length === 0 && !showEmptyGrid ? (
-          <CalendarEmptyState
-            isAdmin={isAdmin}
-            onAddClass={() => {
-              setEditingClass(null);
-              setIsFormModalOpen(true);
-            }}
-            onShowGrid={() => setShowEmptyGrid(true)}
-          />
-        ) : (
-          <CalendarComponent
-            events={schedulerEvents}
-            onEventsChange={handleEventsChange}
-            onEventEditingStart={handleEventEditingStart}
-            views={["day", "week", "month", "agenda"]}
-            defaultView="week"
-            readOnly={!isAdmin}
-            areEventsDraggable={isAdmin}
-            areEventsResizable={isAdmin}
-            sx={{
-              height: "760px",
-              fontFamily: "inherit",
-            }}
-          />
-        )}
-        {isAdmin && (
-          <Tooltip
-            title={t("planning.addClass", "Add Class")}
-            placement="left"
-            arrow
-          >
-            <Fab
-              color="primary"
-              aria-label={t("planning.addClass", "Add Class")}
-              data-testid="planning-add-class-fab"
-              onClick={() => {
+    <PlanningLayout
+      hero={
+        <PlanningHero
+          userRole={loaderData.user.role}
+          isAdmin={isAdmin}
+          onOpenExport={() => setIsExportModalOpen(true)}
+        />
+      }
+      calendar={
+        <CalendarFrame ref={calendarFrameRef}>
+          <CalendarHeaderTooltips containerRef={calendarFrameRef} />
+          {loadError ? (
+            <CalendarErrorState
+              onRetry={loadScheduler}
+              feedToken={feedTokenState}
+              userId={loaderData.user.id}
+            />
+          ) : !CalendarComponent ? (
+            <CalendarSkeleton />
+          ) : classesState.length === 0 && !showEmptyGrid ? (
+            <CalendarEmptyState
+              isAdmin={isAdmin}
+              onAddClass={() => {
                 setEditingClass(null);
                 setIsFormModalOpen(true);
               }}
+              onShowGrid={() => setShowEmptyGrid(true)}
+            />
+          ) : (
+            <CalendarComponent
+              events={schedulerEvents}
+              onEventsChange={handleEventsChange}
+              onEventEditingStart={handleEventEditingStart}
+              views={["day", "week", "month", "agenda"]}
+              defaultView="week"
+              readOnly={!isAdmin}
+              areEventsDraggable={isAdmin}
+              areEventsResizable={isAdmin}
               sx={{
-                position: "absolute",
-                bottom: { xs: 20, sm: 24 },
-                right: { xs: 20, sm: 24 },
-                zIndex: 20,
-                width: 64,
-                height: 64,
-                borderRadius: "20px",
-                boxShadow: (theme) =>
-                  `0 10px 28px -4px ${alpha(theme.palette.primary.main, 0.45)}, 0 4px 12px rgba(0,0,0,0.15)`,
-                transition: "all 0.2s cubic-bezier(0.2, 0, 0, 1)",
-                "&:hover": {
-                  transform: "scale(1.08)",
-                  boxShadow: (theme) =>
-                    `0 14px 32px -4px ${alpha(theme.palette.primary.main, 0.6)}, 0 6px 16px rgba(0,0,0,0.2)`,
-                },
-                "&:active": {
-                  transform: "scale(0.96)",
-                },
+                height: "760px",
+                fontFamily: "inherit",
               }}
+            />
+          )}
+          {isAdmin && (
+            <Tooltip
+              title={t("planning.addClass", "Add Class")}
+              placement="left"
+              arrow
             >
-              <AddRoundedIcon sx={{ fontSize: "2.25rem" }} />
-            </Fab>
-          </Tooltip>
-        )}
-      </CalendarFrame>
+              <Fab
+                color="primary"
+                aria-label={t("planning.addClass", "Add Class")}
+                data-testid="planning-add-class-fab"
+                onClick={() => {
+                  setEditingClass(null);
+                  setIsFormModalOpen(true);
+                }}
+                sx={{
+                  position: "absolute",
+                  bottom: { xs: 20, sm: 24 },
+                  right: { xs: 20, sm: 24 },
+                  zIndex: 20,
+                  width: 64,
+                  height: 64,
+                  borderRadius: "20px",
+                  boxShadow: (theme) =>
+                    `0 10px 28px -4px ${alpha(theme.palette.primary.main, 0.45)}, 0 4px 12px rgba(0,0,0,0.15)`,
+                  transition: "all 0.2s cubic-bezier(0.2, 0, 0, 1)",
+                  "&:hover": {
+                    transform: "scale(1.08)",
+                    boxShadow: (theme) =>
+                      `0 14px 32px -4px ${alpha(theme.palette.primary.main, 0.6)}, 0 6px 16px rgba(0,0,0,0.2)`,
+                  },
+                  "&:active": {
+                    transform: "scale(0.96)",
+                  },
+                }}
+              >
+                <AddRoundedIcon sx={{ fontSize: "2.25rem" }} />
+              </Fab>
+            </Tooltip>
+          )}
+        </CalendarFrame>
+      }
+      dialogs={
+        <>
+          {selectedClass && (
+            <ClassDetailsDialog
+              classItem={selectedClass}
+              isAdmin={isAdmin}
+              onClose={() => setSelectedClass(null)}
+              onEdit={() => {
+                setEditingClass(selectedClass);
+                setSelectedClass(null);
+                setIsFormModalOpen(true);
+              }}
+              onDelete={() => handleDeleteClass(selectedClass.id)}
+            />
+          )}
 
-      {selectedClass && (
-        <ClassDetailsDialog
-          classItem={selectedClass}
-          isAdmin={isAdmin}
-          onClose={() => setSelectedClass(null)}
-          onEdit={() => {
-            setEditingClass(selectedClass);
-            setSelectedClass(null);
-            setIsFormModalOpen(true);
-          }}
-          onDelete={() => handleDeleteClass(selectedClass.id)}
-        />
-      )}
+          {isAdmin && isFormModalOpen && (
+            <ClassFormDialog
+              editingClass={editingClass}
+              sessions={loaderData.sessions}
+              instructors={loaderData.instructors}
+              onClose={() => {
+                setIsFormModalOpen(false);
+                setEditingClass(null);
+              }}
+              onSaved={(savedClass) => {
+                if (editingClass) {
+                  setClassesState((prev) =>
+                    prev.map((c) => (c.id === savedClass.id ? savedClass : c)),
+                  );
+                  setSnackbarMessage(t("planning.messages.updated"));
+                } else {
+                  setClassesState((prev) => [...prev, savedClass]);
+                  setSnackbarMessage(t("planning.messages.created"));
+                }
+                setIsFormModalOpen(false);
+                setEditingClass(null);
+              }}
+            />
+          )}
 
-      {isAdmin && isFormModalOpen && (
-        <ClassFormDialog
-          editingClass={editingClass}
-          sessions={loaderData.sessions}
-          instructors={loaderData.instructors}
-          onClose={() => {
-            setIsFormModalOpen(false);
-            setEditingClass(null);
-          }}
-          onSaved={(savedClass) => {
-            if (editingClass) {
-              setClassesState((prev) =>
-                prev.map((c) => (c.id === savedClass.id ? savedClass : c)),
-              );
-              setSnackbarMessage(t("planning.messages.updated"));
-            } else {
-              setClassesState((prev) => [...prev, savedClass]);
-              setSnackbarMessage(t("planning.messages.created"));
-            }
-            setIsFormModalOpen(false);
-            setEditingClass(null);
-          }}
-        />
-      )}
-
-      <CalendarExportDialog
-        open={isExportModalOpen}
-        onClose={() => setIsExportModalOpen(false)}
-        feedToken={feedTokenState}
-        isAdmin={isAdmin}
-        userId={loaderData.user.id}
-        onRegenerateToken={handleRegenerateToken}
-        onNotify={(msg) => setSnackbarMessage(msg)}
-      />
-
-      <Snackbar
-        open={Boolean(snackbarMessage)}
-        autoHideDuration={4000}
-        onClose={() => setSnackbarMessage(null)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
+          <CalendarExportDialog
+            open={isExportModalOpen}
+            onClose={() => setIsExportModalOpen(false)}
+            feedToken={feedTokenState}
+            isAdmin={isAdmin}
+            userId={loaderData.user.id}
+            onRegenerateToken={handleRegenerateToken}
+            onNotify={(msg) => setSnackbarMessage(msg)}
+          />
+        </>
+      }
+      feedback={
+        <Snackbar
+          open={Boolean(snackbarMessage)}
+          autoHideDuration={4000}
           onClose={() => setSnackbarMessage(null)}
-          severity="success"
-          sx={{ borderRadius: "14px", fontWeight: 600 }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </RootContainer>
+          <Alert
+            onClose={() => setSnackbarMessage(null)}
+            severity="success"
+            sx={{ borderRadius: "14px", fontWeight: 600 }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+      }
+    />
   );
 }

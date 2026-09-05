@@ -1,6 +1,9 @@
 import { memo, Fragment } from "react";
 import { styled } from "@mui/material/styles";
-import { ALL_EXPRESSIVE_SHAPES, EXPRESSIVE_SHAPE_CATALOG } from "./shapes";
+import {
+  ALL_EXPRESSIVE_SHAPES,
+  EXPRESSIVE_SHAPE_CATALOG,
+} from "~/tokens/shapes";
 
 const HiddenSvgDefs = styled("svg")({
   position: "absolute",
@@ -14,7 +17,7 @@ export const ShapeDefs = memo(function ShapeDefs() {
   return (
     <HiddenSvgDefs aria-hidden="true">
       <defs>
-        {ALL_EXPRESSIVE_SHAPES.map((shapeKey) => {
+        {ALL_EXPRESSIVE_SHAPES.map((shapeKey: string) => {
           const shape = EXPRESSIVE_SHAPE_CATALOG[shapeKey];
           if (!shape?.pathData) return null;
           return (

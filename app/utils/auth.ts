@@ -94,9 +94,9 @@ async function tryFetchAccounts(
   url: string,
 ): Promise<AccountDefinition[] | null> {
   try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const responsePayload = (await res.json()) as {
+    const httpResponse = await fetch(url);
+    if (!httpResponse.ok) return null;
+    const responsePayload = (await httpResponse.json()) as {
       accounts?: AccountDefinition[];
       users?: AccountDefinition[];
       personas?: AccountDefinition[];
@@ -126,13 +126,13 @@ async function tryCreateAccount(
   role: UserRole,
 ): Promise<AccountDefinition | null> {
   try {
-    const res = await fetch(url, {
+    const httpResponse = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role }),
     });
-    if (!res.ok) return null;
-    const responsePayload = (await res.json()) as {
+    if (!httpResponse.ok) return null;
+    const responsePayload = (await httpResponse.json()) as {
       account?: AccountDefinition;
       user?: AccountDefinition;
       persona?: AccountDefinition;
@@ -176,7 +176,7 @@ export async function loginAsAccount(
   };
 
   if (typeof window !== "undefined" && typeof fetch !== "undefined") {
-    const res = await fetch("/api/dev/impersonate", {
+    const httpResponse = await fetch("/api/dev/impersonate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -185,13 +185,13 @@ export async function loginAsAccount(
       }),
     });
 
-    if (res.ok) {
-      const responseBody = (await res.json()) as { user?: AuthUser };
+    if (httpResponse.ok) {
+      const responseBody = (await httpResponse.json()) as { user?: AuthUser };
       if (responseBody.user) {
         resolvedUser = responseBody.user;
       }
     } else {
-      const errorData = (await res.json().catch(() => ({}))) as {
+      const errorData = (await httpResponse.json().catch(() => ({}))) as {
         error?: string;
         errorCode?: string;
       };
@@ -199,7 +199,7 @@ export async function loginAsAccount(
         errorData.error || errorData.errorCode || "Impersonation failed",
       );
       Object.assign(error, {
-        statusCode: res.status,
+        statusCode: httpResponse.status,
         errorCode: errorData.errorCode,
       });
       throw error;
@@ -214,13 +214,13 @@ export async function loginAsAccount(
 export async function stopImpersonation(): Promise<AuthUser | null> {
   let resolvedUser: AuthUser | null = null;
   if (typeof window !== "undefined" && typeof fetch !== "undefined") {
-    const res = await fetch("/api/dev/impersonate", {
+    const httpResponse = await fetch("/api/dev/impersonate", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
 
-    if (res.ok) {
-      const responseBody = (await res.json()) as { user?: AuthUser };
+    if (httpResponse.ok) {
+      const responseBody = (await httpResponse.json()) as { user?: AuthUser };
       if (responseBody.user) {
         resolvedUser = responseBody.user;
         sessionStorage.setItem(
@@ -229,7 +229,7 @@ export async function stopImpersonation(): Promise<AuthUser | null> {
         );
       }
     } else {
-      const errorData = (await res.json().catch(() => ({}))) as {
+      const errorData = (await httpResponse.json().catch(() => ({}))) as {
         error?: string;
         errorCode?: string;
       };
@@ -237,7 +237,7 @@ export async function stopImpersonation(): Promise<AuthUser | null> {
         errorData.error || errorData.errorCode || "Stop impersonation failed",
       );
       Object.assign(error, {
-        statusCode: res.status,
+        statusCode: httpResponse.status,
         errorCode: errorData.errorCode,
       });
       throw error;
@@ -289,9 +289,9 @@ export async function getStoredUser(): Promise<AuthUser | null> {
     }
 
     // Try fetching from server session
-    const res = await fetch("/api/session");
-    if (res.ok) {
-      const responseBody = (await res.json()) as { user?: AuthUser };
+    const httpResponse = await fetch("/api/session");
+    if (httpResponse.ok) {
+      const responseBody = (await httpResponse.json()) as { user?: AuthUser };
       if (responseBody.user) {
         sessionStorage.setItem(
           "aptispace_auth_user",

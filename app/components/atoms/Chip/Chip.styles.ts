@@ -1,6 +1,6 @@
 import { styled, alpha } from "@mui/material/styles";
 import MuiChip from "@mui/material/Chip";
-import type { ResolvedShapeStyle } from "../Avatar/shapes";
+import type { ResolvedShapeStyle } from "~/tokens/shapes";
 import type { ChipShape } from "./Chip.types";
 
 interface StyledChipProps {

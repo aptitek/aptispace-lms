@@ -102,18 +102,24 @@ async function submitClassForm(
     description: formState.description || null,
   };
 
-  const res = await fetch("/api/classes", {
+  const response = await fetch("/api/classes", {
     method,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 
-  return (await res.json()) as { class?: ClassWithDetails; error?: string };
+  return (await response.json()) as {
+    class?: ClassWithDetails;
+    error?: string;
+  };
 }
 
 interface FormFieldsProps {
   formState: FormState;
-  updateField: <K extends keyof FormState>(key: K, val: FormState[K]) => void;
+  updateField: <K extends keyof FormState>(
+    key: K,
+    fieldValue: FormState[K],
+  ) => void;
   sessions: SessionOption[];
   instructors: InstructorOption[];
 }
@@ -299,9 +305,9 @@ export function ClassFormDialog({
 
   const updateField = <K extends keyof FormState>(
     key: K,
-    val: FormState[K],
+    fieldValue: FormState[K],
   ) => {
-    setFormState((prev) => ({ ...prev, [key]: val }));
+    setFormState((prev) => ({ ...prev, [key]: fieldValue }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

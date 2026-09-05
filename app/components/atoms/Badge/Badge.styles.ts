@@ -1,6 +1,6 @@
 import { styled, alpha, type Theme } from "@mui/material/styles";
 import MuiBadge from "@mui/material/Badge";
-import { resolveShapeStyle, type ResolvedShapeStyle } from "../Avatar/shapes";
+import { resolveShapeStyle, type ResolvedShapeStyle } from "~/tokens/shapes";
 import type { BadgeShape, BadgeSize, BadgeColor } from "./Badge.types";
 
 export function getResolvedBadgeShape(

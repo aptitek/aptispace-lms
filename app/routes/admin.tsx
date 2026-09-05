@@ -6,12 +6,10 @@ import {
   useRevalidator,
   useLocation,
   useNavigate,
-  useOutletContext,
   type LoaderFunctionArgs,
   type ActionFunctionArgs,
 } from "react-router";
-import Header from "~/components/organisms/Header/Header";
-import Footer from "~/components/organisms/Footer/Footer";
+import { AdminLayout } from "~/components/templates/AdminLayout";
 import { authGuard } from "~/utils/session.server";
 import {
   logout,
@@ -38,7 +36,6 @@ import AdminCohortsTabPanel from "./admin.cohorts-tab";
 import { AdminMissionCenterTabPanel } from "./admin.mission-tab";
 import { AdminUsersTabPanel } from "./admin.users-tab";
 import { AdminCoursesTabPanel } from "./admin.courses-tab";
-import { PageRoot, AdminMainWorkspace } from "./admin.styles";
 import type { Route } from "./+types/admin";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -240,8 +237,8 @@ export default function AdminManagement() {
     emailDomain?: string;
     usernamePattern?: string;
   }) => {
-    const data = buildInstitutionSubmitData(payload);
-    fetcher.submit(data, { method: "post" });
+    const submitPayload = buildInstitutionSubmitData(payload);
+    fetcher.submit(submitPayload, { method: "post" });
     if (!payload.id) {
       setSelectedSchoolForEdit(null);
     } else if (selectedSchoolForEdit) {
@@ -258,8 +255,8 @@ export default function AdminManagement() {
       notifyError(new Error("No institution selected"));
       return;
     }
-    const data = buildCohortSubmitData(institutionId, payload);
-    fetcher.submit(data, { method: "post" });
+    const submitPayload = buildCohortSubmitData(institutionId, payload);
+    fetcher.submit(submitPayload, { method: "post" });
     if (!payload.id) {
       setSelectedCohortForEdit(null);
     } else if (selectedCohortForEdit) {
@@ -427,18 +424,21 @@ export default function AdminManagement() {
     startYearMax,
   ]);
 
-  const outletContext = useOutletContext<{ user?: AuthUser } | null>();
-  const isNestedInShell = Boolean(outletContext);
   const hasInspectorOpen = Boolean(selectedUser);
 
-  const workspaceContent = (
-    <AdminMainWorkspace>
-      <AdminTabsSection
-        activeTab={activeTab}
-        totalUsers={loaderData.totalUsers}
-        openIssuesCount={loaderData.missionCenter?.openIssuesCount}
-        onChange={handleTabChange}
-      />
+  return (
+    <AdminLayout
+      user={loaderData.user}
+      onLogout={handleLogout}
+      tabs={
+        <AdminTabsSection
+          activeTab={activeTab}
+          totalUsers={loaderData.totalUsers}
+          openIssuesCount={loaderData.missionCenter?.openIssuesCount}
+          onChange={handleTabChange}
+        />
+      }
+    >
       <AdminTabContent
         activeTab={activeTab}
         usersProps={{
@@ -505,23 +505,6 @@ export default function AdminManagement() {
             : undefined
         }
       />
-    </AdminMainWorkspace>
-  );
-
-  if (isNestedInShell) {
-    return workspaceContent;
-  }
-
-  return (
-    <PageRoot>
-      <Header
-        mode="full"
-        user={loaderData.user}
-        onLogout={handleLogout}
-        data-testid="admin-header"
-      />
-      {workspaceContent}
-      <Footer />
-    </PageRoot>
+    </AdminLayout>
   );
 }

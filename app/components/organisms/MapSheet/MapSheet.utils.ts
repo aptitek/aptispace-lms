@@ -178,8 +178,8 @@ function matchPatternStrategies(
 ): ParsedRoomInfo | null {
   const matchers = [tryPunctuation, tryAlphaNumeric, tryGroundFloor, tryDigits];
   for (const matcher of matchers) {
-    const res = matcher(rawRoom, isFr, roomName);
-    if (res) return res;
+    const matchedRoom = matcher(rawRoom, isFr, roomName);
+    if (matchedRoom) return matchedRoom;
   }
   return null;
 }

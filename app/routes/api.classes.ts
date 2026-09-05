@@ -115,8 +115,8 @@ async function handleUpdateClass(
   return Response.json({ success: true, class: updated });
 }
 
-function asString(val: unknown): string | null {
-  return typeof val === "string" ? val : null;
+function asString(candidateValue: unknown): string | null {
+  return typeof candidateValue === "string" ? candidateValue : null;
 }
 
 function parseNewClassInput(

@@ -1,7 +1,7 @@
 import type { CardProps } from "@mui/material/Card";
 import type { ReactNode } from "react";
 
-export interface PhysicCardProps extends Omit<CardProps, "children"> {
+export interface PhysicsCardProps extends Omit<CardProps, "children"> {
   /**
    * The content to display on the front of the card.
    */
@@ -76,3 +76,6 @@ export interface PhysicCardProps extends Omit<CardProps, "children"> {
    */
   isTransparent?: boolean;
 }
+
+// Backwards-compatible alias for existing code
+export type PhysicCardProps = PhysicsCardProps;

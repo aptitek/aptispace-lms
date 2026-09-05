@@ -1,4 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import React from "react";
+import { render, screen, cleanup } from "@testing-library/react";
+import { ThemeProvider } from "@mui/material/styles";
+import { I18nextProvider } from "react-i18next";
+import i18n from "~/i18n";
+import { appTheme } from "~/tokens/theme";
 import DevImpersonator from "./DevImpersonator";
 import {
   createAccountInDb,
@@ -14,9 +20,27 @@ describe("DevImpersonator Molecule & Auth Utilities", () => {
     vi.restoreAllMocks();
   });
 
+  afterEach(() => {
+    cleanup();
+  });
+
   it("exports DevImpersonator component properly", () => {
     expect(DevImpersonator).toBeDefined();
     expect(typeof DevImpersonator).toBe("function");
+  });
+
+  it("mounts DevImpersonator in DOM and renders action buttons", () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider theme={appTheme}>
+          <DevImpersonator />
+        </ThemeProvider>
+      </I18nextProvider>,
+    );
+
+    expect(screen.getByTestId("create-student-btn")).toBeDefined();
+    expect(screen.getByTestId("create-instructor-btn")).toBeDefined();
+    expect(screen.getByTestId("create-admin-btn")).toBeDefined();
   });
 
   it("formats role labels and titles correctly", () => {
@@ -75,6 +99,18 @@ describe("DevImpersonator Molecule & Auth Utilities", () => {
   });
 
   it("resolves loginAsAccount with target account credentials", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        user: {
+          id: "test-user-id",
+          name: "Professor Test",
+          email: "test@aptitek.io",
+          role: "instructor",
+        },
+      }),
+    } as unknown as Response);
+
     const authUser = await loginAsAccount({
       id: "test-user-id",
       name: "Professor Test",
@@ -88,6 +124,18 @@ describe("DevImpersonator Molecule & Auth Utilities", () => {
   });
 
   it("resolves loginAsPersona with fallback persona role", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        user: {
+          id: "admin-1",
+          name: "Admin User",
+          email: "admin@aptispace.com",
+          role: "admin",
+        },
+      }),
+    } as unknown as Response);
+
     const authUser = await loginAsPersona("admin");
     expect(authUser.role).toBe("admin");
     expect(authUser.name).toBe("Admin User");

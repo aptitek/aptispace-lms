@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import Avatar, { isUnnamedUser } from "./Avatar";
 import { ISO_19794_5_CONSTANTS } from "./Avatar.types";
 import { resolveM3ShapeRadius } from "./Avatar.styles";
-import { getRoleAvatarShape } from "./shapes";
+import { getRoleAvatarShape } from "~/tokens/shapes";
 
 describe("Avatar Component & MD3 Shape Scale", () => {
   it("exports Avatar component properly", () => {

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { LoadingIndicator } from "react-material-expressive";
+import LoadingIndicator from "~/components/atoms/LoadingIndicator";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
@@ -9,7 +9,7 @@ const meta = {
   tags: ["autodocs"],
   argTypes: {
     contained: { control: "boolean" },
-    className: { control: "text" },
+    size: { control: "number" },
   },
 } satisfies Meta<typeof LoadingIndicator>;
 
@@ -41,19 +41,19 @@ export const ScaleVariants: Story = {
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
         <Box sx={{ textAlign: "center" }}>
-          <LoadingIndicator className="!size-6 [&>svg]:!size-6" />
+          <LoadingIndicator size={24} />
           <Typography variant="caption" sx={{ display: "block" }}>
             Small (24px)
           </Typography>
         </Box>
         <Box sx={{ textAlign: "center" }}>
-          <LoadingIndicator className="!size-9 [&>svg]:!size-9" />
+          <LoadingIndicator size={36} />
           <Typography variant="caption" sx={{ display: "block" }}>
             Medium (36px)
           </Typography>
         </Box>
         <Box sx={{ textAlign: "center" }}>
-          <LoadingIndicator className="!size-16 [&>svg]:!size-16" />
+          <LoadingIndicator size={64} />
           <Typography variant="caption" sx={{ display: "block" }}>
             Large (64px)
           </Typography>
@@ -71,25 +71,31 @@ export const ThemedVariants: Story = {
       </Typography>
       <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
         <Box sx={{ textAlign: "center" }}>
-          <LoadingIndicator className="!size-10 [&>svg]:!size-10" />
+          <LoadingIndicator size={40} />
           <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
             Primary (Solarized Blue)
           </Typography>
         </Box>
         <Box sx={{ textAlign: "center" }}>
-          <LoadingIndicator contained className="!size-12 [&>svg]:!size-10" />
+          <LoadingIndicator contained size={48} />
           <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
             Contained (Base02 / Blue)
           </Typography>
         </Box>
         <Box sx={{ textAlign: "center" }}>
-          <LoadingIndicator className="!size-10 [&>svg]:!size-10 [&>svg]:!text-[var(--color-solarized-cyan)]" />
+          <LoadingIndicator
+            size={40}
+            color="var(--color-solarized-cyan, #2aa198)"
+          />
           <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
             Secondary (Cyan)
           </Typography>
         </Box>
         <Box sx={{ textAlign: "center" }}>
-          <LoadingIndicator className="!size-10 [&>svg]:!size-10 [&>svg]:!text-[var(--color-solarized-magenta)]" />
+          <LoadingIndicator
+            size={40}
+            color="var(--color-solarized-magenta, #d33682)"
+          />
           <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
             Tertiary (Magenta)
           </Typography>

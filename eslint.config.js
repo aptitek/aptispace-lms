@@ -76,6 +76,91 @@ const cssTokensPlugin = {
         };
       },
     },
+    "no-universal-transition": {
+      meta: {
+        type: "problem",
+        docs: {
+          description:
+            "Disallow broad transitions on universal wildcard selectors (*, ::before, ::after).",
+          recommended: true,
+        },
+        messages: {
+          noUniversalTransition:
+            "Universal wildcard transition detected on '*' or '::before/::after'. Broad transitions cause severe browser paint thrashing. Scope transitions to explicit component classes.",
+        },
+      },
+      create(context) {
+        return {
+          Rule(node) {
+            const hasWildcard = node.prelude?.children?.some((sel) => {
+              return sel.children?.some(
+                (child) =>
+                  (child.type === "TypeSelector" && child.name === "*") ||
+                  (child.type === "PseudoElementSelector" &&
+                    (child.name === "before" || child.name === "after")),
+              );
+            });
+            if (hasWildcard) {
+              const hasTransition = node.block?.children?.some(
+                (decl) =>
+                  decl.type === "Declaration" &&
+                  typeof decl.property === "string" &&
+                  decl.property.startsWith("transition"),
+              );
+              if (hasTransition) {
+                context.report({
+                  loc: node.loc,
+                  messageId: "noUniversalTransition",
+                });
+              }
+            }
+          },
+        };
+      },
+    },
+    "no-tailwind-directives": {
+      meta: {
+        type: "problem",
+        docs: {
+          description:
+            "Disallow deprecated Tailwind CSS directives (@theme, @layer, and @import 'tailwindcss').",
+          recommended: true,
+        },
+        messages: {
+          noTailwindAtRule:
+            "Tailwind directive '@{{name}}' detected. Tailwind has been uninstalled in favor of Material Design 3 tokens and styled primitives.",
+          noTailwindImport:
+            "Tailwind import '@import \"tailwindcss\"' detected. Tailwind has been uninstalled in favor of Material Design 3 tokens.",
+        },
+      },
+      create(context) {
+        return {
+          Atrule(node) {
+            if (node.name === "theme" || node.name === "layer") {
+              context.report({
+                loc: node.loc,
+                messageId: "noTailwindAtRule",
+                data: { name: node.name },
+              });
+            } else if (node.name === "import") {
+              const isTailwind = node.prelude?.children?.some(
+                (child) =>
+                  (typeof child.value === "string" &&
+                    child.value.includes("tailwind")) ||
+                  (typeof child.name === "string" &&
+                    child.name.includes("tailwind")),
+              );
+              if (isTailwind) {
+                context.report({
+                  loc: node.loc,
+                  messageId: "noTailwindImport",
+                });
+              }
+            }
+          },
+        };
+      },
+    },
   },
 };
 
@@ -275,14 +360,23 @@ export default tseslint.config(
         "data",
         "data2",
         "temp",
+        "tmp",
         "item",
         "obj",
         "val",
+        "res",
+        "req",
+        "cb",
+        "el",
+        "elem",
         "foo",
         "bar",
         "info",
         "manager",
         "helper",
+        "isNestedInShell",
+        "physicCard",
+        "PhysicCard",
       ],
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "no-duplicate-imports": "error",
@@ -303,11 +397,79 @@ export default tseslint.config(
               message:
                 "Please use `styled` from `@mui/material/styles` to ensure direct access to MUI theme tokens.",
             },
+            {
+              name: "@tailwindcss/vite",
+              message:
+                "Tailwind CSS has been completely removed in favor of Material Design 3 tokens.",
+            },
+            {
+              name: "tailwindcss",
+              message:
+                "Tailwind CSS has been completely removed in favor of Material Design 3 tokens.",
+            },
+            {
+              name: "~/components/molecules/PhysicCard",
+              message:
+                "Misspelling: 'PhysicCard' is deprecated. Import 'PhysicsCard' from '~/components/molecules/PhysicsCard' instead.",
+            },
+            {
+              name: "~/components/molecules/MapSheet",
+              message:
+                "Atomic Design violation: MapSheet is an Organism. Import from '~/components/organisms/MapSheet' instead.",
+            },
+            {
+              name: "~/components/molecules/TimeSheet",
+              message:
+                "Atomic Design violation: TimeSheet is an Organism. Import from '~/components/organisms/TimeSheet' instead.",
+            },
+            {
+              name: "~/components/molecules/CalendarSheet",
+              message:
+                "Atomic Design violation: CalendarSheet is an Organism. Import from '~/components/organisms/CalendarSheet' instead.",
+            },
+            {
+              name: "~/components/atoms/Avatar/shapes",
+              message:
+                "Decoupling violation: Shapes mathematical engine lives in Tier 0 tokens. Import from '~/tokens/shapes' instead.",
+            },
           ],
           patterns: [
             {
               group: ["@mui/material/internal_*"],
               message: "Do not import private/internal MUI APIs.",
+            },
+            {
+              group: [
+                "**/molecules/PhysicCard**",
+                "../molecules/PhysicCard**",
+                "../../molecules/PhysicCard**",
+              ],
+              message:
+                "Misspelling: 'PhysicCard' is deprecated. Import 'PhysicsCard' from '~/components/molecules/PhysicsCard' instead.",
+            },
+            {
+              group: [
+                "**/molecules/MapSheet**",
+                "**/molecules/TimeSheet**",
+                "**/molecules/CalendarSheet**",
+                "../molecules/MapSheet**",
+                "../molecules/TimeSheet**",
+                "../molecules/CalendarSheet**",
+                "../../molecules/MapSheet**",
+                "../../molecules/TimeSheet**",
+                "../../molecules/CalendarSheet**",
+              ],
+              message:
+                "Atomic Design violation: MapSheet, TimeSheet, and CalendarSheet are Organisms. Import them from '~/components/organisms/*' instead.",
+            },
+            {
+              group: [
+                "**/atoms/Avatar/shapes**",
+                "../atoms/Avatar/shapes**",
+                "../../atoms/Avatar/shapes**",
+              ],
+              message:
+                "Decoupling violation: Shapes mathematical engine lives in Tier 0 tokens. Import from '~/tokens/shapes' instead.",
             },
           ],
         },
@@ -320,7 +482,18 @@ export default tseslint.config(
           selector:
             "JSXAttribute[name.name='style'] > JSXExpressionContainer > ObjectExpression",
           message:
-            "Raw inline `style={{ ... }}` is forbidden. Use MUI `styled()` primitives, theme-aware `sx`, or Tailwind design tokens.",
+            "Raw inline `style={{ ... }}` is forbidden. Use MUI `styled()` primitives or theme-aware `sx` design tokens.",
+        },
+        {
+          selector:
+            "JSXAttribute[name.name='className'] > Literal[value=/(!size-|flex-col|items-center|justify-between)/]",
+          message:
+            "Tailwind utility syntax is forbidden in className. Use MUI styled() primitives, theme-aware sx, or MD3 component tokens.",
+        },
+        {
+          selector: "JSXAttribute[name.name='isNestedInShell']",
+          message:
+            "Dead prop 'isNestedInShell' is forbidden. Shell layout is handled exclusively via Template tier layouts.",
         },
         {
           selector:
@@ -456,6 +629,30 @@ export default tseslint.config(
 
   // 4. Atomic Design Hierarchy Layer Guards
   {
+    files: ["app/tokens/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "**/components/**",
+                "../components/**",
+                "../../components/**",
+                "~/components/**",
+                "**/routes/**",
+                "~/routes/**",
+              ],
+              message:
+                "Atomic Design Violation: Tier 0 Tokens cannot import from Components or Routes.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ["app/components/atoms/**", "stories/atoms/**"],
     rules: {
       "no-restricted-imports": [
@@ -570,9 +767,9 @@ export default tseslint.config(
     },
   },
 
-  // 5. React Router Routes and Tokens Overrides
+  // 5. Tokens Definition Overrides (literal color values allowed in low-level theme definitions)
   {
-    files: ["app/routes/**", "app/root.tsx", "app/tokens/**"],
+    files: ["app/tokens/**"],
     rules: {
       "no-restricted-syntax": "off",
       "id-denylist": "off",
@@ -601,6 +798,7 @@ export default tseslint.config(
       complexity: "off",
       "max-lines-per-function": "off",
       "no-restricted-syntax": "off",
+      "id-denylist": "off",
       "sonarjs/no-duplicate-string": "off",
       "sonarjs/cognitive-complexity": "off",
       "sonarjs/no-identical-functions": "off",
@@ -619,6 +817,21 @@ export default tseslint.config(
       "sonarjs/no-hardcoded-ip": "off",
       "sonarjs/no-duplicate-string": "off",
       "sonarjs/pseudo-random": "off",
+    },
+  },
+
+  // 6c. React Component Test File Enforcement (.test.tsx mandatory for components to enforce DOM mounting)
+  {
+    files: ["app/components/**/*.test.ts", "app/components/**/*.spec.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Program",
+          message:
+            "TDD Violation: Component tests in app/components/ must use the .test.tsx extension and mount components with @testing-library/react.",
+        },
+      ],
     },
   },
 
@@ -675,6 +888,8 @@ export default tseslint.config(
     },
     rules: {
       "css-tokens/no-raw-colors": "error",
+      "css-tokens/no-universal-transition": "error",
+      "css-tokens/no-tailwind-directives": "error",
     },
   },
 

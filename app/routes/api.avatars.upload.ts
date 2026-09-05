@@ -55,20 +55,23 @@ interface R2UploadParams {
   r2Bucket: NonNullable<ReturnType<typeof resolveR2Bucket>>;
   context: unknown;
   key: string;
-  data: ArrayBuffer;
+  fileBuffer: ArrayBuffer;
   mimeType: string;
 }
 
 async function saveToR2Bucket(params: R2UploadParams): Promise<string> {
-  const { r2Bucket, context, key, data, mimeType } = params;
-  await r2Bucket.put(key, data, {
+  const { r2Bucket, context, key, fileBuffer, mimeType } = params;
+  await r2Bucket.put(key, fileBuffer, {
     httpMetadata: { contentType: mimeType },
   });
   return resolvePublicR2Url(context, key);
 }
 
-function saveToDataUrlFallback(data: ArrayBuffer, mimeType: string): string {
-  const base64 = Buffer.from(data).toString("base64");
+function saveToDataUrlFallback(
+  fileBuffer: ArrayBuffer,
+  mimeType: string,
+): string {
+  const base64 = Buffer.from(fileBuffer).toString("base64");
   return `data:${mimeType};base64,${base64}`;
 }
 
@@ -118,7 +121,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
           r2Bucket,
           context,
           key: uniqueKey,
-          data: arrayBufferData,
+          fileBuffer: arrayBufferData,
           mimeType: validFile.type,
         })
       : saveToDataUrlFallback(arrayBufferData, validFile.type);

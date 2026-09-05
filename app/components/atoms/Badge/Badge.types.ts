@@ -1,6 +1,6 @@
 import type { ElementType, ReactNode } from "react";
 import type { BadgeProps as MuiBadgeProps } from "@mui/material/Badge";
-import type { ExpressiveShapeName } from "../Avatar/shapes";
+import type { ExpressiveShapeName } from "~/tokens/shapes";
 
 export type BadgeShape = ExpressiveShapeName | string | number;
 export type BadgeSize = "small" | "medium" | "large";

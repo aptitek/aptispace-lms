@@ -9,7 +9,7 @@ import {
 import Card, { type CardProps } from "@mui/material/Card";
 import Box from "@mui/material/Box";
 import { styled, useTheme, alpha } from "@mui/material/styles";
-import type { PhysicCardProps } from "./PhysicCard.types";
+import type { PhysicsCardProps } from "./PhysicsCard.types";
 import { holoGradient } from "../../../tokens/holo";
 
 const TiltContainer = styled(motion.div)({
@@ -117,7 +117,7 @@ function useCardMotion(
   };
 }
 
-function PhysicCardFront({
+function PhysicsCardFront({
   cardProps,
   frontContent,
   isTiltingEnabled,
@@ -190,7 +190,7 @@ function PhysicCardFront({
 }
 
 // eslint-disable-next-line complexity
-function PhysicCardBack({
+function PhysicsCardBack({
   cardProps,
   backContent,
   isTiltingEnabled,
@@ -306,7 +306,7 @@ function useCardFlip({
 }
 
 // eslint-disable-next-line complexity
-export default function PhysicCard({
+export function PhysicsCard({
   frontContent,
   backContent,
   isFlipped: controlledIsFlipped,
@@ -323,7 +323,7 @@ export default function PhysicCard({
   isTransparent = false,
   sx,
   ...cardProps
-}: PhysicCardProps) {
+}: PhysicsCardProps) {
   const isTiltingEnabled = Boolean(interactive && tiltStrength > 0);
 
   const { isFlipped, canFlip, handleClick } = useCardFlip({
@@ -353,7 +353,7 @@ export default function PhysicCard({
 
   return (
     <Box
-      className="physic-card"
+      className="physics-card physic-card"
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -381,7 +381,7 @@ export default function PhysicCard({
           animate={{ rotateY: isFlipped ? 180 : 0 }}
           transition={flipTransition}
         >
-          <PhysicCardFront
+          <PhysicsCardFront
             cardProps={cardProps}
             frontContent={frontContent}
             isTiltingEnabled={isTiltingEnabled}
@@ -393,7 +393,7 @@ export default function PhysicCard({
             sheenX={sheenX}
             sheenY={sheenY}
           />
-          <PhysicCardBack
+          <PhysicsCardBack
             cardProps={cardProps}
             backContent={backContent}
             isTiltingEnabled={isTiltingEnabled}
@@ -410,3 +410,8 @@ export default function PhysicCard({
     </Box>
   );
 }
+
+// Backwards-compatible alias
+/* eslint-disable-next-line id-denylist */
+export const PhysicCard = PhysicsCard;
+export default PhysicsCard;

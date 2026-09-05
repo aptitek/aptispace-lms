@@ -1,6 +1,15 @@
 import React, { useState, useEffect, type RefObject } from "react";
+import { styled } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import Tooltip from "~/components/atoms/Tooltip/Tooltip";
+
+const HiddenTooltipAnchor = styled("span")({
+  position: "fixed",
+  pointerEvents: "none",
+  width: 0,
+  height: 0,
+  opacity: 0,
+});
 
 export interface CalendarHeaderTooltipsProps {
   containerRef: RefObject<HTMLElement | null>;
@@ -328,15 +337,7 @@ export function CalendarHeaderTooltips({
         },
       }}
     >
-      <span
-        style={{
-          position: "fixed",
-          pointerEvents: "none",
-          width: 0,
-          height: 0,
-          opacity: 0,
-        }}
-      />
+      <HiddenTooltipAnchor />
     </Tooltip>
   );
 }

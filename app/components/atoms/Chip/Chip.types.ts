@@ -1,6 +1,6 @@
 import type { ElementType, ReactNode } from "react";
 import type { ChipProps as MuiChipProps } from "@mui/material/Chip";
-import type { ExpressiveShapeName } from "../Avatar/shapes";
+import type { ExpressiveShapeName } from "~/tokens/shapes";
 
 export type ChipShape = ExpressiveShapeName | string | number;
 

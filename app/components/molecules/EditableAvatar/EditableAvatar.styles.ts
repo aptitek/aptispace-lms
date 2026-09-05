@@ -2,7 +2,7 @@ import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import { resolveM3ShapeStyle } from "../../atoms/Avatar";
+import { resolveM3ShapeStyle } from "~/tokens/shapes";
 import type {
   EditableAvatarShape,
   EditableAvatarSize,

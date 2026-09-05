@@ -292,7 +292,7 @@ export function buildCohortSubmitData(
   payload: CohortSavePayload,
 ): Record<string, string> {
   const intent = payload.id ? "update-cohort" : "create-cohort";
-  const data: Record<string, string> = { intent, institutionId };
+  const formDataRecord: Record<string, string> = { intent, institutionId };
 
   const stringFields: Array<[keyof CohortSavePayload, string]> = [
     ["id", "id"],
@@ -305,16 +305,16 @@ export function buildCohortSubmitData(
 
   for (const [prop, key] of stringFields) {
     const fieldValue = payload[prop];
-    if (typeof fieldValue === "string") data[key] = fieldValue;
+    if (typeof fieldValue === "string") formDataRecord[key] = fieldValue;
   }
 
   if (payload.year !== undefined) {
-    data.year = payload.year === null ? "" : String(payload.year);
+    formDataRecord.year = payload.year === null ? "" : String(payload.year);
   }
   if (payload.tags !== undefined) {
-    data.tags = JSON.stringify(payload.tags);
+    formDataRecord.tags = JSON.stringify(payload.tags);
   }
-  return data;
+  return formDataRecord;
 }
 
 export interface InstitutionSavePayload {
@@ -331,18 +331,19 @@ export function buildInstitutionSubmitData(
   payload: InstitutionSavePayload,
 ): Record<string, string> {
   const intent = payload.id ? "update-institution" : "create-institution";
-  const data: Record<string, string> = {
+  const formDataRecord: Record<string, string> = {
     intent,
     name: payload.name,
     slug: payload.slug,
   };
-  if (payload.id) data.id = payload.id;
-  if (payload.type) data.type = payload.type;
-  if (payload.logoUrl) data.logoUrl = payload.logoUrl;
-  if (payload.emailDomain !== undefined) data.emailDomain = payload.emailDomain;
+  if (payload.id) formDataRecord.id = payload.id;
+  if (payload.type) formDataRecord.type = payload.type;
+  if (payload.logoUrl) formDataRecord.logoUrl = payload.logoUrl;
+  if (payload.emailDomain !== undefined)
+    formDataRecord.emailDomain = payload.emailDomain;
   if (payload.usernamePattern !== undefined)
-    data.usernamePattern = payload.usernamePattern;
-  return data;
+    formDataRecord.usernamePattern = payload.usernamePattern;
+  return formDataRecord;
 }
 
 export function mergeUpdatedUser(

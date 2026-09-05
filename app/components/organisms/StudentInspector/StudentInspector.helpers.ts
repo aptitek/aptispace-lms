@@ -72,9 +72,9 @@ export function sortCohortsBySchoolAndDate(
 }
 
 export function sortAssignedByDate(
-  items: CompactCohortItem[],
+  cohortList: CompactCohortItem[],
 ): CompactCohortItem[] {
-  return [...items].sort((a, b) => {
+  return [...cohortList].sort((a, b) => {
     const timeA = parseCohortTimestamp(a.startDate);
     const timeB = parseCohortTimestamp(b.startDate);
     if (timeA !== timeB) return timeB - timeA;

@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import PhysicCard from "../app/components/molecules/PhysicCard/PhysicCard";
+import PhysicsCard from "../app/components/molecules/PhysicsCard/PhysicsCard";
 
-const meta: Meta<typeof PhysicCard> = {
-  title: "Molecules/PhysicCard",
-  component: PhysicCard,
+const meta: Meta<typeof PhysicsCard> = {
+  title: "Molecules/PhysicsCard",
+  component: PhysicsCard,
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
@@ -14,7 +14,7 @@ const meta: Meta<typeof PhysicCard> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof PhysicCard>;
+type Story = StoryObj<typeof PhysicsCard>;
 
 const FrontPlaceholder = () => (
   <Box

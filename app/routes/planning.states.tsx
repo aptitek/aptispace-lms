@@ -1,5 +1,5 @@
 import React from "react";
-import { alpha } from "@mui/material/styles";
+import { alpha, type Theme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -24,17 +24,17 @@ const SKELETON_EVENTS = [
   { id: "skel-event-5", col: 5, top: 60, height: 120, color: "indigo" },
 ];
 
-function getPastelColor(colorName: string): string {
+function getPastelColor(colorName: string, theme: Theme): string {
   switch (colorName) {
     case "teal":
-      return "rgba(20, 184, 166, 0.2)";
+      return alpha(theme.palette.info.light, 0.2);
     case "amber":
-      return "rgba(245, 158, 11, 0.22)";
+      return alpha(theme.palette.warning.main, 0.22);
     case "red":
-      return "rgba(239, 68, 68, 0.2)";
+      return alpha(theme.palette.error.main, 0.2);
     case "indigo":
     default:
-      return "rgba(99, 102, 241, 0.22)";
+      return alpha(theme.palette.secondary.main, 0.22);
   }
 }
 
@@ -152,18 +152,18 @@ function CalendarSkeletonGrid() {
         ))}
 
         {/* Shimmer Event Cards */}
-        {SKELETON_EVENTS.map((item) => (
+        {SKELETON_EVENTS.map((skeletonEvent) => (
           <Box
-            key={item.id}
+            key={skeletonEvent.id}
             sx={{
               position: "absolute",
-              left: `calc(${((item.col - 1) * 100) / 7}% + 12px)`,
+              left: `calc(${((skeletonEvent.col - 1) * 100) / 7}% + 12px)`,
               width: `calc(${100 / 7}% - 20px)`,
-              top: `${item.top}px`,
-              height: `${item.height}px`,
+              top: `${skeletonEvent.top}px`,
+              height: `${skeletonEvent.height}px`,
               borderRadius: "14px",
               p: 1.5,
-              bgcolor: getPastelColor(item.color),
+              bgcolor: (theme) => getPastelColor(skeletonEvent.color, theme),
               boxShadow: "0 4px 14px -4px rgba(0,0,0,0.1)",
               backdropFilter: "blur(8px)",
               display: "flex",

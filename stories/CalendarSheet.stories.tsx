@@ -4,10 +4,10 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import dayjs from "dayjs";
 
-import CalendarSheet from "~/components/molecules/CalendarSheet/CalendarSheet";
+import CalendarSheet from "~/components/organisms/CalendarSheet/CalendarSheet";
 
 const meta: Meta<typeof CalendarSheet> = {
-  title: "Molecules/CalendarSheet",
+  title: "Organisms/CalendarSheet",
   component: CalendarSheet,
   tags: ["autodocs"],
   parameters: {

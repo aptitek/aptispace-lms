@@ -8,9 +8,9 @@ import ListItem from "@mui/material/ListItem";
 import InputAdornment from "@mui/material/InputAdornment";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { alpha, useTheme } from "@mui/material/styles";
-
 import { useTranslation } from "react-i18next";
-import PhysicCard from "../../molecules/PhysicCard/PhysicCard";
+
+import PhysicsCard from "../../molecules/PhysicsCard/PhysicsCard";
 import HoloDecorator from "../../molecules/HoloDecorator/HoloDecorator";
 import Avatar from "../../atoms/Avatar/Avatar";
 import Chip from "../../atoms/Chip/Chip";
@@ -466,7 +466,7 @@ export default function ProfileCard(props: ProfileCardProps) {
       }}
       {...restProps}
     >
-      <PhysicCard
+      <PhysicsCard
         isTransparent
         interactive
         ratio="85.6/53.98"
