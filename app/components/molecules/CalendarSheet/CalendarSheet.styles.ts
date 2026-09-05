@@ -202,21 +202,22 @@ export const PerforationHoles = styled("div", {
 
 export const SheetBody = styled("div", {
   shouldForwardProp: (prop) => prop !== "$size" && prop !== "$orientation",
-})<{ $size: CalendarSheetSize; $orientation: CalendarSheetOrientation }>(
-  ({ $size, $orientation }) => {
-    const cfg = SIZE_CONFIG[$size];
-    const isHorizontal = $orientation === "horizontal";
+})<{ $size: CalendarSheetSize; $orientation: CalendarSheetOrientation }>(({
+  $size,
+  $orientation,
+}) => {
+  const cfg = SIZE_CONFIG[$size];
+  const isHorizontal = $orientation === "horizontal";
 
-    return {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: cfg.bodyPadding,
-      gap: isHorizontal ? 0.5 : 0.25,
-    };
-  },
-);
+  return {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: cfg.bodyPadding,
+    gap: isHorizontal ? 0.5 : 0.25,
+  };
+});
 
 export const DayNumber = styled("span", {
   shouldForwardProp: (prop) => prop !== "$size",
@@ -256,25 +257,27 @@ export const WeekdayName = styled("span", {
 
 export const ChipWrapper = styled("div", {
   shouldForwardProp: (prop) => prop !== "$size" && prop !== "$orientation",
-})<{ $size: CalendarSheetSize; $orientation: CalendarSheetOrientation }>(
-  ({ theme, $size, $orientation }) => {
-    const isHorizontal = $orientation === "horizontal";
+})<{ $size: CalendarSheetSize; $orientation: CalendarSheetOrientation }>(({
+  theme,
+  $size,
+  $orientation,
+}) => {
+  const isHorizontal = $orientation === "horizontal";
 
-    return {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: isHorizontal
-        ? theme.spacing(1, 1.5, 1, 0)
-        : theme.spacing(0, 1, 1),
-      transform: $size === "small" ? "scale(0.88)" : "none",
-      transformOrigin: isHorizontal ? "center left" : "top center",
-      "& .MuiChip-root": {
-        fontWeight: 700,
-        height: $size === "small" ? "20px" : "24px",
-        fontSize: $size === "small" ? "0.6875rem" : "0.75rem",
-        borderRadius: "9999px",
-      },
-    };
-  },
-);
+  return {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: isHorizontal
+      ? theme.spacing(1, 1.5, 1, 0)
+      : theme.spacing(0, 1, 1),
+    transform: $size === "small" ? "scale(0.88)" : "none",
+    transformOrigin: isHorizontal ? "center left" : "top center",
+    "& .MuiChip-root": {
+      fontWeight: 700,
+      height: $size === "small" ? "20px" : "24px",
+      fontSize: $size === "small" ? "0.6875rem" : "0.75rem",
+      borderRadius: "9999px",
+    },
+  };
+});

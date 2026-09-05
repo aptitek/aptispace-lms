@@ -131,19 +131,28 @@ export const SizeComparison: Story = {
   render: () => (
     <Box sx={{ display: "flex", gap: 3, alignItems: "flex-end" }}>
       <Box sx={{ textAlign: "center" }}>
-        <Typography variant="caption" sx={{ display: "block", mb: 1, fontWeight: 700 }}>
+        <Typography
+          variant="caption"
+          sx={{ display: "block", mb: 1, fontWeight: 700 }}
+        >
           Small
         </Typography>
         <CalendarSheet date={baseDate} size="small" />
       </Box>
       <Box sx={{ textAlign: "center" }}>
-        <Typography variant="caption" sx={{ display: "block", mb: 1, fontWeight: 700 }}>
+        <Typography
+          variant="caption"
+          sx={{ display: "block", mb: 1, fontWeight: 700 }}
+        >
           Medium
         </Typography>
         <CalendarSheet date={baseDate} size="medium" />
       </Box>
       <Box sx={{ textAlign: "center" }}>
-        <Typography variant="caption" sx={{ display: "block", mb: 1, fontWeight: 700 }}>
+        <Typography
+          variant="caption"
+          sx={{ display: "block", mb: 1, fontWeight: 700 }}
+        >
           Large
         </Typography>
         <CalendarSheet date={baseDate} size="large" />

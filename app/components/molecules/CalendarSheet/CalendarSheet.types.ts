@@ -4,10 +4,7 @@ import type { Dayjs } from "dayjs";
 export type CalendarSheetSize = "small" | "medium" | "large";
 export type CalendarSheetOrientation = "vertical" | "horizontal";
 export type CalendarSheetHeaderColor =
-  | "primary"
-  | "secondary"
-  | "error"
-  | "default";
+  "primary" | "secondary" | "error" | "default";
 export type RelativeChipVariant = "auto" | "relative" | "days";
 
 export interface CalendarSheetProps {
