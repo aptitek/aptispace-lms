@@ -78,6 +78,7 @@ interface FloatingOverlayDeckProps {
   campus: string;
   building: string;
   roomInfo: ReturnType<typeof parseRoomCode>;
+  size?: MapSheetProps["size"];
   doorCode?: string;
   instructions?: string;
   isCodeCopied: boolean;
@@ -111,6 +112,7 @@ function FloatingOverlayDeck(props: FloatingOverlayDeckProps) {
         campus={props.campus}
         building={props.building}
         roomInfo={props.roomInfo}
+        size={props.size}
         doorCode={props.doorCode}
         instructions={props.instructions}
         isCodeCopied={props.isCodeCopied}
@@ -164,13 +166,17 @@ export const MapSheet = forwardRef<HTMLElement, MapSheetProps>(
 
     const roomInfo = useMemo(
       () =>
-        parseRoomCode(
-          config.room,
-          config.floor,
-          config.roomNumber,
-          activeLocale,
-        ),
-      [config.room, config.floor, config.roomNumber, activeLocale],
+        parseRoomCode(config.room, config.floor, config.roomNumber, {
+          locale: activeLocale,
+          roomName: config.roomName,
+        }),
+      [
+        config.room,
+        config.floor,
+        config.roomNumber,
+        activeLocale,
+        config.roomName,
+      ],
     );
 
     const sheetTexts = resolveSheetTexts(
@@ -284,6 +290,7 @@ export const MapSheet = forwardRef<HTMLElement, MapSheetProps>(
         campus={sheetTexts.campus}
         building={sheetTexts.building}
         roomInfo={roomInfo}
+        size={config.size}
         doorCode={config.doorCode}
         instructions={sheetTexts.instructions}
         isCodeCopied={copiedField === "code"}
@@ -368,6 +375,7 @@ export const MapSheet = forwardRef<HTMLElement, MapSheetProps>(
           onCopyAddress={handleCopyAddress}
           onDirections={handleDirections}
           labels={labels}
+          size={config.size}
         />
       </SheetCard>
     );

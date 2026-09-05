@@ -2,20 +2,17 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import Menu from "@mui/material/Menu";
-import { useTheme, alpha } from "@mui/material/styles";
+import AccessCodeChip from "./MapSheetAccessChip";
 
 // Icons
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import ApartmentRoundedIcon from "@mui/icons-material/ApartmentRounded";
 import MeetingRoomRoundedIcon from "@mui/icons-material/MeetingRoomRounded";
 import LayersRoundedIcon from "@mui/icons-material/LayersRounded";
-import DialpadRoundedIcon from "@mui/icons-material/DialpadRounded";
 import LocationOnRoundedIcon from "@mui/icons-material/LocationOnRounded";
 import NavigationRoundedIcon from "@mui/icons-material/NavigationRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import Tooltip from "../../atoms/Tooltip";
 import { cleanCampusName, cleanBuildingName } from "./MapSheet.utils";
@@ -32,11 +29,11 @@ import {
   FloorPill,
   ChipDivider,
   RoomPill,
-  DoorCodePill,
   BottomActionsBar,
   AddressTextWrapper,
   ChipsDeckRow,
   WayfindingChip,
+  NavigationM3Fab,
 } from "./MapSheet.styles";
 
 export interface MapSheetLabels {
@@ -78,6 +75,62 @@ interface ActionsSectionProps {
   onCopyAddress: () => void;
   onDirections: () => void;
   labels: MapSheetLabels;
+  size?: MapSheetSize;
+}
+
+const PAD_MAP: Record<MapSheetSize, string> = {
+  small: "52px",
+  medium: "58px",
+  large: "64px",
+};
+
+const FAB_ICON_SIZE_MAP: Record<MapSheetSize, string> = {
+  small: "1.15rem",
+  medium: "1.3rem",
+  large: "1.45rem",
+};
+
+function getRightPad(
+  showDirectionsButton: boolean,
+  size: MapSheetSize,
+): string {
+  if (!showDirectionsButton) return "14px";
+  return PAD_MAP[size] ?? "58px";
+}
+
+interface CopyAddressButtonProps {
+  isAddressCopied: boolean;
+  onCopyAddress: () => void;
+  labels: MapSheetLabels;
+}
+
+function CopyAddressButton({
+  isAddressCopied,
+  onCopyAddress,
+  labels,
+}: CopyAddressButtonProps) {
+  const title = isAddressCopied ? labels.copiedAddress : labels.copyAddress;
+  return (
+    <Tooltip arrow title={title}>
+      <IconButton
+        size="small"
+        onClick={onCopyAddress}
+        aria-label={labels.copyAddress}
+        data-testid="copy-address-button"
+        sx={{
+          color: isAddressCopied ? "success.main" : "text.secondary",
+          p: 0.5,
+          flexShrink: 0,
+        }}
+      >
+        {isAddressCopied ? (
+          <CheckRoundedIcon fontSize="small" />
+        ) : (
+          <ContentCopyRoundedIcon fontSize="small" />
+        )}
+      </IconButton>
+    </Tooltip>
+  );
 }
 
 export function ActionsSection({
@@ -88,11 +141,13 @@ export function ActionsSection({
   onCopyAddress,
   onDirections,
   labels,
+  size = "medium",
 }: ActionsSectionProps) {
-  const theme = useTheme();
+  const rightPad = getRightPad(showDirectionsButton, size);
+  const iconSize = FAB_ICON_SIZE_MAP[size] ?? "1.3rem";
 
   return (
-    <BottomActionsBar data-testid="map-bottom-actions">
+    <BottomActionsBar data-testid="map-bottom-actions" sx={{ pr: rightPad }}>
       <AddressTextWrapper>
         <LocationOnRoundedIcon
           fontSize="small"
@@ -113,63 +168,28 @@ export function ActionsSection({
             {address}
           </Typography>
         </Tooltip>
+
+        {showCopyAddressButton ? (
+          <CopyAddressButton
+            isAddressCopied={isAddressCopied}
+            onCopyAddress={onCopyAddress}
+            labels={labels}
+          />
+        ) : null}
       </AddressTextWrapper>
 
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 0.75,
-          flexShrink: 0,
-        }}
-      >
-        {showCopyAddressButton ? (
-          <Tooltip
-            arrow
-            title={isAddressCopied ? labels.copiedAddress : labels.copyAddress}
+      {showDirectionsButton ? (
+        <Tooltip arrow title={labels.directions}>
+          <NavigationM3Fab
+            $fabSize={size}
+            onClick={onDirections}
+            aria-label={labels.directions}
+            data-testid="get-directions-button"
           >
-            <IconButton
-              size="small"
-              onClick={onCopyAddress}
-              aria-label={labels.copyAddress}
-              data-testid="copy-address-button"
-              sx={{
-                color: isAddressCopied ? "success.main" : "text.secondary",
-                p: 0.5,
-              }}
-            >
-              {isAddressCopied ? (
-                <CheckRoundedIcon fontSize="small" />
-              ) : (
-                <ContentCopyRoundedIcon fontSize="small" />
-              )}
-            </IconButton>
-          </Tooltip>
-        ) : null}
-
-        {showDirectionsButton ? (
-          <Tooltip arrow title={labels.directions}>
-            <IconButton
-              size="small"
-              onClick={onDirections}
-              aria-label={labels.directions}
-              data-testid="get-directions-button"
-              sx={{
-                backgroundColor: theme.palette.primary.main,
-                color: theme.palette.primary.contrastText,
-                borderRadius: "8px",
-                p: 0.6,
-                "&:hover": {
-                  backgroundColor: theme.palette.primary.dark,
-                  boxShadow: `0 3px 10px ${alpha(theme.palette.primary.main, 0.35)}`,
-                },
-              }}
-            >
-              <NavigationRoundedIcon sx={{ fontSize: "1.05rem" }} />
-            </IconButton>
-          </Tooltip>
-        ) : null}
-      </Box>
+            <NavigationRoundedIcon sx={{ fontSize: iconSize }} />
+          </NavigationM3Fab>
+        </Tooltip>
+      ) : null}
     </BottomActionsBar>
   );
 }
@@ -183,83 +203,23 @@ export function InstructionsMenuTrigger({
   instructions,
   label,
 }: InstructionsMenuTriggerProps) {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-
-  const handleOpen = (e: React.MouseEvent<HTMLElement>) => {
-    e.stopPropagation();
-    setAnchorEl(e.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   return (
-    <>
-      <Tooltip arrow title={label}>
-        <WayfindingChip
-          $variant="instruction"
-          onClick={handleOpen}
-          aria-haspopup="true"
-          aria-expanded={Boolean(anchorEl)}
-          data-testid="instructions-menu-trigger"
-          sx={{ cursor: "pointer" }}
-        >
-          <InfoOutlinedIcon
-            sx={{ fontSize: "0.85rem", color: "warning.main" }}
-          />
-          <span>{label}</span>
-        </WayfindingChip>
-      </Tooltip>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-        data-testid="instructions-menu"
-        slotProps={{
-          paper: {
-            sx: {
-              maxWidth: 360,
-              p: 1.5,
-              borderRadius: "12px",
-              boxShadow: (theme) =>
-                `0 8px 24px ${alpha(theme.palette.common.black, 0.16)}`,
-            },
-          },
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, p: 0.5 }}>
-          <InfoOutlinedIcon
-            sx={{
-              fontSize: "1.1rem",
-              color: "warning.main",
-              mt: 0.25,
-              flexShrink: 0,
-            }}
-          />
-          <Box sx={{ minWidth: 0 }}>
-            <Typography
-              variant="subtitle2"
-              sx={{ fontWeight: 800, mb: 0.5, color: "text.primary" }}
-            >
-              {label}
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-                lineHeight: 1.5,
-                fontSize: "0.8125rem",
-                wordBreak: "break-word",
-              }}
-            >
-              {instructions}
-            </Typography>
-          </Box>
-        </Box>
-      </Menu>
-    </>
+    <AccessCodeChip
+      instructions={instructions}
+      labels={{
+        campus: "",
+        building: "",
+        room: "",
+        floor: "",
+        instructions: label,
+        doorCode: "",
+        copiedDoorCode: "",
+        copyAddress: "",
+        copiedAddress: "",
+        directions: "",
+        copy: "",
+      }}
+    />
   );
 }
 
@@ -267,6 +227,7 @@ export interface CompactChipsItineraryProps {
   campus: string;
   building: string;
   roomInfo: ParsedRoomInfo;
+  size?: MapSheetSize;
   floorPrefix?: string;
   doorCode?: string;
   instructions?: string;
@@ -279,6 +240,7 @@ export function CompactChipsItinerary({
   campus,
   building,
   roomInfo,
+  size = "medium",
   doorCode,
   instructions,
   isCodeCopied,
@@ -313,74 +275,58 @@ export function CompactChipsItinerary({
             data-testid="chip-building"
           >
             <ApartmentRoundedIcon
-              sx={{ fontSize: "0.85rem", color: "info.main" }}
+              sx={{ fontSize: "0.85rem", color: "primary.main" }}
             />
             <span>{cleanBuilding}</span>
           </WayfindingChip>
         </Tooltip>
 
-        {/* Room & Floor Chip: (3 | 02) - Prominently sized at the end of the location hierarchy */}
-        <Tooltip arrow title={roomInfo.tooltipText}>
-          <RoomChipContainer
-            tabIndex={0}
-            role="note"
-            aria-label={roomInfo.tooltipText}
-            data-testid="room-floor-chip"
-          >
-            <Tooltip arrow title={roomInfo.floorLabel}>
-              <FloorPill data-testid="floor-pill">
-                <LayersRoundedIcon sx={{ fontSize: "0.95rem" }} />
-                <span>{roomInfo.floor}</span>
-              </FloorPill>
-            </Tooltip>
-            <ChipDivider aria-hidden="true">|</ChipDivider>
-            <Tooltip arrow title={roomInfo.roomLabel}>
-              <RoomPill data-testid="room-pill">
-                <MeetingRoomRoundedIcon sx={{ fontSize: "0.95rem" }} />
-                <span>{roomInfo.roomNumber}</span>
-              </RoomPill>
-            </Tooltip>
-          </RoomChipContainer>
-        </Tooltip>
-
-        {/* Door Code Pill */}
-        {doorCode ? (
-          <DoorCodePill data-testid="door-code-pill">
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <DialpadRoundedIcon sx={{ fontSize: "0.85rem" }} />
-              <span>{doorCode}</span>
-            </Box>
-            <Tooltip
-              arrow
-              title={isCodeCopied ? labels.copiedDoorCode : labels.copy}
+        {/* Optional Room Name Chip */}
+        {roomInfo.roomName ? (
+          <Tooltip arrow title={roomInfo.roomName}>
+            <WayfindingChip
+              $variant="room"
+              aria-label={roomInfo.roomName}
+              data-testid="chip-room-name"
+              sx={{ fontWeight: 800 }}
             >
-              <IconButton
-                size="small"
-                onClick={onCopyDoorCode}
-                aria-label={labels.doorCode}
-                data-testid="copy-door-code-button"
-                sx={{
-                  p: 0.25,
-                  color: isCodeCopied ? "success.main" : "inherit",
-                }}
-              >
-                {isCodeCopied ? (
-                  <CheckRoundedIcon sx={{ fontSize: "0.85rem" }} />
-                ) : (
-                  <ContentCopyRoundedIcon sx={{ fontSize: "0.85rem" }} />
-                )}
-              </IconButton>
-            </Tooltip>
-          </DoorCodePill>
+              <MeetingRoomRoundedIcon sx={{ fontSize: "0.85rem" }} />
+              <span>{roomInfo.roomName}</span>
+            </WayfindingChip>
+          </Tooltip>
         ) : null}
 
-        {/* Instructions Menu Trigger */}
-        {instructions ? (
-          <InstructionsMenuTrigger
-            instructions={instructions}
-            label={labels.instructions}
-          />
-        ) : null}
+        {/* Room & Floor Chip: (3 | 02) - Prominently sized! */}
+        <RoomChipContainer
+          $size={size}
+          tabIndex={0}
+          role="note"
+          aria-label={roomInfo.tooltipText}
+          data-testid="room-floor-chip"
+        >
+          <Tooltip arrow title={roomInfo.floorLabel}>
+            <FloorPill data-testid="floor-pill">
+              <LayersRoundedIcon />
+              <span>{roomInfo.floor}</span>
+            </FloorPill>
+          </Tooltip>
+          <ChipDivider aria-hidden="true">|</ChipDivider>
+          <Tooltip arrow title={roomInfo.roomLabel}>
+            <RoomPill data-testid="room-pill">
+              <MeetingRoomRoundedIcon />
+              <span>{roomInfo.roomNumber}</span>
+            </RoomPill>
+          </Tooltip>
+        </RoomChipContainer>
+
+        {/* Access Code & Instructions in the same chip */}
+        <AccessCodeChip
+          doorCode={doorCode}
+          instructions={instructions}
+          isCodeCopied={isCodeCopied}
+          onCopyDoorCode={onCopyDoorCode}
+          labels={labels}
+        />
       </ChipsDeckRow>
     </Box>
   );
@@ -409,6 +355,7 @@ export function MapSheetItinerary({
           campus={campus}
           building={building}
           roomInfo={roomInfo}
+          size={size}
           doorCode={doorCode}
           instructions={instructions}
           isCodeCopied={copiedField === "code"}

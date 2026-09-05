@@ -5,14 +5,36 @@ export const DEFAULT_CAMPUS_COORDINATES: MapCoordinates = {
   lon: 2.352222,
 };
 
+export interface ParseRoomCodeOptions {
+  locale?: string;
+  roomName?: string;
+}
+
+interface RoomInfoOptions {
+  isFr?: boolean;
+  roomName?: string;
+}
+
+function formatFloorLabel(floor: string, isFr: boolean): string {
+  if (floor === "0") {
+    return isFr ? "Rez-de-chaussée" : "Ground Floor";
+  }
+  return isFr ? `Étage ${floor}` : `Floor ${floor}`;
+}
+
 function buildRoomInfo(
   floor: string,
   roomNumber: string,
   rawRoom: string,
-  isFr: boolean,
+  options: RoomInfoOptions = {},
 ): ParsedRoomInfo {
-  const floorLabel = isFr ? `Étage ${floor}` : `Floor ${floor}`;
-  const roomLabel = isFr ? `Salle ${roomNumber}` : `Room ${roomNumber}`;
+  const isFr = Boolean(options.isFr);
+  const roomName = options.roomName;
+  const floorLabel = formatFloorLabel(floor, isFr);
+  const prefix = isFr ? "Salle" : "Room";
+  const roomLabel = `${prefix} ${roomNumber}`;
+  const roomIdentifier = rawRoom || roomNumber;
+  const fullRoomLabel = `${prefix} ${roomIdentifier}`;
 
   return {
     floor,
@@ -21,7 +43,9 @@ function buildRoomInfo(
     chipText: `(${floor} | ${roomNumber})`,
     floorLabel,
     roomLabel,
+    fullRoomLabel,
     tooltipText: `${floorLabel} • ${roomLabel}`,
+    roomName: roomName ? roomName.trim() : undefined,
   };
 }
 
@@ -29,7 +53,7 @@ function tryExplicit(
   rawRoom: string,
   explicitFloor?: string | number,
   explicitRoom?: string | number,
-  isFr = false,
+  options: RoomInfoOptions = {},
 ): ParsedRoomInfo | null {
   if (explicitFloor === undefined && explicitRoom === undefined) {
     return null;
@@ -45,22 +69,27 @@ function tryExplicit(
     floor,
     roomNumber,
     rawRoom || `${floor}${roomNumber}`,
-    isFr,
+    options,
   );
 }
 
-function tryPunctuation(rawRoom: string, isFr: boolean): ParsedRoomInfo | null {
+function tryPunctuation(
+  rawRoom: string,
+  isFr: boolean,
+  roomName?: string,
+): ParsedRoomInfo | null {
   const match = rawRoom.match(/([A-Za-z]+[-_/\s]*)?(\d+)[._\-\s/]+(\d+)/);
   if (!match) return null;
 
   const floor = match[2];
   const roomNumber = match[3].padStart(2, "0");
-  return buildRoomInfo(floor, roomNumber, rawRoom, isFr);
+  return buildRoomInfo(floor, roomNumber, rawRoom, { isFr, roomName });
 }
 
 function tryAlphaNumeric(
   rawRoom: string,
   isFr: boolean,
+  roomName?: string,
 ): ParsedRoomInfo | null {
   const match = rawRoom.match(/([A-Za-z\s]+)?(\d{3,4})$/);
   if (!match) return null;
@@ -70,10 +99,14 @@ function tryAlphaNumeric(
   const floor = isFourDigits ? digits.slice(0, 2) : digits.slice(0, 1);
   const roomNumber = isFourDigits ? digits.slice(2) : digits.slice(1);
 
-  return buildRoomInfo(floor, roomNumber, rawRoom, isFr);
+  return buildRoomInfo(floor, roomNumber, rawRoom, { isFr, roomName });
 }
 
-function tryGroundFloor(rawRoom: string, isFr: boolean): ParsedRoomInfo | null {
+function tryGroundFloor(
+  rawRoom: string,
+  isFr: boolean,
+  roomName?: string,
+): ParsedRoomInfo | null {
   if (!/^(RDC|RC|GF|GROUND)/i.test(rawRoom)) return null;
 
   const roomDigits = rawRoom.replace(/^\D+/g, "") || "01";
@@ -81,6 +114,7 @@ function tryGroundFloor(rawRoom: string, isFr: boolean): ParsedRoomInfo | null {
   const floor = "0";
   const floorLabel = isFr ? "Rez-de-chaussée" : "Ground Floor";
   const roomLabel = isFr ? `Salle ${roomNumber}` : `Room ${roomNumber}`;
+  const fullRoomLabel = isFr ? `Salle ${roomNumber}` : `Room ${roomNumber}`;
 
   return {
     floor,
@@ -89,11 +123,17 @@ function tryGroundFloor(rawRoom: string, isFr: boolean): ParsedRoomInfo | null {
     chipText: `(0 | ${roomNumber})`,
     floorLabel,
     roomLabel,
+    fullRoomLabel,
     tooltipText: `${floorLabel} • ${roomLabel}`,
+    roomName: roomName?.trim() || undefined,
   };
 }
 
-function tryDigits(rawRoom: string, isFr: boolean): ParsedRoomInfo | null {
+function tryDigits(
+  rawRoom: string,
+  isFr: boolean,
+  roomName?: string,
+): ParsedRoomInfo | null {
   const match = rawRoom.match(/\d+/);
   if (!match) return null;
 
@@ -102,7 +142,7 @@ function tryDigits(rawRoom: string, isFr: boolean): ParsedRoomInfo | null {
   const roomNumber =
     digits.length > 2 ? digits.slice(-2) : digits.padStart(2, "0");
 
-  return buildRoomInfo(floor, roomNumber, rawRoom, isFr);
+  return buildRoomInfo(floor, roomNumber, rawRoom, { isFr, roomName });
 }
 
 /**
@@ -116,40 +156,62 @@ function tryDigits(rawRoom: string, isFr: boolean): ParsedRoomInfo | null {
  * - "Lab 105" -> floor: "1", room: "05", chip: "(1 | 05)"
  * - "3.12" -> floor: "3", room: "12", chip: "(3 | 12)"
  */
+function resolveLocaleOptions(localeOrOptions?: string | ParseRoomCodeOptions) {
+  if (typeof localeOrOptions === "object" && localeOrOptions !== null) {
+    const loc = localeOrOptions.locale || "en";
+    return {
+      isFr: loc.startsWith("fr"),
+      roomName: localeOrOptions.roomName,
+    };
+  }
+  const loc = localeOrOptions || "en";
+  return {
+    isFr: loc.startsWith("fr"),
+    roomName: undefined,
+  };
+}
+
+function matchPatternStrategies(
+  rawRoom: string,
+  isFr: boolean,
+  roomName?: string,
+): ParsedRoomInfo | null {
+  const matchers = [tryPunctuation, tryAlphaNumeric, tryGroundFloor, tryDigits];
+  for (const matcher of matchers) {
+    const res = matcher(rawRoom, isFr, roomName);
+    if (res) return res;
+  }
+  return null;
+}
+
 export function parseRoomCode(
   roomInput?: string | null,
   explicitFloor?: string | number,
   explicitRoom?: string | number,
-  locale = "en",
+  localeOrOptions?: string | ParseRoomCodeOptions,
 ): ParsedRoomInfo {
-  const isFr = locale.startsWith("fr");
+  const { isFr, roomName } = resolveLocaleOptions(localeOrOptions);
   const rawRoom = (roomInput || "").trim();
+  const roomOpts = { isFr, roomName };
 
   const explicitResult = tryExplicit(
     rawRoom,
     explicitFloor,
     explicitRoom,
-    isFr,
+    roomOpts,
   );
   if (explicitResult) return explicitResult;
 
   if (!rawRoom) {
-    return buildRoomInfo("—", "—", "", isFr);
+    return buildRoomInfo("—", "—", "", roomOpts);
   }
 
-  const punctResult = tryPunctuation(rawRoom, isFr);
-  if (punctResult) return punctResult;
+  const patternResult = matchPatternStrategies(rawRoom, isFr, roomName);
+  if (patternResult) return patternResult;
 
-  const alphaResult = tryAlphaNumeric(rawRoom, isFr);
-  if (alphaResult) return alphaResult;
-
-  const groundResult = tryGroundFloor(rawRoom, isFr);
-  if (groundResult) return groundResult;
-
-  const digitResult = tryDigits(rawRoom, isFr);
-  if (digitResult) return digitResult;
-
-  return buildRoomInfo("0", rawRoom, rawRoom, isFr);
+  const fallbackName = !/\d/.test(rawRoom) ? rawRoom : undefined;
+  const detectedName = roomName || fallbackName;
+  return buildRoomInfo("0", rawRoom, rawRoom, { isFr, roomName: detectedName });
 }
 
 /**

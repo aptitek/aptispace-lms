@@ -1,33 +1,37 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import ApartmentRoundedIcon from "@mui/icons-material/ApartmentRounded";
 import MeetingRoomRoundedIcon from "@mui/icons-material/MeetingRoomRounded";
 import LayersRoundedIcon from "@mui/icons-material/LayersRounded";
-import VpnKeyRoundedIcon from "@mui/icons-material/VpnKeyRounded";
-import BadgeRoundedIcon from "@mui/icons-material/BadgeRounded";
-import DialpadRoundedIcon from "@mui/icons-material/DialpadRounded";
-import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
-import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import Tooltip from "../../atoms/Tooltip";
 import type { ParsedRoomInfo, AccessType } from "./MapSheet.types";
+import AccessCodeChip, { resolveAccessIcon } from "./MapSheetAccessChip";
 import {
   TransitLineWrapper,
-  TransitTrackLine,
+  TransitTrackWrapper,
+  TransitTrackProgress,
   ItineraryStep,
   StepIconBadge,
   StepContent,
-  RoomChipContainer,
-  FloorPill,
-  ChipDivider,
-  RoomPill,
-  InstructionBox,
-  DoorCodePill,
 } from "./MapSheet.styles";
+
+export interface TransitTrackLineProps {
+  className?: string;
+}
+
+/**
+ * Animated vertical wavy connector line using MD3 wavy progress bar from dependencies
+ */
+export function TransitTrackLine({ className }: TransitTrackLineProps) {
+  return (
+    <TransitTrackWrapper className={className} data-testid="transit-track-line">
+      <TransitTrackProgress wavy value={100} thickness={4} />
+    </TransitTrackWrapper>
+  );
+}
 
 import { cleanCampusName, cleanBuildingName } from "./MapSheet.utils";
 
@@ -43,16 +47,6 @@ export interface MapSheetLabels {
   copiedAddress: string;
   directions: string;
   copy: string;
-}
-
-function resolveAccessIcon(accessType?: AccessType) {
-  if (accessType === "badge") {
-    return <BadgeRoundedIcon sx={{ fontSize: "1.1rem" }} />;
-  }
-  if (accessType === "key") {
-    return <VpnKeyRoundedIcon sx={{ fontSize: "1.1rem" }} />;
-  }
-  return <DialpadRoundedIcon sx={{ fontSize: "1.1rem" }} />;
 }
 
 interface InstructionSectionProps {
@@ -82,61 +76,14 @@ export function InstructionSection({
         </StepIconBadge>
       </Tooltip>
       <StepContent>
-        <InstructionBox>
-          {doorCode ? (
-            <DoorCodePill data-testid="door-code-pill">
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <DialpadRoundedIcon sx={{ fontSize: "0.95rem" }} />
-                <span>{doorCode}</span>
-              </Box>
-
-              <Tooltip
-                arrow
-                title={isCopied ? labels.copiedDoorCode : labels.copy}
-              >
-                <IconButton
-                  size="small"
-                  onClick={onCopyDoorCode}
-                  aria-label={labels.doorCode}
-                  data-testid="copy-door-code-button"
-                  sx={{
-                    p: 0.5,
-                    color: isCopied ? "success.main" : "inherit",
-                  }}
-                >
-                  {isCopied ? (
-                    <CheckRoundedIcon fontSize="small" />
-                  ) : (
-                    <ContentCopyRoundedIcon fontSize="small" />
-                  )}
-                </IconButton>
-              </Tooltip>
-            </DoorCodePill>
-          ) : null}
-
-          {instructions ? (
-            <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.75 }}>
-              <InfoOutlinedIcon
-                sx={{
-                  fontSize: "0.9rem",
-                  color: "warning.main",
-                  mt: 0.2,
-                  flexShrink: 0,
-                }}
-              />
-              <Typography
-                variant="caption"
-                sx={{
-                  lineHeight: 1.35,
-                  color: "text.secondary",
-                  fontWeight: 500,
-                }}
-              >
-                {instructions}
-              </Typography>
-            </Box>
-          ) : null}
-        </InstructionBox>
+        <AccessCodeChip
+          doorCode={doorCode}
+          instructions={instructions}
+          accessType={accessType}
+          isCodeCopied={isCopied}
+          onCopyDoorCode={onCopyDoorCode}
+          labels={labels}
+        />
       </StepContent>
     </ItineraryStep>
   );
@@ -207,7 +154,7 @@ export function ExtendedStepperItinerary({
         <StepContent>
           <Typography
             variant="subtitle2"
-            sx={{ fontWeight: 800, color: "text.primary" }}
+            sx={{ fontWeight: 800, color: "primary.main" }}
             aria-label={`${labels.building}: ${building}`}
           >
             {cleanBuilding}
@@ -215,36 +162,53 @@ export function ExtendedStepperItinerary({
         </StepContent>
       </ItineraryStep>
 
-      {/* Step 3: Room & Floor Chip: 302 = (3 | 02) */}
+      {/* Step 3: Floor */}
+      <ItineraryStep data-testid="step-floor">
+        <Tooltip arrow title={roomInfo.floorLabel}>
+          <StepIconBadge $variant="room" aria-label={roomInfo.floorLabel}>
+            <LayersRoundedIcon sx={{ fontSize: "1.15rem" }} />
+          </StepIconBadge>
+        </Tooltip>
+        <StepContent>
+          <Typography
+            variant="subtitle2"
+            sx={{ fontWeight: 800, color: "text.primary" }}
+            data-testid="floor-pill"
+          >
+            {roomInfo.floorLabel}
+          </Typography>
+        </StepContent>
+      </ItineraryStep>
+
+      {/* Step 4: Room */}
       <ItineraryStep data-testid="step-room">
-        <Tooltip arrow title={roomInfo.tooltipText}>
-          <StepIconBadge $variant="room" aria-label={roomInfo.tooltipText}>
+        <Tooltip arrow title={roomInfo.roomLabel}>
+          <StepIconBadge $variant="room" aria-label={roomInfo.roomLabel}>
             <MeetingRoomRoundedIcon sx={{ fontSize: "1.15rem" }} />
           </StepIconBadge>
         </Tooltip>
         <StepContent>
-          <Tooltip arrow title={roomInfo.tooltipText}>
-            <RoomChipContainer
-              tabIndex={0}
-              role="note"
-              aria-label={roomInfo.tooltipText}
-              data-testid="room-floor-chip"
+          <Box
+            sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}
+            data-testid="room-floor-chip"
+          >
+            {roomInfo.roomName ? (
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 800, color: "text.primary" }}
+                data-testid="chip-room-name"
+              >
+                {roomInfo.roomName}
+              </Typography>
+            ) : null}
+            <Typography
+              variant="subtitle2"
+              sx={{ fontWeight: 800, color: "text.primary" }}
+              data-testid="room-pill"
             >
-              <Tooltip arrow title={roomInfo.floorLabel}>
-                <FloorPill data-testid="floor-pill">
-                  <LayersRoundedIcon sx={{ fontSize: "0.95rem" }} />
-                  <span>{roomInfo.floor}</span>
-                </FloorPill>
-              </Tooltip>
-              <ChipDivider aria-hidden="true">|</ChipDivider>
-              <Tooltip arrow title={roomInfo.roomLabel}>
-                <RoomPill data-testid="room-pill">
-                  <MeetingRoomRoundedIcon sx={{ fontSize: "0.95rem" }} />
-                  <span>{roomInfo.roomNumber}</span>
-                </RoomPill>
-              </Tooltip>
-            </RoomChipContainer>
-          </Tooltip>
+              {roomInfo.roomLabel}
+            </Typography>
+          </Box>
         </StepContent>
       </ItineraryStep>
 

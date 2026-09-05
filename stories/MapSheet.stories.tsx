@@ -35,6 +35,11 @@ const meta: Meta<typeof MapSheet> = {
       control: "text",
       description: "Room code automatically parsed into floor and room chip",
     },
+    roomName: {
+      control: "text",
+      description:
+        "Optional custom room name or lecture hall title (e.g. Amphithéâtre Alan Turing)",
+    },
     doorCode: {
       control: "text",
       description: "Keycode or door entry PIN",
@@ -87,6 +92,24 @@ export const DefaultClassroom: Story = {
     doorCode: "*4829#",
     instructions:
       "Badge RFID requis aux portes vitrées après 18h. Prendre l'ascenseur B au 3e étage, salle sur la droite.",
+    accessType: "code",
+    size: "medium",
+    orientation: "horizontal",
+    coordinates: { lat: 48.7118, lon: 2.1698 },
+  },
+};
+
+export const NamedAmphitheater: Story = {
+  args: {
+    address: "Rue Noetzlin, 91190 Gif-sur-Yvette, France",
+    campusName: "Campus Paris-Saclay",
+    buildingName: "Bâtiment Alan Turing",
+    room: "302",
+    roomName: "Amphithéâtre Alan Turing",
+    floor: 3,
+    doorCode: "*4829#",
+    instructions:
+      "Badge RFID requis aux portes vitrées après 18h. Prendre l'ascenseur B au 3e étage.",
     accessType: "code",
     size: "medium",
     orientation: "horizontal",

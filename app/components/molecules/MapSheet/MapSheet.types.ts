@@ -12,7 +12,9 @@ export interface ParsedRoomInfo {
   chipText: string;
   floorLabel: string;
   roomLabel: string;
+  fullRoomLabel: string;
   tooltipText: string;
+  roomName?: string;
 }
 
 export type MapSheetSize = "small" | "medium" | "large";
@@ -77,6 +79,11 @@ export interface MapSheetProps {
    * Automatically parsed to display floor and room in a chip like (3 | 02).
    */
   room?: string;
+
+  /**
+   * Optional room name or lecture hall title (e.g. "Amphithéâtre Alan Turing", "Lab Poincaré").
+   */
+  roomName?: string;
 
   /**
    * Explicit floor override if not parsing from room string.

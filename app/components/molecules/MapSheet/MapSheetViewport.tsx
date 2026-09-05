@@ -1,20 +1,9 @@
 import React from "react";
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
 import ExploreRoundedIcon from "@mui/icons-material/ExploreRounded";
 import NavigationRoundedIcon from "@mui/icons-material/NavigationRounded";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
-import RestartAltRoundedIcon from "@mui/icons-material/RestartAltRounded";
-import ImportContactsRoundedIcon from "@mui/icons-material/ImportContactsRounded";
-import MapRoundedIcon from "@mui/icons-material/MapRounded";
-import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
-import OpenInFullRoundedIcon from "@mui/icons-material/OpenInFullRounded";
-import CloseFullscreenRoundedIcon from "@mui/icons-material/CloseFullscreenRounded";
-import ViewSidebarRoundedIcon from "@mui/icons-material/ViewSidebarRounded";
 import type { Variants } from "framer-motion";
 
-import Tooltip from "../../atoms/Tooltip";
 import type {
   MapSheetOrientation,
   MapCoordinates,
@@ -30,10 +19,10 @@ import {
   PaperCreaseLayer,
   CreaseLine,
   MapIframe,
-  MapControlsToolbar,
   MapCompassBadge,
   FloatingWayfindingOverlay,
 } from "./MapSheet.styles";
+import { ViewportControls, ExtendedCompactButton } from "./MapSheetControls";
 
 export interface MapSheetViewportProps {
   mode: MapSheetMode;
@@ -132,236 +121,6 @@ function UnifiedMapMesh({
   );
 }
 
-interface ModeControlsProps {
-  allowModeToggle?: boolean;
-  mode: MapSheetMode;
-  extendedView?: ExtendedMapView;
-  onToggleMode?: () => void;
-  onToggleExtendedView?: () => void;
-  modeToggleLabel: string;
-  viewToggleLabel: string;
-}
-
-function ModeControls({
-  allowModeToggle,
-  mode,
-  extendedView,
-  onToggleMode,
-  onToggleExtendedView,
-  modeToggleLabel,
-  viewToggleLabel,
-}: ModeControlsProps) {
-  const isExtended = mode === "extended";
-  const isFull = extendedView === "full";
-
-  return (
-    <>
-      {allowModeToggle && onToggleMode ? (
-        <Tooltip arrow title={modeToggleLabel}>
-          <IconButton
-            size="small"
-            onClick={onToggleMode}
-            aria-label={modeToggleLabel}
-            data-testid="mode-toggle-button"
-          >
-            {isExtended ? (
-              <CloseFullscreenRoundedIcon fontSize="small" />
-            ) : (
-              <OpenInFullRoundedIcon fontSize="small" />
-            )}
-          </IconButton>
-        </Tooltip>
-      ) : null}
-
-      {isExtended && onToggleExtendedView ? (
-        <Tooltip arrow title={viewToggleLabel}>
-          <IconButton
-            size="small"
-            onClick={onToggleExtendedView}
-            aria-label={viewToggleLabel}
-            data-testid="extended-view-toggle-button"
-          >
-            {isFull ? (
-              <ViewSidebarRoundedIcon fontSize="small" />
-            ) : (
-              <MapRoundedIcon fontSize="small" />
-            )}
-          </IconButton>
-        </Tooltip>
-      ) : null}
-    </>
-  );
-}
-
-interface ZoomControlsProps {
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onResetZoom: () => void;
-  titleOsm: string;
-  osmHref: string;
-  labelZoomIn: string;
-  labelZoomOut: string;
-  labelResetView: string;
-}
-
-function ZoomControls({
-  onZoomIn,
-  onZoomOut,
-  onResetZoom,
-  titleOsm,
-  osmHref,
-  labelZoomIn,
-  labelZoomOut,
-  labelResetView,
-}: ZoomControlsProps) {
-  return (
-    <>
-      <Tooltip arrow title={labelZoomIn}>
-        <IconButton
-          size="small"
-          onClick={onZoomIn}
-          aria-label={labelZoomIn}
-          data-testid="zoom-in-button"
-        >
-          <AddRoundedIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-
-      <Tooltip arrow title={labelZoomOut}>
-        <IconButton
-          size="small"
-          onClick={onZoomOut}
-          aria-label={labelZoomOut}
-          data-testid="zoom-out-button"
-        >
-          <RemoveRoundedIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-
-      <Tooltip arrow title={labelResetView}>
-        <IconButton
-          size="small"
-          onClick={onResetZoom}
-          aria-label={labelResetView}
-          data-testid="zoom-reset-button"
-        >
-          <RestartAltRoundedIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-
-      <Tooltip arrow title={titleOsm}>
-        <IconButton
-          size="small"
-          component="a"
-          href={osmHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={titleOsm}
-          data-testid="osm-link-button"
-        >
-          <OpenInNewRoundedIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    </>
-  );
-}
-
-interface MapToolbarProps {
-  allowFoldToggle: boolean;
-  foldButtonLabel: string;
-  isFolded: boolean;
-  onToggleFold: () => void;
-  allowModeToggle?: boolean;
-  mode: MapSheetMode;
-  extendedView?: ExtendedMapView;
-  onToggleMode?: () => void;
-  onToggleExtendedView?: () => void;
-  modeToggleLabel: string;
-  viewToggleLabel: string;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onResetZoom: () => void;
-  titleOsm: string;
-  osmHref: string;
-  labelZoomIn: string;
-  labelZoomOut: string;
-  labelResetView: string;
-}
-
-function MapToolbar(props: MapToolbarProps) {
-  return (
-    <MapControlsToolbar data-testid="map-controls-toolbar">
-      <ModeControls
-        allowModeToggle={props.allowModeToggle !== false}
-        mode={props.mode}
-        extendedView={props.extendedView}
-        onToggleMode={props.onToggleMode}
-        onToggleExtendedView={props.onToggleExtendedView}
-        modeToggleLabel={props.modeToggleLabel}
-        viewToggleLabel={props.viewToggleLabel}
-      />
-
-      {props.allowFoldToggle ? (
-        <Tooltip arrow title={props.foldButtonLabel}>
-          <IconButton
-            size="small"
-            onClick={props.onToggleFold}
-            aria-label={props.foldButtonLabel}
-            data-testid="fold-toggle-button"
-          >
-            {props.isFolded ? (
-              <MapRoundedIcon fontSize="small" />
-            ) : (
-              <ImportContactsRoundedIcon fontSize="small" />
-            )}
-          </IconButton>
-        </Tooltip>
-      ) : null}
-
-      <ZoomControls
-        onZoomIn={props.onZoomIn}
-        onZoomOut={props.onZoomOut}
-        onResetZoom={props.onResetZoom}
-        titleOsm={props.titleOsm}
-        osmHref={props.osmHref}
-        labelZoomIn={props.labelZoomIn}
-        labelZoomOut={props.labelZoomOut}
-        labelResetView={props.labelResetView}
-      />
-    </MapControlsToolbar>
-  );
-}
-
-interface CompactExpandButtonProps {
-  onToggleMode?: () => void;
-  label: string;
-}
-
-function CompactExpandButton({
-  onToggleMode,
-  label,
-}: CompactExpandButtonProps) {
-  if (!onToggleMode) return null;
-  return (
-    <MapControlsToolbar
-      data-testid="map-controls-toolbar"
-      sx={{ top: 8, bottom: "auto", right: 8 }}
-    >
-      <Tooltip arrow title={label}>
-        <IconButton
-          size="small"
-          onClick={onToggleMode}
-          aria-label={label}
-          data-testid="mode-toggle-button"
-          sx={{ width: 26, height: 26, padding: "2px" }}
-        >
-          <OpenInFullRoundedIcon sx={{ fontSize: "0.95rem" }} />
-        </IconButton>
-      </Tooltip>
-    </MapControlsToolbar>
-  );
-}
-
 function resolveViewportLabels(
   isExtended: boolean,
   isFull: boolean,
@@ -377,6 +136,60 @@ function resolveViewportLabels(
     : (props.labelFullMapView ?? "Full Map View");
   const foldStatus = isFolded ? props.labelFolded : props.labelUnfolded;
   return { foldButtonLabel, modeToggleLabel, viewToggleLabel, foldStatus };
+}
+
+interface ExtendedOverlaysProps {
+  dmsCoords?: string;
+  scaleRatio: number;
+  foldStatus: string;
+  currentZoom: number;
+  allowModeToggle?: boolean;
+  onToggleMode?: () => void;
+  modeToggleLabel: string;
+}
+
+function ExtendedOverlays({
+  dmsCoords,
+  scaleRatio,
+  foldStatus,
+  currentZoom,
+  allowModeToggle,
+  onToggleMode,
+  modeToggleLabel,
+}: ExtendedOverlaysProps) {
+  return (
+    <>
+      <PaperTopTape data-testid="map-top-tape">
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <ExploreRoundedIcon sx={{ fontSize: "0.85rem" }} />
+          <span>OSM • {dmsCoords}</span>
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <span>SCALE 1:{scaleRatio}</span>
+          <span>•</span>
+          <span>{foldStatus}</span>
+        </Box>
+      </PaperTopTape>
+
+      <MapCompassBadge data-testid="map-compass-badge">
+        <NavigationRoundedIcon
+          sx={{
+            fontSize: "0.95rem",
+            color: "primary.main",
+            transform: "rotate(-45deg)",
+          }}
+        />
+        <span>{currentZoom}x ZOOM</span>
+      </MapCompassBadge>
+
+      {allowModeToggle !== false ? (
+        <ExtendedCompactButton
+          onToggleMode={onToggleMode}
+          label={modeToggleLabel}
+        />
+      ) : null}
+    </>
+  );
 }
 
 export function MapSheetViewport(props: MapSheetViewportProps) {
@@ -400,33 +213,16 @@ export function MapSheetViewport(props: MapSheetViewportProps) {
       $mode={props.mode}
       $isFullMap={isFullMap}
     >
-      {/* Paper Surveyor Top Tape with DMS Coordinates - Extended Mode Only */}
       {isExtended ? (
-        <PaperTopTape data-testid="map-top-tape">
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <ExploreRoundedIcon sx={{ fontSize: "0.85rem" }} />
-            <span>OSM • {props.dmsCoords}</span>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <span>SCALE 1:{scaleRatio}</span>
-            <span>•</span>
-            <span>{labels.foldStatus}</span>
-          </Box>
-        </PaperTopTape>
-      ) : null}
-
-      {/* Compass Rose Stamp - Extended Mode Only */}
-      {isExtended ? (
-        <MapCompassBadge data-testid="map-compass-badge">
-          <NavigationRoundedIcon
-            sx={{
-              fontSize: "0.95rem",
-              color: "primary.main",
-              transform: "rotate(-45deg)",
-            }}
-          />
-          <span>{props.currentZoom}x ZOOM</span>
-        </MapCompassBadge>
+        <ExtendedOverlays
+          dmsCoords={props.dmsCoords}
+          scaleRatio={scaleRatio}
+          foldStatus={labels.foldStatus}
+          currentZoom={props.currentZoom}
+          allowModeToggle={props.allowModeToggle}
+          onToggleMode={props.onToggleMode}
+          modeToggleLabel={labels.modeToggleLabel}
+        />
       ) : null}
 
       <UnifiedMapMesh
@@ -437,44 +233,20 @@ export function MapSheetViewport(props: MapSheetViewportProps) {
         isCompact={!isExtended}
       />
 
-      {/* Floating Wayfinding Deck in Full Map Mode */}
       {isFullMap && props.children ? (
         <FloatingWayfindingOverlay data-testid="floating-wayfinding-overlay">
           {props.children}
         </FloatingWayfindingOverlay>
       ) : null}
 
-      {/* Map Controls: Full toolbar in extended mode, clean minimal expand button in compact mode */}
-      {props.showControls ? (
-        isExtended ? (
-          <MapToolbar
-            allowFoldToggle={props.allowFoldToggle}
-            foldButtonLabel={labels.foldButtonLabel}
-            isFolded={props.isFolded}
-            onToggleFold={props.onToggleFold}
-            allowModeToggle={props.allowModeToggle}
-            mode={props.mode}
-            extendedView={viewMode}
-            onToggleMode={props.onToggleMode}
-            onToggleExtendedView={props.onToggleExtendedView}
-            modeToggleLabel={labels.modeToggleLabel}
-            viewToggleLabel={labels.viewToggleLabel}
-            onZoomIn={props.onZoomIn}
-            onZoomOut={props.onZoomOut}
-            onResetZoom={props.onResetZoom}
-            titleOsm={props.titleOsm}
-            osmHref={osmHref}
-            labelZoomIn={props.labelZoomIn}
-            labelZoomOut={props.labelZoomOut}
-            labelResetView={props.labelResetView}
-          />
-        ) : props.allowModeToggle !== false ? (
-          <CompactExpandButton
-            onToggleMode={props.onToggleMode}
-            label={labels.modeToggleLabel}
-          />
-        ) : null
-      ) : null}
+      <ViewportControls
+        showControls={props.showControls}
+        isExtended={isExtended}
+        viewMode={viewMode}
+        labels={labels}
+        osmHref={osmHref}
+        props={props}
+      />
     </MapPerspectiveWrapper>
   );
 }

@@ -1,4 +1,12 @@
 import { styled, alpha } from "@mui/material/styles";
+import Fab from "@mui/material/Fab";
+import { Progress } from "react-material-expressive";
+export {
+  DoorCodePill,
+  ChipsDeckRow,
+  WayfindingChip,
+  AddressTextWrapper,
+} from "./MapSheetChips.styles";
 import type {
   MapSheetSize,
   MapSheetOrientation,
@@ -161,6 +169,7 @@ export const ItineraryContainer = styled("section", {
     boxSizing: "border-box",
     minWidth: 0,
     overflow: "visible",
+    height: isExtended ? "100%" : "auto",
     backgroundColor: "transparent",
     ...theme.applyStyles("dark", {
       backgroundColor: alpha(theme.palette.background.default, 0.25),
@@ -175,7 +184,9 @@ export const TransitLineWrapper = styled("div")({
   position: "relative",
   display: "flex",
   flexDirection: "column",
-  gap: 8,
+  justifyContent: "space-between",
+  height: "100%",
+  minHeight: 250,
   minWidth: 0,
 });
 
@@ -191,16 +202,52 @@ export const ItineraryStep = styled("div")({
 });
 
 /**
- * Dotted line connecting adjacent itinerary nodes
+ * Container wrapping the vertical wavy connector line linking itinerary nodes
  */
-export const TransitTrackLine = styled("div")(({ theme }) => ({
+export const TransitTrackWrapper = styled("div")({
   position: "absolute",
-  top: 16,
-  left: 13,
-  bottom: 8,
-  width: 2,
-  borderLeft: `2px dashed ${alpha(theme.palette.primary.main, 0.35)}`,
+  top: 14,
+  left: 0,
+  bottom: 14,
+  width: 28,
+  overflow: "hidden",
+  pointerEvents: "none",
   zIndex: 1,
+});
+
+/**
+ * MD3 Expressive wavy progress indicator rotated 90 degrees to form the vertical itinerary transit line
+ */
+export const TransitTrackProgress = styled(Progress)(({ theme }) => ({
+  position: "absolute",
+  left: 14,
+  top: 0,
+  transform: "rotate(90deg) translateY(-5px)",
+  transformOrigin: "0 0",
+  width: "1000px !important",
+  color: theme.palette.primary.main,
+  filter: `drop-shadow(0 0 4px ${alpha(theme.palette.primary.main, 0.45)})`,
+  "& .linearDeterminate": {
+    overflow: "visible !important",
+  },
+  "& .text-primary": {
+    color: "inherit !important",
+  },
+  "& .bg-secondary-container": {
+    display: "none !important",
+  },
+  "& span.rounded-full": {
+    display: "none !important",
+  },
+  "@media (prefers-reduced-motion: reduce)": {
+    "& .wavePhase": {
+      animation: "none !important",
+    },
+  },
+  ...theme.applyStyles("dark", {
+    color: theme.palette.primary.light || theme.palette.primary.main,
+    filter: `drop-shadow(0 0 6px ${alpha(theme.palette.primary.main, 0.65)})`,
+  }),
 }));
 
 /**
@@ -214,7 +261,7 @@ export const StepIconBadge = styled("div", {
 }) => {
   const colorMap = {
     campus: theme.palette.success.main,
-    building: theme.palette.info.main,
+    building: theme.palette.primary.main,
     room: theme.palette.secondary.main,
     instruction: theme.palette.warning.main,
   };
@@ -229,10 +276,12 @@ export const StepIconBadge = styled("div", {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: alpha(color, 0.12),
+    backgroundColor: theme.palette.background.paper,
+    backgroundImage: `linear-gradient(${alpha(color, 0.15)}, ${alpha(color, 0.15)})`,
     color: color,
-    border: `1px solid ${alpha(color, 0.25)}`,
+    border: `1px solid ${alpha(color, 0.3)}`,
     flexShrink: 0,
+    boxShadow: `0 1px 3px ${alpha(color, 0.1)}`,
   };
 });
 
@@ -246,39 +295,69 @@ export const StepContent = styled("div")({
   flex: 1,
 });
 
+const ROOM_CHIP_SIZE_METRICS: Record<
+  MapSheetSize,
+  { fontSize: string; padding: string; borderRadius: string; gap: number }
+> = {
+  small: {
+    fontSize: "1.1rem",
+    padding: "5px 12px",
+    borderRadius: "10px",
+    gap: 6,
+  },
+  medium: {
+    fontSize: "1.35rem",
+    padding: "7px 18px",
+    borderRadius: "12px",
+    gap: 8,
+  },
+  large: {
+    fontSize: "1.65rem",
+    padding: "9px 22px",
+    borderRadius: "14px",
+    gap: 8,
+  },
+};
+
 /**
  * Expressive Room & Floor Chip: (3 | 02)
  */
-export const RoomChipContainer = styled("div")(({ theme }) => {
+export const RoomChipContainer = styled("div", {
+  shouldForwardProp: (prop) => prop !== "$size",
+})<{ $size?: MapSheetSize }>(({ theme, $size = "medium" }) => {
   const color = theme.palette.secondary.main;
+  const metrics =
+    ROOM_CHIP_SIZE_METRICS[$size] ?? ROOM_CHIP_SIZE_METRICS.medium;
+
   return {
     display: "inline-flex",
     alignItems: "center",
-    gap: 6,
-    padding: "5px 14px",
-    borderRadius: "9px",
-    backgroundColor: alpha(color, 0.08),
-    border: `1px solid ${alpha(color, 0.32)}`,
+    gap: metrics.gap,
+    padding: metrics.padding,
+    borderRadius: metrics.borderRadius,
+    backgroundColor: alpha(color, 0.1),
+    border: `1.5px solid ${alpha(color, 0.42)}`,
     color: theme.palette.secondary.dark || color,
-    fontSize: "0.95rem",
-    fontWeight: 800,
+    fontSize: metrics.fontSize,
+    fontWeight: 900,
     fontFamily: "SFMono-Regular, Menlo, Monaco, Consolas, monospace",
     width: "fit-content",
-    boxShadow: `0 1px 3px ${alpha(color, 0.08)}`,
-    lineHeight: 1.3,
+    boxShadow: `0 2px 8px ${alpha(color, 0.16)}`,
+    lineHeight: 1.25,
     userSelect: "none",
+    letterSpacing: "0.02em",
     transition:
       "transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease",
     "&:hover": {
       transform: "translateY(-1px)",
       borderColor: color,
-      boxShadow: `0 2px 8px ${alpha(color, 0.2)}`,
+      boxShadow: `0 4px 14px ${alpha(color, 0.3)}`,
     },
     ...theme.applyStyles("dark", {
-      backgroundColor: alpha(color, 0.14),
-      borderColor: alpha(color, 0.45),
+      backgroundColor: alpha(color, 0.18),
+      borderColor: alpha(color, 0.55),
       color: theme.palette.secondary.light || color,
-      boxShadow: `0 1px 5px ${alpha(color, 0.22)}`,
+      boxShadow: `0 2px 10px ${alpha(color, 0.3)}`,
     }),
   };
 });
@@ -289,11 +368,14 @@ export const RoomChipContainer = styled("div")(({ theme }) => {
 export const FloorPill = styled("span")({
   display: "inline-flex",
   alignItems: "center",
-  gap: 4,
+  gap: 5,
   color: "inherit",
-  fontWeight: 800,
+  fontWeight: 900,
   fontSize: "inherit",
   userSelect: "none",
+  "& svg": {
+    fontSize: "1.15em",
+  },
 });
 
 /**
@@ -301,10 +383,11 @@ export const FloorPill = styled("span")({
  */
 export const ChipDivider = styled("span")(({ theme }) => ({
   color: alpha(theme.palette.secondary.main, 0.45),
-  fontWeight: 500,
+  fontWeight: 400,
   fontSize: "inherit",
-  margin: "0 2px",
+  margin: "0 3px",
   userSelect: "none",
+  opacity: 0.7,
 }));
 
 /**
@@ -313,57 +396,16 @@ export const ChipDivider = styled("span")(({ theme }) => ({
 export const RoomPill = styled("span")({
   display: "inline-flex",
   alignItems: "center",
-  gap: 4,
+  gap: 5,
   color: "inherit",
-  fontWeight: 800,
+  fontWeight: 900,
   fontSize: "inherit",
   letterSpacing: "0.02em",
   userSelect: "none",
+  "& svg": {
+    fontSize: "1.15em",
+  },
 });
-
-/**
- * Tactical instruction box for door security codes and entrance notes
- */
-export const InstructionBox = styled("div")(({ theme }) => ({
-  position: "relative",
-  display: "flex",
-  flexDirection: "column",
-  gap: 4,
-  padding: "4px 8px",
-  borderRadius: "8px",
-  backgroundColor: alpha(theme.palette.warning.main, 0.07),
-  border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`,
-  marginTop: 2,
-  ...theme.applyStyles("dark", {
-    backgroundColor: alpha(theme.palette.warning.main, 0.1),
-    borderColor: alpha(theme.palette.warning.main, 0.25),
-  }),
-}));
-
-/**
- * Door code display pill with one-click copy button
- */
-export const DoorCodePill = styled("div")(({ theme }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 6,
-  padding: "2px 8px",
-  borderRadius: "7px",
-  backgroundColor: alpha(theme.palette.error.main, 0.08),
-  border: `1px dashed ${alpha(theme.palette.error.main, 0.42)}`,
-  fontFamily: "SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-  fontWeight: 800,
-  fontSize: "0.78rem",
-  letterSpacing: "0.04em",
-  color: theme.palette.error.dark || theme.palette.error.main,
-  width: "fit-content",
-  lineHeight: 1.3,
-  ...theme.applyStyles("dark", {
-    backgroundColor: alpha(theme.palette.error.main, 0.12),
-    borderColor: alpha(theme.palette.error.main, 0.5),
-    color: theme.palette.error.light || theme.palette.error.main,
-  }),
-}));
 
 /**
  * Main content body containing the map viewport and the wayfinding itinerary
@@ -392,6 +434,7 @@ export const CardBodyWrapper = styled("div", {
  * Full-width bottom action strip for directions, copy address, and navigation
  */
 export const BottomActionsBar = styled("footer")(({ theme }) => ({
+  position: "relative",
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
@@ -404,6 +447,7 @@ export const BottomActionsBar = styled("footer")(({ theme }) => ({
   boxSizing: "border-box",
   minWidth: 0,
   flexShrink: 0,
+  overflow: "visible",
   ...theme.applyStyles("dark", {
     backgroundColor: alpha(theme.palette.background.default, 0.45),
     borderTopColor: alpha(theme.palette.divider, 0.2),
@@ -411,78 +455,54 @@ export const BottomActionsBar = styled("footer")(({ theme }) => ({
 }));
 
 /**
- * Address text container with truncated overflow protection
+ * Material Design 3 (MD3) Circular Floating Action Button for Navigation / Directions
+ * Features circular container shape (borderRadius: 50%), elevated floating shadow,
+ * smooth cubic-bezier transitions, and high-contrast styling.
  */
-export const AddressTextWrapper = styled("div")({
-  display: "flex",
-  alignItems: "center",
-  gap: 6,
-  minWidth: 0,
-  flex: 1,
-});
-
-/**
- * Row holding wayfinding chips (Campus, Building, Room, Code)
- */
-export const ChipsDeckRow = styled("div")({
-  display: "flex",
-  alignItems: "center",
-  gap: 6,
-  flexWrap: "wrap",
-  minWidth: 0,
-});
-
-/**
- * Expressive Wayfinding Chip for Campus, Building, and Instructions
- */
-export const WayfindingChip = styled("div", {
-  shouldForwardProp: (prop) => prop !== "$variant",
-})<{ $variant?: "campus" | "building" | "instruction" }>(({
+export const NavigationM3Fab = styled(Fab, {
+  shouldForwardProp: (prop) => prop !== "$fabSize",
+})<{ $fabSize?: "small" | "medium" | "large" }>(({
   theme,
-  $variant = "campus",
+  $fabSize = "medium",
 }) => {
-  const isCampus = $variant === "campus";
-  const isInstruction = $variant === "instruction";
-  const colorObj = isCampus
-    ? theme.palette.success
-    : isInstruction
-      ? theme.palette.warning
-      : theme.palette.info;
-  const color = colorObj.main;
+  const sizePx = $fabSize === "small" ? 38 : $fabSize === "large" ? 48 : 44;
+  const topOffsetPx =
+    $fabSize === "small" ? -19 : $fabSize === "large" ? -24 : -22;
 
   return {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 5,
-    padding: "3px 8px",
-    borderRadius: "8px",
-    backgroundColor: alpha(color, 0.08),
-    border: `1px solid ${alpha(color, 0.3)}`,
-    color: colorObj.dark || color,
-    fontSize: "0.75rem",
-    fontWeight: 700,
-    maxWidth: "200px",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    userSelect: "none",
-    boxShadow: `0 1px 2px ${alpha(color, 0.06)}`,
-    transition:
-      "transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease",
+    position: "absolute",
+    right: 14,
+    top: topOffsetPx,
+    width: sizePx,
+    height: sizePx,
+    minHeight: sizePx,
+    borderRadius: "50%",
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    zIndex: 10,
+    boxShadow: `0 6px 18px ${alpha(theme.palette.primary.main, 0.45)}, 0 3px 8px ${alpha(theme.palette.common.black, 0.25)}`,
+    transition: "all 0.25s cubic-bezier(0.2, 0, 0, 1)",
+    flexShrink: 0,
     "&:hover": {
-      transform: "translateY(-1px)",
-      borderColor: color,
-      boxShadow: `0 2px 6px ${alpha(color, 0.18)}`,
+      backgroundColor: theme.palette.primary.dark,
+      transform: "scale(1.08)",
+      boxShadow: `0 10px 24px ${alpha(theme.palette.primary.main, 0.6)}, 0 4px 12px ${alpha(theme.palette.common.black, 0.35)}`,
+    },
+    "&:active": {
+      transform: "scale(0.96)",
+      boxShadow: `0 3px 8px ${alpha(theme.palette.primary.main, 0.4)}`,
+    },
+    "&.Mui-focusVisible": {
+      outline: `2px solid ${theme.palette.primary.main}`,
+      outlineOffset: 3,
     },
     ...theme.applyStyles("dark", {
-      backgroundColor: alpha(color, 0.14),
-      borderColor: alpha(color, 0.42),
-      color: colorObj.light || color,
+      backgroundColor: theme.palette.primary.main,
+      boxShadow: `0 6px 20px rgba(0, 0, 0, 0.55), 0 0 20px ${alpha(theme.palette.primary.main, 0.45)}`,
+      "&:hover": {
+        backgroundColor: theme.palette.primary.light,
+        boxShadow: `0 10px 28px rgba(0, 0, 0, 0.65), 0 0 28px ${alpha(theme.palette.primary.main, 0.7)}`,
+      },
     }),
-    "& span": {
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap",
-    },
   };
 });

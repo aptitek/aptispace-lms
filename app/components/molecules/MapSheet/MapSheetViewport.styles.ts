@@ -244,16 +244,18 @@ export const MapControlsToolbar = styled("div")(({ theme }) => ({
   position: "absolute",
   bottom: 8,
   right: 8,
+  maxWidth: "calc(100% - 16px)",
   display: "flex",
   alignItems: "center",
-  gap: 4,
-  padding: "2px 6px",
+  gap: 3,
+  padding: "2px 5px",
   borderRadius: "10px",
   backgroundColor: alpha(theme.palette.background.paper, 0.88),
   backdropFilter: "blur(10px)",
   border: `1px solid ${alpha(theme.palette.divider, 0.35)}`,
   boxShadow: "0 3px 10px rgba(0, 0, 0, 0.1)",
   zIndex: 5,
+  boxSizing: "border-box",
 }));
 
 /**

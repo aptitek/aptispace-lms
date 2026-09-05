@@ -89,6 +89,16 @@ describe("MapSheet Molecule", () => {
       expect(parsed.roomNumber).toBe("—");
       expect(parsed.chipText).toBe("(— | —)");
     });
+
+    it("supports explicit roomName parameter and computes fullRoomLabel", () => {
+      const parsed = parseRoomCode("302", undefined, undefined, {
+        locale: "en",
+        roomName: "Amphithéâtre Alan Turing",
+      });
+      expect(parsed.roomName).toBe("Amphithéâtre Alan Turing");
+      expect(parsed.fullRoomLabel).toBe("Room 302");
+      expect(parsed.floorLabel).toBe("Floor 3");
+    });
   });
 
   describe("URL & Coordinate helpers", () => {
@@ -286,10 +296,85 @@ describe("MapSheet Molecule", () => {
 
       expect(html).toContain('data-testid="step-campus"');
       expect(html).toContain('data-testid="step-building"');
+      expect(html).toContain('data-testid="step-floor"');
       expect(html).toContain('data-testid="step-room"');
+      expect(html).toContain('data-testid="room-floor-chip"');
       expect(html).toContain('data-testid="step-instructions"');
       expect(html).toContain('data-testid="mode-toggle-button"');
       expect(html).toContain('data-testid="extended-view-toggle-button"');
+    });
+
+    it("renders floor and room chip prominently in compact mode", () => {
+      const html = renderWithTheme(
+        React.createElement(MapSheet, {
+          address: defaultAddress,
+          campusName: "Campus Paris-Saclay",
+          buildingName: "Bâtiment Alan Turing",
+          room: "302",
+          mode: "compact",
+        }),
+      );
+
+      expect(html).toContain('data-testid="room-floor-chip"');
+      expect(html).toContain('data-testid="floor-pill"');
+      expect(html).toContain('data-testid="room-pill"');
+      expect(html).toContain("3");
+      expect(html).toContain("02");
+    });
+
+    it("renders custom room name chip when roomName is provided", () => {
+      const html = renderWithTheme(
+        React.createElement(MapSheet, {
+          address: defaultAddress,
+          campusName: "Campus Paris-Saclay",
+          buildingName: "Bâtiment Alan Turing",
+          room: "302",
+          roomName: "Amphithéâtre Alan Turing",
+          mode: "compact",
+        }),
+      );
+
+      expect(html).toContain('data-testid="chip-room-name"');
+      expect(html).toContain("Amphithéâtre Alan Turing");
+      expect(html).toContain('data-testid="room-floor-chip"');
+      expect(html).toContain("3");
+      expect(html).toContain("02");
+    });
+
+    it("combines door code and instructions in the same chip and provides hover card", () => {
+      const html = renderWithTheme(
+        React.createElement(MapSheet, {
+          address: defaultAddress,
+          room: "302",
+          doorCode: "4920#",
+          instructions: "Entrée côté nord, sonner à l'accueil",
+          mode: "compact",
+        }),
+      );
+
+      // In the same chip
+      expect(html).toContain('data-testid="door-code-pill"');
+      expect(html).toContain("4920#");
+      expect(html).toContain('data-testid="instructions-menu-trigger"');
+      expect(html).toContain('data-testid="copy-door-code-button"');
+    });
+
+    it("removes static text instruction in extended mode while keeping instruction trigger", () => {
+      const html = renderWithTheme(
+        React.createElement(MapSheet, {
+          address: defaultAddress,
+          room: "302",
+          doorCode: "4920#",
+          instructions: "Sonner à l'interphone puis monter au 3ème",
+          mode: "extended",
+          extendedView: "split",
+        }),
+      );
+
+      expect(html).toContain('data-testid="step-instructions"');
+      expect(html).toContain('data-testid="door-code-pill"');
+      expect(html).toContain("4920#");
+      expect(html).toContain('data-testid="instructions-menu-trigger"');
     });
   });
 
