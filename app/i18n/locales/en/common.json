@@ -456,5 +456,35 @@
       "regenerateBtn": "Regenerate Token",
       "done": "Done"
     }
+  },
+  "mapSheet": {
+    "title": "Location & Access",
+    "campus": "Campus",
+    "building": "Building",
+    "room": "Room",
+    "floor": "Floor",
+    "level": "Level",
+    "instructions": "Instructions",
+    "doorCode": "Door Code",
+    "copiedDoorCode": "Door code copied!",
+    "copyAddress": "Copy Address",
+    "copiedAddress": "Address copied to clipboard!",
+    "getDirections": "Get Directions",
+    "openOsm": "OpenStreetMap",
+    "unfoldMap": "Unfold Map",
+    "foldMap": "Fold Map",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "resetView": "Reset View",
+    "defaultCampus": "AptiSpace Campus",
+    "defaultBuilding": "Main Academic Hall",
+    "defaultInstructions": "Scan student badge or enter keycode at the main glass entrance door.",
+    "foldStatusFolded": "Folded Paper Map",
+    "foldStatusUnfolded": "Unfolded Map View",
+    "expandMap": "Extended Full Map",
+    "collapseMap": "Compact Map View",
+    "fullMapView": "Full Map View",
+    "splitView": "Side-by-Side Steps"
   }
 }
+

@@ -456,5 +456,35 @@
       "regenerateBtn": "Renouveler le jeton",
       "done": "Terminé"
     }
+  },
+  "mapSheet": {
+    "title": "Localisation & Accès",
+    "campus": "Campus",
+    "building": "Bâtiment",
+    "room": "Salle",
+    "floor": "Étage",
+    "level": "Niveau",
+    "instructions": "Consignes d'accès",
+    "doorCode": "Code d'accès",
+    "copiedDoorCode": "Code porte copié !",
+    "copyAddress": "Copier l'adresse",
+    "copiedAddress": "Adresse copiée dans le presse-papier !",
+    "getDirections": "Itinéraire",
+    "openOsm": "OpenStreetMap",
+    "unfoldMap": "Déplier le plan",
+    "foldMap": "Replier le plan",
+    "zoomIn": "Zoomer",
+    "zoomOut": "Dézoomer",
+    "resetView": "Réinitialiser",
+    "defaultCampus": "Campus AptiSpace",
+    "defaultBuilding": "Bâtiment Principal",
+    "defaultInstructions": "Badge étudiant requis à l'entrée vitrée ou saisir le digicode.",
+    "foldStatusFolded": "Plan papier plié",
+    "foldStatusUnfolded": "Vue plan déplié",
+    "expandMap": "Mode carte étendue",
+    "collapseMap": "Mode carte compacte",
+    "fullMapView": "Plein écran carte",
+    "splitView": "Vue côte-à-côte"
   }
 }
+
