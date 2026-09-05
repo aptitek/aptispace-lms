@@ -48,14 +48,30 @@ export const FLAG_COLORS = {
   uk: UK_FLAG_COLORS,
 } as const;
 
+// Progress percentage-based theme color spectrum
+export const PROGRESS_THEME_COLORS = {
+  purple: "#6c71c4",
+  blue: "#268bd2",
+  cyan: "#2aa198",
+  green: "#859900",
+  yellow: "#b58900",
+  orange: "#cb4b16",
+  red: "#dc322f",
+  magenta: "#d33682",
+  darkContrast: "#002b36",
+  lightContrast: "#ffffff",
+} as const;
+
 // Aggregated Named Color Tokens
 export const NAMED_COLORS = {
   roles: ROLE_COLORS,
   celestial: CELESTIAL_COLORS,
   flags: FLAG_COLORS,
+  progress: PROGRESS_THEME_COLORS,
 } as const;
 
 export type NamedColors = typeof NAMED_COLORS;
 export type RoleColors = typeof ROLE_COLORS;
 export type CelestialColors = typeof CELESTIAL_COLORS;
 export type FlagColors = typeof FLAG_COLORS;
+export type ProgressThemeColors = typeof PROGRESS_THEME_COLORS;

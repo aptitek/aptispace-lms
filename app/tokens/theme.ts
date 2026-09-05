@@ -13,10 +13,12 @@ import {
   UK_FLAG_COLORS,
   FLAG_COLORS,
   NAMED_COLORS,
+  PROGRESS_THEME_COLORS,
   type NamedColors,
   type RoleColors,
   type CelestialColors,
   type FlagColors,
+  type ProgressThemeColors,
 } from "./namedColors";
 
 export {
@@ -27,10 +29,12 @@ export {
   UK_FLAG_COLORS,
   FLAG_COLORS,
   NAMED_COLORS,
+  PROGRESS_THEME_COLORS,
   type NamedColors,
   type RoleColors,
   type CelestialColors,
   type FlagColors,
+  type ProgressThemeColors,
 };
 
 declare module "@mui/material/styles" {
