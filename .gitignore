@@ -24,6 +24,7 @@ node_modules/
 # Testing & Coverage
 /coverage/
 /.vitest/
+/.scannerwork/
 /test-results/
 /playwright-report/
 /blob-report/

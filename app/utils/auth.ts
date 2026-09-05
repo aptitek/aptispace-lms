@@ -50,7 +50,32 @@ export interface AccountDefinition {
   githubUsername?: string;
 }
 
-export const DEV_PERSONAS: readonly PersonaDefinition[] = [];
+export const DEV_PERSONAS: readonly PersonaDefinition[] = [
+  {
+    id: "dev-admin",
+    role: "admin",
+    name: "Admin User",
+    email: "admin@aptitek.io",
+    title: "System Administrator",
+    badge: "Admin",
+  },
+  {
+    id: "dev-instructor",
+    role: "instructor",
+    name: "Instructor User",
+    email: "instructor@aptitek.io",
+    title: "Instructor",
+    badge: "Instructor",
+  },
+  {
+    id: "dev-student",
+    role: "student",
+    name: "Student User",
+    email: "student@aptitek.io",
+    title: "Student",
+    badge: "Student",
+  },
+];
 
 export function getRoleLabel(role: UserRole): string {
   if (role === "admin") return "Admin";

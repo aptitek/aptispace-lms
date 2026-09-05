@@ -43,7 +43,7 @@ function base64UrlEncode(bytes: Uint8Array): string {
   return btoa(binary)
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
-    .replace(/=+$/, "");
+    .replace(/={1,2}$/, "");
 }
 
 function base64UrlDecode(encodedString: string): Uint8Array {

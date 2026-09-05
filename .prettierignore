@@ -1,0 +1,10 @@
+node_modules/
+build/
+dist/
+coverage/
+.scannerwork/
+.react-router/
+.wireit/
+.agents/
+storybook-static/
+pnpm-lock.yaml

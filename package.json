@@ -20,7 +20,11 @@
     "db:setup:local": "wireit",
     "typegen:cf": "wrangler types",
     "deploy": "wrangler deploy",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:coverage": "wireit",
+    "sonar": "wireit",
+    "sonar:server": "docker compose -f docker-compose.sonar.yml up -d",
+    "sonar:down": "docker compose -f docker-compose.sonar.yml down"
   },
   "wireit": {
     "db:generate": {
@@ -89,6 +93,22 @@
         "package.json"
       ],
       "output": []
+    },
+    "test:coverage": {
+      "command": "vitest run --coverage --project unit",
+      "env": {
+        "NODE_OPTIONS": "--no-deprecation"
+      },
+      "files": [
+        "app/**/*",
+        "test/**/*",
+        "vitest.config.ts",
+        "tsconfig.json",
+        "package.json"
+      ],
+      "output": [
+        "coverage/**/*"
+      ]
     },
     "storybook": {
       "command": "storybook dev -p 6006 --ci",
@@ -163,6 +183,23 @@
       "env": {
         "NODE_OPTIONS": "--max-http-header-size=65536"
       }
+    },
+    "sonar": {
+      "command": "node scripts/sonar-scan.mjs",
+      "dependencies": [
+        "test:coverage",
+        "lint",
+        "typecheck"
+      ],
+      "files": [
+        "sonar-project.properties",
+        "scripts/sonar-scan.mjs",
+        "app/**/*",
+        "coverage/lcov.info"
+      ],
+      "output": [
+        ".scannerwork/**/*"
+      ]
     }
   },
   "dependencies": {
@@ -204,6 +241,7 @@
     "@eslint/css": "^1.4.0",
     "@eslint/js": "^10.0.1",
     "@react-router/dev": "^8",
+    "@sonar/scan": "^5.0.0",
     "@storybook/addon-a11y": "^10.5.10",
     "@storybook/addon-docs": "^10.5.10",
     "@storybook/addon-mcp": "0.7.0",
@@ -225,6 +263,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-sonarjs": "^4.2.0",
     "eslint-plugin-storybook": "^10.5.10",
     "globals": "^17.11.0",
     "husky": "^9.1.7",

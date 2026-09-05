@@ -9,6 +9,7 @@ import storybookPlugin from "eslint-plugin-storybook";
 import cssPlugin from "@eslint/css";
 import prettierConfig from "eslint-config-prettier";
 import globals from "globals";
+import sonarjs from "eslint-plugin-sonarjs";
 
 const HEX_COLOR_PATTERN = /#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/;
 const RAW_COLOR_FN_PATTERN = /\b(rgba?|hsla?|hwb|lab|lch|oklab|oklch)\s*\(/i;
@@ -92,6 +93,8 @@ export default tseslint.config(
       "**/public/**",
       "**/*.d.ts",
       "debug-storybook.log",
+      "**/coverage/**",
+      "**/.scannerwork/**",
     ],
   },
 
@@ -104,6 +107,25 @@ export default tseslint.config(
     ...cfg,
     files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
   })),
+
+  // 2b. SonarQube Rules & Quality Gate
+  {
+    ...sonarjs.configs.recommended,
+    files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+    rules: {
+      ...sonarjs.configs.recommended.rules,
+      "sonarjs/cognitive-complexity": ["error", 20],
+      "sonarjs/no-duplicate-string": ["warn", { threshold: 4 }],
+      "sonarjs/no-identical-functions": "warn",
+      "sonarjs/no-nested-conditional": "warn",
+      "sonarjs/pseudo-random": "warn",
+      "sonarjs/use-type-alias": "warn",
+      "sonarjs/redundant-type-aliases": "warn",
+      "sonarjs/no-hardcoded-ip": "warn",
+      "sonarjs/super-linear-regex": "warn",
+      "sonarjs/regex-complexity": "warn",
+    },
+  },
 
   // 3. Global Language Options & Settings
   {
@@ -533,6 +555,24 @@ export default tseslint.config(
       complexity: "off",
       "max-lines-per-function": "off",
       "no-restricted-syntax": "off",
+      "sonarjs/no-duplicate-string": "off",
+      "sonarjs/cognitive-complexity": "off",
+      "sonarjs/no-identical-functions": "off",
+      "sonarjs/prefer-specific-assertions": "off",
+      "sonarjs/no-invariant-returns": "off",
+      "sonarjs/no-hardcoded-ip": "off",
+      "sonarjs/pseudo-random": "off",
+      "sonarjs/no-floating-point-equality": "off",
+    },
+  },
+
+  // 6b. Mock Data Files
+  {
+    files: ["**/*.mock.{ts,tsx,js,jsx}", "**/mock.{ts,tsx,js,jsx}"],
+    rules: {
+      "sonarjs/no-hardcoded-ip": "off",
+      "sonarjs/no-duplicate-string": "off",
+      "sonarjs/pseudo-random": "off",
     },
   },
 
@@ -551,6 +591,8 @@ export default tseslint.config(
       ...storybookPlugin.configs.recommended.rules,
       "no-restricted-syntax": "off",
       complexity: "off",
+      "sonarjs/no-duplicate-string": "off",
+      "sonarjs/cognitive-complexity": "off",
     },
   },
 
@@ -562,6 +604,8 @@ export default tseslint.config(
       complexity: "off",
       "id-denylist": "off",
       "max-lines": "off",
+      "sonarjs/no-duplicate-string": "off",
+      "sonarjs/cognitive-complexity": "off",
     },
   },
 

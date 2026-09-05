@@ -80,7 +80,8 @@ export function generateUsernameFromPattern({
 
   // Clean trailing/leading separators or multiple dots/underscores if names are partially empty
   result = result
-    .replace(/^[._-]+|[._-]+$/g, "")
+    .replace(/^[._-]+/, "")
+    .replace(/[._-]+$/, "")
     .replace(/[._-]{2,}/g, (m) => m[0]);
 
   return result;

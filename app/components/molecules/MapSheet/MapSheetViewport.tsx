@@ -102,7 +102,7 @@ function UnifiedMapMesh({
   return (
     <UnifiedMapCanvas
       animate={isFolded ? "folded" : "unfolded"}
-      initial={initialFolded ? "folded" : "folded"}
+      initial={initialFolded ? "folded" : "unfolded"}
       variants={UNFOLD_VARIANTS}
       data-testid="folding-paper-mesh"
     >

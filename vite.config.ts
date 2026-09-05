@@ -83,6 +83,23 @@ export default defineConfig({
     noExternal: [/@mui\/x-scheduler/, /@atlaskit/],
   },
   test: {
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "lcov", "html"],
+      reportsDirectory: "./coverage",
+      exclude: [
+        "node_modules/**",
+        "build/**",
+        ".react-router/**",
+        "storybook-static/**",
+        ".wireit/**",
+        ".agents/**",
+        "**/*.d.ts",
+        "**/*.stories.{ts,tsx}",
+        "stories/**",
+        "test/**",
+      ],
+    },
     projects: [
       {
         extends: true,
