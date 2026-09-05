@@ -1,5 +1,5 @@
 import type { BoxProps } from "@mui/material/Box";
-import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
+import type { Td1MrzData } from "~/utils/icao9303";
 import type { CohortConfig } from "~/types/institution";
 
 export interface ProfileCardProps extends Omit<BoxProps, "onChange"> {

@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import InstitutionChip from "../app/components/atoms/InstitutionChip/InstitutionChip";
+import InstitutionChip from "../app/components/molecules/InstitutionChip/InstitutionChip";
 
 const meta = {
-  title: "Atoms/InstitutionChip",
+  title: "Molecules/InstitutionChip",
   component: InstitutionChip,
   tags: ["autodocs"],
   parameters: {
@@ -12,7 +12,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "InstitutionChip Atom Component with distinct MD3 expressive shapes and colors: Schools (Cyan clamshell) and Institutions (Yellow semicircle).",
+          "InstitutionChip Molecule Component with distinct MD3 expressive shapes and colors: Schools (Cyan clamshell) and Institutions (Yellow semicircle).",
       },
     },
   },

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { styled } from "@mui/material/styles";
-import Guilloche from "../app/components/atoms/Guilloche/Guilloche";
+import Guilloche from "../app/components/molecules/Guilloche/Guilloche";
 
 const meta: Meta<typeof Guilloche> = {
-  title: "Atoms/Guilloche",
+  title: "Molecules/Guilloche",
   component: Guilloche,
   parameters: {
     layout: "centered",

@@ -88,6 +88,8 @@
       "files": [
         "app/**/*",
         "test/**/*",
+        "stories/**/*",
+        ".storybook/**/*",
         "vitest.config.ts",
         "tsconfig.json",
         "package.json"
@@ -127,6 +129,7 @@
       "files": [
         ".storybook/**/*",
         "app/**/*",
+        "stories/**/*",
         "package.json",
         "tsconfig.json"
       ],
@@ -138,6 +141,8 @@
       "command": "eslint . && prettier . --write",
       "files": [
         "app/**/*",
+        ".storybook/**/*",
+        "stories/**/*",
         "eslint.config.js",
         "package.json",
         "tsconfig.json"

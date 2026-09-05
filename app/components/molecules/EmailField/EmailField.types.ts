@@ -4,9 +4,6 @@ import type { TextFieldProps as MuiTextFieldProps } from "@mui/material/TextFiel
 export type EmailFieldVariant = "outlined" | "filled" | "standard";
 export type EmailFieldSize = "small" | "medium" | "large";
 
-export type FixedDomainFieldVariant = EmailFieldVariant;
-export type FixedDomainFieldSize = EmailFieldSize;
-
 export interface EmailFieldProps extends Omit<
   MuiTextFieldProps,
   "size" | "variant" | "onChange" | "value" | "defaultValue"
@@ -32,5 +29,3 @@ export interface EmailFieldProps extends Omit<
   testId?: string;
   "data-testid"?: string;
 }
-
-export type FixedDomainEmailFieldProps = EmailFieldProps;

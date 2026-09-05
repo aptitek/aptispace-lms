@@ -1,4 +1,5 @@
 import { forwardRef, type ReactNode } from "react";
+import Box from "@mui/material/Box";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import { type AvatarProps } from "./Avatar.types";
 import {
@@ -43,7 +44,9 @@ interface RenderAvatarContentOptions {
 function renderAvatarContent(options: RenderAvatarContentOptions): ReactNode {
   const { src, alt, children, initials, placeholderIcon } = options;
   if (src) {
-    return <img src={src} alt={alt ?? "Avatar"} loading="lazy" />;
+    return (
+      <Box component="img" src={src} alt={alt ?? "Avatar"} loading="lazy" />
+    );
   }
   if (children) {
     return children;

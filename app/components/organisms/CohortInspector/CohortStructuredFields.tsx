@@ -15,7 +15,7 @@ import {
   COMMON_SPECIALTY_TAGS,
   getSpecialtySlug,
 } from "~/utils/cohortFormat";
-import CohortChip from "../../atoms/CohortChip/CohortChip";
+import CohortChip from "../../molecules/CohortChip/CohortChip";
 
 export interface CohortStructuredFieldsProps {
   diploma: string;

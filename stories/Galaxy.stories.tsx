@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import Galaxy from "../app/components/atoms/Galaxy";
+import Galaxy from "../app/components/organisms/Galaxy";
 
 const meta = {
-  title: "Atoms/Galaxy",
+  title: "Organisms/Galaxy",
   component: Galaxy,
   parameters: {
     layout: "fullscreen",

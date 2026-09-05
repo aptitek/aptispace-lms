@@ -3,14 +3,16 @@ import Box from "@mui/material/Box";
 import { alpha, useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import Chip from "../../atoms/Chip/Chip";
-import HoloDecorator from "../../atoms/HoloDecorator/HoloDecorator";
-import Logo from "../../atoms/Logo/Logo";
-import MrzZone from "../../atoms/MrzZone/MrzZone";
-import Guilloche, { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche";
+import HoloDecorator from "../../molecules/HoloDecorator/HoloDecorator";
+import Logo from "../../molecules/Logo/Logo";
+import Mrz from "../../atoms/Mrz/Mrz";
+import Guilloche, {
+  generateGuillocheMaskDataUrl,
+} from "../../molecules/Guilloche";
 import Electronics from "../../atoms/Electronics/Electronics";
-import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
+import type { Td1MrzData } from "~/utils/icao9303";
 
-import CohortChip from "../../atoms/CohortChip/CohortChip";
+import CohortChip from "../../molecules/CohortChip/CohortChip";
 import type { CohortConfig } from "~/types/institution";
 
 export interface ProfileHeaderChipsProps {
@@ -165,7 +167,7 @@ export function BackContent({ mrzData }: BackContentProps) {
       </Box>
 
       <Box sx={{ width: "100%", position: "relative", zIndex: 1, mt: "auto" }}>
-        <MrzZone cardData={mrzData} fullWidth darkOnLight />
+        <Mrz cardData={mrzData} fullWidth darkOnLight />
       </Box>
     </Box>
   );

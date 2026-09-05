@@ -1,8 +1,8 @@
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import Badge from "~/components/atoms/Badge/Badge";
-import InstitutionLogo from "~/components/atoms/InstitutionLogo/InstitutionLogo";
-import InstitutionChip from "~/components/atoms/InstitutionChip/InstitutionChip";
+import InstitutionLogo from "../InstitutionLogo/InstitutionLogo";
+import InstitutionChip from "../InstitutionChip/InstitutionChip";
 import SchoolIcon from "@mui/icons-material/School";
 import Box from "@mui/material/Box";
 import type { SchoolConfig } from "~/types/institution";

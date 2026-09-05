@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "~/components/atoms/Chip/Chip";
-import RoleChip from "~/components/atoms/RoleChip/RoleChip";
+import RoleChip from "../RoleChip/RoleChip";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";

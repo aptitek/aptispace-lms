@@ -1,7 +1,7 @@
 import type { SchoolConfig } from "~/types/institution";
 import type { OnboardingProfile } from "~/types/profile";
 import type { getUserWithAffiliations } from "~/services/userService";
-import type { Td1MrzData } from "~/components/atoms/MrzZone/MrzZone.types";
+import type { Td1MrzData } from "~/utils/icao9303";
 import { generateEmailFromPattern } from "~/utils/emailFormat";
 
 export const DEFAULT_INSTITUTIONAL_DOMAIN = "aptitek.io";

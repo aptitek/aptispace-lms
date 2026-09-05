@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import Logo from "~/components/atoms/Logo/Logo";
+import Logo from "~/components/molecules/Logo/Logo";
 
 const meta = {
-  title: "Atoms/Logo",
+  title: "Molecules/Logo",
   component: Logo,
   tags: ["autodocs"],
   argTypes: {

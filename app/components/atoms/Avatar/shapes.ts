@@ -67,8 +67,6 @@ export type ExpressiveShapeName =
   | "bun"
   | "heart";
 
-export type M3ExpressiveShapeName = ExpressiveShapeName;
-
 export interface ShapeDefinition {
   name: string;
   label: string;
@@ -76,8 +74,6 @@ export interface ShapeDefinition {
   clipPath: string;
   borderRadius?: string;
 }
-
-export type M3ShapeDefinition = ShapeDefinition;
 
 const RAW_SHAPE_ENTRIES: Array<[string, string, RoundedPolygon]> = [
   ["circle", "Circle", MaterialShapes.Circle],

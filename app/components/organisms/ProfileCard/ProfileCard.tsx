@@ -11,12 +11,14 @@ import { alpha, useTheme } from "@mui/material/styles";
 
 import { useTranslation } from "react-i18next";
 import PhysicCard from "../../molecules/PhysicCard/PhysicCard";
-import HoloDecorator from "../../atoms/HoloDecorator/HoloDecorator";
+import HoloDecorator from "../../molecules/HoloDecorator/HoloDecorator";
 import Avatar from "../../atoms/Avatar/Avatar";
 import Chip from "../../atoms/Chip/Chip";
-import RoleChip from "../../atoms/RoleChip/RoleChip";
-import InstitutionLogo from "../../atoms/InstitutionLogo/InstitutionLogo";
-import Guilloche, { generateGuillocheMaskDataUrl } from "../../atoms/Guilloche";
+import RoleChip from "../../molecules/RoleChip/RoleChip";
+import InstitutionLogo from "../../molecules/InstitutionLogo/InstitutionLogo";
+import Guilloche, {
+  generateGuillocheMaskDataUrl,
+} from "../../molecules/Guilloche";
 import Electronics from "../../atoms/Electronics/Electronics";
 import EditableAvatar from "../../molecules/EditableAvatar/EditableAvatar";
 import { getRoleConfig } from "../../../tokens/roles";

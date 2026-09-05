@@ -8,7 +8,7 @@ import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import CodeRoundedIcon from "@mui/icons-material/CodeRounded";
 import VerifiedRoundedIcon from "@mui/icons-material/VerifiedRounded";
 import Chip from "../app/components/atoms/Chip/Chip";
-import RoleChip from "../app/components/atoms/RoleChip/RoleChip";
+import RoleChip from "../app/components/molecules/RoleChip/RoleChip";
 
 const meta = {
   title: "Atoms/Chip",
@@ -284,7 +284,7 @@ export const RoleChips: Story = {
   render: () => (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Typography variant="subtitle2" sx={{ color: "text.secondary" }}>
-        RoleChip Atom (Shaped + Colored + Icon)
+        RoleChip Molecule (Shaped + Colored + Icon)
       </Typography>
       <Box
         sx={{

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { styled } from "@mui/material/styles";
-import Galaxy from "~/components/atoms/Galaxy/Galaxy";
+import Galaxy from "~/components/organisms/Galaxy/Galaxy";
 import Header, { type HeaderMode } from "~/components/organisms/Header/Header";
 import Footer from "~/components/organisms/Footer/Footer";
 import type { AuthUser } from "~/utils/auth";

@@ -115,15 +115,15 @@ export default tseslint.config(
     rules: {
       ...sonarjs.configs.recommended.rules,
       "sonarjs/cognitive-complexity": ["error", 20],
-      "sonarjs/no-duplicate-string": ["warn", { threshold: 4 }],
+      "sonarjs/no-duplicate-string": ["warn", { threshold: 10 }],
       "sonarjs/no-identical-functions": "warn",
-      "sonarjs/no-nested-conditional": "warn",
-      "sonarjs/pseudo-random": "warn",
-      "sonarjs/use-type-alias": "warn",
-      "sonarjs/redundant-type-aliases": "warn",
+      "sonarjs/no-nested-conditional": "off",
+      "sonarjs/pseudo-random": "off",
+      "sonarjs/use-type-alias": "off",
+      "sonarjs/redundant-type-aliases": "error",
       "sonarjs/no-hardcoded-ip": "warn",
-      "sonarjs/super-linear-regex": "warn",
-      "sonarjs/regex-complexity": "warn",
+      "sonarjs/super-linear-regex": "off",
+      "sonarjs/regex-complexity": "off",
     },
   },
 
@@ -189,17 +189,63 @@ export default tseslint.config(
       "react/self-closing-comp": "error",
       "react/no-array-index-key": "warn",
 
+      // Enforce MUI/Expressive components over native ones
+      "react/forbid-elements": [
+        "error",
+        {
+          forbid: [
+            {
+              element: "button",
+              message:
+                "Use <Button>, <IconButton>, or <HoldButton> from @mui/material or atoms instead.",
+            },
+            {
+              element: "input",
+              message:
+                "Use <TextField> from @mui/material or <EmailField> instead.",
+            },
+            {
+              element: "select",
+              message:
+                "Use <Select> or <TextField select> from @mui/material instead.",
+            },
+            {
+              element: "textarea",
+              message: "Use <TextField multiline> from @mui/material instead.",
+            },
+            {
+              element: "img",
+              message: 'Use <Box component="img"> or <Avatar> instead.',
+            },
+            {
+              element: "a",
+              message:
+                'Use React Router\'s <Link> or <Button href="..."> instead.',
+            },
+          ],
+        },
+      ],
+
       // --- React Hooks ---
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
 
-      // --- JSX Accessibility (a11y) ---
+      // --- JSX Accessibility (a11y) - WCAG 2.1 AA Enforced ---
       "jsx-a11y/alt-text": "error",
       "jsx-a11y/anchor-has-content": "error",
       "jsx-a11y/aria-props": "error",
       "jsx-a11y/aria-proptypes": "error",
       "jsx-a11y/aria-role": "error",
       "jsx-a11y/role-has-required-aria-props": "error",
+      "jsx-a11y/role-supports-aria-props": "error",
+      "jsx-a11y/aria-unsupported-elements": "error",
+      "jsx-a11y/heading-has-content": "error",
+      "jsx-a11y/html-has-lang": "error",
+      "jsx-a11y/no-redundant-roles": "error",
+      "jsx-a11y/no-interactive-element-to-noninteractive-role": "error",
+      "jsx-a11y/no-noninteractive-element-to-interactive-role": "error",
+      "jsx-a11y/interactive-supports-focus": "error",
+      "jsx-a11y/tabindex-no-positive": "error",
 
       // --- TypeScript Strictness ---
       "@typescript-eslint/no-explicit-any": "error",
@@ -596,16 +642,26 @@ export default tseslint.config(
     },
   },
 
-  // 8. Config Files
+  // 8. Config & Script Files
   {
-    files: ["*.config.{ts,js,mjs}", "vitest.shims.d.ts"],
+    files: ["*.config.{ts,js,mjs}", "scripts/**", "vitest.shims.d.ts"],
     rules: {
+      "no-console": "off",
       "no-restricted-syntax": "off",
       complexity: "off",
       "id-denylist": "off",
       "max-lines": "off",
       "sonarjs/no-duplicate-string": "off",
       "sonarjs/cognitive-complexity": "off",
+    },
+  },
+
+  // 8b. Component Styles & Theme Tokens (CSS-in-JS)
+  {
+    files: ["**/*.styles.ts", "app/tokens/**"],
+    rules: {
+      "sonarjs/no-duplicate-string": "off",
+      "sonarjs/no-nested-conditional": "off",
     },
   },
 

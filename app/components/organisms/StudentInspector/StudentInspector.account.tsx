@@ -9,7 +9,7 @@ import { alpha } from "@mui/material/styles";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import Avatar from "~/components/atoms/Avatar/Avatar";
-import RoleChip from "~/components/atoms/RoleChip/RoleChip";
+import RoleChip from "~/components/molecules/RoleChip/RoleChip";
 import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
 
 export interface InspectorAccountSectionProps {

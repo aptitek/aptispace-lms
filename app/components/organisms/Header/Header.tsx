@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Logo from "../../atoms/Logo/Logo";
+import Logo from "../../molecules/Logo/Logo";
 import LanguageToggle from "../../atoms/LanguageToggle/LanguageToggle";
 import ThemeToggle from "../../atoms/ThemeToggle/ThemeToggle";
 import HeaderUserAvatar from "../../molecules/HeaderUserAvatar/HeaderUserAvatar";
@@ -11,7 +11,7 @@ import FullScreenModal from "../../molecules/FullScreenModal/FullScreenModal";
 import ProfileCard from "../ProfileCard/ProfileCard";
 import HeaderTabs from "../../molecules/HeaderTabs/HeaderTabs";
 import type { HeaderTabItem } from "../../molecules/HeaderTabs/HeaderTabs.types";
-import type { Td1MrzData } from "../../atoms/MrzZone/MrzZone.types";
+import type { Td1MrzData } from "~/utils/icao9303";
 import type { CohortConfig } from "../../../types/institution";
 import { logout, stopImpersonation, type AuthUser } from "../../../utils/auth";
 

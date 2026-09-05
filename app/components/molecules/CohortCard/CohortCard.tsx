@@ -15,7 +15,7 @@ import {
 
 import Chip from "@mui/material/Chip";
 
-import CohortChip from "~/components/atoms/CohortChip/CohortChip";
+import CohortChip from "~/components/molecules/CohortChip/CohortChip";
 
 export interface CohortCardProps {
   cohort: CohortConfig;

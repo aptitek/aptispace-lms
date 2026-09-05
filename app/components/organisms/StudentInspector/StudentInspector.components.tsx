@@ -5,7 +5,7 @@ import Tooltip from "@mui/material/Tooltip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import Chip from "~/components/atoms/Chip/Chip";
-import RoleChip from "~/components/atoms/RoleChip/RoleChip";
+import RoleChip from "~/components/molecules/RoleChip/RoleChip";
 import InputLabel from "@mui/material/InputLabel";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";

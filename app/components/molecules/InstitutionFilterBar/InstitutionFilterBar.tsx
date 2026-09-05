@@ -6,7 +6,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import IconButton from "@mui/material/IconButton";
-import InstitutionChip from "~/components/atoms/InstitutionChip/InstitutionChip";
+import InstitutionChip from "../InstitutionChip/InstitutionChip";
 import YearRangePicker from "~/components/molecules/YearRangePicker/YearRangePicker";
 
 export interface InstitutionFilterBarProps {

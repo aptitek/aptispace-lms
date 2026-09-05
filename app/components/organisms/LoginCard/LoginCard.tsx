@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import Button from "@mui/material/Button";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { LoadingIndicator } from "react-material-expressive";
-import Logo from "~/components/atoms/Logo/Logo";
+import Logo from "~/components/molecules/Logo/Logo";
 import DevImpersonator from "~/components/molecules/DevImpersonator/DevImpersonator";
 import {
   loginWithGitHub,

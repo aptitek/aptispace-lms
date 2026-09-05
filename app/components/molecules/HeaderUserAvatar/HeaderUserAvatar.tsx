@@ -7,6 +7,7 @@ import {
   useCallback,
   type KeyboardEvent,
 } from "react";
+import Box from "@mui/material/Box";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -60,7 +61,14 @@ function AvatarMediaSlot({
   const initials = computeUserInitials(name);
 
   if (avatarUrl) {
-    return <img src={avatarUrl} alt={name || fallbackAria} loading="lazy" />;
+    return (
+      <Box
+        component="img"
+        src={avatarUrl}
+        alt={name || fallbackAria}
+        loading="lazy"
+      />
+    );
   }
 
   if (initials) {

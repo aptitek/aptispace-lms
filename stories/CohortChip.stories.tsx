@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
-import CohortChip from "../app/components/atoms/CohortChip/CohortChip";
+import CohortChip from "../app/components/molecules/CohortChip/CohortChip";
 
 const meta: Meta<typeof CohortChip> = {
-  title: "Atoms/CohortChip",
+  title: "Molecules/CohortChip",
   component: CohortChip,
   parameters: {
     layout: "centered",

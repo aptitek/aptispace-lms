@@ -9,7 +9,7 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import EditableAvatar from "~/components/molecules/EditableAvatar/EditableAvatar";
-import InstitutionChip from "~/components/atoms/InstitutionChip/InstitutionChip";
+import InstitutionChip from "~/components/molecules/InstitutionChip/InstitutionChip";
 import {
   formatUsernameSamplePreview,
   DEFAULT_USERNAME_PATTERN,
