@@ -15,6 +15,7 @@ import type {
 import {
   SheetCard,
   SheetHeader,
+  MonthYearText,
   PerforationHoles,
   SheetBody,
   DayNumber,
@@ -267,7 +268,9 @@ export const CalendarSheet = forwardRef<HTMLDivElement, CalendarSheetProps>(
       >
         <SheetHeader $size={size} $headerColor={headerColor}>
           {showPerforations && <PerforationHoles $size={size} />}
-          <span>{monthYear}</span>
+          <MonthYearText $size={size} data-testid="calendar-sheet-month-year">
+            {monthYear}
+          </MonthYearText>
         </SheetHeader>
 
         <SheetBody $size={size} $orientation={orientation}>

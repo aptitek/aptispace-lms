@@ -77,6 +77,11 @@ export interface TimeSheetProps {
    * Accessible ARIA label.
    */
   ariaLabel?: string;
+
+  /**
+   * Optional controlled hover state (previewing needle animation to end time).
+   */
+  isHovered?: boolean;
 }
 
 export interface TimeIntervalInfo {
@@ -85,9 +90,20 @@ export interface TimeIntervalInfo {
   isUpcomingToday: boolean;
   isPastToday: boolean;
   digitalRange: string;
+  durationFormatted: string;
   startHourAngle: number;
   endHourAngle: number;
+  startMinuteAngle: number;
+  endMinuteAngle: number;
+  targetEndHourAngle: number;
+  targetEndMinuteAngle: number;
   sweepAngle: number;
+  endDot: {
+    x: number;
+    y: number;
+    angle: number;
+    radius: number;
+  };
   elapsedPercent: number;
   progressColor: string;
   remainingMinutes: number;

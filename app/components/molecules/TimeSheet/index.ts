@@ -9,8 +9,14 @@ export type {
 } from "./TimeSheet.types";
 export {
   computeNeedleAngle,
+  computeHourNeedleAngle,
+  computeMinuteNeedleAngle,
+  computeClockwiseTargetAngle,
+  computeEndDotCoordinates,
+  HOUR_NEEDLE_LENGTH,
   formatDigitalInterval,
   computeTimeIntervalInfo,
   buildWavyArc,
+  generateWavyArcPhases,
   type ComputeTimeIntervalOptions,
 } from "./TimeSheet.utils";

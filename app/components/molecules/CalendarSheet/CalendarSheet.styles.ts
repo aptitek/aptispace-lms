@@ -26,10 +26,12 @@ interface StyledWeekdayProps {
 
 const SIZE_CONFIG = {
   small: {
+    height: 124,
+    cardHeight: 82,
     minWidth: 84,
     maxWidth: 104,
     headerFontSize: "0.6875rem",
-    headerPadding: "3px 6px",
+    headerPadding: "12px 6px 4px",
     dayFontSize: "1.5rem",
     weekdayFontSize: "0.65rem",
     bodyPadding: "6px 8px 8px",
@@ -38,10 +40,12 @@ const SIZE_CONFIG = {
     holeOffset: 12,
   },
   medium: {
+    height: 175,
+    cardHeight: 116,
     minWidth: 124,
     maxWidth: 154,
     headerFontSize: "0.8125rem",
-    headerPadding: "6px 10px",
+    headerPadding: "15px 10px 6px",
     dayFontSize: "2.4rem",
     weekdayFontSize: "0.75rem",
     bodyPadding: "10px 12px 12px",
@@ -50,10 +54,12 @@ const SIZE_CONFIG = {
     holeOffset: 20,
   },
   large: {
+    height: 220,
+    cardHeight: 148,
     minWidth: 160,
     maxWidth: 200,
     headerFontSize: "0.9375rem",
-    headerPadding: "8px 14px",
+    headerPadding: "18px 14px 8px",
     dayFontSize: "3.25rem",
     weekdayFontSize: "0.85rem",
     bodyPadding: "14px 16px 16px",
@@ -111,6 +117,8 @@ export const SheetCard = styled("div", {
     width: isHorizontal ? "auto" : "fit-content",
     minWidth: isHorizontal ? "auto" : cfg.minWidth,
     maxWidth: isHorizontal ? "none" : cfg.maxWidth,
+    height: isHorizontal ? cfg.cardHeight : cfg.height,
+    minHeight: isHorizontal ? cfg.cardHeight : cfg.height,
     borderRadius: "16px",
     backgroundColor: alpha(theme.palette.background.paper, 0.95),
     border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
@@ -167,6 +175,18 @@ export const SheetHeader = styled("div", {
   };
 });
 
+export const MonthYearText = styled("span", {
+  shouldForwardProp: (prop) => prop !== "$size",
+})<{ $size?: CalendarSheetSize }>(() => ({
+  display: "inline-block",
+  lineHeight: 1.25,
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  maxWidth: "100%",
+  zIndex: 1,
+}));
+
 export const PerforationHoles = styled("div", {
   shouldForwardProp: (prop) => prop !== "$size",
 })<{ $size: CalendarSheetSize }>(({ theme, $size }) => {
@@ -214,6 +234,7 @@ export const SheetBody = styled("div", {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
+    flex: isHorizontal ? "none" : 1,
     padding: cfg.bodyPadding,
     gap: isHorizontal ? 0.5 : 0.25,
   };
@@ -268,9 +289,10 @@ export const ChipWrapper = styled("div", {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
     padding: isHorizontal
       ? theme.spacing(1, 1.5, 1, 0)
-      : theme.spacing(0, 1, 1),
+      : theme.spacing(0, 1, 1.25),
     transform: $size === "small" ? "scale(0.88)" : "none",
     transformOrigin: isHorizontal ? "center left" : "top center",
     "& .MuiChip-root": {

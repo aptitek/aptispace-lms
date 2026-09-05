@@ -18,6 +18,37 @@ export function computeNeedleAngle(
   return hour * 30 + minute * 0.5;
 }
 
+export const computeHourNeedleAngle = computeNeedleAngle;
+
+export function computeMinuteNeedleAngle(
+  date: Date | string | number | Dayjs,
+): number {
+  const d = dayjs(date);
+  const minute = d.minute();
+  return (minute * 6) % 360;
+}
+
+export function computeClockwiseTargetAngle(
+  startAngle: number,
+  endAngle: number,
+): number {
+  const diff = (endAngle - startAngle) % 360;
+  const sweep = diff < 0 ? diff + 360 : diff;
+  return startAngle + sweep;
+}
+
+export const HOUR_NEEDLE_LENGTH = 24; // center (50, 50) to hour needle tip (50, 26)
+
+export function computeEndDotCoordinates(
+  endHourAngle: number,
+  radius = HOUR_NEEDLE_LENGTH,
+): { x: number; y: number; angle: number; radius: number } {
+  const thetaRad = (endHourAngle * Math.PI) / 180;
+  const x = Number((50 + radius * Math.sin(thetaRad)).toFixed(2));
+  const y = Number((50 - radius * Math.cos(thetaRad)).toFixed(2));
+  return { x, y, angle: endHourAngle, radius };
+}
+
 export function formatDigitalInterval(
   start: Dayjs,
   end: Dayjs,
@@ -97,13 +128,32 @@ export function generate12SidedCookiePath(
   return toClosedPath(points);
 }
 
+export interface WavyArcOptions {
+  baseR?: number;
+  amp?: number;
+  phase?: number;
+}
+
 export function buildWavyArc(
   startAngle: number,
   sweepAngle: number,
-  baseR = 36.5,
+  optionsOrBaseR?: WavyArcOptions | number,
   amp = 2.4,
 ): string {
   if (sweepAngle <= 0) return "";
+
+  let baseR = 36.5;
+  let phase = 0;
+  let amplitude = amp;
+
+  if (typeof optionsOrBaseR === "object" && optionsOrBaseR !== null) {
+    if (optionsOrBaseR.baseR !== undefined) baseR = optionsOrBaseR.baseR;
+    if (optionsOrBaseR.amp !== undefined) amplitude = optionsOrBaseR.amp;
+    if (optionsOrBaseR.phase !== undefined) phase = optionsOrBaseR.phase;
+  } else if (typeof optionsOrBaseR === "number") {
+    baseR = optionsOrBaseR;
+  }
+
   const samples = Math.max(16, Math.round((sweepAngle / 30) * 8));
   const points: [number, number][] = [];
 
@@ -111,7 +161,7 @@ export function buildWavyArc(
     const t = i / samples;
     const angleDeg = startAngle + t * sweepAngle;
     const thetaRad = (angleDeg * Math.PI) / 180;
-    const wave = amp * Math.cos(12 * thetaRad);
+    const wave = amplitude * Math.cos(12 * thetaRad - phase);
     const r = baseR + wave;
     const x = 50 + r * Math.sin(thetaRad);
     const y = 50 - r * Math.cos(thetaRad);
@@ -119,6 +169,27 @@ export function buildWavyArc(
   }
 
   return toOpenPath(points);
+}
+
+export interface WavyArcPhasesOptions {
+  numPhases?: number;
+  baseR?: number;
+  amp?: number;
+}
+
+export function generateWavyArcPhases(
+  startAngle: number,
+  sweepAngle: number,
+  options: WavyArcPhasesOptions = {},
+): string {
+  if (sweepAngle <= 0) return "";
+  const { numPhases = 12, baseR = 36.5, amp = 2.4 } = options;
+  const phases: string[] = [];
+  for (let i = 0; i <= numPhases; i++) {
+    const phase = (2 * Math.PI * i) / numPhases;
+    phases.push(buildWavyArc(startAngle, sweepAngle, { baseR, amp, phase }));
+  }
+  return phases.join(";");
 }
 
 function resolveUpcomingText(diffMins: number, isFr: boolean): string {
@@ -306,6 +377,23 @@ export function getContrastTextColor(hexColor: string): string {
     : PROGRESS_THEME_COLORS.lightContrast;
 }
 
+export function formatDigitalDuration(
+  totalMinutes: number,
+  isFr = false,
+): string {
+  const safeMinutes = Math.max(1, Math.round(totalMinutes));
+  const hours = Math.floor(safeMinutes / 60);
+  const mins = safeMinutes % 60;
+
+  if (hours > 0 && mins > 0) {
+    return `${hours}h ${mins}m`;
+  }
+  if (hours > 0) {
+    return `${hours}h`;
+  }
+  return isFr ? `${mins} min` : `${mins}m`;
+}
+
 export function computeTimeIntervalInfo(
   startTime: Date | string | number | Dayjs,
   endTime: Date | string | number | Dayjs,
@@ -321,10 +409,27 @@ export function computeTimeIntervalInfo(
   const timing = checkIntervalTiming(startD, endD, refD);
   const startHourAngle = computeNeedleAngle(startD);
   const endHourAngle = computeNeedleAngle(endD);
+  const startMinuteAngle = computeMinuteNeedleAngle(startD);
+  const endMinuteAngle = computeMinuteNeedleAngle(endD);
+
+  const targetEndHourAngle = computeClockwiseTargetAngle(
+    startHourAngle,
+    endHourAngle,
+  );
+  const targetEndMinuteAngle = computeClockwiseTargetAngle(
+    startMinuteAngle,
+    endMinuteAngle,
+  );
+
   const rawDiff = endHourAngle - startHourAngle;
   const sweepAngle = rawDiff <= 0 ? rawDiff + 360 : rawDiff;
+  const endDot = computeEndDotCoordinates(endHourAngle);
 
   const duration = calculateDurationStats(startD, endD, refD);
+  const durationFormatted = formatDigitalDuration(
+    duration.totalDurationMinutes,
+    isFr,
+  );
   const progressColor = interpolateProgressColor(duration.elapsedPercent);
 
   const { chipLabel, chipColor } = resolveChipState({
@@ -343,11 +448,17 @@ export function computeTimeIntervalInfo(
   return {
     ...timing,
     ...duration,
+    durationFormatted,
     progressColor,
     digitalRange,
     startHourAngle,
     endHourAngle,
+    startMinuteAngle,
+    endMinuteAngle,
+    targetEndHourAngle,
+    targetEndMinuteAngle,
     sweepAngle,
+    endDot,
     chipLabel,
     chipColor,
   };

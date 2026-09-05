@@ -16,7 +16,7 @@ const meta: Meta<typeof TimeSheet> = {
     docs: {
       description: {
         component:
-          "TimeSheet component displaying a localized digital time interval, an analog clock with start/end needles and MD3 spring animation, an animated squiggly circular progress arc, and a conditional chip with squiggly M3 progress when happening now.",
+          "TimeSheet molecule displaying a localized digital time interval, a Material You 12-sided scalloped clock dial with 2 needles (shorter hour needle and longer minute needle) for start time, an accent dot for the end time hour, smooth MD3 spring animation of needles to end time on hover, and an undulating MD3 circular wavy line with live status badge and progress.",
       },
     },
   },
@@ -51,9 +51,20 @@ const now = dayjs();
 
 export const UpcomingToday: Story = {
   args: {
-    startTime: now.add(2, "hour").toDate(),
-    endTime: now.add(4, "hour").toDate(),
-    referenceTime: now.toDate(),
+    startTime: now.hour(14).minute(0).second(0).toDate(),
+    endTime: now.hour(16).minute(30).second(0).toDate(),
+    referenceTime: now.hour(12).minute(0).second(0).toDate(),
+    size: "medium",
+    color: "primary",
+  },
+};
+
+export const HoverEndTimeAnimation: Story = {
+  args: {
+    startTime: now.hour(14).minute(0).second(0).toDate(),
+    endTime: now.hour(16).minute(30).second(0).toDate(),
+    referenceTime: now.hour(12).minute(0).second(0).toDate(),
+    isHovered: true,
     size: "medium",
     color: "primary",
   },
@@ -204,6 +215,97 @@ export const ProgressThemeSpectrum: Story = {
               />
             </Box>
           ))}
+        </Box>
+      </Box>
+    );
+  },
+};
+
+export const DualNeedlesAndEndDotShowcase: Story = {
+  render: () => {
+    const start1 = now.hour(14).minute(0).second(0).toDate();
+    const end1 = now.hour(16).minute(30).second(0).toDate();
+
+    const start2 = now.hour(10).minute(15).second(0).toDate();
+    const end2 = now.hour(11).minute(45).second(0).toDate();
+
+    const start3 = now.hour(11).minute(30).second(0).toDate();
+    const end3 = now.hour(13).minute(15).second(0).toDate();
+
+    const ref = now.hour(9).minute(0).second(0).toDate();
+
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, p: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          Dual Needles + End Hour Dot & MD3 Animated Wavy Line
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{ color: "text.secondary", maxWidth: 640 }}
+        >
+          At rest, the 2 needles show the start time (shorter hour hand and
+          longer minute hand), while the dot marks the end hour. Hover over any
+          card to watch both needles smoothly spring clockwise to the end time,
+          while the undulating MD3 wavy progress arc ripples along the scalloped
+          dial.
+        </Typography>
+
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 4,
+            alignItems: "flex-start",
+          }}
+        >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <Typography variant="caption" sx={{ fontWeight: 700 }}>
+              14:00 – 16:30 (Interactive Hover)
+            </Typography>
+            <TimeSheet
+              startTime={start1}
+              endTime={end1}
+              referenceTime={ref}
+              size="medium"
+            />
+          </Box>
+
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <Typography variant="caption" sx={{ fontWeight: 700 }}>
+              14:00 – 16:30 (Preview Hovered State)
+            </Typography>
+            <TimeSheet
+              startTime={start1}
+              endTime={end1}
+              referenceTime={ref}
+              isHovered={true}
+              size="medium"
+            />
+          </Box>
+
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <Typography variant="caption" sx={{ fontWeight: 700 }}>
+              10:15 – 11:45 (Quarter to Quarter)
+            </Typography>
+            <TimeSheet
+              startTime={start2}
+              endTime={end2}
+              referenceTime={ref}
+              size="medium"
+            />
+          </Box>
+
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <Typography variant="caption" sx={{ fontWeight: 700 }}>
+              11:30 – 13:15 (Across Noon Boundary)
+            </Typography>
+            <TimeSheet
+              startTime={start3}
+              endTime={end3}
+              referenceTime={ref}
+              size="medium"
+            />
+          </Box>
         </Box>
       </Box>
     );

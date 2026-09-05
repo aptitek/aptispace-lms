@@ -5,7 +5,13 @@ import dayjs from "dayjs";
 
 import TimeSheet, {
   computeNeedleAngle,
+  computeHourNeedleAngle,
+  computeMinuteNeedleAngle,
+  computeClockwiseTargetAngle,
+  computeEndDotCoordinates,
+  generateWavyArcPhases,
   formatDigitalInterval,
+  formatDigitalDuration,
   computeTimeIntervalInfo,
   buildWavyArc,
   interpolateProgressColor,
@@ -16,10 +22,11 @@ import "~/i18n";
 describe("TimeSheet Molecule", () => {
   const baseToday = dayjs("2026-09-05T12:00:00");
 
-  describe("computeNeedleAngle", () => {
+  describe("computeNeedleAngle (Hours)", () => {
     it("computes 0° for 12:00", () => {
       expect(computeNeedleAngle("2026-09-05T12:00:00")).toBe(0);
       expect(computeNeedleAngle("2026-09-05T00:00:00")).toBe(0);
+      expect(computeHourNeedleAngle("2026-09-05T12:00:00")).toBe(0);
     });
 
     it("computes 60° for 14:00 (2:00 PM)", () => {
@@ -34,6 +41,63 @@ describe("TimeSheet Molecule", () => {
     it("computes 180° for 06:00 (6:00 AM/PM)", () => {
       expect(computeNeedleAngle("2026-09-05T06:00:00")).toBe(180);
       expect(computeNeedleAngle("2026-09-05T18:00:00")).toBe(180);
+    });
+  });
+
+  describe("computeMinuteNeedleAngle (Minutes)", () => {
+    it("computes 0° for 00 minutes", () => {
+      expect(computeMinuteNeedleAngle("2026-09-05T14:00:00")).toBe(0);
+    });
+
+    it("computes 90° for 15 minutes", () => {
+      expect(computeMinuteNeedleAngle("2026-09-05T14:15:00")).toBe(90);
+    });
+
+    it("computes 180° for 30 minutes", () => {
+      expect(computeMinuteNeedleAngle("2026-09-05T14:30:00")).toBe(180);
+    });
+
+    it("computes 270° for 45 minutes", () => {
+      expect(computeMinuteNeedleAngle("2026-09-05T14:45:00")).toBe(270);
+    });
+  });
+
+  describe("computeClockwiseTargetAngle", () => {
+    it("targets end angle directly when clockwise ahead", () => {
+      expect(computeClockwiseTargetAngle(60, 120)).toBe(120);
+      expect(computeClockwiseTargetAngle(0, 180)).toBe(180);
+    });
+
+    it("wraps forward across 360° boundary for smooth clockwise animation", () => {
+      // e.g. 10:00 (300°) to 1:00 (30°) -> rotates forward to 390°
+      expect(computeClockwiseTargetAngle(300, 30)).toBe(390);
+      // e.g. :45 (270°) to :15 (90°) -> rotates forward to 450°
+      expect(computeClockwiseTargetAngle(270, 90)).toBe(450);
+    });
+
+    it("keeps angle unchanged when start and end angles match", () => {
+      expect(computeClockwiseTargetAngle(60, 60)).toBe(60);
+      expect(computeClockwiseTargetAngle(0, 0)).toBe(0);
+    });
+  });
+
+  describe("computeEndDotCoordinates", () => {
+    it("computes (x, y) coordinates at exactly the hour needle distance (24px from center)", () => {
+      const top = computeEndDotCoordinates(0); // 12 o'clock
+      expect(top.x).toBe(50);
+      expect(top.y).toBe(26); // exactly matches hour needle tip y2=26
+
+      const right = computeEndDotCoordinates(90); // 3 o'clock
+      expect(right.x).toBe(74);
+      expect(right.y).toBe(50);
+
+      const bottom = computeEndDotCoordinates(180); // 6 o'clock
+      expect(bottom.x).toBe(50);
+      expect(bottom.y).toBe(74);
+
+      const left = computeEndDotCoordinates(270); // 9 o'clock
+      expect(left.x).toBe(26);
+      expect(left.y).toBe(50);
     });
   });
 
@@ -60,7 +124,24 @@ describe("TimeSheet Molecule", () => {
     });
   });
 
-  describe("buildWavyArc", () => {
+  describe("formatDigitalDuration", () => {
+    it("formats full hours without minutes", () => {
+      expect(formatDigitalDuration(60)).toBe("1h");
+      expect(formatDigitalDuration(120)).toBe("2h");
+    });
+
+    it("formats hours and minutes", () => {
+      expect(formatDigitalDuration(90)).toBe("1h 30m");
+      expect(formatDigitalDuration(150)).toBe("2h 30m");
+    });
+
+    it("formats minutes only for English and French", () => {
+      expect(formatDigitalDuration(45, false)).toBe("45m");
+      expect(formatDigitalDuration(45, true)).toBe("45 min");
+    });
+  });
+
+  describe("buildWavyArc & generateWavyArcPhases", () => {
     it("generates an SVG cubic bezier path for positive sweep angle", () => {
       const path = buildWavyArc(60, 45);
       expect(path).toContain("M");
@@ -70,6 +151,15 @@ describe("TimeSheet Molecule", () => {
     it("returns empty string when sweep angle is zero or negative", () => {
       expect(buildWavyArc(60, 0)).toBe("");
       expect(buildWavyArc(60, -10)).toBe("");
+      expect(generateWavyArcPhases(60, 0)).toBe("");
+    });
+
+    it("generates semicolon-separated phase paths for MD3 SMIL animation", () => {
+      const phases = generateWavyArcPhases(60, 60, { numPhases: 4 });
+      expect(phases).toContain(";");
+      const frames = phases.split(";");
+      expect(frames).toHaveLength(5);
+      expect(frames[0]).toContain("M");
     });
   });
 
@@ -225,7 +315,67 @@ describe("TimeSheet Molecule", () => {
       expect(html).not.toContain("time-sheet-dial-date");
     });
 
-    it("renders chip and wavy progress and live dot with tooltip when event is happening now", () => {
+    it("removes the inner circle inside the cookie dial", () => {
+      const start = dayjs("2026-09-05T14:00:00");
+      const end = dayjs("2026-09-05T16:00:00");
+
+      const html = ReactDOMServer.renderToString(
+        React.createElement(TimeSheet, {
+          startTime: start,
+          endTime: end,
+          referenceTime: baseToday,
+        }),
+      );
+
+      // Verify no r="38" circle inside the cookie
+      expect(html).not.toContain('r="38"');
+    });
+
+    it("renders 2 needles (shorter hour needle, longer minute needle) and 1 ghostly end hour dot at hour needle distance", () => {
+      const start = dayjs("2026-09-05T14:00:00");
+      const end = dayjs("2026-09-05T16:00:00");
+
+      const html = ReactDOMServer.renderToString(
+        React.createElement(TimeSheet, {
+          startTime: start,
+          endTime: end,
+          referenceTime: baseToday,
+        }),
+      );
+
+      expect(html).toContain("time-sheet-hour-needle");
+      expect(html).toContain("time-sheet-minute-needle");
+      expect(html).toContain("time-sheet-end-dot");
+
+      // Hour hand is shorter (y2="26"), minute hand is longer (y2="16")
+      expect(html).toContain('y2="26"');
+      expect(html).toContain('y2="16"');
+
+      // Ghostly fill (rgba with alpha 0.38)
+      expect(html).toContain("rgba(25, 118, 210, 0.38)");
+      // Dot is at distance 24 from center (50, 50) for 16:00 (120deg) -> cx="70.78" cy="62"
+      expect(html).toContain('cx="70.78"');
+      expect(html).toContain('cy="62"');
+    });
+
+    it("animates the circular wavy progress line MD3 style with SMIL phases", () => {
+      const start = dayjs("2026-09-05T14:00:00");
+      const end = dayjs("2026-09-05T16:00:00");
+
+      const html = ReactDOMServer.renderToString(
+        React.createElement(TimeSheet, {
+          startTime: start,
+          endTime: end,
+          referenceTime: baseToday,
+        }),
+      );
+
+      expect(html).toContain("time-sheet-wavy-arc");
+      expect(html).toContain('<animate attributeName="d"');
+      expect(html).toContain('repeatCount="indefinite"');
+    });
+
+    it("renders live mode as a circular MD3 badge on the top right of the card when happening now", () => {
       const start = dayjs("2026-09-05T14:00:00");
       const end = dayjs("2026-09-05T16:00:00");
       const refTime = dayjs("2026-09-05T15:00:00");
@@ -240,9 +390,74 @@ describe("TimeSheet Molecule", () => {
       );
 
       expect(html).toContain("Now • 1h remaining");
-      expect(html).toContain("time-sheet-live-dot");
+      expect(html).toContain("time-sheet-live-badge");
       expect(html).toContain("Live");
       expect(html).toContain("time-sheet-wavy-progress");
+    });
+
+    it("renders duration chip in digital format on the left of the other chip", () => {
+      const start = dayjs("2026-09-05T14:00:00");
+      const end = dayjs("2026-09-05T16:30:00");
+      const refTime = dayjs("2026-09-05T12:00:00");
+
+      const html = ReactDOMServer.renderToString(
+        React.createElement(TimeSheet, {
+          startTime: start,
+          endTime: end,
+          referenceTime: refTime,
+          locale: "en",
+        }),
+      );
+
+      expect(html).toContain("time-sheet-duration-chip");
+      expect(html).toContain("2h 30m");
+      expect(html).toContain("time-sheet-chip");
+      expect(html).toContain("in 2 hours");
+
+      const durationIndex = html.indexOf("time-sheet-duration-chip");
+      const chipIndex = html.indexOf("time-sheet-chip");
+      expect(durationIndex).toBeGreaterThan(-1);
+      expect(chipIndex).toBeGreaterThan(-1);
+      expect(durationIndex).toBeLessThan(chipIndex);
+    });
+
+    it("moves the 2 needles smoothly to the end time on hover", () => {
+      const start = dayjs("2026-09-05T14:15:00");
+      const end = dayjs("2026-09-05T16:30:00");
+
+      const htmlHovered = ReactDOMServer.renderToString(
+        React.createElement(TimeSheet, {
+          startTime: start,
+          endTime: end,
+          referenceTime: baseToday,
+          isHovered: true,
+        }),
+      );
+
+      expect(htmlHovered).toContain("time-sheet-hour-needle");
+      expect(htmlHovered).toContain("time-sheet-minute-needle");
+      expect(htmlHovered).toContain("time-sheet-end-dot");
+      // Hour target 16:30 is 135deg (4 * 30 + 15)
+      expect(htmlHovered).toContain("rotate(135deg)");
+      // Minute target 30 min is 180deg (30 * 6)
+      expect(htmlHovered).toContain("rotate(180deg)");
+
+      const htmlRest = ReactDOMServer.renderToString(
+        React.createElement(TimeSheet, {
+          startTime: start,
+          endTime: end,
+          referenceTime: baseToday,
+          isHovered: false,
+        }),
+      );
+
+      expect(htmlRest).toContain("time-sheet-hour-needle");
+      expect(htmlRest).toContain("time-sheet-minute-needle");
+      expect(htmlRest).toContain("time-sheet-end-dot");
+      // Hour start 14:15 is 67.5deg (2 * 30 + 15 * 0.5)
+      expect(htmlRest).toContain("rotate(67.5deg)");
+      // Minute start 15 min is 90deg (15 * 6)
+      expect(htmlRest).toContain("rotate(90deg)");
     });
 
     it("does NOT render chip when event is not today", () => {

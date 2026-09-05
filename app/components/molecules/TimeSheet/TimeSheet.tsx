@@ -1,4 +1,4 @@
-import React, { forwardRef, useMemo } from "react";
+import React, { forwardRef, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Progress } from "react-material-expressive";
@@ -13,6 +13,7 @@ import type {
 import {
   computeTimeIntervalInfo,
   buildWavyArc,
+  generateWavyArcPhases,
   generate12SidedCookiePath,
   type ComputeTimeIntervalOptions,
 } from "./TimeSheet.utils";
@@ -24,10 +25,15 @@ import {
   ConnectedCard,
   DigitalIntervalRow,
   DigitalIntervalText,
-  LivePulseDot,
+  LiveBadge,
+  DetailsChipsRow,
+  DurationChip,
   TimeSheetChip,
   ProgressContainer,
   SPRING_TRANSITION,
+  HOUR_SPRING_TRANSITION,
+  MINUTE_SPRING_TRANSITION,
+  DOT_SPRING_TRANSITION,
 } from "./TimeSheet.styles";
 
 const DEFAULT_TIME_PROPS = {
@@ -55,6 +61,16 @@ function resolveChipSize(size: TimeSheetSize): "small" | "medium" {
   return size === "large" ? "medium" : "small";
 }
 
+function resolveAccessibleLabel(
+  ariaLabel?: string,
+  digitalRange?: string,
+  chipLabel?: string | null,
+): string {
+  if (ariaLabel) return ariaLabel;
+  if (chipLabel) return `Time interval: ${digitalRange}, ${chipLabel}`;
+  return `Time interval: ${digitalRange}`;
+}
+
 function useTimeSheetCalculations(
   startTime: TimeSheetProps["startTime"],
   endTime: TimeSheetProps["endTime"],
@@ -70,60 +86,65 @@ function useTimeSheetCalculations(
     [intervalInfo.startHourAngle, intervalInfo.sweepAngle],
   );
 
+  const wavyArcPhases = useMemo(
+    () =>
+      generateWavyArcPhases(
+        intervalInfo.startHourAngle,
+        intervalInfo.sweepAngle,
+      ),
+    [intervalInfo.startHourAngle, intervalInfo.sweepAngle],
+  );
+
   const cookiePath = useMemo(() => generate12SidedCookiePath(), []);
 
-  return { intervalInfo, wavyArcPath, cookiePath };
+  return { intervalInfo, wavyArcPath, wavyArcPhases, cookiePath };
 }
 
 interface DetailsSectionContentProps {
   intervalInfo: TimeIntervalInfo;
   size: TimeSheetSize;
-  isFr: boolean;
 }
 
 function DetailsSectionContent({
   intervalInfo,
   size,
-  isFr,
 }: DetailsSectionContentProps) {
   const chipSize = resolveChipSize(size);
   const chipVariant = resolveChipVariant(intervalInfo.isHappeningNow);
-  const liveTooltip = isFr ? "En direct" : "Live";
   const activeProgressColor = intervalInfo.isHappeningNow
     ? intervalInfo.progressColor
     : undefined;
 
   return (
     <>
-      <DigitalIntervalRow>
+      <DigitalIntervalRow $isHappeningNow={intervalInfo.isHappeningNow}>
         <DigitalIntervalText
           $size={size}
           data-testid="time-sheet-digital-interval"
         >
           {intervalInfo.digitalRange}
         </DigitalIntervalText>
-
-        {intervalInfo.isHappeningNow && (
-          <Tooltip title={liveTooltip} arrow>
-            <LivePulseDot
-              role="status"
-              aria-label={liveTooltip}
-              data-testid="time-sheet-live-dot"
-            />
-          </Tooltip>
-        )}
       </DigitalIntervalRow>
 
-      {intervalInfo.isToday && intervalInfo.chipLabel && (
-        <TimeSheetChip
+      <DetailsChipsRow>
+        <DurationChip
           size={chipSize}
-          color={intervalInfo.chipColor}
-          variant={chipVariant}
-          label={intervalInfo.chipLabel}
-          $progressColor={activeProgressColor}
-          data-testid="time-sheet-chip"
+          variant="outlined"
+          label={intervalInfo.durationFormatted}
+          data-testid="time-sheet-duration-chip"
         />
-      )}
+
+        {intervalInfo.isToday && intervalInfo.chipLabel && (
+          <TimeSheetChip
+            size={chipSize}
+            color={intervalInfo.chipColor}
+            variant={chipVariant}
+            label={intervalInfo.chipLabel}
+            $progressColor={activeProgressColor}
+            data-testid="time-sheet-chip"
+          />
+        )}
+      </DetailsChipsRow>
 
       {intervalInfo.isHappeningNow && (
         <ProgressContainer
@@ -133,6 +154,90 @@ function DetailsSectionContent({
           <Progress wavy value={intervalInfo.elapsedPercent} thickness={4} />
         </ProgressContainer>
       )}
+    </>
+  );
+}
+
+interface ClockDialNeedlesProps {
+  intervalInfo: TimeIntervalInfo;
+  activeColor: string;
+  isHovered: boolean;
+}
+
+function ClockDialNeedles({
+  intervalInfo,
+  activeColor,
+  isHovered,
+}: ClockDialNeedlesProps) {
+  const ghostColor = alpha(activeColor, 0.38);
+
+  return (
+    <>
+      {/* End Time Dot: Ghostly accent dot at the same distance from center as the hour needle */}
+      <motion.circle
+        cx={intervalInfo.endDot.x}
+        cy={intervalInfo.endDot.y}
+        r={3.2}
+        fill={ghostColor}
+        animate={{
+          scale: isHovered ? 1.2 : 1,
+          opacity: isHovered ? 0.6 : 1,
+        }}
+        transition={DOT_SPRING_TRANSITION}
+        data-testid="time-sheet-end-dot"
+      />
+
+      {/* Start Hour Needle: Shorter & sturdier, springs to end hour on hover */}
+      <MotionHandGroup
+        initial={{
+          rotate: isHovered
+            ? intervalInfo.targetEndHourAngle
+            : intervalInfo.startHourAngle,
+        }}
+        animate={{
+          rotate: isHovered
+            ? intervalInfo.targetEndHourAngle
+            : intervalInfo.startHourAngle,
+        }}
+        transition={HOUR_SPRING_TRANSITION}
+        data-testid="time-sheet-hour-needle"
+      >
+        <line
+          x1="50"
+          y1="50"
+          x2="50"
+          y2="26"
+          stroke={activeColor}
+          strokeWidth="4.8"
+          strokeLinecap="round"
+        />
+      </MotionHandGroup>
+
+      {/* Start Minute Needle: Longer & sleeker, springs to end minute on hover */}
+      <MotionHandGroup
+        initial={{
+          rotate: isHovered
+            ? intervalInfo.targetEndMinuteAngle
+            : intervalInfo.startMinuteAngle,
+        }}
+        animate={{
+          rotate: isHovered
+            ? intervalInfo.targetEndMinuteAngle
+            : intervalInfo.startMinuteAngle,
+        }}
+        transition={MINUTE_SPRING_TRANSITION}
+        data-testid="time-sheet-minute-needle"
+      >
+        <line
+          x1="50"
+          y1="50"
+          x2="50"
+          y2="16"
+          stroke={activeColor}
+          strokeWidth="3.2"
+          strokeLinecap="round"
+        />
+      </MotionHandGroup>
     </>
   );
 }
@@ -168,22 +273,23 @@ export const TimeSheet = forwardRef<HTMLDivElement, TimeSheetProps>(
       [referenceTime, normLocale, hourFormat],
     );
 
-    const { intervalInfo, wavyArcPath, cookiePath } = useTimeSheetCalculations(
-      startTime,
-      endTime,
-      calculationOptions,
-    );
+    const { intervalInfo, wavyArcPath, wavyArcPhases, cookiePath } =
+      useTimeSheetCalculations(startTime, endTime, calculationOptions);
+
+    const [internalHovered, setInternalHovered] = useState(false);
+    const isHovered = config.isHovered ?? internalHovered;
 
     const primaryColor = theme.palette.primary.main;
     const activeColor = intervalInfo.isHappeningNow
       ? intervalInfo.progressColor
       : primaryColor;
+    const liveTooltip = isFr ? "En direct" : "Live";
 
-    const accessibleLabel =
-      ariaLabel ||
-      `Time interval: ${intervalInfo.digitalRange}${
-        intervalInfo.chipLabel ? `, ${intervalInfo.chipLabel}` : ""
-      }`;
+    const accessibleLabel = resolveAccessibleLabel(
+      ariaLabel,
+      intervalInfo.digitalRange,
+      intervalInfo.chipLabel,
+    );
 
     return (
       <SheetCard
@@ -194,6 +300,10 @@ export const TimeSheet = forwardRef<HTMLDivElement, TimeSheetProps>(
         className={className}
         style={style}
         onClick={onClick}
+        onMouseEnter={() => setInternalHovered(true)}
+        onMouseLeave={() => setInternalHovered(false)}
+        onFocusCapture={() => setInternalHovered(true)}
+        onBlurCapture={() => setInternalHovered(false)}
         role="group"
         aria-label={accessibleLabel}
         data-testid="time-sheet"
@@ -217,76 +327,35 @@ export const TimeSheet = forwardRef<HTMLDivElement, TimeSheetProps>(
               data-testid="time-sheet-cookie-dial"
             />
 
-            {/* Inner guideline */}
-            <circle
-              cx="50"
-              cy="50"
-              r="38"
-              fill="none"
-              stroke={activeColor}
-              strokeWidth="0.5"
-              strokeOpacity="0.08"
-            />
-
-            {/* Tightly Scallop-Mirroring Squiggly Circular Progress Line */}
+            {/* Tightly Scallop-Mirroring Squiggly Circular Progress Line with MD3 Animation */}
             {wavyArcPath && (
               <motion.path
                 d={wavyArcPath}
                 fill="none"
                 stroke={activeColor}
-                strokeWidth={2.8}
+                strokeWidth={isHovered ? 3.4 : 2.8}
                 strokeLinecap="round"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
                 transition={SPRING_TRANSITION}
                 data-testid="time-sheet-wavy-arc"
-              />
+              >
+                {wavyArcPhases && (
+                  <animate
+                    attributeName="d"
+                    dur="2.4s"
+                    repeatCount="indefinite"
+                    values={wavyArcPhases}
+                  />
+                )}
+              </motion.path>
             )}
 
-            {/* Start Needle: Rounded pill hand */}
-            <line
-              x1="50"
-              y1="50"
-              x2="50"
-              y2="28"
-              stroke={activeColor}
-              strokeWidth="6"
-              strokeLinecap="round"
-              transform={`rotate(${intervalInfo.startHourAngle} 50 50)`}
-              data-testid="time-sheet-start-needle"
+            <ClockDialNeedles
+              intervalInfo={intervalInfo}
+              activeColor={activeColor}
+              isHovered={isHovered}
             />
-
-            {/* End Needle: Pastel / secondary pill hand */}
-            <line
-              x1="50"
-              y1="50"
-              x2="50"
-              y2="18"
-              stroke={alpha(activeColor, 0.42)}
-              strokeWidth="6"
-              strokeLinecap="round"
-              transform={`rotate(${intervalInfo.endHourAngle} 50 50)`}
-              data-testid="time-sheet-end-needle"
-            />
-
-            {/* Animated Needle with MD3 Spring Transition from Start to End */}
-            <MotionHandGroup
-              initial={{ rotate: intervalInfo.startHourAngle }}
-              animate={{ rotate: intervalInfo.endHourAngle }}
-              transition={SPRING_TRANSITION}
-              transformTemplate={({ rotate }) => `rotate(${rotate} 50 50)`}
-              data-testid="time-sheet-animated-needle"
-            >
-              <line
-                x1="50"
-                y1="50"
-                x2="50"
-                y2="18"
-                stroke={activeColor}
-                strokeWidth="6"
-                strokeLinecap="round"
-              />
-            </MotionHandGroup>
 
             {/* Center Pivot Hub (matching Material You widget) */}
             <circle cx="50" cy="50" r="4.2" fill={activeColor} />
@@ -305,11 +374,18 @@ export const TimeSheet = forwardRef<HTMLDivElement, TimeSheetProps>(
           $orientation={orientation}
           data-testid="time-sheet-connected-card"
         >
-          <DetailsSectionContent
-            intervalInfo={intervalInfo}
-            size={size}
-            isFr={isFr}
-          />
+          {intervalInfo.isHappeningNow && (
+            <Tooltip title={liveTooltip} arrow>
+              <LiveBadge
+                role="status"
+                aria-label={liveTooltip}
+                $size={size}
+                data-testid="time-sheet-live-badge"
+              />
+            </Tooltip>
+          )}
+
+          <DetailsSectionContent intervalInfo={intervalInfo} size={size} />
         </ConnectedCard>
       </SheetCard>
     );
@@ -320,9 +396,16 @@ TimeSheet.displayName = "TimeSheet";
 
 export {
   computeNeedleAngle,
+  computeHourNeedleAngle,
+  computeMinuteNeedleAngle,
+  computeClockwiseTargetAngle,
+  computeEndDotCoordinates,
+  HOUR_NEEDLE_LENGTH,
   formatDigitalInterval,
+  formatDigitalDuration,
   computeTimeIntervalInfo,
   buildWavyArc,
+  generateWavyArcPhases,
   generate12SidedCookiePath,
   interpolateProgressColor,
   getContrastTextColor,

@@ -32,7 +32,7 @@ const SIZE_CONFIG = {
     overlapOffset: 28,
     cardPaddingLeft: 34,
     cardPaddingRight: 16,
-    digitalFontSize: "0.85rem",
+    digitalFontSize: "1.05rem",
     detailsGap: 4,
     chipScale: 0.85,
     chipHeight: "20px",
@@ -44,7 +44,7 @@ const SIZE_CONFIG = {
     overlapOffset: 38,
     cardPaddingLeft: 46,
     cardPaddingRight: 20,
-    digitalFontSize: "1.0625rem",
+    digitalFontSize: "1.35rem",
     detailsGap: 8,
     chipScale: 1,
     chipHeight: "24px",
@@ -56,7 +56,7 @@ const SIZE_CONFIG = {
     overlapOffset: 48,
     cardPaddingLeft: 56,
     cardPaddingRight: 24,
-    digitalFontSize: "1.28rem",
+    digitalFontSize: "1.65rem",
     detailsGap: 10,
     chipScale: 1,
     chipHeight: "24px",
@@ -98,6 +98,27 @@ export const SPRING_TRANSITION: Transition = {
   stiffness: 280,
   damping: 24,
   mass: 0.8,
+};
+
+export const HOUR_SPRING_TRANSITION: Transition = {
+  type: "spring",
+  stiffness: 260,
+  damping: 23,
+  mass: 0.9,
+};
+
+export const MINUTE_SPRING_TRANSITION: Transition = {
+  type: "spring",
+  stiffness: 290,
+  damping: 24,
+  mass: 0.7,
+};
+
+export const DOT_SPRING_TRANSITION: Transition = {
+  type: "spring",
+  stiffness: 340,
+  damping: 20,
+  mass: 0.6,
 };
 
 export const SheetCard = styled("div", {
@@ -160,7 +181,8 @@ export const ClockSvg = styled("svg", {
 });
 
 export const MotionHandGroup = styled(motion.g)(() => ({
-  // Hand container grouping with SVG rotation
+  transformBox: "view-box !important" as "view-box",
+  transformOrigin: "50% 50% !important",
 }));
 
 export const ConnectedCard = styled("div", {
@@ -203,12 +225,15 @@ export const ConnectedCard = styled("div", {
   };
 });
 
-export const DigitalIntervalRow = styled("div")({
+export const DigitalIntervalRow = styled("div", {
+  shouldForwardProp: (prop) => prop !== "$isHappeningNow",
+})<{ $isHappeningNow?: boolean }>(({ $isHappeningNow }) => ({
   display: "flex",
   alignItems: "center",
   gap: 8,
   whiteSpace: "nowrap",
-});
+  paddingRight: $isHappeningNow ? 28 : 0,
+}));
 
 export const DigitalIntervalText = styled("span", {
   shouldForwardProp: (prop) => prop !== "$size",
@@ -226,15 +251,63 @@ export const DigitalIntervalText = styled("span", {
   };
 });
 
-export const LivePulseDot = styled("span")(({ theme }) => ({
-  width: 8,
-  height: 8,
-  borderRadius: "50%",
-  backgroundColor: theme.palette.error.main,
-  display: "inline-block",
-  animation: `${pulseAnimation} 1.6s infinite ease-in-out`,
-  cursor: "pointer",
-  flexShrink: 0,
+export const LiveBadge = styled("span", {
+  shouldForwardProp: (prop) => prop !== "$size",
+})<{ $size: TimeSheetSize }>(({ theme, $size }) => {
+  const badgeDim = $size === "small" ? 14 : $size === "large" ? 20 : 16;
+  const topPos = $size === "small" ? 8 : $size === "large" ? 14 : 11;
+  const rightPos = $size === "small" ? 10 : $size === "large" ? 16 : 13;
+
+  return {
+    position: "absolute",
+    top: topPos,
+    right: rightPos,
+    zIndex: 5,
+    width: badgeDim,
+    height: badgeDim,
+    minWidth: badgeDim,
+    minHeight: badgeDim,
+    borderRadius: "50%",
+    backgroundColor: theme.palette.error.main,
+    border: `2px solid ${theme.palette.background.paper}`,
+    boxShadow: `0 0 0 0 ${alpha(theme.palette.error.main, 0.7)}`,
+    display: "inline-block",
+    animation: `${pulseAnimation} 1.8s infinite ease-in-out`,
+    cursor: "pointer",
+    flexShrink: 0,
+    boxSizing: "content-box",
+    transition: theme.transitions.create(["transform", "background-color"]),
+    "&:hover": {
+      transform: "scale(1.15)",
+    },
+    ...theme.applyStyles("dark", {
+      border: `2px solid ${theme.palette.background.paper}`,
+      boxShadow: `0 2px 8px ${alpha(theme.palette.error.main, 0.6)}`,
+    }),
+  };
+});
+
+export const LivePulseDot = LiveBadge;
+
+export const DetailsChipsRow = styled("div")({
+  display: "flex",
+  alignItems: "center",
+  gap: 6,
+  flexWrap: "nowrap",
+  whiteSpace: "nowrap",
+});
+
+export const DurationChip = styled(Chip)(({ theme }) => ({
+  fontWeight: 700,
+  fontVariantNumeric: "tabular-nums",
+  letterSpacing: "-0.01em",
+  borderColor: alpha(theme.palette.divider, 0.8),
+  backgroundColor: alpha(theme.palette.action.hover, 0.04),
+  color: theme.palette.text.secondary,
+  "& .MuiChip-label": {
+    paddingLeft: 8,
+    paddingRight: 8,
+  },
 }));
 
 export const TimeSheetChip = styled(Chip, {
