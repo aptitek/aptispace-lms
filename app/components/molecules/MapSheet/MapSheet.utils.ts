@@ -34,13 +34,19 @@ function tryExplicit(
   if (explicitFloor === undefined && explicitRoom === undefined) {
     return null;
   }
-  const floor = explicitFloor !== undefined ? String(explicitFloor).trim() : "0";
+  const floor =
+    explicitFloor !== undefined ? String(explicitFloor).trim() : "0";
   const roomNumber =
     explicitRoom !== undefined
       ? String(explicitRoom).trim().padStart(2, "0")
       : rawRoom;
 
-  return buildRoomInfo(floor, roomNumber, rawRoom || `${floor}${roomNumber}`, isFr);
+  return buildRoomInfo(
+    floor,
+    roomNumber,
+    rawRoom || `${floor}${roomNumber}`,
+    isFr,
+  );
 }
 
 function tryPunctuation(rawRoom: string, isFr: boolean): ParsedRoomInfo | null {
@@ -52,7 +58,10 @@ function tryPunctuation(rawRoom: string, isFr: boolean): ParsedRoomInfo | null {
   return buildRoomInfo(floor, roomNumber, rawRoom, isFr);
 }
 
-function tryAlphaNumeric(rawRoom: string, isFr: boolean): ParsedRoomInfo | null {
+function tryAlphaNumeric(
+  rawRoom: string,
+  isFr: boolean,
+): ParsedRoomInfo | null {
   const match = rawRoom.match(/([A-Za-z\s]+)?(\d{3,4})$/);
   if (!match) return null;
 
@@ -90,7 +99,8 @@ function tryDigits(rawRoom: string, isFr: boolean): ParsedRoomInfo | null {
 
   const digits = match[0];
   const floor = digits.length > 2 ? digits.slice(0, -2) : "0";
-  const roomNumber = digits.length > 2 ? digits.slice(-2) : digits.padStart(2, "0");
+  const roomNumber =
+    digits.length > 2 ? digits.slice(-2) : digits.padStart(2, "0");
 
   return buildRoomInfo(floor, roomNumber, rawRoom, isFr);
 }
@@ -115,7 +125,12 @@ export function parseRoomCode(
   const isFr = locale.startsWith("fr");
   const rawRoom = (roomInput || "").trim();
 
-  const explicitResult = tryExplicit(rawRoom, explicitFloor, explicitRoom, isFr);
+  const explicitResult = tryExplicit(
+    rawRoom,
+    explicitFloor,
+    explicitRoom,
+    isFr,
+  );
   if (explicitResult) return explicitResult;
 
   if (!rawRoom) {
@@ -212,10 +227,7 @@ export function formatCoordinatesDMS(coords: MapCoordinates): string {
 export function cleanCampusName(name?: string): string {
   if (!name) return "";
   const cleaned = name
-    .replace(
-      /\bcampus\b(\s+de\s+|\s+d['’]\s*|\s*[-–—:]\s*|\s+)?/gi,
-      "",
-    )
+    .replace(/\bcampus\b(\s+de\s+|\s+d['’]\s*|\s*[-–—:]\s*|\s+)?/gi, "")
     .replace(/\s+/g, " ")
     .trim();
   return cleaned || name;

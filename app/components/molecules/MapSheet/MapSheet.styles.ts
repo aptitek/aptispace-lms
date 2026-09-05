@@ -262,12 +262,13 @@ export const RoomChipContainer = styled("div")(({ theme }) => {
     color: theme.palette.secondary.dark || color,
     fontSize: "0.95rem",
     fontWeight: 800,
-    fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+    fontFamily: "SFMono-Regular, Menlo, Monaco, Consolas, monospace",
     width: "fit-content",
     boxShadow: `0 1px 3px ${alpha(color, 0.08)}`,
     lineHeight: 1.3,
     userSelect: "none",
-    transition: "transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease",
+    transition:
+      "transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease",
     "&:hover": {
       transform: "translateY(-1px)",
       borderColor: color,
@@ -350,7 +351,7 @@ export const DoorCodePill = styled("div")(({ theme }) => ({
   borderRadius: "7px",
   backgroundColor: alpha(theme.palette.error.main, 0.08),
   border: `1px dashed ${alpha(theme.palette.error.main, 0.42)}`,
-  fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  fontFamily: "SFMono-Regular, Menlo, Monaco, Consolas, monospace",
   fontWeight: 800,
   fontSize: "0.78rem",
   letterSpacing: "0.04em",
@@ -466,7 +467,8 @@ export const WayfindingChip = styled("div", {
     textOverflow: "ellipsis",
     userSelect: "none",
     boxShadow: `0 1px 2px ${alpha(color, 0.06)}`,
-    transition: "transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease",
+    transition:
+      "transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease",
     "&:hover": {
       transform: "translateY(-1px)",
       borderColor: color,

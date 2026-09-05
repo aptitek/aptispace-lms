@@ -70,12 +70,7 @@ describe("MapSheet Molecule", () => {
     });
 
     it("handles explicit floor and roomNumber overrides", () => {
-      const parsed = parseRoomCode(
-        "IgnoredRaw",
-        4,
-        "15",
-        "en",
-      );
+      const parsed = parseRoomCode("IgnoredRaw", 4, "15", "en");
       expect(parsed.floor).toBe("4");
       expect(parsed.roomNumber).toBe("15");
       expect(parsed.chipText).toBe("(4 | 15)");
@@ -107,7 +102,9 @@ describe("MapSheet Molecule", () => {
 
     it("builds a valid OpenStreetMap view URL", () => {
       const url = buildOsmViewUrl({ lat: 48.8566, lon: 2.3522 }, 16);
-      expect(url).toContain("https://www.openstreetmap.org/?mlat=48.85660&mlon=2.35220#map=16");
+      expect(url).toContain(
+        "https://www.openstreetmap.org/?mlat=48.85660&mlon=2.35220#map=16",
+      );
     });
 
     it("builds directions URL with coordinates", () => {
@@ -144,7 +141,7 @@ describe("MapSheet Molecule", () => {
       // Room chip parts
       expect(html).toContain("3");
       expect(html).toContain("02");
-      expect(html).toContain("data-testid=\"room-floor-chip\"");
+      expect(html).toContain('data-testid="room-floor-chip"');
     });
 
     it("renders door access code and instructions menu trigger when provided", () => {
@@ -158,8 +155,8 @@ describe("MapSheet Molecule", () => {
       );
 
       expect(html).toContain("*4829#");
-      expect(html).toContain("data-testid=\"door-code-pill\"");
-      expect(html).toContain("data-testid=\"instructions-menu-trigger\"");
+      expect(html).toContain('data-testid="door-code-pill"');
+      expect(html).toContain('data-testid="instructions-menu-trigger"');
     });
 
     it("renders with different sizing scales ('small', 'medium', 'large')", () => {
@@ -187,12 +184,7 @@ describe("MapSheet Molecule", () => {
     });
 
     it("renders different access types ('code', 'badge', 'intercom', 'key')", () => {
-      for (const accessType of [
-        "code",
-        "badge",
-        "intercom",
-        "key",
-      ] as const) {
+      for (const accessType of ["code", "badge", "intercom", "key"] as const) {
         const html = renderWithTheme(
           React.createElement(MapSheet, {
             address: defaultAddress,
@@ -213,12 +205,12 @@ describe("MapSheet Molecule", () => {
         }),
       );
 
-      expect(compactHtml).toContain("role=\"region\"");
-      expect(compactHtml).not.toContain("data-testid=\"map-top-tape\"");
-      expect(compactHtml).not.toContain("data-testid=\"map-compass-badge\"");
-      expect(compactHtml).not.toContain("data-testid=\"zoom-in-button\"");
-      expect(compactHtml).not.toContain("data-testid=\"fold-toggle-button\"");
-      expect(compactHtml).toContain("data-testid=\"mode-toggle-button\"");
+      expect(compactHtml).toContain('role="region"');
+      expect(compactHtml).not.toContain('data-testid="map-top-tape"');
+      expect(compactHtml).not.toContain('data-testid="map-compass-badge"');
+      expect(compactHtml).not.toContain('data-testid="zoom-in-button"');
+      expect(compactHtml).not.toContain('data-testid="fold-toggle-button"');
+      expect(compactHtml).toContain('data-testid="mode-toggle-button"');
 
       const extendedHtml = renderWithTheme(
         React.createElement(MapSheet, {
@@ -228,11 +220,11 @@ describe("MapSheet Molecule", () => {
         }),
       );
 
-      expect(extendedHtml).toContain("data-testid=\"map-top-tape\"");
+      expect(extendedHtml).toContain('data-testid="map-top-tape"');
       expect(extendedHtml).toContain("OSM •");
-      expect(extendedHtml).toContain("data-testid=\"map-compass-badge\"");
-      expect(extendedHtml).toContain("data-testid=\"zoom-in-button\"");
-      expect(extendedHtml).toContain("data-testid=\"fold-toggle-button\"");
+      expect(extendedHtml).toContain('data-testid="map-compass-badge"');
+      expect(extendedHtml).toContain('data-testid="zoom-in-button"');
+      expect(extendedHtml).toContain('data-testid="fold-toggle-button"');
     });
 
     it("renders campus and building as chips in compact mode", () => {
@@ -246,15 +238,15 @@ describe("MapSheet Molecule", () => {
         }),
       );
 
-      expect(html).toContain("data-testid=\"chips-deck-row\"");
-      expect(html).toContain("data-testid=\"chip-campus\"");
+      expect(html).toContain('data-testid="chips-deck-row"');
+      expect(html).toContain('data-testid="chip-campus"');
       expect(html).toContain("Paris-Saclay");
-      expect(html).toContain("data-testid=\"chip-building\"");
+      expect(html).toContain('data-testid="chip-building"');
       expect(html).toContain("Alan Turing");
-      expect(html).toContain("data-testid=\"room-floor-chip\"");
-      expect(html).toContain("data-testid=\"floor-pill\"");
-      expect(html).toContain("data-testid=\"room-pill\"");
-      expect(html).toContain("data-testid=\"mode-toggle-button\"");
+      expect(html).toContain('data-testid="room-floor-chip"');
+      expect(html).toContain('data-testid="floor-pill"');
+      expect(html).toContain('data-testid="room-pill"');
+      expect(html).toContain('data-testid="mode-toggle-button"');
     });
 
     it("renders extended full map mode with floating wayfinding overlay and view controls", () => {
@@ -270,13 +262,13 @@ describe("MapSheet Molecule", () => {
         }),
       );
 
-      expect(html).toContain("data-testid=\"floating-wayfinding-overlay\"");
-      expect(html).toContain("data-testid=\"chip-campus\"");
-      expect(html).toContain("data-testid=\"chip-building\"");
-      expect(html).toContain("data-testid=\"room-floor-chip\"");
-      expect(html).toContain("data-testid=\"door-code-pill\"");
-      expect(html).toContain("data-testid=\"mode-toggle-button\"");
-      expect(html).toContain("data-testid=\"extended-view-toggle-button\"");
+      expect(html).toContain('data-testid="floating-wayfinding-overlay"');
+      expect(html).toContain('data-testid="chip-campus"');
+      expect(html).toContain('data-testid="chip-building"');
+      expect(html).toContain('data-testid="room-floor-chip"');
+      expect(html).toContain('data-testid="door-code-pill"');
+      expect(html).toContain('data-testid="mode-toggle-button"');
+      expect(html).toContain('data-testid="extended-view-toggle-button"');
     });
 
     it("renders extended split view mode with transit steps", () => {
@@ -292,12 +284,12 @@ describe("MapSheet Molecule", () => {
         }),
       );
 
-      expect(html).toContain("data-testid=\"step-campus\"");
-      expect(html).toContain("data-testid=\"step-building\"");
-      expect(html).toContain("data-testid=\"step-room\"");
-      expect(html).toContain("data-testid=\"step-instructions\"");
-      expect(html).toContain("data-testid=\"mode-toggle-button\"");
-      expect(html).toContain("data-testid=\"extended-view-toggle-button\"");
+      expect(html).toContain('data-testid="step-campus"');
+      expect(html).toContain('data-testid="step-building"');
+      expect(html).toContain('data-testid="step-room"');
+      expect(html).toContain('data-testid="step-instructions"');
+      expect(html).toContain('data-testid="mode-toggle-button"');
+      expect(html).toContain('data-testid="extended-view-toggle-button"');
     });
   });
 
@@ -321,4 +313,3 @@ describe("MapSheet Molecule", () => {
     });
   });
 });
-

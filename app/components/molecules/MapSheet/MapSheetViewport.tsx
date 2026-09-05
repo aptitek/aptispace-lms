@@ -337,7 +337,10 @@ interface CompactExpandButtonProps {
   label: string;
 }
 
-function CompactExpandButton({ onToggleMode, label }: CompactExpandButtonProps) {
+function CompactExpandButton({
+  onToggleMode,
+  label,
+}: CompactExpandButtonProps) {
   if (!onToggleMode) return null;
   return (
     <MapControlsToolbar

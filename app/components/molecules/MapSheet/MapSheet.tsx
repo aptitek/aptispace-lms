@@ -265,7 +265,10 @@ export const MapSheet = forwardRef<HTMLElement, MapSheetProps>(
         doorCode: t("mapSheet.doorCode", "Door Code"),
         copiedDoorCode: t("mapSheet.copiedDoorCode", "Door code copied!"),
         copyAddress: t("mapSheet.copyAddress", "Copy Address"),
-        copiedAddress: t("mapSheet.copiedAddress", "Address copied to clipboard!"),
+        copiedAddress: t(
+          "mapSheet.copiedAddress",
+          "Address copied to clipboard!",
+        ),
         directions: t("mapSheet.getDirections", "Directions"),
         copy: t("common.copy", "Copy"),
       }),
@@ -301,10 +304,7 @@ export const MapSheet = forwardRef<HTMLElement, MapSheetProps>(
         aria-label={t("mapSheet.title", "Location & Access")}
         data-testid="map-sheet"
       >
-        <CardBodyWrapper
-          $orientation={config.orientation}
-          $size={config.size}
-        >
+        <CardBodyWrapper $orientation={config.orientation} $size={config.size}>
           <MapSheetViewport
             mode={currentMode}
             extendedView={currentExtendedView}

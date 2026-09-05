@@ -55,12 +55,14 @@ const meta: Meta<typeof MapSheet> = {
     mode: {
       control: "radio",
       options: ["compact", "extended"],
-      description: "Display mode: compact with wayfinding chips or extended full map",
+      description:
+        "Display mode: compact with wayfinding chips or extended full map",
     },
     extendedView: {
       control: "radio",
       options: ["full", "split"],
-      description: "Layout style in extended mode: full map with overlay or side-by-side split view",
+      description:
+        "Layout style in extended mode: full map with overlay or side-by-side split view",
     },
     allowModeToggle: {
       control: "boolean",

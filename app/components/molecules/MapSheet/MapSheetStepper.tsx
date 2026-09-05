@@ -77,10 +77,7 @@ export function InstructionSection({
   return (
     <ItineraryStep data-testid="step-instructions">
       <Tooltip arrow title={labels.instructions}>
-        <StepIconBadge
-          $variant="instruction"
-          aria-label={labels.instructions}
-        >
+        <StepIconBadge $variant="instruction" aria-label={labels.instructions}>
           {resolveAccessIcon(accessType)}
         </StepIconBadge>
       </Tooltip>
@@ -221,10 +218,7 @@ export function ExtendedStepperItinerary({
       {/* Step 3: Room & Floor Chip: 302 = (3 | 02) */}
       <ItineraryStep data-testid="step-room">
         <Tooltip arrow title={roomInfo.tooltipText}>
-          <StepIconBadge
-            $variant="room"
-            aria-label={roomInfo.tooltipText}
-          >
+          <StepIconBadge $variant="room" aria-label={roomInfo.tooltipText}>
             <MeetingRoomRoundedIcon sx={{ fontSize: "1.15rem" }} />
           </StepIconBadge>
         </Tooltip>

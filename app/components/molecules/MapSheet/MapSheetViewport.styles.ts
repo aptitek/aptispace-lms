@@ -21,7 +21,8 @@ export const PaperTopTape = styled("div")(({ theme }) => ({
   justifyContent: "space-between",
   padding: "0 10px",
   fontSize: "0.625rem",
-  fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+  fontFamily:
+    'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
   letterSpacing: "0.06em",
   color: alpha(theme.palette.text.secondary, 0.7),
   backgroundColor: alpha(theme.palette.background.default, 0.75),
@@ -274,7 +275,7 @@ export const MapCompassBadge = styled("div")(({ theme }) => ({
   zIndex: 5,
   fontSize: "0.625rem",
   fontWeight: 700,
-  fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  fontFamily: "SFMono-Regular, Menlo, Monaco, Consolas, monospace",
   color: theme.palette.text.primary,
 }));
 
