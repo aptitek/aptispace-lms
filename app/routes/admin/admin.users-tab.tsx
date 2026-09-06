@@ -1,5 +1,5 @@
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
-import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
+import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 import type { AuthUser } from "~/utils/auth";
 import FilterBar from "~/components/molecules/FilterBar/FilterBar";
 import UserGrid from "~/components/molecules/UserGrid/UserGrid";
@@ -21,12 +21,12 @@ export interface AdminUsersTabPanelProps {
   onStartYearMinChange: (year: number | null) => void;
   startYearMax: number | null;
   onStartYearMaxChange: (year: number | null) => void;
-  filteredUsers: EntityCardData[];
-  selectedUser: EntityCardData | null;
-  onUserClick: (user: EntityCardData) => void;
+  filteredUsers: UserCardData[];
+  selectedUser: UserCardData | null;
+  onUserClick: (user: UserCardData) => void;
   onCreateNewUser: () => void;
-  onImpersonate: (user: EntityCardData) => void;
-  onDeleteUser: (user: EntityCardData) => void;
+  onImpersonate: (user: UserCardData) => void;
+  onDeleteUser: (user: UserCardData) => void;
   hasInspectorOpen: boolean;
   onCloseInspector: () => void;
   onAddCohort: (params: { studentId: string; cohortId: string }) => void;

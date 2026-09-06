@@ -3,7 +3,6 @@ import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Galaxy from "~/components/organisms/Galaxy/Galaxy";
 import Sidebar, { type SidebarVariant } from "~/components/organisms/Sidebar";
-import Footer from "~/components/organisms/Footer/Footer";
 import type { AuthUser } from "~/utils/auth";
 
 export type HeaderMode = "subtle" | "full";
@@ -100,8 +99,6 @@ export default function AuthLayout({
       )}
 
       <ContentWrapper>{children}</ContentWrapper>
-
-      <Footer />
     </LayoutRoot>
   );
 }

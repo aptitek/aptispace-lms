@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import EntityCard from "~/components/molecules/EntityCard/EntityCard";
+import UserCard from "~/components/molecules/UserCard/UserCard";
 
-const meta: Meta<typeof EntityCard> = {
-  title: "Molecules/EntityCard",
-  component: EntityCard,
+const meta: Meta<typeof UserCard> = {
+  title: "Molecules/UserCard",
+  component: UserCard,
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
@@ -11,11 +11,11 @@ const meta: Meta<typeof EntityCard> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof EntityCard>;
+type Story = StoryObj<typeof UserCard>;
 
 export const DefaultStudent: Story = {
   args: {
-    entity: {
+    user: {
       id: "student-001",
       firstName: "Alexandre",
       familyName: "MOREAU",
@@ -43,7 +43,7 @@ export const DefaultStudent: Story = {
 
 export const PendingOnboarding: Story = {
   args: {
-    entity: {
+    user: {
       id: "student-002",
       firstName: "Thomas",
       familyName: "DUBOIS",
@@ -59,7 +59,7 @@ export const PendingOnboarding: Story = {
 
 export const WithoutGithub: Story = {
   args: {
-    entity: {
+    user: {
       id: "student-003-uuid-longer-example",
       firstName: "Sophie",
       familyName: "LAURENT",
@@ -74,7 +74,7 @@ export const WithoutGithub: Story = {
 
 export const InstructorRole: Story = {
   args: {
-    entity: {
+    user: {
       id: "inst-001",
       firstName: "Marc",
       familyName: "BERTRAND",
@@ -88,7 +88,7 @@ export const InstructorRole: Story = {
 
 export const AdminRole: Story = {
   args: {
-    entity: {
+    user: {
       id: "adm-001",
       firstName: "Ada",
       familyName: "LOVELACE",

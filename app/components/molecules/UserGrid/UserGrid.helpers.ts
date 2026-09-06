@@ -2,10 +2,10 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import type { UserGridProps } from "./UserGrid.types";
-import type { EntityCardData } from "../EntityCard/EntityCard.types";
+import type { UserCardData } from "../UserCard/UserCard.types";
 
 export function matchesStudentSearch(
-  student: EntityCardData,
+  student: UserCardData,
   query: string,
 ): boolean {
   const name =
@@ -23,9 +23,9 @@ export function matchesStudentSearch(
 }
 
 export function filterStudents(
-  students: EntityCardData[],
+  students: UserCardData[],
   rawQuery: string,
-): EntityCardData[] {
+): UserCardData[] {
   const query = rawQuery.toLowerCase().trim();
   if (!query) return students;
   return students.filter((student) => matchesStudentSearch(student, query));

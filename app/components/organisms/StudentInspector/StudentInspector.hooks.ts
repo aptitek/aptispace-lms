@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
+import type { UserCardData } from "../../molecules/UserCard/UserCard.types";
 import type { CohortWithInstitution } from "./StudentInspector.types";
 import {
   DEFAULT_FALLBACK_SCHOOL,
@@ -9,7 +9,7 @@ import {
 import type { SchoolConfig, CohortConfig } from "../../../types/institution";
 
 export function useInspectorCohortsState(
-  targetStudent: EntityCardData | null,
+  targetStudent: UserCardData | null,
   schools: SchoolConfig[],
   cohorts: CohortWithInstitution[],
   onAddCohort: (params: {

@@ -329,6 +329,142 @@ export function resolveShapeStyle(
 
 export const resolveM3ShapeStyle = resolveShapeStyle;
 
+export type ChipShape = ExpressiveShapeName | string | number;
+
+export const CHIP_SHAPE_RADIUS_MAP: Record<string, string> = {
+  // Standard scales
+  none: "0px",
+  "extra-small": "4px",
+  "extra-small-top": "4px 4px 0 0",
+  small: "6px",
+  medium: "8px",
+  rounded: "8px",
+  large: "12px",
+  "large-top": "12px 12px 0 0",
+  "large-end": "0 12px 12px 0",
+  "large-start": "12px 0 0 12px",
+  "extra-large": "16px",
+  "extra-large-top": "16px 16px 0 0",
+  full: "9999px",
+  circular: "9999px",
+  pill: "9999px",
+  oval: "9999px",
+  square: "4px",
+
+  // Expressive geometric shape adaptations tailored for horizontal rectangular chips
+  asymmetric: "16px 4px 16px 4px",
+  arch: "14px 14px 4px 4px",
+  bun: "14px 14px 6px 6px",
+  cut: "12px 2px 12px 2px",
+  slanted: "14px 4px 14px 4px",
+  clamshell: "14px 14px 4px 14px",
+  fan: "14px 4px 4px 4px",
+  gem: "12px 4px 12px 4px",
+  diamond: "12px 2px 12px 2px",
+  "4-sided-cookie": "12px 6px 12px 6px",
+  "four-sided-cookie": "12px 6px 12px 6px",
+  foursidedcookie: "12px 6px 12px 6px",
+  "6-sided-cookie": "12px 6px 12px 6px",
+  "six-sided-cookie": "12px 6px 12px 6px",
+  sixsidedcookie: "12px 6px 12px 6px",
+  "7-sided-cookie": "12px 6px 12px 6px",
+  "seven-sided-cookie": "12px 6px 12px 6px",
+  sevensidedcookie: "12px 6px 12px 6px",
+  "9-sided-cookie": "12px 6px 12px 6px",
+  "nine-sided-cookie": "12px 6px 12px 6px",
+  ninesidedcookie: "12px 6px 12px 6px",
+  "12-sided-cookie": "12px 6px 12px 6px",
+  "twelve-sided-cookie": "12px 6px 12px 6px",
+  twelvesidedcookie: "12px 6px 12px 6px",
+  "ghost-ish": "14px 14px 4px 4px",
+  ghostish: "14px 14px 4px 4px",
+  "soft-burst": "12px 4px 12px 4px",
+  softburst: "12px 4px 12px 4px",
+  "soft-boom": "12px 4px 12px 4px",
+  softboom: "12px 4px 12px 4px",
+  flower: "12px 6px 12px 6px",
+  puffy: "12px 6px 12px 6px",
+  "puffy-diamond": "12px 4px 12px 4px",
+  puffydiamond: "12px 4px 12px 4px",
+  "pixel-circle": "8px",
+  pixelcircle: "8px",
+  "pixel-triangle": "12px 4px 12px 4px",
+  pixeltriangle: "12px 4px 12px 4px",
+  semicircle: "14px 14px 0 0",
+  heart: "14px 14px 6px 6px",
+  sunny: "12px 6px 12px 6px",
+  "very-sunny": "12px 6px 12px 6px",
+  verysunny: "12px 6px 12px 6px",
+  burst: "12px 4px 12px 4px",
+  boom: "12px 4px 12px 4px",
+  biometric: "8px",
+};
+
+export const RECTANGULAR_CHIP_RADIUS_MAP = CHIP_SHAPE_RADIUS_MAP;
+
+export function resolveChipShape(shape?: ChipShape): ResolvedShapeStyle | null {
+  if (shape === undefined || shape === null) return null;
+  if (typeof shape === "number") {
+    return { borderRadius: `${shape}px` };
+  }
+  const key = String(shape).toLowerCase().trim();
+  const rectangularRadius = CHIP_SHAPE_RADIUS_MAP[key];
+  if (rectangularRadius) {
+    return { borderRadius: rectangularRadius };
+  }
+  const expressiveDef =
+    EXPRESSIVE_SHAPE_CATALOG[shape] || EXPRESSIVE_SHAPE_CATALOG[key];
+  if (expressiveDef) {
+    return {
+      borderRadius: expressiveDef.borderRadius ?? "0px",
+      clipPath: expressiveDef.clipPath,
+      pathData: expressiveDef.pathData,
+    };
+  }
+  const scaleRad = SHAPE_SCALE_RADIUS_MAP[key] || SHAPE_SCALE_RADIUS_MAP[shape];
+  if (scaleRad) {
+    return { borderRadius: scaleRad };
+  }
+  return { borderRadius: String(shape) };
+}
+
+export const getResolvedChipShape = resolveChipShape;
+
+const COMPANY_INSTITUTION_ALIASES = new Set([
+  "company",
+  "companies",
+  "institution",
+  "institutions",
+  "corporate",
+  "business",
+  "enterprise",
+  "organization",
+  "org",
+]);
+
+/**
+ * Resolves the default chip shape for an institution type:
+ * - school: "clamshell"
+ * - company/institution: "semicircle"
+ * - all / fallback: "pill"
+ */
+export function getInstitutionChipShape(type?: string | null): ChipShape {
+  const norm = (type || "").toLowerCase().trim();
+  if (norm === "all") return "pill";
+  if (COMPANY_INSTITUTION_ALIASES.has(norm)) {
+    return "semicircle";
+  }
+  return "clamshell";
+}
+
+/**
+ * Resolves the default chip shape for cohorts:
+ * MD3 compound cohort chips default to "pill"
+ */
+export function getCohortChipShape(_cohort?: unknown): ChipShape {
+  return "pill";
+}
+
 /**
  * Shape-based avatar system resolver:
  * - student: MD3 pill ("pill")

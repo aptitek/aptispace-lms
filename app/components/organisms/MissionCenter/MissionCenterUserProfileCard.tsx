@@ -5,14 +5,14 @@ import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
 import DevicesRoundedIcon from "@mui/icons-material/DevicesRounded";
 import PersonOffRoundedIcon from "@mui/icons-material/PersonOffRounded";
 import { useTranslation } from "react-i18next";
-import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
+import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
-import EntityCard from "~/components/molecules/EntityCard/EntityCard";
+import UserCard from "~/components/molecules/UserCard/UserCard";
 import { NetworkMetaCard } from "./MissionCenter.styles";
 import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 
 export interface MissionCenterUserProfileCardProps {
-  user?: EntityCardData | null;
+  user?: UserCardData | null;
   ipAddress?: string | null;
   userAgent?: string | null;
   title?: string;
@@ -126,7 +126,7 @@ function NetworkOriginCard({
   );
 }
 
-const anonymousEntity: EntityCardData = {
+const anonymousEntity: UserCardData = {
   id: "anonymous",
   firstName: "Anonymous",
   familyName: "Visitor",
@@ -137,7 +137,7 @@ const anonymousEntity: EntityCardData = {
   cohortName: "Public Web",
 };
 
-function resolveSchoolConfig(user?: EntityCardData | null): SchoolConfig {
+function resolveSchoolConfig(user?: UserCardData | null): SchoolConfig {
   return {
     id: user?.institutionId || "aptispace",
     name: user?.institutionName || "AptiSpace Platform",
@@ -146,7 +146,7 @@ function resolveSchoolConfig(user?: EntityCardData | null): SchoolConfig {
 }
 
 function resolveCohortConfig(
-  user?: EntityCardData | null,
+  user?: UserCardData | null,
 ): CohortConfig | undefined {
   const primaryCohort = user?.cohorts?.[0];
   if (!primaryCohort) return undefined;
@@ -159,7 +159,7 @@ function resolveCohortConfig(
   };
 }
 
-function canImpersonateUser(user?: EntityCardData | null): boolean {
+function canImpersonateUser(user?: UserCardData | null): boolean {
   if (!user || !user.id) return false;
   return user.id !== "anonymous";
 }
@@ -192,10 +192,10 @@ export function MissionCenterUserProfileCard({
         </Typography>
       )}
 
-      {/* User Grid Card (EntityCard) Render */}
+      {/* User Card Render */}
       <Box sx={{ width: "100%" }}>
-        <EntityCard
-          entity={entity}
+        <UserCard
+          user={entity}
           school={school}
           cohort={cohort}
           interactive={false}

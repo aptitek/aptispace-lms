@@ -23,7 +23,7 @@ describe("AuthLayout Template", () => {
     expect(typeof AuthLayout).toBe("function");
   });
 
-  it("renders children, auth-sidebar, footer, and galaxy background by default", () => {
+  it("renders children, auth-sidebar, and galaxy background by default", () => {
     render(
       <I18nextProvider i18n={i18n}>
         <ThemeProvider theme={appTheme}>

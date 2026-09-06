@@ -6,10 +6,10 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import PeopleAltRoundedIcon from "@mui/icons-material/PeopleAltRounded";
-import EntityCard from "../EntityCard/EntityCard";
-import EntityCardSkeleton from "../EntityCard/EntityCardSkeleton";
+import UserCard from "../UserCard/UserCard";
+import UserCardSkeleton from "../UserCard/UserCardSkeleton";
 import type { UserGridProps } from "./UserGrid.types";
-import type { EntityCardData } from "../EntityCard/EntityCard.types";
+import type { UserCardData } from "../UserCard/UserCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import {
   useUserGridLogic,
@@ -193,7 +193,7 @@ function EmptyGridState({
       {placeholderCount > 0 && (
         <EmptyPlaceholderGrid data-testid="static-skeleton-placeholders">
           {placeholderKeys.map((slotKey) => (
-            <EntityCardSkeleton
+            <UserCardSkeleton
               key={slotKey}
               variant="static"
               animated={false}
@@ -217,7 +217,7 @@ function LoadingSkeletonZone({ count }: LoadingSkeletonZoneProps) {
   return (
     <MD3CollectionGrid data-testid="grid-skeleton-loading-zone">
       {keys.map((slotKey) => (
-        <EntityCardSkeleton
+        <UserCardSkeleton
           key={slotKey}
           variant="shimmer"
           animated={true}
@@ -229,15 +229,15 @@ function LoadingSkeletonZone({ count }: LoadingSkeletonZoneProps) {
 }
 
 interface UserCardsZoneProps {
-  students: EntityCardData[];
+  students: UserCardData[];
   selectedStudentId?: string | null;
   school?: SchoolConfig;
   cohort?: CohortConfig;
   zoneId?: string;
-  onStudentClick?: (student: EntityCardData) => void;
-  onImpersonate?: (student: EntityCardData) => void;
+  onStudentClick?: (student: UserCardData) => void;
+  onImpersonate?: (student: UserCardData) => void;
   showImpersonate?: boolean;
-  onDelete?: (student: EntityCardData) => void;
+  onDelete?: (student: UserCardData) => void;
   showDelete?: boolean;
   onAddUser?: () => void;
   showAddUser?: boolean;
@@ -264,10 +264,10 @@ function UserCardsZone({
 
   return (
     <MD3CollectionGrid data-testid="user-zone-wrapper" id={zoneId}>
-      {students.map((student: EntityCardData) => (
-        <EntityCard
+      {students.map((student: UserCardData) => (
+        <UserCard
           key={student.id}
-          entity={student}
+          user={student}
           school={school}
           cohort={cohort}
           isSelected={Boolean(
@@ -283,7 +283,7 @@ function UserCardsZone({
         />
       ))}
       {shouldRenderGhost && (
-        <EntityCardSkeleton
+        <UserCardSkeleton
           isGhost
           onClick={onAddUser}
           tooltipTitle={addUserTooltip}
@@ -295,8 +295,8 @@ function UserCardsZone({
 }
 
 interface GridBodyProps {
-  filteredStudents: EntityCardData[];
-  displayedStudents: EntityCardData[];
+  filteredStudents: UserCardData[];
+  displayedStudents: UserCardData[];
   selectedStudentId?: string | null;
   resolvedEmptyMessage: string;
   hasQuery: boolean;
@@ -306,10 +306,10 @@ interface GridBodyProps {
   isInstructor: boolean;
   school?: SchoolConfig;
   cohort?: CohortConfig;
-  onStudentClick?: (student: EntityCardData) => void;
-  onImpersonate?: (student: EntityCardData) => void;
+  onStudentClick?: (student: UserCardData) => void;
+  onImpersonate?: (student: UserCardData) => void;
   showImpersonate?: boolean;
-  onDelete?: (student: EntityCardData) => void;
+  onDelete?: (student: UserCardData) => void;
   showDelete?: boolean;
   onAddUser?: () => void;
   showAddUser?: boolean;

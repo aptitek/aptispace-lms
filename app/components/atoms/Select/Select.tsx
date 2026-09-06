@@ -70,73 +70,82 @@ function resolveLeadingAdornment(leadingIcon?: ReactNode): ReactNode {
   return <InputAdornment position="start">{leadingIcon}</InputAdornment>;
 }
 
-export const Select = forwardRef<HTMLDivElement, SelectProps<unknown>>(
-  function Select(props, ref) {
-    const {
-      value,
-      onChange,
-      options,
-      variant = "outlined",
-      size = "small",
-      label,
+function SelectInner<T = string | number>(
+  props: SelectProps<T>,
+  ref: React.ForwardedRef<HTMLDivElement>,
+) {
+  const {
+    value,
+    onChange,
+    options,
+    variant = "outlined",
+    size = "small",
+    label,
+    placeholder,
+    leadingIcon,
+    renderValue,
+    minWidth = 160,
+    disabled,
+    error,
+    helperText,
+    children,
+    className,
+    sx,
+    "data-testid": dataTestId,
+    testId,
+    ...rest
+  } = props;
+
+  const activeTestId = testId ?? dataTestId ?? "md3-select";
+
+  const customRenderValue = (selected: unknown) => {
+    if (renderValue) {
+      return renderValue(selected as T);
+    }
+    return resolveSelectedDisplay(
+      selected,
+      options as SelectOption<unknown>[],
       placeholder,
-      leadingIcon,
-      renderValue,
-      minWidth = 160,
-      disabled,
-      error,
-      helperText,
-      children,
-      className,
-      sx,
-      "data-testid": dataTestId,
-      testId,
-      ...rest
-    } = props;
-
-    const activeTestId = testId ?? dataTestId ?? "md3-select";
-
-    const customRenderValue = (selected: unknown) => {
-      if (renderValue) {
-        return renderValue(selected);
-      }
-      return resolveSelectedDisplay(selected, options, placeholder);
-    };
-
-    const slotProps = {
-      input: {
-        startAdornment: resolveLeadingAdornment(leadingIcon),
-      },
-      select: {
-        renderValue: customRenderValue,
-        MenuProps: MENU_PROPS,
-      },
-    };
-
-    return (
-      <StyledMD3SelectRoot
-        ref={ref}
-        select
-        variant={variant}
-        size={size}
-        label={label}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        error={error}
-        helperText={helperText}
-        className={className}
-        sx={{ minWidth, ...sx }}
-        data-testid={activeTestId}
-        $hasLeadingIcon={Boolean(leadingIcon)}
-        slotProps={slotProps}
-        {...rest}
-      >
-        {renderSelectChildren(children, options)}
-      </StyledMD3SelectRoot>
     );
-  },
-);
+  };
 
-Select.displayName = "Select";
+  const slotProps = {
+    input: {
+      startAdornment: resolveLeadingAdornment(leadingIcon),
+    },
+    select: {
+      renderValue: customRenderValue,
+      MenuProps: MENU_PROPS,
+    },
+  };
+
+  return (
+    <StyledMD3SelectRoot
+      ref={ref}
+      select
+      variant={variant}
+      size={size}
+      label={label}
+      value={value}
+      onChange={(e) => onChange(e.target.value as T)}
+      disabled={disabled}
+      error={error}
+      helperText={helperText}
+      className={className}
+      sx={{ minWidth, ...sx }}
+      data-testid={activeTestId}
+      $hasLeadingIcon={Boolean(leadingIcon)}
+      slotProps={slotProps}
+      {...rest}
+    >
+      {renderSelectChildren(children, options as SelectOption<unknown>[])}
+    </StyledMD3SelectRoot>
+  );
+}
+
+export const Select = forwardRef(SelectInner) as <T = string | number>(
+  props: SelectProps<T> & { ref?: React.Ref<HTMLDivElement> },
+) => React.ReactElement | null;
+
+(Select as { displayName?: string }).displayName = "Select";
 export default Select;

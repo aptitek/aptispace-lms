@@ -23,7 +23,7 @@ import type {
   SystemMetricsData,
   TableRowMetric,
 } from "~/types/missionCenter";
-import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
+import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 import type { AuthUser } from "~/utils/auth";
 import { resolveR2Bucket } from "~/utils/r2.server";
 import {
@@ -72,7 +72,7 @@ export async function getAuditLogs(
     });
 
     return rawLogs.map((log) => {
-      let actor: EntityCardData | null = null;
+      let actor: UserCardData | null = null;
       if (log.user) {
         actor = mapDbUserToStudent(log.user as unknown as DbUserWithAffil);
       }
@@ -128,7 +128,7 @@ export async function getErrorReports(
     });
 
     return rawReports.map((report) => {
-      let user: EntityCardData | null = null;
+      let user: UserCardData | null = null;
       if (report.user) {
         user = mapDbUserToStudent(report.user as unknown as DbUserWithAffil);
       }

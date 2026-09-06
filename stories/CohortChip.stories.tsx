@@ -132,3 +132,41 @@ export const InteractiveWithDelete: Story = {
     onDelete: () => alert("Delete clicked!"),
   },
 };
+
+export const ShapeVariants: Story = {
+  render: () => (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        alignItems: "flex-start",
+      }}
+    >
+      <CohortChip
+        cohort={{ diploma: "M", year: 1, tags: ["AI", "Dev"] }}
+        shape="pill"
+      />
+      <CohortChip
+        cohort={{ diploma: "B", year: 3, tags: ["Cyber"] }}
+        shape="clamshell"
+      />
+      <CohortChip
+        cohort={{ diploma: "D", year: 4, tags: ["Data", "Research"] }}
+        shape="arch"
+      />
+      <CohortChip
+        cohort={{ diploma: "F", year: 0, tags: ["Network", "IoT"] }}
+        shape="asymmetric"
+      />
+      <CohortChip
+        cohort={{ diploma: "L", year: 2, tags: ["Web"] }}
+        shape="square"
+      />
+      <CohortChip
+        cohort={{ diploma: "C", year: 0, tags: ["Cloud"] }}
+        shape="bun"
+      />
+    </Box>
+  ),
+};

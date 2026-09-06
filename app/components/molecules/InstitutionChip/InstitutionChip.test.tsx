@@ -10,25 +10,22 @@ describe("InstitutionChip Molecule Component", () => {
     expect(InstitutionChip.displayName).toBe("InstitutionChip");
   });
 
-  it("creates React element for school with cyan clamshell defaults", () => {
-    const element = React.createElement(InstitutionChip, {
-      institutionType: "school",
-    });
+  it.each([
+    { institutionType: "school", expectedType: "school" },
+    { institutionType: "company", expectedType: "company" },
+    { institutionType: "all", expectedType: "all" },
+  ])(
+    "creates React element for $institutionType with default settings",
+    ({ institutionType, expectedType }) => {
+      const element = React.createElement(InstitutionChip, {
+        institutionType,
+      });
 
-    expect(element).toBeDefined();
-    const props = element.props as InstitutionChipProps;
-    expect(props.institutionType).toBe("school");
-  });
-
-  it("creates React element for company/institution with yellow semicircle defaults", () => {
-    const element = React.createElement(InstitutionChip, {
-      institutionType: "company",
-    });
-
-    expect(element).toBeDefined();
-    const props = element.props as InstitutionChipProps;
-    expect(props.institutionType).toBe("company");
-  });
+      expect(element).toBeDefined();
+      const props = element.props as InstitutionChipProps;
+      expect(props.institutionType).toBe(expectedType);
+    },
+  );
 
   it("allows custom overrides for shape, color, label, and icon", () => {
     const customIcon = <span data-testid="custom-icon">★</span>;

@@ -1,4 +1,5 @@
 import type { CohortConfig } from "~/types/institution";
+import type { ChipShape } from "~/tokens/shapes";
 
 export type CohortChipSize = "small" | "medium" | "large";
 
@@ -14,6 +15,11 @@ export interface CohortChipProps {
     | null;
   size?: CohortChipSize;
   variant?: "outlined" | "filled";
+  /**
+   * Expressive or geometric shape for the cohort chip.
+   * Centralized in the shape engine (defaults to "pill").
+   */
+  shape?: ChipShape;
   onClick?: () => void;
   onDelete?: () => void;
   disabled?: boolean;

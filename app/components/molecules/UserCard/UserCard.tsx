@@ -10,16 +10,18 @@ import CohortChip from "../CohortChip/CohortChip";
 import Badge from "../../atoms/Badge/Badge";
 import Tooltip from "../../atoms/Tooltip/Tooltip";
 import { HoldButton } from "../../atoms/HoldButton";
-import type { EntityCardProps, EntityCardData } from "./EntityCard.types";
+import type { UserCardProps, UserCardData } from "./UserCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import { loginAsAccount, type UserRole } from "~/utils/auth";
 import { getRoleConfig } from "~/tokens/roles";
 import {
   DEFAULT_SCHOOL,
   formatGithubHandle,
-  resolveEntityCardLabels,
-  useCardInteractivity,
-} from "./EntityCard.helpers";
+  resolveUserCardLabels,
+  resolveCardInteractivity,
+  resolveCardTestId,
+  resolveCardAccessibility,
+} from "./UserCard.helpers";
 import {
   StyledCard,
   StyledCardContent,
@@ -40,7 +42,7 @@ import {
   ImpersonateIconButton,
   DeleteHoldWrapper,
   deleteHoldButtonSx,
-} from "./EntityCard.styles";
+} from "./UserCard.styles";
 
 function CompactHeaderSlot({
   school,
@@ -139,7 +141,7 @@ function CompactAvatarSlot({
   displayName,
   role,
 }: {
-  entity: EntityCardData;
+  entity: UserCardData;
   displayName: string;
   role: UserRole;
 }) {
@@ -179,12 +181,12 @@ function CompactAvatarSlot({
 }
 
 interface CompactDetailsProps {
-  entity: EntityCardData;
+  entity: UserCardData;
   displayName: string;
   showImpersonate?: boolean;
-  onImpersonate?: (entity: EntityCardData) => void;
+  onImpersonate?: (entity: UserCardData) => void;
   showDelete?: boolean;
-  onDelete?: (entity: EntityCardData) => void;
+  onDelete?: (entity: UserCardData) => void;
 }
 
 function CompactStudentDetailsSlot({
@@ -325,9 +327,10 @@ function CompactStudentDetailsSlot({
   );
 }
 
-export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
+export const UserCard = forwardRef<HTMLDivElement, UserCardProps>(
   (props, ref) => {
     const {
+      user,
       entity,
       school = DEFAULT_SCHOOL,
       cohort,
@@ -340,16 +343,19 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
       interactive = true,
       isSelected = false,
       className,
-      testId = "entity-card",
+      testId,
       style,
     } = props;
 
-    const { isInteractive, handleClick, handleKeyDown } = useCardInteractivity(
-      interactive,
-      onClick,
-      entity,
-    );
-    const labels = resolveEntityCardLabels(entity, school, cohort);
+    const targetUser = user ?? entity;
+    const { isInteractive, handleClick, handleKeyDown } =
+      resolveCardInteractivity(interactive, onClick, targetUser);
+
+    if (!targetUser) return null;
+
+    const resolvedTestId = resolveCardTestId(testId, Boolean(props.entity));
+    const labels = resolveUserCardLabels(targetUser, school, cohort);
+    const a11y = resolveCardAccessibility(isInteractive, labels.displayName);
 
     return (
       <StyledCard
@@ -359,13 +365,13 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
         isSelected={isSelected}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        tabIndex={isInteractive ? 0 : undefined}
-        role={isInteractive ? "button" : "article"}
-        aria-label={`User card for ${labels.displayName}`}
+        tabIndex={a11y.tabIndex}
+        role={a11y.role}
+        aria-label={a11y.ariaLabel}
         className={className}
         style={style}
-        data-testid={testId}
-        data-student-id={entity.id}
+        data-testid={resolvedTestId}
+        data-student-id={targetUser.id}
       >
         <StyledCardContent>
           <CompactHeaderSlot
@@ -373,18 +379,18 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
             institutionLabel={labels.institutionLabel}
             cohortConfig={labels.cohortConfig}
             cohortYear={labels.cohortYear}
-            isProfileComplete={entity.isProfileComplete}
+            isProfileComplete={targetUser.isProfileComplete}
             role={labels.role}
           />
 
           <CardBodyRow>
             <CompactAvatarSlot
-              entity={entity}
+              entity={targetUser}
               displayName={labels.displayName}
               role={labels.role}
             />
             <CompactStudentDetailsSlot
-              entity={entity}
+              entity={targetUser}
               displayName={labels.displayName}
               showImpersonate={showImpersonate}
               onImpersonate={onImpersonate}
@@ -398,5 +404,6 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
   },
 );
 
-EntityCard.displayName = "EntityCard";
-export default EntityCard;
+UserCard.displayName = "UserCard";
+export const EntityCard = UserCard;
+export default UserCard;

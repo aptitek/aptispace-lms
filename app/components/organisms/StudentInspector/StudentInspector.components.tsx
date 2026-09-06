@@ -19,9 +19,9 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 import type {
-  EntityCardData,
+  UserCardData,
   CompactCohortItem,
-} from "../../molecules/EntityCard/EntityCard.types";
+} from "../../molecules/UserCard/UserCard.types";
 import type { SchoolConfig } from "../../../types/institution";
 import type { CohortWithInstitution } from "./StudentInspector.types";
 import {
@@ -258,7 +258,7 @@ export function AdminAccessPanel() {
 }
 
 export interface StudentCohortAssignmentSectionProps {
-  targetStudent: EntityCardData;
+  targetStudent: UserCardData;
   assignedCohorts: CompactCohortItem[];
   availableToAdd: CohortWithInstitution[];
   schoolMap: Map<string, SchoolConfig>;

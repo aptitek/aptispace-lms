@@ -2,7 +2,6 @@ import React from "react";
 import { styled } from "@mui/material/styles";
 import { Outlet, useLoaderData, type LoaderFunctionArgs } from "react-router";
 import Sidebar from "~/components/organisms/Sidebar/Sidebar";
-import Footer from "~/components/organisms/Footer/Footer";
 import { authGuard } from "~/utils/session.server";
 import { logout, resolveActiveUser } from "~/utils/auth";
 import { isUserProfileComplete } from "~/services/userService";
@@ -61,7 +60,6 @@ export default function AppLayout() {
       <AppShellMain data-testid="app-shell-main">
         <Outlet context={{ user }} />
       </AppShellMain>
-      <Footer data-testid="app-shell-footer" />
     </AppShellRoot>
   );
 }

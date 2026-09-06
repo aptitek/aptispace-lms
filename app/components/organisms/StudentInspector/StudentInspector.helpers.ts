@@ -1,7 +1,7 @@
 import type {
-  EntityCardData,
+  UserCardData,
   CompactCohortItem,
-} from "../../molecules/EntityCard/EntityCard.types";
+} from "../../molecules/UserCard/UserCard.types";
 import type { CohortWithInstitution } from "./StudentInspector.types";
 
 import type { SchoolConfig } from "../../../types/institution";
@@ -83,7 +83,7 @@ export function sortAssignedByDate(
 }
 
 export function resolveAssignedCohorts(
-  student: EntityCardData,
+  student: UserCardData,
 ): CompactCohortItem[] {
   if (student.cohorts && student.cohorts.length > 0) {
     return sortAssignedByDate(student.cohorts);

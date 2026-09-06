@@ -1,7 +1,7 @@
 import type {
-  EntityCardData,
+  UserCardData,
   CompactCohortItem,
-} from "~/components/molecules/EntityCard/EntityCard.types";
+} from "~/components/molecules/UserCard/UserCard.types";
 import type { AuthUser, UserRole } from "~/utils/auth";
 import type { getAllUsersWithAffiliations } from "~/services/userService";
 import { getCohortDisplayName } from "~/utils/cohortFormat";
@@ -154,7 +154,7 @@ function resolveStudentEmail(
   return primaryAffil?.email || githubEmail || "";
 }
 
-export function mapDbUserToStudent(dbUser: DbUserWithAffil): EntityCardData {
+export function mapDbUserToStudent(dbUser: DbUserWithAffil): UserCardData {
   const cohortAffils = getSortedCohortAffils(dbUser);
   const studentCohorts = buildStudentCohorts(cohortAffils);
   const primaryAffil = cohortAffils[0] || dbUser.affiliations?.[0];
@@ -183,7 +183,7 @@ export function mapDbUserToStudent(dbUser: DbUserWithAffil): EntityCardData {
 }
 
 export function resolveModalUser(
-  selectedStudent: EntityCardData | null,
+  selectedStudent: UserCardData | null,
 ): AuthUser | null {
   if (!selectedStudent) return null;
   return {
@@ -197,22 +197,22 @@ export function resolveModalUser(
   };
 }
 
-function matchesRole(user: EntityCardData, roleFilter: string): boolean {
+function matchesRole(user: UserCardData, roleFilter: string): boolean {
   return roleFilter === "all" || user.role === roleFilter;
 }
 
-function matchesSchool(user: EntityCardData, schoolFilter: string): boolean {
+function matchesSchool(user: UserCardData, schoolFilter: string): boolean {
   return schoolFilter === "all" || user.institutionId === schoolFilter;
 }
 
-function matchesCohort(user: EntityCardData, cohortFilter: string): boolean {
+function matchesCohort(user: UserCardData, cohortFilter: string): boolean {
   return (
     cohortFilter === "all" ||
     Boolean(user.cohorts?.some((c) => c.id === cohortFilter))
   );
 }
 
-function matchesQuery(user: EntityCardData, query: string): boolean {
+function matchesQuery(user: UserCardData, query: string): boolean {
   if (!query) return true;
   const q = query.toLowerCase();
   const searchStr =
@@ -221,7 +221,7 @@ function matchesQuery(user: EntityCardData, query: string): boolean {
 }
 
 function matchesYear(
-  user: EntityCardData,
+  user: UserCardData,
   min?: number | null,
   max?: number | null,
 ): boolean {
@@ -264,7 +264,7 @@ export interface UserFilterCriteria {
 }
 
 export function matchesUserFilters(
-  user: EntityCardData,
+  user: UserCardData,
   filters: UserFilterCriteria,
 ): boolean {
   return (
@@ -347,9 +347,9 @@ export function buildInstitutionSubmitData(
 }
 
 export function mergeUpdatedUser(
-  prev: EntityCardData,
+  prev: UserCardData,
   updatedUser: AuthUser,
-): EntityCardData {
+): UserCardData {
   const parts = (updatedUser.name || "").trim().split(/\s+/);
   const firstName =
     parts.length > 1 ? parts.slice(0, -1).join(" ") : parts[0] || "";

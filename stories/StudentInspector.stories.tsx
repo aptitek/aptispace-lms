@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import StudentInspector from "../app/components/organisms/StudentInspector/StudentInspector";
-import type { EntityCardData } from "../app/components/molecules/EntityCard/EntityCard.types";
+import type { UserCardData } from "../app/components/molecules/UserCard/UserCard.types";
 import type { SchoolConfig } from "../app/types/institution";
 import type { CohortWithInstitution } from "../app/components/organisms/StudentInspector/StudentInspector.types";
 
@@ -45,7 +45,7 @@ const mockCohorts: CohortWithInstitution[] = [
   },
 ];
 
-const sampleStudent: EntityCardData = {
+const sampleStudent: UserCardData = {
   id: "student-1",
   firstName: "Elena",
   familyName: "ROSTOVA",

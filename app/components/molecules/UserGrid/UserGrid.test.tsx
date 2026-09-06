@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import UserGrid from "./UserGrid";
-import type { EntityCardData } from "../EntityCard/EntityCard.types";
+import type { UserCardData } from "../UserCard/UserCard.types";
 
-const sampleStudents: EntityCardData[] = [
+const sampleStudents: UserCardData[] = [
   {
     id: "s1",
     firstName: "Alice",
@@ -26,7 +26,7 @@ const sampleStudents: EntityCardData[] = [
   },
 ];
 
-const sampleInstructors: EntityCardData[] = [
+const sampleInstructors: UserCardData[] = [
   {
     id: "inst-1",
     firstName: "Sarah",
@@ -39,7 +39,7 @@ const sampleInstructors: EntityCardData[] = [
   },
 ];
 
-const sampleAdmins: EntityCardData[] = [
+const sampleAdmins: UserCardData[] = [
   {
     id: "admin-1",
     firstName: "Arthur",

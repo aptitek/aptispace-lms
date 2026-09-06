@@ -19,7 +19,7 @@ import {
 } from "~/utils/auth";
 import { isUserProfileComplete } from "~/services/userService";
 import { useStatusCenter } from "~/utils/statusCenterContext";
-import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
+import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import type { CohortWithInstitution } from "~/components/organisms/StudentInspector/StudentInspector.types";
 import { loadAdminDashboardData } from "./admin.loader";
@@ -127,7 +127,7 @@ export default function AdminManagement() {
   const { notifyError, notifySuccess } = useStatusCenter();
 
   const activeTab = resolveTabFromPath(location.pathname);
-  const [selectedUser, setSelectedUser] = useState<EntityCardData | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserCardData | null>(null);
 
   // Filters
   const [roleFilter, setRoleFilter] = useState<string>("all");
@@ -190,7 +190,7 @@ export default function AdminManagement() {
     navigate(`/admin/${newTabKey}`);
   };
 
-  const handleUserClick = (user: EntityCardData) => {
+  const handleUserClick = (user: UserCardData) => {
     setSelectedUser(user);
   };
 
@@ -332,7 +332,7 @@ export default function AdminManagement() {
     revalidator.revalidate();
   };
 
-  const handleDeleteUser = async (user: EntityCardData) => {
+  const handleDeleteUser = async (user: UserCardData) => {
     const userName = `${user.firstName} ${user.familyName}`.trim();
     try {
       fetcher.submit(
@@ -363,7 +363,7 @@ export default function AdminManagement() {
     }
   };
 
-  const handleImpersonate = async (user: EntityCardData) => {
+  const handleImpersonate = async (user: UserCardData) => {
     const userName = `${user.firstName} ${user.familyName}`.trim();
     try {
       await loginAsAccount({

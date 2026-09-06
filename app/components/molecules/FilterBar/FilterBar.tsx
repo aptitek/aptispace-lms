@@ -190,8 +190,8 @@ function CohortFilterField({
           c.institutionId === schoolFilter,
       )
       .map((cohort) => ({
-        value: cohort.id,
-        label: cohort.name,
+        value: cohort.id ?? "",
+        label: cohort.name ?? "",
       })),
   ];
 

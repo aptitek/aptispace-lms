@@ -1,19 +1,19 @@
 import type React from "react";
-import type { EntityCardData } from "../EntityCard/EntityCard.types";
+import type { UserCardData } from "../UserCard/UserCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 
 export interface UserGridProps {
-  students: EntityCardData[];
+  students: UserCardData[];
   school?: SchoolConfig;
   cohort?: CohortConfig;
-  onStudentClick?: (student: EntityCardData) => void;
+  onStudentClick?: (student: UserCardData) => void;
   selectedStudentId?: string | null;
   onAddUser?: () => void;
   showAddUser?: boolean;
   addUserTooltip?: string;
-  onImpersonate?: (student: EntityCardData) => void;
+  onImpersonate?: (student: UserCardData) => void;
   showImpersonate?: boolean;
-  onDelete?: (student: EntityCardData) => void;
+  onDelete?: (student: UserCardData) => void;
   showDelete?: boolean;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;

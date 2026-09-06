@@ -6,9 +6,9 @@ export type {
   ClockCardColor,
   HourFormat,
   TimeIntervalInfo,
-  TimeSheetProps,
-  TimeSheetSize,
-  TimeSheetOrientation,
-  TimeSheetColor,
+  ClockCardProps as TimeSheetProps,
+  ClockCardSize as TimeSheetSize,
+  ClockCardOrientation as TimeSheetOrientation,
+  ClockCardColor as TimeSheetColor,
 } from "./ClockCard.types";
 export * from "./ClockCard.utils";

@@ -1,5 +1,5 @@
 import type React from "react";
-import type { EntityCardData } from "./EntityCard.types";
+import type { UserCardData } from "./UserCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import type { UserRole } from "~/utils/auth";
 
@@ -10,18 +10,18 @@ export function formatGithubHandle(username?: string | null): string {
   return trimmed.startsWith("@") ? trimmed : `@${trimmed}`;
 }
 
-export function resolveDisplayName(entity: EntityCardData): string {
-  if (entity.displayName) return entity.displayName;
-  const fullName = `${entity.firstName} ${entity.familyName}`.trim();
+export function resolveDisplayName(user: UserCardData): string {
+  if (user.displayName) return user.displayName;
+  const fullName = `${user.firstName} ${user.familyName}`.trim();
   return fullName || "User";
 }
 
 export function resolveCohortLabel(
-  entity: EntityCardData,
+  user: UserCardData,
   cohort?: CohortConfig,
 ): string {
   if (cohort?.name) return cohort.name;
-  if (entity.cohortName) return entity.cohortName;
+  if (user.cohortName) return user.cohortName;
   return "Cohort 2026";
 }
 
@@ -33,27 +33,27 @@ export function parseDateYear(dateInput?: string | Date | null): string | null {
 }
 
 export function resolveCohortYear(
-  entity: EntityCardData,
+  user: UserCardData,
   cohort?: CohortConfig,
 ): string {
   if (cohort?.startYear) return String(cohort.startYear);
   const cohortDateYear = parseDateYear(cohort?.startDate);
   if (cohortDateYear) return cohortDateYear;
 
-  if (entity.cohortStartYear) return String(entity.cohortStartYear);
-  const studentDateYear = parseDateYear(entity.cohortStartDate);
+  if (user.cohortStartYear) return String(user.cohortStartYear);
+  const studentDateYear = parseDateYear(user.cohortStartDate);
   if (studentDateYear) return studentDateYear;
 
-  const match = entity.cohortName?.match(/\b(20\d{2})\b/);
+  const match = user.cohortName?.match(/\b(20\d{2})\b/);
   return match ? match[1] : "2026";
 }
 
 export function resolveInstitutionLabel(
-  entity: EntityCardData,
+  user: UserCardData,
   school?: SchoolConfig,
 ): string {
   if (school?.name) return school.name;
-  if (entity.institutionName) return entity.institutionName;
+  if (user.institutionName) return user.institutionName;
   return "Aptitek";
 }
 
@@ -64,11 +64,11 @@ export const DEFAULT_SCHOOL: SchoolConfig = {
 };
 
 export function resolveCohortConfigForChip(
-  entity: EntityCardData,
+  user: UserCardData,
   cohortProp?: CohortConfig,
 ): CohortConfig {
   if (cohortProp) return cohortProp;
-  const primaryCompact = entity.cohorts?.[0];
+  const primaryCompact = user.cohorts?.[0];
   if (primaryCompact) {
     return {
       id: primaryCompact.id,
@@ -82,24 +82,22 @@ export function resolveCohortConfigForChip(
     };
   }
   return {
-    name: entity.cohortName || "Cohort 2026",
-    startDate: entity.cohortStartDate
-      ? String(entity.cohortStartDate)
-      : undefined,
+    name: user.cohortName || "Cohort 2026",
+    startDate: user.cohortStartDate ? String(user.cohortStartDate) : undefined,
   };
 }
 
-export function resolveEntityCardLabels(
-  entity: EntityCardData,
+export function resolveUserCardLabels(
+  user: UserCardData,
   school?: SchoolConfig,
   cohort?: CohortConfig,
 ) {
-  const role: UserRole = entity.role ?? "student";
-  const displayName = resolveDisplayName(entity);
-  const cohortLabel = resolveCohortLabel(entity, cohort);
-  const cohortYear = resolveCohortYear(entity, cohort);
-  const institutionLabel = resolveInstitutionLabel(entity, school);
-  const cohortConfig = resolveCohortConfigForChip(entity, cohort);
+  const role: UserRole = user.role ?? "student";
+  const displayName = resolveDisplayName(user);
+  const cohortLabel = resolveCohortLabel(user, cohort);
+  const cohortYear = resolveCohortYear(user, cohort);
+  const institutionLabel = resolveInstitutionLabel(user, school);
+  const cohortConfig = resolveCohortConfigForChip(user, cohort);
   return {
     role,
     displayName,
@@ -110,21 +108,44 @@ export function resolveEntityCardLabels(
   };
 }
 
-export function useCardInteractivity(
-  interactive: boolean,
-  onClick: ((entity: EntityCardData) => void) | undefined,
-  entity: EntityCardData,
+export const resolveEntityCardLabels = resolveUserCardLabels;
+
+export function resolveCardTestId(
+  testId?: string,
+  hasEntityProp?: boolean,
+): string {
+  if (testId) return testId;
+  return hasEntityProp ? "entity-card" : "user-card";
+}
+
+export function resolveCardAccessibility(
+  isInteractive: boolean,
+  displayName: string,
 ) {
-  const isInteractive = Boolean(interactive && onClick);
+  return {
+    tabIndex: isInteractive ? 0 : undefined,
+    role: isInteractive ? "button" : "article",
+    ariaLabel: `User card for ${displayName}`,
+  };
+}
+
+export function resolveCardInteractivity(
+  interactive: boolean,
+  onClick: ((user: UserCardData) => void) | undefined,
+  user?: UserCardData,
+) {
+  const isInteractive = Boolean(interactive && onClick && user);
   const handleClick = () => {
-    if (isInteractive && onClick) onClick(entity);
+    if (isInteractive && onClick && user) onClick(user);
   };
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const isActivationKey = event.key === "Enter" || event.key === " ";
-    if (isInteractive && isActivationKey) {
+    if (isInteractive && isActivationKey && user) {
       event.preventDefault();
-      onClick?.(entity);
+      onClick?.(user);
     }
   };
   return { isInteractive, handleClick, handleKeyDown };
 }
+
+export const useCardInteractivity = resolveCardInteractivity;

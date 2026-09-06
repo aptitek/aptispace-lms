@@ -11,7 +11,7 @@ import {
   resolveVisibleTabs,
 } from "~/components/molecules/HeaderTabs/HeaderTabs.config";
 import type { HeaderTabItem } from "~/components/molecules/HeaderTabs/HeaderTabs.types";
-import { logout, stopImpersonation } from "~/utils/auth";
+import { logout, stopImpersonation, type AuthUser } from "~/utils/auth";
 import { M3_SPRINGS, M3_MOTION_DURATIONS } from "~/tokens/motion";
 import {
   SidebarRail,

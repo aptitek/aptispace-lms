@@ -116,7 +116,7 @@ aptispace-lms/
 │   ├── components/
 │   │   ├── atoms/          # Primitive components (Avatar, Logo, Toggles, Guilloche, Galaxy)
 │   │   ├── molecules/      # Composite UI (EditableAvatar, EmailField, IdCard, DevImpersonator)
-│   │   ├── organisms/      # Feature blocks (Header, Footer, LoginCard, OnboardingCard, StatusCenter)
+│   │   ├── organisms/      # Feature blocks (Sidebar, LoginCard, OnboardingCard, StatusCenter)
 │   │   └── templates/      # Page layouts (AuthLayout)
 │   ├── config/             # Application configs, school data, admin allowances
 │   ├── db/                 # Drizzle ORM schema, relations, and database client

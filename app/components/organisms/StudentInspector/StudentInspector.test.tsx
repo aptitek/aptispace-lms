@@ -4,7 +4,7 @@ import {
   SchoolBadgeInline,
   InspectorAccountSection,
 } from "./StudentInspector.components";
-import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
+import type { UserCardData } from "../../molecules/UserCard/UserCard.types";
 import type { SchoolConfig } from "../../../types/institution";
 import type { CohortWithInstitution } from "./StudentInspector.types";
 
@@ -44,7 +44,7 @@ const mockCohorts: CohortWithInstitution[] = [
   },
 ];
 
-const mockStudent: EntityCardData = {
+const mockStudent: UserCardData = {
   id: "student-123",
   firstName: "Ada",
   familyName: "LOVELACE",
@@ -114,7 +114,7 @@ describe("StudentInspector Organism", () => {
   });
 
   it("handles instructor and admin entity inspection props", () => {
-    const mockInstructor: EntityCardData = {
+    const mockInstructor: UserCardData = {
       id: "inst-1",
       firstName: "Sarah",
       familyName: "CONNOR",
@@ -122,7 +122,7 @@ describe("StudentInspector Organism", () => {
       role: "instructor",
     };
 
-    const mockAdmin: EntityCardData = {
+    const mockAdmin: UserCardData = {
       id: "adm-1",
       firstName: "Ada",
       familyName: "LOVELACE",

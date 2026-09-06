@@ -1,4 +1,4 @@
-import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
+import type { UserCardData } from "../../molecules/UserCard/UserCard.types";
 import type { SchoolConfig, CohortConfig } from "../../../types/institution";
 import type { AuthUser } from "../../../utils/auth";
 
@@ -11,7 +11,7 @@ export interface StudentInspectorProps {
   /**
    * The currently selected student data
    */
-  student: EntityCardData | null;
+  student: UserCardData | null;
   /**
    * Available institutions/schools
    */
@@ -41,11 +41,11 @@ export interface StudentInspectorProps {
   /**
    * Callback to impersonate the inspected student
    */
-  onImpersonate?: (student: EntityCardData) => void;
+  onImpersonate?: (student: UserCardData) => void;
   /**
    * Callback to delete the inspected student
    */
-  onDelete?: (student: EntityCardData) => void;
+  onDelete?: (student: UserCardData) => void;
   /**
    * Callback fired when student profile is updated via the extended ProfileCard
    */

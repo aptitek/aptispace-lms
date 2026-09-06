@@ -10,9 +10,9 @@ export type {
   CalendarCardHeaderColor,
   RelativeChipVariant,
   RelativeStatusInfo,
-  CalendarSheetProps,
-  CalendarSheetSize,
-  CalendarSheetOrientation,
-  CalendarSheetHeaderColor,
+  CalendarCardProps as CalendarSheetProps,
+  CalendarCardSize as CalendarSheetSize,
+  CalendarCardOrientation as CalendarSheetOrientation,
+  CalendarCardHeaderColor as CalendarSheetHeaderColor,
 } from "./CalendarCard.types";
 export { computeRelativeStatus } from "./CalendarCard";

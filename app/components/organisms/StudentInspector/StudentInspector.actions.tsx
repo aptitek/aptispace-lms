@@ -4,11 +4,11 @@ import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import { useTranslation } from "react-i18next";
 import { HoldButton } from "../../atoms/HoldButton";
-import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
+import type { UserCardData } from "../../molecules/UserCard/UserCard.types";
 
 export interface InspectorImpersonateButtonProps {
-  targetStudent: EntityCardData;
-  onImpersonate: (student: EntityCardData) => void;
+  targetStudent: UserCardData;
+  onImpersonate: (student: UserCardData) => void;
 }
 
 export function InspectorImpersonateButton({
@@ -46,8 +46,8 @@ export function InspectorImpersonateButton({
 }
 
 export interface InspectorDeleteButtonProps {
-  targetStudent: EntityCardData;
-  onDelete: (student: EntityCardData) => void;
+  targetStudent: UserCardData;
+  onDelete: (student: UserCardData) => void;
 }
 
 export function InspectorDeleteButton({
@@ -91,9 +91,9 @@ export function InspectorDeleteButton({
 }
 
 export interface InspectorActionGroupProps {
-  targetStudent?: EntityCardData | null;
-  onImpersonate?: (student: EntityCardData) => void;
-  onDelete?: (student: EntityCardData) => void;
+  targetStudent?: UserCardData | null;
+  onImpersonate?: (student: UserCardData) => void;
+  onDelete?: (student: UserCardData) => void;
 }
 
 export function InspectorActionGroup({

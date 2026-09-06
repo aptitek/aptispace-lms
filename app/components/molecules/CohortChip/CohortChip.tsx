@@ -7,6 +7,7 @@ import {
   parseCohortName,
   getSpecialtySlug,
 } from "~/utils/cohortFormat";
+import { getCohortChipShape } from "~/tokens/shapes";
 import type { CohortChipProps, CohortChipSize } from "./CohortChip.types";
 import {
   CohortChipRoot,
@@ -129,6 +130,18 @@ function CohortDeleteButton({
   );
 }
 
+function resolveInteractiveState(isClickable: boolean, onClick?: () => void) {
+  return {
+    onClick: isClickable ? onClick : undefined,
+    tabIndex: isClickable ? 0 : undefined,
+    role: isClickable ? "button" : "status",
+  };
+}
+
+function resolveShapeAttr(shape: unknown): string | undefined {
+  return typeof shape === "string" ? shape : undefined;
+}
+
 /**
  * MD3 Cohort Chip Component
  *
@@ -141,6 +154,7 @@ export const CohortChip = forwardRef<HTMLDivElement, CohortChipProps>(
       cohort,
       size = "medium",
       variant = "outlined",
+      shape,
       onClick,
       onDelete,
       disabled = false,
@@ -157,8 +171,9 @@ export const CohortChip = forwardRef<HTMLDivElement, CohortChipProps>(
     const diplomaLabel = computeDiplomaBadgeText(diploma, year);
     const isClickable = Boolean(onClick && !disabled);
     const resolvedTestId = resolveTestId(dataTestId, testId);
+    const resolvedShape = shape ?? getCohortChipShape(cohort);
     const handleKeyDown = createKeyboardHandler(isClickable, onClick);
-    const handleClick = isClickable ? onClick : undefined;
+    const interactiveProps = resolveInteractiveState(isClickable, onClick);
 
     return (
       <CohortChipRoot
@@ -167,15 +182,17 @@ export const CohortChip = forwardRef<HTMLDivElement, CohortChipProps>(
         $diplomaColor={diplomaColor}
         $isClickable={isClickable}
         $variant={variant}
-        onClick={handleClick}
+        $shape={resolvedShape}
+        onClick={interactiveProps.onClick}
         onKeyDown={handleKeyDown}
-        tabIndex={isClickable ? 0 : undefined}
-        role={isClickable ? "button" : "status"}
+        tabIndex={interactiveProps.tabIndex}
+        role={interactiveProps.role}
         className={className}
         data-testid={resolvedTestId}
         data-size={size}
+        data-shape={resolveShapeAttr(resolvedShape)}
         data-diploma={resolveDiplomaAttr(diploma)}
-        data-year={year ?? undefined}
+        data-year={year === null ? undefined : year}
       >
         <CohortDiplomaSegment
           $size={size}

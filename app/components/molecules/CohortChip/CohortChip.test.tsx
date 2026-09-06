@@ -68,4 +68,23 @@ describe("CohortChip Molecule Component", () => {
     const { CohortDivider } = await import("./CohortChip.styles");
     expect(CohortDivider).toBeDefined();
   });
+
+  it("supports shape property with centralized chip shape engine", () => {
+    const element = React.createElement(CohortChip, {
+      cohort: { diploma: "M", year: 1, tags: ["AI"] },
+      shape: "clamshell",
+    });
+
+    expect(element).toBeDefined();
+    expect(element.props.shape).toBe("clamshell");
+  });
+
+  it("defaults to pill shape when shape prop is omitted", () => {
+    const element = React.createElement(CohortChip, {
+      cohort: { diploma: "M", year: 1, tags: ["AI"] },
+    });
+
+    expect(element).toBeDefined();
+    expect(element.props.shape).toBeUndefined();
+  });
 });

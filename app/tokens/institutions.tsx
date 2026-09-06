@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
-import type { ExpressiveShapeName } from "./shapes";
+import { type ChipShape, getInstitutionChipShape } from "./shapes";
 
-export type ChipShape = ExpressiveShapeName | string | number;
+export type { ChipShape };
 
 export type InstitutionType = "school" | "company";
 
@@ -27,14 +27,14 @@ export const INSTITUTION_CONFIGS: Record<InstitutionType, InstitutionConfig> = {
     key: "school",
     label: "School",
     chipColor: "info", // Cyan in MD3 theme
-    chipShape: "clamshell", // MD3 clamshell shape
+    chipShape: getInstitutionChipShape("school"), // MD3 clamshell shape
     icon: <SchoolRoundedIcon data-testid="institution-icon-school" />,
   },
   company: {
     key: "company",
     label: "Institution",
     chipColor: "warning", // Yellow in MD3 theme
-    chipShape: "semicircle", // MD3 semicircle shape
+    chipShape: getInstitutionChipShape("company"), // MD3 semicircle shape
     icon: <BusinessRoundedIcon data-testid="institution-icon-company" />,
   },
 };

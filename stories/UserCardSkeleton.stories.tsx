@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import EntityCardSkeleton from "../app/components/molecules/EntityCard/EntityCardSkeleton";
+import UserCardSkeleton from "../app/components/molecules/UserCard/UserCardSkeleton";
 
-const meta: Meta<typeof EntityCardSkeleton> = {
-  title: "Molecules/EntityCardSkeleton",
-  component: EntityCardSkeleton,
+const meta: Meta<typeof UserCardSkeleton> = {
+  title: "Molecules/UserCardSkeleton",
+  component: UserCardSkeleton,
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
@@ -11,7 +11,7 @@ const meta: Meta<typeof EntityCardSkeleton> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof EntityCardSkeleton>;
+type Story = StoryObj<typeof UserCardSkeleton>;
 
 export const ShimmerAnimated: Story = {
   args: {

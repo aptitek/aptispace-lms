@@ -13,19 +13,10 @@ import {
   SkeletonNameBlock,
   SkeletonFooterRow,
   GhostFabOverlay,
-} from "./EntityCardSkeleton.styles";
+} from "./UserCardSkeleton.styles";
+import type { UserCardSkeletonProps } from "./UserCard.types";
 
-export interface EntityCardSkeletonProps {
-  variant?: "shimmer" | "static";
-  animated?: boolean;
-  opacity?: number;
-  isGhost?: boolean;
-  onClick?: () => void;
-  tooltipTitle?: string;
-  className?: string;
-  testId?: string;
-  style?: React.CSSProperties;
-}
+export type { UserCardSkeletonProps };
 
 function resolveSkeletonState(
   isGhost: boolean,
@@ -52,7 +43,7 @@ function createSkeletonKeyHandler(
   };
 }
 
-export function EntityCardSkeleton({
+export function UserCardSkeleton({
   variant = "shimmer",
   animated = true,
   opacity,
@@ -60,9 +51,9 @@ export function EntityCardSkeleton({
   onClick,
   tooltipTitle,
   className,
-  testId = "entity-card-skeleton",
+  testId = "user-card-skeleton",
   style,
-}: EntityCardSkeletonProps) {
+}: UserCardSkeletonProps) {
   const { t } = useTranslation(["common", "admin"]);
   const isInteractive = Boolean(onClick);
   const state = resolveSkeletonState(isGhost, variant, animated, opacity);
@@ -186,4 +177,5 @@ export function EntityCardSkeleton({
   );
 }
 
-export default EntityCardSkeleton;
+export const EntityCardSkeleton = UserCardSkeleton;
+export default UserCardSkeleton;

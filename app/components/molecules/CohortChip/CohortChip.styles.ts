@@ -2,6 +2,7 @@ import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import type { DiplomaColorTheme } from "~/utils/cohortFormat";
+import { type ChipShape, resolveChipShape } from "~/tokens/shapes";
 import type { CohortChipSize } from "./CohortChip.types";
 
 interface StyledRootProps {
@@ -9,11 +10,47 @@ interface StyledRootProps {
   $diplomaColor: DiplomaColorTheme;
   $isClickable?: boolean;
   $variant?: "outlined" | "filled";
+  $shape?: ChipShape;
+}
+
+const COHORT_SIZE_MAP: Record<
+  CohortChipSize,
+  { height: number; fontSize: string }
+> = {
+  small: { height: 22, fontSize: "0.72rem" },
+  medium: { height: 28, fontSize: "0.82rem" },
+  large: { height: 36, fontSize: "0.95rem" },
+};
+
+function getCohortRootBackground(
+  isFilled: boolean,
+  diplomaColor: DiplomaColorTheme,
+  paperColor: string,
+): string {
+  if (isFilled) return diplomaColor.light;
+  return alpha(paperColor, 0.95);
+}
+
+function getCohortHoverStyles(
+  isClickable: boolean | undefined,
+  borderColor: string,
+) {
+  if (!isClickable) return {};
+  return {
+    "&:hover": {
+      transform: "translateY(-1px)",
+      boxShadow: "0 3px 8px rgba(0, 0, 0, 0.15)",
+      borderColor,
+    },
+    "&:active": {
+      transform: "translateY(0)",
+    },
+  };
 }
 
 export const CohortChipRoot = styled(Box, {
   shouldForwardProp: (prop) =>
-    !["$size", "$diplomaColor", "$isClickable", "$variant"].includes(
+    !["$size", "$diplomaColor", "$isClickable", "$variant", "$shape"].includes(
       prop as string,
     ),
 })<StyledRootProps>(({
@@ -22,39 +59,34 @@ export const CohortChipRoot = styled(Box, {
   $diplomaColor,
   $isClickable,
   $variant,
+  $shape,
 }) => {
-  const sizeMap = {
-    small: {
-      height: 22,
-      fontSize: "0.72rem",
-      gap: 0,
-    },
-    medium: {
-      height: 28,
-      fontSize: "0.82rem",
-      gap: 0,
-    },
-    large: {
-      height: 36,
-      fontSize: "0.95rem",
-      gap: 0,
-    },
-  }[$size];
-
+  const sizeConfig = COHORT_SIZE_MAP[$size];
   const isFilled = $variant === "filled";
+  const shapeStyle = resolveChipShape($shape ?? "pill");
+  const hasClipPath = Boolean(shapeStyle?.clipPath);
+  const borderColor = $diplomaColor.border || alpha(theme.palette.divider, 0.4);
+  const bgColor = getCohortRootBackground(
+    isFilled,
+    $diplomaColor,
+    theme.palette.background.paper,
+  );
+  const hoverStyles = getCohortHoverStyles($isClickable, $diplomaColor.main);
 
   return {
     display: "inline-flex",
     alignItems: "center",
     boxSizing: "border-box",
-    height: sizeMap.height,
-    fontSize: sizeMap.fontSize,
-    borderRadius: 9999, // MD3 Pill shape
+    height: sizeConfig.height,
+    fontSize: sizeConfig.fontSize,
+    borderRadius: shapeStyle?.borderRadius ?? "9999px",
+    ...(hasClipPath && {
+      clipPath: shapeStyle?.clipPath,
+      WebkitClipPath: shapeStyle?.clipPath,
+    }),
     overflow: "hidden",
-    border: `1px solid ${$diplomaColor.border || alpha(theme.palette.divider, 0.4)}`,
-    backgroundColor: isFilled
-      ? $diplomaColor.light
-      : alpha(theme.palette.background.paper, 0.95),
+    border: `1px solid ${borderColor}`,
+    backgroundColor: bgColor,
     backdropFilter: "blur(8px)",
     boxShadow: `0 1px 2px ${alpha(theme.palette.common.black, 0.05)}`,
     cursor: $isClickable ? "pointer" : "default",
@@ -63,17 +95,7 @@ export const CohortChipRoot = styled(Box, {
       "transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background-color 0.15s ease",
     verticalAlign: "middle",
     maxWidth: "100%",
-
-    ...($isClickable && {
-      "&:hover": {
-        transform: "translateY(-1px)",
-        boxShadow: "0 3px 8px rgba(0, 0, 0, 0.15)",
-        borderColor: $diplomaColor.main,
-      },
-      "&:active": {
-        transform: "translateY(0)",
-      },
-    }),
+    ...hoverStyles,
   };
 });
 

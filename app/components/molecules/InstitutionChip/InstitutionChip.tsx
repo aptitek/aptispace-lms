@@ -2,6 +2,7 @@ import React, { forwardRef, type ReactNode, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import Chip from "~/components/atoms/Chip/Chip";
 import { getInstitutionConfig } from "~/tokens/institutions";
+import { getInstitutionChipShape } from "~/tokens/shapes";
 import type { InstitutionChipProps } from "./InstitutionChip.types";
 
 interface ResolvedVisuals {
@@ -36,11 +37,13 @@ function resolveInstitutionVisuals(
   defaultAllLabel: string,
   defaultTypeLabel: string,
 ): ResolvedVisuals {
+  const defaultShape = getInstitutionChipShape(rawType);
+
   if (rawType === "all") {
     return {
       resolvedLabel: props.label ?? defaultAllLabel,
       resolvedIcon: props.icon as ReactElement | undefined,
-      resolvedShape: props.shape ?? "pill",
+      resolvedShape: props.shape ?? defaultShape,
       resolvedColor: props.color ?? "default",
       resolvedTestId: props.testId || "institution-chip-all",
     };
@@ -56,7 +59,7 @@ function resolveInstitutionVisuals(
   return {
     resolvedLabel: props.label ?? defaultTypeLabel,
     resolvedIcon,
-    resolvedShape: props.shape ?? instConfig.chipShape,
+    resolvedShape: props.shape ?? defaultShape,
     resolvedColor: props.color ?? instConfig.chipColor,
     resolvedTestId: props.testId || `institution-chip-${instConfig.key}`,
   };

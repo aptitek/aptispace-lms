@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
-import EntityCard from "./EntityCard";
-import type { EntityCardData, EntityCardProps } from "./EntityCard.types";
+import UserCard, { EntityCard } from "./UserCard";
+import type { UserCardData, UserCardProps } from "./UserCard.types";
 
-const mockStudent: EntityCardData = {
+const mockStudent: UserCardData = {
   id: "student-12345678",
   firstName: "Jane",
   familyName: "DOE",
@@ -15,18 +15,19 @@ const mockStudent: EntityCardData = {
   cohortStartYear: "2026",
 };
 
-describe("EntityCard Molecule", () => {
-  it("exports EntityCard component properly", () => {
-    expect(EntityCard).toBeDefined();
-    expect(typeof EntityCard).toBe("object"); // forwardRef
-    expect(EntityCard.displayName).toBe("EntityCard");
+describe("UserCard Molecule", () => {
+  it("exports UserCard and EntityCard components properly", () => {
+    expect(UserCard).toBeDefined();
+    expect(typeof UserCard).toBe("object"); // forwardRef
+    expect(UserCard.displayName).toBe("UserCard");
+    expect(EntityCard).toBe(UserCard);
   });
 
-  it("creates React element with appropriate props and student data", () => {
+  it("creates React element with appropriate props and user data", () => {
     const onImpersonateMock = vi.fn();
     const onDeleteMock = vi.fn();
-    const element = React.createElement(EntityCard, {
-      entity: mockStudent,
+    const element = React.createElement(UserCard, {
+      user: mockStudent,
       variant: "elevation" as const,
       onImpersonate: onImpersonateMock,
       showImpersonate: true,
@@ -35,13 +36,14 @@ describe("EntityCard Molecule", () => {
     });
 
     expect(element).toBeDefined();
-    const props = element.props as EntityCardProps;
-    expect(props.entity.firstName).toBe("Jane");
-    expect(props.entity.familyName).toBe("DOE");
-    expect(props.entity.email).toBe("jane.doe@aptitek.io");
-    expect(props.entity.role).toBe("student");
-    expect(props.entity.githubUsername).toBe("janedoe");
-    expect(props.entity.cohortStartYear).toBe("2026");
+    const props = element.props as UserCardProps;
+    const target = props.user ?? props.entity;
+    expect(target?.firstName).toBe("Jane");
+    expect(target?.familyName).toBe("DOE");
+    expect(target?.email).toBe("jane.doe@aptitek.io");
+    expect(target?.role).toBe("student");
+    expect(target?.githubUsername).toBe("janedoe");
+    expect(target?.cohortStartYear).toBe("2026");
     expect(props.variant).toBe("elevation");
     expect(props.showImpersonate).toBe(true);
     expect(props.onImpersonate).toBe(onImpersonateMock);
@@ -49,14 +51,24 @@ describe("EntityCard Molecule", () => {
     expect(props.onDelete).toBe(onDeleteMock);
   });
 
+  it("supports backwards compatibility with entity prop", () => {
+    const element = React.createElement(UserCard, {
+      entity: mockStudent,
+    });
+
+    expect(element).toBeDefined();
+    const props = element.props as UserCardProps;
+    expect(props.entity?.firstName).toBe("Jane");
+  });
+
   it("supports incomplete profile and custom school configuration", () => {
-    const incompleteStudent: EntityCardData = {
+    const incompleteStudent: UserCardData = {
       ...mockStudent,
       isProfileComplete: false,
     };
 
-    const element = React.createElement(EntityCard, {
-      entity: incompleteStudent,
+    const element = React.createElement(UserCard, {
+      user: incompleteStudent,
       school: {
         id: "school-aptitek",
         name: "Aptitek Tech",
@@ -69,15 +81,16 @@ describe("EntityCard Molecule", () => {
       },
     });
 
-    const props = element.props as EntityCardProps;
-    expect(props.entity.isProfileComplete).toBe(false);
+    const props = element.props as UserCardProps;
+    const target = props.user ?? props.entity;
+    expect(target?.isProfileComplete).toBe(false);
     expect(props.school?.name).toBe("Aptitek Tech");
     expect(props.cohort?.name).toBe("Cohort 2026 Alpha");
     expect(props.cohort?.startYear).toBe(2026);
   });
 
-  it("handles instructor and admin entities without requiring student cohort chips", () => {
-    const instructor: EntityCardData = {
+  it("handles instructor and admin users without requiring student cohort chips", () => {
+    const instructor: UserCardData = {
       id: "inst-1",
       firstName: "Sarah",
       familyName: "CONNOR",
@@ -86,7 +99,7 @@ describe("EntityCard Molecule", () => {
       isProfileComplete: true,
     };
 
-    const admin: EntityCardData = {
+    const admin: UserCardData = {
       id: "adm-1",
       firstName: "Ada",
       familyName: "LOVELACE",
@@ -95,17 +108,17 @@ describe("EntityCard Molecule", () => {
       isProfileComplete: true,
     };
 
-    const instElement = React.createElement(EntityCard, { entity: instructor });
-    const admElement = React.createElement(EntityCard, { entity: admin });
+    const instElement = React.createElement(UserCard, { user: instructor });
+    const admElement = React.createElement(UserCard, { user: admin });
 
     expect(instElement).toBeDefined();
     expect(admElement).toBeDefined();
-    expect(instElement.props.entity.role).toBe("instructor");
-    expect(admElement.props.entity.role).toBe("admin");
+    expect(instElement.props.user?.role).toBe("instructor");
+    expect(admElement.props.user?.role).toBe("admin");
   });
 
   it("passes structured cohort data to CohortChip for students", () => {
-    const studentWithStructuredCohort: EntityCardData = {
+    const studentWithStructuredCohort: UserCardData = {
       ...mockStudent,
       cohorts: [
         {
@@ -118,12 +131,12 @@ describe("EntityCard Molecule", () => {
       ],
     };
 
-    const element = React.createElement(EntityCard, {
-      entity: studentWithStructuredCohort,
+    const element = React.createElement(UserCard, {
+      user: studentWithStructuredCohort,
     });
     expect(element).toBeDefined();
-    expect(element.props.entity.cohorts?.[0]?.diploma).toBe("M");
-    expect(element.props.entity.cohorts?.[0]?.year).toBe(1);
-    expect(element.props.entity.cohorts?.[0]?.tags).toEqual(["IA", "Dev"]);
+    expect(element.props.user?.cohorts?.[0]?.diploma).toBe("M");
+    expect(element.props.user?.cohorts?.[0]?.year).toBe(1);
+    expect(element.props.user?.cohorts?.[0]?.tags).toEqual(["IA", "Dev"]);
   });
 });

@@ -1,4 +1,4 @@
-import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
+import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 import type { SystemHealthStatus } from "~/utils/statusCenter.types";
 
 export type AuditActionType = "INSERT" | "UPDATE" | "DELETE";
@@ -9,7 +9,7 @@ export interface AdminAuditLogItem {
   recordId: string;
   action: AuditActionType;
   userId: string | null;
-  actor?: EntityCardData | null;
+  actor?: UserCardData | null;
   oldValues: string | null;
   newValues: string | null;
   createdAt: string | Date;
@@ -33,7 +33,7 @@ export interface AdminErrorReportItem {
   userAgent?: string | null;
   contextData?: string | null;
   userId?: string | null;
-  user?: EntityCardData | null;
+  user?: UserCardData | null;
   status: ErrorStatusType;
   createdAt: string | Date;
 }
@@ -53,9 +53,9 @@ export interface SecurityIncidentItem {
   userAgent?: string | null;
   timestamp: string | Date;
   userId?: string | null;
-  user?: EntityCardData | null;
+  user?: UserCardData | null;
   actorUserId?: string | null;
-  actorUser?: EntityCardData | null;
+  actorUser?: UserCardData | null;
   rawError?: AdminErrorReportItem | null;
   rawAudit?: AdminAuditLogItem | null;
 }

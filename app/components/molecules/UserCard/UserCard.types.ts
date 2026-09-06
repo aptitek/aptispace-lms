@@ -14,7 +14,7 @@ export interface CompactCohortItem {
   institutionName?: string;
 }
 
-export interface EntityCardData {
+export interface UserCardData {
   id: string;
   firstName: string;
   familyName: string;
@@ -33,17 +33,18 @@ export interface EntityCardData {
   institutionName?: string;
 }
 
-export type EntityCardVariant = "elevation" | "outlined"; // MD3 variants mapped to MUI Card
+export type UserCardVariant = "elevation" | "outlined";
 
-export interface EntityCardProps {
-  entity: EntityCardData;
+export interface UserCardProps {
+  user?: UserCardData;
+  entity?: UserCardData;
   school?: SchoolConfig;
   cohort?: CohortConfig;
-  variant?: EntityCardVariant;
-  onClick?: (entity: EntityCardData) => void;
-  onImpersonate?: (entity: EntityCardData) => void;
+  variant?: UserCardVariant;
+  onClick?: (user: UserCardData) => void;
+  onImpersonate?: (user: UserCardData) => void;
   showImpersonate?: boolean;
-  onDelete?: (entity: EntityCardData) => void;
+  onDelete?: (user: UserCardData) => void;
   showDelete?: boolean;
   interactive?: boolean;
   isSelected?: boolean;
@@ -51,3 +52,21 @@ export interface EntityCardProps {
   testId?: string;
   style?: React.CSSProperties;
 }
+
+export interface UserCardSkeletonProps {
+  variant?: "shimmer" | "static";
+  animated?: boolean;
+  opacity?: number;
+  isGhost?: boolean;
+  onClick?: () => void;
+  tooltipTitle?: string;
+  className?: string;
+  testId?: string;
+  style?: React.CSSProperties;
+}
+
+// Backwards compatibility aliases
+export type EntityCardData = UserCardData;
+export type EntityCardVariant = "elevation" | "outlined";
+export type EntityCardProps = UserCardProps;
+export type EntityCardSkeletonProps = UserCardSkeletonProps;

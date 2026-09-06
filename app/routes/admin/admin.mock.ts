@@ -1,4 +1,4 @@
-import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
+import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 import type { SchoolConfig } from "~/types/institution";
 import type { CohortWithInstitution } from "~/components/organisms/StudentInspector/StudentInspector.types";
 
@@ -70,7 +70,7 @@ export function getDefaultCohorts(): CohortWithInstitution[] {
   ];
 }
 
-export function getDefaultStudents(): EntityCardData[] {
+export function getDefaultStudents(): UserCardData[] {
   return [
     {
       id: "std-001",
@@ -219,7 +219,7 @@ export function getDefaultStudents(): EntityCardData[] {
   ];
 }
 
-export function getDefaultInstructors(): EntityCardData[] {
+export function getDefaultInstructors(): UserCardData[] {
   return [
     {
       id: "inst-001",
@@ -264,7 +264,7 @@ export function getDefaultInstructors(): EntityCardData[] {
   ];
 }
 
-export function getDefaultAdmins(): EntityCardData[] {
+export function getDefaultAdmins(): UserCardData[] {
   return [
     {
       id: "admin-001",

@@ -10,10 +10,10 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import Avatar from "~/components/atoms/Avatar/Avatar";
 import RoleChip from "~/components/molecules/RoleChip/RoleChip";
-import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
+import type { UserCardData } from "../../molecules/UserCard/UserCard.types";
 
 export interface InspectorAccountSectionProps {
-  targetStudent: EntityCardData;
+  targetStudent: UserCardData;
   onUpdateGithub?: (studentId: string, githubId: string) => void;
   isSubmitting?: boolean;
 }

@@ -3,13 +3,13 @@ import type {
   AdminErrorReportItem,
   SystemMetricsData,
 } from "~/types/missionCenter";
-import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
+import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 import {
   getDefaultAdmins,
   getDefaultStudents,
 } from "~/routes/admin/admin.helpers";
 
-export function getMockAdminUser(): EntityCardData {
+export function getMockAdminUser(): UserCardData {
   const admins = getDefaultAdmins();
   return (
     admins[0] || {
@@ -24,7 +24,7 @@ export function getMockAdminUser(): EntityCardData {
   );
 }
 
-export function getMockStudentUser(): EntityCardData {
+export function getMockStudentUser(): UserCardData {
   const students = getDefaultStudents();
   return (
     students[0] || {

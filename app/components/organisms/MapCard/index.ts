@@ -7,10 +7,10 @@ export type {
   MapCardOrientation,
   AccessType,
   MapCardMode,
-  MapSheetProps,
-  MapSheetSize,
-  MapSheetOrientation,
-  MapSheetMode,
+  MapCardProps as MapSheetProps,
+  MapCardSize as MapSheetSize,
+  MapCardOrientation as MapSheetOrientation,
+  MapCardMode as MapSheetMode,
 } from "./MapCard.types";
 export {
   parseRoomCode,
