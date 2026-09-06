@@ -10,11 +10,16 @@ import SchoolCard, {
 import CohortCard, {
   CohortCardSkeleton,
 } from "~/components/molecules/CohortCard/CohortCard";
-import InstitutionFilterBar from "~/components/molecules/InstitutionFilterBar/InstitutionFilterBar";
+import Filter from "~/components/molecules/Filter/Filter";
+import InstitutionChip from "~/components/molecules/InstitutionChip/InstitutionChip";
 import InstitutionInspector from "~/components/organisms/InstitutionInspector/InstitutionInspector";
 import CohortInspector from "~/components/organisms/CohortInspector/CohortInspector";
-import CohortFilterBar from "~/components/molecules/CohortFilterBar/CohortFilterBar";
-import { parseCohortName } from "~/utils/cohortFormat";
+import {
+  parseCohortName,
+  DIPLOMA_OPTIONS,
+  COMMON_SPECIALTY_TAGS,
+  getSpecialtySlug,
+} from "~/utils/cohortFormat";
 import { normalizeInstitutionType } from "~/tokens/institutions";
 import {
   TabPanelContainer,
@@ -250,6 +255,36 @@ export function AdminCohortsTabPanel({
     cohortSearchQuery,
   ]);
 
+  const allCohortTags = useMemo(() => {
+    return Array.from(
+      new Set([...availableSchoolTags, ...COMMON_SPECIALTY_TAGS]),
+    );
+  }, [availableSchoolTags]);
+
+  const hasActiveCohortFilters = useMemo(() => {
+    if (cohortSearchQuery.trim().length > 0) return true;
+    if (cohortDiplomaFilter !== "all") return true;
+    if (cohortYearFilter !== "all" && cohortYearFilter !== "") return true;
+    if (cohortTagFilter !== "all") return true;
+    return cohortStartYearMin !== null || cohortStartYearMax !== null;
+  }, [
+    cohortSearchQuery,
+    cohortDiplomaFilter,
+    cohortYearFilter,
+    cohortTagFilter,
+    cohortStartYearMin,
+    cohortStartYearMax,
+  ]);
+
+  const handleClearCohortFilters = () => {
+    setCohortSearchQuery("");
+    setCohortDiplomaFilter("all");
+    setCohortYearFilter("all");
+    setCohortTagFilter("all");
+    setCohortStartYearMin(null);
+    setCohortStartYearMax(null);
+  };
+
   return (
     <TabPanelContainer
       hasSidePanel={hasCohortsInspectorOpen}
@@ -264,12 +299,50 @@ export function AdminCohortsTabPanel({
             {t("admin.schoolsTitle", "Schools & Institutions")}
           </Typography>
 
-          <InstitutionFilterBar
-            query={institutionQuery}
-            onQueryChange={setInstitutionQuery}
-            typeFilter={institutionTypeFilter}
-            onTypeFilterChange={setInstitutionTypeFilter}
-          />
+          <Filter testId="institution-filter-bar">
+            <Filter.Select
+              label={t("filterBar.institutionType", "Institution Type")}
+              value={institutionTypeFilter}
+              onChange={setInstitutionTypeFilter}
+              minWidth={180}
+              testId="institution-type-filter"
+              renderValue={(selectedType) => (
+                <InstitutionChip
+                  institutionType={String(selectedType)}
+                  size="small"
+                />
+              )}
+              options={[
+                {
+                  value: "all",
+                  chip: <InstitutionChip institutionType="all" size="small" />,
+                },
+                {
+                  value: "academic",
+                  chip: (
+                    <InstitutionChip institutionType="school" size="small" />
+                  ),
+                },
+                {
+                  value: "company",
+                  chip: (
+                    <InstitutionChip institutionType="company" size="small" />
+                  ),
+                },
+              ]}
+            />
+            <Filter.Spacer />
+            <Filter.Search
+              value={institutionQuery}
+              onChange={setInstitutionQuery}
+              placeholder={t(
+                "filterBar.searchInstitutionsPlaceholder",
+                "Search institutions (name, slug)...",
+              )}
+              minWidth={260}
+              testId="institution-search-input"
+            />
+          </Filter>
 
           <MD3CollectionGrid data-testid="schools-zone">
             {filteredSchools.map((school) => (
@@ -300,21 +373,85 @@ export function AdminCohortsTabPanel({
               })}
             </Typography>
 
-            <CohortFilterBar
-              query={cohortSearchQuery}
-              onQueryChange={setCohortSearchQuery}
-              diplomaFilter={cohortDiplomaFilter}
-              onDiplomaFilterChange={setCohortDiplomaFilter}
-              yearFilter={cohortYearFilter}
-              onYearFilterChange={setCohortYearFilter}
-              tagFilter={cohortTagFilter}
-              onTagFilterChange={setCohortTagFilter}
-              startYearMin={cohortStartYearMin}
-              onStartYearMinChange={setCohortStartYearMin}
-              startYearMax={cohortStartYearMax}
-              onStartYearMaxChange={setCohortStartYearMax}
-              availableTags={availableSchoolTags}
-            />
+            <Filter testId="cohort-filter-bar">
+              <Filter.Select
+                label={t("diplomas.title", "Diploma")}
+                value={cohortDiplomaFilter}
+                onChange={setCohortDiplomaFilter}
+                minWidth={150}
+                testId="cohort-diploma-filter"
+                options={[
+                  {
+                    value: "all",
+                    label: <em>{t("diplomas.all", "All Diplomas")}</em>,
+                  },
+                  ...DIPLOMA_OPTIONS.map((opt) => ({
+                    value: opt.code,
+                    label: `${opt.code} – ${t(opt.labelKey, opt.defaultLabel)}`,
+                  })),
+                ]}
+              />
+
+              <Filter.Number
+                label={t("cohortYear.title", "Year")}
+                placeholder={t("cohortYear.all", "All")}
+                value={cohortYearFilter}
+                onChange={setCohortYearFilter}
+                min={0}
+                max={20}
+                testId="cohort-year-filter"
+              />
+
+              <Filter.Select
+                label={t("filterBar.tag", "Specialty")}
+                value={cohortTagFilter}
+                onChange={setCohortTagFilter}
+                minWidth={160}
+                testId="cohort-tag-filter"
+                options={[
+                  {
+                    value: "all",
+                    label: <em>{t("filterBar.allTags", "All Specialties")}</em>,
+                  },
+                  ...allCohortTags.map((tag) => ({
+                    value: tag,
+                    label: t(
+                      `cohortTags.${getSpecialtySlug(tag)}`,
+                      tag.toUpperCase(),
+                    ),
+                  })),
+                ]}
+              />
+
+              <Filter.Range
+                startYearMin={cohortStartYearMin}
+                startYearMax={cohortStartYearMax}
+                onStartYearMinChange={setCohortStartYearMin}
+                onStartYearMaxChange={setCohortStartYearMax}
+                testId="cohort-year-range"
+              />
+
+              {hasActiveCohortFilters && (
+                <Filter.Clear
+                  onClear={handleClearCohortFilters}
+                  testId="cohort-clear-filters"
+                  label={t("clearFilters", "Reset")}
+                />
+              )}
+
+              <Filter.Spacer />
+
+              <Filter.Search
+                placeholder={t(
+                  "filterBar.searchCohortsPlaceholder",
+                  "Search cohorts (name, tag, year)...",
+                )}
+                value={cohortSearchQuery}
+                onChange={setCohortSearchQuery}
+                minWidth={260}
+                testId="cohort-search-input"
+              />
+            </Filter>
 
             <MD3CollectionGrid data-testid="cohorts-zone">
               {filteredCohorts.map((cohort) => (

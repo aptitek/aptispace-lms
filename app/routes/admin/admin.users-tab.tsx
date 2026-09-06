@@ -1,7 +1,12 @@
+import { useTranslation } from "react-i18next";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 import type { AuthUser } from "~/utils/auth";
-import FilterBar from "~/components/molecules/FilterBar/FilterBar";
+import Filter from "~/components/molecules/Filter/Filter";
+import RoleChip from "~/components/molecules/RoleChip/RoleChip";
+import InstitutionLogo from "~/components/molecules/InstitutionLogo/InstitutionLogo";
 import UserGrid from "~/components/molecules/UserGrid/UserGrid";
 import StudentInspector from "~/components/organisms/StudentInspector/StudentInspector";
 import { TabPanelContainer, MainColumn, SideColumn } from "./admin.styles";
@@ -65,6 +70,50 @@ export function AdminUsersTabPanel({
   onUpdateGithub,
   isSubmitting,
 }: AdminUsersTabPanelProps) {
+  const { t } = useTranslation(["common"]);
+
+  const schoolOptions = [
+    {
+      value: "all",
+      label: t("filterBar.allSchools", "All Schools"),
+    },
+    ...schools.map((school) => ({
+      value: school.id,
+      label: (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {school.logoUrl && (
+            <InstitutionLogo
+              logoUrl={school.logoUrl}
+              name={school.name}
+              height={18}
+              maxWidth={80}
+              fallback={null}
+            />
+          )}
+          <Typography variant="body2">{school.name}</Typography>
+        </Box>
+      ),
+    })),
+  ];
+
+  const cohortOptions = [
+    {
+      value: "all",
+      label: t("filterBar.allCohorts", "All Cohorts"),
+    },
+    ...cohorts
+      .filter(
+        (c) =>
+          schoolFilter === "all" ||
+          !schoolFilter ||
+          c.institutionId === schoolFilter,
+      )
+      .map((cohort) => ({
+        value: cohort.id ?? "",
+        label: cohort.name ?? "",
+      })),
+  ];
+
   return (
     <TabPanelContainer
       hasSidePanel={hasInspectorOpen}
@@ -74,22 +123,82 @@ export function AdminUsersTabPanel({
       data-testid="admin-tabpanel-users"
     >
       <MainColumn>
-        <FilterBar
-          query={searchQuery}
-          onQueryChange={onQueryChange}
-          roleFilter={roleFilter}
-          onRoleFilterChange={onRoleFilterChange}
-          schoolFilter={schoolFilter}
-          onSchoolFilterChange={onSchoolFilterChange}
-          schools={schools}
-          cohortFilter={cohortFilter}
-          onCohortFilterChange={onCohortFilterChange}
-          cohorts={cohorts}
-          startYearMin={startYearMin}
-          onStartYearMinChange={onStartYearMinChange}
-          startYearMax={startYearMax}
-          onStartYearMaxChange={onStartYearMaxChange}
-        />
+        <Filter testId="generic-filter-bar">
+          <Filter.Select
+            label={t("filterBar.role", "Role")}
+            value={roleFilter}
+            onChange={onRoleFilterChange}
+            minWidth={170}
+            testId="filter-role-select"
+            options={[
+              { value: "all", chip: <RoleChip userRole="all" size="small" /> },
+              {
+                value: "student",
+                chip: <RoleChip userRole="student" size="small" />,
+              },
+              {
+                value: "instructor",
+                chip: <RoleChip userRole="instructor" size="small" />,
+              },
+              {
+                value: "admin",
+                chip: <RoleChip userRole="admin" size="small" />,
+              },
+            ]}
+          />
+          <Filter.Select
+            label={t("filterBar.school", "School")}
+            value={schoolFilter}
+            onChange={onSchoolFilterChange}
+            minWidth={200}
+            testId="filter-school-select"
+            renderValue={(selectedId) => {
+              if (selectedId === "all") {
+                return t("filterBar.allSchools", "All Schools");
+              }
+              const found = schools.find((s) => s.id === selectedId);
+              return (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {found?.logoUrl && (
+                    <InstitutionLogo
+                      logoUrl={found.logoUrl}
+                      name={found.name}
+                      height={18}
+                      maxWidth={80}
+                      fallback={null}
+                    />
+                  )}
+                  <Typography variant="body2">
+                    {found?.name || selectedId}
+                  </Typography>
+                </Box>
+              );
+            }}
+            options={schoolOptions}
+          />
+          <Filter.Select
+            label={t("filterBar.cohort", "Cohort")}
+            value={cohortFilter}
+            onChange={onCohortFilterChange}
+            minWidth={200}
+            testId="filter-cohort-select"
+            options={cohortOptions}
+          />
+          <Filter.Range
+            startYearMin={startYearMin}
+            startYearMax={startYearMax}
+            onStartYearMinChange={onStartYearMinChange}
+            onStartYearMaxChange={onStartYearMaxChange}
+            testId="filter-year-range"
+          />
+          <Filter.Spacer />
+          <Filter.Search
+            value={searchQuery}
+            onChange={onQueryChange}
+            placeholder={t("filterBar.searchPlaceholder", "Search users...")}
+            testId="filter-search-input"
+          />
+        </Filter>
         <UserGrid
           students={filteredUsers}
           selectedStudentId={selectedUser?.id}
