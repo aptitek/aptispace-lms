@@ -75,20 +75,26 @@ export const RangeInputsContainer = styled("div")(({ theme }) => ({
 
 export const RangeSubInputWrapper = styled("span", {
   shouldForwardProp: (prop) => prop !== "$isActive" && prop !== "$isFocused",
-})<{ $isActive: boolean; $isFocused: boolean }>(({ theme, $isActive, $isFocused }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "0 2px",
-  cursor: "text",
-  color: $isActive && $isFocused ? theme.palette.primary.main : theme.palette.text.primary,
-  borderBottom: $isActive && $isFocused
-    ? `2px solid ${theme.palette.primary.main}`
-    : "2px solid transparent",
-  transition: theme.transitions.create(["color", "border-color"], {
-    duration: theme.transitions.duration.shorter,
+})<{ $isActive: boolean; $isFocused: boolean }>(
+  ({ theme, $isActive, $isFocused }) => ({
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "0 2px",
+    cursor: "text",
+    color:
+      $isActive && $isFocused
+        ? theme.palette.primary.main
+        : theme.palette.text.primary,
+    borderBottom:
+      $isActive && $isFocused
+        ? `2px solid ${theme.palette.primary.main}`
+        : "2px solid transparent",
+    transition: theme.transitions.create(["color", "border-color"], {
+      duration: theme.transitions.duration.shorter,
+    }),
   }),
-}));
+);
 
 export const RangeSubInput = styled("input")(({ theme }) => ({
   border: "none",

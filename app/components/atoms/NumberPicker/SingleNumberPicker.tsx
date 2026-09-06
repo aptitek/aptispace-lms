@@ -215,7 +215,8 @@ export const SingleNumberPicker = forwardRef<HTMLDivElement, NumberPickerProps>(
         data-testid={activeTestId}
         slotProps={{
           input: stepAdornments,
-          inputLabel: props.shrink !== undefined ? { shrink: props.shrink } : undefined,
+          inputLabel:
+            props.shrink !== undefined ? { shrink: props.shrink } : undefined,
           htmlInput: {
             min,
             max,

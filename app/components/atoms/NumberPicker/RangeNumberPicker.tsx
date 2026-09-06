@@ -52,7 +52,9 @@ function computeStepValue(
   const { min, max, step } = bounds;
   if (current === null) {
     if (otherVal !== null) {
-      return direction === "increment" ? otherVal : Math.max(min, otherVal - step);
+      return direction === "increment"
+        ? otherVal
+        : Math.max(min, otherVal - step);
     }
     return getDefaultInitialYear(min, max);
   }
@@ -192,16 +194,17 @@ function buildStartAdornment(options: StartAdornmentOptions) {
   const { icon, disabled, onDecrement, testId } = options;
   return (
     <InputAdornment position="start" sx={{ mr: 0.5 }}>
-      {icon !== null && (
-        icon ? (
-          <Box sx={{ mr: 0.5, display: "flex", alignItems: "center" }}>{icon}</Box>
+      {icon !== null &&
+        (icon ? (
+          <Box sx={{ mr: 0.5, display: "flex", alignItems: "center" }}>
+            {icon}
+          </Box>
         ) : (
           <DateRangeRoundedIcon
             data-testid="range-icon"
             sx={{ display: "none" }}
           />
-        )
-      )}
+        ))}
       <IconButton
         size="small"
         onClick={onDecrement}
@@ -334,20 +337,40 @@ const RangeUnifiedPicker = forwardRef<HTMLDivElement, RangeViewProps>(
 
     const handleDecrement = () => {
       if (activeBoundary === "from") {
-        const nextMin = computeStepValue(effectiveMin, "decrement", bounds, effectiveMax);
+        const nextMin = computeStepValue(
+          effectiveMin,
+          "decrement",
+          bounds,
+          effectiveMax,
+        );
         handleMinChange?.(nextMin);
       } else {
-        const nextMax = computeStepValue(effectiveMax, "decrement", bounds, effectiveMin);
+        const nextMax = computeStepValue(
+          effectiveMax,
+          "decrement",
+          bounds,
+          effectiveMin,
+        );
         handleMaxChange?.(nextMax);
       }
     };
 
     const handleIncrement = () => {
       if (activeBoundary === "from") {
-        const nextMin = computeStepValue(effectiveMin, "increment", bounds, effectiveMax);
+        const nextMin = computeStepValue(
+          effectiveMin,
+          "increment",
+          bounds,
+          effectiveMax,
+        );
         handleMinChange?.(nextMin);
       } else {
-        const nextMax = computeStepValue(effectiveMax, "increment", bounds, effectiveMin);
+        const nextMax = computeStepValue(
+          effectiveMax,
+          "increment",
+          bounds,
+          effectiveMin,
+        );
         handleMaxChange?.(nextMax);
       }
     };
@@ -404,7 +427,9 @@ const RangeUnifiedPicker = forwardRef<HTMLDivElement, RangeViewProps>(
           notched={isShrunk && hasLabel}
           startAdornment={startAdornment}
           endAdornment={endAdornment}
-          inputComponent={DualRangeInputs as unknown as React.ElementType<InputBaseComponentProps>}
+          inputComponent={
+            DualRangeInputs as unknown as React.ElementType<InputBaseComponentProps>
+          }
           inputProps={{
             fromValue: effectiveMin,
             toValue: effectiveMax,
@@ -435,7 +460,12 @@ RangeUnifiedPicker.displayName = "RangeUnifiedPicker";
 export const RangeNumberPicker = forwardRef<HTMLDivElement, NumberPickerProps>(
   function RangeNumberPicker(props, ref) {
     const { t } = useTranslation("common");
-    const { variant = "unified", label, placeholderMin, placeholderMax } = props;
+    const {
+      variant = "unified",
+      label,
+      placeholderMin,
+      placeholderMax,
+    } = props;
 
     const {
       effectiveMin,
@@ -445,7 +475,8 @@ export const RangeNumberPicker = forwardRef<HTMLDivElement, NumberPickerProps>(
       hasValue,
     } = resolveEffectiveRangeValues(props);
 
-    const activeTestId = props.testId ?? props["data-testid"] ?? "number-range-picker";
+    const activeTestId =
+      props.testId ?? props["data-testid"] ?? "number-range-picker";
     const displayLabel = label ?? t("filterBar.startYearRange", "Start Year");
     const fromPlaceholder = placeholderMin ?? t("filterBar.yearFrom", "From");
     const toPlaceholder = placeholderMax ?? t("filterBar.yearTo", "To");

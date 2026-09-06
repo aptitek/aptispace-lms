@@ -242,8 +242,12 @@ describe("NumberPicker Atom", () => {
         </I18nextProvider>,
       );
 
-      const fromInput = screen.getByTestId("range-aliases-from") as HTMLInputElement;
-      const toInput = screen.getByTestId("range-aliases-to") as HTMLInputElement;
+      const fromInput = screen.getByTestId(
+        "range-aliases-from",
+      ) as HTMLInputElement;
+      const toInput = screen.getByTestId(
+        "range-aliases-to",
+      ) as HTMLInputElement;
 
       expect(fromInput.value).toBe("2021");
       expect(toInput.value).toBe("2027");
@@ -305,8 +309,12 @@ describe("NumberPicker Atom", () => {
       expect(label).not.toBeNull();
       expect(label?.className).toContain("MuiInputLabel-shrink");
 
-      const fromInput = screen.getByTestId("empty-range-test-from") as HTMLInputElement;
-      const toInput = screen.getByTestId("empty-range-test-to") as HTMLInputElement;
+      const fromInput = screen.getByTestId(
+        "empty-range-test-from",
+      ) as HTMLInputElement;
+      const toInput = screen.getByTestId(
+        "empty-range-test-to",
+      ) as HTMLInputElement;
       expect(fromInput.placeholder).toBe("From");
       expect(toInput.placeholder).toBe("To");
     });

@@ -31,7 +31,18 @@ interface SplitFieldProps {
 }
 
 function SplitField(props: SplitFieldProps) {
-  const { label, value, onChange, size, disabled, min, max, step, showStepButtons, testId } = props;
+  const {
+    label,
+    value,
+    onChange,
+    size,
+    disabled,
+    min,
+    max,
+    step,
+    showStepButtons,
+    testId,
+  } = props;
   const handleChange = (rawInput: number | string) => {
     onChange?.(parseBoundaryValue(rawInput));
   };
