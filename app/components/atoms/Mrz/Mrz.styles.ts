@@ -87,7 +87,7 @@ export const StatusPill = styled("span", {
   right: 4,
   display: "inline-flex",
   alignItems: "center",
-  gap: "3px",
+  gap: "4px",
   fontSize: "8px",
   fontWeight: 800,
   padding: "2px 6px",

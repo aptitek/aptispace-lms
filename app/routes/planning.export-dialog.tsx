@@ -118,7 +118,7 @@ export function CalendarExportDialog({
                 fontSize: "0.65rem",
                 fontWeight: 800,
                 px: 1,
-                py: 0.2,
+                py: 0.25,
                 borderRadius: "9999px",
                 bgcolor: (theme) => alpha(theme.palette.success.main, 0.1),
                 color: "success.main",
@@ -203,7 +203,7 @@ export function CalendarExportDialog({
 
         <Box
           sx={{
-            p: 1.75,
+            p: 2,
             borderRadius: "16px",
             backgroundColor: (theme) => alpha(theme.palette.info.main, 0.06),
             border: (theme) =>

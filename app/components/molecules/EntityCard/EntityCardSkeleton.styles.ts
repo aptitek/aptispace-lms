@@ -131,7 +131,7 @@ export const SkeletonDetailsContainer = styled("div")({
   minHeight: "80px",
   minWidth: 0,
   flex: 1,
-  gap: "3px",
+  gap: "4px",
 });
 
 export const SkeletonNameBlock = styled("div")({

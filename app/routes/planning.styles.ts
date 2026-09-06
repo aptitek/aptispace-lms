@@ -256,7 +256,7 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
       "&[data-under-hour='true']": {
         paddingTop: "2px !important",
         paddingBottom: "2px !important",
-        paddingLeft: "14px !important",
+        paddingLeft: "16px !important",
       },
       "&[data-under-fifteen-minutes='true']": {
         paddingTop: "0 !important",
@@ -266,17 +266,17 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
     },
   "& .MuiEventCalendar-dayGridEvent.event-remote, & .MuiEventCalendar-dayGridEvent.event-in-person, & .MuiEventCalendar-dayGridEvent[data-palette='blue'], & .MuiEventCalendar-dayGridEvent[data-palette='green']":
     {
-      paddingRight: "22px !important",
+      paddingRight: "24px !important",
     },
   "& .MuiEventCalendar-agendaViewEventListItem .event-remote, & .MuiEventCalendar-agendaViewEventListItem .event-in-person, & .MuiEventCalendar-agendaViewEventListItem [data-palette='blue'], & .MuiEventCalendar-agendaViewEventListItem [data-palette='green']":
     {
-      paddingRight: "38px !important",
+      paddingRight: "40px !important",
     },
   "& .event-remote::after, & .event-in-person::after": {
     content: '""',
     position: "absolute",
-    top: "5px",
-    right: "5px",
+    top: "4px",
+    right: "4px",
     width: "18px",
     height: "18px",
     borderRadius: "50%",
@@ -309,7 +309,7 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
     {
       top: "50%",
       transform: "translateY(-50%)",
-      right: "3px",
+      right: "4px",
       width: "14px",
       height: "14px",
       backgroundSize: "9px 9px",

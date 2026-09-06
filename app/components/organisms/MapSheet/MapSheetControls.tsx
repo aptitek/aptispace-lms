@@ -264,7 +264,7 @@ export function ExtendedCompactButton({
     <MapControlsToolbar
       data-testid="extended-compact-toolbar"
       sx={{
-        top: 26,
+        top: 24,
         bottom: "auto",
         right: 8,
         backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.92),

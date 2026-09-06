@@ -151,7 +151,7 @@ function ClassDetailsHeader({ isRemote, onClose }: ClassDetailsHeaderProps) {
               cursor: "help",
               gap: 0.5,
               px: 1.25,
-              py: 0.35,
+              py: 0.5,
               borderRadius: "8px",
               fontSize: "0.75rem",
               fontWeight: 800,

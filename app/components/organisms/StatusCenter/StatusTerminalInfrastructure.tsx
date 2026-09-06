@@ -236,7 +236,7 @@ function InfrastructureTile({
       sx={{
         flex: 1,
         minWidth: { xs: "100%", sm: "240px" },
-        p: 1.75,
+        p: 2,
         borderRadius: (theme) => theme.shape.corners.largeIncreased,
         border: 1,
         borderColor: "divider",

@@ -89,7 +89,7 @@ export function StatusTerminalEventRow({
       <Box
         onClick={onToggleExpand}
         sx={{
-          p: 1.75,
+          p: 1.5,
           display: "flex",
           alignItems: "flex-start",
           gap: 1.5,

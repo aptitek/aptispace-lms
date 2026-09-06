@@ -52,7 +52,7 @@ export function InstructionsCard({
         sx={{
           fontSize: "1.2rem",
           color: "warning.main",
-          mt: 0.2,
+          mt: 0.25,
           flexShrink: 0,
         }}
       />

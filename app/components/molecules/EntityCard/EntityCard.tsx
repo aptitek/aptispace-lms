@@ -124,7 +124,7 @@ function CompactHeaderSlot({
               height: 20,
               fontSize: "0.625rem",
               fontWeight: 800,
-              "& .MuiChip-label": { px: 0.6 },
+              "& .MuiChip-label": { px: 0.5 },
             }}
             data-testid="compact-pending-chip"
           />
@@ -261,7 +261,7 @@ function CompactStudentDetailsSlot({
             backgroundColor: "background.paper",
             border: (theme: { palette: { divider: string } }) =>
               `1px solid ${theme.palette.divider}`,
-            "& .MuiChip-label": { px: 0.8 },
+            "& .MuiChip-label": { px: 0.75 },
             "&:hover": { borderColor: "primary.main" },
           }}
         />

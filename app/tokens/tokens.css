@@ -167,6 +167,64 @@
   --md-sys-shape-corner-extra-large-increased: 32px;
   --md-sys-shape-corner-extra-extra-large: 48px;
   --md-sys-shape-corner-full: 9999px;
+
+  /* Material Design 3 Spacing Scale (8dp grid baseline & half-steps) */
+  --md-sys-spacing-none: 0px;
+  --md-sys-spacing-hairline: 2px;
+  --md-sys-spacing-micro: 4px;
+  --md-sys-spacing-compact-half: 6px;
+  --md-sys-spacing-compact: 8px;
+  --md-sys-spacing-medium-half: 10px;
+  --md-sys-spacing-medium: 12px;
+  --md-sys-spacing-standard: 16px;
+  --md-sys-spacing-large-half: 20px;
+  --md-sys-spacing-large: 24px;
+  --md-sys-spacing-extra-large: 32px;
+  --md-sys-spacing-section-half: 40px;
+  --md-sys-spacing-extra-extra-large: 48px;
+  --md-sys-spacing-huge-half: 56px;
+  --md-sys-spacing-huge: 64px;
+  --md-sys-spacing-massive: 80px;
+  --md-sys-spacing-macro: 96px;
+  --md-sys-spacing-giant: 120px;
+  --md-sys-spacing-jumbo: 160px;
+
+  /* DesignForDucks Spacing Friendship Semantic Tokens */
+  --spacing-friendship-inseparable: 4px;
+  --spacing-friendship-best-friends: 8px;
+  --spacing-friendship-friends: 16px;
+  --spacing-friendship-grouping: 24px;
+  --spacing-friendship-casual-friends: 32px;
+  --spacing-friendship-sections: 48px;
+  --spacing-friendship-acquaintances: 64px;
+  --spacing-friendship-distant-acquaintances: 80px;
+  --spacing-friendship-strangers: 120px;
+
+  /* Line Thickness / Stroke / Border Width Scale */
+  --md-sys-stroke-none: 0px;
+  --md-sys-stroke-hairline: 0.5px;
+  --md-sys-stroke-thin: 1px;
+  --md-sys-stroke-medium: 2px;
+  --md-sys-stroke-thick: 3px;
+  --md-sys-stroke-heavy: 4px;
+  --md-sys-stroke-expressive: 6px;
+
+  /* Standard UI Dimensions */
+  --md-sys-dimension-touch-target: 48px;
+  --md-sys-dimension-touch-target-dense: 40px;
+  --md-sys-dimension-icon-small: 18px;
+  --md-sys-dimension-icon-inline: 20px;
+  --md-sys-dimension-icon-standard: 24px;
+  --md-sys-dimension-icon-large: 32px;
+  --md-sys-dimension-icon-extra-large: 40px;
+  --md-sys-dimension-icon-huge: 48px;
+  --md-sys-dimension-chip-height: 32px;
+  --md-sys-dimension-button-small: 32px;
+  --md-sys-dimension-button-medium: 40px;
+  --md-sys-dimension-button-large: 48px;
+  --md-sys-dimension-input-standard: 56px;
+  --md-sys-dimension-header-height: 64px;
+  --md-sys-dimension-navigation-bar-height: 80px;
 }
 
 .light,

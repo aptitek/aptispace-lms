@@ -95,7 +95,7 @@ export const StudentDetails = styled("div")({
   minHeight: "80px",
   minWidth: 0,
   flex: 1,
-  gap: "3px",
+  gap: "4px",
 });
 
 export const StudentNameBlock = styled("div")({
@@ -152,7 +152,7 @@ export const CardFooterRow = styled("div")(({ theme }) => ({
 export const ImpersonateIconButton = styled(IconButton)(({ theme }) => ({
   width: "24px",
   height: "24px",
-  padding: "3px",
+  padding: "4px",
   borderRadius: "8px",
   color: theme.palette.secondary.main,
   backgroundColor: alpha(theme.palette.secondary.main, 0.1),
@@ -195,7 +195,7 @@ export const deleteHoldButtonSx = {
   minHeight: "24px",
   maxHeight: "24px",
   p: 0,
-  padding: "3px",
+  padding: "4px",
   borderRadius: "8px",
   boxSizing: "border-box" as const,
   color: "error.main",

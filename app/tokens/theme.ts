@@ -35,6 +35,36 @@ import {
   M3_MOTION_EASINGS,
 } from "./motion";
 
+import {
+  M3_SPACINGS,
+  M3_SPACING_STRINGS,
+  M3_SPACING_FRIENDSHIPS,
+  M3_STROKES,
+  M3_STROKE_STRINGS,
+  M3_DIMENSIONS,
+  M3_SPACING_CSS_VARIABLES,
+  M3_STROKE_CSS_VARIABLES,
+  type M3SpacingToken,
+  type SpacingFriendship,
+  type M3StrokeToken,
+  type M3DimensionToken,
+} from "./spacing";
+
+export {
+  M3_SPACINGS,
+  M3_SPACING_STRINGS,
+  M3_SPACING_FRIENDSHIPS,
+  M3_STROKES,
+  M3_STROKE_STRINGS,
+  M3_DIMENSIONS,
+  M3_SPACING_CSS_VARIABLES,
+  M3_STROKE_CSS_VARIABLES,
+  type M3SpacingToken,
+  type SpacingFriendship,
+  type M3StrokeToken,
+  type M3DimensionToken,
+};
+
 export { M3_MOTION, M3_SPRINGS, M3_MOTION_DURATIONS, M3_MOTION_EASINGS };
 
 export {
@@ -95,9 +125,17 @@ declare module "@mui/material/styles" {
   }
   interface Theme {
     named: typeof NAMED_COLORS;
+    spacings: typeof M3_SPACINGS;
+    friendships: typeof M3_SPACING_FRIENDSHIPS;
+    strokes: typeof M3_STROKES;
+    dimensions: typeof M3_DIMENSIONS;
   }
   interface ThemeOptions {
     named?: typeof NAMED_COLORS;
+    spacings?: typeof M3_SPACINGS;
+    friendships?: typeof M3_SPACING_FRIENDSHIPS;
+    strokes?: typeof M3_STROKES;
+    dimensions?: typeof M3_DIMENSIONS;
   }
   interface Shape {
     borderRadius: number | string;
@@ -129,6 +167,10 @@ export type M3ShapeToken = keyof typeof M3_SHAPE_SCALE;
  */
 const sharedThemeBase = {
   named: NAMED_COLORS,
+  spacings: M3_SPACINGS,
+  friendships: M3_SPACING_FRIENDSHIPS,
+  strokes: M3_STROKES,
+  dimensions: M3_DIMENSIONS,
   typography: {
     fontFamily:
       '"Recursive", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',

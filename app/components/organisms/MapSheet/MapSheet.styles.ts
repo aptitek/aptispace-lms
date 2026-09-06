@@ -8,6 +8,13 @@ export {
   WayfindingChip,
   AddressTextWrapper,
 } from "./MapSheetChips.styles";
+export * from "./MapSheetViewport.styles";
+import {
+  SIZE_METRICS,
+  ROOM_CHIP_SIZE_METRICS,
+  getSheetDimensions,
+} from "./MapSheetMetrics";
+export { SIZE_METRICS };
 import type {
   MapSheetSize,
   MapSheetOrientation,
@@ -20,83 +27,8 @@ interface StyledContainerProps {
   $mode: MapSheetMode;
 }
 
-export const SIZE_METRICS = {
-  small: {
-    minHeight: 124,
-    maxHeight: 160,
-    maxWidth: 460,
-    fontSize: "0.72rem",
-    iconSize: "0.85rem",
-    padding: "8px 10px",
-    gap: 0.75,
-    chipScale: 0.82,
-    mapFlex: "0 0 38%",
-  },
-  medium: {
-    minHeight: 160,
-    maxHeight: 210,
-    maxWidth: 580,
-    fontSize: "0.78rem",
-    iconSize: "0.95rem",
-    padding: "10px 12px",
-    gap: 1,
-    chipScale: 0.9,
-    mapFlex: "0 0 40%",
-  },
-  large: {
-    minHeight: 195,
-    maxHeight: 250,
-    maxWidth: 680,
-    fontSize: "0.85rem",
-    iconSize: "1.1rem",
-    padding: "12px 14px",
-    gap: 1.25,
-    chipScale: 1,
-    mapFlex: "0 0 42%",
-  },
-};
-
-interface SheetDimensions {
-  maxWidth: number | string;
-  minHeight: number;
-  height: number | string;
-  maxHeight: number | string;
-}
-
-function getExtendedDimensions(isHorizontal: boolean): SheetDimensions {
-  return {
-    maxWidth: isHorizontal ? 920 : 560,
-    minHeight: isHorizontal ? 380 : 320,
-    height: isHorizontal ? 400 : "auto",
-    maxHeight: "none",
-  };
-}
-
-function getCompactDimensions(
-  isHorizontal: boolean,
-  metrics: { maxWidth: number; minHeight: number; maxHeight: number },
-): SheetDimensions {
-  return {
-    maxWidth: isHorizontal ? metrics.maxWidth : 440,
-    minHeight: metrics.minHeight,
-    height: "auto",
-    maxHeight: "none",
-  };
-}
-
-function getSheetDimensions(
-  isExtended: boolean,
-  isHorizontal: boolean,
-  metrics: { maxWidth: number; minHeight: number; maxHeight: number },
-): SheetDimensions {
-  if (isExtended) {
-    return getExtendedDimensions(isHorizontal);
-  }
-  return getCompactDimensions(isHorizontal, metrics);
-}
-
 /**
- * Root card surface with tactile paper elevation, delicate borders, and solarized depth
+ * Root card surface with tactile paper elevation, delicate borders, and depth
  */
 export const SheetCard = styled("article", {
   shouldForwardProp: (prop) =>
@@ -145,9 +77,6 @@ export const SheetCard = styled("article", {
     },
   };
 });
-
-// Re-export viewport styles
-export * from "./MapSheetViewport.styles";
 
 /**
  * Right / bottom side container presenting the wayfinding itinerary
@@ -208,47 +137,39 @@ export const ItineraryStep = styled("div")({
  */
 export const TransitTrackWrapper = styled("div")({
   position: "absolute",
-  top: 14,
+  top: 16,
   left: 0,
-  bottom: 14,
+  bottom: 16,
   width: 28,
   overflow: "hidden",
   pointerEvents: "none",
   zIndex: 1,
 });
 
+const SHARED_PROGRESS_STYLES = {
+  "& .linearDeterminate": { overflow: "visible !important" },
+  "& .text-primary": { color: "inherit !important" },
+  "& .bg-secondary-container": { display: "none !important" },
+  "& span.rounded-full": { display: "none !important" },
+  "& .wavePhase": { animationDirection: "reverse !important" },
+  "@media (prefers-reduced-motion: reduce)": {
+    "& .wavePhase": { animation: "none !important" },
+  },
+} as const;
+
 /**
  * MD3 Expressive wavy progress indicator rotated 90 degrees to form the vertical itinerary transit line
  */
 export const TransitTrackProgress = styled(Progress)(({ theme }) => ({
   position: "absolute",
-  left: 14,
+  left: 16,
   top: 0,
   transform: "rotate(90deg) translateY(-5px)",
   transformOrigin: "0 0",
   width: "1000px !important",
   color: theme.palette.primary.main,
   filter: `drop-shadow(0 0 4px ${alpha(theme.palette.primary.main, 0.45)})`,
-  "& .linearDeterminate": {
-    overflow: "visible !important",
-  },
-  "& .text-primary": {
-    color: "inherit !important",
-  },
-  "& .bg-secondary-container": {
-    display: "none !important",
-  },
-  "& span.rounded-full": {
-    display: "none !important",
-  },
-  "& .wavePhase": {
-    animationDirection: "reverse !important",
-  },
-  "@media (prefers-reduced-motion: reduce)": {
-    "& .wavePhase": {
-      animation: "none !important",
-    },
-  },
+  ...SHARED_PROGRESS_STYLES,
   ...theme.applyStyles("dark", {
     color: theme.palette.primary.light || theme.palette.primary.main,
     filter: `drop-shadow(0 0 6px ${alpha(theme.palette.primary.main, 0.65)})`,
@@ -283,26 +204,7 @@ export const HorizontalTransitTrackProgress = styled(Progress)(({ theme }) => ({
   color: theme.palette.primary.main,
   opacity: 0.85,
   filter: `drop-shadow(0 0 4px ${alpha(theme.palette.primary.main, 0.45)})`,
-  "& .linearDeterminate": {
-    overflow: "visible !important",
-  },
-  "& .text-primary": {
-    color: "inherit !important",
-  },
-  "& .bg-secondary-container": {
-    display: "none !important",
-  },
-  "& span.rounded-full": {
-    display: "none !important",
-  },
-  "& .wavePhase": {
-    animationDirection: "reverse !important",
-  },
-  "@media (prefers-reduced-motion: reduce)": {
-    "& .wavePhase": {
-      animation: "none !important",
-    },
-  },
+  ...SHARED_PROGRESS_STYLES,
   ...theme.applyStyles("dark", {
     color: theme.palette.primary.light || theme.palette.primary.main,
     filter: `drop-shadow(0 0 6px ${alpha(theme.palette.primary.main, 0.65)})`,
@@ -353,30 +255,6 @@ export const StepContent = styled("div")({
   minWidth: 0,
   flex: 1,
 });
-
-const ROOM_CHIP_SIZE_METRICS: Record<
-  MapSheetSize,
-  { fontSize: string; padding: string; borderRadius: string; gap: number }
-> = {
-  small: {
-    fontSize: "1.1rem",
-    padding: "5px 12px",
-    borderRadius: "12px",
-    gap: 6,
-  },
-  medium: {
-    fontSize: "1.35rem",
-    padding: "7px 18px",
-    borderRadius: "12px",
-    gap: 8,
-  },
-  large: {
-    fontSize: "1.65rem",
-    padding: "9px 22px",
-    borderRadius: "16px",
-    gap: 8,
-  },
-};
 
 /**
  * Expressive Room & Floor Chip: (3 | 02)
@@ -431,7 +309,7 @@ export const RoomChipContainer = styled("div", {
 export const FloorPill = styled("span")({
   display: "inline-flex",
   alignItems: "center",
-  gap: 5,
+  gap: 4,
   color: "inherit",
   fontWeight: 900,
   fontSize: "inherit",
@@ -448,7 +326,7 @@ export const ChipDivider = styled("span")(({ theme }) => ({
   color: alpha(theme.palette.secondary.main, 0.45),
   fontWeight: 400,
   fontSize: "inherit",
-  margin: "0 3px",
+  margin: "0 4px",
   userSelect: "none",
   opacity: 0.7,
 }));
@@ -459,7 +337,7 @@ export const ChipDivider = styled("span")(({ theme }) => ({
 export const RoomPill = styled("span")({
   display: "inline-flex",
   alignItems: "center",
-  gap: 5,
+  gap: 4,
   color: "inherit",
   fontWeight: 900,
   fontSize: "inherit",
@@ -502,7 +380,7 @@ export const BottomActionsBar = styled("footer")(({ theme }) => ({
   alignItems: "center",
   justifyContent: "space-between",
   gap: 12,
-  padding: "8px 14px",
+  padding: "8px 16px",
   borderTop: `1px solid ${alpha(theme.palette.divider, 0.4)}`,
   backgroundColor: alpha(theme.palette.background.paper, 0.75),
   backdropFilter: "blur(8px)",
@@ -519,8 +397,6 @@ export const BottomActionsBar = styled("footer")(({ theme }) => ({
 
 /**
  * Material Design 3 (MD3) Circular Floating Action Button for Navigation / Directions
- * Features circular container shape (borderRadius: 50%), elevated floating shadow,
- * smooth cubic-bezier transitions, and high-contrast styling.
  */
 export const NavigationM3Fab = styled(Fab, {
   shouldForwardProp: (prop) => prop !== "$fabSize",
@@ -534,7 +410,7 @@ export const NavigationM3Fab = styled(Fab, {
 
   return {
     position: "absolute",
-    right: 14,
+    right: 16,
     top: topOffsetPx,
     width: sizePx,
     height: sizePx,

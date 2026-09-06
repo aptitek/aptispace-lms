@@ -224,7 +224,7 @@ export function MissionCenterErrorInspector({
                 copiedStack ? <CheckRoundedIcon /> : <ContentCopyRoundedIcon />
               }
               onClick={handleCopyStack}
-              sx={{ fontSize: "0.7rem", py: 0.2 }}
+              sx={{ fontSize: "0.7rem", py: 0.25 }}
             >
               {copiedStack
                 ? t("common:copied", "Copied!")

@@ -19,9 +19,9 @@ const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const SKELETON_EVENTS = [
   { id: "skel-event-1", col: 1, top: 40, height: 110, color: "indigo" },
   { id: "skel-event-2", col: 2, top: 120, height: 140, color: "teal" },
-  { id: "skel-event-3", col: 3, top: 70, height: 95, color: "amber" },
+  { id: "skel-event-3", col: 3, top: 80, height: 95, color: "amber" },
   { id: "skel-event-4", col: 4, top: 160, height: 130, color: "red" },
-  { id: "skel-event-5", col: 5, top: 60, height: 120, color: "indigo" },
+  { id: "skel-event-5", col: 5, top: 64, height: 120, color: "indigo" },
 ];
 
 function getPastelColor(colorName: string, theme: Theme): string {

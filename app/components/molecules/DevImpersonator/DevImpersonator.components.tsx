@@ -111,7 +111,7 @@ export function DevAccountItem({
                 height: 18,
                 fontSize: "0.625rem",
                 fontWeight: 800,
-                "& .MuiChip-label": { px: 0.6 },
+                "& .MuiChip-label": { px: 0.5 },
               }}
             />
 

@@ -97,7 +97,7 @@ export function CohortDateModeToggle({
           fontSize: "0.8rem",
           textTransform: "none",
           gap: 0.75,
-          py: 0.6,
+          py: 0.5,
           color: "text.secondary",
           "&.Mui-selected": {
             bgcolor: (theme) =>
