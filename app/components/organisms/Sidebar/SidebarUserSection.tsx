@@ -7,11 +7,11 @@ import Tooltip from "~/components/atoms/Tooltip/Tooltip";
 import type { AuthUser } from "~/utils/auth";
 import { isUnnamedUser } from "~/components/atoms/Avatar/Avatar";
 import { M3_SPRINGS, M3_MOTION_DURATIONS } from "~/tokens/motion";
+import RoleChip from "~/components/molecules/RoleChip/RoleChip";
 import {
   UserCardSlot,
   UserDetailsText,
   UserNameHeading,
-  UserRoleCaption,
   LogoutActionButton,
   AdminReturnActionButton,
 } from "./Sidebar.styles";
@@ -136,6 +136,7 @@ function SidebarUserDetails({
 
   return (
     <UserDetailsText
+      $isExtended={isExtended}
       initial={false}
       animate={{
         opacity: isExtended ? 1 : 0,
@@ -144,7 +145,16 @@ function SidebarUserDetails({
       transition={transition}
     >
       <UserNameHeading title={name}>{name || "User"}</UserNameHeading>
-      <UserRoleCaption>{role || "member"}</UserRoleCaption>
+      <RoleChip
+        userRole={role}
+        size="small"
+        testId="sidebar-user-role-badge"
+        sx={{
+          mt: 0.5,
+          fontWeight: 700,
+          maxWidth: "100%",
+        }}
+      />
     </UserDetailsText>
   );
 }
@@ -181,7 +191,7 @@ export function SidebarUserSection({
   const tooltipPlacement = isExtended ? "top" : "right";
 
   return (
-    <UserCardSlot data-testid="sidebar-user-card">
+    <UserCardSlot $isExtended={isExtended} data-testid="sidebar-user-card">
       <Tooltip
         title={user.name || t("loginCard.profileAria", "Profile")}
         placement={tooltipPlacement}

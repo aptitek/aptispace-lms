@@ -115,6 +115,28 @@ describe("Sidebar Component", () => {
     expect(onLogout).toHaveBeenCalled();
   });
 
+  it("extends immediately on click without waiting for hover delay and collapses on click outside", () => {
+    vi.useFakeTimers();
+    renderSidebar({
+      user: testStudentUser,
+      hoverDelay: 2000,
+      "data-testid": "app-sidebar",
+    });
+
+    const sidebar = screen.getByTestId("app-sidebar");
+
+    // Initially collapsed
+    expect(screen.queryByTestId("sidebar-logout-button")).toBeNull();
+
+    // Clicking rail immediately extends it!
+    fireEvent.click(sidebar);
+    expect(screen.getByTestId("sidebar-logout-button")).toBeDefined();
+
+    // Clicking outside collapses it back
+    fireEvent.mouseDown(document.body);
+    expect(screen.queryByTestId("sidebar-logout-button")).toBeNull();
+  });
+
   it("renders admin tab when user has admin role", () => {
     const adminUser: AuthUser = {
       id: "admin-1",
@@ -160,5 +182,44 @@ describe("Sidebar Component", () => {
     fireEvent.click(avatarTrigger);
 
     expect(screen.getByTestId("sidebar-profile-card-modal")).toBeDefined();
+  });
+
+  it("renders role badge for student user when extended", () => {
+    renderSidebar({
+      user: testStudentUser,
+      hoverDelay: 0,
+      "data-testid": "app-sidebar",
+    });
+
+    const sidebar = screen.getByTestId("app-sidebar");
+    fireEvent.mouseEnter(sidebar);
+
+    const roleBadge = screen.getByTestId("sidebar-user-role-badge");
+    expect(roleBadge).toBeDefined();
+    expect(roleBadge.textContent).toContain("STUDENT");
+    expect(screen.getByTestId("role-icon-student")).toBeDefined();
+  });
+
+  it("renders role badge for admin user when extended", () => {
+    const adminUser: AuthUser = {
+      id: "admin-1",
+      name: "Trillian Astra",
+      email: "admin@galaxy.org",
+      role: "admin",
+    };
+
+    renderSidebar({
+      user: adminUser,
+      hoverDelay: 0,
+      "data-testid": "app-sidebar",
+    });
+
+    const sidebar = screen.getByTestId("app-sidebar");
+    fireEvent.mouseEnter(sidebar);
+
+    const roleBadge = screen.getByTestId("sidebar-user-role-badge");
+    expect(roleBadge).toBeDefined();
+    expect(roleBadge.textContent).toContain("ADMIN");
+    expect(screen.getByTestId("role-icon-admin")).toBeDefined();
   });
 });

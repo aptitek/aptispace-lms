@@ -269,6 +269,7 @@ export default function Sidebar({
   const layoutIdPrefix = useId();
 
   const [isHovered, setIsHovered] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
@@ -281,6 +282,30 @@ export default function Sidebar({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!isClicked) return;
+
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (railRef.current && !railRef.current.contains(event.target as Node)) {
+        setIsClicked(false);
+      }
+    };
+
+    const handleDocumentKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsClicked(false);
+        setIsHovered(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleDocumentClick);
+    document.addEventListener("keydown", handleDocumentKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleDocumentClick);
+      document.removeEventListener("keydown", handleDocumentKeyDown);
+    };
+  }, [isClicked]);
 
   const handleMouseEnter = () => {
     if (hoverTimerRef.current) {
@@ -303,7 +328,15 @@ export default function Sidebar({
     setIsHovered(false);
   };
 
-  const isExtended = isHovered || isFocused;
+  const handleClick = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    setIsClicked(true);
+  };
+
+  const isExtended = isHovered || isFocused || isClicked;
   const visibleTabs = showTabs ? resolveVisibleTabs(tabs, user) : [];
   const activeTabId = resolveActiveTabId(location.pathname, visibleTabs);
 
@@ -343,6 +376,7 @@ export default function Sidebar({
         transition={SIDEBAR_SPRING}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
         onFocus={() => setIsFocused(true)}
         onBlur={(e) => {
           if (!railRef.current?.contains(e.relatedTarget as Node)) {

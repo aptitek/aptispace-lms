@@ -220,24 +220,20 @@ export const SidebarBottomSection = styled(Box)(({ theme }) => ({
   width: "100%",
 }));
 
-export const UserCardSlot = styled(Box)(({ theme }) => ({
+export const UserCardSlot = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "$isExtended",
+})<{ $isExtended?: boolean }>(({ theme, $isExtended }) => ({
   display: "flex",
   alignItems: "center",
-  justifyContent: "space-between",
+  justifyContent: $isExtended ? "space-between" : "center",
   width: "100%",
-  padding: theme.spacing(0.75, 1),
-  borderRadius: M3_SHAPE_CORNER_STRINGS.large,
-  backgroundColor:
-    theme.palette.surfaceContainerLow || theme.palette.background.paper,
+  padding: theme.spacing(0.5, 0.25),
   boxSizing: "border-box",
-  transition: "background-color 150ms ease",
-  "&:hover": {
-    backgroundColor:
-      theme.palette.surfaceContainer || theme.palette.background.paper,
-  },
 }));
 
-export const UserDetailsText = styled(motion.div)(({ theme }) => ({
+export const UserDetailsText = styled(motion.div, {
+  shouldForwardProp: (prop) => prop !== "$isExtended",
+})<{ $isExtended?: boolean }>(({ theme, $isExtended }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "flex-start",
@@ -245,6 +241,7 @@ export const UserDetailsText = styled(motion.div)(({ theme }) => ({
   whiteSpace: "nowrap",
   marginLeft: theme.spacing(1.25),
   flex: 1,
+  pointerEvents: $isExtended ? "auto" : "none",
 }));
 
 export const UserNameHeading = styled("span")(({ theme }) => ({
@@ -254,14 +251,6 @@ export const UserNameHeading = styled("span")(({ theme }) => ({
   overflow: "hidden",
   textOverflow: "ellipsis",
   maxWidth: "110px",
-}));
-
-export const UserRoleCaption = styled("span")(({ theme }) => ({
-  fontSize: "0.6875rem",
-  color: theme.palette.text.secondary,
-  textTransform: "uppercase",
-  letterSpacing: "0.04em",
-  fontWeight: 600,
 }));
 
 export const LogoutActionButton = styled(IconButton)(({ theme }) => ({
