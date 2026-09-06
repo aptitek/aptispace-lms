@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
 import Filter from "../app/components/molecules/Filter";
 import RoleChip from "../app/components/molecules/RoleChip/RoleChip";
-import InstitutionChip from "../app/components/molecules/InstitutionChip/InstitutionChip";
+import Chip from "../app/components/atoms/Chip/Chip";
 
 const meta = {
   title: "Molecules/Filter",
@@ -131,23 +131,20 @@ function CompoundFilterDemo() {
           onChange={setInstType}
           minWidth={180}
           renderValue={(selectedType) => (
-            <InstitutionChip
-              institutionType={String(selectedType)}
-              size="small"
-            />
+            <Chip institutionType={String(selectedType)} size="small" />
           )}
           options={[
             {
               value: "all",
-              chip: <InstitutionChip institutionType="all" size="small" />,
+              chip: <Chip institutionType="all" size="small" />,
             },
             {
               value: "academic",
-              chip: <InstitutionChip institutionType="school" size="small" />,
+              chip: <Chip institutionType="school" size="small" />,
             },
             {
               value: "company",
-              chip: <InstitutionChip institutionType="company" size="small" />,
+              chip: <Chip institutionType="company" size="small" />,
             },
           ]}
         />

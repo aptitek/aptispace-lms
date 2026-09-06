@@ -12,7 +12,7 @@ export interface ProfileCardProps extends Omit<BoxProps, "onChange"> {
    */
   institutionName?: string;
   /**
-   * Structured cohort or cohort config to display with CohortChip
+   * Structured cohort or cohort config to display with SegmentedChip
    */
   cohort?: CohortConfig;
   /**

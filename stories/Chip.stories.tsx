@@ -8,7 +8,6 @@ import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import CodeRoundedIcon from "@mui/icons-material/CodeRounded";
 import VerifiedRoundedIcon from "@mui/icons-material/VerifiedRounded";
 import Chip from "../app/components/atoms/Chip/Chip";
-import RoleChip from "../app/components/molecules/RoleChip/RoleChip";
 
 const meta = {
   title: "Atoms/Chip",
@@ -284,7 +283,7 @@ export const RoleChips: Story = {
   render: () => (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Typography variant="subtitle2" sx={{ color: "text.secondary" }}>
-        RoleChip Molecule (Shaped + Colored + Icon)
+        Role Presets (Shaped + Colored + Icon)
       </Typography>
       <Box
         sx={{
@@ -294,11 +293,53 @@ export const RoleChips: Story = {
           alignItems: "center",
         }}
       >
-        <RoleChip userRole="student" size="small" />
-        <RoleChip userRole="instructor" size="small" />
-        <RoleChip userRole="admin" size="small" />
-        <RoleChip userRole="all" size="small" />
-        <RoleChip userRole="admin" variant="outlined" size="small" />
+        <Chip userRole="student" size="small" />
+        <Chip userRole="instructor" size="small" />
+        <Chip userRole="admin" size="small" />
+        <Chip userRole="all" size="small" />
+        <Chip userRole="admin" variant="outlined" size="small" />
+      </Box>
+    </Box>
+  ),
+};
+
+export const InstitutionChips: Story = {
+  render: () => (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box>
+        <Typography variant="subtitle2" sx={{ mb: 1, color: "text.secondary" }}>
+          Institution Category Presets (Filled)
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1.5,
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
+        >
+          <Chip institutionType="school" variant="filled" />
+          <Chip institutionType="company" variant="filled" />
+          <Chip institutionType="all" variant="filled" />
+        </Box>
+      </Box>
+
+      <Box>
+        <Typography variant="subtitle2" sx={{ mb: 1, color: "text.secondary" }}>
+          Outlined & Small Variants
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1.5,
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
+        >
+          <Chip institutionType="school" variant="outlined" size="small" />
+          <Chip institutionType="company" variant="outlined" size="small" />
+          <Chip institutionType="all" variant="outlined" size="small" />
+        </Box>
       </Box>
     </Box>
   ),

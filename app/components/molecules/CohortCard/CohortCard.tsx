@@ -15,7 +15,7 @@ import {
 
 import Chip from "@mui/material/Chip";
 
-import CohortChip from "~/components/molecules/CohortChip/CohortChip";
+import SegmentedChip from "~/components/molecules/SegmentedChip/SegmentedChip";
 
 export interface CohortCardProps {
   cohort: CohortConfig;
@@ -106,7 +106,7 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
               mb: 0.5,
             }}
           >
-            <CohortChip
+            <SegmentedChip
               cohort={cohort}
               size="medium"
               data-testid={`cohort-card-chip-${cohort.id}`}

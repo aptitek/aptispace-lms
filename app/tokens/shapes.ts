@@ -458,10 +458,10 @@ export function getInstitutionChipShape(type?: string | null): ChipShape {
 }
 
 /**
- * Resolves the default chip shape for cohorts:
- * MD3 compound cohort chips default to "pill"
+ * Resolves the default chip shape for segmented chips (including cohorts):
+ * MD3 compound / segmented chips default to "pill"
  */
-export function getCohortChipShape(_cohort?: unknown): ChipShape {
+export function getSegmentedChipShape(_data?: unknown): ChipShape {
   return "pill";
 }
 

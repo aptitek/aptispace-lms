@@ -117,7 +117,7 @@ describe("UserCard Molecule", () => {
     expect(admElement.props.user?.role).toBe("admin");
   });
 
-  it("passes structured cohort data to CohortChip for students", () => {
+  it("passes structured cohort data to SegmentedChip for students", () => {
     const studentWithStructuredCohort: UserCardData = {
       ...mockStudent,
       cohorts: [

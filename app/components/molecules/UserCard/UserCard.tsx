@@ -6,7 +6,7 @@ import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import Avatar from "../../atoms/Avatar/Avatar";
 import Chip from "../../atoms/Chip/Chip";
-import CohortChip from "../CohortChip/CohortChip";
+import SegmentedChip from "../SegmentedChip/SegmentedChip";
 import Badge from "../../atoms/Badge/Badge";
 import Tooltip from "../../atoms/Tooltip/Tooltip";
 import { HoldButton } from "../../atoms/HoldButton";
@@ -80,7 +80,7 @@ function CompactHeaderSlot({
       <HeaderBadges>
         {role === "student" ? (
           <>
-            <CohortChip
+            <SegmentedChip
               cohort={cohortConfig}
               size="small"
               data-testid="compact-cohort-chip"

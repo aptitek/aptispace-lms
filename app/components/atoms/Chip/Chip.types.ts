@@ -1,8 +1,10 @@
 import type { ElementType, ReactNode } from "react";
 import type { ChipProps as MuiChipProps } from "@mui/material/Chip";
 import type { ChipShape } from "~/tokens/shapes";
+import type { InstitutionType } from "~/tokens/institutions";
+import type { RoleType } from "~/tokens/roles";
 
-export type { ChipShape };
+export type { ChipShape, InstitutionType, RoleType };
 
 export interface BaseChipProps {
   /**
@@ -11,6 +13,30 @@ export interface BaseChipProps {
    * 'ghost-ish', 'diamond', 'arch', 'slanted', etc.) or custom radius string/number.
    */
   shape?: ChipShape;
+
+  /**
+   * Institution category type preset ("school" | "company" | "all" | string).
+   * Automatically resolves institution icon, M3 shape (clamshell, semicircle),
+   * theme color (cyan/yellow), and internationalized label.
+   */
+  institutionType?: InstitutionType | string | null;
+
+  /**
+   * Alias for institutionType.
+   */
+  institution?: InstitutionType | string | null;
+
+  /**
+   * User role preset ("student" | "instructor" | "admin" | "all" | string).
+   * Automatically resolves role icon, M3 shape (pill, ghost-ish, 9-sided-cookie),
+   * theme color (success/info/secondary), and internationalized label.
+   */
+  userRole?: RoleType | "all" | string | null;
+
+  /**
+   * Whether to display the preset's associated icon (defaults to true).
+   */
+  showIcon?: boolean;
 
   /**
    * Optional image source URL or custom image ReactNode.

@@ -11,7 +11,7 @@ import CohortCard, {
   CohortCardSkeleton,
 } from "~/components/molecules/CohortCard/CohortCard";
 import Filter from "~/components/molecules/Filter/Filter";
-import InstitutionChip from "~/components/molecules/InstitutionChip/InstitutionChip";
+import Chip from "~/components/atoms/Chip/Chip";
 import InstitutionInspector from "~/components/organisms/InstitutionInspector/InstitutionInspector";
 import CohortInspector from "~/components/organisms/CohortInspector/CohortInspector";
 import {
@@ -307,27 +307,20 @@ export function AdminCohortsTabPanel({
               minWidth={180}
               testId="institution-type-filter"
               renderValue={(selectedType) => (
-                <InstitutionChip
-                  institutionType={String(selectedType)}
-                  size="small"
-                />
+                <Chip institutionType={String(selectedType)} size="small" />
               )}
               options={[
                 {
                   value: "all",
-                  chip: <InstitutionChip institutionType="all" size="small" />,
+                  chip: <Chip institutionType="all" size="small" />,
                 },
                 {
                   value: "academic",
-                  chip: (
-                    <InstitutionChip institutionType="school" size="small" />
-                  ),
+                  chip: <Chip institutionType="school" size="small" />,
                 },
                 {
                   value: "company",
-                  chip: (
-                    <InstitutionChip institutionType="company" size="small" />
-                  ),
+                  chip: <Chip institutionType="company" size="small" />,
                 },
               ]}
             />

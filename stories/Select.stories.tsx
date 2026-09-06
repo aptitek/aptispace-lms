@@ -5,7 +5,7 @@ import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import Select from "~/components/atoms/Select/Select";
 import RoleChip from "~/components/molecules/RoleChip/RoleChip";
-import InstitutionChip from "~/components/molecules/InstitutionChip/InstitutionChip";
+import Chip from "~/components/atoms/Chip/Chip";
 
 const meta = {
   title: "Atoms/Select",
@@ -97,11 +97,11 @@ function FilledVariantDemo() {
         options={[
           {
             value: "school",
-            chip: <InstitutionChip institutionType="school" size="small" />,
+            chip: <Chip institutionType="school" size="small" />,
           },
           {
             value: "company",
-            chip: <InstitutionChip institutionType="company" size="small" />,
+            chip: <Chip institutionType="company" size="small" />,
           },
         ]}
       />

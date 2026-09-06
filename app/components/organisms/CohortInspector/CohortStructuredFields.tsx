@@ -15,7 +15,7 @@ import {
   COMMON_SPECIALTY_TAGS,
   getSpecialtySlug,
 } from "~/utils/cohortFormat";
-import CohortChip from "../../molecules/CohortChip/CohortChip";
+import SegmentedChip from "../../molecules/SegmentedChip/SegmentedChip";
 
 export interface CohortStructuredFieldsProps {
   diploma: string;
@@ -92,7 +92,7 @@ export function CohortStructuredFields({
       }}
       data-testid="cohort-structured-fields"
     >
-      {/* Live CohortChip Badge Preview */}
+      {/* Live SegmentedChip Badge Preview */}
       <Box
         sx={{
           display: "flex",
@@ -121,7 +121,7 @@ export function CohortStructuredFields({
         >
           {t("cohortNaming.preview", "Cohort Badge Preview")}
         </Typography>
-        <CohortChip
+        <SegmentedChip
           cohort={{ diploma, year, tags }}
           size="large"
           data-testid="cohort-inspector-preview-chip"

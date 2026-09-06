@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import Badge from "~/components/atoms/Badge/Badge";
 import InstitutionLogo from "../InstitutionLogo/InstitutionLogo";
-import InstitutionChip from "../InstitutionChip/InstitutionChip";
+import Chip from "~/components/atoms/Chip/Chip";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import Box from "@mui/material/Box";
 import type { SchoolConfig } from "~/types/institution";
@@ -78,7 +78,7 @@ export const SchoolCard = forwardRef<HTMLDivElement, SchoolCardProps>(
             />
           </LogoContainer>
           <SchoolName>{school.name}</SchoolName>
-          <InstitutionChip
+          <Chip
             institutionType={school.type || "academic"}
             size="small"
             variant="outlined"

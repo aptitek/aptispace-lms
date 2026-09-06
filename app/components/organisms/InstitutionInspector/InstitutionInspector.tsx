@@ -9,7 +9,7 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import EditableAvatar from "~/components/molecules/EditableAvatar/EditableAvatar";
-import InstitutionChip from "~/components/molecules/InstitutionChip/InstitutionChip";
+import Chip from "~/components/atoms/Chip/Chip";
 import {
   formatUsernameSamplePreview,
   DEFAULT_USERNAME_PATTERN,
@@ -296,19 +296,16 @@ export default function InstitutionInspector({
         slotProps={{
           select: {
             renderValue: (selectedVal) => (
-              <InstitutionChip
-                institutionType={String(selectedVal)}
-                size="small"
-              />
+              <Chip institutionType={String(selectedVal)} size="small" />
             ),
           },
         }}
       >
         <MenuItem value="academic" sx={{ py: 0.75 }}>
-          <InstitutionChip institutionType="school" size="small" />
+          <Chip institutionType="school" size="small" />
         </MenuItem>
         <MenuItem value="company" sx={{ py: 0.75 }}>
-          <InstitutionChip institutionType="company" size="small" />
+          <Chip institutionType="company" size="small" />
         </MenuItem>
       </TextField>
 

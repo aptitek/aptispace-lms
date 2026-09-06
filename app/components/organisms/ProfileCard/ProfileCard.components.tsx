@@ -12,7 +12,7 @@ import Guilloche, {
 import Electronics from "../../atoms/Electronics/Electronics";
 import type { Td1MrzData } from "~/utils/icao9303";
 
-import CohortChip from "../../molecules/CohortChip/CohortChip";
+import SegmentedChip from "../../molecules/SegmentedChip/SegmentedChip";
 import type { CohortConfig } from "~/types/institution";
 
 export interface ProfileHeaderChipsProps {
@@ -54,7 +54,7 @@ export function ProfileHeaderChips({
   if (activeCohort) {
     return (
       <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-        <CohortChip
+        <SegmentedChip
           cohort={activeCohort}
           size={cohortChipSize}
           data-testid="profile-cohort-chip"

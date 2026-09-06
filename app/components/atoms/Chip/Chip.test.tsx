@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import React from "react";
 import Chip from "./Chip";
 import { getResolvedChipShape } from "./Chip.styles";
 import type { ChipShape } from "./Chip.types";
@@ -33,5 +34,50 @@ describe("Generic Chip Atom Component", () => {
   it("returns null when chip shape is undefined or null", () => {
     expect(getResolvedChipShape(undefined)).toBeNull();
     expect(getResolvedChipShape(null as unknown as ChipShape)).toBeNull();
+  });
+
+  it("creates React element with institutionType='school'", () => {
+    const element = React.createElement(Chip, {
+      institutionType: "school",
+      size: "small",
+    });
+    expect(element).toBeDefined();
+    expect(element.props.institutionType).toBe("school");
+  });
+
+  it("creates React element with institutionType='company'", () => {
+    const element = React.createElement(Chip, {
+      institutionType: "company",
+      variant: "outlined",
+    });
+    expect(element).toBeDefined();
+    expect(element.props.institutionType).toBe("company");
+  });
+
+  it("creates React element with institutionType='all'", () => {
+    const element = React.createElement(Chip, {
+      institutionType: "all",
+      testId: "filter-all-inst",
+    });
+    expect(element).toBeDefined();
+    expect(element.props.institutionType).toBe("all");
+  });
+
+  it("creates React element with userRole='student'", () => {
+    const element = React.createElement(Chip, {
+      userRole: "student",
+      size: "small",
+    });
+    expect(element).toBeDefined();
+    expect(element.props.userRole).toBe("student");
+  });
+
+  it("creates React element with userRole='admin'", () => {
+    const element = React.createElement(Chip, {
+      userRole: "admin",
+      label: "ADMINISTRATOR",
+    });
+    expect(element).toBeDefined();
+    expect(element.props.userRole).toBe("admin");
   });
 });
