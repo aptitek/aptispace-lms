@@ -152,8 +152,14 @@ function computePresetLabels(
   institutionType?: string | null,
   userRole?: string | null,
 ): PresetLabels {
-  const defaultAllInstLabel = translate("common:institutions.all", "All Institutions");
-  const defaultAllRoleLabel = translate("common:filterBar.allRoles", "All Roles");
+  const defaultAllInstLabel = translate(
+    "common:institutions.all",
+    "All Institutions",
+  );
+  const defaultAllRoleLabel = translate(
+    "common:filterBar.allRoles",
+    "All Roles",
+  );
   const defaultInstLabel =
     institutionType && institutionType !== "all"
       ? translate(
@@ -292,7 +298,11 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(
     const translate = (key: string, defaultValue: string) =>
       String(t(key, defaultValue));
     const effectiveInstitutionType = institutionType ?? institution;
-    const labels = computePresetLabels(translate, effectiveInstitutionType, userRole);
+    const labels = computePresetLabels(
+      translate,
+      effectiveInstitutionType,
+      userRole,
+    );
 
     const presets = resolvePresets(
       {
