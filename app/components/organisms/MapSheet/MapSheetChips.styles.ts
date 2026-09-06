@@ -1,4 +1,5 @@
 import { styled, alpha } from "@mui/material/styles";
+import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 
 /**
  * Door code display pill with one-click copy button
@@ -13,7 +14,8 @@ export const DoorCodePill = styled("div")(({ theme }) => ({
   borderRadius: "9999px",
   backgroundColor: alpha(theme.palette.background.paper, 0.88),
   border: `1px dashed ${alpha(theme.palette.error.main, 0.42)}`,
-  fontFamily: "SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+  fontFamily: FONT_FAMILIES.mono,
+  fontVariationSettings: RECURSIVE_PRESETS.casualMono,
   fontWeight: 800,
   fontSize: "0.78rem",
   letterSpacing: "0.04em",

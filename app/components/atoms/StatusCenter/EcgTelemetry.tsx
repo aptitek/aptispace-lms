@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { styled, useTheme, type Theme } from "@mui/material/styles";
+import { FONT_FAMILIES } from "~/tokens/typography";
 import type { SystemHealthStatus } from "~/utils/statusCenterContext";
 
 export interface EcgTelemetryProps {
@@ -38,7 +39,7 @@ const TelemetryMetrics = styled("div")(({ theme }) => ({
   justifyContent: "space-between",
   alignItems: "center",
   pointerEvents: "none",
-  fontFamily: "Recursive, 'JetBrains Mono', 'Courier New', monospace",
+  fontFamily: FONT_FAMILIES.mono,
   fontSize: "0.6875rem",
   fontWeight: 600,
   letterSpacing: "0.08em",

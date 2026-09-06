@@ -1,6 +1,7 @@
 import { styled, alpha, type Theme } from "@mui/material/styles";
 import MuiBadge from "@mui/material/Badge";
 import { resolveShapeStyle, type ResolvedShapeStyle } from "~/tokens/shapes";
+import { FONT_FAMILIES } from "~/tokens/typography";
 import type { BadgeShape, BadgeSize, BadgeColor } from "./Badge.types";
 
 export function getResolvedBadgeShape(
@@ -143,7 +144,7 @@ function getBadgeGlowStyles(
 function getBadgeMonoStyles(mono?: boolean) {
   if (!mono) return {};
   return {
-    fontFamily: '"Roboto Mono", "Fira Code", monospace',
+    fontFamily: FONT_FAMILIES.mono,
     fontWeight: 700,
     letterSpacing: "0.02em",
   };

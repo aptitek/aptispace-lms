@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { styled, type SxProps, type Theme } from "@mui/material/styles";
+import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 import HoloDecorator from "../HoloDecorator/HoloDecorator";
 
 export interface LogoProps {
@@ -61,7 +62,7 @@ const TextContainer = styled("div", {
 });
 
 const AptiSpan = styled("span")(({ theme }) => ({
-  fontFamily: '"Milkshake", cursive, sans-serif',
+  fontFamily: FONT_FAMILIES.logo,
   fontWeight: "normal",
   fontStyle: "normal",
   color: theme.palette.success.main,
@@ -71,8 +72,8 @@ const AptiSpan = styled("span")(({ theme }) => ({
 }));
 
 const SpaceSpan = styled("span")(({ theme }) => ({
-  fontFamily: '"Recursive", sans-serif',
-  fontVariationSettings: '"CASL" 0, "CRSV" 0, "MONO" 0, "slnt" 0',
+  fontFamily: FONT_FAMILIES.display,
+  fontVariationSettings: RECURSIVE_PRESETS.linear,
   fontWeight: 800,
   color: theme.palette.secondary.main,
   letterSpacing: "-0.03em",

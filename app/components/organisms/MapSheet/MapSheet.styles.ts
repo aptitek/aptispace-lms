@@ -15,6 +15,7 @@ import {
   getSheetDimensions,
 } from "./MapSheetMetrics";
 export { SIZE_METRICS };
+import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 import type {
   MapSheetSize,
   MapSheetOrientation,
@@ -279,7 +280,8 @@ export const RoomChipContainer = styled("div", {
     color: theme.palette.secondary.dark || color,
     fontSize: metrics.fontSize,
     fontWeight: 900,
-    fontFamily: "SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+    fontFamily: FONT_FAMILIES.mono,
+    fontVariationSettings: RECURSIVE_PRESETS.casualMono,
     width: "fit-content",
     boxShadow: `0 2px 8px ${alpha(color, 0.16)}`,
     lineHeight: 1.25,

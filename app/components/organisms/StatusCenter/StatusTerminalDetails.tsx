@@ -9,6 +9,11 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useTranslation } from "react-i18next";
 import type { TelemetryEventItem } from "~/utils/statusCenter.types";
 import { formatDiagnosticDetails } from "~/utils/statusCenter.utils";
+import {
+  FONT_FAMILIES,
+  RECURSIVE_PRESETS,
+  FONT_FEATURES,
+} from "~/tokens/typography";
 
 interface StatusTerminalDetailsProps {
   eventEntry: TelemetryEventItem;
@@ -28,7 +33,8 @@ function DiagnosticMetaGrid({
         display: "grid",
         gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
         gap: 1,
-        fontFamily: "monospace",
+        fontFamily: FONT_FAMILIES.mono,
+        fontVariationSettings: RECURSIVE_PRESETS.mono,
         fontSize: "0.75rem",
       }}
     >
@@ -43,7 +49,11 @@ function DiagnosticMetaGrid({
         </Typography>
         <Typography
           variant="body2"
-          sx={{ fontFamily: "monospace", fontSize: "0.75rem" }}
+          sx={{
+            fontFamily: FONT_FAMILIES.mono,
+            fontVariationSettings: RECURSIVE_PRESETS.mono,
+            fontSize: "0.75rem",
+          }}
         >
           {eventEntry.source || "application"}
           {eventEntry.statusCode ? ` • HTTP ${eventEntry.statusCode}` : ""}
@@ -59,7 +69,12 @@ function DiagnosticMetaGrid({
         </Typography>
         <Typography
           variant="body2"
-          sx={{ fontFamily: "monospace", fontSize: "0.75rem" }}
+          sx={{
+            fontFamily: FONT_FAMILIES.mono,
+            fontVariationSettings: RECURSIVE_PRESETS.mono,
+            fontFeatureSettings: FONT_FEATURES.tabularNumbers,
+            fontSize: "0.75rem",
+          }}
         >
           {eventEntry.timestamp.toLocaleTimeString()} (
           {eventEntry.timestamp.toISOString()})
@@ -77,7 +92,8 @@ function DiagnosticMetaGrid({
           <Typography
             variant="body2"
             sx={{
-              fontFamily: "monospace",
+              fontFamily: FONT_FAMILIES.mono,
+              fontVariationSettings: RECURSIVE_PRESETS.mono,
               fontSize: "0.75rem",
               wordBreak: "break-all",
             }}
@@ -115,7 +131,8 @@ function ContextPayloadBlock({
           backgroundColor: "background.paper",
           border: 1,
           borderColor: "divider",
-          fontFamily: "monospace",
+          fontFamily: FONT_FAMILIES.mono,
+          fontVariationSettings: RECURSIVE_PRESETS.mono,
           fontSize: "0.72rem",
           overflowX: "auto",
           color: "text.primary",
@@ -150,7 +167,8 @@ function StackTraceBlock({ stack }: { stack?: string }) {
           backgroundColor: "background.paper",
           border: 1,
           borderColor: "divider",
-          fontFamily: "monospace",
+          fontFamily: FONT_FAMILIES.mono,
+          fontVariationSettings: RECURSIVE_PRESETS.mono,
           fontSize: "0.7rem",
           maxHeight: 180,
           overflow: "auto",
@@ -188,7 +206,8 @@ function ComponentStackBlock({ componentStack }: { componentStack?: string }) {
           backgroundColor: "background.paper",
           border: 1,
           borderColor: "divider",
-          fontFamily: "monospace",
+          fontFamily: FONT_FAMILIES.mono,
+          fontVariationSettings: RECURSIVE_PRESETS.mono,
           fontSize: "0.7rem",
           maxHeight: 180,
           overflow: "auto",

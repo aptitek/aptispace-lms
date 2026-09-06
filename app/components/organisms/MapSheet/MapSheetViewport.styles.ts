@@ -6,6 +6,7 @@ import type {
   MapSheetMode,
 } from "./MapSheet.types";
 import { SIZE_METRICS } from "./MapSheet.styles";
+import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 
 /**
  * Top decorative binder strip styled like an authentic surveyor's map header
@@ -21,8 +22,8 @@ export const PaperTopTape = styled("div")(({ theme }) => ({
   justifyContent: "space-between",
   padding: "0 10px",
   fontSize: "0.625rem",
-  fontFamily:
-    'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+  fontFamily: FONT_FAMILIES.mono,
+  fontVariationSettings: RECURSIVE_PRESETS.mono,
   letterSpacing: "0.06em",
   color: alpha(theme.palette.text.secondary, 0.7),
   backgroundColor: alpha(theme.palette.background.default, 0.75),
@@ -277,7 +278,8 @@ export const MapCompassBadge = styled("div")(({ theme }) => ({
   zIndex: 5,
   fontSize: "0.625rem",
   fontWeight: 700,
-  fontFamily: "SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+  fontFamily: FONT_FAMILIES.mono,
+  fontVariationSettings: RECURSIVE_PRESETS.casualMono,
   color: theme.palette.text.primary,
 }));
 

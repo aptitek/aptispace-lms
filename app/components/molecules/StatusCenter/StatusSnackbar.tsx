@@ -2,6 +2,7 @@ import React from "react";
 import { styled, useTheme, type Theme } from "@mui/material/styles";
 import { motion, AnimatePresence } from "framer-motion";
 import { M3_SPRINGS } from "~/tokens/motion";
+import { FONT_FAMILIES } from "~/tokens/typography";
 import { useTranslation } from "react-i18next";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
@@ -74,7 +75,7 @@ const TitleText = styled("span")({
   fontWeight: 700,
   lineHeight: 1.3,
   letterSpacing: "0.02em",
-  fontFamily: "Recursive, Inter, sans-serif",
+  fontFamily: FONT_FAMILIES.brand,
   color: "inherit",
 });
 

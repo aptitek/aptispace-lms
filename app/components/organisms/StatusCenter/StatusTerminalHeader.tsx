@@ -10,6 +10,7 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ScienceRoundedIcon from "@mui/icons-material/ScienceRounded";
 import { useTranslation } from "react-i18next";
 import type { SystemHealthStatus } from "~/utils/statusCenter.types";
+import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 
 interface StatusTerminalHeaderProps {
   systemStatus: SystemHealthStatus;
@@ -95,7 +96,8 @@ export function StatusTerminalHeader({
               fontWeight: 700,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              fontFamily: "monospace",
+              fontFamily: FONT_FAMILIES.mono,
+              fontVariationSettings: RECURSIVE_PRESETS.mono,
             }}
           >
             {t("systemStatus.terminalTitle", {
@@ -107,7 +109,8 @@ export function StatusTerminalHeader({
             sx={{
               color: statusBadgeColor,
               fontWeight: 600,
-              fontFamily: "monospace",
+              fontFamily: FONT_FAMILIES.mono,
+              fontVariationSettings: RECURSIVE_PRESETS.mono,
               display: "flex",
               alignItems: "center",
               gap: 0.5,

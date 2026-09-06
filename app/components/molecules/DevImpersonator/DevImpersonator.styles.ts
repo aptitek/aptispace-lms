@@ -6,6 +6,7 @@ import ButtonBase from "@mui/material/ButtonBase";
 import Chip from "~/components/atoms/Chip/Chip";
 import TextField from "@mui/material/TextField";
 import { M3_MOTION } from "~/tokens/theme";
+import { FONT_FAMILIES } from "~/tokens/typography";
 import type { UserRole } from "~/utils/auth";
 
 export const DevContainer = styled(Paper)(({ theme }) => {
@@ -80,7 +81,7 @@ export const ModeBadge = styled(Chip)(({ theme }) => ({
   color: theme.palette.warning.contrastText,
   fontWeight: 800,
   letterSpacing: "0.04em",
-  fontFamily: "monospace",
+  fontFamily: FONT_FAMILIES.mono,
   "& .MuiChip-label": {
     paddingLeft: 8,
     paddingRight: 8,

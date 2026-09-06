@@ -2,6 +2,7 @@ import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Paper from "@mui/material/Paper";
+import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 
 export const MissionCenterRoot = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -95,7 +96,8 @@ export const ContentContainer = styled(Paper)(({ theme }) => ({
 }));
 
 export const CodePreBox = styled(Box)(({ theme }) => ({
-  fontFamily: '"Fira Code", "Roboto Mono", monospace',
+  fontFamily: FONT_FAMILIES.mono,
+  fontVariationSettings: RECURSIVE_PRESETS.mono,
   fontSize: "0.8rem",
   padding: theme.spacing(1.5),
   borderRadius: theme.shape.borderRadius,

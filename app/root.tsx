@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 
 import type { Route } from "./+types/root";
 import { getThemeByMode } from "./tokens/theme";
+import { FONT_FAMILIES, RECURSIVE_PRESETS } from "./tokens/typography";
 import { ThemeModeProvider, useThemeMode } from "./utils/themeContext";
 import {
   StatusCenterProvider,
@@ -208,7 +209,11 @@ function ErrorBoundaryContent({ error }: { error: unknown }) {
             label={errorInfo.statusCode || "ERR"}
             color={errorInfo.isNotFound ? "warning" : "error"}
             variant="outlined"
-            sx={{ fontWeight: 800, fontFamily: "monospace" }}
+            sx={{
+              fontWeight: 800,
+              fontFamily: FONT_FAMILIES.mono,
+              fontVariationSettings: RECURSIVE_PRESETS.mono,
+            }}
           />
           <Typography
             variant="h5"
@@ -259,7 +264,8 @@ function ErrorBoundaryContent({ error }: { error: unknown }) {
                 theme.palette.surfaceContainerHighest ||
                 theme.palette.background.default,
               color: "text.primary",
-              fontFamily: "monospace",
+              fontFamily: FONT_FAMILIES.mono,
+              fontVariationSettings: RECURSIVE_PRESETS.mono,
               fontSize: "0.75rem",
               overflowX: "auto",
               maxHeight: 240,

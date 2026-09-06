@@ -1,6 +1,7 @@
 import { styled, alpha, type Theme } from "@mui/material/styles";
 import CardContent from "@mui/material/CardContent";
 import IconButton from "@mui/material/IconButton";
+import { FONT_FAMILIES } from "~/tokens/typography";
 import { StyledExpressiveCard } from "../../atoms/ExpressiveCard";
 
 export const StyledCard = StyledExpressiveCard;
@@ -135,7 +136,7 @@ export const StudentEmail = styled("div")(({ theme }) => ({
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
-  fontFamily: 'monospace, "Roboto Mono", Consolas',
+  fontFamily: FONT_FAMILIES.mono,
   letterSpacing: "0.01em",
 }));
 

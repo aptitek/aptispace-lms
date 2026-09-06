@@ -10,6 +10,7 @@ import InfoOutlineRoundedIcon from "@mui/icons-material/InfoOutlineRounded";
 import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
 import LockOutlineRoundedIcon from "@mui/icons-material/LockOutlineRounded";
 import { useTranslation } from "react-i18next";
+import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 
 export function InstitutionEmailPreviewBox({
   previewEmail,
@@ -41,7 +42,8 @@ export function InstitutionEmailPreviewBox({
       <Typography
         variant="body2"
         sx={{
-          fontFamily: "monospace",
+          fontFamily: FONT_FAMILIES.mono,
+          fontVariationSettings: RECURSIVE_PRESETS.mono,
           fontWeight: 700,
           color: "primary.main",
           wordBreak: "break-all",

@@ -1,4 +1,5 @@
 import { styled, alpha } from "@mui/material/styles";
+import { FONT_FAMILIES } from "~/tokens/typography";
 
 export const MrzContainer = styled("div", {
   shouldForwardProp: (prop) =>
@@ -11,7 +12,7 @@ export const MrzContainer = styled("div", {
   position: "relative",
   containerType: "inline-size",
   width: fullWidth ? "100%" : "auto",
-  fontFamily: '"OCR-B", "Courier New", Courier, monospace',
+  fontFamily: FONT_FAMILIES.mrz,
   backgroundColor: alpha(theme.palette.common.white, 0.98),
   backdropFilter: "blur(12px)",
   borderTop: `1.5px solid ${alpha(theme.palette.common.black, 0.15)}`,
@@ -52,7 +53,7 @@ export const MrzPre = styled("pre", {
   margin: 0,
   padding: 0,
   width: "100%",
-  fontFamily: '"OCR-B", "Courier New", Courier, monospace',
+  fontFamily: FONT_FAMILIES.mrz,
   fontSize: compact
     ? "clamp(11px, 2.7cqw, 14px)"
     : "clamp(12.5px, 3.25cqw, 16.5px)",
@@ -102,7 +103,7 @@ export const StatusPill = styled("span", {
     isValidStatus ? theme.palette.success.main : theme.palette.error.main
   }`,
   boxShadow: `0 1px 4px ${alpha(theme.palette.common.black, 0.3)}`,
-  fontFamily: "monospace",
+  fontFamily: FONT_FAMILIES.mono,
   letterSpacing: "0.5px",
   textTransform: "uppercase",
 

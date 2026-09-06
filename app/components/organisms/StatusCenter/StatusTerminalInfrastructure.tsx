@@ -14,6 +14,11 @@ import type {
   ServiceHealthReport,
   SystemHealthStatus,
 } from "~/utils/statusCenter.types";
+import {
+  FONT_FAMILIES,
+  RECURSIVE_PRESETS,
+  FONT_FEATURES,
+} from "~/tokens/typography";
 
 interface StatusTheme {
   label: string;
@@ -104,7 +109,8 @@ function TileHeader({
             variant="caption"
             sx={{
               fontWeight: 700,
-              fontFamily: "monospace",
+              fontFamily: FONT_FAMILIES.mono,
+              fontVariationSettings: RECURSIVE_PRESETS.mono,
               display: "block",
               lineHeight: 1.2,
             }}
@@ -116,7 +122,8 @@ function TileHeader({
             sx={{
               fontSize: "0.7rem",
               color: "text.secondary",
-              fontFamily: "monospace",
+              fontFamily: FONT_FAMILIES.mono,
+              fontVariationSettings: RECURSIVE_PRESETS.mono,
               display: "block",
             }}
           >
@@ -131,7 +138,8 @@ function TileHeader({
         color={isLoading ? "default" : statusTheme.color}
         variant="outlined"
         sx={{
-          fontFamily: "monospace",
+          fontFamily: FONT_FAMILIES.mono,
+          fontVariationSettings: RECURSIVE_PRESETS.mono,
           fontSize: "0.68rem",
           fontWeight: 700,
           height: 22,
@@ -179,7 +187,8 @@ function TileFooter({ report, statusTheme, isLoading }: TileFooterProps) {
         sx={{
           fontSize: "0.72rem",
           color: "text.secondary",
-          fontFamily: "monospace",
+          fontFamily: FONT_FAMILIES.mono,
+          fontVariationSettings: RECURSIVE_PRESETS.mono,
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
@@ -199,7 +208,9 @@ function TileFooter({ report, statusTheme, isLoading }: TileFooterProps) {
         <Typography
           variant="caption"
           sx={{
-            fontFamily: "monospace",
+            fontFamily: FONT_FAMILIES.mono,
+            fontVariationSettings: RECURSIVE_PRESETS.mono,
+            fontFeatureSettings: FONT_FEATURES.tabularNumbers,
             fontWeight: 700,
             fontSize: "0.72rem",
             color: latencyColor,
@@ -297,7 +308,8 @@ export function StatusTerminalInfrastructure() {
         <Typography
           variant="caption"
           sx={{
-            fontFamily: "monospace",
+            fontFamily: FONT_FAMILIES.mono,
+            fontVariationSettings: RECURSIVE_PRESETS.mono,
             fontWeight: 700,
             letterSpacing: "0.06em",
             color: "text.secondary",

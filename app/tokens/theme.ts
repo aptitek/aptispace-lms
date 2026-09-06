@@ -9,6 +9,12 @@ import {
 import {
   ROLE_COLORS,
   CELESTIAL_COLORS,
+  FLAG_COLORS,
+  NAMED_COLORS,
+} from "./namedColors";
+export {
+  ROLE_COLORS,
+  CELESTIAL_COLORS,
   EU_FLAG_COLORS,
   FRENCH_FLAG_COLORS,
   UK_FLAG_COLORS,
@@ -28,14 +34,27 @@ import {
   createLightShadows,
   createDebugHighlightShadows,
 } from "./shadows";
+export {
+  createDarkHighlightShadows,
+  createLightShadows,
+  createDebugHighlightShadows,
+};
+
 import {
   M3_MOTION,
   M3_SPRINGS,
   M3_MOTION_DURATIONS,
   M3_MOTION_EASINGS,
 } from "./motion";
+export { M3_MOTION, M3_SPRINGS, M3_MOTION_DURATIONS, M3_MOTION_EASINGS };
 
 import {
+  M3_SPACINGS,
+  M3_SPACING_FRIENDSHIPS,
+  M3_STROKES,
+  M3_DIMENSIONS,
+} from "./spacing";
+export {
   M3_SPACINGS,
   M3_SPACING_STRINGS,
   M3_SPACING_FRIENDSHIPS,
@@ -50,43 +69,19 @@ import {
   type M3DimensionToken,
 } from "./spacing";
 
+import {
+  FONT_FAMILIES,
+  RECURSIVE_PRESETS,
+  FONT_FEATURES,
+  M3_TYPESCALE,
+  type M3TypeScaleRole,
+} from "./typography";
 export {
-  M3_SPACINGS,
-  M3_SPACING_STRINGS,
-  M3_SPACING_FRIENDSHIPS,
-  M3_STROKES,
-  M3_STROKE_STRINGS,
-  M3_DIMENSIONS,
-  M3_SPACING_CSS_VARIABLES,
-  M3_STROKE_CSS_VARIABLES,
-  type M3SpacingToken,
-  type SpacingFriendship,
-  type M3StrokeToken,
-  type M3DimensionToken,
-};
-
-export { M3_MOTION, M3_SPRINGS, M3_MOTION_DURATIONS, M3_MOTION_EASINGS };
-
-export {
-  createDarkHighlightShadows,
-  createLightShadows,
-  createDebugHighlightShadows,
-};
-
-export {
-  ROLE_COLORS,
-  CELESTIAL_COLORS,
-  EU_FLAG_COLORS,
-  FRENCH_FLAG_COLORS,
-  UK_FLAG_COLORS,
-  FLAG_COLORS,
-  NAMED_COLORS,
-  PROGRESS_THEME_COLORS,
-  type NamedColors,
-  type RoleColors,
-  type CelestialColors,
-  type FlagColors,
-  type ProgressThemeColors,
+  FONT_FAMILIES,
+  RECURSIVE_PRESETS,
+  FONT_FEATURES,
+  M3_TYPESCALE,
+  type M3TypeScaleRole,
 };
 
 export interface ThemeRoleColors {
@@ -129,6 +124,10 @@ declare module "@mui/material/styles" {
     friendships: typeof M3_SPACING_FRIENDSHIPS;
     strokes: typeof M3_STROKES;
     dimensions: typeof M3_DIMENSIONS;
+    typographyTokens: typeof M3_TYPESCALE;
+    fontFamilies: typeof FONT_FAMILIES;
+    fontPresets: typeof RECURSIVE_PRESETS;
+    fontFeatures: typeof FONT_FEATURES;
   }
   interface ThemeOptions {
     named?: typeof NAMED_COLORS;
@@ -136,6 +135,44 @@ declare module "@mui/material/styles" {
     friendships?: typeof M3_SPACING_FRIENDSHIPS;
     strokes?: typeof M3_STROKES;
     dimensions?: typeof M3_DIMENSIONS;
+    typographyTokens?: typeof M3_TYPESCALE;
+    fontFamilies?: typeof FONT_FAMILIES;
+    fontPresets?: typeof RECURSIVE_PRESETS;
+    fontFeatures?: typeof FONT_FEATURES;
+  }
+  interface TypographyVariants {
+    displayLarge: React.CSSProperties;
+    displayMedium: React.CSSProperties;
+    displaySmall: React.CSSProperties;
+    headlineLarge: React.CSSProperties;
+    headlineMedium: React.CSSProperties;
+    headlineSmall: React.CSSProperties;
+    titleLarge: React.CSSProperties;
+    titleMedium: React.CSSProperties;
+    titleSmall: React.CSSProperties;
+    bodyLarge: React.CSSProperties;
+    bodyMedium: React.CSSProperties;
+    bodySmall: React.CSSProperties;
+    labelLarge: React.CSSProperties;
+    labelMedium: React.CSSProperties;
+    labelSmall: React.CSSProperties;
+  }
+  interface TypographyVariantsOptions {
+    displayLarge?: React.CSSProperties;
+    displayMedium?: React.CSSProperties;
+    displaySmall?: React.CSSProperties;
+    headlineLarge?: React.CSSProperties;
+    headlineMedium?: React.CSSProperties;
+    headlineSmall?: React.CSSProperties;
+    titleLarge?: React.CSSProperties;
+    titleMedium?: React.CSSProperties;
+    titleSmall?: React.CSSProperties;
+    bodyLarge?: React.CSSProperties;
+    bodyMedium?: React.CSSProperties;
+    bodySmall?: React.CSSProperties;
+    labelLarge?: React.CSSProperties;
+    labelMedium?: React.CSSProperties;
+    labelSmall?: React.CSSProperties;
   }
   interface Shape {
     borderRadius: number | string;
@@ -158,11 +195,6 @@ export const M3_SHAPE_SCALE = M3_SHAPE_CORNERS;
 export type M3ShapeToken = keyof typeof M3_SHAPE_SCALE;
 
 /**
- * Creates Material 3 Dark Mode Elevation Shadows:
- * Per M3 specifications, dark mode does NOT use black drop shadows.
- * Elevation is purely expressed through perimeter highlight rings & surface highlight.
- */
-/**
  * Shared base options across all themes: typography, shapes, transitions, and component overrides.
  */
 const sharedThemeBase = {
@@ -171,9 +203,13 @@ const sharedThemeBase = {
   friendships: M3_SPACING_FRIENDSHIPS,
   strokes: M3_STROKES,
   dimensions: M3_DIMENSIONS,
+  typographyTokens: M3_TYPESCALE,
+  fontFamilies: FONT_FAMILIES,
+  fontPresets: RECURSIVE_PRESETS,
+  fontFeatures: FONT_FEATURES,
   typography: {
-    fontFamily:
-      '"Recursive", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: FONT_FAMILIES.brand,
+    ...M3_TYPESCALE,
     h1: { fontWeight: 700, letterSpacing: "-0.02em" },
     h2: { fontWeight: 700, letterSpacing: "-0.015em" },
     h3: { fontWeight: 600, letterSpacing: "-0.01em" },

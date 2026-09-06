@@ -18,6 +18,7 @@ import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlin
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 import { SoftDialog } from "./planning.styles";
+import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 
 export interface CalendarExportDialogProps {
   open: boolean;
@@ -139,7 +140,8 @@ export function CalendarExportDialog({
                   sx: {
                     borderRadius: "12px",
                     fontSize: "0.82rem",
-                    fontFamily: "monospace",
+                    fontFamily: FONT_FAMILIES.mono,
+                    fontVariationSettings: RECURSIVE_PRESETS.mono,
                     bgcolor: (theme) =>
                       alpha(theme.palette.background.paper, 0.8),
                   },

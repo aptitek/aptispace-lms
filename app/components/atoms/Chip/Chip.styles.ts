@@ -1,6 +1,7 @@
 import { styled, alpha } from "@mui/material/styles";
 import MuiChip from "@mui/material/Chip";
 import type { ResolvedShapeStyle } from "~/tokens/shapes";
+import { FONT_FAMILIES } from "~/tokens/typography";
 import type { ChipShape } from "./Chip.types";
 
 interface StyledChipProps {
@@ -119,7 +120,7 @@ export const StyledMuiChip = styled(MuiChip, {
     }),
 
     ...($mono && {
-      fontFamily: '"Roboto Mono", "Fira Code", monospace',
+      fontFamily: FONT_FAMILIES.mono,
       letterSpacing: "0.02em",
       fontWeight: 600,
       "& .MuiChip-label": {

@@ -11,6 +11,11 @@ import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 
 import type { SystemMetricsData } from "~/types/missionCenter";
+import {
+  FONT_FAMILIES,
+  RECURSIVE_PRESETS,
+  FONT_FEATURES,
+} from "~/tokens/typography";
 
 export interface MissionCenterMetricsTabProps {
   metrics: SystemMetricsData;
@@ -88,7 +93,12 @@ export function MissionCenterMetricsTab({
             </Typography>
             <Typography
               variant="caption"
-              sx={{ fontFamily: "monospace", fontWeight: 700 }}
+              sx={{
+                fontFamily: FONT_FAMILIES.mono,
+                fontVariationSettings: RECURSIVE_PRESETS.mono,
+                fontFeatureSettings: FONT_FEATURES.tabularNumbers,
+                fontWeight: 700,
+              }}
             >
               {metrics.infrastructure.d1.latencyMs ?? 1} ms
             </Typography>
@@ -146,7 +156,12 @@ export function MissionCenterMetricsTab({
             </Typography>
             <Typography
               variant="caption"
-              sx={{ fontFamily: "monospace", fontWeight: 700 }}
+              sx={{
+                fontFamily: FONT_FAMILIES.mono,
+                fontVariationSettings: RECURSIVE_PRESETS.mono,
+                fontFeatureSettings: FONT_FEATURES.tabularNumbers,
+                fontWeight: 700,
+              }}
             >
               {metrics.infrastructure.r2.latencyMs ?? 1} ms
             </Typography>
@@ -287,13 +302,22 @@ export function MissionCenterMetricsTab({
                 >
                   <Typography
                     variant="body2"
-                    sx={{ fontFamily: "monospace", fontWeight: 600 }}
+                    sx={{
+                      fontFamily: FONT_FAMILIES.mono,
+                      fontVariationSettings: RECURSIVE_PRESETS.mono,
+                      fontWeight: 600,
+                    }}
                   >
                     {tMetric.tableName}
                   </Typography>
                   <Typography
                     variant="caption"
-                    sx={{ fontFamily: "monospace", fontWeight: 700 }}
+                    sx={{
+                      fontFamily: FONT_FAMILIES.mono,
+                      fontVariationSettings: RECURSIVE_PRESETS.mono,
+                      fontFeatureSettings: FONT_FEATURES.tabularNumbers,
+                      fontWeight: 700,
+                    }}
                   >
                     {tMetric.rowCount} rows
                   </Typography>

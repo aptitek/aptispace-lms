@@ -22,6 +22,7 @@ import type {
 } from "~/types/missionCenter";
 import { CodePreBox } from "./MissionCenter.styles";
 import { MissionCenterUserProfileCard } from "./MissionCenterUserProfileCard";
+import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 
 export interface MissionCenterErrorInspectorProps {
   report: AdminErrorReportItem;
@@ -191,7 +192,8 @@ export function MissionCenterErrorInspector({
             backgroundColor:
               theme.palette.surfaceContainerHighest ||
               theme.palette.background.paper,
-            fontFamily: "monospace",
+            fontFamily: FONT_FAMILIES.mono,
+            fontVariationSettings: RECURSIVE_PRESETS.mono,
           }}
         >
           {report.message}

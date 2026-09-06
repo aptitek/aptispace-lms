@@ -438,6 +438,7 @@ export default tseslint.config(
       "m3-theme/enforce-motion-tokens": "error",
       "m3-theme/enforce-shape-tokens": "error",
       "m3-theme/enforce-spacing-tokens": "error",
+      "m3-theme/enforce-typography-tokens": "error",
 
       // --- Design Tokens & MUI Theme / Styled Primitives Enforcement ---
       "no-restricted-imports": [
@@ -823,6 +824,7 @@ export default tseslint.config(
       "m3-theme/enforce-motion-tokens": "off",
       "m3-theme/enforce-shape-tokens": "off",
       "m3-theme/enforce-spacing-tokens": "off",
+      "m3-theme/enforce-typography-tokens": "off",
     },
   },
 
@@ -861,6 +863,7 @@ export default tseslint.config(
       "m3-theme/enforce-motion-tokens": "off",
       "m3-theme/enforce-shape-tokens": "off",
       "m3-theme/enforce-spacing-tokens": "off",
+      "m3-theme/enforce-typography-tokens": "off",
       "sonarjs/no-duplicate-string": "off",
       "sonarjs/cognitive-complexity": "off",
       "sonarjs/no-identical-functions": "off",
@@ -916,6 +919,7 @@ export default tseslint.config(
       "m3-theme/enforce-motion-tokens": "off",
       "m3-theme/enforce-shape-tokens": "off",
       "m3-theme/enforce-spacing-tokens": "off",
+      "m3-theme/enforce-typography-tokens": "off",
       complexity: "off",
       "sonarjs/no-duplicate-string": "off",
       "sonarjs/cognitive-complexity": "off",

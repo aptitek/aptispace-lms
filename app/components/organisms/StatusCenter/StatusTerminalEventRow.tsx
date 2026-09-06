@@ -17,6 +17,11 @@ import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import { useTranslation } from "react-i18next";
 import type { TelemetryEventItem } from "~/utils/statusCenter.types";
 import { StatusTerminalDetails } from "./StatusTerminalDetails";
+import {
+  FONT_FAMILIES,
+  RECURSIVE_PRESETS,
+  FONT_FEATURES,
+} from "~/tokens/typography";
 
 interface StatusTerminalEventRowProps {
   eventEntry: TelemetryEventItem;
@@ -117,7 +122,8 @@ export function StatusTerminalEventRow({
               sx={{
                 fontWeight: 700,
                 fontSize: "0.82rem",
-                fontFamily: "monospace",
+                fontFamily: FONT_FAMILIES.mono,
+                fontVariationSettings: RECURSIVE_PRESETS.mono,
                 color: resolveSeverityColor(eventEntry.severity),
               }}
             >
@@ -132,7 +138,9 @@ export function StatusTerminalEventRow({
                 sx={{
                   height: 18,
                   fontSize: "0.65rem",
-                  fontFamily: "monospace",
+                  fontFamily: FONT_FAMILIES.mono,
+                  fontVariationSettings: RECURSIVE_PRESETS.mono,
+                  fontFeatureSettings: FONT_FEATURES.tabularNumbers,
                   fontWeight: 700,
                 }}
               />
@@ -171,7 +179,9 @@ export function StatusTerminalEventRow({
               mt: 0.75,
               color: "text.secondary",
               fontSize: "0.72rem",
-              fontFamily: "monospace",
+              fontFamily: FONT_FAMILIES.mono,
+              fontVariationSettings: RECURSIVE_PRESETS.mono,
+              fontFeatureSettings: FONT_FEATURES.tabularNumbers,
             }}
           >
             <span>{eventEntry.timestamp.toLocaleTimeString()}</span>

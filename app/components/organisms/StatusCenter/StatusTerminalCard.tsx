@@ -11,6 +11,7 @@ import { StatusTerminalHeader } from "./StatusTerminalHeader";
 import { StatusTerminalInfrastructure } from "./StatusTerminalInfrastructure";
 import { StatusTerminalFilterChips } from "./StatusTerminalFilterChips";
 import { StatusTerminalEventRow } from "./StatusTerminalEventRow";
+import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 
 export function StatusTerminalCard() {
   const { t } = useTranslation("common");
@@ -94,7 +95,8 @@ export function StatusTerminalCard() {
             <Typography
               variant="body2"
               sx={{
-                fontFamily: "monospace",
+                fontFamily: FONT_FAMILIES.mono,
+                fontVariationSettings: RECURSIVE_PRESETS.mono,
                 fontWeight: 600,
                 textAlign: "center",
               }}
@@ -143,7 +145,8 @@ export function StatusTerminalCard() {
           <Typography
             variant="caption"
             sx={{
-              fontFamily: "monospace",
+              fontFamily: FONT_FAMILIES.mono,
+              fontVariationSettings: RECURSIVE_PRESETS.mono,
               fontWeight: 700,
               letterSpacing: "0.05em",
               color: "text.secondary",

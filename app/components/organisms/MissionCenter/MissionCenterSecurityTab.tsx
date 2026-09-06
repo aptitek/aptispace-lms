@@ -21,6 +21,7 @@ import {
 import type { SecurityIncidentItem } from "~/types/missionCenter";
 import { MissionCenterUserProfileCard } from "./MissionCenterUserProfileCard";
 import { MissionCenterJsonModal } from "./MissionCenterJsonModal";
+import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 
 export interface MissionCenterSecurityTabProps {
   securityIncidents: SecurityIncidentItem[];
@@ -112,7 +113,8 @@ function SecurityThreatPanel({ incident, onInspectPayload }: ThreatPanelProps) {
             backgroundColor:
               theme.palette.surfaceContainerHighest ||
               theme.palette.background.paper,
-            fontFamily: "monospace",
+            fontFamily: FONT_FAMILIES.mono,
+            fontVariationSettings: RECURSIVE_PRESETS.mono,
           }}
         >
           {incident.description}
@@ -247,7 +249,11 @@ function SecurityIncidentTable({
           <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
             <Typography
               variant="body2"
-              sx={{ fontFamily: "monospace", fontSize: "0.8rem" }}
+              sx={{
+                fontFamily: FONT_FAMILIES.mono,
+                fontVariationSettings: RECURSIVE_PRESETS.mono,
+                fontSize: "0.8rem",
+              }}
             >
               {params.value || "Unknown"}
             </Typography>

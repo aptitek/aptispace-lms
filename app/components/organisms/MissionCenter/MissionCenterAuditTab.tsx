@@ -17,6 +17,11 @@ import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 
 import type { AdminAuditLogItem, AuditActionType } from "~/types/missionCenter";
 import { MissionCenterJsonModal } from "./MissionCenterJsonModal";
+import {
+  FONT_FAMILIES,
+  RECURSIVE_PRESETS,
+  FONT_FEATURES,
+} from "~/tokens/typography";
 
 export interface MissionCenterAuditTabProps {
   auditLogs: AdminAuditLogItem[];
@@ -103,7 +108,9 @@ export function MissionCenterAuditTab({
               <Typography
                 variant="body2"
                 sx={{
-                  fontFamily: "monospace",
+                  fontFamily: FONT_FAMILIES.mono,
+                  fontVariationSettings: RECURSIVE_PRESETS.mono,
+                  fontFeatureSettings: FONT_FEATURES.tabularNumbers,
                   fontSize: "0.75rem",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
@@ -203,7 +210,8 @@ export function MissionCenterAuditTab({
             <Typography
               variant="body2"
               sx={{
-                fontFamily: "monospace",
+                fontFamily: FONT_FAMILIES.mono,
+                fontVariationSettings: RECURSIVE_PRESETS.mono,
                 fontSize: "0.8rem",
                 fontWeight: 600,
               }}
@@ -224,7 +232,8 @@ export function MissionCenterAuditTab({
               variant="body2"
               noWrap
               sx={{
-                fontFamily: "monospace",
+                fontFamily: FONT_FAMILIES.mono,
+                fontVariationSettings: RECURSIVE_PRESETS.mono,
                 fontSize: "0.75rem",
                 color: "text.secondary",
               }}

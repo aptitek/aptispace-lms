@@ -9,6 +9,7 @@ import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCar
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import EntityCard from "~/components/molecules/EntityCard/EntityCard";
 import { NetworkMetaCard } from "./MissionCenter.styles";
+import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 
 export interface MissionCenterUserProfileCardProps {
   user?: EntityCardData | null;
@@ -68,7 +69,8 @@ function NetworkOriginCard({
             color={isSecurity ? "error" : "default"}
             variant="outlined"
             sx={{
-              fontFamily: "monospace",
+              fontFamily: FONT_FAMILIES.mono,
+              fontVariationSettings: RECURSIVE_PRESETS.mono,
               fontWeight: 700,
               fontSize: "0.75rem",
             }}
@@ -92,7 +94,8 @@ function NetworkOriginCard({
             variant="caption"
             sx={{
               color: "text.secondary",
-              fontFamily: "monospace",
+              fontFamily: FONT_FAMILIES.mono,
+              fontVariationSettings: RECURSIVE_PRESETS.mono,
               fontSize: "0.72rem",
               wordBreak: "break-all",
             }}
