@@ -150,7 +150,8 @@ describe("Material Design 3 ESLint Theming Rules", () => {
       `;
 
       const [result] = await eslint.lintText(code, {
-        filePath: "app/components/molecules/ElevatedCard/ElevatedCard.styles.ts",
+        filePath:
+          "app/components/molecules/ElevatedCard/ElevatedCard.styles.ts",
       });
 
       const violations = result?.messages.filter(
