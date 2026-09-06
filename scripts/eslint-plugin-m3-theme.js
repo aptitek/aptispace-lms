@@ -1,7 +1,7 @@
 /**
  * ESLint Plugin: eslint-plugin-m3-theme
  * Enforces Material Design 3 design system architecture, dynamic theme awareness,
- * surface containers, and dark mode elevation specifications.
+ * surface containers, and dark mode elevation specifications via whitelist enforcement.
  */
 
 function isInteractiveContext(node) {
@@ -9,13 +9,9 @@ function isInteractiveContext(node) {
   while (current) {
     if (current.type === "Property") {
       const key = current.key.name || current.key.value;
-      if (typeof key === "string" && isInteractiveKey(key)) {
-        return true;
-      }
+      if (typeof key === "string" && isInteractiveKey(key)) return true;
     } else if (current.type === "VariableDeclarator" && current.id?.name) {
-      if (/Ripple|StateLayer/i.test(current.id.name)) {
-        return true;
-      }
+      if (/Ripple|StateLayer/i.test(current.id.name)) return true;
     }
     current = current.parent;
   }
@@ -37,36 +33,114 @@ function isInteractiveKey(key) {
   );
 }
 
-function extractActionToken(node) {
+const DEFAULT_ALLOWED_BACKGROUNDS = new Set([
+  "surfaceContainer",
+  "surfaceContainerLowest",
+  "surfaceContainerLow",
+  "surfaceContainerHigh",
+  "surfaceContainerHighest",
+  "surface",
+  "surfaceDim",
+  "surfaceBright",
+  "surfaceVariant",
+  "inverseSurface",
+  "inverseOnSurface",
+  "scrim",
+  "outline",
+  "outlineVariant",
+  "background.paper",
+  "background.default",
+  "paper",
+  "default",
+  "primary.main",
+  "primary.light",
+  "primary.dark",
+  "primary.contrastText",
+  "secondary.main",
+  "secondary.light",
+  "secondary.dark",
+  "secondary.contrastText",
+  "error.main",
+  "error.light",
+  "error.dark",
+  "error.contrastText",
+  "warning.main",
+  "warning.light",
+  "warning.dark",
+  "warning.contrastText",
+  "info.main",
+  "info.light",
+  "info.dark",
+  "info.contrastText",
+  "success.main",
+  "success.light",
+  "success.dark",
+  "success.contrastText",
+  "divider",
+  "transparent",
+  "inherit",
+  "currentColor",
+  "roles.admin",
+  "roles.instructor",
+  "roles.student",
+]);
+
+function checkContainerBackground(node, allowedSet) {
   if (!node) return null;
-  if (
-    node.type === "Literal" &&
-    typeof node.value === "string" &&
-    /^action\.(hover|selected|disabledBackground|focus)$/.test(node.value)
-  ) {
-    return node.value;
-  }
-  if (
-    node.type === "MemberExpression" &&
-    node.property?.name &&
-    /^(hover|selected|disabledBackground|focus)$/.test(node.property.name)
-  ) {
-    if (node.object?.property?.name === "action") {
-      return `action.${node.property.name}`;
+  if (node.type === "Literal" && typeof node.value === "string") {
+    const val = node.value.trim();
+    if (
+      allowedSet.has(val) ||
+      DEFAULT_ALLOWED_BACKGROUNDS.has(val) ||
+      Array.from(allowedSet).some((pat) => pat && val.includes(pat))
+    ) {
+      return null;
     }
+    if (val.startsWith("var(--")) return null;
+    if (/^action\.(hover|selected|disabledBackground|focus)$/.test(val)) {
+      return { type: "action", token: val };
+    }
+    return { type: "unallowed", token: val };
   }
-  if (
-    node.type === "CallExpression" &&
-    node.callee?.name === "alpha" &&
-    node.arguments?.[0]
-  ) {
-    return extractActionToken(node.arguments[0]);
+  if (node.type === "MemberExpression") {
+    const propName = node.property?.name || "";
+    if (/^(hover|selected|disabledBackground|focus)$/.test(propName)) {
+      if (node.object?.property?.name === "action") {
+        return { type: "action", token: `action.${propName}` };
+      }
+    }
+    const fullPath = `${node.object?.property?.name || ""}.${propName}`;
+    if (allowedSet.has(propName) || allowedSet.has(fullPath)) return null;
+    if (
+      DEFAULT_ALLOWED_BACKGROUNDS.has(propName) ||
+      DEFAULT_ALLOWED_BACKGROUNDS.has(fullPath)
+    )
+      return null;
+    const objName = node.object?.name || node.object?.property?.name;
+    if (/^(grey|common|roles|targetPalette|palette)$/.test(objName))
+      return null;
+    return null;
+  }
+  if (node.type === "CallExpression" && node.callee?.name === "alpha") {
+    return checkContainerBackground(node.arguments?.[0], allowedSet);
   }
   if (node.type === "LogicalExpression") {
-    return extractActionToken(node.right) || extractActionToken(node.left);
+    return (
+      checkContainerBackground(node.right, allowedSet) ||
+      checkContainerBackground(node.left, allowedSet)
+    );
   }
-  if (node.type === "ArrowFunctionExpression" && node.body) {
-    return extractActionToken(node.body);
+  if (node.type === "ConditionalExpression") {
+    return (
+      checkContainerBackground(node.consequent, allowedSet) ||
+      checkContainerBackground(node.alternate, allowedSet)
+    );
+  }
+  if (
+    node.type === "ArrowFunctionExpression" ||
+    node.type === "FunctionExpression"
+  ) {
+    return checkContainerBackground(node.body, allowedSet);
   }
   return null;
 }
@@ -94,9 +168,8 @@ function isAlphaPaperCall(node) {
       return true;
     }
   }
-  if (node.type === "ArrowFunctionExpression" && node.body) {
+  if (node.type === "ArrowFunctionExpression" && node.body)
     return isAlphaPaperCall(node.body);
-  }
   return false;
 }
 
@@ -115,52 +188,132 @@ function isInsideApplyStylesDark(node) {
   return false;
 }
 
+function createContainerBackgroundRule() {
+  return {
+    meta: {
+      type: "problem",
+      docs: {
+        description:
+          "Enforce that container backgrounds use approved Material Design 3 surface containers via whitelist.",
+      },
+      schema: [
+        {
+          type: "object",
+          properties: { allowed: { type: "array", items: { type: "string" } } },
+          additionalProperties: false,
+        },
+      ],
+      messages: {
+        noActionBackground:
+          "Action token '{{token}}' is an interactive state overlay, not a surface container. Use Material Design 3 surface containers (e.g. 'theme.palette.surfaceContainer', 'surfaceContainerLow', 'surfaceContainerHigh') or add to allowed whitelist.",
+        unallowedBackground:
+          "Container background '{{token}}' is not in the allowed theme whitelist. Use Material Design 3 surface containers (e.g. 'theme.palette.surfaceContainer', 'surfaceContainerLow', 'surfaceContainerHigh') or add to allowed whitelist in eslint.config.js.",
+      },
+    },
+    create(context) {
+      const options = context.options?.[0] || {};
+      const allowedSet = new Set(options.allowed || []);
+
+      function inspectNode(valueNode, reportNode) {
+        if (isInteractiveContext(valueNode)) return;
+        const result = checkContainerBackground(valueNode, allowedSet);
+        if (result) {
+          const messageId =
+            result.type === "action"
+              ? "noActionBackground"
+              : "unallowedBackground";
+          context.report({
+            node: reportNode,
+            messageId,
+            data: { token: result.token },
+          });
+        }
+      }
+
+      return {
+        Property(node) {
+          const key = node.key?.name || node.key?.value;
+          if (key === "backgroundColor" || key === "bgcolor") {
+            inspectNode(node.value, node);
+          }
+        },
+        JSXAttribute(node) {
+          const name = node.name?.name;
+          if (name === "bgcolor" || name === "backgroundColor") {
+            const val = node.value?.expression || node.value;
+            inspectNode(val, node);
+          }
+        },
+      };
+    },
+  };
+}
+
 export const m3ThemePlugin = {
-  meta: {
-    name: "eslint-plugin-m3-theme",
-  },
+  meta: { name: "eslint-plugin-m3-theme" },
   rules: {
-    "no-action-as-container-background": {
+    "no-action-as-container-background": createContainerBackgroundRule(),
+    "allowed-container-background": createContainerBackgroundRule(),
+
+    "allowed-theme-colors": {
       meta: {
         type: "problem",
         docs: {
           description:
-            "Disallow using action overlay tokens (action.hover, action.selected, etc.) as container backgrounds.",
+            "Enforce that raw colors match approved whitelist in eslint.config.js.",
         },
+        schema: [
+          {
+            type: "object",
+            properties: {
+              allowed: { type: "array", items: { type: "string" } },
+            },
+            additionalProperties: false,
+          },
+        ],
         messages: {
-          noActionBackground:
-            "Action token '{{token}}' is an interactive state overlay, not a surface container. Use Material Design 3 surface containers (e.g. 'theme.palette.surfaceContainer', 'surfaceContainerLow', 'surfaceContainerHigh') instead.",
+          unallowedColor:
+            "Hardcoded color '{{value}}' is not in the allowed color whitelist. Use MUI theme semantic tokens, CSS variables, or add '{{value}}' to the allowed whitelist in eslint.config.js.",
         },
       },
       create(context) {
-        return {
-          Property(node) {
-            const key = node.key?.name || node.key?.value;
-            if (key !== "backgroundColor" && key !== "bgcolor") return;
-            if (isInteractiveContext(node)) return;
+        const options = context.options?.[0] || {};
+        const allowedPatterns = (options.allowed || []).map((c) =>
+          c.toLowerCase().trim(),
+        );
+        const HEX_REGEX = /^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+        const FN_REGEX = /^(rgb|hsl)a?\s*\(/i;
 
-            const token = extractActionToken(node.value);
-            if (token) {
-              context.report({
-                node,
-                messageId: "noActionBackground",
-                data: { token },
-              });
-            }
+        function checkColorValue(val, targetNode) {
+          if (typeof val !== "string") return;
+          const trimmed = val.trim().toLowerCase();
+          if (
+            trimmed.startsWith("var(--") ||
+            trimmed === "transparent" ||
+            trimmed === "inherit" ||
+            trimmed === "currentcolor"
+          )
+            return;
+          if (allowedPatterns.some((pattern) => trimmed.includes(pattern)))
+            return;
+
+          if (HEX_REGEX.test(val.trim()) || FN_REGEX.test(val.trim())) {
+            context.report({
+              node: targetNode,
+              messageId: "unallowedColor",
+              data: { value: val.trim() },
+            });
+          }
+        }
+
+        return {
+          Literal(node) {
+            if (typeof node.value === "string")
+              checkColorValue(node.value, node);
           },
-          JSXAttribute(node) {
-            const name = node.name?.name;
-            if (name !== "bgcolor" && name !== "backgroundColor") return;
-            const token =
-              extractActionToken(node.value) ||
-              extractActionToken(node.value?.expression);
-            if (token) {
-              context.report({
-                node,
-                messageId: "noActionBackground",
-                data: { token },
-              });
-            }
+          TemplateElement(node) {
+            if (typeof node.value?.raw === "string")
+              checkColorValue(node.value.raw, node);
           },
         };
       },
@@ -197,12 +350,12 @@ export const m3ThemePlugin = {
               node.name === "ROLE_COLORS" ||
               node.name === "DEFAULT_ROLE_COLORS"
             ) {
-              const parentType = node.parent?.type;
+              const pType = node.parent?.type;
               if (
-                parentType !== "ImportSpecifier" &&
-                parentType !== "ExportSpecifier" &&
-                parentType !== "TSInterfaceDeclaration" &&
-                parentType !== "TSTypeAliasDeclaration"
+                pType !== "ImportSpecifier" &&
+                pType !== "ExportSpecifier" &&
+                pType !== "TSInterfaceDeclaration" &&
+                pType !== "TSTypeAliasDeclaration"
               ) {
                 context.report({
                   node,
@@ -234,14 +387,10 @@ export const m3ThemePlugin = {
             const key = node.key?.name || node.key?.value;
             if (key !== "backgroundColor" && key !== "bgcolor") return;
             if (!isAlphaPaperCall(node.value)) return;
-
             const parentObject =
               node.parent?.type === "ObjectExpression" ? node.parent : null;
             if (parentObject && !hasBackdropFilter(parentObject)) {
-              context.report({
-                node,
-                messageId: "noAlphaPaper",
-              });
+              context.report({ node, messageId: "noAlphaPaper" });
             }
           },
         };
@@ -266,7 +415,6 @@ export const m3ThemePlugin = {
             const key = node.key?.name || node.key?.value;
             if (key !== "boxShadow" && key !== "filter") return;
             if (!isInsideApplyStylesDark(node)) return;
-
             const rawVal = context.sourceCode
               ? context.sourceCode.getText(node.value)
               : "";
@@ -274,10 +422,7 @@ export const m3ThemePlugin = {
               /rgba\(\s*0\s*,\s*0\s*,\s*0\s*,/i.test(rawVal) ||
               /common\.black/i.test(rawVal)
             ) {
-              context.report({
-                node,
-                messageId: "noDarkBlackShadow",
-              });
+              context.report({ node, messageId: "noDarkBlackShadow" });
             }
           },
         };
@@ -306,10 +451,7 @@ export const m3ThemePlugin = {
               typeof node.value.value === "string" &&
               /rgba\(\s*0\s*,\s*0\s*,\s*0\s*,/i.test(node.value.value)
             ) {
-              context.report({
-                node,
-                messageId: "noHardcodedShadow",
-              });
+              context.report({ node, messageId: "noHardcodedShadow" });
             }
           },
         };
@@ -356,10 +498,7 @@ export const m3ThemePlugin = {
               node.name?.type === "JSXIdentifier" &&
               node.name.name === "svg"
             ) {
-              context.report({
-                node,
-                messageId: "noRawSvgIcon",
-              });
+              context.report({ node, messageId: "noRawSvgIcon" });
             }
           },
           CallExpression(node) {
@@ -446,10 +585,8 @@ export const m3ThemePlugin = {
             if (
               typeof importSource !== "string" ||
               !importSource.startsWith("@mui/icons-material/")
-            ) {
+            )
               return;
-            }
-
             const iconModule = importSource.slice(
               "@mui/icons-material/".length,
             );

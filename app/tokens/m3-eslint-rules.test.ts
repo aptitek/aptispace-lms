@@ -7,6 +7,12 @@ describe("Material Design 3 ESLint Theming Rules", () => {
       {
         rules: {
           "m3-theme/no-action-as-container-background": "error",
+          "m3-theme/allowed-theme-colors": [
+            "error",
+            {
+              allowed: ["#00ff66", "rgba(0, 0, 0,"],
+            },
+          ],
           "m3-theme/no-static-role-colors": "error",
           "m3-theme/no-alpha-paper-surface": "error",
           "m3-theme/no-dark-mode-black-shadow": "error",
@@ -18,7 +24,22 @@ describe("Material Design 3 ESLint Theming Rules", () => {
     ],
   });
 
-  describe("m3-theme/no-action-as-container-background", () => {
+  const customAllowedEslint = new ESLint({
+    overrideConfig: [
+      {
+        rules: {
+          "m3-theme/no-action-as-container-background": [
+            "error",
+            {
+              allowed: ["fuchsia", "custom-brand-bg"],
+            },
+          ],
+        },
+      },
+    ],
+  });
+
+  describe("m3-theme/no-action-as-container-background (whitelist enforcement)", () => {
     it("reports static action tokens used as container backgrounds", async () => {
       const code = `
         import Box from "@mui/material/Box";
@@ -45,6 +66,82 @@ describe("Material Design 3 ESLint Theming Rules", () => {
       expect(violations[0]?.message).toContain("Action token 'action.hover'");
     });
 
+    it("reports un-whitelisted container backgrounds", async () => {
+      const code = `
+        import Box from "@mui/material/Box";
+        export function Card() {
+          return (
+            <Box
+              sx={{
+                backgroundColor: "fuchsia",
+              }}
+            />
+          );
+        }
+      `;
+
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/TestCard/TestCard.tsx",
+      });
+
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/no-action-as-container-background",
+      );
+      expect(violations.length).toBeGreaterThan(0);
+      expect(violations[0]?.message).toContain(
+        "Container background 'fuchsia' is not in the allowed theme whitelist",
+      );
+    });
+
+    it("permits approved surface containers and CSS variables", async () => {
+      const code = `
+        import Box from "@mui/material/Box";
+        export function Card() {
+          return (
+            <Box
+              sx={{
+                backgroundColor: "surfaceContainerLow",
+                color: "var(--custom-color)",
+              }}
+            />
+          );
+        }
+      `;
+
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/TestCard/TestCard.tsx",
+      });
+
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/no-action-as-container-background",
+      );
+      expect(violations).toHaveLength(0);
+    });
+
+    it("permits custom background tokens when added to the allowed option", async () => {
+      const code = `
+        import Box from "@mui/material/Box";
+        export function Card() {
+          return (
+            <Box
+              sx={{
+                backgroundColor: "fuchsia",
+              }}
+            />
+          );
+        }
+      `;
+
+      const [result] = await customAllowedEslint.lintText(code, {
+        filePath: "app/components/molecules/TestCard/TestCard.tsx",
+      });
+
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/no-action-as-container-background",
+      );
+      expect(violations).toHaveLength(0);
+    });
+
     it("permits action tokens inside interactive pseudo-classes (&:hover)", async () => {
       const code = `
         import Box from "@mui/material/Box";
@@ -68,6 +165,44 @@ describe("Material Design 3 ESLint Theming Rules", () => {
 
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-action-as-container-background",
+      );
+      expect(violations).toHaveLength(0);
+    });
+  });
+
+  describe("m3-theme/allowed-theme-colors", () => {
+    it("reports hardcoded raw colors not present in the allowed whitelist", async () => {
+      const code = `
+        export const BAD_COLOR = "#ff00aa";
+      `;
+
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/atoms/Badge/Badge.styles.ts",
+      });
+
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/allowed-theme-colors",
+      );
+      expect(violations.length).toBeGreaterThan(0);
+      expect(violations[0]?.message).toContain(
+        "Hardcoded color '#ff00aa' is not in the allowed color whitelist",
+      );
+    });
+
+    it("permits colors present in the allowed whitelist, CSS variables, and keywords", async () => {
+      const code = `
+        export const BRAND = "#00ff66";
+        export const SHADOW = "rgba(0, 0, 0, 0.2)";
+        export const VAR_COLOR = "var(--color-primary)";
+        export const TRANSPARENT = "transparent";
+      `;
+
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/atoms/Badge/Badge.styles.ts",
+      });
+
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/allowed-theme-colors",
       );
       expect(violations).toHaveLength(0);
     });

@@ -28,6 +28,18 @@ const cssTokensPlugin = {
             "Disallow raw #hex or rgba()/rgb() colors in CSS files that are not base tokens.",
           recommended: true,
         },
+        schema: [
+          {
+            type: "object",
+            properties: {
+              allowed: {
+                type: "array",
+                items: { type: "string" },
+              },
+            },
+            additionalProperties: false,
+          },
+        ],
         messages: {
           noRawHex:
             "Hardcoded hex color '{{value}}' detected in CSS. Use design tokens (e.g. var(--color-*)) instead.",
@@ -36,8 +48,15 @@ const cssTokensPlugin = {
         },
       },
       create(context) {
+        const options = context.options?.[0] || {};
+        const allowedPatterns = (options.allowed || []).map((c) =>
+          c.toLowerCase().trim(),
+        );
+
         return {
           Hash(node) {
+            const hexVal = `#${node.value}`.toLowerCase();
+            if (allowedPatterns.some((p) => hexVal.includes(p))) return;
             context.report({
               loc: node.loc,
               messageId: "noRawHex",
@@ -46,6 +65,8 @@ const cssTokensPlugin = {
           },
           Function(node) {
             if (/^(rgba?|hsla?|hwb|lab|lch|oklab|oklch)$/i.test(node.name)) {
+              const fnName = node.name.toLowerCase();
+              if (allowedPatterns.some((p) => fnName.includes(p))) return;
               context.report({
                 loc: node.loc,
                 messageId: "noRawColorFn",
@@ -55,7 +76,8 @@ const cssTokensPlugin = {
           },
           Declaration(node) {
             if (node.value && node.value.type === "Raw") {
-              const rawVal = node.value.value || "";
+              const rawVal = (node.value.value || "").toLowerCase();
+              if (allowedPatterns.some((p) => rawVal.includes(p))) return;
               const hexMatch = HEX_COLOR_PATTERN.exec(rawVal);
               if (hexMatch) {
                 context.report({
@@ -384,7 +406,29 @@ export default tseslint.config(
       "no-duplicate-imports": "error",
 
       // --- Material Design 3 Theming & Elevation Architecture ---
-      "m3-theme/no-action-as-container-background": "error",
+      "m3-theme/no-action-as-container-background": [
+        "error",
+        {
+          allowed: ["rgba(0, 0, 0,"],
+        },
+      ],
+      "m3-theme/allowed-theme-colors": [
+        "error",
+        {
+          allowed: [
+            "rgba(0, 0, 0,",
+            "rgba(0,0,0,",
+            "rgba(0, 43, 54,",
+            "rgba(0, 255, 102,",
+            "rgba(0, 229, 255,",
+            "rgba(255, 255, 255,",
+            "rgba(255,255,255,",
+            "rgba(42, 161, 152,",
+            "rgba(42,161,152,",
+            "#00ff66",
+          ],
+        },
+      ],
       "m3-theme/no-static-role-colors": "error",
       "m3-theme/no-alpha-paper-surface": "off",
       "m3-theme/no-dark-mode-black-shadow": "off",
@@ -518,33 +562,9 @@ export default tseslint.config(
             "Do not access `SOLARIZED_BASE` directly. Use CSS variables or theme-level semantic tokens instead of low-level color primitives.",
         },
         {
-          selector:
-            "Literal[value=/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
-          message:
-            "Hardcoded hex color literal detected. Use MUI theme semantic tokens or CSS variables instead.",
-        },
-        {
-          selector:
-            "TemplateElement[value.raw=/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
-          message:
-            "Hardcoded hex color in template string detected. Use MUI theme semantic tokens or CSS variables instead.",
-        },
-        {
           selector: "Identifier[name=/^(ROLE_COLORS|DEFAULT_ROLE_COLORS)$/]",
           message:
             "Static `ROLE_COLORS` is forbidden in UI code. Use `theme.palette.roles` from the MUI theme to support dynamic theming and debug modes.",
-        },
-        {
-          selector:
-            "Literal[value=/^(rgb|hsl)a?\\(/]:not([value=/rgba\\(0,\\s*0,\\s*0,/])",
-          message:
-            "Hardcoded rgb/hsl color literal detected. Use MUI theme semantic tokens or CSS variables instead.",
-        },
-        {
-          selector:
-            "TemplateElement[value.raw=/^(rgb|hsl)a?\\(/]:not([value.raw=/rgba\\(0,\\s*0,\\s*0,/])",
-          message:
-            "Hardcoded rgb/hsl color in template string detected. Use MUI theme semantic tokens or CSS variables instead.",
         },
       ],
 
@@ -796,6 +816,7 @@ export default tseslint.config(
       "m3-theme/no-hardcoded-box-shadow": "off",
       "m3-theme/no-raw-svg-icons": "off",
       "m3-theme/enforce-rounded-icons": "off",
+      "m3-theme/allowed-theme-colors": "off",
     },
   },
 
@@ -830,6 +851,7 @@ export default tseslint.config(
       "m3-theme/no-hardcoded-box-shadow": "off",
       "m3-theme/no-raw-svg-icons": "off",
       "m3-theme/enforce-rounded-icons": "off",
+      "m3-theme/allowed-theme-colors": "off",
       "sonarjs/no-duplicate-string": "off",
       "sonarjs/cognitive-complexity": "off",
       "sonarjs/no-identical-functions": "off",
@@ -880,6 +902,8 @@ export default tseslint.config(
     rules: {
       ...storybookPlugin.configs.recommended.rules,
       "no-restricted-syntax": "off",
+      "m3-theme/no-action-as-container-background": "off",
+      "m3-theme/allowed-theme-colors": "off",
       complexity: "off",
       "sonarjs/no-duplicate-string": "off",
       "sonarjs/cognitive-complexity": "off",
