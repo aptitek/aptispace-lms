@@ -203,6 +203,7 @@ describe("CalendarSheet Molecule", () => {
         React.createElement(CalendarSheet, {
           date: referenceDate,
           orientation: "horizontal",
+          referenceDate,
         }),
       );
 
