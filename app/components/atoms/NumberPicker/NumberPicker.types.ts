@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { SxProps, Theme } from "@mui/material/styles";
 
 export type NumberPickerMode = "single" | "range";
+export type RangePickerVariant = "unified" | "split";
 
 export interface NumberPickerProps {
   /**
@@ -11,6 +12,14 @@ export interface NumberPickerProps {
    * @default "single"
    */
   mode?: NumberPickerMode;
+
+  /**
+   * Layout variant for range mode:
+   * - "unified": A single MD3 outlined input with dual seamless inputs inside
+   * - "split": Two separate linked SingleNumberPicker fields side-by-side
+   * @default "unified"
+   */
+  variant?: RangePickerVariant;
 
   // --- Single mode props ---
   value?: number | string;
@@ -40,7 +49,10 @@ export interface NumberPickerProps {
   onStartYearMaxChange?: (year: number | null) => void;
 
   // Common props
+  shrink?: boolean;
   size?: "small" | "medium";
+  disabled?: boolean;
+  fullWidth?: boolean;
   className?: string;
   sx?: SxProps<Theme>;
   testId?: string;
