@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { action } from "./api.errors.report";
+import { action } from "./report";
 
 function makeActionArgs(request: Request, customContext: unknown = {}) {
   return {

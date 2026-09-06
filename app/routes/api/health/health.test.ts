@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { loader } from "./api.health";
+import { loader } from "./health";
 import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 
 function createMockD1Database(shouldFail = false): D1Database {

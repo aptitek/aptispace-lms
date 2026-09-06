@@ -6,7 +6,7 @@ import {
   formatAccountFromDb,
   handleCreateUser,
   type CreateUserBody,
-} from "~/routes/api.users";
+} from "~/routes/api/users/users";
 
 function isDevOrAdmin(sessionRole?: string): boolean {
   const isDev =

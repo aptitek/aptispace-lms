@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { loader, action } from "./api.dev.personas";
+import { loader, action } from "./personas";
 import * as sessionServer from "~/utils/session.server";
 import * as userService from "~/services/userService";
 import * as dbModule from "~/db";
-import * as apiUsersModule from "./api.users";
+import * as apiUsersModule from "../users/users";
 
 function makeLoaderArgs(request: Request, context: unknown = {}) {
   return {

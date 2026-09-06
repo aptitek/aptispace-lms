@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { loader } from "./api.calendar.$token[.]ics";
+import { loader } from "./calendar.$token[.]ics";
 import * as classService from "~/services/classService";
 import * as dbModule from "~/db";
 

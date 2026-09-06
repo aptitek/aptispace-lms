@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { loader, action } from "./api.profile";
+import { loader, action } from "./profile";
 import * as sessionServer from "~/utils/session.server";
 
 function makeLoaderArgs(request: Request, context: unknown = {}) {

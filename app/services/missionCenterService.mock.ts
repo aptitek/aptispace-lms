@@ -4,7 +4,10 @@ import type {
   SystemMetricsData,
 } from "~/types/missionCenter";
 import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
-import { getDefaultAdmins, getDefaultStudents } from "~/routes/admin.helpers";
+import {
+  getDefaultAdmins,
+  getDefaultStudents,
+} from "~/routes/admin/admin.helpers";
 
 export function getMockAdminUser(): EntityCardData {
   const admins = getDefaultAdmins();

@@ -1,13 +1,14 @@
 import { styled } from "@mui/material/styles";
 
 export const PageRoot = styled("div")({
-  minHeight: "100vh",
+  flex: 1,
+  width: "100%",
   display: "flex",
   flexDirection: "column",
   position: "relative",
 });
 
-export const AdminMainWorkspace = styled("main")(({ theme }) => ({
+export const AdminMainWorkspace = styled("div")(({ theme }) => ({
   flex: 1,
   display: "flex",
   flexDirection: "column",

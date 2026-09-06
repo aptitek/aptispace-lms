@@ -26,11 +26,15 @@ import type {
 import type { EntityCardData } from "~/components/molecules/EntityCard/EntityCard.types";
 import type { AuthUser } from "~/utils/auth";
 import { resolveR2Bucket } from "~/utils/r2.server";
-import { probeD1, probeR2, resolveOverallStatus } from "~/routes/api.health";
+import {
+  probeD1,
+  probeR2,
+  resolveOverallStatus,
+} from "~/routes/api/health/health";
 import {
   mapDbUserToStudent,
   type DbUserWithAffil,
-} from "~/routes/admin.helpers";
+} from "~/routes/admin/admin.helpers";
 import {
   getMockAuditLogs,
   getMockErrorReports,

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { loader, action } from "./api.users";
+import { loader, action } from "./users";
 import * as sessionServer from "~/utils/session.server";
 import * as userService from "~/services/userService";
 

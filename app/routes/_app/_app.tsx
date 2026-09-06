@@ -1,7 +1,7 @@
 import React from "react";
 import { styled } from "@mui/material/styles";
 import { Outlet, useLoaderData, type LoaderFunctionArgs } from "react-router";
-import Header from "~/components/organisms/Header/Header";
+import Sidebar from "~/components/organisms/Sidebar/Sidebar";
 import Footer from "~/components/organisms/Footer/Footer";
 import { authGuard } from "~/utils/session.server";
 import { logout, resolveActiveUser } from "~/utils/auth";
@@ -23,20 +23,26 @@ const AppShellRoot = styled("div")(({ theme }) => ({
   minHeight: "100vh",
   width: "100%",
   display: "flex",
-  flexDirection: "column",
-  justifyContent: "space-between",
+  position: "relative",
   backgroundColor: theme.palette.background.default,
   color: theme.palette.text.primary,
   boxSizing: "border-box",
 }));
 
-const AppShellMain = styled("main")({
+const AppShellMain = styled("main")(({ theme }) => ({
   flex: 1,
   display: "flex",
   flexDirection: "column",
-  width: "100%",
+  width: `calc(100% - ${theme.spacing(9)})`,
+  marginLeft: theme.spacing(9),
+  minHeight: "100vh",
   boxSizing: "border-box",
-});
+  position: "relative",
+  [theme.breakpoints.down("sm")]: {
+    width: `calc(100% - ${theme.spacing(9)})`,
+    marginLeft: theme.spacing(9),
+  },
+}));
 
 export default function AppLayout() {
   const { user } = useLoaderData<typeof loader>();
@@ -47,16 +53,15 @@ export default function AppLayout() {
 
   return (
     <AppShellRoot data-testid="app-shell-root">
-      <Header
-        mode="full"
+      <Sidebar
         user={user}
         onLogout={handleLogout}
-        data-testid="app-shell-header"
+        data-testid="app-shell-sidebar"
       />
-      <AppShellMain>
+      <AppShellMain data-testid="app-shell-main">
         <Outlet context={{ user }} />
       </AppShellMain>
-      <Footer />
+      <Footer data-testid="app-shell-footer" />
     </AppShellRoot>
   );
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { action } from "./api.avatars.upload";
+import { action } from "./upload";
 
 function makeActionArgs(request: Request, customContext: unknown = {}) {
   return {

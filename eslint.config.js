@@ -262,7 +262,7 @@ export default tseslint.config(
         { type: "molecules", pattern: "molecules/*", base: "app/components" },
         { type: "organisms", pattern: "organisms/*", base: "app/components" },
         { type: "templates", pattern: "templates/*", base: "app/components" },
-        { type: "pages", pattern: "routes/*", base: "app" },
+        { type: "pages", pattern: "routes/**", base: "app" },
         { type: "tokens", pattern: "tokens/*", base: "app" },
         {
           type: "shared",

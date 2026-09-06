@@ -1,66 +1,36 @@
 import { styled, alpha, type Theme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import Chip from "~/components/atoms/Chip/Chip";
-import StatusGatewayTrigger from "~/components/molecules/StatusCenter/StatusGatewayTrigger";
 
 export interface FooterProps {
   className?: string;
+  "data-testid"?: string;
 }
 
-const FooterRoot = styled("footer")(({ theme }) => ({
-  position: "relative",
-  zIndex: 1,
-  width: "100%",
-  padding: theme.spacing(2, 4),
+const FloatingFooterRoot = styled("footer")(({ theme }) => ({
+  position: "fixed",
+  bottom: 16,
+  right: 24,
+  zIndex: 1000,
   display: "flex",
   alignItems: "center",
-  justifyContent: "space-between",
-  fontSize: theme.typography.caption.fontSize ?? "0.75rem",
-  color: theme.palette.text.secondary,
+  pointerEvents: "none",
   boxSizing: "border-box",
-  borderTop: `1px solid ${theme.palette.divider}`,
-  backgroundColor:
-    theme.palette.surfaceContainer || theme.palette.background.paper,
-  backdropFilter: "blur(12px)",
 
-  [theme.breakpoints.down("md")]: {
-    flexDirection: "column",
-    gap: theme.spacing(1.5),
-    padding: theme.spacing(2),
-    textAlign: "center",
+  [theme.breakpoints.down("sm")]: {
+    bottom: 12,
+    right: 16,
   },
 }));
 
-const FooterLeft = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  flexWrap: "wrap",
-}));
-
-const CopyrightText = styled("span")(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  fontSize: "0.75rem",
-}));
-
-const FooterRight = styled("div")({
-  display: "flex",
-  alignItems: "center",
-  gap: "8px",
-});
-
-export default function Footer({ className }: FooterProps) {
+export default function Footer({
+  className,
+  "data-testid": dataTestId = "footer-container",
+}: FooterProps) {
   const { t } = useTranslation(["common", "meta"]);
-  const currentYear = new Date().getFullYear();
 
   return (
-    <FooterRoot className={className} data-testid="footer-container">
-      <FooterLeft>
-        <CopyrightText>
-          &copy; {currentYear} {t("meta:appName", "Aptispace LMS")}.{" "}
-          {t("allRightsReserved", "All rights reserved.")}
-        </CopyrightText>
-      </FooterLeft>
+    <FloatingFooterRoot className={className} data-testid={dataTestId}>
       <Chip
         label={t("craftedBy", "Crafted by Aptitek")}
         image="/aptitek-logo.svg"
@@ -78,28 +48,40 @@ export default function Footer({ className }: FooterProps) {
         testId="crafted-by-chip"
         aria-label={t("craftedByAria", "Crafted by Aptitek")}
         sx={{
+          pointerEvents: "auto",
           height: 28,
           px: 0.5,
           borderRadius: "8px",
           backgroundColor: (theme: Theme) =>
-            alpha(theme.palette.background.paper, 0.95),
-          borderColor: (theme: Theme) => alpha(theme.palette.divider, 0.7),
+            alpha(theme.palette.background.paper, 0.85),
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          borderColor: (theme: Theme) => alpha(theme.palette.divider, 0.6),
+          boxShadow: (theme: Theme) =>
+            `0 4px 16px ${alpha(theme.palette.common.black, 0.1)}`,
           color: "text.primary",
           fontWeight: 600,
           fontSize: "0.75rem",
           letterSpacing: "0.02em",
           textDecoration: "none",
           cursor: "pointer",
+          transition: "all 150ms cubic-bezier(0.2, 0, 0, 1)",
           "&:hover": {
             backgroundColor: (theme: Theme) =>
-              alpha(theme.palette.primary.main, 0.1),
+              alpha(theme.palette.primary.main, 0.12),
             borderColor: (theme: Theme) => theme.palette.primary.main,
+            transform: "translateY(-1px)",
+            boxShadow: (theme: Theme) =>
+              `0 6px 20px ${alpha(theme.palette.primary.main, 0.2)}`,
           },
+          ...(theme: Theme) =>
+            theme.applyStyles("dark", {
+              backgroundColor: alpha(theme.palette.background.paper, 0.8),
+              borderColor: alpha(theme.palette.divider, 0.4),
+              boxShadow: `0 4px 18px ${alpha(theme.palette.common.black, 0.4)}`,
+            }),
         }}
       />
-      <FooterRight>
-        <StatusGatewayTrigger />
-      </FooterRight>
-    </FooterRoot>
+    </FloatingFooterRoot>
   );
 }
