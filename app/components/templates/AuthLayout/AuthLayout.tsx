@@ -1,15 +1,20 @@
 import type { ReactNode } from "react";
 import { styled } from "@mui/material/styles";
+import Box from "@mui/material/Box";
 import Galaxy from "~/components/organisms/Galaxy/Galaxy";
-import Header, { type HeaderMode } from "~/components/organisms/Header/Header";
+import Sidebar, { type SidebarVariant } from "~/components/organisms/Sidebar";
 import Footer from "~/components/organisms/Footer/Footer";
 import type { AuthUser } from "~/utils/auth";
+
+export type HeaderMode = "subtle" | "full";
 
 export interface AuthLayoutProps {
   children: ReactNode;
   headerMode?: HeaderMode;
+  sidebarVariant?: SidebarVariant;
   user?: AuthUser | null;
   onLogout?: () => void;
+  onReturnToAdmin?: () => void;
   headerChildren?: ReactNode;
   showGalaxy?: boolean;
 }
@@ -58,9 +63,10 @@ const ContentWrapper = styled("main")(({ theme }) => ({
 
 export default function AuthLayout({
   children,
-  headerMode = "subtle",
+  sidebarVariant = "auth",
   user,
   onLogout,
+  onReturnToAdmin,
   headerChildren,
   showGalaxy = true,
 }: AuthLayoutProps) {
@@ -79,9 +85,19 @@ export default function AuthLayout({
         </CanvasBackdrop>
       )}
 
-      <Header mode={headerMode} user={user} onLogout={onLogout}>
-        {headerChildren}
-      </Header>
+      <Sidebar
+        variant={sidebarVariant}
+        user={user}
+        onLogout={onLogout}
+        onReturnToAdmin={onReturnToAdmin}
+        data-testid="auth-sidebar"
+      />
+
+      {headerChildren && (
+        <Box sx={{ position: "absolute", top: 16, right: 24, zIndex: 10 }}>
+          {headerChildren}
+        </Box>
+      )}
 
       <ContentWrapper>{children}</ContentWrapper>
 

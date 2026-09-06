@@ -1,4 +1,4 @@
-import React, {
+import {
   forwardRef,
   useState,
   useCallback,
@@ -6,16 +6,49 @@ import React, {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { styled } from "@mui/material/styles";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, type HTMLMotionProps } from "framer-motion";
 import { M3_SPRINGS } from "~/tokens/motion";
+import {
+  type SwitchSize,
+  type SwitchSizeConfig,
+  SWITCH_SIZE_CONFIGS,
+  SwitchTrack,
+  SwitchThumb,
+  SwitchRippleLayer,
+  filterDollarProp,
+} from "./Switch.styles";
 
-export interface MD3SwitchProps {
+export type { SwitchSize, SwitchSizeConfig };
+export {
+  SWITCH_SIZE_CONFIGS,
+  SwitchTrack,
+  SwitchThumb,
+  SwitchRippleLayer,
+  filterDollarProp,
+};
+
+export interface SwitchRenderProps {
+  isChecked: boolean;
+  isHovered: boolean;
+  isPressed: boolean;
+  disabled: boolean;
+  size: SwitchSize;
+  cfg: SwitchSizeConfig;
+}
+
+export interface MD3SwitchProps extends Omit<
+  HTMLMotionProps<"button">,
+  "size" | "onChange" | "children" | "ref"
+> {
   checked?: boolean;
   defaultChecked?: boolean;
   onChange?: (checked: boolean) => void;
   disabled?: boolean;
-  icon?: ReactNode | ((checked: boolean) => ReactNode);
+  size?: SwitchSize;
+  icon?:
+    | ReactNode
+    | ((checked: boolean, renderProps: SwitchRenderProps) => ReactNode);
+  children?: ReactNode | ((renderProps: SwitchRenderProps) => ReactNode);
   className?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;
@@ -23,117 +56,30 @@ export interface MD3SwitchProps {
   id?: string;
 }
 
-const filterDollarProp = (prop: PropertyKey) =>
-  typeof prop === "string" && !prop.startsWith("$");
-
-const Track = styled(motion.button, {
-  shouldForwardProp: filterDollarProp,
-})<{
-  $checked: boolean;
-  $disabled: boolean;
-}>(({ theme, $checked, $disabled }) => {
-  const primary = theme.palette.primary.main;
-  const outline = theme.palette.text.secondary;
-  const surfaceContainerHighest =
-    theme.palette.surfaceContainerHighest || theme.palette.background.paper;
-
-  return {
-    position: "relative",
-    display: "inline-flex",
-    alignItems: "center",
-    width: 52,
-    height: 32,
-    padding: 0,
-    borderRadius: 16,
-    cursor: $disabled ? "not-allowed" : "pointer",
-    boxSizing: "border-box",
-    border: $checked ? `2px solid ${primary}` : `2px solid ${outline}`,
-    backgroundColor: $checked ? primary : surfaceContainerHighest,
-    opacity: $disabled ? 0.38 : 1,
-    outline: "none",
-    userSelect: "none",
-    WebkitTapHighlightColor: "transparent",
-    transition:
-      "background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease",
-
-    "&:focus-visible": {
-      boxShadow: `0 0 0 2px ${theme.palette.background.default}, 0 0 0 4px ${primary}`,
-    },
-  };
-});
-
-const Thumb = styled(motion.span, {
-  shouldForwardProp: filterDollarProp,
-})<{
-  $checked: boolean;
-  $isPressed: boolean;
-  $hasIcon: boolean;
-}>(({ theme, $checked, $hasIcon }) => {
-  const onPrimary =
-    theme.palette.primary.contrastText || theme.palette.common.white;
-  const outline = theme.palette.text.secondary;
-
-  return {
-    position: "absolute",
-    left: 4,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: "50%",
-    backgroundColor: $checked ? onPrimary : outline,
-    color: $checked
-      ? theme.palette.primary.main
-      : theme.palette.background.paper,
-    pointerEvents: "none",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.2)",
-    ...theme.applyStyles("dark", {
-      boxShadow: "0 0 0 1px rgba(255, 255, 255, 0.12)",
-    }),
-    svg: {
-      width: $checked || $hasIcon ? 14 : 12,
-      height: $checked || $hasIcon ? 14 : 12,
-    },
-  };
-});
-
-const RippleStateLayer = styled(motion.span, {
-  shouldForwardProp: filterDollarProp,
-})<{
-  $checked: boolean;
-}>(({ theme, $checked }) => ({
-  position: "absolute",
-  width: 40,
-  height: 40,
-  borderRadius: "50%",
-  backgroundColor: $checked
-    ? theme.palette.primary.main
-    : theme.palette.text.primary,
-  opacity: 0.1,
-  pointerEvents: "none",
-}));
-
-function resolveThumbMetrics(
-  isChecked: boolean,
-  hasIcon: boolean,
-  isPressed: boolean,
-) {
-  const size = isPressed ? 26 : isChecked ? 24 : hasIcon ? 20 : 16;
-  const travelX = isChecked ? 20 : hasIcon ? 2 : 4;
-  return { size, travelX };
-}
-
-interface SwitchControllerOptions {
+export interface SwitchControllerOptions {
   controlledChecked?: boolean;
   defaultChecked?: boolean;
   disabled?: boolean;
   onChange?: (checked: boolean) => void;
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+  onKeyDown?: (e: KeyboardEvent<HTMLButtonElement>) => void;
+  onMouseEnter?: (e: MouseEvent<HTMLButtonElement>) => void;
+  onMouseLeave?: (e: MouseEvent<HTMLButtonElement>) => void;
+  onMouseDown?: (e: MouseEvent<HTMLButtonElement>) => void;
+  onMouseUp?: (e: MouseEvent<HTMLButtonElement>) => void;
 }
 
-function useSwitchController({
+export function useSwitchController({
   controlledChecked,
   defaultChecked = false,
   disabled = false,
   onChange,
+  onClick,
+  onKeyDown,
+  onMouseEnter,
+  onMouseLeave,
+  onMouseDown,
+  onMouseUp,
 }: SwitchControllerOptions) {
   const [uncontrolledChecked, setUncontrolledChecked] =
     useState(defaultChecked);
@@ -153,15 +99,40 @@ function useSwitchController({
   }, [disabled, isChecked, controlledChecked, onChange]);
 
   const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    handleToggle();
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === " " || e.key === "Enter") {
+    onClick?.(e);
+    if (!e.defaultPrevented) {
       e.preventDefault();
       handleToggle();
     }
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+    onKeyDown?.(e);
+    if (!e.defaultPrevented && (e.key === " " || e.key === "Enter")) {
+      e.preventDefault();
+      handleToggle();
+    }
+  };
+
+  const handleMouseEnter = (e: MouseEvent<HTMLButtonElement>) => {
+    setIsHovered(true);
+    onMouseEnter?.(e);
+  };
+
+  const handleMouseLeave = (e: MouseEvent<HTMLButtonElement>) => {
+    setIsHovered(false);
+    setIsPressed(false);
+    onMouseLeave?.(e);
+  };
+
+  const handleMouseDown = (e: MouseEvent<HTMLButtonElement>) => {
+    setIsPressed(true);
+    onMouseDown?.(e);
+  };
+
+  const handleMouseUp = (e: MouseEvent<HTMLButtonElement>) => {
+    setIsPressed(false);
+    onMouseUp?.(e);
   };
 
   return {
@@ -170,9 +141,60 @@ function useSwitchController({
     isPressed,
     setIsHovered,
     setIsPressed,
+    handleToggle,
     handleClick,
     handleKeyDown,
+    handleMouseEnter,
+    handleMouseLeave,
+    handleMouseDown,
+    handleMouseUp,
   };
+}
+
+export function resolveThumbMetrics(
+  cfg: SwitchSizeConfig,
+  isChecked: boolean,
+  hasIcon: boolean,
+  isPressed: boolean,
+) {
+  const size = isPressed
+    ? cfg.thumbSize + 2
+    : isChecked || hasIcon
+      ? cfg.thumbSize
+      : cfg.thumbSizeUnchecked;
+
+  const insetDiff = (cfg.thumbSize - size) / 2;
+  const travelX = isChecked ? cfg.travelX : insetDiff;
+  const offsetY = isChecked || hasIcon ? 0 : insetDiff;
+
+  return { size, travelX, offsetY };
+}
+
+function renderSwitchIcon(
+  icon: MD3SwitchProps["icon"],
+  isChecked: boolean,
+  renderProps: SwitchRenderProps,
+) {
+  if (typeof icon === "function") {
+    return icon(isChecked, renderProps);
+  }
+  return icon;
+}
+
+function renderSwitchChildren(
+  children: MD3SwitchProps["children"],
+  renderProps: SwitchRenderProps,
+) {
+  if (typeof children === "function") {
+    return children(renderProps);
+  }
+  return children;
+}
+
+function extractCleanDomProps(restProps: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(restProps).filter(([key]) => !key.startsWith("$")),
+  );
 }
 
 /**
@@ -182,36 +204,77 @@ export const Switch = forwardRef<HTMLButtonElement, MD3SwitchProps>(
   (props, ref) => {
     const {
       checked: controlledChecked,
-      defaultChecked = false,
+      defaultChecked,
       onChange,
-      disabled = false,
+      disabled,
+      size = "medium",
       icon,
+      children,
       className,
       "aria-label": ariaLabel,
       "aria-labelledby": ariaLabelledBy,
       "data-testid": dataTestId = "md3-switch",
       id,
+      onClick,
+      onKeyDown,
+      onMouseEnter,
+      onMouseLeave,
+      onMouseDown,
+      onMouseUp,
+      ...restProps
     } = props;
+
+    const isSwitchDisabled = Boolean(disabled);
+    const cfg = SWITCH_SIZE_CONFIGS[size] ?? SWITCH_SIZE_CONFIGS.medium;
 
     const controller = useSwitchController({
       controlledChecked,
       defaultChecked,
-      disabled,
+      disabled: isSwitchDisabled,
       onChange,
+      onClick,
+      onKeyDown,
+      onMouseEnter,
+      onMouseLeave,
+      onMouseDown,
+      onMouseUp,
     });
 
     const hasIcon = Boolean(icon);
-    const { size: thumbSize, travelX: thumbTravelX } = resolveThumbMetrics(
+    const {
+      size: thumbSize,
+      travelX: thumbTravelX,
+      offsetY: thumbOffsetY,
+    } = resolveThumbMetrics(
+      cfg,
       controller.isChecked,
       hasIcon,
       controller.isPressed,
     );
 
-    const renderedIcon =
-      typeof icon === "function" ? icon(controller.isChecked) : icon;
+    const renderProps: SwitchRenderProps = {
+      isChecked: controller.isChecked,
+      isHovered: controller.isHovered,
+      isPressed: controller.isPressed,
+      disabled: isSwitchDisabled,
+      size,
+      cfg,
+    };
+
+    const renderedIcon = renderSwitchIcon(
+      icon,
+      controller.isChecked,
+      renderProps,
+    );
+    const renderedChildren = renderSwitchChildren(children, renderProps);
+    const cleanDomProps = extractCleanDomProps(restProps);
+    const trackClassName = className
+      ? `md3-switch-track ${className}`
+      : "md3-switch-track";
+    const tapAnimation = isSwitchDisabled ? undefined : { scale: 0.96 };
 
     return (
-      <Track
+      <SwitchTrack
         ref={ref}
         id={id}
         type="button"
@@ -219,52 +282,54 @@ export const Switch = forwardRef<HTMLButtonElement, MD3SwitchProps>(
         aria-checked={controller.isChecked}
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
-        disabled={disabled}
+        disabled={isSwitchDisabled}
+        $cfg={cfg}
         $checked={controller.isChecked}
-        $disabled={disabled}
-        className={className}
+        $disabled={isSwitchDisabled}
+        className={trackClassName}
         data-testid={dataTestId}
         onClick={controller.handleClick}
         onKeyDown={controller.handleKeyDown}
-        onMouseEnter={() => controller.setIsHovered(true)}
-        onMouseLeave={() => {
-          controller.setIsHovered(false);
-          controller.setIsPressed(false);
-        }}
-        onMouseDown={() => controller.setIsPressed(true)}
-        onMouseUp={() => controller.setIsPressed(false)}
-        whileTap={disabled ? undefined : { scale: 0.96 }}
+        onMouseEnter={controller.handleMouseEnter}
+        onMouseLeave={controller.handleMouseLeave}
+        onMouseDown={controller.handleMouseDown}
+        onMouseUp={controller.handleMouseUp}
+        whileTap={tapAnimation}
+        {...cleanDomProps}
       >
         <AnimatePresence>
-          {controller.isHovered && !disabled && (
-            <RippleStateLayer
+          {controller.isHovered && !isSwitchDisabled && (
+            <SwitchRippleLayer
+              className="md3-switch-ripple"
+              $cfg={cfg}
               $checked={controller.isChecked}
               initial={{ opacity: 0, scale: 0.6 }}
-              animate={{
-                opacity: 0.12,
-                scale: 1,
-                x: thumbTravelX - 8,
-              }}
+              animate={{ opacity: 0.12, scale: 1 }}
               exit={{ opacity: 0, scale: 0.6 }}
               transition={M3_SPRINGS.expressive.effects.fast}
             />
           )}
         </AnimatePresence>
 
-        <Thumb
+        {renderedChildren}
+
+        <SwitchThumb
+          className="md3-switch-thumb"
+          $cfg={cfg}
           $checked={controller.isChecked}
           $isPressed={controller.isPressed}
           $hasIcon={hasIcon}
           animate={{
             x: thumbTravelX,
+            y: thumbOffsetY,
             width: thumbSize,
             height: thumbSize,
           }}
           transition={M3_SPRINGS.switchThumb}
         >
           {renderedIcon}
-        </Thumb>
-      </Track>
+        </SwitchThumb>
+      </SwitchTrack>
     );
   },
 );

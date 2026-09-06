@@ -1,16 +1,13 @@
+import React from "react";
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
-import InputAdornment from "@mui/material/InputAdornment";
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
-import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
-import YearRangePicker from "~/components/molecules/YearRangePicker/YearRangePicker";
+
+import FilterBar from "~/components/molecules/FilterBar/FilterBar";
+import Select from "~/components/atoms/Select/Select";
+import NumberPicker from "~/components/atoms/NumberPicker/NumberPicker";
+import { SearchField } from "~/components/atoms/TextField/TextField";
 import {
   DIPLOMA_OPTIONS,
   COMMON_SPECIALTY_TAGS,
@@ -49,27 +46,6 @@ function checkHasActiveFilters(criteria: ActiveFilterCriteria): boolean {
   if (criteria.yearFilter !== "all" && criteria.yearFilter !== "") return true;
   if (criteria.tagFilter !== "all") return true;
   return criteria.startYearMin !== null || criteria.startYearMax !== null;
-}
-
-function computeNextIncrementYear(yearFilter: string | number): number {
-  if (yearFilter === "all" || yearFilter === "") return 1;
-  const current = Number(yearFilter);
-  return current < 20 ? current + 1 : current;
-}
-
-function computeNextDecrementYear(
-  yearFilter: string | number,
-): string | number {
-  if (yearFilter === "all" || yearFilter === "") return 0;
-  const current = Number(yearFilter);
-  return current > 0 ? current - 1 : "all";
-}
-
-function parseCohortYearFilterInput(text: string): string | number {
-  const raw = text.trim();
-  if (raw === "" || raw.toLowerCase() === "all") return "all";
-  const num = parseInt(raw, 10);
-  return !isNaN(num) && num >= 0 && num <= 20 ? num : "all";
 }
 
 export function CohortFilterBar({
@@ -113,189 +89,105 @@ export function CohortFilterBar({
     if (onStartYearMaxChange) onStartYearMaxChange(null);
   };
 
-  const endAdornment = query ? (
-    <InputAdornment position="end">
-      <IconButton
-        size="small"
-        onClick={() => onQueryChange("")}
-        aria-label={t("common:clearSearch", "Clear search")}
-      >
-        <ClearRoundedIcon sx={{ fontSize: 16 }} />
-      </IconButton>
-    </InputAdornment>
-  ) : null;
-
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 1.5,
-        alignItems: "center",
-        width: "100%",
-        p: 2,
-        mb: 2.5,
-        borderRadius: "12px",
-        bgcolor: "background.paper",
-        border: "1px solid",
-        borderColor: "divider",
-      }}
-      data-testid={testId}
-    >
-      {/* Diploma Filter */}
-      <TextField
-        select
-        size="small"
+    <FilterBar testId={testId}>
+      {/* Diploma Filter using MD3 Select Atom */}
+      <Select
         label={t("diplomas.title", "Diploma")}
         value={diplomaFilter}
-        onChange={(e) => onDiplomaFilterChange(e.target.value)}
-        sx={{ minWidth: 150 }}
-        data-testid="cohort-diploma-filter"
-      >
-        <MenuItem value="all">
-          <em>{t("diplomas.all", "All Diplomas")}</em>
-        </MenuItem>
-        {DIPLOMA_OPTIONS.map((opt) => (
-          <MenuItem key={opt.code} value={opt.code}>
-            {opt.code} – {t(opt.labelKey, opt.defaultLabel)}
-          </MenuItem>
-        ))}
-      </TextField>
-
-      {/* Year Filter: Number field with -+ */}
-      <TextField
-        size="small"
-        label={t("cohortYear.title", "Year")}
-        placeholder={t("cohortYear.all", "All")}
-        value={yearFilter === "all" ? "" : yearFilter}
-        onChange={(e) =>
-          onYearFilterChange(parseCohortYearFilterInput(e.target.value))
-        }
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <IconButton
-                  size="small"
-                  onClick={() =>
-                    onYearFilterChange(computeNextDecrementYear(yearFilter))
-                  }
-                  aria-label={t("cohortYear.decrease", "Decrease year")}
-                  sx={{ p: 0.5 }}
-                  data-testid="cohort-year-decrement"
-                >
-                  <RemoveRoundedIcon sx={{ fontSize: 16 }} />
-                </IconButton>
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  size="small"
-                  onClick={() =>
-                    onYearFilterChange(computeNextIncrementYear(yearFilter))
-                  }
-                  aria-label={t("cohortYear.increase", "Increase year")}
-                  sx={{ p: 0.5 }}
-                  data-testid="cohort-year-increment"
-                >
-                  <AddRoundedIcon sx={{ fontSize: 16 }} />
-                </IconButton>
-              </InputAdornment>
-            ),
+        onChange={onDiplomaFilterChange}
+        minWidth={150}
+        testId="cohort-diploma-filter"
+        options={[
+          {
+            value: "all",
+            label: <em>{t("diplomas.all", "All Diplomas")}</em>,
           },
-          htmlInput: {
-            inputMode: "numeric",
-            pattern: "[0-9]*",
-            style: { textAlign: "center" },
-            "data-testid": "cohort-year-filter",
-          },
-        }}
-        sx={{
-          width: 140,
-          "& input": { textAlign: "center" },
-        }}
-        data-testid="cohort-year-filter-container"
+          ...DIPLOMA_OPTIONS.map((opt) => ({
+            value: opt.code,
+            label: `${opt.code} – ${t(opt.labelKey, opt.defaultLabel)}`,
+          })),
+        ]}
       />
 
-      {/* Start Year Range Filter */}
+      {/* Year Filter using modular NumberPicker Atom */}
+      <NumberPicker
+        label={t("cohortYear.title", "Year")}
+        placeholder={t("cohortYear.all", "All")}
+        value={yearFilter}
+        onChange={onYearFilterChange}
+        min={0}
+        max={20}
+        testId="cohort-year-filter"
+      />
+
+      {/* Specialty Tag Filter using MD3 Select Atom */}
+      <Select
+        label={t("filterBar.tag", "Specialty")}
+        value={tagFilter}
+        onChange={onTagFilterChange}
+        minWidth={160}
+        testId="cohort-tag-filter"
+        options={[
+          {
+            value: "all",
+            label: <em>{t("filterBar.allTags", "All Specialties")}</em>,
+          },
+          ...allTags.map((tag) => ({
+            value: tag,
+            label: t(`cohortTags.${getSpecialtySlug(tag)}`, tag.toUpperCase()),
+          })),
+        ]}
+      />
+
+      {/* Start Year Range Picker using unified NumberPicker in Range mode */}
       {onStartYearMinChange && onStartYearMaxChange && (
-        <YearRangePicker
+        <NumberPicker
+          mode="range"
           startYearMin={startYearMin}
           startYearMax={startYearMax}
           onStartYearMinChange={onStartYearMinChange}
           onStartYearMaxChange={onStartYearMaxChange}
-          testId="cohort-start-year-range-picker"
+          testId="cohort-year-range"
         />
       )}
 
-      {/* Specialty / Tag Filter */}
-      <TextField
-        select
-        size="small"
-        label={t("specialties.title", "Subject / Specialty")}
-        value={tagFilter}
-        onChange={(e) => onTagFilterChange(e.target.value)}
-        sx={{ minWidth: 170 }}
-        data-testid="cohort-tag-filter"
-      >
-        <MenuItem value="all">
-          <em>{t("specialties.all", "All Subjects")}</em>
-        </MenuItem>
-        {allTags.map((tag) => {
-          const slug = getSpecialtySlug(tag);
-          const label = t(`specialties.${slug}`, tag);
-          return (
-            <MenuItem key={tag} value={tag}>
-              {label !== tag ? `${label} (${tag})` : tag}
-            </MenuItem>
-          );
-        })}
-      </TextField>
-
-      {/* Search Input */}
-      <TextField
-        size="small"
-        placeholder={t(
-          "cohortFilter.searchPlaceholder",
-          "Search cohorts by name, description, tags...",
-        )}
-        value={query}
-        onChange={(e) => onQueryChange(e.target.value)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchRoundedIcon
-                  sx={{ fontSize: 18, color: "text.secondary" }}
-                />
-              </InputAdornment>
-            ),
-            endAdornment,
-          },
-        }}
-        sx={{
-          flex: 1,
-          minWidth: 200,
-        }}
-        data-testid="cohort-search-field"
-      />
-
-      {/* Reset filters button */}
+      {/* Reset / Clear Filters Action */}
       {hasActiveFilters && (
         <Button
           size="small"
-          variant="text"
-          color="secondary"
+          variant="outlined"
+          color="inherit"
+          startIcon={<FilterListRoundedIcon fontSize="small" />}
           onClick={handleClearFilters}
-          startIcon={<FilterListRoundedIcon />}
-          sx={{ textTransform: "none", fontWeight: 600 }}
-          data-testid="cohort-clear-filters-button"
+          sx={{
+            textTransform: "none",
+            borderRadius: "8px",
+            color: "text.secondary",
+            borderColor: "divider",
+            height: 38,
+            px: 1.5,
+          }}
+          data-testid="cohort-clear-filters"
         >
-          {t("cohortFilter.clearFilters", "Clear filters")}
+          {t("common:clearFilters", "Reset")}
         </Button>
       )}
-    </Box>
+
+      <Box sx={{ flexGrow: 1 }} />
+
+      {/* Search using MD3 SearchField Atom */}
+      <SearchField
+        placeholder={t(
+          "filterBar.searchCohortsPlaceholder",
+          "Search cohorts (name, tag, year)...",
+        )}
+        value={query}
+        onChange={(e) => onQueryChange(e.target.value)}
+        sx={{ minWidth: 260 }}
+        testId="cohort-search-input"
+      />
+    </FilterBar>
   );
 }
 

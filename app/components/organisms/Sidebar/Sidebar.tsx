@@ -2,9 +2,9 @@ import React, { useState, useRef, useId, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import Tooltip from "~/components/atoms/Tooltip/Tooltip";
-import LanguageToggle from "~/components/atoms/LanguageToggle/LanguageToggle";
-import ThemeToggle from "~/components/atoms/ThemeToggle/ThemeToggle";
-import DebugThemeToggle from "~/components/atoms/ThemeToggle/DebugThemeToggle";
+import LanguageSwitch from "~/components/molecules/LanguageSwitch/LanguageSwitch";
+import ThemeSwitch from "~/components/molecules/ThemeSwitch/ThemeSwitch";
+import DebugThemeSwitch from "~/components/molecules/ThemeSwitch/DebugThemeSwitch";
 import StatusGatewayTrigger from "~/components/molecules/StatusCenter/StatusGatewayTrigger";
 import {
   DEFAULT_HEADER_TABS,
@@ -222,11 +222,13 @@ function SidebarNavList({
 }
 
 function SidebarBottom({
+  variant,
   user,
   isExtended,
   onOpenProfile,
   onAction,
 }: {
+  variant?: SidebarProps["variant"];
   user?: SidebarProps["user"];
   isExtended: boolean;
   onOpenProfile: () => void;
@@ -241,37 +243,46 @@ function SidebarBottom({
         onAction={onAction}
       />
       <ToggleStackRow data-testid="sidebar-toggles-row">
-        <LanguageToggle size="small" data-testid="sidebar-language-toggle" />
-        <ThemeToggle size="small" data-testid="sidebar-theme-toggle" />
-        <DebugThemeToggle data-testid="sidebar-debug-theme-toggle" />
+        <LanguageSwitch size="small" data-testid="sidebar-language-toggle" />
+        <ThemeSwitch size="small" data-testid="sidebar-theme-toggle" />
+        <DebugThemeSwitch
+          size="small"
+          data-testid="sidebar-debug-theme-toggle"
+        />
       </ToggleStackRow>
-      <StatusCenterSlot data-testid="sidebar-status-slot">
-        <StatusGatewayTrigger showBadge={true} />
-      </StatusCenterSlot>
+      {variant !== "auth" && (
+        <StatusCenterSlot data-testid="sidebar-status-slot">
+          <StatusGatewayTrigger showBadge={true} />
+        </StatusCenterSlot>
+      )}
     </SidebarBottomSection>
   );
 }
 
-export default function Sidebar({
-  user,
-  tabs = DEFAULT_HEADER_TABS,
-  showTabs = true,
-  hoverDelay = DEFAULT_HOVER_EXPAND_DELAY_MS,
-  onLogout,
-  onReturnToAdmin,
-  onUserUpdated,
-  className,
-  "data-testid": dataTestId = "app-sidebar",
-}: SidebarProps) {
-  const { t } = useTranslation("common");
-  const location = useSafeLocation();
-  const navigate = useSafeNavigate();
-  const layoutIdPrefix = useId();
+function executeSidebarAction(
+  user: AuthUser | null | undefined,
+  onReturnToAdmin?: () => void,
+  onLogout?: () => void,
+) {
+  if (user?.impersonating) {
+    if (onReturnToAdmin) {
+      onReturnToAdmin();
+    } else {
+      void stopImpersonation();
+    }
+    return;
+  }
+  if (onLogout) {
+    onLogout();
+  } else {
+    void logout();
+  }
+}
 
+function useSidebarInteractions(hoverDelay: number) {
   const [isHovered, setIsHovered] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -336,8 +347,46 @@ export default function Sidebar({
     setIsClicked(true);
   };
 
-  const isExtended = isHovered || isFocused || isClicked;
-  const visibleTabs = showTabs ? resolveVisibleTabs(tabs, user) : [];
+  return {
+    railRef,
+    isExtended: isHovered || isFocused || isClicked,
+    handleMouseEnter,
+    handleMouseLeave,
+    handleClick,
+    setIsFocused,
+  };
+}
+
+export default function Sidebar({
+  variant = "default",
+  user,
+  tabs = DEFAULT_HEADER_TABS,
+  showTabs,
+  hoverDelay = DEFAULT_HOVER_EXPAND_DELAY_MS,
+  onLogout,
+  onReturnToAdmin,
+  onUserUpdated,
+  className,
+  "data-testid": dataTestId = "app-sidebar",
+}: SidebarProps) {
+  const { t } = useTranslation("common");
+  const location = useSafeLocation();
+  const navigate = useSafeNavigate();
+  const layoutIdPrefix = useId();
+
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  const {
+    railRef,
+    isExtended,
+    handleMouseEnter,
+    handleMouseLeave,
+    handleClick,
+    setIsFocused,
+  } = useSidebarInteractions(hoverDelay);
+
+  const shouldShowTabs = showTabs !== undefined ? showTabs : variant !== "auth";
+  const visibleTabs = shouldShowTabs ? resolveVisibleTabs(tabs, user) : [];
   const activeTabId = resolveActiveTabId(location.pathname, visibleTabs);
 
   const handleTabClick = (tab: HeaderTabItem) => {
@@ -347,19 +396,7 @@ export default function Sidebar({
   };
 
   const handleAction = () => {
-    if (user?.impersonating) {
-      if (onReturnToAdmin) {
-        onReturnToAdmin();
-        return;
-      }
-      void stopImpersonation();
-      return;
-    }
-    if (onLogout) {
-      onLogout();
-      return;
-    }
-    void logout();
+    executeSidebarAction(user, onReturnToAdmin, onLogout);
   };
 
   return (
@@ -369,6 +406,7 @@ export default function Sidebar({
         className={className}
         data-testid={dataTestId}
         $isExtended={isExtended}
+        $variant={variant}
         initial={false}
         animate={{
           width: isExtended ? SIDEBAR_EXTENDED_WIDTH : SIDEBAR_COLLAPSED_WIDTH,
@@ -398,6 +436,7 @@ export default function Sidebar({
           onTabClick={handleTabClick}
         />
         <SidebarBottom
+          variant={variant}
           user={user}
           isExtended={isExtended}
           onOpenProfile={() => setIsProfileModalOpen(true)}

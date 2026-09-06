@@ -222,4 +222,37 @@ describe("Sidebar Component", () => {
     expect(roleBadge.textContent).toContain("ADMIN");
     expect(screen.getByTestId("role-icon-admin")).toBeDefined();
   });
+
+  it("renders correctly in auth variant without tabs or status trigger", () => {
+    renderSidebar({
+      variant: "auth",
+      "data-testid": "auth-sidebar",
+    });
+
+    const sidebar = screen.getByTestId("auth-sidebar");
+    expect(sidebar).toBeDefined();
+    expect(screen.getByTestId("sidebar-favicon")).toBeDefined();
+    expect(screen.queryByRole("tablist")).toBeNull();
+    expect(screen.queryByTestId("sidebar-status-slot")).toBeNull();
+    expect(screen.getByTestId("sidebar-language-toggle")).toBeDefined();
+    expect(screen.getByTestId("sidebar-theme-toggle")).toBeDefined();
+  });
+
+  it("renders auth variant with logged-in user and handles logout", () => {
+    const onLogout = vi.fn();
+    renderSidebar({
+      variant: "auth",
+      user: testStudentUser,
+      onLogout,
+      "data-testid": "auth-sidebar",
+    });
+
+    const sidebar = screen.getByTestId("auth-sidebar");
+    expect(sidebar).toBeDefined();
+    expect(screen.getByTestId("sidebar-user-card")).toBeDefined();
+    fireEvent.click(sidebar);
+    const logoutBtn = screen.getByTestId("sidebar-logout-button");
+    fireEvent.click(logoutBtn);
+    expect(onLogout).toHaveBeenCalled();
+  });
 });

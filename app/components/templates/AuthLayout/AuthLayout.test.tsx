@@ -23,7 +23,7 @@ describe("AuthLayout Template", () => {
     expect(typeof AuthLayout).toBe("function");
   });
 
-  it("renders children, header, footer, and galaxy background by default", () => {
+  it("renders children, auth-sidebar, footer, and galaxy background by default", () => {
     render(
       <I18nextProvider i18n={i18n}>
         <ThemeProvider theme={appTheme}>
@@ -36,6 +36,7 @@ describe("AuthLayout Template", () => {
 
     expect(screen.getByTestId("auth-card")).toBeDefined();
     expect(screen.getByText("Login Form")).toBeDefined();
+    expect(screen.getByTestId("auth-sidebar")).toBeDefined();
     expect(screen.getByTestId("galaxy-mock")).toBeDefined();
   });
 

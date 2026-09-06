@@ -474,17 +474,32 @@ export default tseslint.config(
             {
               name: "~/components/molecules/MapSheet",
               message:
-                "Atomic Design violation: MapSheet is an Organism. Import from '~/components/organisms/MapSheet' instead.",
+                "Atomic Design violation: MapSheet is an Organism. Import from '~/components/organisms/MapCard' instead.",
+            },
+            {
+              name: "~/components/molecules/MapCard",
+              message:
+                "Atomic Design violation: MapCard is an Organism. Import from '~/components/organisms/MapCard' instead.",
             },
             {
               name: "~/components/molecules/TimeSheet",
               message:
-                "Atomic Design violation: TimeSheet is an Organism. Import from '~/components/organisms/TimeSheet' instead.",
+                "Atomic Design violation: TimeSheet is an Organism. Import from '~/components/organisms/ClockCard' instead.",
+            },
+            {
+              name: "~/components/molecules/ClockCard",
+              message:
+                "Atomic Design violation: ClockCard is an Organism. Import from '~/components/organisms/ClockCard' instead.",
             },
             {
               name: "~/components/molecules/CalendarSheet",
               message:
-                "Atomic Design violation: CalendarSheet is an Organism. Import from '~/components/organisms/CalendarSheet' instead.",
+                "Atomic Design violation: CalendarSheet is an Organism. Import from '~/components/organisms/CalendarCard' instead.",
+            },
+            {
+              name: "~/components/molecules/CalendarCard",
+              message:
+                "Atomic Design violation: CalendarCard is an Organism. Import from '~/components/organisms/CalendarCard' instead.",
             },
             {
               name: "~/components/atoms/Avatar/shapes",
@@ -509,17 +524,26 @@ export default tseslint.config(
             {
               group: [
                 "**/molecules/MapSheet**",
+                "**/molecules/MapCard**",
                 "**/molecules/TimeSheet**",
+                "**/molecules/ClockCard**",
                 "**/molecules/CalendarSheet**",
+                "**/molecules/CalendarCard**",
                 "../molecules/MapSheet**",
+                "../molecules/MapCard**",
                 "../molecules/TimeSheet**",
+                "../molecules/ClockCard**",
                 "../molecules/CalendarSheet**",
+                "../molecules/CalendarCard**",
                 "../../molecules/MapSheet**",
+                "../../molecules/MapCard**",
                 "../../molecules/TimeSheet**",
+                "../../molecules/ClockCard**",
                 "../../molecules/CalendarSheet**",
+                "../../molecules/CalendarCard**",
               ],
               message:
-                "Atomic Design violation: MapSheet, TimeSheet, and CalendarSheet are Organisms. Import them from '~/components/organisms/*' instead.",
+                "Atomic Design violation: MapCard, ClockCard, and CalendarCard are Organisms. Import them from '~/components/organisms/*' instead.",
             },
             {
               group: [

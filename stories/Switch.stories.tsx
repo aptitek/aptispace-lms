@@ -78,6 +78,52 @@ export const DebugThemeSwitch: Story = {
   render: () => <DebugSwitchDemo />,
 };
 
+export const Sizes: Story = {
+  render: () => (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Switch size="small" defaultChecked aria-label="Small switch" />
+        <Typography variant="caption" color="text.secondary">
+          Small (46x26)
+        </Typography>
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Switch size="medium" defaultChecked aria-label="Medium switch" />
+        <Typography variant="caption" color="text.secondary">
+          Medium (56x32)
+        </Typography>
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Switch size="large" defaultChecked aria-label="Large switch" />
+        <Typography variant="caption" color="text.secondary">
+          Large (72x40)
+        </Typography>
+      </Box>
+    </Box>
+  ),
+};
+
 export const DisabledStates: Story = {
   render: () => (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

@@ -97,4 +97,39 @@ describe("Material Design 3 Switch Atom", () => {
 
     expect(screen.getByTestId("custom-icon")).toBeDefined();
   });
+
+  it("supports small and large sizes with correct data-testid and roles", () => {
+    const { rerender } = render(
+      <ThemeProvider theme={appTheme}>
+        <Switch size="small" data-testid="size-switch" />
+      </ThemeProvider>,
+    );
+
+    let switchEl = screen.getByTestId("size-switch");
+    expect(switchEl).toBeDefined();
+
+    rerender(
+      <ThemeProvider theme={appTheme}>
+        <Switch size="large" data-testid="size-switch" />
+      </ThemeProvider>,
+    );
+    switchEl = screen.getByTestId("size-switch");
+    expect(switchEl).toBeDefined();
+  });
+
+  it("renders children decorative elements inside track", () => {
+    render(
+      <ThemeProvider theme={appTheme}>
+        <Switch data-testid="children-switch">
+          {({ isChecked }) => (
+            <span data-testid="track-child">{isChecked ? "ON" : "OFF"}</span>
+          )}
+        </Switch>
+      </ThemeProvider>,
+    );
+
+    const child = screen.getByTestId("track-child");
+    expect(child).toBeDefined();
+    expect(child.textContent).toBe("OFF");
+  });
 });

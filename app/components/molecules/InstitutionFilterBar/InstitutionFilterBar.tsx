@@ -1,13 +1,12 @@
+import React from "react";
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
-import InputAdornment from "@mui/material/InputAdornment";
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
-import IconButton from "@mui/material/IconButton";
+
+import FilterBar from "~/components/molecules/FilterBar/FilterBar";
+import Select from "~/components/atoms/Select/Select";
+import NumberPicker from "~/components/atoms/NumberPicker/NumberPicker";
+import { SearchField } from "~/components/atoms/TextField/TextField";
 import InstitutionChip from "../InstitutionChip/InstitutionChip";
-import YearRangePicker from "~/components/molecules/YearRangePicker/YearRangePicker";
 
 export interface InstitutionFilterBarProps {
   query: string;
@@ -34,101 +33,63 @@ export function InstitutionFilterBar({
 }: InstitutionFilterBarProps) {
   const { t } = useTranslation("common");
 
-  const endAdornment = query ? (
-    <InputAdornment position="end">
-      <IconButton
-        size="small"
-        onClick={() => onQueryChange("")}
-        aria-label={t("common:clearSearch", "Clear search")}
-      >
-        <ClearRoundedIcon sx={{ fontSize: 16 }} />
-      </IconButton>
-    </InputAdornment>
-  ) : null;
-
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 2,
-        alignItems: "center",
-        width: "100%",
-        p: 2,
-        mb: 3,
-        borderRadius: "12px",
-        bgcolor: "background.paper",
-        border: "1px solid",
-        borderColor: "divider",
-      }}
-      data-testid={testId}
-    >
-      <TextField
-        select
-        size="small"
+    <FilterBar testId={testId}>
+      {/* Institution Type Filter using MD3 Select Atom with chips */}
+      <Select
         label={t("filterBar.institutionType", "Institution Type")}
         value={typeFilter}
-        onChange={(e) => onTypeFilterChange(e.target.value)}
-        slotProps={{
-          select: {
-            renderValue: (selectedType) => (
-              <InstitutionChip
-                institutionType={String(selectedType)}
-                size="small"
-              />
-            ),
+        onChange={onTypeFilterChange}
+        minWidth={180}
+        testId="institution-type-filter"
+        renderValue={(selectedType) => (
+          <InstitutionChip
+            institutionType={String(selectedType)}
+            size="small"
+          />
+        )}
+        options={[
+          {
+            value: "all",
+            chip: <InstitutionChip institutionType="all" size="small" />,
           },
-        }}
-        sx={{ minWidth: 180 }}
-        data-testid="institution-type-filter"
-      >
-        <MenuItem value="all" sx={{ py: 0.75 }}>
-          <InstitutionChip institutionType="all" size="small" />
-        </MenuItem>
-        <MenuItem value="academic" sx={{ py: 0.75 }}>
-          <InstitutionChip institutionType="school" size="small" />
-        </MenuItem>
-        <MenuItem value="company" sx={{ py: 0.75 }}>
-          <InstitutionChip institutionType="company" size="small" />
-        </MenuItem>
-      </TextField>
+          {
+            value: "academic",
+            chip: <InstitutionChip institutionType="school" size="small" />,
+          },
+          {
+            value: "company",
+            chip: <InstitutionChip institutionType="company" size="small" />,
+          },
+        ]}
+      />
 
+      {/* Start Year Range Filter using unified NumberPicker Atom */}
       {onStartYearMinChange && onStartYearMaxChange && (
-        <YearRangePicker
+        <NumberPicker
+          mode="range"
           startYearMin={startYearMin}
           startYearMax={startYearMax}
           onStartYearMinChange={onStartYearMinChange}
           onStartYearMaxChange={onStartYearMaxChange}
+          testId="institution-year-range"
         />
       )}
 
-      <TextField
-        size="small"
+      <Box sx={{ flexGrow: 1 }} />
+
+      {/* Search using MD3 SearchField Atom */}
+      <SearchField
         placeholder={t(
-          "filterBar.searchInstitutions",
-          "Search institutions by name or slug...",
+          "filterBar.searchInstitutionsPlaceholder",
+          "Search institutions (name, slug)...",
         )}
         value={query}
         onChange={(e) => onQueryChange(e.target.value)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchRoundedIcon
-                  sx={{ fontSize: 18, color: "text.secondary" }}
-                />
-              </InputAdornment>
-            ),
-            endAdornment,
-          },
-        }}
-        sx={{
-          flex: 1,
-          minWidth: 200,
-        }}
-        data-testid="institution-search-field"
+        sx={{ minWidth: 260 }}
+        testId="institution-search-input"
       />
-    </Box>
+    </FilterBar>
   );
 }
 

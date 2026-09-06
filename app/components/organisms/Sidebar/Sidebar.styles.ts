@@ -13,37 +13,44 @@ export const SIDEBAR_SPRING: Transition = M3_SPRINGS.expressive.spatial.default;
 export const TAB_SPRING: Transition = M3_SPRINGS.tabIndicator;
 
 export const SidebarRail = styled(motion.aside, {
-  shouldForwardProp: (prop) => prop !== "$isExtended",
-})<{ $isExtended: boolean }>(({ theme, $isExtended }) => ({
-  position: "fixed",
-  top: 0,
-  left: 0,
-  bottom: 0,
-  height: "100vh",
-  zIndex: 1200,
-  display: "flex",
-  flexDirection: "column",
-  backgroundColor:
-    theme.palette.surfaceContainer || theme.palette.background.paper,
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
-  borderRight: `1px solid ${theme.palette.divider}`,
-  boxSizing: "border-box",
-  overflowX: "hidden",
-  overflowY: "auto",
-  scrollbarWidth: "none",
-  "&::-webkit-scrollbar": {
-    display: "none",
-  },
-  boxShadow: $isExtended
-    ? `0 8px 32px ${alpha(theme.palette.common.black, 0.2)}`
-    : `0 2px 8px ${alpha(theme.palette.common.black, 0.05)}`,
-  ...theme.applyStyles("dark", {
+  shouldForwardProp: (prop) => prop !== "$isExtended" && prop !== "$variant",
+})<{ $isExtended: boolean; $variant?: "default" | "auth" }>(
+  ({ theme, $isExtended, $variant }) => ({
+    position: "fixed",
+    top: 0,
+    left: 0,
+    bottom: 0,
+    height: "100vh",
+    zIndex: 1200,
+    display: "flex",
+    flexDirection: "column",
+    backgroundColor:
+      $variant === "auth"
+        ? alpha(
+            theme.palette.surfaceContainer || theme.palette.background.paper,
+            0.75,
+          )
+        : theme.palette.surfaceContainer || theme.palette.background.paper,
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
+    borderRight: `1px solid ${theme.palette.divider}`,
+    boxSizing: "border-box",
+    overflowX: "hidden",
+    overflowY: "auto",
+    scrollbarWidth: "none",
+    "&::-webkit-scrollbar": {
+      display: "none",
+    },
     boxShadow: $isExtended
-      ? `0 12px 36px ${alpha(theme.palette.common.black, 0.55)}`
-      : `0 2px 10px ${alpha(theme.palette.common.black, 0.25)}`,
+      ? `0 8px 32px ${alpha(theme.palette.common.black, 0.2)}`
+      : `0 2px 8px ${alpha(theme.palette.common.black, 0.05)}`,
+    ...theme.applyStyles("dark", {
+      boxShadow: $isExtended
+        ? `0 12px 36px ${alpha(theme.palette.common.black, 0.55)}`
+        : `0 2px 10px ${alpha(theme.palette.common.black, 0.25)}`,
+    }),
   }),
-}));
+);
 
 export const SidebarHeader = styled(Box)(({ theme }) => ({
   display: "flex",

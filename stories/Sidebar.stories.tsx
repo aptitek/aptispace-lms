@@ -49,3 +49,10 @@ export const ImpersonatedUser: Story = {
     },
   },
 };
+
+export const AuthVariant: Story = {
+  args: {
+    variant: "auth",
+    user: null,
+  },
+};
