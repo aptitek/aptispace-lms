@@ -1,5 +1,6 @@
 import { styled } from "@mui/material/styles";
 import { motion, type Transition } from "framer-motion";
+import { M3_SPRINGS } from "~/tokens/motion";
 
 export type MeridianSize = "small" | "medium" | "large";
 
@@ -48,12 +49,7 @@ export const MERIDIAN_SIZE_CONFIGS = {
   },
 } as const;
 
-export const FLIGHT_SPRING: Transition = {
-  type: "spring",
-  stiffness: 440,
-  damping: 26,
-  mass: 0.75,
-};
+export const FLIGHT_SPRING: Transition = M3_SPRINGS.flightPuck;
 
 const filterDollarProp = (prop: PropertyKey) =>
   typeof prop === "string" && !prop.startsWith("$");

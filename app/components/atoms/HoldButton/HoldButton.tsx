@@ -29,6 +29,7 @@ import {
   type ShapeDefinition,
   type ResolvedShapeStyle,
 } from "~/tokens/shapes";
+import { M3_SPRINGS, M3_MOTION_EASINGS } from "~/tokens/motion";
 
 export interface HoldButtonProps extends Omit<
   ButtonProps,
@@ -217,14 +218,14 @@ function useHoldGesture(
 
       animControlsRef.current = animate(progress, 1, {
         duration: holdTime / 1000,
-        ease: [0.2, 0, 0, 1],
+        ease: M3_MOTION_EASINGS.tuples.emphasized,
         onComplete: async () => {
           isComplete.current = true;
           triggerHaptic("heavy");
           onHoldComplete();
 
           await new Promise((r) => setTimeout(r, 200));
-          await animate(opacity, 0, { duration: 0.3 });
+          await animate(opacity, 0, M3_SPRINGS.expressive.effects.default);
           progress.set(0);
         },
       });
@@ -241,12 +242,12 @@ function useHoldGesture(
       triggerHaptic("medium");
       buttonControls.start({
         x: [0, -6, 6, -6, 6, 0],
-        transition: { duration: 0.3, ease: "easeInOut" },
+        transition: M3_SPRINGS.expressive.effects.default,
       });
     }
 
-    animate(progress, 0, { type: "spring", stiffness: 300, damping: 30 });
-    animate(opacity, 0, { duration: 0.25 });
+    animate(progress, 0, M3_SPRINGS.holdReset);
+    animate(opacity, 0, M3_SPRINGS.expressive.effects.default);
   }, [progress, opacity, buttonControls]);
 
   return { progress, opacity, startHold, cancelHold };

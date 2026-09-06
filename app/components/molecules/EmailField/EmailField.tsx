@@ -9,6 +9,7 @@ import {
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { AnimatePresence } from "framer-motion";
+import { M3_SPRINGS } from "~/tokens/motion";
 import InputAdornment from "@mui/material/InputAdornment";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
@@ -179,10 +180,7 @@ function EmailEndAdornment({
               initial={{ width: 0, opacity: 0 }}
               animate={{ width: "auto", opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
-              transition={{
-                duration: 0.3,
-                ease: [0.2, 0, 0, 1],
-              }}
+              transition={M3_SPRINGS.expressive.spatial.fast}
             >
               {domainText}
             </MotionDomainSpan>

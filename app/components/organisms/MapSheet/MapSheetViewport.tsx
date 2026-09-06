@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import ExploreRoundedIcon from "@mui/icons-material/ExploreRounded";
 import NavigationRoundedIcon from "@mui/icons-material/NavigationRounded";
 import type { Variants } from "framer-motion";
+import { M3_SPRINGS } from "~/tokens/motion";
 
 import type {
   MapSheetOrientation,
@@ -65,22 +66,14 @@ const UNFOLD_VARIANTS: Variants = {
     rotateX: 5,
     scale: 0.94,
     transformOrigin: "left center",
-    transition: {
-      type: "spring" as const,
-      stiffness: 220,
-      damping: 24,
-    },
+    transition: M3_SPRINGS.mapFold,
   },
   unfolded: {
     rotateY: 0,
     rotateX: 0,
     scale: 1,
     transformOrigin: "center center",
-    transition: {
-      type: "spring" as const,
-      stiffness: 180,
-      damping: 20,
-    },
+    transition: M3_SPRINGS.mapUnfold,
   },
 };
 

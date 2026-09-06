@@ -11,6 +11,7 @@ import Box from "@mui/material/Box";
 import { styled, useTheme, alpha } from "@mui/material/styles";
 import type { PhysicsCardProps } from "./PhysicsCard.types";
 import { holoGradient } from "../../../tokens/holo";
+import { M3_SPRINGS } from "~/tokens/motion";
 
 const TiltContainer = styled(motion.div)({
   width: "100%",
@@ -76,7 +77,7 @@ function useCardMotion(
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const springConfig = { stiffness: 300, damping: 30, mass: 1 };
+  const springConfig = M3_SPRINGS.cardTilt;
   const springX = useSpring(mouseX, springConfig);
   const springY = useSpring(mouseY, springConfig);
 
@@ -344,12 +345,7 @@ export function PhysicsCard({
     handleMouseLeave,
   } = useCardMotion(isTiltingEnabled, tiltStrength, cardRef);
 
-  const flipTransition = {
-    type: "spring" as const,
-    stiffness: 260,
-    damping: 20,
-    mass: 1,
-  };
+  const flipTransition = M3_SPRINGS.cardFlip;
 
   return (
     <Box

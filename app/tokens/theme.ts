@@ -27,6 +27,14 @@ import {
   createLightShadows,
   createDebugHighlightShadows,
 } from "./shadows";
+import {
+  M3_MOTION,
+  M3_SPRINGS,
+  M3_MOTION_DURATIONS,
+  M3_MOTION_EASINGS,
+} from "./motion";
+
+export { M3_MOTION, M3_SPRINGS, M3_MOTION_DURATIONS, M3_MOTION_EASINGS };
 
 export {
   createDarkHighlightShadows,
@@ -115,29 +123,6 @@ export const M3_SHAPE_SCALE = {
 } as const;
 
 export type M3ShapeToken = keyof typeof M3_SHAPE_SCALE;
-
-export const M3_MOTION = {
-  easing: {
-    emphasized: "cubic-bezier(0.2, 0, 0, 1)",
-    emphasizedDecelerate: "cubic-bezier(0.05, 0.7, 0.1, 1)",
-    emphasizedAccelerate: "cubic-bezier(0.3, 0, 0.8, 0.15)",
-    standard: "cubic-bezier(0.2, 0, 0, 1)",
-    standardDecelerate: "cubic-bezier(0, 0, 0.2, 1)",
-    standardAccelerate: "cubic-bezier(0.3, 0, 1, 1)",
-  },
-  duration: {
-    short1: 50,
-    short2: 100,
-    short3: 150,
-    short4: 200,
-    medium1: 250,
-    medium2: 300,
-    medium3: 350,
-    medium4: 400,
-    long1: 450,
-    long2: 500,
-  },
-} as const;
 
 /**
  * Creates Material 3 Dark Mode Elevation Shadows:

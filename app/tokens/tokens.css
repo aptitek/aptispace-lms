@@ -113,14 +113,18 @@
   --md-sys-elevation-level4: 0 0 0 1px rgba(255, 255, 255, 0.14);
   --md-sys-elevation-level5: 0 0 0 1px rgba(255, 255, 255, 0.16);
 
-  /* Material 3 Expressive Motion Tokens */
+  /* Material 3 Expressive Motion Tokens - Easings */
   --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
   --md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
   --md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
   --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
   --md-sys-motion-easing-standard-decelerate: cubic-bezier(0, 0, 0.2, 1);
   --md-sys-motion-easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+  --md-sys-motion-easing-expressive-standard: cubic-bezier(0.4, 0.14, 0.3, 1);
+  --md-sys-motion-easing-expressive-decelerate: cubic-bezier(0.1, 0.9, 0.2, 1);
+  --md-sys-motion-easing-expressive-accelerate: cubic-bezier(0.4, 0, 0.7, 0.2);
 
+  /* Material 3 Expressive Motion Tokens - Durations */
   --md-sys-motion-duration-short1: 50ms;
   --md-sys-motion-duration-short2: 100ms;
   --md-sys-motion-duration-short3: 150ms;
@@ -131,6 +135,20 @@
   --md-sys-motion-duration-medium4: 400ms;
   --md-sys-motion-duration-long1: 450ms;
   --md-sys-motion-duration-long2: 500ms;
+  --md-sys-motion-duration-long3: 550ms;
+  --md-sys-motion-duration-long4: 600ms;
+  --md-sys-motion-duration-extra-long1: 700ms;
+  --md-sys-motion-duration-extra-long2: 800ms;
+  --md-sys-motion-duration-extra-long3: 900ms;
+  --md-sys-motion-duration-extra-long4: 1000ms;
+
+  /* Material 3 Semantic Spatial vs Effects Presets */
+  --md-sys-motion-spatial-fast: 350ms cubic-bezier(0.1, 0.9, 0.2, 1);
+  --md-sys-motion-spatial-default: 500ms cubic-bezier(0.1, 0.9, 0.2, 1);
+  --md-sys-motion-spatial-slow: 700ms cubic-bezier(0.1, 0.9, 0.2, 1);
+  --md-sys-motion-effects-fast: 150ms cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-effects-default: 250ms cubic-bezier(0.05, 0.7, 0.1, 1);
+  --md-sys-motion-effects-slow: 400ms cubic-bezier(0.05, 0.7, 0.1, 1);
 
   /* Material 3 Expressive State Layer Opacities */
   --md-sys-state-hover-opacity: 0.08;

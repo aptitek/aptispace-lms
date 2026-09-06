@@ -1,5 +1,6 @@
 import { styled, alpha } from "@mui/material/styles";
 import { motion, type Transition } from "framer-motion";
+import { M3_SPRINGS } from "~/tokens/motion";
 
 export type SwitchSize = "small" | "medium" | "large";
 
@@ -48,19 +49,9 @@ export const SIZE_CONFIGS = {
   },
 } as const;
 
-export const SPRING_TRANSITION: Transition = {
-  type: "spring",
-  stiffness: 480,
-  damping: 28,
-  mass: 0.8,
-};
+export const SPRING_TRANSITION: Transition = M3_SPRINGS.celestialThumb;
 
-export const PEEK_SPRING: Transition = {
-  type: "spring",
-  stiffness: 380,
-  damping: 22,
-  mass: 0.6,
-};
+export const PEEK_SPRING: Transition = M3_SPRINGS.celestialPeek;
 
 const filterDollarProp = (prop: PropertyKey) =>
   typeof prop === "string" && !prop.startsWith("$");

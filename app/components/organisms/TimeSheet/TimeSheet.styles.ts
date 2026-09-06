@@ -1,5 +1,6 @@
 import { styled, alpha, keyframes } from "@mui/material/styles";
 import { motion, type Transition } from "framer-motion";
+import { M3_SPRINGS } from "~/tokens/motion";
 import Chip from "../../atoms/Chip";
 import { getContrastTextColor } from "./TimeSheet.utils";
 import type { TimeSheetSize, TimeSheetOrientation } from "./TimeSheet.types";
@@ -93,33 +94,13 @@ function getConnectedCardLayout(
   };
 }
 
-export const SPRING_TRANSITION: Transition = {
-  type: "spring",
-  stiffness: 280,
-  damping: 24,
-  mass: 0.8,
-};
+export const SPRING_TRANSITION: Transition = M3_SPRINGS.timeSheetCard;
 
-export const HOUR_SPRING_TRANSITION: Transition = {
-  type: "spring",
-  stiffness: 260,
-  damping: 23,
-  mass: 0.9,
-};
+export const HOUR_SPRING_TRANSITION: Transition = M3_SPRINGS.timeSheetHour;
 
-export const MINUTE_SPRING_TRANSITION: Transition = {
-  type: "spring",
-  stiffness: 290,
-  damping: 24,
-  mass: 0.7,
-};
+export const MINUTE_SPRING_TRANSITION: Transition = M3_SPRINGS.timeSheetMinute;
 
-export const DOT_SPRING_TRANSITION: Transition = {
-  type: "spring",
-  stiffness: 340,
-  damping: 20,
-  mass: 0.6,
-};
+export const DOT_SPRING_TRANSITION: Transition = M3_SPRINGS.timeSheetDot;
 
 export const SheetCard = styled("div", {
   shouldForwardProp: (prop) =>

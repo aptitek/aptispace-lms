@@ -2,6 +2,7 @@ import { styled, alpha, type Theme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import IconButton from "@mui/material/IconButton";
+import { M3_MOTION_DURATIONS, M3_MOTION_EASINGS } from "~/tokens/motion";
 
 export const HeaderAvatarContainer = styled(Box, {
   shouldForwardProp: (prop) => prop !== "$size" && prop !== "$isOpen",
@@ -68,8 +69,8 @@ export const AvatarMorphTrigger = styled(ButtonBase, {
     backgroundColor: alpha(roleColor, 0.1),
     cursor: "pointer",
     transition: theme.transitions.create(["transform", "filter"], {
-      duration: 350,
-      easing: "cubic-bezier(0.2, 0, 0, 1)",
+      duration: M3_MOTION_DURATIONS.medium3,
+      easing: M3_MOTION_EASINGS.css.standard,
     }),
     "&:hover, &:focus-visible": {
       transform: "scale(1.05)",
@@ -140,8 +141,8 @@ export const SlidingPillTrack = styled(Box, {
   opacity: $isOpen ? 1 : 0,
   pointerEvents: $isOpen ? "auto" : "none",
   transition: theme.transitions.create(["width", "opacity", "box-shadow"], {
-    duration: 350,
-    easing: "cubic-bezier(0.2, 0, 0, 1)",
+    duration: M3_MOTION_DURATIONS.medium3,
+    easing: M3_MOTION_EASINGS.css.standard,
   }),
 
   ...theme.applyStyles("dark", {
@@ -177,8 +178,8 @@ export const RoundLogoutButton = styled(IconButton, {
     transition: theme.transitions.create(
       ["transform", "opacity", "background-color", "border-color", "color"],
       {
-        duration: 300,
-        easing: "cubic-bezier(0.2, 0, 0, 1)",
+        duration: M3_MOTION_DURATIONS.medium2,
+        easing: M3_MOTION_EASINGS.css.standard,
       },
     ),
     "&:hover": {

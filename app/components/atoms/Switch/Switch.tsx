@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { styled } from "@mui/material/styles";
 import { motion, AnimatePresence } from "framer-motion";
+import { M3_SPRINGS } from "~/tokens/motion";
 
 export interface MD3SwitchProps {
   checked?: boolean;
@@ -245,7 +246,7 @@ export const Switch = forwardRef<HTMLButtonElement, MD3SwitchProps>(
                 x: thumbTravelX - 8,
               }}
               exit={{ opacity: 0, scale: 0.6 }}
-              transition={{ duration: 0.15 }}
+              transition={M3_SPRINGS.expressive.effects.fast}
             />
           )}
         </AnimatePresence>
@@ -259,11 +260,7 @@ export const Switch = forwardRef<HTMLButtonElement, MD3SwitchProps>(
             width: thumbSize,
             height: thumbSize,
           }}
-          transition={{
-            type: "spring",
-            stiffness: 500,
-            damping: 30,
-          }}
+          transition={M3_SPRINGS.switchThumb}
         >
           {renderedIcon}
         </Thumb>

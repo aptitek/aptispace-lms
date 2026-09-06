@@ -1,6 +1,7 @@
 import React from "react";
 import { styled, useTheme, type Theme } from "@mui/material/styles";
 import { motion, AnimatePresence } from "framer-motion";
+import { M3_SPRINGS } from "~/tokens/motion";
 import { useTranslation } from "react-i18next";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
@@ -163,7 +164,7 @@ export function StatusSnackbar({
         initial={{ opacity: 0, y: 32, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 24, scale: 0.96 }}
-        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        transition={M3_SPRINGS.snackbar}
       >
         <IconBox color={severityDetails.color}>{severityDetails.icon}</IconBox>
 

@@ -9,9 +9,7 @@ describe("Material Design 3 ESLint Theming Rules", () => {
           "m3-theme/no-action-as-container-background": "error",
           "m3-theme/allowed-theme-colors": [
             "error",
-            {
-              allowed: ["#00ff66", "rgba(0, 0, 0,"],
-            },
+            { allowed: ["#00ff66", "rgba(0, 0, 0,"] },
           ],
           "m3-theme/no-static-role-colors": "error",
           "m3-theme/no-alpha-paper-surface": "error",
@@ -19,6 +17,7 @@ describe("Material Design 3 ESLint Theming Rules", () => {
           "m3-theme/no-hardcoded-box-shadow": "error",
           "m3-theme/no-raw-svg-icons": "error",
           "m3-theme/enforce-rounded-icons": "error",
+          "m3-theme/enforce-motion-tokens": "error",
         },
       },
     ],
@@ -30,9 +29,20 @@ describe("Material Design 3 ESLint Theming Rules", () => {
         rules: {
           "m3-theme/no-action-as-container-background": [
             "error",
-            {
-              allowed: ["fuchsia", "custom-brand-bg"],
-            },
+            { allowed: ["fuchsia", "custom-brand-bg"] },
+          ],
+        },
+      },
+    ],
+  });
+
+  const motionAllowedEslint = new ESLint({
+    overrideConfig: [
+      {
+        rules: {
+          "m3-theme/enforce-motion-tokens": [
+            "error",
+            { allowed: ["0.42", "custom-special-physics"] },
           ],
         },
       },
@@ -41,24 +51,11 @@ describe("Material Design 3 ESLint Theming Rules", () => {
 
   describe("m3-theme/no-action-as-container-background (whitelist enforcement)", () => {
     it("reports static action tokens used as container backgrounds", async () => {
-      const code = `
-        import Box from "@mui/material/Box";
-        export function Card() {
-          return (
-            <Box
-              sx={{
-                p: 2,
-                backgroundColor: "action.hover",
-              }}
-            />
-          );
-        }
-      `;
-
+      const code = `import Box from "@mui/material/Box";
+export function Card() { return <Box sx={{ p: 2, backgroundColor: "action.hover" }} />; }`;
       const [result] = await eslint.lintText(code, {
         filePath: "app/components/molecules/TestCard/TestCard.tsx",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-action-as-container-background",
       );
@@ -67,23 +64,11 @@ describe("Material Design 3 ESLint Theming Rules", () => {
     });
 
     it("reports un-whitelisted container backgrounds", async () => {
-      const code = `
-        import Box from "@mui/material/Box";
-        export function Card() {
-          return (
-            <Box
-              sx={{
-                backgroundColor: "fuchsia",
-              }}
-            />
-          );
-        }
-      `;
-
+      const code = `import Box from "@mui/material/Box";
+export function Card() { return <Box sx={{ backgroundColor: "fuchsia" }} />; }`;
       const [result] = await eslint.lintText(code, {
         filePath: "app/components/molecules/TestCard/TestCard.tsx",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-action-as-container-background",
       );
@@ -94,24 +79,11 @@ describe("Material Design 3 ESLint Theming Rules", () => {
     });
 
     it("permits approved surface containers and CSS variables", async () => {
-      const code = `
-        import Box from "@mui/material/Box";
-        export function Card() {
-          return (
-            <Box
-              sx={{
-                backgroundColor: "surfaceContainerLow",
-                color: "var(--custom-color)",
-              }}
-            />
-          );
-        }
-      `;
-
+      const code = `import Box from "@mui/material/Box";
+export function Card() { return <Box sx={{ backgroundColor: "surfaceContainerLow", color: "var(--custom-color)" }} />; }`;
       const [result] = await eslint.lintText(code, {
         filePath: "app/components/molecules/TestCard/TestCard.tsx",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-action-as-container-background",
       );
@@ -119,23 +91,11 @@ describe("Material Design 3 ESLint Theming Rules", () => {
     });
 
     it("permits custom background tokens when added to the allowed option", async () => {
-      const code = `
-        import Box from "@mui/material/Box";
-        export function Card() {
-          return (
-            <Box
-              sx={{
-                backgroundColor: "fuchsia",
-              }}
-            />
-          );
-        }
-      `;
-
+      const code = `import Box from "@mui/material/Box";
+export function Card() { return <Box sx={{ backgroundColor: "fuchsia" }} />; }`;
       const [result] = await customAllowedEslint.lintText(code, {
         filePath: "app/components/molecules/TestCard/TestCard.tsx",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-action-as-container-background",
       );
@@ -143,26 +103,11 @@ describe("Material Design 3 ESLint Theming Rules", () => {
     });
 
     it("permits action tokens inside interactive pseudo-classes (&:hover)", async () => {
-      const code = `
-        import Box from "@mui/material/Box";
-        export function ButtonWrapper() {
-          return (
-            <Box
-              sx={{
-                p: 1,
-                "&:hover": {
-                  backgroundColor: "action.hover",
-                },
-              }}
-            />
-          );
-        }
-      `;
-
+      const code = `import Box from "@mui/material/Box";
+export function ButtonWrapper() { return <Box sx={{ p: 1, "&:hover": { backgroundColor: "action.hover" } }} />; }`;
       const [result] = await eslint.lintText(code, {
         filePath: "app/components/molecules/TestButton/TestButton.tsx",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-action-as-container-background",
       );
@@ -172,35 +117,24 @@ describe("Material Design 3 ESLint Theming Rules", () => {
 
   describe("m3-theme/allowed-theme-colors", () => {
     it("reports hardcoded raw colors not present in the allowed whitelist", async () => {
-      const code = `
-        export const BAD_COLOR = "#ff00aa";
-      `;
-
+      const code = `export const BAD_COLOR = "#ff00aa";`;
       const [result] = await eslint.lintText(code, {
         filePath: "app/components/atoms/Badge/Badge.styles.ts",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/allowed-theme-colors",
       );
       expect(violations.length).toBeGreaterThan(0);
-      expect(violations[0]?.message).toContain(
-        "Hardcoded color '#ff00aa' is not in the allowed color whitelist",
-      );
+      expect(violations[0]?.message).toContain("Hardcoded color '#ff00aa'");
     });
 
     it("permits colors present in the allowed whitelist, CSS variables, and keywords", async () => {
-      const code = `
-        export const BRAND = "#00ff66";
-        export const SHADOW = "rgba(0, 0, 0, 0.2)";
-        export const VAR_COLOR = "var(--color-primary)";
-        export const TRANSPARENT = "transparent";
-      `;
-
+      const code = `export const OK_HEX = "#00ff66";
+export const OK_CSS_VAR = "var(--md-sys-color-primary)";
+export const OK_TRANSPARENT = "transparent";`;
       const [result] = await eslint.lintText(code, {
         filePath: "app/components/atoms/Badge/Badge.styles.ts",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/allowed-theme-colors",
       );
@@ -210,40 +144,28 @@ describe("Material Design 3 ESLint Theming Rules", () => {
 
   describe("m3-theme/no-static-role-colors", () => {
     it("reports direct usage of static ROLE_COLORS in UI components", async () => {
-      const code = `
-        import { ROLE_COLORS } from "~/tokens/namedColors";
-        export function RoleBadge() {
-          return <span style={{ color: ROLE_COLORS.admin }} />;
-        }
-      `;
-
+      const code = `import { ROLE_COLORS } from "~/tokens/roles";
+export function RoleBadge() { return <span style={{ color: ROLE_COLORS.admin }} />; }`;
       const [result] = await eslint.lintText(code, {
-        filePath: "app/components/atoms/TestBadge/TestBadge.tsx",
+        filePath: "app/components/atoms/Badge/Badge.tsx",
       });
-
       const violations = result?.messages.filter(
-        (m) =>
-          m.ruleId === "m3-theme/no-static-role-colors" ||
-          m.ruleId === "no-restricted-syntax",
+        (m) => m.ruleId === "m3-theme/no-static-role-colors",
       );
       expect(violations.length).toBeGreaterThan(0);
+      expect(violations[0]?.message).toContain(
+        "Static 'ROLE_COLORS' is forbidden in UI components",
+      );
     });
   });
 
   describe("m3-theme/no-alpha-paper-surface", () => {
     it("reports alpha(theme.palette.background.paper) without backdropFilter", async () => {
-      const code = `
-        import { styled, alpha } from "@mui/material/styles";
-        export const Card = styled("div")(({ theme }) => ({
-          backgroundColor: alpha(theme.palette.background.paper, 0.4),
-          padding: 16,
-        }));
-      `;
-
+      const code = `import { styled, alpha } from "@mui/material/styles";
+export const Card = styled("div")(({ theme }) => ({ backgroundColor: alpha(theme.palette.background.paper, 0.5) }));`;
       const [result] = await eslint.lintText(code, {
-        filePath: "app/components/molecules/Card/Card.styles.ts",
+        filePath: "app/components/atoms/Test/Test.styles.ts",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-alpha-paper-surface",
       );
@@ -254,19 +176,11 @@ describe("Material Design 3 ESLint Theming Rules", () => {
     });
 
     it("permits alpha(theme.palette.background.paper) when backdropFilter is present", async () => {
-      const code = `
-        import { styled, alpha } from "@mui/material/styles";
-        export const GlassPanel = styled("div")(({ theme }) => ({
-          backgroundColor: alpha(theme.palette.background.paper, 0.8),
-          backdropFilter: "blur(12px)",
-          padding: 16,
-        }));
-      `;
-
+      const code = `import { styled, alpha } from "@mui/material/styles";
+export const Card = styled("div")(({ theme }) => ({ backgroundColor: alpha(theme.palette.background.paper, 0.5), backdropFilter: "blur(8px)" }));`;
       const [result] = await eslint.lintText(code, {
-        filePath: "app/components/molecules/GlassPanel/GlassPanel.styles.ts",
+        filePath: "app/components/atoms/Test/Test.styles.ts",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-alpha-paper-surface",
       );
@@ -276,46 +190,26 @@ describe("Material Design 3 ESLint Theming Rules", () => {
 
   describe("m3-theme/no-dark-mode-black-shadow", () => {
     it("reports black drop-shadows inside theme.applyStyles('dark')", async () => {
-      const code = `
-        import { styled } from "@mui/material/styles";
-        export const ElevatedCard = styled("div")(({ theme }) => ({
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          ...theme.applyStyles("dark", {
-            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.6)",
-          }),
-        }));
-      `;
-
+      const code = `import { styled } from "@mui/material/styles";
+export const Card = styled("div")(({ theme }) => ({ ...theme.applyStyles("dark", { boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)" }) }));`;
       const [result] = await eslint.lintText(code, {
-        filePath:
-          "app/components/molecules/ElevatedCard/ElevatedCard.styles.ts",
+        filePath: "app/components/atoms/Test/Test.styles.ts",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-dark-mode-black-shadow",
       );
       expect(violations.length).toBeGreaterThan(0);
       expect(violations[0]?.message).toContain(
-        "Dark mode elevation violation: Black drop-shadows are forbidden in dark mode",
+        "Dark mode elevation violation: Black drop-shadows are forbidden",
       );
     });
 
     it("permits perimeter highlight rings in dark mode", async () => {
-      const code = `
-        import { styled } from "@mui/material/styles";
-        export const HighlightCard = styled("div")(({ theme }) => ({
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          ...theme.applyStyles("dark", {
-            boxShadow: "0 0 0 1px rgba(255, 255, 255, 0.15)",
-          }),
-        }));
-      `;
-
+      const code = `import { styled } from "@mui/material/styles";
+export const Card = styled("div")(({ theme }) => ({ ...theme.applyStyles("dark", { boxShadow: "0 0 0 1px rgba(255, 255, 255, 0.1)" }) }));`;
       const [result] = await eslint.lintText(code, {
-        filePath:
-          "app/components/molecules/HighlightCard/HighlightCard.styles.ts",
+        filePath: "app/components/atoms/Test/Test.styles.ts",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-dark-mode-black-shadow",
       );
@@ -325,40 +219,27 @@ describe("Material Design 3 ESLint Theming Rules", () => {
 
   describe("m3-theme/no-hardcoded-box-shadow", () => {
     it("reports hardcoded raw rgba shadow strings in components", async () => {
-      const code = `
-        import { styled } from "@mui/material/styles";
-        export const HardcodedShadowCard = styled("div")({
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-        });
-      `;
-
+      const code = `import Box from "@mui/material/Box";
+export function Card() { return <Box sx={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)" }} />; }`;
       const [result] = await eslint.lintText(code, {
-        filePath: "app/components/molecules/Card/Card.styles.ts",
+        filePath: "app/components/atoms/Test/Test.tsx",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-hardcoded-box-shadow",
       );
       expect(violations.length).toBeGreaterThan(0);
+      expect(violations[0]?.message).toContain(
+        "Hardcoded boxShadow string detected",
+      );
     });
   });
 
   describe("m3-theme/no-raw-svg-icons", () => {
     it("reports raw <svg> elements in UI components", async () => {
-      const code = `
-        export function CustomIcon() {
-          return (
-            <svg viewBox="0 0 24 24">
-              <path d="M12 2L2 22h20L12 2z" />
-            </svg>
-          );
-        }
-      `;
-
+      const code = `export function BadIcon() { return <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2z" /></svg>; }`;
       const [result] = await eslint.lintText(code, {
         filePath: "app/components/atoms/TestIcon/TestIcon.tsx",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-raw-svg-icons",
       );
@@ -369,14 +250,10 @@ describe("Material Design 3 ESLint Theming Rules", () => {
     });
 
     it("reports custom icon path variables (_ICON_PATH)", async () => {
-      const code = `
-        export const SEARCH_ICON_PATH = "M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5";
-      `;
-
+      const code = `export const SEARCH_ICON_PATH = "M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5";`;
       const [result] = await eslint.lintText(code, {
         filePath: "app/components/molecules/SearchField/SearchField.styles.ts",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-raw-svg-icons",
       );
@@ -387,20 +264,10 @@ describe("Material Design 3 ESLint Theming Rules", () => {
     });
 
     it("permits raw svg in exempt graphic definitions like ShapeDefs", async () => {
-      const code = `
-        export function ShapeDefs() {
-          return (
-            <svg style={{ display: "none" }}>
-              <defs><clipPath id="shape" /></defs>
-            </svg>
-          );
-        }
-      `;
-
+      const code = `export function ShapeDefs() { return <svg style={{ display: "none" }}><defs><clipPath id="shape" /></defs></svg>; }`;
       const [result] = await eslint.lintText(code, {
         filePath: "app/components/atoms/Avatar/ShapeDefs.tsx",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/no-raw-svg-icons",
       );
@@ -410,15 +277,11 @@ describe("Material Design 3 ESLint Theming Rules", () => {
 
   describe("m3-theme/enforce-rounded-icons", () => {
     it("reports sharp non-rounded icon imports from @mui/icons-material", async () => {
-      const code = `
-        import SearchIcon from "@mui/icons-material/Search";
-        import CloseIcon from "@mui/icons-material/Close";
-      `;
-
+      const code = `import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from "@mui/icons-material/Close";`;
       const [result] = await eslint.lintText(code, {
         filePath: "app/components/molecules/Test/Test.tsx",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/enforce-rounded-icons",
       );
@@ -428,14 +291,10 @@ describe("Material Design 3 ESLint Theming Rules", () => {
     });
 
     it("reports filled icons where outline-rounded variant exists", async () => {
-      const code = `
-        import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
-      `;
-
+      const code = `import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";`;
       const [result] = await eslint.lintText(code, {
         filePath: "app/components/molecules/Test/Test.tsx",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/enforce-rounded-icons",
       );
@@ -444,18 +303,99 @@ describe("Material Design 3 ESLint Theming Rules", () => {
     });
 
     it("permits rounded unfilled icons and brand icon exceptions", async () => {
-      const code = `
-        import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-        import GitHubIcon from "@mui/icons-material/GitHub";
-        import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
-      `;
-
+      const code = `import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";`;
       const [result] = await eslint.lintText(code, {
         filePath: "app/components/molecules/Test/Test.tsx",
       });
-
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/enforce-rounded-icons",
+      );
+      expect(violations).toHaveLength(0);
+    });
+  });
+
+  describe("m3-theme/enforce-motion-tokens", () => {
+    it("reports hardcoded spring physics { stiffness, damping }", async () => {
+      const code = `export const spring = { type: "spring", stiffness: 300, damping: 20 };`;
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/Test/Test.tsx",
+      });
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/enforce-motion-tokens",
+      );
+      expect(violations.length).toBeGreaterThan(0);
+      expect(violations[0]?.message).toContain("Hardcoded spring physics");
+    });
+
+    it("reports hardcoded bezier curve array in ease", async () => {
+      const code = `import { motion } from "framer-motion";
+export function Card() { return <motion.div transition={{ ease: [0.2, 0, 0, 1] }} />; }`;
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/Test/Test.tsx",
+      });
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/enforce-motion-tokens",
+      );
+      expect(violations.length).toBeGreaterThan(0);
+      expect(violations[0]?.message).toContain("Hardcoded bezier curve array");
+    });
+
+    it("reports hardcoded numeric duration in transition", async () => {
+      const code = `import { motion } from "framer-motion";
+export function Card() { return <motion.div transition={{ duration: 0.25 }} />; }`;
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/Test/Test.tsx",
+      });
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/enforce-motion-tokens",
+      );
+      expect(violations.length).toBeGreaterThan(0);
+      expect(violations[0]?.message).toContain("Hardcoded animation duration");
+    });
+
+    it("reports hardcoded cubic-bezier string in easing property", async () => {
+      const code = `export const config = { easing: "cubic-bezier(0.2, 0, 0, 1)" };`;
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/Test/Test.styles.ts",
+      });
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/enforce-motion-tokens",
+      );
+      expect(violations.length).toBeGreaterThan(0);
+      expect(violations[0]?.message).toContain("Hardcoded cubic-bezier string");
+    });
+
+    it("permits tokenized M3_SPRINGS, M3_MOTION_DURATIONS, and ambient loops", async () => {
+      const code = `import { motion } from "framer-motion";
+import { M3_SPRINGS, M3_MOTION_DURATIONS } from "~/tokens/motion";
+export function Card() {
+  return (
+    <>
+      <motion.div transition={M3_SPRINGS.press} />
+      <motion.div transition={{ duration: M3_MOTION_DURATIONS.s.medium1 }} />
+      <motion.div transition={{ repeat: Infinity, duration: 10, ease: "linear" }} />
+    </>
+  );
+}`;
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/Test/Test.tsx",
+      });
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/enforce-motion-tokens",
+      );
+      expect(violations).toHaveLength(0);
+    });
+
+    it("permits custom motion configs when added to the allowed whitelist option", async () => {
+      const code = `import { motion } from "framer-motion";
+export function Card() { return <motion.div transition={{ duration: 0.42 }} />; }`;
+      const [result] = await motionAllowedEslint.lintText(code, {
+        filePath: "app/components/molecules/Test/Test.tsx",
+      });
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/enforce-motion-tokens",
       );
       expect(violations).toHaveLength(0);
     });

@@ -21,6 +21,7 @@ import {
 import Tooltip from "../../atoms/Tooltip/Tooltip";
 import { isUnnamedUser } from "../../atoms/Avatar/Avatar";
 import { getRoleConfig } from "~/tokens/roles";
+import { M3_MOTION_DURATIONS } from "~/tokens/motion";
 import { type HeaderUserAvatarProps } from "./HeaderUserAvatar.types";
 import {
   HeaderAvatarContainer,
@@ -169,7 +170,9 @@ export function HeaderUserAvatar({
       const targetShape = towardsCircle ? MaterialShapes.Circle : restPolygon;
 
       activeAnimationRef.current = animateMorph(startShape, targetShape, {
-        duration: towardsCircle ? 350 : 300,
+        duration: towardsCircle
+          ? M3_MOTION_DURATIONS.medium3
+          : M3_MOTION_DURATIONS.medium2,
         easing: "emphasized",
         onFrame: (nextPathData) => {
           setCurrentPathD(nextPathData);

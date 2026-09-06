@@ -35,6 +35,7 @@ import {
   DisabledTooltipWrapper,
   PeekingAirplane,
 } from "./LanguageToggle.styles";
+import { M3_SPRINGS } from "~/tokens/motion";
 
 export type { MeridianSize };
 
@@ -162,10 +163,7 @@ function FlightAirplane({
       scale: [1, 1, 0.6],
       opacity: [1, 1, 0],
     };
-    transitionProps = {
-      duration: 0.24,
-      ease: [0.2, 0, 0, 1],
-    };
+    transitionProps = M3_SPRINGS.expressive.effects.default;
   } else if (isHovered) {
     animateProps = {
       x: isFrench ? rightPeekX : leftPeekX,
@@ -175,11 +173,7 @@ function FlightAirplane({
       scale: 1,
       opacity: 0.95,
     };
-    transitionProps = {
-      type: "spring",
-      stiffness: 380,
-      damping: 22,
-    };
+    transitionProps = M3_SPRINGS.celestialPeek;
   } else {
     animateProps = {
       x: isFrench ? rightTuckedX : leftTuckedX,
@@ -189,10 +183,7 @@ function FlightAirplane({
       scale: 0.3,
       opacity: 0,
     };
-    transitionProps = {
-      duration: 0.2,
-      ease: "easeOut",
-    };
+    transitionProps = M3_SPRINGS.standard.effects.fast;
   }
 
   return (
@@ -222,7 +213,7 @@ function FlagGraphic({
           initial={{ opacity: 0, scale: 0.6 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.6 }}
-          transition={{ duration: 0.18 }}
+          transition={M3_SPRINGS.expressive.effects.fast}
         >
           <FrFlag size={flagSize} />
         </motion.div>
@@ -232,7 +223,7 @@ function FlagGraphic({
           initial={{ opacity: 0, scale: 0.6 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.6 }}
-          transition={{ duration: 0.18 }}
+          transition={M3_SPRINGS.expressive.effects.fast}
         >
           <UkFlag size={flagSize} />
         </motion.div>
@@ -407,7 +398,7 @@ export const MeridianToggle = forwardRef<
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.2 }}
+            transition={M3_SPRINGS.expressive.effects.fast}
           />
         )}
       </AnimatePresence>

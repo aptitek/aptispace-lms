@@ -30,6 +30,7 @@ import {
   ToggleWrapper,
   DisabledTooltipWrapper,
 } from "./ThemeToggle.styles";
+import { M3_SPRINGS } from "~/tokens/motion";
 
 export type { SwitchSize };
 
@@ -115,7 +116,7 @@ function ActiveZenithGlyph({
       initial={{ opacity: 0, rotate: -45, scale: 0.5 }}
       animate={{ opacity: 1, rotate: 0, scale: 1 }}
       exit={{ opacity: 0, rotate: 45, scale: 0.5 }}
-      transition={{ duration: 0.22 }}
+      transition={M3_SPRINGS.expressive.effects.fast}
     >
       <IconFlexWrapper>
         <HighContrastMoonGlyph size={iconSize} />
@@ -127,7 +128,7 @@ function ActiveZenithGlyph({
       initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
       animate={{ opacity: 1, rotate: 0, scale: 1 }}
       exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
-      transition={{ duration: 0.22 }}
+      transition={M3_SPRINGS.expressive.effects.fast}
     >
       <IconFlexWrapper>
         <motion.div
@@ -250,7 +251,7 @@ function SwitchRippleIndicator({
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
-      transition={{ duration: 0.2 }}
+      transition={M3_SPRINGS.expressive.effects.fast}
     />
   );
 }

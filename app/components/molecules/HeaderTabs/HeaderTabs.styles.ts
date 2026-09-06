@@ -1,13 +1,9 @@
 import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import { motion, type Transition } from "framer-motion";
+import { M3_SPRINGS } from "~/tokens/motion";
 
-export const MD3_TAB_SPRING: Transition = {
-  type: "spring",
-  stiffness: 400,
-  damping: 30,
-  mass: 0.8,
-};
+export const MD3_TAB_SPRING: Transition = M3_SPRINGS.tabIndicator;
 
 export const NavContainer = styled("nav")(({ theme }) => ({
   display: "inline-flex",

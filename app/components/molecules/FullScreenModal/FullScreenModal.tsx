@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Box from "@mui/material/Box";
 import type { FullScreenModalProps } from "./FullScreenModal.types";
 import { ModalBackdrop, ModalCardSurface } from "./FullScreenModal.styles";
+import { M3_SPRINGS } from "~/tokens/motion";
 
 export function FullScreenModal({
   isOpen,
@@ -40,11 +41,11 @@ export function FullScreenModal({
           initial={{ opacity: 0 }}
           animate={{
             opacity: 1,
-            transition: { duration: 0.4, ease: "easeOut" },
+            transition: M3_SPRINGS.modalBackdrop.enter,
           }}
           exit={{
             opacity: 0,
-            transition: { duration: 0.25, ease: "easeInOut" },
+            transition: M3_SPRINGS.modalBackdrop.exit,
           }}
           onClick={onClose}
           className={className}
@@ -58,12 +59,12 @@ export function FullScreenModal({
             animate={{
               scale: 1,
               opacity: 1,
-              transition: { duration: 0.4, ease: [0.2, 0, 0, 1] },
+              transition: M3_SPRINGS.modalCard.enter,
             }}
             exit={{
               scale: 0.98,
               opacity: 0,
-              transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] },
+              transition: M3_SPRINGS.modalCard.exit,
             }}
             onClick={(clickEv: MouseEvent) => clickEv.stopPropagation()}
             onKeyDown={(e: KeyboardEvent) => e.stopPropagation()}
