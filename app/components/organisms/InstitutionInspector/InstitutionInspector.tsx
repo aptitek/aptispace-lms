@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import Card from "@mui/material/Card";
+import { Inspector } from "../Inspector";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import EditableAvatar from "~/components/molecules/EditableAvatar/EditableAvatar";
 import Chip from "~/components/atoms/Chip/Chip";
 import {
@@ -209,44 +207,18 @@ export default function InstitutionInspector({
   if (!institution) return null;
 
   return (
-    <Card
-      sx={{
-        p: 3,
-        display: "flex",
-        flexDirection: "column",
-        gap: 2.5,
-        height: "calc(100vh - 200px)",
-        maxHeight: "800px",
-        overflowY: "auto",
-        position: "sticky",
-        top: 24,
-        bgcolor: (theme) =>
-          theme.palette.surfaceContainer || theme.palette.background.paper,
-      }}
-      variant="outlined"
-      data-testid="institution-inspector-card"
-    >
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+    <Inspector
+      title={
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
           {isEditing
             ? t("inspector.editInstitution", "Edit Institution")
             : t("inspector.addInstitution", "Add Institution")}
         </Typography>
-        <IconButton
-          onClick={onClose}
-          size="small"
-          aria-label={t("inspector.closeAria", "Close inspector")}
-        >
-          <CloseRoundedIcon />
-        </IconButton>
-      </Box>
-
+      }
+      onClose={onClose}
+      maxHeight="800px"
+      data-testid="institution-inspector-card"
+    >
       <EditableAvatar
         mode="image-only"
         value={form.logoUrl}
@@ -341,6 +313,6 @@ export default function InstitutionInspector({
           </Button>
         </Box>
       )}
-    </Card>
+    </Inspector>
   );
 }

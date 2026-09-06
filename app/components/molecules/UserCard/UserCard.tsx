@@ -3,20 +3,19 @@ import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
-import GitHubIcon from "@mui/icons-material/GitHub";
 import Avatar from "../../atoms/Avatar/Avatar";
 import Chip from "../../atoms/Chip/Chip";
 import SegmentedChip from "../SegmentedChip/SegmentedChip";
 import Badge from "../../atoms/Badge/Badge";
 import Tooltip from "../../atoms/Tooltip/Tooltip";
 import { HoldButton } from "../../atoms/HoldButton";
+import { CompactGithubChip } from "./UserCard.github";
 import type { UserCardProps, UserCardData } from "./UserCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import { loginAsAccount, type UserRole } from "~/utils/auth";
 import { getRoleConfig } from "~/tokens/roles";
 import {
   DEFAULT_SCHOOL,
-  formatGithubHandle,
   resolveUserCardLabels,
   resolveCardInteractivity,
   resolveCardTestId,
@@ -187,6 +186,8 @@ interface CompactDetailsProps {
   onImpersonate?: (entity: UserCardData) => void;
   showDelete?: boolean;
   onDelete?: (entity: UserCardData) => void;
+  editableGithub?: boolean;
+  onUpdateGithub?: (userId: string, newGithubUsername: string) => void;
 }
 
 function CompactStudentDetailsSlot({
@@ -196,6 +197,8 @@ function CompactStudentDetailsSlot({
   onImpersonate,
   showDelete = true,
   onDelete,
+  editableGithub = false,
+  onUpdateGithub,
 }: CompactDetailsProps) {
   const { t } = useTranslation(["auth", "common"]);
   const firstName = entity.firstName;
@@ -249,23 +252,10 @@ function CompactStudentDetailsSlot({
       </StudentEmail>
 
       <CardFooterRow>
-        <Chip
-          icon={<GitHubIcon sx={{ fontSize: 15 }} data-testid="octocat-icon" />}
-          label={formatGithubHandle(entity.githubUsername)}
-          size="small"
-          variant="outlined"
-          mono
-          testId="compact-github-handle"
-          sx={{
-            height: 24,
-            fontSize: "0.75rem",
-            fontWeight: 600,
-            backgroundColor: "background.paper",
-            border: (theme: { palette: { divider: string } }) =>
-              `1px solid ${theme.palette.divider}`,
-            "& .MuiChip-label": { px: 0.75 },
-            "&:hover": { borderColor: "primary.main" },
-          }}
+        <CompactGithubChip
+          entity={entity}
+          editableGithub={editableGithub}
+          onUpdateGithub={onUpdateGithub}
         />
 
         <Box
@@ -342,6 +332,8 @@ export const UserCard = forwardRef<HTMLDivElement, UserCardProps>(
       showDelete = true,
       interactive = true,
       isSelected = false,
+      editableGithub = false,
+      onUpdateGithub,
       className,
       testId,
       style,
@@ -396,6 +388,8 @@ export const UserCard = forwardRef<HTMLDivElement, UserCardProps>(
               onImpersonate={onImpersonate}
               showDelete={showDelete}
               onDelete={onDelete}
+              editableGithub={editableGithub}
+              onUpdateGithub={onUpdateGithub}
             />
           </CardBodyRow>
         </StyledCardContent>

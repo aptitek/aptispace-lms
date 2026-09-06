@@ -16,36 +16,30 @@ describe("missionCenterService", () => {
     vi.clearAllMocks();
   });
 
-  describe("Fallback / Mock mode (db = null)", () => {
-    it("returns mock audit logs when db is null", async () => {
+  describe("Null / disconnected DB handling (no mock fallbacks)", () => {
+    it("returns empty audit logs when db is null", async () => {
       const logs = await getAuditLogs(null);
-      expect(logs.length).toBeGreaterThan(0);
-      expect(logs[0]).toHaveProperty("id");
-      expect(logs[0]).toHaveProperty("action");
-      expect(logs[0]).toHaveProperty("tableName");
+      expect(logs).toEqual([]);
     });
 
-    it("returns mock error reports when db is null", async () => {
+    it("returns empty error reports when db is null", async () => {
       const reports = await getErrorReports(null);
-      expect(reports.length).toBeGreaterThan(0);
-      expect(reports[0]).toHaveProperty("message");
-      expect(reports[0]).toHaveProperty("severity");
-      expect(reports[0]).toHaveProperty("status");
+      expect(reports).toEqual([]);
     });
 
-    it("returns fallback system metrics when db is null", async () => {
+    it("returns zeroed metrics when db is null", async () => {
       const metrics = await getSystemMetrics(null);
       expect(metrics.infrastructure.status).toBeDefined();
-      expect(metrics.counts.totalUsers).toBeGreaterThan(0);
-      expect(metrics.tableInventory.length).toBeGreaterThan(0);
+      expect(metrics.counts.totalUsers).toBe(0);
+      expect(metrics.tableInventory).toEqual([]);
     });
 
-    it("bundles full mission center data in fallback mode", async () => {
+    it("bundles empty mission center data without mock fallbacks", async () => {
       const missionBundle = await getMissionCenterData(null, null);
-      expect(missionBundle.auditLogs.length).toBeGreaterThan(0);
-      expect(missionBundle.errorReports.length).toBeGreaterThan(0);
-      expect(missionBundle.securityIncidents.length).toBeGreaterThan(0);
-      expect(missionBundle.openIssuesCount).toBeGreaterThan(0);
+      expect(missionBundle.auditLogs).toEqual([]);
+      expect(missionBundle.errorReports).toEqual([]);
+      expect(missionBundle.securityIncidents).toEqual([]);
+      expect(missionBundle.openIssuesCount).toBe(0);
     });
   });
 

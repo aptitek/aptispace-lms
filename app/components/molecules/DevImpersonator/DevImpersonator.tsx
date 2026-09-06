@@ -21,16 +21,16 @@ import {
   ToolHeader,
   HeaderTitle,
   HeaderActions,
-  ModeBadge,
   AccountsList,
   EmptyState,
 } from "./DevImpersonator.styles";
 import {
   matchesFilter,
-  DevAccountItem,
   DevQuickCreateSection,
   DevFilterSection,
+  mapAccountToUserCard,
 } from "./DevImpersonator.components";
+import UserCard from "../UserCard/UserCard";
 
 export default function DevImpersonator({
   onSelectAccount,
@@ -156,7 +156,6 @@ export default function DevImpersonator({
               </IconButton>
             </span>
           </Tooltip>
-          <ModeBadge size="small" label={t("devTool.modeBadge")} />
         </HeaderActions>
       </ToolHeader>
 
@@ -183,13 +182,17 @@ export default function DevImpersonator({
           </EmptyState>
         ) : (
           filteredAccounts.map((account) => (
-            <DevAccountItem
+            <UserCard
               key={account.id}
-              account={account}
+              user={mapAccountToUserCard(account)}
+              variant="outlined"
               isSelected={selectedId === account.id}
-              isCurrent={currentUserId === account.id}
-              disabled={isLoading}
-              onSelect={handleSelect}
+              onClick={() => handleSelect(account)}
+              onImpersonate={() => handleSelect(account)}
+              showImpersonate={true}
+              showDelete={false}
+              interactive={true}
+              testId={`account-card-${account.id}`}
             />
           ))
         )}

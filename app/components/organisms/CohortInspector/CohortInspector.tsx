@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import Card from "@mui/material/Card";
+import { Inspector } from "../Inspector";
 import TextField from "@mui/material/TextField";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -307,23 +307,7 @@ export default function CohortInspector({
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Card
-        sx={{
-          p: 3,
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          height: "calc(100vh - 200px)",
-          maxHeight: "850px",
-          overflowY: "auto",
-          position: "sticky",
-          top: 24,
-          bgcolor: (theme) =>
-            theme.palette.surfaceContainer || theme.palette.background.paper,
-        }}
-        variant="outlined"
-        data-testid="cohort-inspector-card"
-      >
+      <Inspector data-testid="cohort-inspector-card">
         <CohortInspectorHeader isEditing={isEditing} onClose={onClose} />
 
         <CohortStructuredFields
@@ -375,7 +359,7 @@ export default function CohortInspector({
           disabled={isSubmitting}
           isSaveDisabled={!diploma.trim()}
         />
-      </Card>
+      </Inspector>
     </LocalizationProvider>
   );
 }

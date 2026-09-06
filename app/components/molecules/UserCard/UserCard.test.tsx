@@ -1,7 +1,10 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import UserCard, { EntityCard } from "./UserCard";
 import type { UserCardData, UserCardProps } from "./UserCard.types";
+
+afterEach(cleanup);
 
 const mockStudent: UserCardData = {
   id: "student-12345678",
@@ -138,5 +141,64 @@ describe("UserCard Molecule", () => {
     expect(element.props.user?.cohorts?.[0]?.diploma).toBe("M");
     expect(element.props.user?.cohorts?.[0]?.year).toBe(1);
     expect(element.props.user?.cohorts?.[0]?.tags).toEqual(["IA", "Dev"]);
+  });
+
+  it("renders editable GitHub chip and triggers onUpdateGithub on save", () => {
+    const onUpdateGithubMock = vi.fn();
+    render(
+      <UserCard
+        user={mockStudent}
+        editableGithub={true}
+        onUpdateGithub={onUpdateGithubMock}
+      />,
+    );
+
+    // Find edit button
+    const editBtn = screen.getByTestId("compact-github-edit-btn");
+    expect(editBtn).toBeDefined();
+
+    // Click edit button to toggle form
+    fireEvent.click(editBtn);
+
+    const input = screen.getByTestId("compact-github-input");
+    expect(input).toBeDefined();
+    expect((input as HTMLInputElement).value).toBe("janedoe");
+
+    // Change input value
+    fireEvent.change(input, { target: { value: "jane-smith" } });
+
+    // Submit form via save button
+    const saveBtn = screen.getByTestId("compact-github-save-btn");
+    fireEvent.click(saveBtn);
+
+    expect(onUpdateGithubMock).toHaveBeenCalledWith(
+      "student-12345678",
+      "jane-smith",
+    );
+    // Form should be closed
+    expect(screen.queryByTestId("compact-github-edit-form")).toBeNull();
+  });
+
+  it("cancels GitHub edit mode when cancel button is clicked without calling onUpdateGithub", () => {
+    const onUpdateGithubMock = vi.fn();
+    render(
+      <UserCard
+        user={mockStudent}
+        editableGithub={true}
+        onUpdateGithub={onUpdateGithubMock}
+      />,
+    );
+
+    const editBtn = screen.getByTestId("compact-github-edit-btn");
+    fireEvent.click(editBtn);
+
+    const input = screen.getByTestId("compact-github-input");
+    fireEvent.change(input, { target: { value: "different-handle" } });
+
+    const cancelBtn = screen.getByTestId("compact-github-cancel-btn");
+    fireEvent.click(cancelBtn);
+
+    expect(onUpdateGithubMock).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("compact-github-edit-form")).toBeNull();
   });
 });

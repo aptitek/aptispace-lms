@@ -49,6 +49,10 @@ export interface EditableAvatarProps {
    */
   shape?: EditableAvatarShape;
   /**
+   * Optional role for role-based MD3 shape resolution (student -> pill, instructor -> ghost-ish, admin -> 9-sided-cookie)
+   */
+  role?: string | null;
+  /**
    * Avatar sizing preset (sm: 32px/40px, md: 48px/56px, lg: 72px/80px, xl: 96px/120px)
    * @default "md"
    */

@@ -5,21 +5,6 @@ import type {
 import type { AuthUser, UserRole } from "~/utils/auth";
 import type { getAllUsersWithAffiliations } from "~/services/userService";
 import { getCohortDisplayName } from "~/utils/cohortFormat";
-import {
-  getDefaultAdmins,
-  getDefaultStudents,
-  getDefaultInstructors,
-  getDefaultSchools,
-  getDefaultCohorts,
-} from "./admin.mock";
-
-export {
-  getDefaultAdmins,
-  getDefaultStudents,
-  getDefaultInstructors,
-  getDefaultSchools,
-  getDefaultCohorts,
-};
 
 export type DbUserWithAffil = Awaited<
   ReturnType<typeof getAllUsersWithAffiliations>

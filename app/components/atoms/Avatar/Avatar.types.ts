@@ -52,4 +52,5 @@ export interface AvatarProps {
   objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
   children?: ReactNode;
   placeholderIcon?: ReactNode;
+  overlay?: ReactNode;
 }

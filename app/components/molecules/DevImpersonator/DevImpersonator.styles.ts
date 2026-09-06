@@ -241,7 +241,7 @@ export const AccountsList = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   gap: theme.spacing(1),
-  maxHeight: 280,
+  maxHeight: 380,
   overflowY: "auto",
   paddingRight: theme.spacing(0.5),
 
@@ -413,13 +413,23 @@ export const EmptyState = styled(Box)(({ theme }) => ({
   gap: theme.spacing(1),
 }));
 
-export const StatusPill = styled(Chip)(() => ({
+export const StatusPill = styled(Chip, {
+  shouldForwardProp: (prop) => prop !== "isCurrent",
+})<{ isCurrent?: boolean }>(({ theme, isCurrent }) => ({
   height: 18,
   fontSize: "0.625rem",
   fontWeight: 700,
-  borderRadius: 4,
+  borderRadius: theme.shape.corners.extraSmall,
+  ...(isCurrent && {
+    backgroundColor: alpha(theme.palette.success.main, 0.15),
+    color: theme.palette.success.main,
+  }),
   "& .MuiChip-label": {
     paddingLeft: 4,
     paddingRight: 4,
+  },
+  "& .MuiChip-icon": {
+    marginLeft: 4,
+    marginRight: -2,
   },
 }));

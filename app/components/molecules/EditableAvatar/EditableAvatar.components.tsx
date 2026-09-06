@@ -18,7 +18,7 @@ import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import LinkRoundedIcon from "@mui/icons-material/LinkRounded";
 import LoadingIndicator from "../../atoms/LoadingIndicator";
 import Tooltip from "@mui/material/Tooltip";
-import Avatar from "../../atoms/Avatar";
+import Avatar, { resolveAvatarShape } from "../../atoms/Avatar";
 import Badge from "../../atoms/Badge/Badge";
 import type {
   EditableAvatarShape,
@@ -41,6 +41,7 @@ export interface MD3AvatarProps {
   url: string;
   name?: string;
   shape?: EditableAvatarShape;
+  role?: string | null;
   size?: EditableAvatarSize;
   editable?: boolean;
   disableTooltip?: boolean;
@@ -162,6 +163,7 @@ function AvatarHoverLayer({
 
 export function MD3AvatarDisplay(props: MD3AvatarProps) {
   const { t } = useTranslation("common");
+  const resolvedShape = resolveAvatarShape(props.shape, props.role);
   const { isInteractive, tooltipText, showTooltip } = getAvatarTooltipConfig(
     props,
     t,
@@ -180,7 +182,7 @@ export function MD3AvatarDisplay(props: MD3AvatarProps) {
       disableHoverListener={!showTooltip}
     >
       <MD3AvatarContainer
-        avatarShape={props.shape}
+        avatarShape={resolvedShape}
         avatarSize={props.size}
         customRatio={props.aspectRatio}
         customWidth={props.width}
@@ -193,21 +195,22 @@ export function MD3AvatarDisplay(props: MD3AvatarProps) {
           src={props.url}
           alt={props.name || "Avatar"}
           name={props.name}
-          showReticle={props.shape === "biometric"}
-          shape={props.shape}
+          showReticle={resolvedShape === "biometric"}
+          shape={resolvedShape}
           height={props.height ?? "100%"}
           width={props.width ?? "100%"}
           aspectRatio={props.aspectRatio}
           objectFit={props.objectFit}
-        >
-          <AvatarHoverLayer
-            show={isInteractive}
-            shape={props.shape}
-            size={props.size}
-            aspectRatio={props.aspectRatio}
-            label={t("avatar.edit", "EDIT")}
-          />
-        </Avatar>
+          overlay={
+            <AvatarHoverLayer
+              show={isInteractive}
+              shape={resolvedShape}
+              size={props.size}
+              aspectRatio={props.aspectRatio}
+              label={t("avatar.edit", "EDIT")}
+            />
+          }
+        />
         {isInteractive && props.isModified ? (
           <AvatarResetActionButton onResetClick={props.onResetClick} />
         ) : null}

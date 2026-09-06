@@ -64,13 +64,13 @@ function renderAvatarContent(options: RenderAvatarContentOptions): ReactNode {
   );
 }
 
-function resolveAvatarShape(
+export function resolveAvatarShape(
   shape?: AvatarProps["shape"],
   role?: string | null,
 ) {
   if (shape !== undefined) return shape;
   if (role) return getRoleAvatarShape(role);
-  return "medium";
+  return "circular";
 }
 
 function resolveAvatarInitials(
@@ -104,6 +104,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
       objectFit,
       children,
       placeholderIcon,
+      overlay,
     } = props;
 
     const resolvedShape = resolveAvatarShape(shape, role);
@@ -134,7 +135,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
           data-shape={resolvedShape}
         >
           {content}
-          {src ? children : null}
+          {overlay}
           {showReticle && <BiometricReticle />}
         </AvatarRoot>
       </>

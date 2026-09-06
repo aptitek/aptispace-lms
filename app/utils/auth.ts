@@ -48,6 +48,9 @@ export interface AccountDefinition {
   institutionId?: string;
   cohortId?: string | null;
   githubUsername?: string;
+  avatarUrl?: string;
+  cohortName?: string;
+  institutionName?: string;
 }
 
 export const DEV_PERSONAS: readonly PersonaDefinition[] = [

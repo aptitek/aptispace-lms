@@ -1,66 +1,127 @@
-import { styled, alpha } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import { motion, type Transition } from "framer-motion";
 import { M3_SPRINGS } from "~/tokens/motion";
-import {
-  Switch,
-  type SwitchSize,
-  type SwitchSizeConfig,
-  SWITCH_SIZE_CONFIGS,
-  filterDollarProp,
-} from "~/components/atoms/Switch";
+import { M3_SHAPE_CORNERS } from "~/tokens/shapes";
 
-export type { SwitchSize };
-export { SWITCH_SIZE_CONFIGS as MERIDIAN_SIZE_CONFIGS };
+export type SwitchSize = "small" | "medium" | "large";
+
+export interface MeridianSizeConfig {
+  width: number;
+  height: number;
+  borderRadius: number;
+  puckSize: number;
+  flagSize: number;
+  mapWidth: number;
+  mapHeight: number;
+  planeSize: number;
+  travelX: number;
+  padX: number;
+  padY: number;
+  stateLayerSize: number;
+}
+
+export const MERIDIAN_SIZE_CONFIGS: Record<SwitchSize, MeridianSizeConfig> = {
+  small: {
+    width: 46,
+    height: 26,
+    borderRadius: M3_SHAPE_CORNERS.full,
+    puckSize: 20,
+    flagSize: 15,
+    mapWidth: 18,
+    mapHeight: 16,
+    planeSize: 13,
+    travelX: 20,
+    padX: 3,
+    padY: 3,
+    stateLayerSize: 34,
+  },
+  medium: {
+    width: 56,
+    height: 32,
+    borderRadius: 16,
+    puckSize: 24,
+    flagSize: 18,
+    mapWidth: 22,
+    mapHeight: 20,
+    planeSize: 16,
+    travelX: 24,
+    padX: 4,
+    padY: 4,
+    stateLayerSize: 42,
+  },
+  large: {
+    width: 72,
+    height: 40,
+    borderRadius: 20,
+    puckSize: 30,
+    flagSize: 23,
+    mapWidth: 28,
+    mapHeight: 25,
+    planeSize: 21,
+    travelX: 32,
+    padX: 5,
+    padY: 5,
+    stateLayerSize: 52,
+  },
+} as const;
 
 export const FLIGHT_SPRING: Transition = M3_SPRINGS.flightPuck;
 
-export const MeridianBaseSwitch = styled(Switch, {
+export const filterDollarProp = (prop: PropertyKey) =>
+  typeof prop === "string" && !prop.startsWith("$");
+
+export const MeridianTrack = styled(motion.button, {
   shouldForwardProp: filterDollarProp,
 })<{
+  $cfg: MeridianSizeConfig;
   $isFrench: boolean;
-}>(({ theme }) => {
+  $disabled?: boolean;
+}>(({ theme, $cfg, $isFrench, $disabled }) => {
   const primaryMain = theme.palette.primary.main;
   const primaryLight = theme.palette.primary.light;
   const bgPaper = theme.palette.background.paper;
   const bgDefault = theme.palette.background.default;
+  const outline = theme.palette.text.secondary;
 
   return {
-    "&.md3-switch-track": {
-      border: `2px solid ${theme.palette.divider}`,
-      backgroundColor: bgDefault,
-      backgroundImage: `linear-gradient(180deg, ${bgPaper} 0%, ${bgDefault} 100%)`,
-      boxShadow: `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 8px ${theme.palette.action.hover}`,
+    position: "relative",
+    display: "inline-flex",
+    alignItems: "center",
+    width: $cfg.width,
+    height: $cfg.height,
+    padding: 0,
+    borderRadius: $cfg.borderRadius,
+    cursor: $disabled ? "not-allowed" : "pointer",
+    boxSizing: "border-box",
+    border: $isFrench ? `2px solid ${primaryMain}` : `2px solid ${outline}`,
+    backgroundColor: bgDefault,
+    backgroundImage: `linear-gradient(180deg, ${bgPaper} 0%, ${bgDefault} 100%)`,
+    boxShadow: `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 8px ${theme.palette.action.hover}`,
+    overflow: "hidden",
+    outline: "none",
+    userSelect: "none",
+    opacity: $disabled ? 0.45 : 1,
+    WebkitTapHighlightColor: "transparent",
+    transition:
+      "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.2s ease",
 
+    "&:hover": {
+      borderColor: primaryMain,
+      boxShadow: `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 12px ${primaryMain}`,
+    },
+
+    ...theme.applyStyles("dark", {
+      boxShadow: `0 0 0 1px ${theme.palette.divider}`,
       "&:hover": {
         borderColor: primaryMain,
-        boxShadow: `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 12px ${primaryMain}`,
+        boxShadow: `0 0 0 1px ${primaryMain}, 0 0 12px ${primaryMain}`,
       },
+    }),
 
-      ...theme.applyStyles("dark", {
-        boxShadow: `0 0 0 1px ${theme.palette.divider}`,
-        "&:hover": {
-          borderColor: primaryMain,
-          boxShadow: `0 0 0 1px ${primaryMain}, 0 0 12px ${primaryMain}`,
-        },
-      }),
-
-      "&:focus-visible": {
-        outline: "none",
-        borderColor: primaryMain,
-        boxShadow: `0 0 0 2px ${bgDefault}, 0 0 0 4px ${primaryMain}, 0 0 16px ${primaryLight}`,
-      },
-
-      "& .md3-switch-thumb": {
-        background: `linear-gradient(135deg, ${primaryMain} 0%, ${theme.palette.primary.dark} 100%)`,
-        boxShadow: `0 0 10px ${primaryMain}, 0 2px 6px rgba(0, 0, 0, 0.2)`,
-        ...theme.applyStyles("dark", {
-          boxShadow: `0 0 10px ${primaryMain}, 0 2px 6px rgba(0, 0, 0, 0.4)`,
-        }),
-      },
-
-      "& .md3-switch-ripple": {
-        backgroundColor: alpha(primaryMain, 0.15),
-      },
+    "&:focus-visible": {
+      outline: "none",
+      borderColor: primaryMain,
+      boxShadow: `0 0 0 2px ${bgDefault}, 0 0 0 4px ${primaryMain}, 0 0 16px ${primaryLight}`,
     },
   };
 });
@@ -79,7 +140,7 @@ export const CountryMapZone = styled("div", {
   shouldForwardProp: filterDollarProp,
 })<{
   $position: "left" | "right";
-  $cfg: SwitchSizeConfig;
+  $cfg: MeridianSizeConfig;
 }>(({ $position, $cfg }) => ({
   position: "absolute",
   top: "50%",
@@ -95,16 +156,16 @@ export const CountryMapZone = styled("div", {
 }));
 
 export const PeekingAirplane = styled(motion.div, {
-  shouldForwardProp: (prop) => prop !== "$planeSize",
+  shouldForwardProp: filterDollarProp,
 })<{
-  $planeSize: number;
-}>(({ theme, $planeSize }) => ({
+  $cfg: MeridianSizeConfig;
+}>(({ theme, $cfg }) => ({
   position: "absolute",
   top: "50%",
   left: 0,
-  width: $planeSize,
-  height: $planeSize,
-  marginTop: -$planeSize / 2,
+  width: $cfg.planeSize,
+  height: $cfg.planeSize,
+  marginTop: -$cfg.planeSize / 2,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -116,6 +177,46 @@ export const PeekingAirplane = styled(motion.div, {
     color: theme.palette.common.white,
     filter: `drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 4px ${theme.palette.primary.main})`,
   }),
+}));
+
+export const FlightPuck = styled(motion.span, {
+  shouldForwardProp: filterDollarProp,
+})<{
+  $cfg: MeridianSizeConfig;
+}>(({ theme, $cfg }) => ({
+  position: "absolute",
+  top: $cfg.padY - 2,
+  left: $cfg.padX - 2,
+  width: $cfg.puckSize,
+  height: $cfg.puckSize,
+  borderRadius: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 4,
+  cursor: "inherit",
+  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+  boxShadow: `0 0 10px ${theme.palette.primary.main}, 0 2px 6px rgba(0, 0, 0, 0.2)`,
+  ...theme.applyStyles("dark", {
+    boxShadow: `0 0 10px ${theme.palette.primary.main}, 0 2px 6px rgba(0, 0, 0, 0.4)`,
+  }),
+}));
+
+export const StateRippleLayer = styled(motion.div, {
+  shouldForwardProp: filterDollarProp,
+})<{
+  $cfg: MeridianSizeConfig;
+}>(({ theme, $cfg }) => ({
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  width: $cfg.stateLayerSize,
+  height: $cfg.stateLayerSize,
+  borderRadius: "50%",
+  transform: "translate(-50%, -50%)",
+  pointerEvents: "none",
+  zIndex: 0,
+  backgroundColor: theme.palette.action.hover,
 }));
 
 export const ToggleWrapper = styled("div")(({ theme }) => ({

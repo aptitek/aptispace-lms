@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { render } from "@testing-library/react";
 import EditableAvatar from "./EditableAvatar";
 
 describe("EditableAvatar Component Molecule (MD3 Standard)", () => {
@@ -37,5 +38,38 @@ describe("EditableAvatar Component Molecule (MD3 Standard)", () => {
     expect(readOnlyProps.editable).toBe(false);
     expect(readOnlyProps.shape).toBe("rounded");
     expect(readOnlyProps.name).toBe("Instructor Shepard");
+  });
+
+  it("resolves default shape to circular for both avatar and overlay when shape is omitted", () => {
+    const { container } = render(
+      <EditableAvatar
+        mode="image-only"
+        value="https://example.com/avatar.jpg"
+        name="Alex Mercer"
+      />,
+    );
+
+    const avatarRoot = container.querySelector('[data-shape="circular"]');
+    expect(avatarRoot).not.toBeNull();
+
+    const overlay = container.querySelector(".avatar-hover-overlay");
+    expect(overlay).not.toBeNull();
+  });
+
+  it("propagates custom shape to avatar and overlay identically", () => {
+    const { container } = render(
+      <EditableAvatar
+        mode="image-only"
+        value="https://example.com/avatar.jpg"
+        shape="rounded"
+        name="Alex Mercer"
+      />,
+    );
+
+    const avatarRoot = container.querySelector('[data-shape="rounded"]');
+    expect(avatarRoot).not.toBeNull();
+
+    const overlay = container.querySelector(".avatar-hover-overlay");
+    expect(overlay).not.toBeNull();
   });
 });

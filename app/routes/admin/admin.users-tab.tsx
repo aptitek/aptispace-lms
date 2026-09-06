@@ -8,7 +8,7 @@ import Filter from "~/components/molecules/Filter/Filter";
 import RoleChip from "~/components/molecules/RoleChip/RoleChip";
 import InstitutionLogo from "~/components/molecules/InstitutionLogo/InstitutionLogo";
 import UserGrid from "~/components/molecules/UserGrid/UserGrid";
-import StudentInspector from "~/components/organisms/StudentInspector/StudentInspector";
+import UserInspector from "~/components/organisms/UserInspector/UserInspector";
 import { TabPanelContainer, MainColumn, SideColumn } from "./admin.styles";
 
 export interface AdminUsersTabPanelProps {
@@ -213,7 +213,7 @@ export function AdminUsersTabPanel({
 
       {hasInspectorOpen && (
         <SideColumn>
-          <StudentInspector
+          <UserInspector
             student={selectedUser}
             schools={schools}
             cohorts={cohorts}

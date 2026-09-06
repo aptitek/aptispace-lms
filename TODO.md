@@ -15,10 +15,10 @@
 [x] Remove server.hmr.overlay and catch the errors with our status center if possible instead
 [x] In status center remove the mention of REALTIME and BPM
 [x] Dev impersonation should not logout to another user but normal logout
-[ ] Remove ALL code that has to do with the fallback when there is no D1 connection and mock data, just show proper error in Status Center.
+[x] Remove ALL code that has to do with the fallback when there is no D1 connection and mock data, just show proper error in Status Center.
 [x] The status center's badge should be smaller
 [ ] Refactor ESLint into more maintainable structure
-[ ] Dev impersonation should not have the extra chip on the top. Add student and such should be a select role + create user and the list should use the filter bar and the list should use UserCard component.
+[x] Dev impersonation should not have the extra chip on the top. Add student and such should be a select role + create user and the list should use the filter bar and the list should use UserCard component.
 [x] Editable avatar doesn't use the correct shape for the edit overlay, it should be the same as the avatar
 [x] In filter bar the level/year field is excesivelly large width
 [ ] LanguageSwitch and ThemeSwitch should use more of the default switch style (size, shape, borders, colors, etc...)
@@ -27,10 +27,10 @@
 [x] Remove YearRangePicker. It has been replaced by NumberPicker
 [x] Make the wavy animation in Clock card on hover only
 [ ] Fix ClockCard color for progress
-[ ] Make the github chip optionally editable by admins in the usercard
+[x] Make the github chip optionally editable by admins in the usercard
 [ ] Make an institution and cohort card component with skeleton mirroring the usercard.
-[ ] Student Inspector will use the userCard component with editable github chip
-[ ] Student Inspector should be renamed UserInspector and add the Cohort and Institution Inspectors as well. Make a generic Inspector using a card + fields + buttons
+[x] Student Inspector will use the userCard component with editable github chip
+[x] Student Inspector should be renamed UserInspector and add the Cohort and Institution Inspectors as well. Make a generic Inspector using a card + fields + buttons
 [ ] MapCard needs a overhaul
 [ ] Find where to make a specialty editor
 

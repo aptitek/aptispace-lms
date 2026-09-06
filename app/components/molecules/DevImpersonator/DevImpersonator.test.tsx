@@ -29,18 +29,40 @@ describe("DevImpersonator Molecule & Auth Utilities", () => {
     expect(typeof DevImpersonator).toBe("function");
   });
 
-  it("mounts DevImpersonator in DOM and renders action buttons", () => {
+  it("mounts DevImpersonator in DOM and renders overhauled controls", () => {
+    const mockAccounts = [
+      {
+        id: "user-1",
+        name: "Alice Smith",
+        email: "alice.smith@aptitek.io",
+        role: "student" as const,
+        badge: "Student",
+        title: "Student",
+        isProfileComplete: true,
+      },
+    ];
+
     render(
       <I18nextProvider i18n={i18n}>
         <ThemeProvider theme={appTheme}>
-          <DevImpersonator />
+          <DevImpersonator initialAccounts={mockAccounts} />
         </ThemeProvider>
       </I18nextProvider>,
     );
 
-    expect(screen.getByTestId("create-student-btn")).toBeDefined();
-    expect(screen.getByTestId("create-instructor-btn")).toBeDefined();
-    expect(screen.getByTestId("create-admin-btn")).toBeDefined();
+    // Role select + create user button
+    expect(screen.getByTestId("create-role-select")).toBeDefined();
+    expect(screen.getByTestId("create-user-btn")).toBeDefined();
+
+    // Canonical Filter bar
+    expect(screen.getByTestId("dev-impersonator-filter")).toBeDefined();
+    expect(screen.getByTestId("accounts-search-input")).toBeDefined();
+
+    // Accounts rendered via UserCard
+    expect(screen.getByTestId("account-card-user-1")).toBeDefined();
+
+    // ModeBadge chip should not exist
+    expect(screen.queryByText("DEV SIMULATION")).toBeNull();
   });
 
   it("formats role labels and titles correctly", () => {

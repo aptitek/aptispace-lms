@@ -46,6 +46,8 @@ export interface UserCardProps {
   showImpersonate?: boolean;
   onDelete?: (user: UserCardData) => void;
   showDelete?: boolean;
+  editableGithub?: boolean;
+  onUpdateGithub?: (userId: string, newGithubUsername: string) => void;
   interactive?: boolean;
   isSelected?: boolean;
   className?: string;

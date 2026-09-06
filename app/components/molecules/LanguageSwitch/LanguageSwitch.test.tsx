@@ -78,4 +78,46 @@ describe("LanguageSwitch and MeridianSwitch components", () => {
     expect(switchBtn).toBeDefined();
     expect(switchBtn.getAttribute("role")).toBe("switch");
   });
+
+  it("shows peeking airplane on hover", () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider theme={appTheme}>
+          <MeridianSwitch language="en" data-testid="meridian-hover-switch" />
+        </ThemeProvider>
+      </I18nextProvider>,
+    );
+
+    const switchBtn = screen.getByTestId("meridian-hover-switch");
+    const airplane = screen.getByTestId("peeking-airplane");
+    expect(airplane).toBeDefined();
+
+    fireEvent.mouseEnter(switchBtn);
+    expect(screen.getByTestId("peeking-airplane")).toBeDefined();
+
+    fireEvent.mouseLeave(switchBtn);
+    expect(screen.getByTestId("peeking-airplane")).toBeDefined();
+  });
+
+  it("toggles from fr back to en", () => {
+    const onLanguageChange = vi.fn();
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider theme={appTheme}>
+          <MeridianSwitch
+            language="fr"
+            onLanguageChange={onLanguageChange}
+            data-testid="meridian-fr-switch"
+          />
+        </ThemeProvider>
+      </I18nextProvider>,
+    );
+
+    const switchBtn = screen.getByTestId("meridian-fr-switch");
+    expect(switchBtn.getAttribute("aria-checked")).toBe("true");
+
+    fireEvent.click(switchBtn);
+    expect(onLanguageChange).toHaveBeenCalledWith("en");
+  });
 });

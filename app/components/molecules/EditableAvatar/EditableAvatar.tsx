@@ -56,6 +56,7 @@ export function EditableAvatar(props: EditableAvatarProps) {
       url={activeAvatarUrl}
       name={props.name}
       shape={props.shape}
+      role={props.role}
       size={props.size}
       editable={isEditable}
       disableTooltip={props.disableTooltip}

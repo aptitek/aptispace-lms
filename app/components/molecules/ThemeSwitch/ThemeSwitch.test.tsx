@@ -83,4 +83,42 @@ describe("ThemeSwitch and ZenithSwitch components", () => {
     expect(switchBtn).toBeDefined();
     expect(switchBtn.getAttribute("role")).toBe("switch");
   });
+
+  it("renders peeking sun on hover when in dark mode", () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider theme={appTheme}>
+          <ZenithSwitch checked={true} data-testid="dark-zenith-switch" />
+        </ThemeProvider>
+      </I18nextProvider>,
+    );
+
+    const switchBtn = screen.getByTestId("dark-zenith-switch");
+    expect(screen.queryByTestId("peeking-sun-preview")).toBeNull();
+
+    fireEvent.mouseEnter(switchBtn);
+    expect(screen.getByTestId("peeking-sun-preview")).toBeDefined();
+
+    fireEvent.mouseLeave(switchBtn);
+    expect(screen.queryByTestId("peeking-sun-preview")).toBeNull();
+  });
+
+  it("renders peeking moon on hover when in light mode", () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider theme={appTheme}>
+          <ZenithSwitch checked={false} data-testid="light-zenith-switch" />
+        </ThemeProvider>
+      </I18nextProvider>,
+    );
+
+    const switchBtn = screen.getByTestId("light-zenith-switch");
+    expect(screen.queryByTestId("peeking-moon-preview")).toBeNull();
+
+    fireEvent.mouseEnter(switchBtn);
+    expect(screen.getByTestId("peeking-moon-preview")).toBeDefined();
+
+    fireEvent.mouseLeave(switchBtn);
+    expect(screen.queryByTestId("peeking-moon-preview")).toBeNull();
+  });
 });

@@ -23,6 +23,7 @@ import type {
   SystemMetricsData,
   TableRowMetric,
 } from "~/types/missionCenter";
+import type { SystemHealthStatus } from "~/utils/statusCenter.types";
 import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 import type { AuthUser } from "~/utils/auth";
 import { resolveR2Bucket } from "~/utils/r2.server";
@@ -35,11 +36,6 @@ import {
   mapDbUserToStudent,
   type DbUserWithAffil,
 } from "~/routes/admin/admin.helpers";
-import {
-  getMockAuditLogs,
-  getMockErrorReports,
-  getFallbackSystemMetrics,
-} from "./missionCenterService.mock";
 
 /* =========================================================================
  * Service Methods
@@ -50,7 +46,7 @@ export async function getAuditLogs(
   options?: { limit?: number; action?: string; tableName?: string },
 ): Promise<AdminAuditLogItem[]> {
   if (!db) {
-    return getMockAuditLogs();
+    return [];
   }
 
   try {
@@ -97,7 +93,7 @@ export async function getAuditLogs(
       "[MissionCenterService] Failed to load audit logs from DB:",
       error,
     );
-    return getMockAuditLogs();
+    return [];
   }
 }
 
@@ -106,7 +102,7 @@ export async function getErrorReports(
   options?: { limit?: number; severity?: string; status?: string },
 ): Promise<AdminErrorReportItem[]> {
   if (!db) {
-    return getMockErrorReports();
+    return [];
   }
 
   try {
@@ -159,7 +155,7 @@ export async function getErrorReports(
       "[MissionCenterService] Failed to load error reports from DB:",
       error,
     );
-    return getMockErrorReports();
+    return [];
   }
 }
 
@@ -242,6 +238,40 @@ async function queryTableCount(db: Database, table: Table): Promise<number> {
   }
 }
 
+function buildEmptySystemMetrics(
+  overallStatus: SystemHealthStatus,
+  d1Report: Awaited<ReturnType<typeof probeD1>>,
+  r2Report: Awaited<ReturnType<typeof probeR2>>,
+): SystemMetricsData {
+  return {
+    infrastructure: {
+      status: overallStatus,
+      timestamp: new Date().toISOString(),
+      d1: d1Report,
+      r2: r2Report,
+      environment: "Cloudflare Workers",
+    },
+    counts: {
+      totalUsers: 0,
+      students: 0,
+      instructors: 0,
+      admins: 0,
+      institutions: 0,
+      cohorts: 0,
+      courses: 0,
+      modules: 0,
+      submissions: 0,
+      grades: 0,
+      auditLogs: 0,
+      totalErrors: 0,
+      openErrors: 0,
+      criticalErrors: 0,
+      securityIncidents: 0,
+    },
+    tableInventory: [],
+  };
+}
+
 export async function getSystemMetrics(
   db: Database | null,
   context?: unknown,
@@ -256,7 +286,7 @@ export async function getSystemMetrics(
   const overallStatus = resolveOverallStatus(d1Report, r2Report);
 
   if (!db) {
-    return getFallbackSystemMetrics(overallStatus, d1Report, r2Report);
+    return buildEmptySystemMetrics(overallStatus, d1Report, r2Report);
   }
 
   try {
@@ -354,33 +384,7 @@ export async function getSystemMetrics(
       "[MissionCenterService] Failed to query full system metrics:",
       err,
     );
-    return {
-      infrastructure: {
-        status: overallStatus,
-        timestamp: new Date().toISOString(),
-        d1: d1Report,
-        r2: r2Report,
-        environment: "Cloudflare Workers",
-      },
-      counts: {
-        totalUsers: 0,
-        students: 0,
-        instructors: 0,
-        admins: 0,
-        institutions: 0,
-        cohorts: 0,
-        courses: 0,
-        modules: 0,
-        submissions: 0,
-        grades: 0,
-        auditLogs: 0,
-        totalErrors: 0,
-        openErrors: 0,
-        criticalErrors: 0,
-        securityIncidents: 0,
-      },
-      tableInventory: [],
-    };
+    return buildEmptySystemMetrics(overallStatus, d1Report, r2Report);
   }
 }
 

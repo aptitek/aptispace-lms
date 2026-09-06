@@ -6,6 +6,58 @@ import * as cohortService from "~/services/cohortService";
 import * as userService from "~/services/userService";
 import * as assessmentService from "~/services/assessmentService";
 
+function mockAuthGuard({
+  db = null,
+  firstName = "Admin",
+  lastName = "USER",
+  impersonating = false,
+  originalUserId,
+  affiliations = [],
+}: {
+  db?: unknown;
+  firstName?: string;
+  lastName?: string;
+  impersonating?: boolean;
+  originalUserId?: string;
+  affiliations?: unknown[];
+} = {}) {
+  return vi.spyOn(sessionServer, "authGuard").mockResolvedValue({
+    session: {
+      userId: "admin-1",
+      role: "admin",
+      issuedAt: Date.now(),
+      expiresAt: Date.now() + 10000,
+      ...(impersonating ? { impersonating: true, originalUserId } : {}),
+    },
+    actorUserId: "admin-1",
+    db: db as never,
+    user: {
+      id: "admin-1",
+      firstName,
+      lastName,
+      displayName: `${firstName} ${lastName}`.trim(),
+      avatarUrl: null,
+      githubId: "admin",
+      githubEmail: "admin@aptitek.io",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      affiliations: affiliations as never,
+    },
+  });
+}
+
+function createActionArgs(formData: FormData) {
+  const request = new Request("http://localhost:3000/admin", {
+    method: "POST",
+    body: formData,
+  });
+  return {
+    request,
+    context: {},
+    params: {},
+  } as unknown as Parameters<typeof action>[0];
+}
+
 describe("Admin Route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -27,28 +79,7 @@ describe("Admin Route", () => {
 
   describe("loader", () => {
     it("redirects to onboarding if profile is incomplete", async () => {
-      vi.spyOn(sessionServer, "authGuard").mockResolvedValue({
-        session: {
-          userId: "admin-1",
-          role: "admin",
-          issuedAt: Date.now(),
-          expiresAt: Date.now() + 10000,
-        },
-        actorUserId: "admin-1",
-        db: null,
-        user: {
-          id: "admin-1",
-          firstName: "",
-          lastName: "",
-          displayName: null,
-          avatarUrl: null,
-          githubId: null,
-          githubEmail: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          affiliations: [],
-        },
-      });
+      mockAuthGuard({ firstName: "", lastName: "" });
 
       const request = new Request("http://localhost:3000/admin");
       const args = {
@@ -69,52 +100,85 @@ describe("Admin Route", () => {
       expect(errorResponse?.headers.get("Location")).toBe("/onboarding");
     });
 
-    it("returns active admin user, students, schools, and cohorts when authorized", async () => {
-      vi.spyOn(sessionServer, "authGuard").mockResolvedValue({
-        session: {
-          userId: "admin-1",
-          role: "admin",
-          issuedAt: Date.now(),
-          expiresAt: Date.now() + 10000,
-        },
-        actorUserId: "admin-1",
-        db: null,
-        user: {
-          id: "admin-1",
-          firstName: "System",
-          lastName: "ADMIN",
-          displayName: "System Admin",
+    it("returns active admin user, students, schools, and cohorts from database", async () => {
+      const mockDb = {} as never;
+      const mockInst = {
+        id: "inst-1",
+        name: "Aptitek",
+        slug: "aptitek",
+        type: "academic" as const,
+        logoUrl: "/aptitek-logo.svg",
+        emailDomain: "aptitek.io",
+        usernamePattern: "{first}.{last}",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      const mockCohort = {
+        id: "cohort-1",
+        name: "M1-IA-Dev",
+        institutionId: "inst-1",
+        diploma: "M",
+        year: 1,
+        tags: ["IA"],
+        description: "Master 1",
+        startDate: new Date("2026-09-01"),
+        endDate: new Date("2027-06-30"),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      vi.spyOn(userService, "getAllUsersWithAffiliations").mockResolvedValue([
+        {
+          id: "student-1",
+          firstName: "Jean",
+          lastName: "DUPONT",
+          displayName: "Jean Dupont",
           avatarUrl: null,
-          githubId: "admin",
-          githubEmail: "admin@aptitek.io",
+          githubId: "jdupont",
+          githubEmail: "jean.dupont@aptitek.io",
           createdAt: new Date(),
           updatedAt: new Date(),
           affiliations: [
             {
-              id: "affil-1",
-              userId: "admin-1",
+              id: "affil-student-1",
+              userId: "student-1",
               institutionId: "inst-1",
-              cohortId: null,
-              email: "admin@aptitek.io",
-              role: "admin",
+              cohortId: "cohort-1",
+              email: "jean.dupont@aptitek.io",
+              role: "student",
               isActive: true,
               createdAt: new Date(),
               updatedAt: new Date(),
-              institution: {
-                id: "inst-1",
-                name: "Aptitek",
-                slug: "aptitek",
-                type: "academic",
-                logoUrl: "/aptitek-logo.svg",
-                emailDomain: "aptitek.io",
-                usernamePattern: "{first}.{last}",
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              },
-              cohort: null,
+              institution: mockInst,
+              cohort: mockCohort,
             },
           ],
         },
+      ]);
+      vi.spyOn(cohortService, "getAllInstitutions").mockResolvedValue([
+        mockInst,
+      ]);
+      vi.spyOn(cohortService, "getAllCohorts").mockResolvedValue([mockCohort]);
+
+      mockAuthGuard({
+        db: mockDb,
+        firstName: "System",
+        lastName: "ADMIN",
+        affiliations: [
+          {
+            id: "affil-1",
+            userId: "admin-1",
+            institutionId: "inst-1",
+            cohortId: null,
+            email: "admin@aptitek.io",
+            role: "admin",
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            institution: mockInst,
+            cohort: null,
+          },
+        ],
       });
 
       const request = new Request("http://localhost:3000/admin");
@@ -130,43 +194,41 @@ describe("Admin Route", () => {
         totalUsers: number;
         schools: unknown[];
         cohorts: unknown[];
-        schoolStudentCounts: Record<string, number>;
-        cohortStudentCounts: Record<string, number>;
       };
 
       expect(result.user.role).toBe("admin");
-      expect(result.users.length).toBeGreaterThan(0);
-      expect(result.totalUsers).toBe(result.users.length);
-      expect(result.schools.length).toBeGreaterThan(0);
-      expect(result.cohorts.length).toBeGreaterThan(0);
+      expect(result.users).toHaveLength(1);
+      expect(result.totalUsers).toBe(1);
+      expect(result.schools).toHaveLength(1);
+      expect(result.cohorts).toHaveLength(1);
+    });
+
+    it("returns empty arrays when database is null (no fallback mocks)", async () => {
+      mockAuthGuard({ db: null });
+
+      const request = new Request("http://localhost:3000/admin");
+      const args = {
+        request,
+        context: {},
+        params: {},
+      } as unknown as Parameters<typeof loader>[0];
+
+      const result = (await loader(args)) as {
+        users: unknown[];
+        schools: unknown[];
+        cohorts: unknown[];
+      };
+
+      expect(result.users).toEqual([]);
+      expect(result.schools).toEqual([]);
+      expect(result.cohorts).toEqual([]);
     });
   });
 
   describe("action", () => {
     it("handles add-cohort intent correctly", async () => {
       const mockDb = {} as never;
-      vi.spyOn(sessionServer, "authGuard").mockResolvedValue({
-        session: {
-          userId: "admin-1",
-          role: "admin",
-          issuedAt: Date.now(),
-          expiresAt: Date.now() + 10000,
-        },
-        actorUserId: "admin-1",
-        db: mockDb,
-        user: {
-          id: "admin-1",
-          firstName: "Admin",
-          lastName: "USER",
-          displayName: "Admin User",
-          avatarUrl: null,
-          githubId: "admin",
-          githubEmail: "admin@aptitek.io",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          affiliations: [],
-        },
-      });
+      mockAuthGuard({ db: mockDb });
 
       const addSpy = vi
         .spyOn(cohortService, "addStudentToCohort")
@@ -177,18 +239,7 @@ describe("Admin Route", () => {
       formData.append("studentId", "std-123");
       formData.append("cohortId", "cohort-2026");
 
-      const request = new Request("http://localhost:3000/admin", {
-        method: "POST",
-        body: formData,
-      });
-
-      const args = {
-        request,
-        context: {},
-        params: {},
-      } as unknown as Parameters<typeof action>[0];
-
-      const res = await action(args);
+      const res = await action(createActionArgs(formData));
       expect(res).toEqual({ success: true });
       expect(addSpy).toHaveBeenCalledWith(mockDb, {
         userId: "std-123",
@@ -199,28 +250,7 @@ describe("Admin Route", () => {
 
     it("handles remove-cohort intent correctly", async () => {
       const mockDb = {} as never;
-      vi.spyOn(sessionServer, "authGuard").mockResolvedValue({
-        session: {
-          userId: "admin-1",
-          role: "admin",
-          issuedAt: Date.now(),
-          expiresAt: Date.now() + 10000,
-        },
-        actorUserId: "admin-1",
-        db: mockDb,
-        user: {
-          id: "admin-1",
-          firstName: "Admin",
-          lastName: "USER",
-          displayName: "Admin User",
-          avatarUrl: null,
-          githubId: "admin",
-          githubEmail: "admin@aptitek.io",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          affiliations: [],
-        },
-      });
+      mockAuthGuard({ db: mockDb });
 
       const removeSpy = vi
         .spyOn(cohortService, "removeStudentFromCohort")
@@ -231,18 +261,7 @@ describe("Admin Route", () => {
       formData.append("studentId", "std-123");
       formData.append("cohortId", "cohort-2026");
 
-      const request = new Request("http://localhost:3000/admin", {
-        method: "POST",
-        body: formData,
-      });
-
-      const args = {
-        request,
-        context: {},
-        params: {},
-      } as unknown as Parameters<typeof action>[0];
-
-      const res = await action(args);
+      const res = await action(createActionArgs(formData));
       expect(res).toEqual({ success: true });
       expect(removeSpy).toHaveBeenCalledWith(mockDb, {
         userId: "std-123",
@@ -253,28 +272,7 @@ describe("Admin Route", () => {
 
     it("handles update-user intent and updates githubId", async () => {
       const mockDb = {} as never;
-      vi.spyOn(sessionServer, "authGuard").mockResolvedValue({
-        session: {
-          userId: "admin-1",
-          role: "admin",
-          issuedAt: Date.now(),
-          expiresAt: Date.now() + 10000,
-        },
-        actorUserId: "admin-1",
-        db: mockDb,
-        user: {
-          id: "admin-1",
-          firstName: "Admin",
-          lastName: "ONE",
-          displayName: "Admin ONE",
-          avatarUrl: null,
-          githubId: "admin",
-          githubEmail: "admin@aptitek.io",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          affiliations: [],
-        },
-      });
+      mockAuthGuard({ db: mockDb, firstName: "Admin", lastName: "ONE" });
 
       const updateSpy = vi.spyOn(userService, "updateUser").mockResolvedValue({
         id: "std-123",
@@ -286,18 +284,7 @@ describe("Admin Route", () => {
       formData.append("studentId", "std-123");
       formData.append("githubId", "mariecurie-science");
 
-      const request = new Request("http://localhost:3000/admin", {
-        method: "POST",
-        body: formData,
-      });
-
-      const args = {
-        request,
-        context: {},
-        params: {},
-      } as unknown as Parameters<typeof action>[0];
-
-      const res = await action(args);
+      const res = await action(createActionArgs(formData));
       expect(res).toEqual({
         success: true,
         user: { id: "std-123", githubId: "mariecurie-science" },
@@ -309,29 +296,10 @@ describe("Admin Route", () => {
 
     it("handles delete-user intent correctly and preserves audit information", async () => {
       const mockDb = {} as never;
-      vi.spyOn(sessionServer, "authGuard").mockResolvedValue({
-        session: {
-          userId: "admin-1",
-          originalUserId: "super-admin-id",
-          impersonating: true,
-          role: "admin",
-          issuedAt: Date.now(),
-          expiresAt: Date.now() + 10000,
-        },
-        actorUserId: "admin-1",
+      mockAuthGuard({
         db: mockDb,
-        user: {
-          id: "admin-1",
-          firstName: "Admin",
-          lastName: "USER",
-          displayName: "Admin User",
-          avatarUrl: null,
-          githubId: "admin",
-          githubEmail: "admin@aptitek.io",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          affiliations: [],
-        },
+        impersonating: true,
+        originalUserId: "super-admin-id",
       });
 
       const userLookupSpy = vi
@@ -346,42 +314,7 @@ describe("Admin Route", () => {
           githubEmail: "john.doe@aptitek.io",
           createdAt: new Date(),
           updatedAt: new Date(),
-          affiliations: [
-            {
-              id: "aff-1",
-              userId: "std-123",
-              institutionId: "school-1",
-              cohortId: "cohort-2026",
-              email: "john.doe@aptitek.io",
-              role: "student",
-              isActive: true,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              institution: {
-                id: "school-1",
-                name: "Aptitek",
-                slug: "aptitek",
-                type: "academic",
-                logoUrl: "/logo.svg",
-                emailDomain: "aptitek.io",
-                usernamePattern: "{first}.{last}",
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              },
-              cohort: {
-                id: "cohort-2026",
-                institutionId: "school-1",
-                diploma: "M",
-                year: 1,
-                tags: ["Dev"],
-                description: null,
-                startDate: new Date(),
-                endDate: null,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              },
-            },
-          ],
+          affiliations: [],
         });
 
       const auditSpy = vi
@@ -396,18 +329,7 @@ describe("Admin Route", () => {
       formData.append("intent", "delete-user");
       formData.append("studentId", "std-123");
 
-      const request = new Request("http://localhost:3000/admin", {
-        method: "POST",
-        body: formData,
-      });
-
-      const args = {
-        request,
-        context: {},
-        params: {},
-      } as unknown as Parameters<typeof action>[0];
-
-      const res = await action(args);
+      const res = await action(createActionArgs(formData));
       expect(res).toEqual({ success: true });
       expect(userLookupSpy).toHaveBeenCalledWith(mockDb, "std-123");
       expect(auditSpy).toHaveBeenCalledWith(
