@@ -230,6 +230,8 @@ function renderNumberField(field: FilterNumberFieldConfig) {
       max={field.max}
       step={field.step}
       placeholder={field.placeholder}
+      minWidth={field.minWidth}
+      maxWidth={field.maxWidth}
       testId={resolveFieldTestId(field)}
     />
   );

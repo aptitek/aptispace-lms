@@ -250,9 +250,9 @@ export const AvatarHoverOverlay = styled(Box, {
   return {
     position: "absolute",
     inset: 0,
-    borderRadius: radius,
-    clipPath,
-    WebkitClipPath: clipPath,
+    borderRadius: radius || "inherit",
+    clipPath: clipPath || "inherit",
+    WebkitClipPath: clipPath || "inherit",
     backgroundColor: alpha(theme.palette.background.paper, 0.85),
     display: "flex",
     flexDirection: "column",
@@ -267,6 +267,7 @@ export const AvatarHoverOverlay = styled(Box, {
     padding: theme.spacing(0.5),
     gap: theme.spacing(0.25),
     zIndex: 2,
+    pointerEvents: "none",
   };
 });
 

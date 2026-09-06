@@ -358,11 +358,11 @@ describe("ClockCard Molecule", () => {
       expect(html).toContain('cy="62"');
     });
 
-    it("animates the circular wavy progress line MD3 style with SMIL phases", () => {
+    it("animates the circular wavy progress line MD3 style with SMIL phases on hover only", () => {
       const start = dayjs("2026-09-05T14:00:00");
       const end = dayjs("2026-09-05T16:00:00");
 
-      const html = ReactDOMServer.renderToString(
+      const defaultHtml = ReactDOMServer.renderToString(
         React.createElement(ClockCard, {
           startTime: start,
           endTime: end,
@@ -370,9 +370,21 @@ describe("ClockCard Molecule", () => {
         }),
       );
 
-      expect(html).toContain("time-sheet-wavy-arc");
-      expect(html).toContain('<animate attributeName="d"');
-      expect(html).toContain('repeatCount="indefinite"');
+      expect(defaultHtml).toContain("time-sheet-wavy-arc");
+      expect(defaultHtml).not.toContain('<animate attributeName="d"');
+
+      const hoveredHtml = ReactDOMServer.renderToString(
+        React.createElement(ClockCard, {
+          startTime: start,
+          endTime: end,
+          referenceTime: baseToday,
+          isHovered: true,
+        }),
+      );
+
+      expect(hoveredHtml).toContain("time-sheet-wavy-arc");
+      expect(hoveredHtml).toContain('<animate attributeName="d"');
+      expect(hoveredHtml).toContain('repeatCount="indefinite"');
     });
 
     it("renders live mode as a circular MD3 badge on the top right of the card when happening now", () => {

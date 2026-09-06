@@ -133,6 +133,11 @@ export default function StatusGatewayTrigger({
           }
           sx={{
             "& .MuiBadge-badge": {
+              width: 7,
+              height: 7,
+              minWidth: 7,
+              minHeight: 7,
+              borderRadius: "50%",
               backgroundColor: statusColor,
               boxShadow: `0 0 4px ${statusColor}`,
             },

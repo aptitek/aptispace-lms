@@ -82,8 +82,8 @@ export { GhostFabOverlay } from "../../atoms/ExpressiveCard";
 export const SkeletonCardContent = styled(CardContent)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  gap: theme.spacing(1.5),
-  padding: theme.spacing(2),
+  gap: theme.spacing(1.25),
+  padding: theme.spacing(1.5, 2, 2),
   "&:last-child": {
     paddingBottom: theme.spacing(2),
   },
@@ -94,7 +94,7 @@ export const SkeletonHeaderRow = styled("div")(({ theme }) => ({
   alignItems: "center",
   justifyContent: "space-between",
   width: "100%",
-  paddingBottom: theme.spacing(1),
+  paddingBottom: theme.spacing(0.5),
   borderBottom: `1px solid ${theme.palette.divider}`,
 }));
 

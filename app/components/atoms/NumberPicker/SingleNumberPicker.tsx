@@ -158,6 +158,8 @@ export const SingleNumberPicker = forwardRef<HTMLDivElement, NumberPickerProps>(
     delete cleanProps.testId;
     delete cleanProps["data-testid"];
     delete cleanProps.shrink;
+    delete cleanProps.minWidth;
+    delete cleanProps.maxWidth;
 
     const {
       value,
@@ -170,6 +172,9 @@ export const SingleNumberPicker = forwardRef<HTMLDivElement, NumberPickerProps>(
       activeTestId,
       displayValue,
     } = resolveSinglePickerValues(props);
+
+    const resolvedMinWidth = props.fullWidth ? "100%" : (props.minWidth ?? 92);
+    const resolvedMaxWidth = props.fullWidth ? "100%" : (props.maxWidth ?? 115);
 
     const handleDecrement = () => {
       if (onChange) {
@@ -211,7 +216,7 @@ export const SingleNumberPicker = forwardRef<HTMLDivElement, NumberPickerProps>(
         value={displayValue}
         onChange={handleInputChange}
         className={className}
-        sx={{ minWidth: 130, ...sx }}
+        sx={{ minWidth: resolvedMinWidth, maxWidth: resolvedMaxWidth, ...sx }}
         data-testid={activeTestId}
         slotProps={{
           input: stepAdornments,

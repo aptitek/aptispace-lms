@@ -38,6 +38,8 @@ export interface FilterNumberFieldConfig {
   max?: number;
   step?: number;
   placeholder?: string;
+  minWidth?: number | string;
+  maxWidth?: number | string;
   testId?: string;
   "data-testid"?: string;
 }

@@ -53,6 +53,8 @@ export interface NumberPickerProps {
   size?: "small" | "medium";
   disabled?: boolean;
   fullWidth?: boolean;
+  minWidth?: number | string;
+  maxWidth?: number | string;
   className?: string;
   sx?: SxProps<Theme>;
   testId?: string;

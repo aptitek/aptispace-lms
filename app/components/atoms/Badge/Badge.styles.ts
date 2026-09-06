@@ -206,6 +206,15 @@ export const StyledMuiBadge = styled(MuiBadge, {
         flexShrink: 0,
       },
 
+      "&.MuiBadge-dot": {
+        minWidth: 8,
+        minHeight: 8,
+        width: 8,
+        height: 8,
+        borderRadius: "50%",
+        padding: 0,
+      },
+
       ...theme.applyStyles("dark", {
         filter: "none",
         boxShadow: hasClipPath

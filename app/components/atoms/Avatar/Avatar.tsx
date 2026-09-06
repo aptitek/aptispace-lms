@@ -134,6 +134,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
           data-shape={resolvedShape}
         >
           {content}
+          {src ? children : null}
           {showReticle && <BiometricReticle />}
         </AvatarRoot>
       </>

@@ -340,7 +340,7 @@ export const ClockCard = forwardRef<HTMLDivElement, ClockCardProps>(
                 transition={SPRING_TRANSITION}
                 data-testid="time-sheet-wavy-arc"
               >
-                {wavyArcPhases && (
+                {wavyArcPhases && isHovered && (
                   <animate
                     attributeName="d"
                     dur="2.4s"

@@ -199,14 +199,15 @@ export function MD3AvatarDisplay(props: MD3AvatarProps) {
           width={props.width ?? "100%"}
           aspectRatio={props.aspectRatio}
           objectFit={props.objectFit}
-        />
-        <AvatarHoverLayer
-          show={isInteractive}
-          shape={props.shape}
-          size={props.size}
-          aspectRatio={props.aspectRatio}
-          label={t("avatar.edit", "EDIT")}
-        />
+        >
+          <AvatarHoverLayer
+            show={isInteractive}
+            shape={props.shape}
+            size={props.size}
+            aspectRatio={props.aspectRatio}
+            label={t("avatar.edit", "EDIT")}
+          />
+        </Avatar>
         {isInteractive && props.isModified ? (
           <AvatarResetActionButton onResetClick={props.onResetClick} />
         ) : null}
