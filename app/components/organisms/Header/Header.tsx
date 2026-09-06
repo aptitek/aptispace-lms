@@ -6,6 +6,7 @@ import Button from "@mui/material/Button";
 import Logo from "../../molecules/Logo/Logo";
 import LanguageToggle from "../../atoms/LanguageToggle/LanguageToggle";
 import ThemeToggle from "../../atoms/ThemeToggle/ThemeToggle";
+import DebugThemeToggle from "../../atoms/ThemeToggle/DebugThemeToggle";
 import HeaderUserAvatar from "../../molecules/HeaderUserAvatar/HeaderUserAvatar";
 import FullScreenModal from "../../molecules/FullScreenModal/FullScreenModal";
 import ProfileCard from "../ProfileCard/ProfileCard";
@@ -47,7 +48,9 @@ const HeaderRoot = styled("header", {
     alignItems: "center",
     justifyContent: isSubtle ? "flex-end" : "space-between",
     padding: theme.spacing(2, 4),
-    backgroundColor: isSubtle ? "transparent" : theme.palette.background.paper,
+    backgroundColor: isSubtle
+      ? "transparent"
+      : theme.palette.surfaceContainer || theme.palette.background.paper,
     backdropFilter: isSubtle ? "none" : "blur(16px)",
     WebkitBackdropFilter: isSubtle ? "none" : "blur(16px)",
     borderBottom: isSubtle ? "none" : `1px solid ${theme.palette.divider}`,
@@ -55,11 +58,6 @@ const HeaderRoot = styled("header", {
       ["background-color", "border-color", "backdrop-filter"],
       { duration: theme.transitions.duration.standard },
     ),
-    ...(isSubtle
-      ? {}
-      : theme.applyStyles("dark", {
-          backgroundColor: theme.palette.action.disabledBackground,
-        })),
 
     [theme.breakpoints.down("sm")]: {
       padding: theme.spacing(1.5, 2),
@@ -421,6 +419,7 @@ export default function Header({
           />
 
           <ThemeToggle data-testid="header-theme-toggle" />
+          <DebugThemeToggle data-testid="header-debug-theme-toggle" />
           <LanguageToggle data-testid="header-language-toggle" />
         </RightSlot>
       </HeaderRoot>

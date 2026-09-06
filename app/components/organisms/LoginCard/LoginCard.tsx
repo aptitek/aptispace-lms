@@ -83,7 +83,7 @@ const SecurityNote = styled("div")(({ theme }) => ({
 const StatusBanner = styled("div")(({ theme }) => ({
   padding: theme.spacing(1.25, 1.5),
   borderRadius: theme.shape.borderRadius,
-  backgroundColor: theme.palette.action.selected,
+  backgroundColor: theme.palette.surfaceContainerHigh,
   border: `1px solid ${theme.palette.success.main}`,
   color: theme.palette.success.light,
   fontSize: "0.85rem",

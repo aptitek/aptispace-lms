@@ -318,6 +318,8 @@ export default function CohortInspector({
           overflowY: "auto",
           position: "sticky",
           top: 24,
+          bgcolor: (theme) =>
+            theme.palette.surfaceContainer || theme.palette.background.paper,
         }}
         variant="outlined"
         data-testid="cohort-inspector-card"

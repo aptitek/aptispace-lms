@@ -107,7 +107,9 @@ function CalendarSkeletonGrid() {
               gap: 0.5,
               py: 0.75,
               borderRadius: "12px",
-              bgcolor: (theme) => alpha(theme.palette.action.hover, 0.3),
+              bgcolor: (theme) =>
+                theme.palette.surfaceContainerLow ||
+                theme.palette.background.paper,
             }}
           >
             <Typography

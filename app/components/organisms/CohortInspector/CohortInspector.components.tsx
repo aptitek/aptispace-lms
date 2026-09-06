@@ -87,7 +87,7 @@ export function CohortDateModeToggle({
       sx={{
         p: 0.5,
         borderRadius: 2,
-        bgcolor: "action.hover",
+        bgcolor: (theme) => theme.palette.surfaceContainerHigh,
         border: "1px solid",
         borderColor: "divider",
         "& .MuiToggleButtonGroup-grouped": {
@@ -100,11 +100,15 @@ export function CohortDateModeToggle({
           py: 0.6,
           color: "text.secondary",
           "&.Mui-selected": {
-            bgcolor: "background.paper",
+            bgcolor: (theme) =>
+              theme.palette.surfaceContainerLowest ||
+              theme.palette.background.paper,
             color: "primary.main",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+            boxShadow: (theme) => theme.shadows[1],
             "&:hover": {
-              bgcolor: "background.paper",
+              bgcolor: (theme) =>
+                theme.palette.surfaceContainerLowest ||
+                theme.palette.background.paper,
             },
           },
         },
@@ -280,7 +284,8 @@ export function CohortScheduleCard({
         p: 2,
         borderRadius: 2,
         borderColor: "divider",
-        bgcolor: "action.hover",
+        bgcolor: (theme) =>
+          theme.palette.surfaceContainerLow || theme.palette.background.paper,
         display: "flex",
         flexDirection: "column",
         gap: 1.5,
@@ -344,7 +349,7 @@ export function CohortDurationBanner({
         px: 1.5,
         py: 0.75,
         borderRadius: 1.5,
-        bgcolor: "action.selected",
+        bgcolor: (theme) => theme.palette.surfaceContainerHigh,
         display: "flex",
         alignItems: "center",
         gap: 1,

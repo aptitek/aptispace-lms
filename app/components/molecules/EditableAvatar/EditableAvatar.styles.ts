@@ -227,8 +227,9 @@ export const MD3AvatarContainer = styled(Box, {
       WebkitClipPath: clipPath,
       fontSize,
       fontWeight: 700,
-      backgroundColor: theme.palette.action.selected,
-      color: theme.palette.primary.main,
+      backgroundColor:
+        theme.palette.surfaceContainerHigh || theme.palette.background.paper,
+      color: theme.palette.text.primary,
     },
   };
 });

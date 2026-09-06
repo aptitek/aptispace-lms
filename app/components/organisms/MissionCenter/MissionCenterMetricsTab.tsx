@@ -165,7 +165,7 @@ export function MissionCenterMetricsTab({
             sx={{
               p: 1.5,
               borderRadius: 1.5,
-              bgcolor: theme.palette.action.hover,
+              bgcolor: theme.palette.surfaceContainerLow,
             }}
           >
             <Typography variant="caption" sx={{ color: "text.secondary" }}>
@@ -179,7 +179,7 @@ export function MissionCenterMetricsTab({
             sx={{
               p: 1.5,
               borderRadius: 1.5,
-              bgcolor: theme.palette.action.hover,
+              bgcolor: theme.palette.surfaceContainerLow,
             }}
           >
             <Typography variant="caption" sx={{ color: "text.secondary" }}>
@@ -193,7 +193,7 @@ export function MissionCenterMetricsTab({
             sx={{
               p: 1.5,
               borderRadius: 1.5,
-              bgcolor: theme.palette.action.hover,
+              bgcolor: theme.palette.surfaceContainerLow,
             }}
           >
             <Typography variant="caption" sx={{ color: "text.secondary" }}>
@@ -207,7 +207,7 @@ export function MissionCenterMetricsTab({
             sx={{
               p: 1.5,
               borderRadius: 1.5,
-              bgcolor: theme.palette.action.hover,
+              bgcolor: theme.palette.surfaceContainerLow,
             }}
           >
             <Typography variant="caption" sx={{ color: "text.secondary" }}>
@@ -283,7 +283,7 @@ export function MissionCenterMetricsTab({
                   sx={{
                     height: 6,
                     borderRadius: 3,
-                    bgcolor: theme.palette.action.hover,
+                    bgcolor: theme.palette.surfaceContainerHighest,
                   }}
                 />
               </Box>

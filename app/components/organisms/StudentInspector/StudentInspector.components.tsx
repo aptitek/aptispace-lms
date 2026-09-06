@@ -199,8 +199,11 @@ export function AdminAccessPanel() {
       <SectionHeader>
         <HeaderTitleRow>
           <AdminPanelSettingsRoundedIcon
-            color="secondary"
-            sx={{ fontSize: 20 }}
+            sx={{
+              fontSize: 20,
+              color: (theme) =>
+                theme.palette.roles?.admin || theme.palette.secondary.main,
+            }}
             data-testid="inspector-admin-icon"
           />
           <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
@@ -212,9 +215,17 @@ export function AdminAccessPanel() {
         sx={{
           p: 2,
           borderRadius: 2,
-          bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.08),
+          bgcolor: (theme) =>
+            alpha(
+              theme.palette.roles?.admin || theme.palette.secondary.main,
+              0.08,
+            ),
           border: "1px solid",
-          borderColor: (theme) => alpha(theme.palette.secondary.main, 0.2),
+          borderColor: (theme) =>
+            alpha(
+              theme.palette.roles?.admin || theme.palette.secondary.main,
+              0.2,
+            ),
           display: "flex",
           flexDirection: "column",
           gap: 1,

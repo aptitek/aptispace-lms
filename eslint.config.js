@@ -10,6 +10,7 @@ import cssPlugin from "@eslint/css";
 import prettierConfig from "eslint-config-prettier";
 import globals from "globals";
 import sonarjs from "eslint-plugin-sonarjs";
+import m3ThemePlugin from "./scripts/eslint-plugin-m3-theme.js";
 
 const HEX_COLOR_PATTERN = /#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/;
 const RAW_COLOR_FN_PATTERN = /\b(rgba?|hsla?|hwb|lab|lch|oklab|oklch)\s*\(/i;
@@ -253,6 +254,7 @@ export default tseslint.config(
       "react-hooks": reactHooksPlugin,
       "jsx-a11y": jsxA11yPlugin,
       boundaries: boundariesPlugin,
+      "m3-theme": m3ThemePlugin,
     },
     rules: {
       // --- File Size & Clean Code (Hard 500 lines limit) ---
@@ -380,6 +382,13 @@ export default tseslint.config(
       ],
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "no-duplicate-imports": "error",
+
+      // --- Material Design 3 Theming & Elevation Architecture ---
+      "m3-theme/no-action-as-container-background": "error",
+      "m3-theme/no-static-role-colors": "error",
+      "m3-theme/no-alpha-paper-surface": "off",
+      "m3-theme/no-dark-mode-black-shadow": "off",
+      "m3-theme/no-hardcoded-box-shadow": "off",
 
       // --- Design Tokens & MUI Theme / Styled Primitives Enforcement ---
       "no-restricted-imports": [
@@ -517,6 +526,11 @@ export default tseslint.config(
             "TemplateElement[value.raw=/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
           message:
             "Hardcoded hex color in template string detected. Use MUI theme semantic tokens or CSS variables instead.",
+        },
+        {
+          selector: "Identifier[name=/^(ROLE_COLORS|DEFAULT_ROLE_COLORS)$/]",
+          message:
+            "Static `ROLE_COLORS` is forbidden in UI code. Use `theme.palette.roles` from the MUI theme to support dynamic theming and debug modes.",
         },
         {
           selector:
@@ -773,6 +787,11 @@ export default tseslint.config(
     rules: {
       "no-restricted-syntax": "off",
       "id-denylist": "off",
+      "m3-theme/no-static-role-colors": "off",
+      "m3-theme/no-alpha-paper-surface": "off",
+      "m3-theme/no-action-as-container-background": "off",
+      "m3-theme/no-dark-mode-black-shadow": "off",
+      "m3-theme/no-hardcoded-box-shadow": "off",
     },
   },
 
@@ -797,8 +816,14 @@ export default tseslint.config(
       "vitest/no-conditional-expect": "error",
       complexity: "off",
       "max-lines-per-function": "off",
+      "max-nested-callbacks": "off",
       "no-restricted-syntax": "off",
       "id-denylist": "off",
+      "m3-theme/no-static-role-colors": "off",
+      "m3-theme/no-alpha-paper-surface": "off",
+      "m3-theme/no-action-as-container-background": "off",
+      "m3-theme/no-dark-mode-black-shadow": "off",
+      "m3-theme/no-hardcoded-box-shadow": "off",
       "sonarjs/no-duplicate-string": "off",
       "sonarjs/cognitive-complexity": "off",
       "sonarjs/no-identical-functions": "off",

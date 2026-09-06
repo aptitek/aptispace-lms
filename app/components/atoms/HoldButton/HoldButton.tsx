@@ -84,12 +84,12 @@ function getRoundedRectPath(bounds: RectBounds, radius: number): string {
 
 function resolvePaletteColor(theme: Theme, color?: string): string {
   if (color && color in theme.palette) {
-    return (
-      theme.palette[color as keyof typeof theme.palette] as Record<
-        string,
-        string
-      >
-    ).main;
+    const pal = (theme.palette as unknown as Record<string, { main?: string }>)[
+      color
+    ];
+    if (pal && typeof pal === "object" && pal.main) {
+      return pal.main;
+    }
   }
   return theme.palette.primary.main;
 }

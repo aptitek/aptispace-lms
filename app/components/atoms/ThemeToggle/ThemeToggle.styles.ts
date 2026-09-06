@@ -1,4 +1,4 @@
-import { styled } from "@mui/material/styles";
+import { styled, alpha } from "@mui/material/styles";
 import { motion, type Transition } from "framer-motion";
 
 export type SwitchSize = "small" | "medium" | "large";
@@ -94,7 +94,7 @@ export const SwitchTrack = styled(motion.button, {
       ? `linear-gradient(180deg, ${bgPaper} 0%, ${bgDefault} 100%)`
       : `linear-gradient(180deg, ${bgDefault} 0%, ${bgPaper} 100%)`,
     boxShadow: $isDark
-      ? `inset 0 1px 3px ${theme.palette.action.disabledBackground}, 0 0 8px ${theme.palette.action.hover}`
+      ? `0 0 0 1px ${theme.palette.divider}`
       : `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 8px ${theme.palette.action.hover}`,
     overflow: "hidden",
     outline: "none",
@@ -109,7 +109,7 @@ export const SwitchTrack = styled(motion.button, {
       borderColor: $isDark ? primaryMain : warningMain,
       boxShadow: $isDark
         ? `inset 0 1px 3px ${theme.palette.action.disabledBackground}, 0 0 12px ${primaryMain}`
-        : `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 12px ${warningLight}`,
+        : `inset 0 1px 3px ${alpha(theme.palette.common.black, 0.15)}, 0 0 12px ${warningLight}`,
     },
 
     "&:focus-visible": {
@@ -153,7 +153,7 @@ export const CelestialThumb = styled(motion.span, {
     ? `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
     : `linear-gradient(135deg, ${theme.palette.warning.light} 0%, ${theme.palette.warning.main} 100%)`,
   boxShadow: $isDark
-    ? `0 0 12px ${theme.palette.primary.main}, 0 2px 5px ${theme.palette.action.disabledBackground}`
+    ? `0 0 12px ${theme.palette.primary.main}, 0 0 0 1px rgba(255, 255, 255, 0.2)`
     : `0 0 14px ${theme.palette.warning.light}, 0 2px 5px rgba(0, 0, 0, 0.2)`,
 }));
 

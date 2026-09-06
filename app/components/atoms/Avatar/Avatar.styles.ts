@@ -131,7 +131,8 @@ export const AvatarRoot = styled(Box, {
     overflow: "hidden",
     border: shapeStyle.clipPath ? "none" : `1px solid ${theme.palette.divider}`,
     flexShrink: 0,
-    backgroundColor: theme.palette.background.default,
+    backgroundColor:
+      theme.palette.surfaceContainerHigh || theme.palette.background.paper,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -155,11 +156,12 @@ export const FallbackAvatarHolder = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  color: theme.palette.text.secondary,
+  color: theme.palette.text.primary,
   fontSize: "1.5rem",
   fontWeight: 700,
   textTransform: "uppercase",
-  backgroundColor: theme.palette.action.hover,
+  backgroundColor:
+    theme.palette.surfaceContainerHigh || theme.palette.background.paper,
   userSelect: "none",
   "& svg": {
     width: "60%",

@@ -19,7 +19,8 @@ const FooterRoot = styled("footer")(({ theme }) => ({
   color: theme.palette.text.secondary,
   boxSizing: "border-box",
   borderTop: `1px solid ${theme.palette.divider}`,
-  backgroundColor: theme.palette.action.hover,
+  backgroundColor:
+    theme.palette.surfaceContainer || theme.palette.background.paper,
   backdropFilter: "blur(12px)",
 
   [theme.breakpoints.down("md")]: {

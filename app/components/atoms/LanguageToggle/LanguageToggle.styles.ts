@@ -97,10 +97,10 @@ export const MeridianTrack = styled(motion.button, {
     },
 
     ...theme.applyStyles("dark", {
-      boxShadow: `inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 8px ${theme.palette.action.hover}`,
+      boxShadow: `0 0 0 1px ${theme.palette.divider}`,
       "&:hover": {
         borderColor: primaryMain,
-        boxShadow: `inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 12px ${primaryMain}`,
+        boxShadow: `0 0 0 1px ${primaryMain}, 0 0 12px ${primaryMain}`,
       },
     }),
 

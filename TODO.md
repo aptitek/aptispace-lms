@@ -17,6 +17,9 @@
 [x] Dev impersonation should not logout to another user but normal logout
 [ ] Remove ALL code that has to do with the fallback when there is no D1 connection and mock data, just show proper error in Status Center.
 [ ] The status center's badge should be smaller
+[ ] Refactor ESLint into more maintainable structure
+[ ] 
+
 
 --- MANUAL TASKS ---
 

@@ -85,7 +85,8 @@ export function CohortStructuredFields({
         gap: 2,
         p: 2,
         borderRadius: 2,
-        bgcolor: "background.paper",
+        bgcolor: (theme) =>
+          theme.palette.surfaceContainerLow || theme.palette.background.paper,
         border: "1px solid",
         borderColor: "divider",
       }}
@@ -100,7 +101,9 @@ export function CohortStructuredFields({
           justifyContent: "center",
           p: 2,
           borderRadius: 2,
-          bgcolor: "action.hover",
+          bgcolor: (theme) =>
+            theme.palette.surfaceContainerHigh ||
+            theme.palette.surfaceContainer,
           border: "1px dashed",
           borderColor: "divider",
           gap: 1,

@@ -22,7 +22,7 @@ export function InstitutionEmailPreviewBox({
       sx={{
         p: 1.5,
         borderRadius: 1.5,
-        bgcolor: "action.hover",
+        bgcolor: (theme) => theme.palette.surfaceContainer,
         border: "1px dashed",
         borderColor: "divider",
         display: "flex",
@@ -93,7 +93,7 @@ export function InstitutionEmailCardHeader({
         sx={{
           p: 0.5,
           borderRadius: 2,
-          bgcolor: "action.hover",
+          bgcolor: (theme) => theme.palette.surfaceContainerHigh,
           border: "1px solid",
           borderColor: "divider",
           "& .MuiToggleButtonGroup-grouped": {
@@ -106,11 +106,15 @@ export function InstitutionEmailCardHeader({
             py: 0.6,
             color: "text.secondary",
             "&.Mui-selected": {
-              bgcolor: "background.paper",
+              bgcolor: (theme) =>
+                theme.palette.surfaceContainerLowest ||
+                theme.palette.background.paper,
               color: "primary.main",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+              boxShadow: (theme) => theme.shadows[1],
               "&:hover": {
-                bgcolor: "background.paper",
+                bgcolor: (theme) =>
+                  theme.palette.surfaceContainerLowest ||
+                  theme.palette.background.paper,
               },
             },
           },
@@ -264,8 +268,9 @@ export function InstitutionEmailCard({
         display: "flex",
         flexDirection: "column",
         gap: 1.5,
-        bgcolor: (theme) => alpha(theme.palette.background.paper, 0.4),
-        border: (theme) => `1px solid ${alpha(theme.palette.divider, 0.6)}`,
+        bgcolor: (theme) =>
+          theme.palette.surfaceContainerLow || theme.palette.background.paper,
+        border: (theme) => `1px solid ${theme.palette.divider}`,
       }}
       data-testid="inspector-institution-email-card"
     >

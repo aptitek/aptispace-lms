@@ -91,7 +91,9 @@ export function CalendarExportDialog({
           sx={{
             p: 2,
             borderRadius: "16px",
-            backgroundColor: (theme) => alpha(theme.palette.action.hover, 0.4),
+            backgroundColor: (theme) =>
+              theme.palette.surfaceContainerLow ||
+              theme.palette.background.paper,
             border: (theme) => `1px solid ${alpha(theme.palette.divider, 0.5)}`,
             display: "flex",
             flexDirection: "column",

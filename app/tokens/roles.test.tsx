@@ -46,7 +46,7 @@ describe("roles token system (Single Source of Truth)", () => {
     expect(admin.badgeShape).toBe("9-sided-cookie");
     expect(admin.statusChipShape).toBe("bun");
     expect(admin.color).toBe(ROLE_COLORS.admin);
-    expect(admin.badgeColor).toBe("secondary");
+    expect(admin.badgeColor).toBe("admin");
     expect(admin.chipColor).toBe("secondary");
   });
 

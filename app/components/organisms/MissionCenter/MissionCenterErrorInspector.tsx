@@ -188,7 +188,9 @@ export function MissionCenterErrorInspector({
             fontWeight: 600,
             p: 1.5,
             borderRadius: 1.5,
-            backgroundColor: theme.palette.action.hover,
+            backgroundColor:
+              theme.palette.surfaceContainerHighest ||
+              theme.palette.background.paper,
             fontFamily: "monospace",
           }}
         >

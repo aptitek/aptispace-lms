@@ -11,7 +11,10 @@ export type BadgeColor =
   | "error"
   | "info"
   | "warning"
-  | "default";
+  | "default"
+  | "admin"
+  | "student"
+  | "instructor";
 
 export interface BaseBadgeProps {
   /**

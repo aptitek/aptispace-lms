@@ -72,4 +72,20 @@ describe("CSS Design Tokens Linting", () => {
     );
     expect(tokenRuleErrors).toHaveLength(0);
   });
+
+  it("defines required Material 3 debug theme tokens in tokens.css", async () => {
+    const fs = await import("fs/promises");
+    const path = await import("path");
+    const content = await fs.readFile(
+      path.resolve(process.cwd(), "app/tokens/tokens.css"),
+      "utf-8",
+    );
+
+    expect(content).toContain('[data-theme="debug"]');
+    expect(content).toContain(".debug");
+    expect(content).toContain("--md-sys-color-primary: #00ff66");
+    expect(content).toContain("--md-sys-color-on-primary: #000000");
+    expect(content).toContain("--md-sys-color-secondary: #ff007f");
+    expect(content).toContain("--md-sys-elevation-level1: 0 0 0 2px #00ff66");
+  });
 });

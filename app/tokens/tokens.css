@@ -89,7 +89,7 @@
 
   --md-sys-color-outline: var(--color-solarized-base01); /* #586e75 */
   --md-sys-color-outline-variant: rgba(88, 110, 117, 0.3);
-  --md-sys-color-shadow: #000000;
+  --md-sys-color-shadow: transparent;
   --md-sys-color-scrim: #000000;
 
   --md-sys-color-inverse-surface: var(--color-solarized-base2);
@@ -103,6 +103,15 @@
   --md-sys-color-surface-container: #073642;
   --md-sys-color-surface-container-high: #0a4351;
   --md-sys-color-surface-container-highest: #0d5162;
+
+  /* Material 3 Elevation Tokens - Dark Mode (Pure Highlights, No Drop Shadows) */
+  --md-sys-elevation-highlight: rgba(255, 255, 255, 0.08);
+  --md-sys-elevation-level0: none;
+  --md-sys-elevation-level1: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --md-sys-elevation-level2: 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --md-sys-elevation-level3: 0 0 0 1px rgba(255, 255, 255, 0.12);
+  --md-sys-elevation-level4: 0 0 0 1px rgba(255, 255, 255, 0.14);
+  --md-sys-elevation-level5: 0 0 0 1px rgba(255, 255, 255, 0.16);
 
   /* Material 3 Expressive Motion Tokens */
   --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
@@ -179,4 +188,82 @@
   --md-sys-color-surface-container: #eee8d5;
   --md-sys-color-surface-container-high: #e3ddca;
   --md-sys-color-surface-container-highest: #d8d1bc;
+
+  /* Material 3 Elevation Tokens - Light Mode */
+  --md-sys-elevation-highlight: rgba(0, 0, 0, 0);
+  --md-sys-elevation-level0: none;
+  --md-sys-elevation-level1:
+    0 1px 3px 1px rgba(0, 0, 0, 0.15), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-level2:
+    0 2px 6px 2px rgba(0, 0, 0, 0.15), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-level3:
+    0 4px 8px 3px rgba(0, 0, 0, 0.15), 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-level4:
+    0 6px 10px 4px rgba(0, 0, 0, 0.15), 0 2px 3px 0 rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-level5:
+    0 8px 12px 6px rgba(0, 0, 0, 0.15), 0 4px 4px 0 rgba(0, 0, 0, 0.3);
+}
+
+.debug,
+[data-theme="debug"] {
+  /* Material 3 Expressive System Colors - Debug Mode (Loud Neon Palette to Catch Unstyled Items) */
+  --md-sys-color-primary: #00ff66; /* Neon Lime */
+  --md-sys-color-surface-tint: #00ff66;
+  --md-sys-color-on-primary: #000000;
+  --md-sys-color-primary-container: #003816;
+  --md-sys-color-on-primary-container: #55ff99;
+
+  --md-sys-color-secondary: #ff007f; /* Hot Magenta */
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #4d0026;
+  --md-sys-color-on-secondary-container: #ff99cc;
+
+  --md-sys-color-tertiary: #00e5ff; /* Electric Cyan */
+  --md-sys-color-on-tertiary: #000000;
+  --md-sys-color-tertiary-container: #00363d;
+  --md-sys-color-on-tertiary-container: #80f2ff;
+
+  --md-sys-color-error: #ff2a00; /* Vivid Red-Orange */
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #4d0d00;
+  --md-sys-color-on-error-container: #ff9480;
+
+  --md-sys-color-background: #120024; /* Deep Ultraviolet */
+  --md-sys-color-on-background: #ffff00; /* Neon Yellow Text */
+  --md-sys-color-surface: #190033;
+  --md-sys-color-on-surface: #ffff00;
+  --md-sys-color-surface-variant: #28004d;
+  --md-sys-color-on-surface-variant: #00ffff; /* Electric Cyan Subtext */
+
+  --md-sys-color-outline: #ff00aa;
+  --md-sys-color-outline-variant: rgba(255, 0, 170, 0.4);
+  --md-sys-color-shadow: transparent;
+  --md-sys-color-scrim: #000000;
+
+  --md-sys-color-inverse-surface: #ffff00;
+  --md-sys-color-inverse-on-surface: #120024;
+  --md-sys-color-inverse-primary: #006622;
+
+  --md-sys-color-surface-dim: #0e001c;
+  --md-sys-color-surface-bright: #30005a;
+  --md-sys-color-surface-container-lowest: #0a0014;
+  --md-sys-color-surface-container-low: #15002b;
+  --md-sys-color-surface-container: #200042;
+  --md-sys-color-surface-container-high: #2c0059;
+  --md-sys-color-surface-container-highest: #3b0078;
+
+  /* Named Role Color Tokens - Debug Mode */
+  --color-role-student: #00ff66;
+  --color-role-instructor: #00e5ff;
+  --color-role-admin: #ff00aa;
+  --color-role-guest: #a855f7;
+
+  /* Material 3 Elevation Tokens - Debug Mode (Vivid Highlight Rings, No Drop Shadows) */
+  --md-sys-elevation-highlight: #00ff66;
+  --md-sys-elevation-level0: none;
+  --md-sys-elevation-level1: 0 0 0 2px #00ff66;
+  --md-sys-elevation-level2: 0 0 0 2px #00e5ff;
+  --md-sys-elevation-level3: 0 0 0 2px #ff007f;
+  --md-sys-elevation-level4: 0 0 0 3px #ffff00;
+  --md-sys-elevation-level5: 0 0 0 3px #ff00aa;
 }

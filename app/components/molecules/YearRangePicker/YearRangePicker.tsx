@@ -87,7 +87,11 @@ export function YearRangePicker({
         borderRadius: "8px",
         border: "1px solid",
         borderColor: hasValue ? "primary.main" : "divider",
-        bgcolor: hasValue ? "action.hover" : "transparent",
+        bgcolor: (theme) =>
+          hasValue
+            ? theme.palette.surfaceContainerLow ||
+              theme.palette.background.paper
+            : "transparent",
         transition: "all 0.2s ease-in-out",
       }}
       data-testid={testId}

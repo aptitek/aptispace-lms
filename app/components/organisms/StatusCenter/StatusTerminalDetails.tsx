@@ -235,7 +235,7 @@ export function StatusTerminalDetails({
     <Box
       sx={{
         p: 2,
-        backgroundColor: "action.selected",
+        backgroundColor: (theme) => theme.palette.surfaceContainerHighest,
         borderTop: 1,
         borderColor: "divider",
         display: "flex",

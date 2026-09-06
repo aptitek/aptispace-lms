@@ -13,7 +13,10 @@ export type BadgeColor =
   | "error"
   | "info"
   | "warning"
-  | "default";
+  | "default"
+  | "admin"
+  | "student"
+  | "instructor";
 
 export type ChipShape = ExpressiveShapeName | string | number;
 
@@ -68,7 +71,7 @@ export const ROLE_CONFIGS: Record<RoleType, RoleConfig> = {
     key: "admin",
     label: "Admin",
     color: ROLE_COLORS.admin,
-    badgeColor: "secondary",
+    badgeColor: "admin",
     chipColor: "secondary",
     avatarShape: "9-sided-cookie",
     polygonShape: MaterialShapes.Cookie9Sided,

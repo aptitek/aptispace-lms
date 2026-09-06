@@ -91,7 +91,9 @@ function TileHeader({
             width: 32,
             height: 32,
             borderRadius: 1.5,
-            backgroundColor: "action.hover",
+            backgroundColor: (theme) =>
+              theme.palette.surfaceContainerHigh ||
+              theme.palette.background.paper,
             color: "text.primary",
           }}
         >

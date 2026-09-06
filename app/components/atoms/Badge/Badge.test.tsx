@@ -40,6 +40,15 @@ describe("Generic Badge Atom Component", () => {
 
     const defaultLight = resolveBadgePaletteColor(lightTheme, "default");
     expect(defaultLight.main).toBe(lightTheme.palette.text.primary);
+
+    const adminDark = resolveBadgePaletteColor(darkTheme, "admin");
+    expect(adminDark.main).toBe(darkTheme.palette.roles.admin);
+
+    const studentDark = resolveBadgePaletteColor(darkTheme, "student");
+    expect(studentDark.main).toBe(darkTheme.palette.roles.student);
+
+    const instructorLight = resolveBadgePaletteColor(lightTheme, "instructor");
+    expect(instructorLight.main).toBe(lightTheme.palette.roles.instructor);
   });
 
   it("returns null when badge shape is undefined or null", () => {

@@ -196,7 +196,7 @@ export const InteractivePlayground: Story = {
             sx={{
               p: 1.5,
               borderRadius: 2,
-              backgroundColor: "action.hover",
+              backgroundColor: (theme) => theme.palette.surfaceContainerHigh,
               border: "1px dashed",
               borderColor: "primary.main",
               display: "flex",

@@ -43,7 +43,8 @@ export function StatusTerminalFilterChips({
         justifyContent: "space-between",
         borderBottom: 1,
         borderColor: "divider",
-        backgroundColor: "action.hover",
+        backgroundColor: (theme) =>
+          theme.palette.surfaceContainerLow || theme.palette.background.paper,
         flexWrap: "wrap",
         gap: 1,
       }}

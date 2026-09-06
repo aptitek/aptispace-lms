@@ -302,7 +302,8 @@ export const DurationChip = styled(Chip)(({ theme }) => ({
   fontVariantNumeric: "tabular-nums",
   letterSpacing: "-0.01em",
   borderColor: alpha(theme.palette.divider, 0.8),
-  backgroundColor: alpha(theme.palette.action.hover, 0.04),
+  backgroundColor:
+    theme.palette.surfaceContainerLow || theme.palette.background.paper,
   color: theme.palette.text.secondary,
   "& .MuiChip-label": {
     paddingLeft: 8,

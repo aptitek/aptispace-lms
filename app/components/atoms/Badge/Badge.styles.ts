@@ -10,32 +10,49 @@ export function getResolvedBadgeShape(
   return resolveShapeStyle(shape);
 }
 
+function resolveRolePaletteColor(
+  theme: Theme,
+  color: "admin" | "student" | "instructor",
+) {
+  const fallback =
+    color === "student"
+      ? theme.palette.success
+      : color === "instructor"
+        ? theme.palette.info
+        : theme.palette.secondary;
+  const roleHex = theme.palette.roles?.[color];
+  return {
+    main: roleHex || fallback.main,
+    light: roleHex || fallback.light,
+    dark: roleHex || fallback.dark,
+    contrastText: fallback.contrastText,
+  };
+}
+
 export function resolveBadgePaletteColor(
   theme: Theme,
   color: BadgeColor = "default",
 ) {
-  switch (color) {
-    case "primary":
-      return theme.palette.primary;
-    case "secondary":
-      return theme.palette.secondary;
-    case "success":
-      return theme.palette.success;
-    case "error":
-      return theme.palette.error;
-    case "info":
-      return theme.palette.info;
-    case "warning":
-      return theme.palette.warning;
-    case "default":
-    default:
-      return {
-        main: theme.palette.text.primary,
-        light: theme.palette.text.secondary,
-        dark: theme.palette.text.primary,
-        contrastText: theme.palette.background.paper,
-      };
+  if (color === "admin" || color === "student" || color === "instructor") {
+    return resolveRolePaletteColor(theme, color);
   }
+  if (color !== "default" && color in theme.palette) {
+    const pal = theme.palette[color as keyof Theme["palette"]];
+    if (pal && typeof pal === "object" && "main" in pal) {
+      return pal as {
+        main: string;
+        light: string;
+        dark: string;
+        contrastText: string;
+      };
+    }
+  }
+  return {
+    main: theme.palette.text.primary,
+    light: theme.palette.text.secondary,
+    dark: theme.palette.text.primary,
+    contrastText: theme.palette.background.paper,
+  };
 }
 
 export const BADGE_SIZE_CONFIG: Record<
@@ -102,7 +119,7 @@ function getBadgeShapeStyles(
       clipPath: shapeStyle.clipPath,
       WebkitClipPath: shapeStyle.clipPath,
       border: "none",
-      filter: `drop-shadow(0 2px 4px ${alpha(paletteColorMain, glow ? 0.75 : 0.45)})`,
+      filter: `drop-shadow(0 1px 3px ${alpha(paletteColorMain, glow ? 0.75 : 0.45)})`,
     }),
   };
 }
@@ -166,6 +183,8 @@ export const StyledMuiBadge = styled(MuiBadge, {
       alignItems: "center",
       justifyContent: "center",
       overflow: "visible",
+      backgroundColor: paletteColor.main,
+      color: paletteColor.contrastText,
       transition: theme.transitions.create([
         "background-color",
         "transform",
@@ -185,6 +204,15 @@ export const StyledMuiBadge = styled(MuiBadge, {
         display: "block",
         flexShrink: 0,
       },
+
+      ...theme.applyStyles("dark", {
+        filter: "none",
+        boxShadow: hasClipPath
+          ? "none"
+          : $glow
+            ? `0 0 0 2px ${paletteColor.main}`
+            : undefined,
+      }),
     },
   };
 });
@@ -196,7 +224,7 @@ function getStandaloneBoxShadow(
 ) {
   if (hasClipPath) return "none";
   if (glow) return `0 0 12px ${alpha(paletteColorMain, 0.6)}`;
-  return `0 2px 8px ${alpha(paletteColorMain, 0.35)}`;
+  return `0 1px 3px rgba(0, 0, 0, 0.25)`;
 }
 
 function getStandaloneVisualStyles(
@@ -206,13 +234,13 @@ function getStandaloneVisualStyles(
   glow?: boolean,
 ) {
   return {
-    border: hasClipPath ? "none" : `1px solid ${alpha(paletteColorMain, 0.65)}`,
+    border: hasClipPath ? "none" : `1px solid ${alpha(paletteColorMain, 0.4)}`,
     borderRadius: shapeStyle?.borderRadius ?? "50%",
     clipPath: shapeStyle?.clipPath,
     WebkitClipPath: shapeStyle?.clipPath,
     boxShadow: getStandaloneBoxShadow(hasClipPath, paletteColorMain, glow),
     filter: hasClipPath
-      ? `drop-shadow(0 2px 4px ${alpha(paletteColorMain, glow ? 0.75 : 0.45)})`
+      ? `drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25))`
       : undefined,
   };
 }
@@ -255,10 +283,8 @@ export const StandaloneBadgeRoot = styled("span", {
     maxHeight: sizeCfg.dim,
     aspectRatio: "1 / 1",
     padding: 0,
-    backgroundColor: alpha(paletteColor.main, 0.22),
-    color: paletteColor.main,
-    backdropFilter: "blur(8px)",
-    WebkitBackdropFilter: "blur(8px)",
+    backgroundColor: paletteColor.main,
+    color: paletteColor.contrastText,
     boxSizing: "border-box",
     fontWeight: 700,
     fontSize: sizeCfg.fontSize,
@@ -299,22 +325,18 @@ export const StandaloneBadgeRoot = styled("span", {
     },
 
     "&:hover": {
-      boxShadow: hasClipPath
-        ? "none"
-        : `0 0 12px ${alpha(paletteColor.main, 0.7)}`,
-      filter: hasClipPath
-        ? `drop-shadow(0 0 8px ${alpha(paletteColor.main, 0.85)})`
-        : undefined,
-      borderColor: paletteColor.main,
       transform: "scale(1.08)",
+      filter: "brightness(1.15)",
     },
 
     ...theme.applyStyles("dark", {
-      backgroundColor: alpha(paletteColor.main, 0.28),
-      border: hasClipPath
+      border: hasClipPath ? "none" : "1px solid rgba(255, 255, 255, 0.18)",
+      boxShadow: hasClipPath
         ? "none"
-        : `1px solid ${alpha(paletteColor.main, 0.65)}`,
-      color: paletteColor.main,
+        : $glow
+          ? `0 0 0 2px ${paletteColor.main}`
+          : "0 0 0 1px rgba(255, 255, 255, 0.15)",
+      filter: "none",
     }),
   };
 });

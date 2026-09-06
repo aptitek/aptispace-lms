@@ -97,7 +97,7 @@ export const M3ExtendedFab = styled(Button, {
     : "none",
   backgroundColor: isReady
     ? theme.palette.primary.main
-    : alpha(theme.palette.action.disabledBackground, 0.2),
+    : theme.palette.surfaceContainerHigh,
   color: isReady
     ? theme.palette.primary.contrastText || theme.palette.common.white
     : theme.palette.text.disabled,

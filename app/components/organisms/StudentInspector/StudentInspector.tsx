@@ -55,6 +55,8 @@ export default function StudentInspector({
         overflowY: "auto",
         position: "sticky",
         top: 24,
+        bgcolor: (theme) =>
+          theme.palette.surfaceContainer || theme.palette.background.paper,
       }}
       variant="outlined"
       className={className}

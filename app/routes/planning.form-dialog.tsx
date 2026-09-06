@@ -191,7 +191,8 @@ function FormFields({
           backgroundColor: (theme) =>
             formState.isRemote
               ? alpha(theme.palette.primary.main, 0.08)
-              : alpha(theme.palette.action.hover, 0.04),
+              : theme.palette.surfaceContainerLow ||
+                theme.palette.background.paper,
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>

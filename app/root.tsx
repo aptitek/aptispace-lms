@@ -251,7 +251,9 @@ function ErrorBoundaryContent({ error }: { error: unknown }) {
               mt: 2,
               p: 2,
               borderRadius: 1.5,
-              backgroundColor: "action.hover",
+              backgroundColor: (theme) =>
+                theme.palette.surfaceContainerHighest ||
+                theme.palette.background.default,
               color: "text.primary",
               fontFamily: "monospace",
               fontSize: "0.75rem",

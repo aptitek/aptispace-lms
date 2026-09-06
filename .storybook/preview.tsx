@@ -1,22 +1,32 @@
 import type { Preview } from "@storybook/react-vite";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { appTheme } from "../app/tokens/theme";
+import { getThemeByMode } from "../app/tokens/theme";
 import "../app/i18n";
 import "../app/app.css";
 
-import { ThemeModeProvider } from "../app/utils/themeContext";
+import { ThemeModeProvider, useThemeMode } from "../app/utils/themeContext";
 import { StatusCenterProvider } from "../app/utils/statusCenterContext";
+
+function StorybookThemeWrapper({ children }: { children: React.ReactNode }) {
+  const { mode } = useThemeMode();
+  const theme = getThemeByMode(mode);
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {children}
+    </ThemeProvider>
+  );
+}
 
 const preview: Preview = {
   decorators: [
     (Story) => (
       <ThemeModeProvider>
         <StatusCenterProvider>
-          <ThemeProvider theme={appTheme}>
-            <CssBaseline />
+          <StorybookThemeWrapper>
             <Story />
-          </ThemeProvider>
+          </StorybookThemeWrapper>
         </StatusCenterProvider>
       </ThemeModeProvider>
     ),
