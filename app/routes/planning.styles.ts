@@ -7,7 +7,7 @@ export { RootContainer } from "~/components/templates/PlanningLayout";
 export const HeroCard = styled(Box)(({ theme }) => ({
   position: "relative",
   padding: theme.spacing(3, 3.5),
-  borderRadius: "24px",
+  borderRadius: "28px",
   backgroundColor: alpha(theme.palette.background.paper, 0.7),
   border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
   backdropFilter: "blur(16px)",
@@ -37,7 +37,7 @@ export function createSvgDataUri(path: string, fill = "currentColor"): string {
 
 export const CalendarFrame = styled(Box)(({ theme }) => ({
   position: "relative",
-  borderRadius: "24px",
+  borderRadius: "28px",
   backgroundColor: alpha(theme.palette.background.paper, 0.85),
   border: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
   backdropFilter: "blur(16px)",
@@ -45,7 +45,7 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
   overflow: "hidden",
   minHeight: "720px",
   "& .MuiEventCalendar-root": {
-    borderRadius: "24px",
+    borderRadius: "28px",
     border: "none",
   },
   "& .MuiEventCalendar-headerToolbarSidePanelToggle svg, & .MuiEventCalendar-preferencesMenuButton svg":
@@ -439,7 +439,7 @@ export const FilterBar = styled(Box)(({ theme }) => ({
 
 export const SoftDialog = styled(Dialog)(() => ({
   "& .MuiDialog-paper": {
-    borderRadius: "24px",
+    borderRadius: "32px",
     padding: "8px",
     boxShadow: "0 24px 60px -12px rgba(0, 0, 0, 0.2)",
     backdropFilter: "blur(20px)",

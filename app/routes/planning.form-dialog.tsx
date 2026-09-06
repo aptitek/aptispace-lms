@@ -376,7 +376,7 @@ export function ClassFormDialog({
           <Button
             onClick={onClose}
             disabled={isSubmitting}
-            sx={{ borderRadius: "10px", fontWeight: 700 }}
+            sx={{ borderRadius: "9999px", fontWeight: 700 }}
           >
             {t("planning.form.cancel")}
           </Button>
@@ -384,7 +384,7 @@ export function ClassFormDialog({
             type="submit"
             variant="contained"
             disabled={isSubmitting}
-            sx={{ borderRadius: "10px", fontWeight: 700, px: 3 }}
+            sx={{ borderRadius: "9999px", fontWeight: 700, px: 3 }}
           >
             {submitText}
           </Button>

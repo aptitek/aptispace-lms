@@ -2,6 +2,7 @@ import { createTheme, type ThemeOptions } from "@mui/material/styles";
 import {
   M3_EXPRESSIVE_CATALOG,
   M3_SCALE_RADIUS_MAP,
+  M3_SHAPE_CORNERS,
   resolveM3ShapeStyle,
 } from "./shapes";
 
@@ -100,27 +101,21 @@ declare module "@mui/material/styles" {
   }
   interface Shape {
     borderRadius: number | string;
+    corners: typeof M3_SHAPE_CORNERS;
     m3: typeof M3_EXPRESSIVE_CATALOG;
     scale: typeof M3_SCALE_RADIUS_MAP;
     resolve: typeof resolveM3ShapeStyle;
   }
   interface ShapeOptions {
     borderRadius?: number | string;
+    corners?: typeof M3_SHAPE_CORNERS;
     m3?: typeof M3_EXPRESSIVE_CATALOG;
     scale?: typeof M3_SCALE_RADIUS_MAP;
     resolve?: typeof resolveM3ShapeStyle;
   }
 }
 
-export const M3_SHAPE_SCALE = {
-  none: 0,
-  extraSmall: 4,
-  small: 8,
-  medium: 12,
-  large: 16,
-  extraLarge: 28,
-  full: 9999,
-} as const;
+export const M3_SHAPE_SCALE = M3_SHAPE_CORNERS;
 
 export type M3ShapeToken = keyof typeof M3_SHAPE_SCALE;
 
@@ -150,7 +145,8 @@ const sharedThemeBase = {
     button: { textTransform: "none", fontWeight: 600 },
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: M3_SHAPE_CORNERS.largeIncreased,
+    corners: M3_SHAPE_CORNERS,
     m3: M3_EXPRESSIVE_CATALOG,
     scale: M3_SCALE_RADIUS_MAP,
     resolve: resolveM3ShapeStyle,

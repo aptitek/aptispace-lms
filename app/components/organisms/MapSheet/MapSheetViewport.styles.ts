@@ -249,7 +249,7 @@ export const MapControlsToolbar = styled("div")(({ theme }) => ({
   alignItems: "center",
   gap: 3,
   padding: "2px 5px",
-  borderRadius: "10px",
+  borderRadius: "12px",
   backgroundColor: alpha(theme.palette.background.paper, 0.88),
   backdropFilter: "blur(10px)",
   border: `1px solid ${alpha(theme.palette.divider, 0.35)}`,

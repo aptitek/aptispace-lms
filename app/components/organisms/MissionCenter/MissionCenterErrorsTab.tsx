@@ -387,7 +387,7 @@ export function MissionCenterErrorsTab({
             width: "100%",
             height: 520,
             backgroundColor: theme.palette.background.paper,
-            borderRadius: 3,
+            borderRadius: (theme) => theme.shape.corners.largeIncreased,
           }}
           data-testid="errors-table"
         >
@@ -418,7 +418,7 @@ export function MissionCenterErrorsTab({
               ),
             }}
             sx={{
-              borderRadius: 3,
+              borderRadius: (theme) => theme.shape.corners.largeIncreased,
               border: `1px solid ${theme.palette.divider}`,
               cursor: "pointer",
             }}

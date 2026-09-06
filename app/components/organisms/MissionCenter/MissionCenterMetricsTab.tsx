@@ -38,7 +38,13 @@ export function MissionCenterMetricsTab({
         }}
       >
         {/* D1 Service Card */}
-        <Card variant="outlined" sx={{ p: 2.5, borderRadius: 2 }}>
+        <Card
+          variant="outlined"
+          sx={{
+            p: 2.5,
+            borderRadius: (theme) => theme.shape.corners.largeIncreased,
+          }}
+        >
           <Box
             sx={{
               display: "flex",
@@ -90,7 +96,13 @@ export function MissionCenterMetricsTab({
         </Card>
 
         {/* R2 Service Card */}
-        <Card variant="outlined" sx={{ p: 2.5, borderRadius: 2 }}>
+        <Card
+          variant="outlined"
+          sx={{
+            p: 2.5,
+            borderRadius: (theme) => theme.shape.corners.largeIncreased,
+          }}
+        >
           <Box
             sx={{
               display: "flex",
@@ -143,7 +155,13 @@ export function MissionCenterMetricsTab({
       </Box>
 
       {/* 2. Platform Demographics & Volume */}
-      <Card variant="outlined" sx={{ p: 2.5, borderRadius: 2 }}>
+      <Card
+        variant="outlined"
+        sx={{
+          p: 2.5,
+          borderRadius: (theme) => theme.shape.corners.largeIncreased,
+        }}
+      >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
           <PeopleAltRoundedIcon sx={{ color: "primary.main" }} />
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
@@ -164,7 +182,7 @@ export function MissionCenterMetricsTab({
           <Box
             sx={{
               p: 1.5,
-              borderRadius: 1.5,
+              borderRadius: (theme) => theme.shape.corners.small,
               bgcolor: theme.palette.surfaceContainerLow,
             }}
           >
@@ -178,7 +196,7 @@ export function MissionCenterMetricsTab({
           <Box
             sx={{
               p: 1.5,
-              borderRadius: 1.5,
+              borderRadius: (theme) => theme.shape.corners.small,
               bgcolor: theme.palette.surfaceContainerLow,
             }}
           >
@@ -192,7 +210,7 @@ export function MissionCenterMetricsTab({
           <Box
             sx={{
               p: 1.5,
-              borderRadius: 1.5,
+              borderRadius: (theme) => theme.shape.corners.small,
               bgcolor: theme.palette.surfaceContainerLow,
             }}
           >
@@ -206,7 +224,7 @@ export function MissionCenterMetricsTab({
           <Box
             sx={{
               p: 1.5,
-              borderRadius: 1.5,
+              borderRadius: (theme) => theme.shape.corners.small,
               bgcolor: theme.palette.surfaceContainerLow,
             }}
           >
@@ -223,7 +241,10 @@ export function MissionCenterMetricsTab({
       {/* 3. D1 SQLite Database Table Inventory */}
       <Card
         variant="outlined"
-        sx={{ p: 2.5, borderRadius: 2 }}
+        sx={{
+          p: 2.5,
+          borderRadius: (theme) => theme.shape.corners.largeIncreased,
+        }}
         data-testid="d1-table-inventory"
       >
         <Box
@@ -282,7 +303,7 @@ export function MissionCenterMetricsTab({
                   value={percentage}
                   sx={{
                     height: 6,
-                    borderRadius: 3,
+                    borderRadius: 9999,
                     bgcolor: theme.palette.surfaceContainerHighest,
                   }}
                 />

@@ -78,7 +78,7 @@ export function MissionCenterErrorInspector({
       variant="outlined"
       sx={{
         p: 2.5,
-        borderRadius: 3,
+        borderRadius: (theme) => theme.shape.corners.largeIncreased,
         backgroundColor: theme.palette.background.paper,
         display: "flex",
         flexDirection: "column",
@@ -187,7 +187,7 @@ export function MissionCenterErrorInspector({
           sx={{
             fontWeight: 600,
             p: 1.5,
-            borderRadius: 1.5,
+            borderRadius: (theme) => theme.shape.corners.small,
             backgroundColor:
               theme.palette.surfaceContainerHighest ||
               theme.palette.background.paper,

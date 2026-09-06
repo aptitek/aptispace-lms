@@ -1,6 +1,7 @@
 import { styled } from "@mui/material/styles";
 import { motion, type Transition } from "framer-motion";
 import { M3_SPRINGS } from "~/tokens/motion";
+import { M3_SHAPE_CORNERS } from "~/tokens/shapes";
 
 export type MeridianSize = "small" | "medium" | "large";
 
@@ -8,7 +9,7 @@ export const MERIDIAN_SIZE_CONFIGS = {
   small: {
     width: 46,
     height: 26,
-    borderRadius: 13,
+    borderRadius: M3_SHAPE_CORNERS.full,
     puckSize: 20,
     flagSize: 15,
     mapWidth: 18,

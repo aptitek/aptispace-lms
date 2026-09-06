@@ -167,7 +167,7 @@ function EmailEndAdornment({
           cursor: isFocused ? "pointer" : "default",
           py: 0.25,
           px: 0.25,
-          borderRadius: 0.5,
+          borderRadius: 4,
           "&:hover": {
             color: "text.primary",
           },

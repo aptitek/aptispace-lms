@@ -350,7 +350,7 @@ export function MissionCenterAuditTab({
           width: "100%",
           height: 520,
           backgroundColor: theme.palette.background.paper,
-          borderRadius: 2,
+          borderRadius: (theme) => theme.shape.corners.largeIncreased,
         }}
         data-testid="audit-logs-datagrid"
       >
@@ -373,7 +373,7 @@ export function MissionCenterAuditTab({
           }}
           sx={{
             border: `1px solid ${theme.palette.divider}`,
-            borderRadius: 2,
+            borderRadius: (theme) => theme.shape.corners.largeIncreased,
           }}
         />
       </Box>

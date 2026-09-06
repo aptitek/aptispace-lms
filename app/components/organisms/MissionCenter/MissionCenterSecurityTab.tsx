@@ -41,7 +41,7 @@ function SecurityThreatPanel({ incident, onInspectPayload }: ThreatPanelProps) {
       variant="outlined"
       sx={{
         p: 2.5,
-        borderRadius: 3,
+        borderRadius: (theme) => theme.shape.corners.largeIncreased,
         backgroundColor: theme.palette.background.paper,
         display: "flex",
         flexDirection: "column",
@@ -108,7 +108,7 @@ function SecurityThreatPanel({ incident, onInspectPayload }: ThreatPanelProps) {
           sx={{
             fontWeight: 600,
             p: 1.5,
-            borderRadius: 1.5,
+            borderRadius: (theme) => theme.shape.corners.small,
             backgroundColor:
               theme.palette.surfaceContainerHighest ||
               theme.palette.background.paper,
@@ -295,7 +295,7 @@ function SecurityIncidentTable({
       sx={{
         width: "100%",
         height: 520,
-        borderRadius: 3,
+        borderRadius: (theme) => theme.shape.corners.largeIncreased,
         backgroundColor: theme.palette.background.paper,
       }}
       data-testid="security-incidents-table"
@@ -327,7 +327,7 @@ function SecurityIncidentTable({
           ),
         }}
         sx={{
-          borderRadius: 3,
+          borderRadius: (theme) => theme.shape.corners.largeIncreased,
           border: `1px solid ${theme.palette.divider}`,
           cursor: "pointer",
         }}
@@ -365,7 +365,7 @@ function SecurityAlertBanner({ count }: { count: number }) {
     <Alert
       severity={severity}
       icon={icon}
-      sx={{ borderRadius: 2 }}
+      sx={{ borderRadius: (theme) => theme.shape.corners.medium }}
       data-testid="security-status-alert"
     >
       <AlertTitle sx={{ fontWeight: 700 }}>{title}</AlertTitle>

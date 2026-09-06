@@ -11,7 +11,7 @@ export const NavContainer = styled("nav")(({ theme }) => ({
   position: "relative",
   padding: "3px",
   gap: "3px",
-  borderRadius: "24px",
+  borderRadius: "9999px",
   backgroundColor: alpha(theme.palette.text.primary, 0.04),
   border: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
   backdropFilter: "blur(12px)",
@@ -26,7 +26,7 @@ export const NavContainer = styled("nav")(({ theme }) => ({
   [theme.breakpoints.down("sm")]: {
     padding: "2px",
     gap: "2px",
-    borderRadius: "20px",
+    borderRadius: "9999px",
   },
 }));
 
@@ -89,7 +89,7 @@ export const ActivePillIndicator = styled(motion.div)(({ theme }) => ({
   position: "absolute",
   inset: 0,
   zIndex: 0,
-  borderRadius: "18px",
+  borderRadius: "9999px",
   backgroundColor: alpha(theme.palette.primary.main, 0.12),
   border: `1px solid ${alpha(theme.palette.primary.main, 0.28)}`,
   boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.12)}`,
@@ -102,7 +102,7 @@ export const ActivePillIndicator = styled(motion.div)(({ theme }) => ({
   }),
 
   [theme.breakpoints.down("sm")]: {
-    borderRadius: "16px",
+    borderRadius: "9999px",
   },
 }));
 

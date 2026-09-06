@@ -53,7 +53,7 @@ export function MissionCenterJsonModal({
       slotProps={{
         paper: {
           sx: {
-            borderRadius: 3,
+            borderRadius: (theme) => theme.shape.corners.extraLargeIncreased,
             backgroundColor: "background.paper",
           },
         },

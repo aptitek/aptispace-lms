@@ -84,7 +84,7 @@ export function CohortStructuredFields({
         flexDirection: "column",
         gap: 2,
         p: 2,
-        borderRadius: 2,
+        borderRadius: (theme) => theme.shape.corners.largeIncreased,
         bgcolor: (theme) =>
           theme.palette.surfaceContainerLow || theme.palette.background.paper,
         border: "1px solid",
@@ -100,7 +100,7 @@ export function CohortStructuredFields({
           alignItems: "center",
           justifyContent: "center",
           p: 2,
-          borderRadius: 2,
+          borderRadius: (theme) => theme.shape.corners.medium,
           bgcolor: (theme) =>
             theme.palette.surfaceContainerHigh ||
             theme.palette.surfaceContainer,

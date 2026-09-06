@@ -361,7 +361,7 @@ const ROOM_CHIP_SIZE_METRICS: Record<
   small: {
     fontSize: "1.1rem",
     padding: "5px 12px",
-    borderRadius: "10px",
+    borderRadius: "12px",
     gap: 6,
   },
   medium: {
@@ -373,7 +373,7 @@ const ROOM_CHIP_SIZE_METRICS: Record<
   large: {
     fontSize: "1.65rem",
     padding: "9px 22px",
-    borderRadius: "14px",
+    borderRadius: "16px",
     gap: 8,
   },
 };

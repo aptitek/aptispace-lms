@@ -55,7 +55,7 @@ const IconBox = styled("div", {
   justifyContent: "center",
   width: 36,
   height: 36,
-  borderRadius: 10,
+  borderRadius: 12,
   backgroundColor: `${color}18`,
   color: color,
   flexShrink: 0,

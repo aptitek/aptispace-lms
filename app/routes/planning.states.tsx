@@ -57,7 +57,7 @@ function CalendarSkeletonToolbar() {
           variant="rounded"
           width={76}
           height={36}
-          sx={{ borderRadius: "10px" }}
+          sx={{ borderRadius: "9999px" }}
         />
         <Skeleton variant="circular" width={36} height={36} />
         <Skeleton variant="circular" width={36} height={36} />
@@ -76,7 +76,7 @@ function CalendarSkeletonToolbar() {
             variant="rounded"
             width={64}
             height={32}
-            sx={{ borderRadius: "10px" }}
+            sx={{ borderRadius: "9999px" }}
           />
         ))}
       </Box>
@@ -163,7 +163,7 @@ function CalendarSkeletonGrid() {
               width: `calc(${100 / 7}% - 20px)`,
               top: `${skeletonEvent.top}px`,
               height: `${skeletonEvent.height}px`,
-              borderRadius: "14px",
+              borderRadius: "16px",
               p: 1.5,
               bgcolor: (theme) => getPastelColor(skeletonEvent.color, theme),
               boxShadow: "0 4px 14px -4px rgba(0,0,0,0.1)",
@@ -177,7 +177,7 @@ function CalendarSkeletonGrid() {
               variant="rounded"
               width="70%"
               height={16}
-              sx={{ borderRadius: "6px" }}
+              sx={{ borderRadius: "4px" }}
             />
             <Skeleton
               variant="rounded"

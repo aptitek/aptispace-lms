@@ -194,7 +194,7 @@ function ErrorBoundaryContent({ error }: { error: unknown }) {
           maxWidth: 600,
           width: "100%",
           p: { xs: 3, sm: 4 },
-          borderRadius: 3,
+          borderRadius: (theme) => theme.shape.corners.largeIncreased,
           border: 1,
           borderColor: "divider",
           backgroundColor: "background.paper",
@@ -254,7 +254,7 @@ function ErrorBoundaryContent({ error }: { error: unknown }) {
             sx={{
               mt: 2,
               p: 2,
-              borderRadius: 1.5,
+              borderRadius: (theme) => theme.shape.corners.small,
               backgroundColor: (theme) =>
                 theme.palette.surfaceContainerHighest ||
                 theme.palette.background.default,

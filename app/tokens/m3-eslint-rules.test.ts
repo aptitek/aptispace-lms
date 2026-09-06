@@ -18,6 +18,7 @@ describe("Material Design 3 ESLint Theming Rules", () => {
           "m3-theme/no-raw-svg-icons": "error",
           "m3-theme/enforce-rounded-icons": "error",
           "m3-theme/enforce-motion-tokens": "error",
+          "m3-theme/enforce-shape-tokens": "error",
         },
       },
     ],
@@ -43,6 +44,19 @@ describe("Material Design 3 ESLint Theming Rules", () => {
           "m3-theme/enforce-motion-tokens": [
             "error",
             { allowed: ["0.42", "custom-special-physics"] },
+          ],
+        },
+      },
+    ],
+  });
+
+  const shapeAllowedEslint = new ESLint({
+    overrideConfig: [
+      {
+        rules: {
+          "m3-theme/enforce-shape-tokens": [
+            "error",
+            { allowed: ["15px", "77"] },
           ],
         },
       },
@@ -396,6 +410,71 @@ export function Card() { return <motion.div transition={{ duration: 0.42 }} />; 
       });
       const violations = result?.messages.filter(
         (m) => m.ruleId === "m3-theme/enforce-motion-tokens",
+      );
+      expect(violations).toHaveLength(0);
+    });
+  });
+
+  describe("m3-theme/enforce-shape-tokens", () => {
+    it("reports non-standard numeric and string borderRadius literals", async () => {
+      const code = `import Box from "@mui/material/Box";
+export function Card() { return <Box sx={{ borderRadius: 10 }}><div style={{ borderRadius: "14px" }} /></Box>; }`;
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/TestCard/TestCard.tsx",
+      });
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/enforce-shape-tokens",
+      );
+      expect(violations.length).toBeGreaterThanOrEqual(2);
+      expect(violations[0]?.message).toContain("Non-standard corner radius");
+    });
+
+    it("reports direct import from material-shapes-ts in UI components", async () => {
+      const code = `import { MaterialShapes } from "material-shapes-ts";
+export const shape = MaterialShapes;`;
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/TestCard/TestCard.tsx",
+      });
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/enforce-shape-tokens",
+      );
+      expect(violations.length).toBeGreaterThan(0);
+      expect(violations[0]?.message).toContain(
+        "Direct import from 'material-shapes-ts' is forbidden",
+      );
+    });
+
+    it("permits approved M3 scale tokens, numbers, strings, and multi-corner values", async () => {
+      const code = `import Box from "@mui/material/Box";
+import { M3_SHAPE_CORNERS } from "~/tokens/shapes";
+export function Card() {
+  return (
+    <Box sx={{ borderRadius: "12px", p: 1 }}>
+      <div style={{ borderRadius: M3_SHAPE_CORNERS.largeIncreased }} />
+      <div style={{ borderRadius: "16px 16px 0 0" }} />
+      <div style={{ borderRadius: 9999 }} />
+      <div style={{ borderRadius: "50%" }} />
+      <div style={{ borderRadius: "var(--md-sys-shape-corner-medium)" }} />
+    </Box>
+  );
+}`;
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/TestCard/TestCard.tsx",
+      });
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/enforce-shape-tokens",
+      );
+      expect(violations).toHaveLength(0);
+    });
+
+    it("permits whitelisted corner values via allowed option", async () => {
+      const code = `import Box from "@mui/material/Box";
+export function Card() { return <Box sx={{ borderRadius: "15px" }}><div style={{ borderRadius: 77 }} /></Box>; }`;
+      const [result] = await shapeAllowedEslint.lintText(code, {
+        filePath: "app/components/molecules/TestCard/TestCard.tsx",
+      });
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/enforce-shape-tokens",
       );
       expect(violations).toHaveLength(0);
     });

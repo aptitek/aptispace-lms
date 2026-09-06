@@ -55,7 +55,7 @@ export function InspectorAccountSection({
       variant="outlined"
       sx={{
         p: 2,
-        borderRadius: 2,
+        borderRadius: (theme) => theme.shape.corners.largeIncreased,
         display: "flex",
         flexDirection: "column",
         gap: 2,

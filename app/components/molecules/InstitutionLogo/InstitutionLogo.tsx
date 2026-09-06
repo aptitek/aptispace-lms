@@ -86,7 +86,7 @@ export function InstitutionLogo({
         height,
         maxWidth,
         objectFit: "contain",
-        borderRadius: 1,
+        borderRadius: 4,
         display: "block",
       }}
     />

@@ -9,6 +9,7 @@ import { createContainerBackgroundRule } from "./m3-theme-helpers.js";
 import { colorRules } from "./m3-theme-color-rules.js";
 import { iconRules } from "./m3-theme-icon-rules.js";
 import { motionRules } from "./m3-theme-motion-rules.js";
+import { shapeRules } from "./m3-theme-shape-rules.js";
 
 export const m3ThemePlugin = {
   meta: { name: "eslint-plugin-m3-theme" },
@@ -18,6 +19,7 @@ export const m3ThemePlugin = {
     ...colorRules,
     ...iconRules,
     ...motionRules,
+    ...shapeRules,
   },
 };
 

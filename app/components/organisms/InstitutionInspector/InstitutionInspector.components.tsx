@@ -21,7 +21,7 @@ export function InstitutionEmailPreviewBox({
     <Box
       sx={{
         p: 1.5,
-        borderRadius: 1.5,
+        borderRadius: (theme) => theme.shape.corners.small,
         bgcolor: (theme) => theme.palette.surfaceContainer,
         border: "1px dashed",
         borderColor: "divider",
@@ -95,13 +95,13 @@ export function InstitutionEmailCardHeader({
         aria-label={t("inspector.domainConstraint", "Domain Constraint")}
         sx={{
           p: 0.5,
-          borderRadius: 2,
+          borderRadius: (theme) => theme.shape.corners.medium,
           bgcolor: (theme) => theme.palette.surfaceContainerHigh,
           border: "1px solid",
           borderColor: "divider",
           "& .MuiToggleButtonGroup-grouped": {
             border: 0,
-            borderRadius: 1.5,
+            borderRadius: (theme) => theme.shape.corners.small,
             fontWeight: 600,
             fontSize: "0.8rem",
             textTransform: "none",
@@ -151,7 +151,7 @@ export function InstitutionFreeDomainNotice() {
     <Box
       sx={{
         p: 1.5,
-        borderRadius: 1.5,
+        borderRadius: (theme) => theme.shape.corners.small,
         bgcolor: (theme) => alpha(theme.palette.info.main, 0.08),
         border: (theme) => `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
         display: "flex",
@@ -267,7 +267,7 @@ export function InstitutionEmailCard({
       variant="outlined"
       sx={{
         p: 2,
-        borderRadius: 2,
+        borderRadius: (theme) => theme.shape.corners.largeIncreased,
         display: "flex",
         flexDirection: "column",
         gap: 1.5,

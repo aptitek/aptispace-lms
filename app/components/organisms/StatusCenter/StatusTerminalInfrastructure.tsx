@@ -90,7 +90,7 @@ function TileHeader({
             justifyContent: "center",
             width: 32,
             height: 32,
-            borderRadius: 1.5,
+            borderRadius: (theme) => theme.shape.corners.small,
             backgroundColor: (theme) =>
               theme.palette.surfaceContainerHigh ||
               theme.palette.background.paper,
@@ -237,7 +237,7 @@ function InfrastructureTile({
         flex: 1,
         minWidth: { xs: "100%", sm: "240px" },
         p: 1.75,
-        borderRadius: 2,
+        borderRadius: (theme) => theme.shape.corners.largeIncreased,
         border: 1,
         borderColor: "divider",
         backgroundColor: "background.paper",

@@ -75,7 +75,7 @@ export const HeaderActions = styled(Box)(({ theme }) => ({
 export const ModeBadge = styled(Chip)(({ theme }) => ({
   height: 22,
   fontSize: "0.6875rem",
-  borderRadius: 6,
+  borderRadius: 9999,
   backgroundColor: theme.palette.warning.main,
   color: theme.palette.warning.contrastText,
   fontWeight: 800,
@@ -250,11 +250,11 @@ export const AccountsList = styled(Box)(({ theme }) => ({
   },
   "&::-webkit-scrollbar-track": {
     background: alpha(theme.palette.divider, 0.1),
-    borderRadius: 3,
+    borderRadius: 9999,
   },
   "&::-webkit-scrollbar-thumb": {
     background: alpha(theme.palette.text.secondary, 0.3),
-    borderRadius: 3,
+    borderRadius: 9999,
     "&:hover": {
       background: alpha(theme.palette.text.secondary, 0.5),
     },

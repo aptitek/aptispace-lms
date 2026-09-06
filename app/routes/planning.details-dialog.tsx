@@ -411,7 +411,7 @@ export function ClassDetailsDialog({
               size="small"
               startIcon={<DeleteOutlineRoundedIcon />}
               onClick={onDelete}
-              sx={{ borderRadius: "10px", fontWeight: 700 }}
+              sx={{ borderRadius: "9999px", fontWeight: 700 }}
             >
               {t("planning.details.delete")}
             </Button>
@@ -420,7 +420,7 @@ export function ClassDetailsDialog({
               size="small"
               startIcon={<EditRoundedIcon />}
               onClick={onEdit}
-              sx={{ borderRadius: "10px", fontWeight: 700 }}
+              sx={{ borderRadius: "9999px", fontWeight: 700 }}
             >
               {t("planning.details.edit")}
             </Button>
@@ -430,7 +430,7 @@ export function ClassDetailsDialog({
         )}
         <Button
           onClick={onClose}
-          sx={{ borderRadius: "10px", fontWeight: 700 }}
+          sx={{ borderRadius: "9999px", fontWeight: 700 }}
         >
           {t("planning.details.close")}
         </Button>

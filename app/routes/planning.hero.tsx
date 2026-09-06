@@ -43,7 +43,7 @@ export function PlanningHero({
           sx={{
             width: 44,
             height: 44,
-            borderRadius: "14px",
+            borderRadius: "16px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -83,7 +83,7 @@ export function PlanningHero({
           startIcon={<LinkRoundedIcon />}
           onClick={onOpenExport}
           sx={{
-            borderRadius: "14px",
+            borderRadius: "9999px",
             textTransform: "none",
             fontWeight: 700,
             px: 2,

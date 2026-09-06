@@ -121,7 +121,7 @@ export const StyledFormControl = styled(FormControl)(({ theme }) => {
   return {
     flex: 1,
     "& .MuiOutlinedInput-root": {
-      borderRadius: 10,
+      borderRadius: 12,
       backgroundColor: alpha(theme.palette.background.paper, 0.8),
       transition: theme.transitions.create(["border-color", "box-shadow"]),
       "&:hover .MuiOutlinedInput-notchedOutline": {
@@ -155,7 +155,7 @@ export const AddCohortButton = styled(Button)(({ theme }) => {
   return {
     height: 40,
     fontWeight: 700,
-    borderRadius: 10,
+    borderRadius: 9999,
     padding: theme.spacing(0, 2),
     textTransform: "none",
     backgroundColor: theme.palette.primary.main,
@@ -186,7 +186,7 @@ export const SchoolLogoMini = styled("img")(({ theme }) => ({
   maxWidth: 26,
   maxHeight: 18,
   objectFit: "contain",
-  borderRadius: 2,
+  borderRadius: 4,
   ...theme.applyStyles("dark", {
     filter: "brightness(1.1)",
   }),

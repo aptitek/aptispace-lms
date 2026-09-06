@@ -36,7 +36,7 @@ export const FabDockPanel = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   backgroundColor: alpha(theme.palette.background.paper, 0.8),
   backdropFilter: "blur(20px)",
-  borderRadius: "24px",
+  borderRadius: "28px",
   border: `1px solid ${theme.palette.divider}`,
   boxShadow: `0 12px 40px rgba(0, 0, 0, 0.35)`,
   boxSizing: "border-box",

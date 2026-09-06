@@ -106,14 +106,14 @@ export function EntityCardSkeleton({
               width={72}
               height={20}
               animation={state.animation}
-              sx={{ borderRadius: "10px" }}
+              sx={{ borderRadius: "9999px" }}
             />
             <Skeleton
               variant="rounded"
               width={40}
               height={20}
               animation={state.animation}
-              sx={{ borderRadius: "10px" }}
+              sx={{ borderRadius: "9999px" }}
             />
           </SkeletonHeaderBadges>
         </SkeletonHeaderRow>
@@ -136,14 +136,14 @@ export function EntityCardSkeleton({
                 width="60%"
                 height={14}
                 animation={state.animation}
-                sx={{ borderRadius: "3px" }}
+                sx={{ borderRadius: "4px" }}
               />
               <Skeleton
                 variant="text"
                 width="85%"
                 height={20}
                 animation={state.animation}
-                sx={{ borderRadius: "3px" }}
+                sx={{ borderRadius: "4px" }}
               />
             </SkeletonNameBlock>
 
@@ -152,7 +152,7 @@ export function EntityCardSkeleton({
               width="90%"
               height={12}
               animation={state.animation}
-              sx={{ borderRadius: "3px" }}
+              sx={{ borderRadius: "4px" }}
             />
 
             <SkeletonFooterRow>
@@ -161,7 +161,7 @@ export function EntityCardSkeleton({
                 width={75}
                 height={20}
                 animation={state.animation}
-                sx={{ borderRadius: "6px" }}
+                sx={{ borderRadius: "8px" }}
               />
               <Skeleton
                 variant="circular"

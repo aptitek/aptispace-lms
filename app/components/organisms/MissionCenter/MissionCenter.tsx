@@ -67,7 +67,7 @@ export default function MissionCenter({
               justifyContent: "center",
               width: 44,
               height: 44,
-              borderRadius: 2,
+              borderRadius: (theme) => theme.shape.corners.medium,
               backgroundColor: theme.palette.primary.main,
               color: theme.palette.primary.contrastText,
             }}
@@ -127,7 +127,7 @@ export default function MissionCenter({
               textTransform: "none",
               fontWeight: 700,
               fontSize: "0.85rem",
-              borderRadius: 2,
+              borderRadius: (theme) => theme.shape.corners.medium,
               px: 2,
             },
           }}

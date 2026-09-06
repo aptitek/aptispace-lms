@@ -10,7 +10,7 @@ export const DoorCodePill = styled("div")(({ theme }) => ({
   alignItems: "center",
   gap: 6,
   padding: "2px 8px",
-  borderRadius: "7px",
+  borderRadius: "9999px",
   backgroundColor: alpha(theme.palette.background.paper, 0.88),
   border: `1px dashed ${alpha(theme.palette.error.main, 0.42)}`,
   fontFamily: "SFMono-Regular, Menlo, Monaco, Consolas, monospace",

@@ -349,7 +349,7 @@ export const ActionIconButton = styled(IconButton, {
     justifyContent: "center",
     background: "none",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "8px",
     color: getActionColor(),
     padding: "6px",
     cursor: "pointer",

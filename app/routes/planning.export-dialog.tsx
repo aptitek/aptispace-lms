@@ -119,7 +119,7 @@ export function CalendarExportDialog({
                 fontWeight: 800,
                 px: 1,
                 py: 0.2,
-                borderRadius: "6px",
+                borderRadius: "9999px",
                 bgcolor: (theme) => alpha(theme.palette.success.main, 0.1),
                 color: "success.main",
               }}
@@ -137,7 +137,7 @@ export function CalendarExportDialog({
                 input: {
                   readOnly: true,
                   sx: {
-                    borderRadius: "10px",
+                    borderRadius: "12px",
                     fontSize: "0.82rem",
                     fontFamily: "monospace",
                     bgcolor: (theme) =>
@@ -158,7 +158,7 @@ export function CalendarExportDialog({
                 )
               }
               sx={{
-                borderRadius: "10px",
+                borderRadius: "9999px",
                 textTransform: "none",
                 fontWeight: 700,
                 whiteSpace: "nowrap",
@@ -204,7 +204,7 @@ export function CalendarExportDialog({
         <Box
           sx={{
             p: 1.75,
-            borderRadius: "14px",
+            borderRadius: "16px",
             backgroundColor: (theme) => alpha(theme.palette.info.main, 0.06),
             border: (theme) =>
               `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
@@ -254,7 +254,7 @@ export function CalendarExportDialog({
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button
           onClick={onClose}
-          sx={{ borderRadius: "10px", fontWeight: 700 }}
+          sx={{ borderRadius: "9999px", fontWeight: 700 }}
         >
           {t("planning.export.done")}
         </Button>

@@ -445,7 +445,7 @@ export default function Planning() {
           <Alert
             onClose={() => setSnackbarMessage(null)}
             severity="success"
-            sx={{ borderRadius: "14px", fontWeight: 600 }}
+            sx={{ borderRadius: "16px", fontWeight: 600 }}
           >
             {snackbarMessage}
           </Alert>

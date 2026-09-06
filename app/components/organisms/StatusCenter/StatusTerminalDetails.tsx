@@ -111,7 +111,7 @@ function ContextPayloadBlock({
         sx={{
           m: 0,
           p: 1.5,
-          borderRadius: 1.5,
+          borderRadius: (theme) => theme.shape.corners.small,
           backgroundColor: "background.paper",
           border: 1,
           borderColor: "divider",
@@ -146,7 +146,7 @@ function StackTraceBlock({ stack }: { stack?: string }) {
         sx={{
           m: 0,
           p: 1.5,
-          borderRadius: 1.5,
+          borderRadius: (theme) => theme.shape.corners.small,
           backgroundColor: "background.paper",
           border: 1,
           borderColor: "divider",
@@ -184,7 +184,7 @@ function ComponentStackBlock({ componentStack }: { componentStack?: string }) {
         sx={{
           m: 0,
           p: 1.5,
-          borderRadius: 1.5,
+          borderRadius: (theme) => theme.shape.corners.small,
           backgroundColor: "background.paper",
           border: 1,
           borderColor: "divider",
@@ -272,7 +272,7 @@ export function StatusTerminalDetails({
           sx={{
             fontSize: "0.75rem",
             textTransform: "none",
-            borderRadius: 2,
+            borderRadius: (theme) => theme.shape.corners.full,
             borderColor: "divider",
             color: "inherit",
           }}
@@ -300,7 +300,7 @@ export function StatusTerminalDetails({
           sx={{
             fontSize: "0.75rem",
             textTransform: "none",
-            borderRadius: 2,
+            borderRadius: (theme) => theme.shape.corners.full,
             fontWeight: 600,
           }}
         >

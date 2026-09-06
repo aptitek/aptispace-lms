@@ -129,7 +129,7 @@ export function StatusTerminalHeader({
           sx={{
             fontSize: "0.75rem",
             textTransform: "none",
-            borderRadius: 2,
+            borderRadius: (theme) => theme.shape.corners.full,
             borderColor: "divider",
             color: "inherit",
           }}
@@ -147,7 +147,7 @@ export function StatusTerminalHeader({
             },
             paper: {
               sx: {
-                borderRadius: 2,
+                borderRadius: (theme) => theme.shape.corners.medium,
                 fontSize: "0.75rem",
                 minWidth: 180,
               },

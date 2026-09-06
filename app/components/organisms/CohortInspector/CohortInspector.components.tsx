@@ -86,13 +86,13 @@ export function CohortDateModeToggle({
       aria-label={t("inspector.dateModeAria", "Date selection mode")}
       sx={{
         p: 0.5,
-        borderRadius: 2,
+        borderRadius: (theme) => theme.shape.corners.medium,
         bgcolor: (theme) => theme.palette.surfaceContainerHigh,
         border: "1px solid",
         borderColor: "divider",
         "& .MuiToggleButtonGroup-grouped": {
           border: 0,
-          borderRadius: 1.5,
+          borderRadius: (theme) => theme.shape.corners.small,
           fontWeight: 600,
           fontSize: "0.8rem",
           textTransform: "none",
@@ -282,7 +282,7 @@ export function CohortScheduleCard({
       variant="outlined"
       sx={{
         p: 2,
-        borderRadius: 2,
+        borderRadius: (theme) => theme.shape.corners.largeIncreased,
         borderColor: "divider",
         bgcolor: (theme) =>
           theme.palette.surfaceContainerLow || theme.palette.background.paper,
@@ -348,7 +348,7 @@ export function CohortDurationBanner({
       sx={{
         px: 1.5,
         py: 0.75,
-        borderRadius: 1.5,
+        borderRadius: (theme) => theme.shape.corners.small,
         bgcolor: (theme) => theme.palette.surfaceContainerHigh,
         display: "flex",
         alignItems: "center",

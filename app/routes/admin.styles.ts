@@ -11,7 +11,7 @@ export const StyledTabsContainer = styled("div")(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.divider}`,
   "& .MuiTabs-indicator": {
     height: 3,
-    borderRadius: "3px 3px 0 0",
+    borderRadius: "4px 4px 0 0",
     backgroundColor: theme.palette.primary.main,
     ...theme.applyStyles("dark", {
       backgroundColor: theme.palette.secondary.main,

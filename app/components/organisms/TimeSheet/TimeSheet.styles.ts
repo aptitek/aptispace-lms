@@ -186,7 +186,7 @@ export const ConnectedCard = styled("div", {
     justifyContent: "center",
     ...layout,
     gap: cfg.detailsGap,
-    borderRadius: "18px",
+    borderRadius: "20px",
     backgroundColor: alpha(theme.palette.background.paper, 0.95),
     border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
     boxShadow:

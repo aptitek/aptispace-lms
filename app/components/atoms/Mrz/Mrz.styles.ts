@@ -91,7 +91,7 @@ export const StatusPill = styled("span", {
   fontSize: "8px",
   fontWeight: 800,
   padding: "2px 6px",
-  borderRadius: "10px",
+  borderRadius: "9999px",
   backgroundColor: isValidStatus
     ? theme.palette.success.dark
     : theme.palette.error.dark,

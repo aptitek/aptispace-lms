@@ -15,9 +15,9 @@ import { useTranslation } from "react-i18next";
 import {
   MaterialShapes,
   roundedPolygonToPath,
-  animateMorph,
+  animateExpressiveMorph,
   type MorphAnimation,
-} from "material-shapes-ts";
+} from "~/tokens/shapes";
 import Tooltip from "../../atoms/Tooltip/Tooltip";
 import { isUnnamedUser } from "../../atoms/Avatar/Avatar";
 import { getRoleConfig } from "~/tokens/roles";
@@ -169,15 +169,19 @@ export function HeaderUserAvatar({
       const startShape = towardsCircle ? restPolygon : MaterialShapes.Circle;
       const targetShape = towardsCircle ? MaterialShapes.Circle : restPolygon;
 
-      activeAnimationRef.current = animateMorph(startShape, targetShape, {
-        duration: towardsCircle
-          ? M3_MOTION_DURATIONS.medium3
-          : M3_MOTION_DURATIONS.medium2,
-        easing: "emphasized",
-        onFrame: (nextPathData) => {
-          setCurrentPathD(nextPathData);
+      activeAnimationRef.current = animateExpressiveMorph(
+        startShape,
+        targetShape,
+        {
+          duration: towardsCircle
+            ? M3_MOTION_DURATIONS.medium3
+            : M3_MOTION_DURATIONS.medium2,
+          easing: "emphasized",
+          onFrame: (nextPathData) => {
+            setCurrentPathD(nextPathData);
+          },
         },
-      });
+      );
     },
     [restPolygon],
   );

@@ -1,8 +1,22 @@
 import {
   MaterialShapes,
   roundedPolygonToPath,
+  Morph,
+  morphToPath,
+  animateMorph,
   type RoundedPolygon,
+  type MorphAnimation,
+  type MorphAnimationOptions,
 } from "material-shapes-ts";
+
+export {
+  MaterialShapes,
+  roundedPolygonToPath,
+  Morph,
+  morphToPath,
+  animateMorph,
+};
+export type { RoundedPolygon, MorphAnimation, MorphAnimationOptions };
 
 export type ExpressiveShapeName =
   | "circle"
@@ -202,22 +216,71 @@ export const ALL_EXPRESSIVE_SHAPES: string[] = [
 
 export const ALL_35_M3_SHAPES = ALL_EXPRESSIVE_SHAPES;
 
-export const SHAPE_SCALE_RADIUS_MAP: Record<string, string> = {
+/**
+ * Official Material Design 3 Shape Corner Radius Scale
+ * https://m3.material.io/styles/shape/corner-radius-scale
+ */
+export const M3_SHAPE_CORNERS = {
+  none: 0,
+  extraSmall: 4,
+  small: 8,
+  medium: 12,
+  large: 16,
+  largeIncreased: 20,
+  extraLarge: 28,
+  extraLargeIncreased: 32,
+  extraExtraLarge: 48,
+  full: 9999,
+} as const;
+
+export const M3_SHAPE_CORNER_STRINGS = {
   none: "0px",
-  "extra-small": "4px",
-  "extra-small-top": "4px 4px 0 0",
+  extraSmall: "4px",
   small: "8px",
   medium: "12px",
-  rounded: "12px",
-  landscape: "8px",
   large: "16px",
+  largeIncreased: "20px",
+  extraLarge: "28px",
+  extraLargeIncreased: "32px",
+  extraExtraLarge: "48px",
+  full: "9999px",
+  circular: "50%",
+} as const;
+
+export const M3_SHAPE_CSS_VARIABLES = {
+  none: "var(--md-sys-shape-corner-none)",
+  extraSmall: "var(--md-sys-shape-corner-extra-small)",
+  small: "var(--md-sys-shape-corner-small)",
+  medium: "var(--md-sys-shape-corner-medium)",
+  large: "var(--md-sys-shape-corner-large)",
+  largeIncreased: "var(--md-sys-shape-corner-large-increased)",
+  extraLarge: "var(--md-sys-shape-corner-extra-large)",
+  extraLargeIncreased: "var(--md-sys-shape-corner-extra-large-increased)",
+  extraExtraLarge: "var(--md-sys-shape-corner-extra-extra-large)",
+  full: "var(--md-sys-shape-corner-full)",
+} as const;
+
+export const SHAPE_SCALE_RADIUS_MAP: Record<string, string> = {
+  none: M3_SHAPE_CORNER_STRINGS.none,
+  "extra-small": M3_SHAPE_CORNER_STRINGS.extraSmall,
+  "extra-small-top": "4px 4px 0 0",
+  small: M3_SHAPE_CORNER_STRINGS.small,
+  medium: M3_SHAPE_CORNER_STRINGS.medium,
+  rounded: M3_SHAPE_CORNER_STRINGS.medium,
+  landscape: M3_SHAPE_CORNER_STRINGS.small,
+  large: M3_SHAPE_CORNER_STRINGS.large,
   "large-end": "0 16px 16px 0",
   "large-top": "16px 16px 0 0",
   "large-start": "16px 0 0 16px",
-  "extra-large": "28px",
+  "large-increased": M3_SHAPE_CORNER_STRINGS.largeIncreased,
+  "extra-large": M3_SHAPE_CORNER_STRINGS.extraLarge,
   "extra-large-top": "28px 28px 0 0",
-  full: "9999px",
-  circular: "50%",
+  "extra-large-increased": M3_SHAPE_CORNER_STRINGS.extraLargeIncreased,
+  "extra-extra-large": M3_SHAPE_CORNER_STRINGS.extraExtraLarge,
+  full: M3_SHAPE_CORNER_STRINGS.full,
+  circular: M3_SHAPE_CORNER_STRINGS.circular,
+  pill: M3_SHAPE_CORNER_STRINGS.full,
+  square: M3_SHAPE_CORNER_STRINGS.none,
   cut: "14px 2px 14px 2px",
   asymmetric: "24px 6px 24px 6px",
   biometric: "10px",
@@ -241,7 +304,7 @@ export function resolveShapeStyle(
     return { borderRadius: rad };
   }
   if (!shape) {
-    return { borderRadius: "10px" };
+    return { borderRadius: M3_SHAPE_CORNER_STRINGS.medium };
   }
   if (typeof shape === "number") {
     return { borderRadius: `${shape}px` };
@@ -282,4 +345,39 @@ export function getRoleAvatarShape(role?: string | null): ExpressiveShapeName {
     default:
       return "pill";
   }
+}
+
+// --- Centralized Shape Morphing Engine ---
+
+export type ExpressiveMorphOptions = MorphAnimationOptions;
+
+export function getExpressivePolygon(
+  shape: ExpressiveShapeName | string | RoundedPolygon,
+): RoundedPolygon {
+  if (typeof shape === "object" && shape !== null) return shape;
+  const canonical =
+    typeof shape === "string" ? ALIASES[shape] || shape : "circle";
+  const entry = RAW_SHAPE_ENTRIES.find(([k]) => k === canonical);
+  return entry ? entry[2] : MaterialShapes.Circle;
+}
+
+export function getMorphPath(
+  from: ExpressiveShapeName | string | RoundedPolygon,
+  to: ExpressiveShapeName | string | RoundedPolygon,
+  progress: number,
+): string {
+  const polyA = getExpressivePolygon(from);
+  const polyB = getExpressivePolygon(to);
+  const morph = new Morph(polyA, polyB);
+  return morphToPath(morph, progress).toSvgPathData();
+}
+
+export function animateExpressiveMorph(
+  from: ExpressiveShapeName | string | RoundedPolygon,
+  to: ExpressiveShapeName | string | RoundedPolygon,
+  options: ExpressiveMorphOptions,
+): MorphAnimation {
+  const polyA = getExpressivePolygon(from);
+  const polyB = getExpressivePolygon(to);
+  return animateMorph(polyA, polyB, options);
 }

@@ -153,7 +153,7 @@ export function FacultyAccessPanel() {
       <Box
         sx={{
           p: 2,
-          borderRadius: 2,
+          borderRadius: (theme) => theme.shape.corners.medium,
           bgcolor: (theme) => alpha(theme.palette.info.main, 0.08),
           border: "1px solid",
           borderColor: (theme) => alpha(theme.palette.info.main, 0.2),
@@ -214,7 +214,7 @@ export function AdminAccessPanel() {
       <Box
         sx={{
           p: 2,
-          borderRadius: 2,
+          borderRadius: (theme) => theme.shape.corners.medium,
           bgcolor: (theme) =>
             alpha(
               theme.palette.roles?.admin || theme.palette.secondary.main,

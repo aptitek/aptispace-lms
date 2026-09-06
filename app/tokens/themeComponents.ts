@@ -1,4 +1,5 @@
 import { alpha, type Theme } from "@mui/material/styles";
+import { M3_SHAPE_CORNERS } from "./shapes";
 
 /**
  * Material Design 3 Dynamic Component Overrides
@@ -38,7 +39,7 @@ export const m3DatePickerComponents = {
   MuiPickersPopper: {
     styleOverrides: {
       paper: ({ theme }: { theme: Theme }) => ({
-        borderRadius: 16,
+        borderRadius: M3_SHAPE_CORNERS.largeIncreased,
         backgroundColor: theme.palette.background.paper,
         border: `1px solid ${theme.palette.divider}`,
         boxShadow:
@@ -125,7 +126,7 @@ export const m3DataGridComponents = {
     styleOverrides: {
       root: ({ theme }: { theme: Theme }) => ({
         border: `1px solid ${theme.palette.divider}`,
-        borderRadius: 12,
+        borderRadius: M3_SHAPE_CORNERS.largeIncreased,
         backgroundColor: theme.palette.background.default,
         color: theme.palette.text.primary,
         "& .MuiDataGrid-columnHeaders": {
@@ -189,7 +190,7 @@ export const m3SharedComponents = {
     },
     styleOverrides: {
       root: {
-        borderRadius: 8,
+        borderRadius: M3_SHAPE_CORNERS.full,
         textTransform: "none",
         fontWeight: 600,
         minHeight: 40,
@@ -212,7 +213,7 @@ export const m3SharedComponents = {
   MuiChip: {
     styleOverrides: {
       root: {
-        borderRadius: 8,
+        borderRadius: M3_SHAPE_CORNERS.full,
         fontWeight: 600,
       },
     },
@@ -229,9 +230,19 @@ export const m3SharedComponents = {
   MuiCard: {
     styleOverrides: {
       root: ({ theme }: { theme: Theme }) => ({
+        borderRadius: M3_SHAPE_CORNERS.largeIncreased,
         backgroundColor:
           theme.palette.surfaceContainer || theme.palette.background.paper,
         backgroundImage: "none",
+      }),
+    },
+  },
+  MuiDialog: {
+    styleOverrides: {
+      paper: ({ theme }: { theme: Theme }) => ({
+        borderRadius: M3_SHAPE_CORNERS.extraLargeIncreased,
+        backgroundColor:
+          theme.palette.surfaceContainerHigh || theme.palette.background.paper,
       }),
     },
   },

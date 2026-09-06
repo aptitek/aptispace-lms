@@ -119,7 +119,7 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
                 color="primary"
                 sx={{
                   fontWeight: 700,
-                  borderRadius: 1.5,
+                  borderRadius: "9999px",
                   height: 22,
                   fontSize: "0.75rem",
                   flexShrink: 0,
@@ -182,19 +182,19 @@ export function CohortCardSkeleton({ onClick }: { onClick?: () => void }) {
           variant="text"
           width="85%"
           height={16}
-          sx={{ borderRadius: "3px" }}
+          sx={{ borderRadius: "4px" }}
         />
         <Skeleton
           variant="text"
           width="60%"
           height={16}
-          sx={{ borderRadius: "3px" }}
+          sx={{ borderRadius: "4px" }}
         />
         <Skeleton
           variant="text"
           width="40%"
           height={14}
-          sx={{ mt: 1, borderRadius: "3px" }}
+          sx={{ mt: 1, borderRadius: "4px" }}
         />
       </Box>
 
