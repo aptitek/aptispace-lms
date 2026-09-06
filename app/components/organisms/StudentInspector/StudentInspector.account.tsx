@@ -7,7 +7,7 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import { alpha } from "@mui/material/styles";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import Avatar from "~/components/atoms/Avatar/Avatar";
 import RoleChip from "~/components/molecules/RoleChip/RoleChip";
 import type { EntityCardData } from "../../molecules/EntityCard/EntityCard.types";
@@ -125,7 +125,7 @@ export function InspectorAccountSection({
             ),
             endAdornment: isSaved ? (
               <InputAdornment position="end">
-                <CheckCircleRoundedIcon
+                <CheckCircleOutlineRoundedIcon
                   fontSize="small"
                   color="success"
                   data-testid="inspector-github-saved-icon"

@@ -9,8 +9,8 @@ import {
 } from "react";
 import Box from "@mui/material/Box";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
-import LogoutIcon from "@mui/icons-material/Logout";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
 import { useTranslation } from "react-i18next";
 import {
   MaterialShapes,
@@ -106,9 +106,9 @@ function HeaderActionButtonSlot({
   actionAria,
 }: HeaderActionButtonSlotProps) {
   const Icon = isImpersonating ? (
-    <AdminPanelSettingsIcon sx={{ fontSize: "1.15rem" }} />
+    <AdminPanelSettingsRoundedIcon sx={{ fontSize: "1.15rem" }} />
   ) : (
-    <LogoutIcon sx={{ fontSize: "1.1rem" }} />
+    <LogoutRoundedIcon sx={{ fontSize: "1.1rem" }} />
   );
 
   return (

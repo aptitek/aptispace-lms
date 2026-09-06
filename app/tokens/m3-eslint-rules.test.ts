@@ -11,6 +11,8 @@ describe("Material Design 3 ESLint Theming Rules", () => {
           "m3-theme/no-alpha-paper-surface": "error",
           "m3-theme/no-dark-mode-black-shadow": "error",
           "m3-theme/no-hardcoded-box-shadow": "error",
+          "m3-theme/no-raw-svg-icons": "error",
+          "m3-theme/enforce-rounded-icons": "error",
         },
       },
     ],
@@ -203,6 +205,124 @@ describe("Material Design 3 ESLint Theming Rules", () => {
         (m) => m.ruleId === "m3-theme/no-hardcoded-box-shadow",
       );
       expect(violations.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("m3-theme/no-raw-svg-icons", () => {
+    it("reports raw <svg> elements in UI components", async () => {
+      const code = `
+        export function CustomIcon() {
+          return (
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2L2 22h20L12 2z" />
+            </svg>
+          );
+        }
+      `;
+
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/atoms/TestIcon/TestIcon.tsx",
+      });
+
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/no-raw-svg-icons",
+      );
+      expect(violations.length).toBeGreaterThan(0);
+      expect(violations[0]?.message).toContain(
+        "Raw <svg> elements for icons are forbidden",
+      );
+    });
+
+    it("reports custom icon path variables (_ICON_PATH)", async () => {
+      const code = `
+        export const SEARCH_ICON_PATH = "M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5";
+      `;
+
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/SearchField/SearchField.styles.ts",
+      });
+
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/no-raw-svg-icons",
+      );
+      expect(violations.length).toBeGreaterThan(0);
+      expect(violations[0]?.message).toContain(
+        "Hardcoding custom SVG icon path glyphs",
+      );
+    });
+
+    it("permits raw svg in exempt graphic definitions like ShapeDefs", async () => {
+      const code = `
+        export function ShapeDefs() {
+          return (
+            <svg style={{ display: "none" }}>
+              <defs><clipPath id="shape" /></defs>
+            </svg>
+          );
+        }
+      `;
+
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/atoms/Avatar/ShapeDefs.tsx",
+      });
+
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/no-raw-svg-icons",
+      );
+      expect(violations).toHaveLength(0);
+    });
+  });
+
+  describe("m3-theme/enforce-rounded-icons", () => {
+    it("reports sharp non-rounded icon imports from @mui/icons-material", async () => {
+      const code = `
+        import SearchIcon from "@mui/icons-material/Search";
+        import CloseIcon from "@mui/icons-material/Close";
+      `;
+
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/Test/Test.tsx",
+      });
+
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/enforce-rounded-icons",
+      );
+      expect(violations).toHaveLength(2);
+      expect(violations[0]?.message).toContain("SearchRounded");
+      expect(violations[1]?.message).toContain("CloseRounded");
+    });
+
+    it("reports filled icons where outline-rounded variant exists", async () => {
+      const code = `
+        import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+      `;
+
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/Test/Test.tsx",
+      });
+
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/enforce-rounded-icons",
+      );
+      expect(violations.length).toBeGreaterThan(0);
+      expect(violations[0]?.message).toContain("CheckCircleOutlineRounded");
+    });
+
+    it("permits rounded unfilled icons and brand icon exceptions", async () => {
+      const code = `
+        import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+        import GitHubIcon from "@mui/icons-material/GitHub";
+        import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+      `;
+
+      const [result] = await eslint.lintText(code, {
+        filePath: "app/components/molecules/Test/Test.tsx",
+      });
+
+      const violations = result?.messages.filter(
+        (m) => m.ruleId === "m3-theme/enforce-rounded-icons",
+      );
+      expect(violations).toHaveLength(0);
     });
   });
 });

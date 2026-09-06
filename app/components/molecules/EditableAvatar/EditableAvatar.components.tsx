@@ -11,11 +11,11 @@ import IconButton from "@mui/material/IconButton";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import CloseIcon from "@mui/icons-material/Close";
-import EditIcon from "@mui/icons-material/Edit";
-import LinkIcon from "@mui/icons-material/Link";
+import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
+import RestartAltRoundedIcon from "@mui/icons-material/RestartAltRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import LinkRoundedIcon from "@mui/icons-material/LinkRounded";
 import LoadingIndicator from "../../atoms/LoadingIndicator";
 import Tooltip from "@mui/material/Tooltip";
 import Avatar from "../../atoms/Avatar";
@@ -91,7 +91,7 @@ export function AvatarResetActionButton({
           color="error"
           shape="circle"
           size="small"
-          icon={<RestartAltIcon sx={{ fontSize: 13 }} />}
+          icon={<RestartAltRoundedIcon sx={{ fontSize: 13 }} />}
           standalone
           testId="avatar-reset-badge"
         />
@@ -154,7 +154,7 @@ function AvatarHoverLayer({
       avatarSize={size}
       customRatio={aspectRatio}
     >
-      <EditIcon sx={{ fontSize: "1.1rem" }} />
+      <EditRoundedIcon sx={{ fontSize: "1.1rem" }} />
       <span>{label}</span>
     </AvatarHoverOverlay>
   );
@@ -240,7 +240,7 @@ export function AvatarInputBar(props: AvatarInputBarProps) {
     >
       {props.isDragging ? (
         <DragBadgeHint>
-          <CloudUploadIcon />
+          <CloudUploadRoundedIcon />
           <span>
             {t("avatar.dropImageHint", "Drop image to set or upload avatar")}
           </span>
@@ -251,7 +251,7 @@ export function AvatarInputBar(props: AvatarInputBarProps) {
         {props.isUploading ? (
           <LoadingIndicator size={16} />
         ) : (
-          <LinkIcon sx={{ fontSize: "18px" }} />
+          <LinkRoundedIcon sx={{ fontSize: "18px" }} />
         )}
       </InputPrefixIconHolder>
 
@@ -286,7 +286,7 @@ export function AvatarInputBar(props: AvatarInputBarProps) {
               disabled={props.isUploading}
               aria-label={t("avatar.uploadFile", "Upload avatar file")}
             >
-              <CloudUploadIcon sx={{ fontSize: "18px" }} />
+              <CloudUploadRoundedIcon sx={{ fontSize: "18px" }} />
             </ActionIconButton>
           </span>
         </Tooltip>
@@ -306,7 +306,7 @@ export function AvatarInputBar(props: AvatarInputBarProps) {
                   "Reset avatar to default",
                 )}
               >
-                <RestartAltIcon sx={{ fontSize: "18px" }} />
+                <RestartAltRoundedIcon sx={{ fontSize: "18px" }} />
               </ActionIconButton>
             </span>
           </Tooltip>
@@ -365,7 +365,7 @@ export function SimpleEditModal({
           aria-label={t("avatar.closeModal", "Close edit avatar dialog")}
           sx={{ color: "text.secondary" }}
         >
-          <CloseIcon sx={{ fontSize: "18px" }} />
+          <CloseRoundedIcon sx={{ fontSize: "18px" }} />
         </IconButton>
       </DialogTitle>
       <DialogContent

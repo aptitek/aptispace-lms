@@ -166,6 +166,23 @@ export const m3SharedComponents = {
     },
     styleOverrides: m3TooltipOverrides,
   },
+  MuiSvgIcon: {
+    styleOverrides: {
+      root: {
+        strokeLinecap: "round" as const,
+        strokeLinejoin: "round" as const,
+      },
+      fontSizeSmall: {
+        fontSize: "1.25rem",
+      },
+      fontSizeMedium: {
+        fontSize: "1.5rem",
+      },
+      fontSizeLarge: {
+        fontSize: "2rem",
+      },
+    },
+  },
   MuiButton: {
     defaultProps: {
       disableElevation: true,

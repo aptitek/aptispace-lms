@@ -13,8 +13,8 @@ import {
   type AccountDefinition,
 } from "~/utils/auth";
 import { useStatusCenter } from "~/utils/statusCenterContext";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LockOutlineRoundedIcon from "@mui/icons-material/LockOutlineRounded";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 
 export interface LoginCardProps {
   onSuccess?: (user: AuthUser) => void;
@@ -147,7 +147,7 @@ export default function LoginCard({
 
       {activeUser && (
         <StatusBanner role="status">
-          <CheckCircleIcon />
+          <CheckCircleOutlineRoundedIcon />
           <span>
             {t("loginCard.connectedAs")} <strong>{activeUser.name}</strong> (
             {t(`devTool.roles.${activeUser.role}` as const, {
@@ -174,7 +174,7 @@ export default function LoginCard({
         </Button>
 
         <SecurityNote>
-          <LockOutlinedIcon />
+          <LockOutlineRoundedIcon />
           <span>{t("loginCard.securityNote")}</span>
         </SecurityNote>
       </ActionSection>

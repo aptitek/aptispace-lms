@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import Badge from "~/components/atoms/Badge/Badge";
 import InstitutionLogo from "../InstitutionLogo/InstitutionLogo";
 import InstitutionChip from "../InstitutionChip/InstitutionChip";
-import SchoolIcon from "@mui/icons-material/School";
+import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import Box from "@mui/material/Box";
 import type { SchoolConfig } from "~/types/institution";
 import Skeleton from "@mui/material/Skeleton";
@@ -71,7 +71,7 @@ export const SchoolCard = forwardRef<HTMLDivElement, SchoolCardProps>(
               maxWidth={140}
               testId={`school-card-logo-${school.id}`}
               fallback={
-                <SchoolIcon
+                <SchoolRoundedIcon
                   sx={{ fontSize: 40, color: "text.secondary", opacity: 0.5 }}
                 />
               }

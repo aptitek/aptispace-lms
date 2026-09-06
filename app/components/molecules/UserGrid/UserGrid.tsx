@@ -3,9 +3,9 @@ import Chip from "~/components/atoms/Chip/Chip";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import InputAdornment from "@mui/material/InputAdornment";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
-import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
+import PeopleAltRoundedIcon from "@mui/icons-material/PeopleAltRounded";
 import EntityCard from "../EntityCard/EntityCard";
 import EntityCardSkeleton from "../EntityCard/EntityCardSkeleton";
 import type { UserGridProps } from "./UserGrid.types";
@@ -62,7 +62,7 @@ function GridSearchInput({
         aria-label={t("common:userGrid.clearSearchAria", "Clear search")}
         data-testid="clear-search-btn"
       >
-        <ClearIcon sx={{ fontSize: 16 }} />
+        <ClearRoundedIcon sx={{ fontSize: 16 }} />
       </Button>
     </InputAdornment>
   ) : null;
@@ -81,7 +81,9 @@ function GridSearchInput({
         input: {
           startAdornment: (
             <InputAdornment position="start">
-              <SearchIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+              <SearchRoundedIcon
+                sx={{ fontSize: 18, color: "text.secondary" }}
+              />
             </InputAdornment>
           ),
           endAdornment,
@@ -115,7 +117,7 @@ function ControlsHeaderSlot({
   onClear,
 }: ControlsHeaderSlotProps) {
   const resolvedIcon = icon || (
-    <PeopleAltIcon sx={{ fontSize: 20, color: "primary.main" }} />
+    <PeopleAltRoundedIcon sx={{ fontSize: 20, color: "primary.main" }} />
   );
 
   return (
@@ -172,7 +174,7 @@ function EmptyGridState({
   return (
     <EmptyStateWrapper data-testid="user-grid-empty-state">
       <EmptyGridContainer data-testid="user-grid-empty">
-        <PeopleAltIcon sx={{ fontSize: 44, opacity: 0.4 }} />
+        <PeopleAltRoundedIcon sx={{ fontSize: 44, opacity: 0.4 }} />
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
           {message}
         </Typography>

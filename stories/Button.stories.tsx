@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Button from "@mui/material/Button";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import LoginIcon from "@mui/icons-material/Login";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import { LoadingIndicator } from "react-material-expressive";
 import Box from "@mui/material/Box";
 
@@ -45,7 +45,7 @@ export const PrimaryContained: Story = {
     variant: "contained",
     color: "primary",
     children: "Sign In",
-    endIcon: <ArrowForwardIcon />,
+    endIcon: <ArrowForwardRoundedIcon />,
   },
 };
 
@@ -90,7 +90,7 @@ export const ButtonVariants: Story = {
       <Button variant="contained" color="error">
         Error
       </Button>
-      <Button variant="outlined" startIcon={<LoginIcon />}>
+      <Button variant="outlined" startIcon={<LoginRoundedIcon />}>
         With Icon
       </Button>
       <Button

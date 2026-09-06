@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import InfoOutlineRoundedIcon from "@mui/icons-material/InfoOutlineRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import ShieldRoundedIcon from "@mui/icons-material/ShieldRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -117,7 +117,7 @@ function resolveSeverityDetails(severity: NotificationSeverity, theme: Theme) {
     case "info":
       return {
         color: theme.palette.info.main,
-        icon: <InfoOutlinedIcon fontSize="small" />,
+        icon: <InfoOutlineRoundedIcon fontSize="small" />,
       };
     case "success":
       return {

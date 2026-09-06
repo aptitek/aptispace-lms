@@ -64,12 +64,12 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       "framer-motion",
-      "@mui/icons-material/DarkMode",
-      "@mui/icons-material/LightMode",
-      "@mui/icons-material/Flight",
-      "@mui/icons-material/WbSunny",
-      "@mui/icons-material/NightlightRound",
-      "@mui/icons-material/Language",
+      "@mui/icons-material/DarkModeRounded",
+      "@mui/icons-material/LightModeRounded",
+      "@mui/icons-material/FlightRounded",
+      "@mui/icons-material/WbSunnyRounded",
+      "@mui/icons-material/NightlightRounded",
+      "@mui/icons-material/LanguageRounded",
       "@emotion/react",
       "@emotion/styled",
       "@mui/material",

@@ -2,7 +2,7 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Chip from "~/components/atoms/Chip/Chip";
 import Button from "@mui/material/Button";
-import DeleteSweepOutlinedIcon from "@mui/icons-material/DeleteSweepOutlined";
+import DeleteSweepRoundedIcon from "@mui/icons-material/DeleteSweepRounded";
 import { useTranslation } from "react-i18next";
 import type {
   EventFilterType,
@@ -91,7 +91,7 @@ export function StatusTerminalFilterChips({
           size="small"
           variant="text"
           color="inherit"
-          startIcon={<DeleteSweepOutlinedIcon />}
+          startIcon={<DeleteSweepRoundedIcon />}
           onClick={onClearAll}
           sx={{
             fontSize: "0.72rem",

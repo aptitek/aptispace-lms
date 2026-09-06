@@ -14,10 +14,10 @@ import AuthLayout from "~/components/templates/AuthLayout/AuthLayout";
 import ProfileCard from "~/components/organisms/ProfileCard/ProfileCard";
 import { logout } from "~/utils/auth";
 import { useStatusCenter } from "~/utils/statusCenterContext";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import RadioButtonUncheckedRoundedIcon from "@mui/icons-material/RadioButtonUncheckedRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import SyncIcon from "@mui/icons-material/Sync";
+import SyncRoundedIcon from "@mui/icons-material/SyncRounded";
 import {
   CardWorkspaceContainer,
   FabDockPanel,
@@ -109,27 +109,27 @@ function RequirementsDock({
         <RequirementPill isComplete={isFirstNameFilled}>
           <span>{t("requirements.firstName", "First Name")}</span>
           {isFirstNameFilled ? (
-            <CheckCircleIcon sx={{ fontSize: 16 }} />
+            <CheckCircleOutlineRoundedIcon sx={{ fontSize: 16 }} />
           ) : (
-            <RadioButtonUncheckedIcon sx={{ fontSize: 16 }} />
+            <RadioButtonUncheckedRoundedIcon sx={{ fontSize: 16 }} />
           )}
         </RequirementPill>
 
         <RequirementPill isComplete={isFamilyNameFilled}>
           <span>{t("requirements.familyName", "Family Name")}</span>
           {isFamilyNameFilled ? (
-            <CheckCircleIcon sx={{ fontSize: 16 }} />
+            <CheckCircleOutlineRoundedIcon sx={{ fontSize: 16 }} />
           ) : (
-            <RadioButtonUncheckedIcon sx={{ fontSize: 16 }} />
+            <RadioButtonUncheckedRoundedIcon sx={{ fontSize: 16 }} />
           )}
         </RequirementPill>
 
         <RequirementPill isComplete={isEmailFilled}>
           <span>{t("requirements.email", "Institutional Email")}</span>
           {isEmailFilled ? (
-            <CheckCircleIcon sx={{ fontSize: 16 }} />
+            <CheckCircleOutlineRoundedIcon sx={{ fontSize: 16 }} />
           ) : (
-            <RadioButtonUncheckedIcon sx={{ fontSize: 16 }} />
+            <RadioButtonUncheckedRoundedIcon sx={{ fontSize: 16 }} />
           )}
         </RequirementPill>
       </RequirementsList>
@@ -160,7 +160,7 @@ function RequirementsDock({
         {isSaving ? (
           <Chip
             icon={
-              <SyncIcon
+              <SyncRoundedIcon
                 sx={{ fontSize: 14, animation: "spin 1s linear infinite" }}
               />
             }

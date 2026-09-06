@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
-import SecurityIcon from "@mui/icons-material/Security";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import LockResetIcon from "@mui/icons-material/LockReset";
-import FingerprintIcon from "@mui/icons-material/Fingerprint";
+import DeleteForeverRoundedIcon from "@mui/icons-material/DeleteForeverRounded";
+import PowerSettingsNewRoundedIcon from "@mui/icons-material/PowerSettingsNewRounded";
+import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
+import RestartAltRoundedIcon from "@mui/icons-material/RestartAltRounded";
+import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+import LockResetRoundedIcon from "@mui/icons-material/LockResetRounded";
+import FingerprintRoundedIcon from "@mui/icons-material/FingerprintRounded";
 import { HoldButton } from "~/components/atoms/HoldButton";
 import { ALL_35_M3_SHAPES } from "~/tokens/shapes";
 
@@ -59,7 +59,7 @@ export const Default: Story = {
     holdTime: 1000,
     borderThickness: 2.5,
     outlineGap: 3.5,
-    startIcon: <DeleteForeverIcon />,
+    startIcon: <DeleteForeverRoundedIcon />,
     onHoldComplete: () => alert("Held for 1000ms! Action executed."),
   },
 };
@@ -72,7 +72,7 @@ export const FastAction: Story = {
     holdTime: 500,
     borderThickness: 2.5,
     outlineGap: 3.5,
-    startIcon: <PowerSettingsNewIcon />,
+    startIcon: <PowerSettingsNewRoundedIcon />,
     onHoldComplete: () => alert("Quick hold completed!"),
   },
 };
@@ -85,7 +85,7 @@ export const HighSecurityAction: Story = {
     holdTime: 2500,
     borderThickness: 3,
     outlineGap: 4,
-    startIcon: <SecurityIcon />,
+    startIcon: <SecurityRoundedIcon />,
     onHoldComplete: () => alert("Critical security action authorized!"),
   },
 };
@@ -114,7 +114,7 @@ export const FloatingOutlineDemos: Story = {
           <HoldButton
             variant="contained"
             color="error"
-            startIcon={<DeleteForeverIcon />}
+            startIcon={<DeleteForeverRoundedIcon />}
             onHoldComplete={() => alert("Destructive action confirmed")}
           >
             Contained Standard
@@ -123,7 +123,7 @@ export const FloatingOutlineDemos: Story = {
           <HoldButton
             variant="outlined"
             color="primary"
-            startIcon={<RestartAltIcon />}
+            startIcon={<RestartAltRoundedIcon />}
             sx={{ borderRadius: "28px", px: 3 }}
             onHoldComplete={() => alert("Pill reset completed")}
           >
@@ -133,7 +133,7 @@ export const FloatingOutlineDemos: Story = {
           <HoldButton
             variant="contained"
             color="success"
-            startIcon={<AutoAwesomeIcon />}
+            startIcon={<AutoAwesomeRoundedIcon />}
             sx={{ borderRadius: "16px", px: 2.5 }}
             onHoldComplete={() => alert("Medium rounded action")}
           >
@@ -173,7 +173,7 @@ export const FloatingOutlineDemos: Story = {
             onHoldComplete={() => alert("4-sided Cookie icon held!")}
             title="4-sided cookie button"
           >
-            <PowerSettingsNewIcon />
+            <PowerSettingsNewRoundedIcon />
           </HoldButton>
 
           <HoldButton
@@ -183,7 +183,7 @@ export const FloatingOutlineDemos: Story = {
             onHoldComplete={() => alert("9-sided Cookie icon held!")}
             title="9-sided cookie button"
           >
-            <FingerprintIcon />
+            <FingerprintRoundedIcon />
           </HoldButton>
 
           <HoldButton
@@ -193,7 +193,7 @@ export const FloatingOutlineDemos: Story = {
             onHoldComplete={() => alert("Sunny icon held!")}
             title="Sunny shape button"
           >
-            <AutoAwesomeIcon />
+            <AutoAwesomeRoundedIcon />
           </HoldButton>
 
           <HoldButton
@@ -203,7 +203,7 @@ export const FloatingOutlineDemos: Story = {
             onHoldComplete={() => alert("Gem icon held!")}
             title="Gem shape button"
           >
-            <LockResetIcon />
+            <LockResetRoundedIcon />
           </HoldButton>
 
           <HoldButton
@@ -213,7 +213,7 @@ export const FloatingOutlineDemos: Story = {
             onHoldComplete={() => alert("Heart icon held!")}
             title="Heart shape button"
           >
-            <FavoriteIcon />
+            <FavoriteRoundedIcon />
           </HoldButton>
 
           <HoldButton
@@ -223,7 +223,7 @@ export const FloatingOutlineDemos: Story = {
             onHoldComplete={() => alert("Clamshell icon held!")}
             title="Clamshell button"
           >
-            <RestartAltIcon />
+            <RestartAltRoundedIcon />
           </HoldButton>
         </Box>
       </Box>

@@ -6,7 +6,7 @@ import { alpha, type Theme } from "@mui/material/styles";
 import DialpadRoundedIcon from "@mui/icons-material/DialpadRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import InfoOutlineRoundedIcon from "@mui/icons-material/InfoOutlineRounded";
 import BadgeRoundedIcon from "@mui/icons-material/BadgeRounded";
 import VpnKeyRoundedIcon from "@mui/icons-material/VpnKeyRounded";
 
@@ -48,7 +48,7 @@ export function InstructionsCard({
       }}
       data-testid="instructions-card"
     >
-      <InfoOutlinedIcon
+      <InfoOutlineRoundedIcon
         sx={{
           fontSize: "1.2rem",
           color: "warning.main",
@@ -202,7 +202,7 @@ function InstructionTooltipTrigger({
             },
           }}
         >
-          <InfoOutlinedIcon sx={{ fontSize: "0.95rem" }} />
+          <InfoOutlineRoundedIcon sx={{ fontSize: "0.95rem" }} />
         </Box>
       </Tooltip>
     </>
@@ -284,7 +284,7 @@ function InstructionsChipView({
         sx={{ cursor: "pointer" }}
       >
         {showIcon ? (
-          <InfoOutlinedIcon
+          <InfoOutlineRoundedIcon
             sx={{ fontSize: "0.85rem", color: "warning.main" }}
           />
         ) : null}

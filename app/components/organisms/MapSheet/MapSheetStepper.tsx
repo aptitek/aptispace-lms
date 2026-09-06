@@ -5,7 +5,7 @@ import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import ApartmentRoundedIcon from "@mui/icons-material/ApartmentRounded";
 import MeetingRoomRoundedIcon from "@mui/icons-material/MeetingRoomRounded";
 import LayersRoundedIcon from "@mui/icons-material/LayersRounded";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import InfoOutlineRoundedIcon from "@mui/icons-material/InfoOutlineRounded";
 
 import Tooltip from "../../atoms/Tooltip";
 import type {
@@ -98,7 +98,7 @@ export function InstructionSection({
   const badgeIcon = doorCode ? (
     resolveAccessIcon(accessType, "1.15rem")
   ) : (
-    <InfoOutlinedIcon sx={{ fontSize: "1.15rem" }} />
+    <InfoOutlineRoundedIcon sx={{ fontSize: "1.15rem" }} />
   );
 
   return (

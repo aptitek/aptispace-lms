@@ -1,7 +1,7 @@
 import React, { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
-import LoginIcon from "@mui/icons-material/Login";
+import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import Avatar from "../../atoms/Avatar/Avatar";
@@ -282,7 +282,7 @@ function CompactStudentDetailsSlot({
                 aria-label={impersonateLabel}
                 data-testid="compact-impersonate-btn"
               >
-                <LoginIcon sx={{ fontSize: 14 }} />
+                <LoginRoundedIcon sx={{ fontSize: 14 }} />
               </ImpersonateIconButton>
             </Tooltip>
           )}

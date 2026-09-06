@@ -10,7 +10,7 @@ import InputLabel from "@mui/material/InputLabel";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { alpha } from "@mui/material/styles";
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import SupervisorAccountRoundedIcon from "@mui/icons-material/SupervisorAccountRounded";
@@ -102,7 +102,7 @@ export function SaveStatusIndicator({ status }: { status: ProfileSaveStatus }) {
             color: "success.main",
           }}
         >
-          <CheckCircleRoundedIcon sx={{ fontSize: 16 }} />
+          <CheckCircleOutlineRoundedIcon sx={{ fontSize: 16 }} />
         </Box>
       </Tooltip>
     );

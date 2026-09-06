@@ -6,13 +6,13 @@ import Chip from "~/components/atoms/Chip/Chip";
 import Tooltip from "@mui/material/Tooltip";
 import Collapse from "@mui/material/Collapse";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
+import ShieldRoundedIcon from "@mui/icons-material/ShieldRounded";
+import InfoOutlineRoundedIcon from "@mui/icons-material/InfoOutlineRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
-import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded";
+import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
+import ExpandLessRoundedIcon from "@mui/icons-material/ExpandLessRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import { useTranslation } from "react-i18next";
 import type { TelemetryEventItem } from "~/utils/statusCenter.types";
@@ -50,18 +50,18 @@ function resolveSeverityIcon(severity: TelemetryEventItem["severity"]) {
 
   switch (severity) {
     case "critical":
-      return <LocalFireDepartmentIcon sx={iconStyle} />;
+      return <LocalFireDepartmentRoundedIcon sx={iconStyle} />;
     case "security":
-      return <ShieldOutlinedIcon sx={iconStyle} />;
+      return <ShieldRoundedIcon sx={iconStyle} />;
     case "warning":
-      return <WarningAmberIcon sx={iconStyle} />;
+      return <WarningAmberRoundedIcon sx={iconStyle} />;
     case "success":
       return <CheckCircleOutlineRoundedIcon sx={iconStyle} />;
     case "error":
       return <ErrorOutlineRoundedIcon sx={iconStyle} />;
     case "info":
     default:
-      return <InfoOutlinedIcon sx={iconStyle} />;
+      return <InfoOutlineRoundedIcon sx={iconStyle} />;
   }
 }
 
@@ -217,9 +217,9 @@ export function StatusTerminalEventRow({
             aria-label={isExpanded ? "Collapse details" : "Expand details"}
           >
             {isExpanded ? (
-              <ExpandLessIcon fontSize="small" />
+              <ExpandLessRoundedIcon fontSize="small" />
             ) : (
-              <ExpandMoreIcon fontSize="small" />
+              <ExpandMoreRoundedIcon fontSize="small" />
             )}
           </IconButton>
         </Box>

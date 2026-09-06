@@ -4,7 +4,7 @@ import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import Chip from "~/components/atoms/Chip/Chip";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
 import StorageRoundedIcon from "@mui/icons-material/StorageRounded";
 import CloudQueueRoundedIcon from "@mui/icons-material/CloudQueueRounded";
 import RadioButtonCheckedRoundedIcon from "@mui/icons-material/RadioButtonCheckedRounded";
@@ -332,7 +332,7 @@ export function StatusTerminalInfrastructure() {
                 },
               }}
             >
-              <RefreshIcon sx={{ fontSize: "1rem" }} />
+              <RefreshRoundedIcon sx={{ fontSize: "1rem" }} />
             </IconButton>
           </span>
         </Tooltip>

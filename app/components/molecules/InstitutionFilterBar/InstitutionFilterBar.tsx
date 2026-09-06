@@ -3,8 +3,8 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import InputAdornment from "@mui/material/InputAdornment";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import IconButton from "@mui/material/IconButton";
 import InstitutionChip from "../InstitutionChip/InstitutionChip";
 import YearRangePicker from "~/components/molecules/YearRangePicker/YearRangePicker";
@@ -41,7 +41,7 @@ export function InstitutionFilterBar({
         onClick={() => onQueryChange("")}
         aria-label={t("common:clearSearch", "Clear search")}
       >
-        <ClearIcon sx={{ fontSize: 16 }} />
+        <ClearRoundedIcon sx={{ fontSize: 16 }} />
       </IconButton>
     </InputAdornment>
   ) : null;
@@ -114,7 +114,9 @@ export function InstitutionFilterBar({
           input: {
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+                <SearchRoundedIcon
+                  sx={{ fontSize: 18, color: "text.secondary" }}
+                />
               </InputAdornment>
             ),
             endAdornment,

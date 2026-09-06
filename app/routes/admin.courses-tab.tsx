@@ -2,7 +2,7 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
+import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import Chip from "~/components/atoms/Chip/Chip";
 import { TabPanelContainer } from "./admin.styles";
 
@@ -41,7 +41,7 @@ export function AdminCoursesTabPanel({ className }: AdminCoursesTabPanelProps) {
             justifyContent: "center",
           }}
         >
-          <MenuBookIcon sx={{ fontSize: 36 }} />
+          <MenuBookRoundedIcon sx={{ fontSize: 36 }} />
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

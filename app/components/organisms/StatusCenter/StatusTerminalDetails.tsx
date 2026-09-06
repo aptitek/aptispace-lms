@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import SendIcon from "@mui/icons-material/Send";
+import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
+import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useTranslation } from "react-i18next";
@@ -265,7 +265,7 @@ export function StatusTerminalDetails({
             hasCopied ? (
               <CheckCircleOutlineRoundedIcon color="success" />
             ) : (
-              <ContentCopyIcon />
+              <ContentCopyRoundedIcon />
             )
           }
           onClick={handleCopyDiagnostics}
@@ -293,7 +293,7 @@ export function StatusTerminalDetails({
             ) : eventEntry.reported ? (
               <CheckCircleOutlineRoundedIcon />
             ) : (
-              <SendIcon />
+              <SendRoundedIcon />
             )
           }
           onClick={handleTransmitReport}

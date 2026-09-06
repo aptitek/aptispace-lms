@@ -6,9 +6,8 @@ import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
-import CloseIcon from "@mui/icons-material/Close";
-import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
-import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import ScienceRoundedIcon from "@mui/icons-material/ScienceRounded";
 import { useTranslation } from "react-i18next";
 import type { SystemHealthStatus } from "~/utils/statusCenter.types";
 
@@ -79,11 +78,15 @@ export function StatusTerminalHeader({
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <RadioButtonCheckedIcon
+        <Box
           sx={{
-            fontSize: "1rem",
-            color: statusBadgeColor,
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            backgroundColor: statusBadgeColor,
+            flexShrink: 0,
           }}
+          aria-hidden="true"
         />
         <Box>
           <Typography
@@ -119,7 +122,7 @@ export function StatusTerminalHeader({
         <Button
           size="small"
           variant="outlined"
-          startIcon={<ScienceOutlinedIcon />}
+          startIcon={<ScienceRoundedIcon />}
           onClick={(clickEvent) =>
             setSimulationMenuAnchor(clickEvent.currentTarget)
           }
@@ -233,7 +236,7 @@ export function StatusTerminalHeader({
             onClick={onClose}
             aria-label="Close telemetry terminal"
           >
-            <CloseIcon fontSize="small" />
+            <CloseRoundedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>

@@ -1,18 +1,13 @@
 import React from "react";
 import { styled } from "@mui/material/styles";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import WbSunnyIcon from "@mui/icons-material/WbSunny";
-import NightlightRoundIcon from "@mui/icons-material/NightlightRound";
-
-export const StyledSvg = styled("svg")({
-  display: "block",
-  overflow: "visible",
-});
+import LightModeRoundedIcon from "@mui/icons-material/LightModeRounded";
+import DarkModeRoundedIcon from "@mui/icons-material/DarkModeRounded";
+import WbSunnyRoundedIcon from "@mui/icons-material/WbSunnyRounded";
+import NightlightRoundedIcon from "@mui/icons-material/NightlightRounded";
 
 const filterIconProp = (prop: PropertyKey) => prop !== "$iconSize";
 
-const StyledSunIcon = styled(LightModeIcon, {
+const StyledSunIcon = styled(LightModeRoundedIcon, {
   shouldForwardProp: filterIconProp,
 })<{ $iconSize: number }>(({ theme, $iconSize }) => ({
   fontSize: $iconSize,
@@ -21,7 +16,7 @@ const StyledSunIcon = styled(LightModeIcon, {
   display: "block",
 }));
 
-const StyledMoonIcon = styled(DarkModeIcon, {
+const StyledMoonIcon = styled(DarkModeRoundedIcon, {
   shouldForwardProp: filterIconProp,
 })<{ $iconSize: number }>(({ theme, $iconSize }) => ({
   fontSize: $iconSize,
@@ -30,7 +25,7 @@ const StyledMoonIcon = styled(DarkModeIcon, {
   display: "block",
 }));
 
-const StyledPeekingSun = styled(WbSunnyIcon, {
+const StyledPeekingSun = styled(WbSunnyRoundedIcon, {
   shouldForwardProp: filterIconProp,
 })<{ $iconSize: number }>(({ theme, $iconSize }) => ({
   fontSize: $iconSize,
@@ -39,7 +34,7 @@ const StyledPeekingSun = styled(WbSunnyIcon, {
   display: "block",
 }));
 
-const StyledPeekingMoon = styled(NightlightRoundIcon, {
+const StyledPeekingMoon = styled(NightlightRoundedIcon, {
   shouldForwardProp: filterIconProp,
 })<{ $iconSize: number }>(({ theme, $iconSize }) => ({
   fontSize: $iconSize,

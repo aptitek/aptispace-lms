@@ -7,7 +7,7 @@ import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import EditableAvatar from "~/components/molecules/EditableAvatar/EditableAvatar";
 import InstitutionChip from "~/components/molecules/InstitutionChip/InstitutionChip";
 import {
@@ -243,7 +243,7 @@ export default function InstitutionInspector({
           size="small"
           aria-label={t("inspector.closeAria", "Close inspector")}
         >
-          <CloseIcon />
+          <CloseRoundedIcon />
         </IconButton>
       </Box>
 

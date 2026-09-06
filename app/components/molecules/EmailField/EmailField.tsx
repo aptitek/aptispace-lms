@@ -15,9 +15,9 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
-import EmailIcon from "@mui/icons-material/Email";
+import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import LockOutlineRoundedIcon from "@mui/icons-material/LockOutlineRounded";
 import TextField from "@mui/material/TextField";
 import type { EmailFieldProps } from "./EmailField.types";
 import {
@@ -223,7 +223,7 @@ function EmailEndAdornment({
             }}
             aria-label={t("emailField.fixedDomainAria", { domain: domainText })}
           >
-            <LockOutlinedIcon sx={{ fontSize: metrics.lockIconSize }} />
+            <LockOutlineRoundedIcon sx={{ fontSize: metrics.lockIconSize }} />
           </Box>
         </Tooltip>
       ) : null}
@@ -239,7 +239,9 @@ function renderStartAdornment(
   return (
     <InputAdornment position="start" sx={{ mr: 0.5 }}>
       {leadingIcon ?? (
-        <EmailIcon sx={{ fontSize: iconSize, color: "text.secondary" }} />
+        <EmailRoundedIcon
+          sx={{ fontSize: iconSize, color: "text.secondary" }}
+        />
       )}
     </InputAdornment>
   );

@@ -79,23 +79,17 @@ export const UkMapSilhouette: React.FC<{
   );
 };
 
-const MDI_AIRPLANE_PATH =
-  "M21,16V14L13,9V3.5A1.5,1.5 0 0,0 11.5,2A1.5,1.5 0 0,0 10,3.5V9L2,14V16L10,13.5V19L8,20.5V22L11.5,21L15,22V20.5L13,19V13.5L21,16Z";
+import FlightRoundedIcon from "@mui/icons-material/FlightRounded";
 
 export const MdiAirplaneGlyph: React.FC<{
   size: number;
   className?: string;
 }> = ({ size, className }) => (
-  <StyledSvg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    aria-hidden="true"
+  <FlightRoundedIcon
     className={className}
-  >
-    <path d={MDI_AIRPLANE_PATH} />
-  </StyledSvg>
+    aria-hidden="true"
+    sx={{ fontSize: size, transform: "rotate(90deg)" }}
+  />
 );
 
 const FLAG_RADIUS = 16;

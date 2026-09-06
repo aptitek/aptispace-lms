@@ -5,10 +5,10 @@ import TextField from "@mui/material/TextField";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
 import { alpha } from "@mui/material/styles";
-import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import AlternateEmailRoundedIcon from "@mui/icons-material/AlternateEmailRounded";
+import InfoOutlineRoundedIcon from "@mui/icons-material/InfoOutlineRounded";
 import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import LockOutlineRoundedIcon from "@mui/icons-material/LockOutlineRounded";
 import { useTranslation } from "react-i18next";
 
 export function InstitutionEmailPreviewBox({
@@ -73,7 +73,10 @@ export function InstitutionEmailCardHeader({
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <AlternateEmailIcon fontSize="small" sx={{ color: "primary.main" }} />
+        <AlternateEmailRoundedIcon
+          fontSize="small"
+          sx={{ color: "primary.main" }}
+        />
         <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
           {t("inspector.emailConfig", "Email Configuration")}
         </Typography>
@@ -134,7 +137,7 @@ export function InstitutionEmailCardHeader({
           disabled={disabled}
           data-testid="inspector-domain-constrained-toggle"
         >
-          <LockOutlinedIcon sx={{ fontSize: 16 }} />
+          <LockOutlineRoundedIcon sx={{ fontSize: 16 }} />
           {t("inspector.domainConstraint", "Domain Constraint")}
         </ToggleButton>
       </ToggleButtonGroup>
@@ -158,7 +161,7 @@ export function InstitutionFreeDomainNotice() {
       data-testid="inspector-free-domain-notice"
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <InfoOutlinedIcon fontSize="small" color="info" />
+        <InfoOutlineRoundedIcon fontSize="small" color="info" />
         <Typography
           variant="subtitle2"
           sx={{ fontWeight: 700, color: "info.main" }}

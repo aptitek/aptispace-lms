@@ -11,7 +11,7 @@ import MenuItem from "@mui/material/MenuItem";
 import InputAdornment from "@mui/material/InputAdornment";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
-import CloseIcon from "@mui/icons-material/Close";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DateRangeRoundedIcon from "@mui/icons-material/DateRangeRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
@@ -59,7 +59,7 @@ export function CohortInspectorHeader({
         size="small"
         aria-label={t("inspector.closeAria", "Close inspector")}
       >
-        <CloseIcon />
+        <CloseRoundedIcon />
       </IconButton>
     </Box>
   );

@@ -389,6 +389,8 @@ export default tseslint.config(
       "m3-theme/no-alpha-paper-surface": "off",
       "m3-theme/no-dark-mode-black-shadow": "off",
       "m3-theme/no-hardcoded-box-shadow": "off",
+      "m3-theme/no-raw-svg-icons": "error",
+      "m3-theme/enforce-rounded-icons": "error",
 
       // --- Design Tokens & MUI Theme / Styled Primitives Enforcement ---
       "no-restricted-imports": [
@@ -792,6 +794,8 @@ export default tseslint.config(
       "m3-theme/no-action-as-container-background": "off",
       "m3-theme/no-dark-mode-black-shadow": "off",
       "m3-theme/no-hardcoded-box-shadow": "off",
+      "m3-theme/no-raw-svg-icons": "off",
+      "m3-theme/enforce-rounded-icons": "off",
     },
   },
 
@@ -824,6 +828,8 @@ export default tseslint.config(
       "m3-theme/no-action-as-container-background": "off",
       "m3-theme/no-dark-mode-black-shadow": "off",
       "m3-theme/no-hardcoded-box-shadow": "off",
+      "m3-theme/no-raw-svg-icons": "off",
+      "m3-theme/enforce-rounded-icons": "off",
       "sonarjs/no-duplicate-string": "off",
       "sonarjs/cognitive-complexity": "off",
       "sonarjs/no-identical-functions": "off",

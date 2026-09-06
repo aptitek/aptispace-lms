@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
-import ClearIcon from "@mui/icons-material/Clear";
+import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import DateRangeRoundedIcon from "@mui/icons-material/DateRangeRounded";
 
 export interface YearRangePickerProps {
@@ -144,7 +144,7 @@ export function YearRangePicker({
           sx={{ p: 0.5 }}
           data-testid="year-range-clear-button"
         >
-          <ClearIcon sx={{ fontSize: 14 }} />
+          <ClearRoundedIcon sx={{ fontSize: 14 }} />
         </IconButton>
       )}
     </Box>

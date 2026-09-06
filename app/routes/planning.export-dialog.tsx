@@ -14,7 +14,7 @@ import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 import { SoftDialog } from "./planning.styles";
@@ -151,7 +151,11 @@ export function CalendarExportDialog({
               size="small"
               onClick={handleCopy}
               startIcon={
-                copied ? <CheckCircleRoundedIcon /> : <ContentCopyRoundedIcon />
+                copied ? (
+                  <CheckCircleOutlineRoundedIcon />
+                ) : (
+                  <ContentCopyRoundedIcon />
+                )
               }
               sx={{
                 borderRadius: "10px",

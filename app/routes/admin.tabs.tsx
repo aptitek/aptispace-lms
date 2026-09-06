@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Chip from "~/components/atoms/Chip/Chip";
-import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
-import ClassIcon from "@mui/icons-material/Class";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
+import SupervisorAccountRoundedIcon from "@mui/icons-material/SupervisorAccountRounded";
+import ClassRoundedIcon from "@mui/icons-material/ClassRounded";
+import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import HubRoundedIcon from "@mui/icons-material/HubRounded";
 import { StyledTabsContainer, StyledTab } from "./admin.styles";
 
@@ -58,7 +58,7 @@ export function AdminTabsSection({
       >
         <StyledTab
           value="users"
-          icon={<SupervisorAccountIcon sx={{ fontSize: 18, mr: 0.5 }} />}
+          icon={<SupervisorAccountRoundedIcon sx={{ fontSize: 18, mr: 0.5 }} />}
           iconPosition="start"
           label={
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -79,7 +79,7 @@ export function AdminTabsSection({
 
         <StyledTab
           value="cohorts"
-          icon={<ClassIcon sx={{ fontSize: 18, mr: 0.5 }} />}
+          icon={<ClassRoundedIcon sx={{ fontSize: 18, mr: 0.5 }} />}
           iconPosition="start"
           label={t("common:admin.tabs.cohorts", "Cohorts")}
           id="admin-tab-cohorts"
@@ -122,7 +122,7 @@ export function AdminTabsSection({
 
         <StyledTab
           value="courses"
-          icon={<MenuBookIcon sx={{ fontSize: 18, mr: 0.5 }} />}
+          icon={<MenuBookRoundedIcon sx={{ fontSize: 18, mr: 0.5 }} />}
           iconPosition="start"
           label={t("common:admin.tabs.courses", "Courses")}
           id="admin-tab-courses"

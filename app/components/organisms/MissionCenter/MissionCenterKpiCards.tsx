@@ -8,7 +8,7 @@ import StorageRoundedIcon from "@mui/icons-material/StorageRounded";
 import BugReportRoundedIcon from "@mui/icons-material/BugReportRounded";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import DynamicFeedRoundedIcon from "@mui/icons-material/DynamicFeedRounded";
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 
@@ -80,7 +80,7 @@ export function MissionCenterKpiCards({
             size="small"
             icon={
               isHealthy ? (
-                <CheckCircleRoundedIcon />
+                <CheckCircleOutlineRoundedIcon />
               ) : isDegraded ? (
                 <WarningAmberRoundedIcon />
               ) : (

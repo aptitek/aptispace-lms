@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
-import NotificationsIcon from "@mui/icons-material/Notifications";
+import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
 import SupervisorAccountRoundedIcon from "@mui/icons-material/SupervisorAccountRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
@@ -71,7 +71,7 @@ export const Default: Story = {
     color: "primary",
     children: (
       <IconButton aria-label="notifications">
-        <NotificationsIcon />
+        <NotificationsRoundedIcon />
       </IconButton>
     ),
   },

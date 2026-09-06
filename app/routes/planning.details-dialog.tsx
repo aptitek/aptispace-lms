@@ -19,8 +19,7 @@ import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
-import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 import type { ClassWithDetails } from "~/services/classService";
@@ -68,36 +67,27 @@ function InstructorInfo({ instructor, instructorLabel }: InstructorInfoProps) {
             {instructor.displayName ||
               `${instructor.firstName} ${instructor.lastName}`}
           </Typography>
-          <Box
-            sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.25 }}
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 600,
+              color: "text.secondary",
+              display: "block",
+              mt: 0.25,
+            }}
           >
-            <PersonRoundedIcon
-              fontSize="inherit"
-              sx={{ color: "text.secondary" }}
-            />
-            <Typography
-              variant="caption"
-              sx={{ fontWeight: 600, color: "text.secondary" }}
-            >
-              {instructorLabel}
-            </Typography>
-          </Box>
+            {instructorLabel}
+          </Typography>
         </Box>
       </Box>
 
       <Box sx={{ textAlign: "right" }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <EmailRoundedIcon
-            fontSize="inherit"
-            sx={{ color: "text.secondary" }}
-          />
-          <Typography
-            variant="caption"
-            sx={{ fontWeight: 700, color: "text.primary" }}
-          >
-            {instructor.role === "admin" ? "Admin Faculty" : "Course Faculty"}
-          </Typography>
-        </Box>
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 700, color: "text.primary", display: "block" }}
+        >
+          {instructor.role === "admin" ? "Admin Faculty" : "Course Faculty"}
+        </Typography>
         <Typography variant="caption" sx={{ color: "text.secondary" }}>
           {instructor.email || "faculty@aptispace.io"}
         </Typography>
@@ -401,7 +391,7 @@ export function ClassDetailsDialog({
               }}
             >
               {copied ? (
-                <CheckCircleRoundedIcon color="success" />
+                <CheckCircleOutlineRoundedIcon color="success" />
               ) : (
                 <ContentCopyRoundedIcon />
               )}
