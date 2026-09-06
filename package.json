@@ -24,7 +24,9 @@
     "test:coverage": "wireit",
     "sonar": "wireit",
     "sonar:server": "docker compose -f docker-compose.sonar.yml up -d",
-    "sonar:down": "docker compose -f docker-compose.sonar.yml down"
+    "sonar:down": "docker compose -f docker-compose.sonar.yml down",
+    "knip": "wireit",
+    "knip:fix": "knip --fix --allow-remove-files"
   },
   "wireit": {
     "db:generate": {
@@ -205,6 +207,21 @@
       "output": [
         ".scannerwork/**/*"
       ]
+    },
+    "knip": {
+      "command": "knip",
+      "dependencies": [
+        "typecheck"
+      ],
+      "files": [
+        "app/**/*",
+        "stories/**/*",
+        "scripts/**/*",
+        "knip.json",
+        "package.json",
+        "tsconfig.json"
+      ],
+      "output": []
     }
   },
   "dependencies": {
@@ -266,6 +283,7 @@
     "globals": "^17.12.0",
     "happy-dom": "^20.14.0",
     "husky": "^9.1.7",
+    "knip": "^6.34.0",
     "playwright": "latest",
     "prettier": "^3.9.6",
     "storybook": "^10.6.0",

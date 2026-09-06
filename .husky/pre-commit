@@ -1,3 +1,6 @@
-pnpm lint
 pnpm typecheck
+pnpm knip:fix
+git update-index --again
+pnpm lint
+git update-index --again
 pnpm test

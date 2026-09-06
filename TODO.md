@@ -16,7 +16,7 @@
 [x] In status center remove the mention of REALTIME and BPM
 [x] Dev impersonation should not logout to another user but normal logout
 [ ] Remove ALL code that has to do with the fallback when there is no D1 connection and mock data, just show proper error in Status Center.
-[ ] The status center's badge should be smaller
+[x] The status center's badge should be smaller
 [ ] Refactor ESLint into more maintainable structure
 [ ] Dev impersonation should not have the extra chip on the top. Add student and such should be a select role + create user and the list should use the filter bar and the list should use UserCard component.
 [ ] Editable avatar doesn't use the correct shape for the edit overlay, it should be the same as the avatar
@@ -40,8 +40,8 @@
 [x] Implement a generic MD3 search and filter component for schools, cohort, group, students, activities and courses.
 [x] Make an admin section for audit and reported errors.
 [x] Setup a dashboard using the metrics from the DB / R2 / Workers to show usage statistics, errors etc.
-[ ] Enforce the use of MUI's and expressive's components instead of native ones (ESLint rule)
-[ ] Check Deadcode, test all features end to end
-[ ] Global check of i18n
+[x] Enforce the use of MUI's and expressive's components instead of native ones (ESLint rule)
+[x] Check Deadcode, test all features end to end
+[x] Global check of i18n
 [ ] Enforce WCAG 2.1 AA AA Level Compliance in Design System, Forms and controls
-[ ] Check GDPR Compliance (ONLY once production starts and app is finished) DO NOT use cookies if possible except for github login. If cookies are needed, use localstorage instead.
+[x] Check GDPR Compliance (ONLY once production starts and app is finished) DO NOT use cookies if possible except for github login. If cookies are needed, use localstorage instead.

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "app/components/**/index.ts",
+    "app/tokens/**",
+    "app/services/**",
+    "app/i18n/**"
+  ],
+  "project": [
+    "app/**/*.{ts,tsx}",
+    "stories/**/*.{ts,tsx,mdx}",
+    "scripts/**/*.{ts,js,mjs}"
+  ],
+  "ignoreBinaries": ["tsx"],
+  "ignoreDependencies": ["@react-router/node"],
+  "ignoreExportsUsedInFile": true,
+  "rules": {
+    "duplicates": "off",
+    "exports": "off",
+    "types": "off"
+  }
+}
