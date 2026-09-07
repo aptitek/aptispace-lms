@@ -2,6 +2,7 @@ import React, { forwardRef, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import Tooltip from "@mui/material/Tooltip";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import type { TFunction } from "i18next";
 import {
   getDiplomaColor,
   parseCohortName,
@@ -11,6 +12,7 @@ import { getSegmentedChipShape, type ChipShape } from "~/tokens/shapes";
 import type {
   SegmentedChipProps,
   SegmentedChipSize,
+  SegmentedChipOrientation,
   ChipSegment,
 } from "./SegmentedChip.types";
 import {
@@ -61,7 +63,11 @@ function normalizeSegment(
   if (React.isValidElement(raw)) {
     return { id: defaultId, label: raw };
   }
-  if (raw && typeof raw === "object" && "label" in raw) {
+  if (
+    raw &&
+    typeof raw === "object" &&
+    ("label" in raw || "icon" in raw || "id" in raw)
+  ) {
     return raw as ChipSegment;
   }
   return { id: defaultId, label: String(raw ?? "") };
@@ -225,9 +231,15 @@ interface RenderSegmentProps {
   segment: ChipSegment;
   size: SegmentedChipSize;
   testId: string;
+  isColumn?: boolean;
 }
 
-function RenderSegmentItem({ segment, size, testId }: RenderSegmentProps) {
+function RenderSegmentItem({
+  segment,
+  size,
+  testId,
+  isColumn,
+}: RenderSegmentProps) {
   const resolvedId = segment["data-testid"] || segment.testId || testId;
   const content = (
     <SegmentItem
@@ -240,6 +252,7 @@ function RenderSegmentItem({ segment, size, testId }: RenderSegmentProps) {
       $background={segment.background}
       $color={segment.color}
       $isClickable={Boolean(segment.onClick)}
+      $isColumn={isColumn}
       onClick={segment.onClick}
       className={segment.className}
       data-testid={resolvedId}
@@ -266,6 +279,7 @@ interface RenderSegmentsListOptions {
   divider?: ReactNode;
   size: SegmentedChipSize;
   resolvedTestId: string;
+  orientation?: SegmentedChipOrientation;
 }
 
 function RenderSegmentsList({
@@ -274,18 +288,26 @@ function RenderSegmentsList({
   divider,
   size,
   resolvedTestId,
+  orientation = "horizontal",
 }: RenderSegmentsListOptions) {
+  const isVertical = orientation === "vertical" || orientation === "responsive";
+  const defaultDivider = (
+    <SegmentDivider
+      orientation={isVertical ? "horizontal" : "vertical"}
+      flexItem={!isVertical}
+    />
+  );
+
   return (
     <>
       {segments.map((seg, idx) => (
         <React.Fragment key={seg.id ?? `seg-${idx}`}>
-          {idx > 0 &&
-            showDividers &&
-            (divider ?? <SegmentDivider orientation="vertical" flexItem />)}
+          {idx > 0 && showDividers && (divider ?? defaultDivider)}
           <RenderSegmentItem
             segment={seg}
             size={size}
             testId={`${resolvedTestId}-seg-${idx}`}
+            isColumn={isVertical}
           />
         </React.Fragment>
       ))}
@@ -302,6 +324,7 @@ interface DataAttributesOptions {
   yearAttr?: number | string;
   shapeAttr?: string;
   size: SegmentedChipSize;
+  orientation?: SegmentedChipOrientation;
 }
 
 function resolveDataAttributes(options: DataAttributesOptions) {
@@ -310,6 +333,25 @@ function resolveDataAttributes(options: DataAttributesOptions) {
     "data-shape": options.dataShape ?? options.shapeAttr,
     "data-diploma": options.dataDiploma ?? options.diplomaAttr,
     "data-year": options.dataYear ?? options.yearAttr,
+    "data-orientation": options.orientation,
+  };
+}
+
+function createSpecialtyResolver(t: TFunction) {
+  return (tag: string) => {
+    const slug = getSpecialtySlug(tag);
+    const translated = t(`specialties.${slug}`, { defaultValue: tag });
+    return translated !== tag ? translated : undefined;
+  };
+}
+
+function normalizeChipConfig(props: SegmentedChipProps) {
+  return {
+    size: props.size ?? "medium",
+    variant: props.variant ?? "outlined",
+    orientation: props.orientation ?? "horizontal",
+    disabled: props.disabled ?? false,
+    showDividers: props.showDividers ?? true,
   };
 }
 
@@ -331,14 +373,10 @@ export const SegmentedChip = forwardRef<HTMLDivElement, SegmentedChipProps>(
   function SegmentedChip(props, ref) {
     const {
       cohort,
-      size = "medium",
-      variant = "outlined",
       shape,
       onClick,
       onDelete,
       deleteLabel,
-      disabled = false,
-      showDividers = true,
       divider,
       className,
       sx,
@@ -351,11 +389,14 @@ export const SegmentedChip = forwardRef<HTMLDivElement, SegmentedChipProps>(
       segments: rawSegments,
       leading,
       items,
+      borderColor,
+      bgColor,
       ...rest
     } = props;
 
+    const config = normalizeChipConfig(props);
     const { t } = useTranslation("common");
-    const isClickable = Boolean(onClick && !disabled);
+    const isClickable = Boolean(onClick && !config.disabled);
     const { resolvedTestId, resolvedShape, shapeAttr } = resolveChipIdentifiers(
       dataTestId,
       testId,
@@ -363,12 +404,7 @@ export const SegmentedChip = forwardRef<HTMLDivElement, SegmentedChipProps>(
       shape,
     );
 
-    const getSpecialtyLabel = (tag: string) => {
-      const slug = getSpecialtySlug(tag);
-      const translated = t(`specialties.${slug}`, { defaultValue: tag });
-      return translated !== tag ? translated : undefined;
-    };
-
+    const getSpecialtyLabel = createSpecialtyResolver(t);
     const { segments, diplomaColorBorder, diplomaAttr, yearAttr } =
       resolveSegmentsFromProps(
         { cohort, segments: rawSegments, leading, items },
@@ -386,17 +422,20 @@ export const SegmentedChip = forwardRef<HTMLDivElement, SegmentedChipProps>(
       diplomaAttr,
       yearAttr,
       shapeAttr,
-      size,
+      size: config.size,
+      orientation: config.orientation,
     });
 
     return (
       <SegmentedChipRoot
         ref={ref}
-        $size={size}
+        $size={config.size}
         $isClickable={isClickable}
-        $variant={variant}
+        $variant={config.variant}
         $shape={resolvedShape}
-        $borderColor={diplomaColorBorder}
+        $borderColor={borderColor || diplomaColorBorder}
+        $bgColor={bgColor}
+        $orientation={config.orientation}
         onClick={isClickable ? onClick : undefined}
         onKeyDown={handleKeyDown}
         tabIndex={isClickable ? 0 : undefined}
@@ -409,19 +448,20 @@ export const SegmentedChip = forwardRef<HTMLDivElement, SegmentedChipProps>(
       >
         <RenderSegmentsList
           segments={segments}
-          showDividers={showDividers}
+          showDividers={config.showDividers}
           divider={divider}
-          size={size}
+          size={config.size}
           resolvedTestId={resolvedTestId}
+          orientation={config.orientation}
         />
 
         {renderDeleteSegment({
           onDelete,
-          disabled,
-          size,
+          disabled: config.disabled,
+          size: config.size,
           deleteLabel: resolvedDeleteLabel,
           testId: resolvedTestId,
-          showDividers,
+          showDividers: config.showDividers,
           divider,
         })}
       </SegmentedChipRoot>

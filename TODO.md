@@ -56,5 +56,5 @@
 [x] Enforce WCAG 2.1 AA AA Level Compliance in Design System, Forms and controls
 [x] Check GDPR Compliance (ONLY once production starts and app is finished) DO NOT use cookies if possible except for github login. If cookies are needed, use localstorage instead.
 [ ] Allow for delete account somewhere for users with holdbutton and confirm modal
-[ ] MapCard needs a overhaul
+[x] MapCard needs a overhaul
 [ ] Find where to make a specialty editor

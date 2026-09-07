@@ -1,6 +1,20 @@
-import { describe, it, expect } from "vitest";
 import React from "react";
-import ReactDOMServer from "react-dom/server";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  beforeAll,
+  afterEach,
+} from "vitest";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  cleanup,
+} from "@testing-library/react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 import MapCard, {
@@ -16,13 +30,41 @@ import "~/i18n";
 
 const theme = createTheme();
 
-function renderWithTheme(element: React.ReactElement): string {
-  return ReactDOMServer.renderToString(
-    React.createElement(ThemeProvider, { theme }, element),
-  );
+function renderWithTheme(ui: React.ReactElement) {
+  return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
 }
 
-describe("MapCard Molecule", () => {
+describe("MapCard Organism", () => {
+  const defaultAddress = "Rue Noetzlin, 91190 Gif-sur-Yvette, France";
+  const defaultCoords = { lat: 48.7118, lon: 2.1698 };
+
+  beforeAll(() => {
+    Object.defineProperty(HTMLIFrameElement.prototype, "src", {
+      get() {
+        return this.getAttribute("data-src") || "";
+      },
+      set(val) {
+        this.setAttribute("data-src", val);
+      },
+      configurable: true,
+    });
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    Object.defineProperty(navigator, "clipboard", {
+      value: {
+        writeText: vi.fn().mockResolvedValue(undefined),
+      },
+      configurable: true,
+      writable: true,
+    });
+  });
+
   describe("parseRoomCode utility", () => {
     it("parses 3-digit room code '302' into floor 3 and room 02 with chip (3 | 02)", () => {
       const parsed = parseRoomCode("302", undefined, undefined, "en");
@@ -117,404 +159,245 @@ describe("MapCard Molecule", () => {
       );
     });
 
-    it("builds directions URL with coordinates", () => {
-      const url = buildDirectionsUrl({ lat: 48.8566, lon: 2.3522 });
-      expect(url).toContain("directions?engine=fossgis_osrm_car");
-      expect(url).toContain("48.85660%2C2.35220");
+    it("builds directions URL with coordinates and address", () => {
+      const urlCoords = buildDirectionsUrl({ lat: 48.8566, lon: 2.3522 });
+      expect(urlCoords).toContain("google.com/maps/dir");
+      expect(urlCoords).toContain("48.85660,2.35220");
+
+      const urlAddr = buildDirectionsUrl(undefined, "Paris, France");
+      expect(urlAddr).toContain("google.com/maps/search");
+      expect(urlAddr).toContain("Paris%2C%20France");
     });
 
-    it("formats coordinates into DMS string", () => {
+    it("formats coordinates into standard DMS notation", () => {
       const dms = formatCoordinatesDMS({ lat: 48.8566, lon: 2.3522 });
-      expect(dms).toContain("48°");
+      expect(dms).toContain("48°51'");
       expect(dms).toContain("N");
-      expect(dms).toContain("2°");
+      expect(dms).toContain("2°21'");
       expect(dms).toContain("E");
     });
-  });
 
-  describe("MapCard Component SSR Rendering", () => {
-    const defaultAddress = "12 Rue de Paris, 75007 Paris";
-
-    it("renders campus name, building name, address, and room chip", () => {
-      const html = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          campusName: "Campus Paris-Saclay",
-          buildingName: "Bâtiment Alan Turing",
-          room: "302",
-        }),
-      );
-
-      expect(html).toContain("Campus Paris-Saclay");
-      expect(html).toContain("Bâtiment Alan Turing");
-      expect(html).toContain(defaultAddress);
-      // Room chip parts
-      expect(html).toContain("3");
-      expect(html).toContain("02");
-      expect(html).toContain('data-testid="room-floor-chip"');
-    });
-
-    it("renders door access code and instructions menu trigger when provided", () => {
-      const html = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          room: "302",
-          doorCode: "*4829#",
-          instructions: "Scan student badge at the double door entrance.",
-        }),
-      );
-
-      expect(html).toContain("*4829#");
-      expect(html).toContain('data-testid="door-code-pill"');
-      expect(html).toContain('data-testid="instructions-menu-trigger"');
-    });
-
-    it("renders with different sizing scales ('small', 'medium', 'large')", () => {
-      for (const size of ["small", "medium", "large"] as const) {
-        const html = renderWithTheme(
-          React.createElement(MapCard, {
-            address: defaultAddress,
-            size,
-          }),
-        );
-        expect(html).toContain(defaultAddress);
-      }
-    });
-
-    it("renders vertical and horizontal orientations", () => {
-      for (const orientation of ["horizontal", "vertical"] as const) {
-        const html = renderWithTheme(
-          React.createElement(MapCard, {
-            address: defaultAddress,
-            orientation,
-          }),
-        );
-        expect(html).toContain(defaultAddress);
-      }
-    });
-
-    it("renders different access types ('code', 'badge', 'intercom', 'key')", () => {
-      for (const accessType of ["code", "badge", "intercom", "key"] as const) {
-        const html = renderWithTheme(
-          React.createElement(MapCard, {
-            address: defaultAddress,
-            accessType,
-            doorCode: "1234",
-          }),
-        );
-        expect(html).toContain("1234");
-      }
-    });
-
-    it("renders clean map in compact mode without tape/clutter and full tape/controls in extended mode", () => {
-      const compactHtml = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          coordinates: { lat: 48.8566, lon: 2.3522 },
-          mode: "compact",
-        }),
-      );
-
-      expect(compactHtml).toContain('role="region"');
-      expect(compactHtml).not.toContain('data-testid="map-top-tape"');
-      expect(compactHtml).not.toContain('data-testid="map-compass-badge"');
-      expect(compactHtml).not.toContain('data-testid="zoom-in-button"');
-      expect(compactHtml).not.toContain('data-testid="fold-toggle-button"');
-      expect(compactHtml).toContain('data-testid="mode-toggle-button"');
-
-      const extendedHtml = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          coordinates: { lat: 48.8566, lon: 2.3522 },
-          mode: "extended",
-        }),
-      );
-
-      expect(extendedHtml).toContain('data-testid="map-top-tape"');
-      expect(extendedHtml).toContain("OSM •");
-      expect(extendedHtml).toContain('data-testid="map-compass-badge"');
-      expect(extendedHtml).toContain('data-testid="zoom-in-button"');
-      expect(extendedHtml).toContain('data-testid="fold-toggle-button"');
-    });
-
-    it("renders campus and building as chips in compact mode", () => {
-      const html = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          campusName: "Campus Paris-Saclay",
-          buildingName: "Bâtiment Alan Turing",
-          room: "302",
-          mode: "compact",
-        }),
-      );
-
-      expect(html).toContain('data-testid="chips-deck-row"');
-      expect(html).toContain('data-testid="chip-campus"');
-      expect(html).toContain("Paris-Saclay");
-      expect(html).toContain('data-testid="chip-building"');
-      expect(html).toContain("Alan Turing");
-      expect(html).toContain('data-testid="room-floor-chip"');
-      expect(html).toContain('data-testid="floor-pill"');
-      expect(html).toContain('data-testid="room-pill"');
-      expect(html).toContain('data-testid="mode-toggle-button"');
-    });
-
-    it("renders extended full map mode with floating wayfinding overlay and view controls", () => {
-      const html = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          campusName: "Campus Paris-Saclay",
-          buildingName: "Bâtiment Alan Turing",
-          room: "302",
-          doorCode: "*4829#",
-          mode: "extended",
-          extendedView: "full",
-        }),
-      );
-
-      expect(html).toContain('data-testid="floating-wayfinding-overlay"');
-      expect(html).toContain('data-testid="chip-campus"');
-      expect(html).toContain('data-testid="chip-building"');
-      expect(html).toContain('data-testid="room-floor-chip"');
-      expect(html).toContain('data-testid="door-code-pill"');
-      expect(html).toContain('data-testid="mode-toggle-button"');
-      expect(html).toContain('data-testid="extended-view-toggle-button"');
-    });
-
-    it("renders extended split view mode with transit steps", () => {
-      const html = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          campusName: "Campus Paris-Saclay",
-          buildingName: "Bâtiment Alan Turing",
-          room: "302",
-          doorCode: "*4829#",
-          mode: "extended",
-          extendedView: "split",
-        }),
-      );
-
-      expect(html).toContain('data-testid="step-campus"');
-      expect(html).toContain('data-testid="step-building"');
-      expect(html).toContain('data-testid="step-floor"');
-      expect(html).toContain('data-testid="step-room"');
-      expect(html).toContain('data-testid="room-floor-chip"');
-      expect(html).toContain('data-testid="step-instructions"');
-      expect(html).toContain('data-testid="mode-toggle-button"');
-      expect(html).toContain('data-testid="extended-view-toggle-button"');
-    });
-
-    it("renders floor and room chip prominently in compact mode", () => {
-      const html = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          campusName: "Campus Paris-Saclay",
-          buildingName: "Bâtiment Alan Turing",
-          room: "302",
-          mode: "compact",
-        }),
-      );
-
-      expect(html).toContain('data-testid="room-floor-chip"');
-      expect(html).toContain('data-testid="floor-pill"');
-      expect(html).toContain('data-testid="room-pill"');
-      expect(html).toContain("3");
-      expect(html).toContain("02");
-    });
-
-    it("renders custom room name chip when roomName is provided", () => {
-      const html = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          campusName: "Campus Paris-Saclay",
-          buildingName: "Bâtiment Alan Turing",
-          room: "302",
-          roomName: "Amphithéâtre Alan Turing",
-          mode: "compact",
-        }),
-      );
-
-      expect(html).toContain('data-testid="chip-room-name"');
-      expect(html).toContain("Amphithéâtre Alan Turing");
-      expect(html).toContain('data-testid="room-floor-chip"');
-      expect(html).toContain("3");
-      expect(html).toContain("02");
-    });
-
-    it("combines door code and instructions in the same chip and provides hover card", () => {
-      const html = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          room: "302",
-          doorCode: "4920#",
-          instructions: "Entrée côté nord, sonner à l'accueil",
-          mode: "compact",
-        }),
-      );
-
-      // In the same chip
-      expect(html).toContain('data-testid="door-code-pill"');
-      expect(html).toContain("4920#");
-      expect(html).toContain('data-testid="instructions-menu-trigger"');
-      expect(html).toContain('data-testid="copy-door-code-button"');
-    });
-
-    it("renders instructions in extended stepper mode with instruction card trigger without repeating icons or text", () => {
-      const testInstructions = "Sonner au digicode puis monter au 3eme";
-      const html = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          room: "302",
-          doorCode: "4920#",
-          instructions: testInstructions,
-          mode: "extended",
-          extendedView: "split",
-        }),
-      );
-
-      expect(html).toContain('data-testid="step-instructions"');
-      expect(html).toContain('data-testid="door-code-pill"');
-      expect(html).toContain("4920#");
-      expect(html).toContain('data-testid="instructions-menu-trigger"');
-      expect(html).not.toContain('data-testid="step-instruction-text"');
-    });
-
-    it("renders horizontal wavy transit line behind chips in vertical view and omits it in horizontal view", () => {
-      const verticalHtml = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          room: "302",
-          orientation: "vertical",
-          mode: "compact",
-        }),
-      );
-      expect(verticalHtml).toContain(
-        'data-testid="horizontal-transit-track-line"',
-      );
-
-      const horizontalHtml = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          room: "302",
-          orientation: "horizontal",
-          mode: "compact",
-        }),
-      );
-      expect(horizontalHtml).not.toContain(
-        'data-testid="horizontal-transit-track-line"',
-      );
-    });
-
-    it("renders vertical wavy transit line in extended stepper itinerary view", () => {
-      const html = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          room: "302",
-          mode: "extended",
-          extendedView: "split",
-        }),
-      );
-
-      expect(html).toContain('data-testid="transit-track-line"');
-    });
-
-    it("renders wayfinding instructions across all views", () => {
-      const customInstructions = "Prendre ascenseur B jusqu au 3eme etage.";
-
-      // 1. Compact Horizontal View
-      const compactH = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          room: "302",
-          instructions: customInstructions,
-          orientation: "horizontal",
-          mode: "compact",
-        }),
-      );
-      expect(compactH).toContain('data-testid="instructions-menu-trigger"');
-
-      // 2. Compact Vertical View
-      const compactV = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          room: "302",
-          instructions: customInstructions,
-          orientation: "vertical",
-          mode: "compact",
-        }),
-      );
-      expect(compactV).toContain('data-testid="instructions-menu-trigger"');
-      expect(compactV).toContain('data-testid="horizontal-transit-track-line"');
-
-      // 3. Extended Split Itinerary View
-      const extendedSplit = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          room: "302",
-          instructions: customInstructions,
-          mode: "extended",
-          extendedView: "split",
-        }),
-      );
-      expect(extendedSplit).toContain('data-testid="step-instructions"');
-      expect(extendedSplit).toContain(
-        'data-testid="instructions-menu-trigger"',
-      );
-
-      // 4. Extended Full Map View
-      const extendedFull = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          room: "302",
-          instructions: customInstructions,
-          mode: "extended",
-          extendedView: "full",
-        }),
-      );
-      expect(extendedFull).toContain(
-        'data-testid="floating-wayfinding-overlay"',
-      );
-      expect(extendedFull).toContain('data-testid="instructions-menu-trigger"');
-    });
-
-    it("does not repeat access icon or instructions in extended stepper mode", () => {
-      const html = renderWithTheme(
-        React.createElement(MapCard, {
-          address: defaultAddress,
-          room: "302",
-          doorCode: "4920#",
-          accessType: "code",
-          instructions: "Sonner à l'accueil",
-          mode: "extended",
-          extendedView: "split",
-        }),
-      );
-
-      expect(html).toContain('data-testid="step-instructions"');
-      expect(html).toContain('data-testid="door-code-pill"');
-      expect(html).toContain('data-testid="instructions-menu-trigger"');
-      // Verify instructions text is not repeated in static layout
-      expect(html).not.toContain('data-testid="step-instruction-text"');
-    });
-  });
-
-  describe("cleanCampusName & cleanBuildingName utilities", () => {
-    it("strips redundant campus labels while preserving name", () => {
+    it("strips redundant campus and building prefixes", () => {
       expect(cleanCampusName("Campus Paris-Saclay")).toBe("Paris-Saclay");
       expect(cleanCampusName("Campus de Jussieu")).toBe("Jussieu");
-      expect(cleanCampusName("Sorbonne Innovation Campus")).toBe(
-        "Sorbonne Innovation",
-      );
-      expect(cleanCampusName("Central Campus")).toBe("Central");
-    });
-
-    it("strips redundant building and bâtiment labels while preserving name", () => {
       expect(cleanBuildingName("Bâtiment Alan Turing")).toBe("Alan Turing");
       expect(cleanBuildingName("Building Alan Turing")).toBe("Alan Turing");
-      expect(cleanBuildingName("Bâtiment 333 (Informatique)")).toBe(
-        "333 (Informatique)",
+    });
+  });
+
+  describe("Component Rendering", () => {
+    it("renders prominent segmented chip with campus, building, floor, and room", () => {
+      renderWithTheme(
+        <MapCard
+          address={defaultAddress}
+          campusName="Campus Paris-Saclay"
+          buildingName="Bâtiment Alan Turing"
+          room="302"
+          coordinates={defaultCoords}
+        />,
       );
-      expect(cleanBuildingName("Building B")).toBe("B");
+
+      // Location context chip and prominent hero room chip
+      expect(screen.getByTestId("location-chip")).toBeDefined();
+      expect(screen.getByTestId("prominent-wayfinding-chip")).toBeDefined();
+      // Segments
+      expect(screen.getByTestId("seg-campus").textContent).toContain(
+        "Paris-Saclay",
+      );
+      expect(screen.getByTestId("seg-building").textContent).toContain(
+        "Alan Turing",
+      );
+      expect(screen.getByTestId("seg-floor").textContent).toContain("3");
+      expect(screen.getByTestId("seg-room").textContent).toContain("02");
+    });
+
+    it("renders custom amphitheater roomName when provided", () => {
+      renderWithTheme(
+        <MapCard
+          address={defaultAddress}
+          campusName="Campus Paris-Saclay"
+          buildingName="Bâtiment Alan Turing"
+          room="302"
+          roomName="Amphithéâtre Alan Turing"
+        />,
+      );
+
+      expect(screen.getByTestId("seg-room").textContent).toContain(
+        "Amphithéâtre Alan Turing",
+      );
+    });
+
+    it("renders optional access segmented chip when doorCode or accessType are provided", () => {
+      renderWithTheme(
+        <MapCard
+          address={defaultAddress}
+          campusName="Campus Paris-Saclay"
+          buildingName="Bâtiment Alan Turing"
+          room="302"
+          doorCode="*4829#"
+          accessType="code"
+          instructions="Badge RFID requis après 18h."
+          showInstructionBanner={true}
+        />,
+      );
+
+      // Access chip container
+      expect(screen.getByTestId("optional-access-chip")).toBeDefined();
+      expect(screen.getByTestId("seg-doorcode").textContent).toContain(
+        "*4829#",
+      );
+      expect(screen.getByTestId("seg-access-badge")).toBeDefined();
+      expect(screen.queryByTestId("seg-instructions")).toBeNull();
+      expect(screen.getByTestId("instruction-note").textContent).toContain(
+        "Badge RFID requis après 18h.",
+      );
+    });
+
+    it("does not render instruction note banner by default without showInstructionBanner", () => {
+      renderWithTheme(
+        <MapCard
+          address={defaultAddress}
+          campusName="Campus Paris-Saclay"
+          buildingName="Bâtiment Alan Turing"
+          room="302"
+          doorCode="*4829#"
+          instructions="Badge RFID requis après 18h."
+        />,
+      );
+
+      expect(screen.queryByTestId("instruction-note")).toBeNull();
+    });
+
+    it("does not render optional access chip when no access info is provided", () => {
+      renderWithTheme(
+        <MapCard
+          address={defaultAddress}
+          campusName="Campus Paris-Saclay"
+          buildingName="Bâtiment Alan Turing"
+          room="302"
+        />,
+      );
+
+      expect(screen.queryByTestId("optional-access-chip")).toBeNull();
+      expect(screen.queryByTestId("instruction-note")).toBeNull();
+    });
+
+    it("allows copying door code by clicking the doorcode segment", async () => {
+      const onCopyDoorCode = vi.fn();
+      renderWithTheme(
+        <MapCard
+          address={defaultAddress}
+          room="302"
+          doorCode="*4829#"
+          onCopyDoorCode={onCopyDoorCode}
+        />,
+      );
+
+      const doorCodeSegment = screen.getByTestId("seg-doorcode");
+      fireEvent.click(doorCodeSegment);
+
+      expect(onCopyDoorCode).toHaveBeenCalledWith("*4829#");
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith("*4829#");
+      await waitFor(() => {
+        expect(doorCodeSegment.textContent).toContain("Copié !");
+      });
+    });
+
+    it("renders OSM iframe within 3D folding paper canvas", () => {
+      renderWithTheme(
+        <MapCard
+          address={defaultAddress}
+          coordinates={defaultCoords}
+          zoom={16}
+        />,
+      );
+
+      expect(screen.getByTestId("map-perspective-wrapper")).toBeDefined();
+      expect(screen.getByTestId("folding-paper-canvas")).toBeDefined();
+      const iframe = screen.getByTestId("osm-iframe");
+      expect(iframe).toBeDefined();
+      const iframeSrc =
+        iframe.getAttribute("src") || iframe.getAttribute("data-src") || "";
+      expect(iframeSrc).toContain("openstreetmap.org/export/embed.html");
+    });
+
+    it("renders footer with address, copy button, and navigation FloatingActionButton", async () => {
+      const onCopyAddress = vi.fn();
+      const onDirectionsClick = vi.fn();
+
+      renderWithTheme(
+        <MapCard
+          address={defaultAddress}
+          coordinates={defaultCoords}
+          onCopyAddress={onCopyAddress}
+          onDirectionsClick={onDirectionsClick}
+        />,
+      );
+
+      // Address display
+      expect(screen.getByTestId("address-text").textContent).toContain(
+        defaultAddress,
+      );
+
+      // Copy Address Button
+      const copyBtn = screen.getByTestId("btn-copy-address");
+      expect(copyBtn).toBeDefined();
+      fireEvent.click(copyBtn);
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        defaultAddress,
+      );
+      expect(onCopyAddress).toHaveBeenCalledWith(defaultAddress);
+
+      // Navigation FAB
+      const navFab = screen.getByTestId("fab-navigate-gps");
+      expect(navFab).toBeDefined();
+      fireEvent.click(navFab);
+      expect(onDirectionsClick).toHaveBeenCalledWith(
+        defaultCoords,
+        defaultAddress,
+      );
+    });
+
+    it("does not render viewport controls overlay by default", () => {
+      renderWithTheme(
+        <MapCard address={defaultAddress} coordinates={defaultCoords} />,
+      );
+
+      expect(screen.queryByTestId("map-overlay-controls")).toBeNull();
+      expect(screen.queryByTestId("btn-toggle-fold")).toBeNull();
+    });
+
+    it("toggles fold state using viewport controls when showControls is true", () => {
+      const onFoldChange = vi.fn();
+      renderWithTheme(
+        <MapCard
+          address={defaultAddress}
+          coordinates={defaultCoords}
+          initialFolded={true}
+          showControls={true}
+          onFoldChange={onFoldChange}
+        />,
+      );
+
+      const toggleFoldBtn = screen.getByTestId("btn-toggle-fold");
+      expect(toggleFoldBtn).toBeDefined();
+      fireEvent.click(toggleFoldBtn);
+      expect(onFoldChange).toHaveBeenCalledWith(false);
+    });
+
+    it("renders wayfinding segmented chip in vertical orientation when requested", () => {
+      renderWithTheme(
+        <MapCard
+          address={defaultAddress}
+          campusName="Campus Paris-Saclay"
+          buildingName="Bâtiment Alan Turing"
+          room="302"
+          chipOrientation="vertical"
+        />,
+      );
+
+      const chip = screen.getByTestId("prominent-wayfinding-chip");
+      expect(chip.getAttribute("data-orientation")).toBe("vertical");
     });
   });
 });

@@ -1,9 +1,13 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 export interface MapCoordinates {
   lat: number;
   lon: number;
 }
+
+export type AccessType = "code" | "badge" | "intercom" | "key" | "open";
+export type MapCardSize = "small" | "medium" | "large";
+export type MapCardOrientation = "horizontal" | "vertical";
 
 export interface ParsedRoomInfo {
   floor: string;
@@ -17,140 +21,118 @@ export interface ParsedRoomInfo {
   roomName?: string;
 }
 
-export type MapCardSize = "small" | "medium" | "large";
-export type MapCardOrientation = "horizontal" | "vertical";
-export type AccessType = "code" | "badge" | "intercom" | "key" | "open";
-export type MapCardMode = "compact" | "extended";
-export type ExtendedMapView = "full" | "split";
+export interface ParseRoomCodeOptions {
+  locale?: string;
+  roomName?: string;
+}
 
 export interface MapCardProps {
   /**
-   * Display mode: "compact" for schedule card triad views with chips or "extended" for full interactive map view.
+   * Optional card section title (e.g. "Location & Access"). If omitted, no title banner is displayed.
    */
-  mode?: MapCardMode;
+  title?: string;
 
   /**
-   * View layout when in extended mode: "full" for full-bleed map or "split" for side-by-side stepper. Default: "full".
-   */
-  extendedView?: ExtendedMapView;
-
-  /**
-   * Whether to display the expand / collapse toggle button between compact and extended mode.
-   */
-  allowModeToggle?: boolean;
-
-  /**
-   * Callback fired when switching between compact and extended mode.
-   */
-  onModeChange?: (mode: MapCardMode) => void;
-
-  /**
-   * Callback fired when switching extended view between full and split layout.
-   */
-  onExtendedViewChange?: (view: ExtendedMapView) => void;
-  /**
-   * Human-readable address to display (e.g. "12 Rue de l'Université, 75007 Paris")
+   * Full postal or physical address displayed in the card footer.
    */
   address: string;
 
   /**
-   * Optional exact geographic coordinates for OpenStreetMap marker centering.
-   * If omitted, default coordinates or campus coordinates are used.
+   * Exact geographic coordinates (latitude and longitude) for OSM map centering and GPS routing.
    */
   coordinates?: MapCoordinates;
 
   /**
-   * Map initial zoom level (OpenStreetMap zoom scale 1-19, default 16).
-   */
-  zoom?: number;
-
-  /**
-   * Campus name (e.g. "Campus Paris-Saclay", "North Campus")
+   * Campus name (e.g. "Campus Paris-Saclay", "Sorbonne Innovation Campus").
    */
   campusName?: string;
 
   /**
-   * Building name or identifier (e.g. "Bâtiment Alan Turing", "Building Ada Lovelace")
+   * Building name or pavilion (e.g. "Bâtiment Alan Turing", "Pavillon Poincaré").
    */
   buildingName?: string;
 
   /**
-   * Room number or identifier to be parsed (e.g. "302", "B-204", "Lab 105").
-   * Automatically parsed to display floor and room in a chip like (3 | 02).
+   * Room code or identifier (e.g. "302", "B-204", "004"). Automatically parsed into floor and room number.
    */
   room?: string;
 
   /**
-   * Optional room name or lecture hall title (e.g. "Amphithéâtre Alan Turing", "Lab Poincaré").
+   * Optional custom room title or lecture hall name (e.g. "Amphithéâtre Alan Turing").
    */
   roomName?: string;
 
   /**
-   * Explicit floor override if not parsing from room string.
+   * Explicit floor override (if not parsed from room).
    */
   floor?: string | number;
 
   /**
-   * Explicit room number override if not parsing from room string.
+   * Explicit room number override (if not parsed from room).
    */
   roomNumber?: string | number;
 
   /**
-   * Security door code, keypad code, or pin for classroom access (e.g. "*4829#", "3902A").
+   * Initial OpenStreetMap zoom level (10-19, default: 16).
+   */
+  zoom?: number;
+
+  /**
+   * Security door code, digicode, or entrance PIN (e.g. "*4829#", "3920A").
    */
   doorCode?: string;
 
   /**
-   * Supplementary access instructions or wayfinding guidance
-   * (e.g. "Scan student badge at glass double doors; take elevator B to 3rd floor").
-   */
-  instructions?: string;
-
-  /**
-   * Type of entrance access barrier (code, badge, intercom, key, open).
+   * Entrance security barrier type ("code" | "badge" | "intercom" | "key" | "open").
    */
   accessType?: AccessType;
 
   /**
-   * Component sizing scale ("small" | "medium" | "large"). Default: "medium".
+   * Supplementary access instructions or wayfinding notes.
+   */
+  instructions?: string;
+
+  /**
+   * Sizing scale of the card ("small" | "medium" | "large", default: "medium").
    */
   size?: MapCardSize;
 
   /**
-   * Layout direction ("horizontal" side-by-side or "vertical" stacked). Default: "horizontal".
+   * Layout orientation ("horizontal" side-by-side or "vertical" stacked, default: "horizontal").
    */
   orientation?: MapCardOrientation;
 
   /**
-   * Whether the map begins in a folded paper brochure state.
-   * Defaults to false, but animates the 3D unfolding sequence on load.
+   * Layout orientation of the wayfinding segmented chip ("horizontal" | "vertical" | "responsive", default: "responsive").
+   */
+  chipOrientation?: "horizontal" | "vertical" | "responsive";
+
+  /**
+   * Whether the map begins in folded origami accordion state.
    */
   initialFolded?: boolean;
 
   /**
-   * Whether to display the interactive fold/unfold toggle button.
-   */
-  allowFoldToggle?: boolean;
-
-  /**
-   * Whether to render interactive map viewport controls (zoom in/out, reset, open OSM).
+   * Whether to display interactive fold/unfold toggle and zoom controls on the map.
+   * @default false
    */
   showControls?: boolean;
 
   /**
-   * Whether to show the "Get Directions" action button.
+   * Whether to display a dedicated instruction banner below the chips.
+   * @default false
    */
-  showDirectionsButton?: boolean;
+  showInstructionBanner?: boolean;
 
   /**
-   * Whether to show the "Copy Address" action button.
-   */
-  showCopyAddressButton?: boolean;
-
-  /**
-   * Specific language locale override ("en" | "fr").
+   * Language locale override ("en" | "fr").
    */
   locale?: string;
+
+  /**
+   * Optional custom leading or trailing elements inside wayfinding panel.
+   */
+  children?: ReactNode;
 
   /**
    * Additional CSS class name.
@@ -158,27 +140,32 @@ export interface MapCardProps {
   className?: string;
 
   /**
-   * Inline styles applied to the outer container.
+   * Custom inline styles.
    */
   style?: CSSProperties;
 
   /**
-   * Callback fired when the door code is copied to clipboard.
+   * Custom test identifier.
    */
-  onCopyDoorCode?: (code: string) => void;
+  testId?: string;
 
   /**
-   * Callback fired when the address is copied to clipboard.
+   * Callback fired when the full address is copied.
    */
   onCopyAddress?: (address: string) => void;
 
   /**
-   * Callback fired when "Get Directions" is clicked.
+   * Callback fired when the door code is copied.
    */
-  onDirectionsClick?: (coords?: MapCoordinates, address?: string) => void;
+  onCopyDoorCode?: (doorCode: string) => void;
 
   /**
-   * Callback fired when the paper map fold state changes.
+   * Callback fired when navigation/directions action is clicked.
+   */
+  onDirectionsClick?: (coordinates?: MapCoordinates, address?: string) => void;
+
+  /**
+   * Callback fired when the paper map fold state toggles.
    */
   onFoldChange?: (isFolded: boolean) => void;
 }

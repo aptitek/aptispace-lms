@@ -1,372 +1,112 @@
 import { styled, alpha } from "@mui/material/styles";
-import Fab from "@mui/material/Fab";
-import { Progress } from "react-material-expressive";
-export {
-  DoorCodePill,
-  ChipsDeckWrapper,
-  ChipsDeckRow,
-  WayfindingChip,
-  AddressTextWrapper,
-} from "./MapCardChips.styles";
-export * from "./MapCardViewport.styles";
-import {
-  SIZE_METRICS,
-  ROOM_CHIP_SIZE_METRICS,
-  getSheetDimensions,
-} from "./MapCardMetrics";
-export { SIZE_METRICS };
-import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
-import type {
-  MapCardSize,
-  MapCardOrientation,
-  MapCardMode,
-} from "./MapCard.types";
+import IconButton from "@mui/material/IconButton";
+import { motion } from "framer-motion";
+import type { MapCardSize, MapCardOrientation } from "./MapCard.types";
 
-interface StyledContainerProps {
+interface StyledCardProps {
   $size: MapCardSize;
   $orientation: MapCardOrientation;
-  $mode: MapCardMode;
 }
 
+export const SIZE_METRICS: Record<
+  MapCardSize,
+  {
+    maxWidth: number | string;
+    minHeight: number;
+    padding: number | string;
+    fontSize: string;
+    mapFlex: string;
+    infoFlex: string;
+  }
+> = {
+  small: {
+    maxWidth: 540,
+    minHeight: 140,
+    padding: "12px 16px",
+    fontSize: "0.85rem",
+    mapFlex: "1 1 0%",
+    infoFlex: "0 0 auto",
+  },
+  medium: {
+    maxWidth: 680,
+    minHeight: 155,
+    padding: "12px 16px",
+    fontSize: "0.95rem",
+    mapFlex: "1 1 0%",
+    infoFlex: "0 0 auto",
+  },
+  large: {
+    maxWidth: 820,
+    minHeight: 175,
+    padding: "16px 24px",
+    fontSize: "1.05rem",
+    mapFlex: "1 1 0%",
+    infoFlex: "0 0 auto",
+  },
+};
+
 /**
- * Root card surface with tactile paper elevation, delicate borders, and depth
+ * Main Card surface with tactile elevation and MD3 styling
  */
 export const SheetCard = styled("article", {
-  shouldForwardProp: (prop) =>
-    prop !== "$size" && prop !== "$orientation" && prop !== "$mode",
-})<StyledContainerProps>(({ theme, $size, $orientation, $mode }) => {
+  shouldForwardProp: (prop) => prop !== "$size" && prop !== "$orientation",
+})<StyledCardProps>(({ theme, $size }) => {
   const metrics = SIZE_METRICS[$size];
-  const isHorizontal = $orientation === "horizontal";
-  const isExtended = $mode === "extended";
-  const dimensions = getSheetDimensions(isExtended, isHorizontal, metrics);
 
   return {
     position: "relative",
     display: "flex",
     flexDirection: "column",
-    width: "100%",
-    maxWidth: dimensions.maxWidth,
-    minHeight: dimensions.minHeight,
-    height: dimensions.height,
-    maxHeight: dimensions.maxHeight,
-    borderRadius: "16px",
+    width:
+      typeof metrics.maxWidth === "number" ? `${metrics.maxWidth}px` : "100%",
+    maxWidth: "100%",
+    minHeight: metrics.minHeight,
+    borderRadius: "20px",
     backgroundColor: alpha(theme.palette.background.paper, 0.96),
-    border: `1px solid ${alpha(theme.palette.divider, 0.55)}`,
-    boxShadow: `0 8px 24px -6px rgba(0, 43, 54, 0.1), 0 1px 4px rgba(0, 0, 0, 0.04)`,
-    backdropFilter: "blur(14px)",
-    WebkitBackdropFilter: "blur(14px)",
+    border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+    boxShadow: `0 8px 24px -4px ${alpha(theme.palette.common.black, 0.08)}, 0 2px 6px -1px ${alpha(theme.palette.common.black, 0.04)}`,
+    backdropFilter: "blur(16px)",
+    WebkitBackdropFilter: "blur(16px)",
     overflow: "hidden",
     boxSizing: "border-box",
     transition: "box-shadow 0.25s ease, border-color 0.25s ease",
+    "&:hover": {
+      boxShadow: `0 12px 32px -4px ${alpha(theme.palette.primary.main, 0.18)}, 0 4px 12px -2px ${alpha(theme.palette.common.black, 0.08)}`,
+      borderColor: alpha(theme.palette.primary.main, 0.35),
+    },
     ...theme.applyStyles("dark", {
       backgroundColor: alpha(theme.palette.background.paper, 0.94),
       borderColor: alpha(theme.palette.divider, 0.25),
-      boxShadow: `0 10px 28px -6px rgba(0, 0, 0, 0.5), 0 0 0 1px ${alpha(theme.palette.divider, 0.12)}`,
+      boxShadow: `0 10px 28px -6px ${alpha(theme.palette.common.black, 0.5)}, 0 0 0 1px ${alpha(theme.palette.divider, 0.12)}`,
+      "&:hover": {
+        boxShadow: `0 14px 36px -6px ${alpha(theme.palette.primary.main, 0.28)}, 0 0 0 1px ${alpha(theme.palette.primary.main, 0.35)}`,
+      },
     }),
-    "&:hover": {
-      boxShadow: `0 12px 30px -6px ${alpha(theme.palette.primary.main, 0.2)}`,
-      borderColor: alpha(theme.palette.primary.main, 0.4),
-      ...theme.applyStyles("dark", {
-        boxShadow: `0 14px 36px -8px ${alpha(theme.palette.primary.main, 0.28)}`,
-      }),
-    },
     "@media (max-width: 768px)": {
       flexDirection: "column",
       maxWidth: "100%",
-      height: "auto",
-      maxHeight: "none",
+      minHeight: "auto",
     },
   };
 });
 
 /**
- * Right / bottom side container presenting the wayfinding itinerary
- */
-export const ItineraryContainer = styled("section", {
-  shouldForwardProp: (prop) =>
-    prop !== "$size" && prop !== "$orientation" && prop !== "$mode",
-})<StyledContainerProps>(({ theme, $size, $orientation, $mode }) => {
-  const metrics = SIZE_METRICS[$size];
-  const isHorizontal = $orientation === "horizontal";
-  const isExtended = $mode === "extended";
-
-  return {
-    flex: isHorizontal ? (isExtended ? "1 1 48%" : "1 1 58%") : "1 1 auto",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: isExtended ? "space-between" : "center",
-    padding: metrics.padding,
-    paddingBottom: isExtended ? 24 : undefined,
-    gap: isExtended ? 10 : 8,
-    boxSizing: "border-box",
-    minWidth: 0,
-    overflow: "visible",
-    height: isExtended ? "100%" : "auto",
-    backgroundColor: "transparent",
-    ...theme.applyStyles("dark", {
-      backgroundColor: alpha(theme.palette.background.default, 0.25),
-    }),
-  };
-});
-
-/**
- * Vertical transit-style connector line linking steps
- */
-export const TransitLineWrapper = styled("div")({
-  position: "relative",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "space-between",
-  height: "100%",
-  minHeight: 250,
-  minWidth: 0,
-});
-
-/**
- * Individual itinerary step item
- */
-export const ItineraryStep = styled("div")({
-  position: "relative",
-  display: "flex",
-  alignItems: "center",
-  gap: 8,
-  minWidth: 0,
-});
-
-/**
- * Container wrapping the vertical wavy connector line linking itinerary nodes
- */
-export const TransitTrackWrapper = styled("div")({
-  position: "absolute",
-  top: 16,
-  left: 0,
-  bottom: 16,
-  width: 28,
-  overflow: "hidden",
-  pointerEvents: "none",
-  zIndex: 1,
-});
-
-const SHARED_PROGRESS_STYLES = {
-  "& .linearDeterminate": { overflow: "visible !important" },
-  "& .text-primary": { color: "inherit !important" },
-  "& .bg-secondary-container": { display: "none !important" },
-  "& span.rounded-full": { display: "none !important" },
-  "& .wavePhase": { animationDirection: "reverse !important" },
-  "@media (prefers-reduced-motion: reduce)": {
-    "& .wavePhase": { animation: "none !important" },
-  },
-} as const;
-
-/**
- * MD3 Expressive wavy progress indicator rotated 90 degrees to form the vertical itinerary transit line
- */
-export const TransitTrackProgress = styled(Progress)(({ theme }) => ({
-  position: "absolute",
-  left: 16,
-  top: 0,
-  transform: "rotate(90deg) translateY(-5px)",
-  transformOrigin: "0 0",
-  width: "1000px !important",
-  color: theme.palette.primary.main,
-  filter: `drop-shadow(0 0 4px ${alpha(theme.palette.primary.main, 0.45)})`,
-  ...SHARED_PROGRESS_STYLES,
-  ...theme.applyStyles("dark", {
-    color: theme.palette.primary.light || theme.palette.primary.main,
-    filter: `drop-shadow(0 0 6px ${alpha(theme.palette.primary.main, 0.65)})`,
-  }),
-}));
-
-/**
- * Container wrapping the horizontal wavy connector line linking chips in vertical view
- */
-export const HorizontalTransitTrackWrapper = styled("div")({
-  position: "absolute",
-  left: 0,
-  right: 0,
-  top: "50%",
-  transform: "translateY(-50%)",
-  height: 20,
-  overflow: "hidden",
-  pointerEvents: "none",
-  zIndex: 0,
-  maxWidth: "100%",
-});
-
-/**
- * MD3 Expressive wavy progress indicator running horizontally from left to right
- */
-export const HorizontalTransitTrackProgress = styled(Progress)(({ theme }) => ({
-  position: "absolute",
-  left: 0,
-  top: "50%",
-  transform: "translateY(-50%)",
-  width: "100% !important",
-  color: theme.palette.primary.main,
-  opacity: 0.85,
-  filter: `drop-shadow(0 0 4px ${alpha(theme.palette.primary.main, 0.45)})`,
-  ...SHARED_PROGRESS_STYLES,
-  ...theme.applyStyles("dark", {
-    color: theme.palette.primary.light || theme.palette.primary.main,
-    filter: `drop-shadow(0 0 6px ${alpha(theme.palette.primary.main, 0.65)})`,
-  }),
-}));
-
-/**
- * Stylized icon node for itinerary waypoints
- */
-export const StepIconBadge = styled("div", {
-  shouldForwardProp: (prop) => prop !== "$variant",
-})<{ $variant?: "campus" | "building" | "room" | "instruction" }>(({
-  theme,
-  $variant = "campus",
-}) => {
-  const colorMap = {
-    campus: theme.palette.success.main,
-    building: theme.palette.primary.main,
-    room: theme.palette.secondary.main,
-    instruction: theme.palette.warning.main,
-  };
-  const color = colorMap[$variant];
-
-  return {
-    position: "relative",
-    zIndex: 2,
-    width: 28,
-    height: 28,
-    borderRadius: "8px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: theme.palette.background.paper,
-    backgroundImage: `linear-gradient(${alpha(color, 0.15)}, ${alpha(color, 0.15)})`,
-    color: color,
-    border: `1px solid ${alpha(color, 0.3)}`,
-    flexShrink: 0,
-    boxShadow: `0 1px 3px ${alpha(color, 0.1)}`,
-  };
-});
-
-/**
- * Step content containing labels, titles, and details
- */
-export const StepContent = styled("div")({
-  display: "flex",
-  flexDirection: "column",
-  minWidth: 0,
-  flex: 1,
-});
-
-/**
- * Expressive Room & Floor Chip: (3 | 02)
- */
-export const RoomChipContainer = styled("div", {
-  shouldForwardProp: (prop) => prop !== "$size",
-})<{ $size?: MapCardSize }>(({ theme, $size = "medium" }) => {
-  const color = theme.palette.secondary.main;
-  const metrics =
-    ROOM_CHIP_SIZE_METRICS[$size] ?? ROOM_CHIP_SIZE_METRICS.medium;
-
-  return {
-    position: "relative",
-    zIndex: 1,
-    display: "inline-flex",
-    alignItems: "center",
-    gap: metrics.gap,
-    padding: metrics.padding,
-    borderRadius: metrics.borderRadius,
-    backgroundColor: alpha(theme.palette.background.paper, 0.92),
-    border: `1.5px solid ${alpha(color, 0.42)}`,
-    color: theme.palette.secondary.dark || color,
-    fontSize: metrics.fontSize,
-    fontWeight: 900,
-    fontFamily: FONT_FAMILIES.mono,
-    fontVariationSettings: RECURSIVE_PRESETS.casualMono,
-    width: "fit-content",
-    boxShadow: `0 2px 8px ${alpha(color, 0.16)}`,
-    lineHeight: 1.25,
-    userSelect: "none",
-    letterSpacing: "0.02em",
-    backdropFilter: "blur(6px)",
-    WebkitBackdropFilter: "blur(6px)",
-    transition:
-      "transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease",
-    "&:hover": {
-      transform: "translateY(-1px)",
-      borderColor: color,
-      boxShadow: `0 4px 14px ${alpha(color, 0.3)}`,
-    },
-    ...theme.applyStyles("dark", {
-      backgroundColor: alpha(theme.palette.background.paper, 0.94),
-      borderColor: alpha(color, 0.55),
-      color: theme.palette.secondary.light || color,
-      boxShadow: `0 2px 10px ${alpha(color, 0.3)}`,
-    }),
-  };
-});
-
-/**
- * Room chip floor pill badge
- */
-export const FloorPill = styled("span")({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 4,
-  color: "inherit",
-  fontWeight: 900,
-  fontSize: "inherit",
-  userSelect: "none",
-  "& svg": {
-    fontSize: "1.15em",
-  },
-});
-
-/**
- * Vertical divider inside room chip
- */
-export const ChipDivider = styled("span")(({ theme }) => ({
-  color: alpha(theme.palette.secondary.main, 0.45),
-  fontWeight: 400,
-  fontSize: "inherit",
-  margin: "0 4px",
-  userSelect: "none",
-  opacity: 0.7,
-}));
-
-/**
- * Room chip room number badge
- */
-export const RoomPill = styled("span")({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 4,
-  color: "inherit",
-  fontWeight: 900,
-  fontSize: "inherit",
-  letterSpacing: "0.02em",
-  userSelect: "none",
-  "& svg": {
-    fontSize: "1.15em",
-  },
-});
-
-/**
- * Main content body containing the map viewport and the wayfinding itinerary
+ * Main body wrapper splitting Wayfinding and Map
  */
 export const CardBodyWrapper = styled("div", {
-  shouldForwardProp: (prop) => prop !== "$orientation" && prop !== "$size",
-})<{ $orientation: MapCardOrientation; $size?: MapCardSize }>(({
-  $orientation,
-  $size = "medium",
-}) => {
+  shouldForwardProp: (prop) => prop !== "$size" && prop !== "$orientation",
+})<StyledCardProps>(({ $size, $orientation }) => {
   const metrics = SIZE_METRICS[$size];
+  const isHorizontal = $orientation === "horizontal";
+
   return {
     display: "flex",
-    flexDirection: $orientation === "horizontal" ? "row" : "column",
+    flexDirection: isHorizontal ? "row" : "column",
     alignItems: "stretch",
     width: "100%",
     flex: "1 1 auto",
-    minHeight: $orientation === "horizontal" ? metrics.minHeight : "auto",
+    minHeight: isHorizontal ? metrics.minHeight : "auto",
+    boxSizing: "border-box",
     "@media (max-width: 768px)": {
       flexDirection: "column",
     },
@@ -374,76 +114,279 @@ export const CardBodyWrapper = styled("div", {
 });
 
 /**
- * Full-width bottom action strip for directions, copy address, and navigation
+ * Wayfinding panel hosting the prominent segmented chip and access segmented chip
  */
-export const BottomActionsBar = styled("footer")(({ theme }) => ({
+export const WayfindingContainer = styled("section", {
+  shouldForwardProp: (prop) => prop !== "$size" && prop !== "$orientation",
+})<StyledCardProps>(({ $size, $orientation }) => {
+  const metrics = SIZE_METRICS[$size];
+  const isHorizontal = $orientation === "horizontal";
+
+  return {
+    flex: isHorizontal ? metrics.infoFlex : "1 1 auto",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    padding: metrics.padding,
+    gap: 8,
+    boxSizing: "border-box",
+    minWidth: 0,
+    maxWidth: isHorizontal ? "65%" : "100%",
+    backgroundColor: "transparent",
+  };
+});
+
+/**
+ * Section title / label above the chips
+ */
+export const WayfindingHeader = styled("div")({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 8,
+  width: "100%",
+});
+
+export const WayfindingTitle = styled("span")(({ theme }) => ({
+  fontSize: "0.75rem",
+  fontWeight: 700,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  color: theme.palette.text.secondary,
+  userSelect: "none",
+}));
+
+/**
+ * Container holding the chips with smooth spacing
+ */
+export const ChipsStack = styled("div")({
+  display: "flex",
+  flexDirection: "column",
+  gap: 10,
+  width: "100%",
+});
+
+/**
+ * Optional instruction block rendered beneath chips if instructions are long
+ */
+export const InstructionNote = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "flex-start",
+  gap: 8,
+  padding: "8px 12px",
+  borderRadius: "8px",
+  backgroundColor: alpha(theme.palette.primary.main, 0.05),
+  border: `1px dashed ${alpha(theme.palette.primary.main, 0.25)}`,
+  color: theme.palette.text.primary,
+  fontSize: "0.8rem",
+  lineHeight: 1.35,
+  ...theme.applyStyles("dark", {
+    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+    borderColor: alpha(theme.palette.primary.main, 0.35),
+  }),
+}));
+
+/**
+ * 3D Perspective container wrapping the unfolding map canvas
+ */
+export const MapPerspectiveWrapper = styled("div", {
+  shouldForwardProp: (prop) => prop !== "$size" && prop !== "$orientation",
+})<StyledCardProps>(({ theme, $size, $orientation }) => {
+  const metrics = SIZE_METRICS[$size];
+  const isHorizontal = $orientation === "horizontal";
+
+  return {
+    position: "relative",
+    flex: isHorizontal ? metrics.mapFlex : "1 1 auto",
+    perspective: 1200,
+    minHeight: isHorizontal ? 120 : 100,
+    minWidth: isHorizontal ? 160 : "auto",
+    height: isHorizontal ? "auto" : 130,
+    width: isHorizontal ? "auto" : "100%",
+    backgroundColor: alpha(theme.palette.background.default, 0.5),
+    overflow: "hidden",
+    boxSizing: "border-box",
+    borderLeft: isHorizontal
+      ? `1px solid ${alpha(theme.palette.divider, 0.4)}`
+      : "none",
+    borderBottom: !isHorizontal
+      ? `1px solid ${alpha(theme.palette.divider, 0.4)}`
+      : "none",
+    "@media (max-width: 768px)": {
+      borderLeft: "none",
+      borderBottom: `1px solid ${alpha(theme.palette.divider, 0.4)}`,
+      height: 130,
+      width: "100%",
+    },
+  };
+});
+
+/**
+ * Motion canvas that executes the 3D origami accordion unfolding animation
+ */
+export const UnifiedMapCanvas = styled(motion.div, {
+  shouldForwardProp: (prop) => prop !== "$isFolded",
+})<{ $isFolded?: boolean }>(({ $isFolded }) => ({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  transformStyle: "preserve-3d",
+  overflow: "hidden",
+  cursor: $isFolded ? "pointer" : "default",
+}));
+
+/**
+ * Embedded OpenStreetMap iframe - styled to clip the bottom Leaflet attribution banner
+ */
+export const MapIframe = styled("iframe")({
+  position: "absolute",
+  top: "-48px",
+  left: "-48px",
+  width: "calc(100% + 96px)",
+  height: "calc(100% + 128px)",
+  border: 0,
+  display: "block",
+  pointerEvents: "auto",
+});
+
+/**
+ * Paper Creases overlay for realistic origami fold illusion
+ */
+export const PaperCreaseLayer = styled("div", {
+  shouldForwardProp: (prop) => prop !== "$isFolded",
+})<{ $isFolded: boolean }>(({ $isFolded }) => ({
+  position: "absolute",
+  inset: 0,
+  pointerEvents: "none",
+  zIndex: 3,
+  opacity: $isFolded ? 0.75 : 0,
+  transition: "opacity 0.4s ease",
+  display: "flex",
+  width: "100%",
+  height: "100%",
+}));
+
+export const CreaseLine = styled("div", {
+  shouldForwardProp: (prop) => prop !== "$leftPercent",
+})<{ $leftPercent: number }>(({ $leftPercent }) => ({
+  position: "absolute",
+  left: `${$leftPercent}%`,
+  top: 0,
+  bottom: 0,
+  width: 2,
+  background: `linear-gradient(to right, rgba(0, 0, 0, 0.25), transparent 80%)`,
+  boxShadow: `inset 1px 0 2px rgba(255, 255, 255, 0.3)`,
+}));
+
+/**
+ * Map overlay toolbar (controls for zoom in, zoom out, reset, replay fold)
+ */
+export const MapOverlayControls = styled("div")(({ theme }) => ({
+  position: "absolute",
+  right: 12,
+  top: 12,
+  zIndex: 5,
+  display: "flex",
+  flexDirection: "column",
+  gap: 6,
+  backgroundColor: alpha(theme.palette.background.paper, 0.85),
+  backdropFilter: "blur(10px)",
+  WebkitBackdropFilter: "blur(10px)",
+  borderRadius: "12px",
+  padding: 4,
+  border: `1px solid ${alpha(theme.palette.divider, 0.35)}`,
+  boxShadow: `0 4px 12px ${alpha(theme.palette.common.black, 0.1)}`,
+  ...theme.applyStyles("dark", {
+    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+    borderColor: alpha(theme.palette.divider, 0.2),
+  }),
+}));
+
+export const MapControlButton = styled(IconButton)(({ theme }) => ({
+  width: 30,
+  height: 30,
+  borderRadius: "8px",
+  color: theme.palette.text.primary,
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.12),
+    color: theme.palette.primary.main,
+  },
+}));
+
+/**
+ * Bottom Footer Bar spanning the full width of the card
+ */
+export const FooterActionsBar = styled("footer")(({ theme }) => ({
   position: "relative",
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   gap: 12,
   padding: "8px 16px",
-  borderTop: `1px solid ${alpha(theme.palette.divider, 0.4)}`,
-  backgroundColor: alpha(theme.palette.background.paper, 0.75),
-  backdropFilter: "blur(8px)",
+  minHeight: 46,
+  borderTop: `1px solid ${alpha(theme.palette.divider, 0.45)}`,
+  backgroundColor: alpha(theme.palette.background.paper, 0.8),
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
   width: "100%",
   boxSizing: "border-box",
-  minWidth: 0,
-  flexShrink: 0,
-  overflow: "visible",
+  zIndex: 2,
   ...theme.applyStyles("dark", {
-    backgroundColor: alpha(theme.palette.background.default, 0.45),
+    backgroundColor: alpha(theme.palette.background.default, 0.5),
     borderTopColor: alpha(theme.palette.divider, 0.2),
   }),
 }));
 
 /**
- * Material Design 3 (MD3) Circular Floating Action Button for Navigation / Directions
+ * Address info section in footer
  */
-export const NavigationM3Fab = styled(Fab, {
-  shouldForwardProp: (prop) => prop !== "$fabSize",
-})<{ $fabSize?: "small" | "medium" | "large" }>(({
-  theme,
-  $fabSize = "medium",
-}) => {
-  const sizePx = $fabSize === "small" ? 38 : $fabSize === "large" ? 48 : 44;
-  const topOffsetPx =
-    $fabSize === "small" ? -19 : $fabSize === "large" ? -24 : -22;
-
-  return {
-    position: "absolute",
-    right: 16,
-    top: topOffsetPx,
-    width: sizePx,
-    height: sizePx,
-    minHeight: sizePx,
-    borderRadius: "50%",
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-    zIndex: 10,
-    boxShadow: `0 6px 18px ${alpha(theme.palette.primary.main, 0.45)}, 0 3px 8px ${alpha(theme.palette.common.black, 0.25)}`,
-    transition: "all 0.25s cubic-bezier(0.2, 0, 0, 1)",
-    flexShrink: 0,
-    "&:hover": {
-      backgroundColor: theme.palette.primary.dark,
-      transform: "scale(1.08)",
-      boxShadow: `0 10px 24px ${alpha(theme.palette.primary.main, 0.6)}, 0 4px 12px ${alpha(theme.palette.common.black, 0.35)}`,
-    },
-    "&:active": {
-      transform: "scale(0.96)",
-      boxShadow: `0 3px 8px ${alpha(theme.palette.primary.main, 0.4)}`,
-    },
-    "&.Mui-focusVisible": {
-      outline: `2px solid ${theme.palette.primary.main}`,
-      outlineOffset: 3,
-    },
-    ...theme.applyStyles("dark", {
-      backgroundColor: theme.palette.primary.main,
-      boxShadow: `0 6px 20px rgba(0, 0, 0, 0.55), 0 0 20px ${alpha(theme.palette.primary.main, 0.45)}`,
-      "&:hover": {
-        backgroundColor: theme.palette.primary.light,
-        boxShadow: `0 10px 28px rgba(0, 0, 0, 0.65), 0 0 28px ${alpha(theme.palette.primary.main, 0.7)}`,
-      },
-    }),
-  };
+export const AddressContainer = styled("div")({
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  minWidth: 0,
+  flex: "1 1 auto",
+  overflow: "hidden",
 });
+
+export const AddressLabelText = styled("span")(({ theme }) => ({
+  fontSize: "0.85rem",
+  fontWeight: 500,
+  color: theme.palette.text.primary,
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+}));
+
+/**
+ * Footer action buttons group
+ */
+export const FooterButtonsGroup = styled("div")({
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  flexShrink: 0,
+});
+
+/**
+ * Copy action button in footer
+ */
+export const CopyActionButton = styled(IconButton)(({ theme }) => ({
+  width: 36,
+  height: 36,
+  borderRadius: "8px",
+  color: theme.palette.text.secondary,
+  border: `1px solid ${alpha(theme.palette.divider, 0.35)}`,
+  backgroundColor: alpha(theme.palette.background.default, 0.5),
+  transition: "all 0.2s ease",
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.12),
+    color: theme.palette.primary.main,
+    borderColor: alpha(theme.palette.primary.main, 0.4),
+    transform: "translateY(-1px)",
+  },
+  "&:active": {
+    transform: "scale(0.95)",
+  },
+}));

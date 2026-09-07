@@ -1,25 +1,17 @@
-import type { MapCoordinates, ParsedRoomInfo } from "./MapCard.types";
+import type {
+  MapCoordinates,
+  ParsedRoomInfo,
+  ParseRoomCodeOptions,
+} from "./MapCard.types";
 
 export const DEFAULT_CAMPUS_COORDINATES: MapCoordinates = {
-  lat: 48.856614,
-  lon: 2.352222,
+  lat: 48.7118,
+  lon: 2.1698,
 };
-
-export interface ParseRoomCodeOptions {
-  locale?: string;
-  roomName?: string;
-}
 
 interface RoomInfoOptions {
   isFr?: boolean;
   roomName?: string;
-}
-
-function formatFloorLabel(floor: string, isFr: boolean): string {
-  if (floor === "0") {
-    return isFr ? "Rez-de-chaussée" : "Ground Floor";
-  }
-  return isFr ? `Étage ${floor}` : `Floor ${floor}`;
 }
 
 function buildRoomInfo(
@@ -28,13 +20,10 @@ function buildRoomInfo(
   rawRoom: string,
   options: RoomInfoOptions = {},
 ): ParsedRoomInfo {
-  const isFr = Boolean(options.isFr);
-  const roomName = options.roomName;
-  const floorLabel = formatFloorLabel(floor, isFr);
-  const prefix = isFr ? "Salle" : "Room";
-  const roomLabel = `${prefix} ${roomNumber}`;
-  const roomIdentifier = rawRoom || roomNumber;
-  const fullRoomLabel = `${prefix} ${roomIdentifier}`;
+  const { isFr = false, roomName } = options;
+  const floorLabel = isFr ? `Étage ${floor}` : `Floor ${floor}`;
+  const roomLabel = isFr ? `Salle ${roomNumber}` : `Room ${roomNumber}`;
+  const fullRoomLabel = isFr ? `Salle ${rawRoom}` : `Room ${rawRoom}`;
 
   return {
     floor,
@@ -145,17 +134,6 @@ function tryDigits(
   return buildRoomInfo(floor, roomNumber, rawRoom, { isFr, roomName });
 }
 
-/**
- * Parses classroom / room strings into floor and room identifiers.
- *
- * Examples:
- * - "302" -> floor: "3", room: "02", chip: "(3 | 02)"
- * - "1408" -> floor: "14", room: "08", chip: "(14 | 08)"
- * - "004" -> floor: "0", room: "04", chip: "(0 | 04)"
- * - "B-204" -> floor: "2", room: "04", chip: "(2 | 04)"
- * - "Lab 105" -> floor: "1", room: "05", chip: "(1 | 05)"
- * - "3.12" -> floor: "3", room: "12", chip: "(3 | 12)"
- */
 function resolveLocaleOptions(localeOrOptions?: string | ParseRoomCodeOptions) {
   if (typeof localeOrOptions === "object" && localeOrOptions !== null) {
     const loc = localeOrOptions.locale || "en";
@@ -184,6 +162,17 @@ function matchPatternStrategies(
   return null;
 }
 
+/**
+ * Parses classroom / room strings into floor and room identifiers.
+ *
+ * Examples:
+ * - "302" -> floor: "3", room: "02", chip: "(3 | 02)"
+ * - "1408" -> floor: "14", room: "08", chip: "(14 | 08)"
+ * - "004" -> floor: "0", room: "04", chip: "(0 | 04)"
+ * - "B-204" -> floor: "2", room: "04", chip: "(2 | 04)"
+ * - "Lab 105" -> floor: "1", room: "05", chip: "(1 | 05)"
+ * - "3.12" -> floor: "3", room: "12", chip: "(3 | 12)"
+ */
 export function parseRoomCode(
   roomInput?: string | null,
   explicitFloor?: string | number,
@@ -245,17 +234,17 @@ export function buildOsmViewUrl(
 }
 
 /**
- * Builds external routing / directions URL.
+ * Builds external routing / directions URL or geo intent.
  */
 export function buildDirectionsUrl(
   coords?: MapCoordinates,
   address?: string,
 ): string {
   if (coords) {
-    return `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=%3B${coords.lat.toFixed(5)}%2C${coords.lon.toFixed(5)}`;
+    return `https://www.google.com/maps/dir/?api=1&destination=${coords.lat.toFixed(5)},${coords.lon.toFixed(5)}`;
   }
   if (address) {
-    return `https://www.openstreetmap.org/search?query=${encodeURIComponent(address)}`;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
   }
   return "https://www.openstreetmap.org";
 }

@@ -122,4 +122,31 @@ describe("SegmentedChip Molecule Component", () => {
     );
     expect(screen.getByTestId("large-chip")).toBeDefined();
   });
+
+  it("supports vertical and responsive orientation", () => {
+    const { unmount } = renderWithTheme(
+      <SegmentedChip
+        segments={["Vertical", "Stack"]}
+        orientation="vertical"
+        testId="vertical-chip"
+      />,
+    );
+    const verticalChip = screen.getByTestId("vertical-chip");
+    expect(verticalChip.getAttribute("data-orientation")).toBe("vertical");
+    unmount();
+
+    renderWithTheme(
+      <SegmentedChip
+        segments={["Responsive", "Stack"]}
+        orientation="responsive"
+        testId="responsive-chip"
+      />,
+    );
+    const responsiveChip = screen.getByTestId("responsive-chip");
+    expect(responsiveChip.getAttribute("data-orientation")).toBe("responsive");
+    const dividers = responsiveChip.querySelectorAll("hr");
+    expect(dividers).toHaveLength(1);
+    expect(dividers[0].classList.contains("MuiDivider-root")).toBe(true);
+    expect(dividers[0].classList.contains("MuiDivider-vertical")).toBe(false);
+  });
 });

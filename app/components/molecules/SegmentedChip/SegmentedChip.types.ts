@@ -5,12 +5,13 @@ import type { CohortConfig } from "~/types/institution";
 
 export type SegmentedChipSize = "small" | "medium" | "large";
 export type SegmentedChipVariant = "outlined" | "filled";
+export type SegmentedChipOrientation = "horizontal" | "vertical" | "responsive";
 
 export interface ChipSegment {
   /** Unique key or identifier for this segment */
   id?: string;
-  /** Content to display within the segment */
-  label: ReactNode;
+  /** Optional content to display within the segment */
+  label?: ReactNode;
   /** Optional icon rendered before the label */
   icon?: ReactNode;
   /** Optional tooltip title on hover */
@@ -76,6 +77,14 @@ export interface SegmentedChipProps {
   variant?: SegmentedChipVariant;
 
   /**
+   * Layout orientation ("horizontal" | "vertical" | "responsive").
+   * - "horizontal": inline row (default)
+   * - "vertical": vertically stacked segments
+   * - "responsive": inline row that wraps and adapts to column on narrow viewports
+   */
+  orientation?: SegmentedChipOrientation;
+
+  /**
    * Expressive or geometric shape for the chip.
    * Centralized in the shape engine (defaults to "pill").
    */
@@ -130,6 +139,16 @@ export interface SegmentedChipProps {
    * Custom MUI sx styling
    */
   sx?: SxProps<Theme>;
+
+  /**
+   * Custom border color override
+   */
+  borderColor?: string;
+
+  /**
+   * Custom background color override
+   */
+  bgColor?: string;
 
   /**
    * Custom data attributes

@@ -1,70 +1,44 @@
-import React from "react";
-import Box from "@mui/material/Box";
-import ExploreRoundedIcon from "@mui/icons-material/ExploreRounded";
-import NavigationRoundedIcon from "@mui/icons-material/NavigationRounded";
+import React, { useState, useEffect } from "react";
 import type { Variants } from "framer-motion";
-import { M3_SPRINGS } from "~/tokens/motion";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
+import RestartAltRoundedIcon from "@mui/icons-material/RestartAltRounded";
+import ReplayRoundedIcon from "@mui/icons-material/ReplayRounded";
+import Tooltip from "@mui/material/Tooltip";
 
+import { M3_SPRINGS } from "~/tokens/motion";
 import type {
+  MapCardSize,
   MapCardOrientation,
   MapCoordinates,
-  MapCardSize,
-  MapCardMode,
-  ExtendedMapView,
 } from "./MapCard.types";
-import { buildOsmViewUrl } from "./MapCard.utils";
+import { buildOsmEmbedUrl } from "./MapCard.utils";
 import {
-  PaperTopTape,
   MapPerspectiveWrapper,
   UnifiedMapCanvas,
+  MapIframe,
   PaperCreaseLayer,
   CreaseLine,
-  MapIframe,
-  MapCompassBadge,
-  FloatingWayfindingOverlay,
+  MapOverlayControls,
+  MapControlButton,
 } from "./MapCard.styles";
-import { ViewportControls, ExtendedCompactButton } from "./MapCardControls";
 
 export interface MapCardViewportProps {
-  mode: MapCardMode;
-  extendedView?: ExtendedMapView;
-  size: MapCardSize;
-  orientation: MapCardOrientation;
-  isFolded: boolean;
-  initialFolded: boolean;
-  osmEmbedUrl: string;
-  coordinates: MapCoordinates;
-  currentZoom: number;
-  dmsCoords: string;
-  showControls: boolean;
-  allowFoldToggle: boolean;
-  allowModeToggle?: boolean;
-  onToggleFold: () => void;
-  onToggleMode?: () => void;
-  onToggleExtendedView?: () => void;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onResetZoom: () => void;
-  titleOsm: string;
-  labelFolded: string;
-  labelUnfolded: string;
-  labelZoomIn: string;
-  labelZoomOut: string;
-  labelResetView: string;
-  labelUnfoldMap: string;
-  labelFoldMap: string;
-  labelExpandMap?: string;
-  labelCollapseMap?: string;
-  labelFullMapView?: string;
-  labelSplitView?: string;
-  children?: React.ReactNode;
+  coordinates?: MapCoordinates;
+  zoom?: number;
+  size?: MapCardSize;
+  orientation?: MapCardOrientation;
+  initialFolded?: boolean;
+  showControls?: boolean;
+  titleOsm?: string;
+  onFoldChange?: (isFolded: boolean) => void;
 }
 
 const UNFOLD_VARIANTS: Variants = {
   folded: {
-    rotateY: -22,
-    rotateX: 5,
-    scale: 0.94,
+    rotateY: -28,
+    rotateX: 6,
+    scale: 0.92,
     transformOrigin: "left center",
     transition: M3_SPRINGS.mapFold,
   },
@@ -77,169 +51,142 @@ const UNFOLD_VARIANTS: Variants = {
   },
 };
 
-interface UnifiedMapMeshProps {
-  isFolded: boolean;
-  initialFolded: boolean;
-  osmEmbedUrl: string;
-  titleOsm: string;
-  isCompact?: boolean;
-}
-
-function UnifiedMapMesh({
-  isFolded,
-  initialFolded,
-  osmEmbedUrl,
-  titleOsm,
-  isCompact,
-}: UnifiedMapMeshProps) {
-  return (
-    <UnifiedMapCanvas
-      animate={isFolded ? "folded" : "unfolded"}
-      initial={initialFolded ? "folded" : "unfolded"}
-      variants={UNFOLD_VARIANTS}
-      data-testid="folding-paper-mesh"
-    >
-      <MapIframe
-        src={osmEmbedUrl}
-        title={titleOsm}
-        loading="lazy"
-        data-testid="osm-iframe-main"
-        $isCompact={isCompact}
-      />
-      <PaperCreaseLayer $isFolded={isFolded}>
-        <CreaseLine $leftPercent={33.33} />
-        <CreaseLine $leftPercent={66.66} />
-      </PaperCreaseLayer>
-    </UnifiedMapCanvas>
-  );
-}
-
-function resolveViewportLabels(
-  isExtended: boolean,
-  isFull: boolean,
-  isFolded: boolean,
-  props: MapCardViewportProps,
-) {
-  const foldButtonLabel = isFolded ? props.labelUnfoldMap : props.labelFoldMap;
-  const modeToggleLabel = isExtended
-    ? (props.labelCollapseMap ?? "Compact Map View")
-    : (props.labelExpandMap ?? "Extended Full Map");
-  const viewToggleLabel = isFull
-    ? (props.labelSplitView ?? "Side-by-Side Steps")
-    : (props.labelFullMapView ?? "Full Map View");
-  const foldStatus = isFolded ? props.labelFolded : props.labelUnfolded;
-  return { foldButtonLabel, modeToggleLabel, viewToggleLabel, foldStatus };
-}
-
-interface ExtendedOverlaysProps {
-  dmsCoords?: string;
-  scaleRatio: number;
-  foldStatus: string;
-  currentZoom: number;
-  allowModeToggle?: boolean;
-  onToggleMode?: () => void;
-  modeToggleLabel: string;
-}
-
-function ExtendedOverlays({
-  dmsCoords,
-  scaleRatio,
-  foldStatus,
-  currentZoom,
-  allowModeToggle,
-  onToggleMode,
-  modeToggleLabel,
-}: ExtendedOverlaysProps) {
-  return (
-    <>
-      <PaperTopTape data-testid="map-top-tape">
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <ExploreRoundedIcon sx={{ fontSize: "0.85rem" }} />
-          <span>OSM • {dmsCoords}</span>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <span>SCALE 1:{scaleRatio}</span>
-          <span>•</span>
-          <span>{foldStatus}</span>
-        </Box>
-      </PaperTopTape>
-
-      <MapCompassBadge data-testid="map-compass-badge">
-        <NavigationRoundedIcon
-          sx={{
-            fontSize: "0.95rem",
-            color: "primary.main",
-            transform: "rotate(-45deg)",
-          }}
-        />
-        <span>{currentZoom}x ZOOM</span>
-      </MapCompassBadge>
-
-      {allowModeToggle !== false ? (
-        <ExtendedCompactButton
-          onToggleMode={onToggleMode}
-          label={modeToggleLabel}
-        />
-      ) : null}
-    </>
-  );
+function normalizeViewportProps(props: MapCardViewportProps) {
+  return {
+    zoom: props.zoom ?? 16,
+    size: props.size ?? "medium",
+    orientation: props.orientation ?? "horizontal",
+    initialFolded: Boolean(props.initialFolded),
+    showControls: Boolean(props.showControls),
+    titleOsm: props.titleOsm ?? "OpenStreetMap View",
+  };
 }
 
 export function MapCardViewport(props: MapCardViewportProps) {
-  const isExtended = props.mode === "extended";
-  const viewMode = props.extendedView || "full";
-  const isFullMap = isExtended && viewMode === "full";
-  const labels = resolveViewportLabels(
-    isExtended,
-    viewMode === "full",
-    props.isFolded,
-    props,
-  );
+  const { coordinates, onFoldChange } = props;
+  const { zoom, size, orientation, initialFolded, showControls, titleOsm } =
+    normalizeViewportProps(props);
 
-  const osmHref = buildOsmViewUrl(props.coordinates, props.currentZoom);
-  const scaleRatio = Math.round(5000 * Math.pow(2, 16 - props.currentZoom));
+  const [isFolded, setIsFolded] = useState<boolean>(true);
+  const [currentZoom, setCurrentZoom] = useState<number>(zoom);
+
+  // Unfolding sequence on mount: starts folded, then unfolds smoothly
+  useEffect(() => {
+    if (initialFolded) {
+      setIsFolded(true);
+      return;
+    }
+
+    setIsFolded(true);
+    const timer = setTimeout(() => {
+      setIsFolded(false);
+      onFoldChange?.(false);
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [initialFolded, onFoldChange]);
+
+  const handleToggleFold = () => {
+    setIsFolded((prev) => {
+      const next = !prev;
+      onFoldChange?.(next);
+      return next;
+    });
+  };
+
+  const handleZoomIn = () => {
+    setCurrentZoom((z) => Math.min(z + 1, 19));
+  };
+
+  const handleZoomOut = () => {
+    setCurrentZoom((z) => Math.max(z - 1, 10));
+  };
+
+  const handleResetZoom = () => {
+    setCurrentZoom(zoom);
+    setIsFolded(false);
+  };
+
+  const embedUrl = buildOsmEmbedUrl(coordinates, currentZoom);
 
   return (
     <MapPerspectiveWrapper
-      $orientation={props.orientation}
-      $size={props.size}
-      $mode={props.mode}
-      $isFullMap={isFullMap}
+      $size={size}
+      $orientation={orientation}
+      data-testid="map-perspective-wrapper"
     >
-      {isExtended ? (
-        <ExtendedOverlays
-          dmsCoords={props.dmsCoords}
-          scaleRatio={scaleRatio}
-          foldStatus={labels.foldStatus}
-          currentZoom={props.currentZoom}
-          allowModeToggle={props.allowModeToggle}
-          onToggleMode={props.onToggleMode}
-          modeToggleLabel={labels.modeToggleLabel}
+      <UnifiedMapCanvas
+        animate={isFolded ? "folded" : "unfolded"}
+        initial="folded"
+        variants={UNFOLD_VARIANTS}
+        $isFolded={isFolded}
+        data-testid="folding-paper-canvas"
+        onClick={isFolded ? handleToggleFold : undefined}
+      >
+        <MapIframe
+          src={embedUrl}
+          title={titleOsm}
+          loading="lazy"
+          data-testid="osm-iframe"
         />
-      ) : null}
 
-      <UnifiedMapMesh
-        isFolded={props.isFolded}
-        initialFolded={props.initialFolded}
-        osmEmbedUrl={props.osmEmbedUrl}
-        titleOsm={props.titleOsm}
-        isCompact={!isExtended}
-      />
+        <PaperCreaseLayer $isFolded={isFolded} data-testid="paper-crease-layer">
+          <CreaseLine $leftPercent={33.33} />
+          <CreaseLine $leftPercent={66.66} />
+        </PaperCreaseLayer>
+      </UnifiedMapCanvas>
 
-      {isFullMap && props.children ? (
-        <FloatingWayfindingOverlay data-testid="floating-wayfinding-overlay">
-          {props.children}
-        </FloatingWayfindingOverlay>
-      ) : null}
+      {showControls && (
+        <MapOverlayControls data-testid="map-overlay-controls">
+          <Tooltip
+            title={isFolded ? "Déplier la carte" : "Rejouer le dépliage"}
+            arrow
+            placement="left"
+          >
+            <MapControlButton
+              onClick={handleToggleFold}
+              size="small"
+              aria-label="Toggle fold"
+              data-testid="btn-toggle-fold"
+            >
+              <ReplayRoundedIcon sx={{ fontSize: 18 }} />
+            </MapControlButton>
+          </Tooltip>
 
-      <ViewportControls
-        showControls={props.showControls}
-        isExtended={isExtended}
-        viewMode={viewMode}
-        labels={labels}
-        osmHref={osmHref}
-        props={props}
-      />
+          <Tooltip title="Zoom avant" arrow placement="left">
+            <MapControlButton
+              onClick={handleZoomIn}
+              size="small"
+              aria-label="Zoom in"
+              data-testid="btn-zoom-in"
+            >
+              <AddRoundedIcon sx={{ fontSize: 18 }} />
+            </MapControlButton>
+          </Tooltip>
+
+          <Tooltip title="Zoom arrière" arrow placement="left">
+            <MapControlButton
+              onClick={handleZoomOut}
+              size="small"
+              aria-label="Zoom out"
+              data-testid="btn-zoom-out"
+            >
+              <RemoveRoundedIcon sx={{ fontSize: 18 }} />
+            </MapControlButton>
+          </Tooltip>
+
+          <Tooltip title="Réinitialiser" arrow placement="left">
+            <MapControlButton
+              onClick={handleResetZoom}
+              size="small"
+              aria-label="Reset zoom"
+              data-testid="btn-reset-zoom"
+            >
+              <RestartAltRoundedIcon sx={{ fontSize: 18 }} />
+            </MapControlButton>
+          </Tooltip>
+        </MapOverlayControls>
+      )}
     </MapPerspectiveWrapper>
   );
 }
