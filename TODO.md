@@ -21,9 +21,8 @@
 [x] Dev impersonation should not have the extra chip on the top. Add student and such should be a select role + create user and the list should use the filter bar and the list should use UserCard component.
 [x] Editable avatar doesn't use the correct shape for the edit overlay, it should be the same as the avatar
 [x] In filter bar the level/year field is excesivelly large width
-[ ] LanguageSwitch and ThemeSwitch should use more of the default switch style (size, shape, borders, colors, etc...)
+[x] LanguageSwitch and ThemeSwitch should use more of the default switch style (size, shape, borders, colors, etc...)
 [x] In UserCard the header should be less tall (reflect in the skeleton)
-[ ] Make all component have a skeleton version if it is a good practice
 [x] Remove YearRangePicker. It has been replaced by NumberPicker
 [x] Make the wavy animation in Clock card on hover only
 [x] Fix ClockCard color for progress
@@ -31,21 +30,19 @@
 [x] Make an institution and cohort card component with skeleton mirroring the usercard.
 [x] Student Inspector will use the userCard component with editable github chip
 [x] Student Inspector should be renamed UserInspector and add the Cohort and Institution Inspectors as well. Make a generic Inspector using a card + fields + buttons
-[ ] MapCard needs a overhaul
-[ ] Find where to make a specialty editor
-[ ] Rename EditableAvatar to ImageUpload
-[ ] HoldButton expressive shapes do not display progress
-[ ] Switch uses bad color for the circle when off
-[ ] Rename ExpressiveCard to Card
-[ ] Rename GhostActionButton to FloatingActionButton
-[ ] MaterialSymbol renamed to Icon and fix the props like weight fill, etc
-[ ] CalendarCard uses out of theme color for the title in Past Event
-[ ] Sidebar needs to not display background and logo in auth mode (renamed ghost variant)
-[ ] In InstitutionInspector the emailconfiguration should use a card as container instead of a pill shaped container.
-[ ] In InstitutionInspector the emailConfiguration needs to use tabs with animations instead of buttons.
-[ ] In User inspector, the cohort assignement needs to hapen on selection, no need for add button
-[ ] MissionCenter main table needs to be in a card not a pill
-[ ] Better contrast in devImpersonator for new account text
+[x] Rename EditableAvatar to ImageUpload
+[x] HoldButton expressive shapes do not display progress
+[x] Switch uses bad color for the circle when off
+[x] Rename ExpressiveCard to Card
+[x] Rename GhostActionButton to FloatingActionButton
+[x] MaterialSymbol renamed to Icon and fix the props like weight fill, etc
+[x] CalendarCard uses out of theme color for the title in Past Event
+[x] Sidebar needs to not display background and logo in auth mode (renamed ghost variant)
+[x] In InstitutionInspector the emailconfiguration should use a card as container instead of a pill shaped container.
+[x] In InstitutionInspector the emailConfiguration needs to use tabs with animations instead of buttons.
+[x] In User inspector, the cohort assignement needs to hapen on selection, no need for add button
+[x] MissionCenter main table needs to be in a card not a pill
+[x] Better contrast in devImpersonator for new account text
 
 --- MANUAL TASKS ---
 
@@ -59,3 +56,5 @@
 [x] Enforce WCAG 2.1 AA AA Level Compliance in Design System, Forms and controls
 [x] Check GDPR Compliance (ONLY once production starts and app is finished) DO NOT use cookies if possible except for github login. If cookies are needed, use localstorage instead.
 [ ] Allow for delete account somewhere for users with holdbutton and confirm modal
+[ ] MapCard needs a overhaul
+[ ] Find where to make a specialty editor

@@ -1,13 +1,9 @@
 import { styled, alpha } from "@mui/material/styles";
-import {
-  StyledExpressiveCard,
-  DashedSkeletonCard,
-  GhostFabOverlay,
-} from "../../atoms/ExpressiveCard";
+import { StyledCard, DashedSkeletonCard, FabOverlay } from "../../atoms/Card";
 
-export { GhostFabOverlay, DashedSkeletonCard };
+export { FabOverlay, DashedSkeletonCard };
 
-export const CardContainer = styled(StyledExpressiveCard)(({ theme }) => ({
+export const CardContainer = styled(StyledCard)(({ theme }) => ({
   padding: theme.spacing(2.5),
   gap: theme.spacing(1),
 }));
@@ -24,12 +20,32 @@ export const CohortName = styled("div")(({ theme }) => ({
 export const CohortDescription = styled("div")(({ theme }) => ({
   fontSize: "0.85rem",
   color: theme.palette.text.secondary,
+  lineHeight: 1.4,
   display: "-webkit-box",
   WebkitLineClamp: 2,
   WebkitBoxOrient: "vertical",
   overflow: "hidden",
-  textOverflow: "ellipsis",
-  minHeight: "2.5em",
+  minHeight: "2.8em",
+}));
+
+export const CohortHeaderRow = styled("div")({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  width: "100%",
+});
+
+export const CohortMetaRow = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  marginTop: "auto",
+  paddingTop: theme.spacing(1),
+  borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  fontSize: "0.75rem",
+  color: theme.palette.text.secondary,
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
 }));
 
 export const CohortDates = styled("div")(({ theme }) => ({
@@ -45,7 +61,7 @@ export const SkeletonContainer = styled(DashedSkeletonCard)(({ theme }) => ({
   padding: theme.spacing(2.5),
 }));
 
-export const SkeletonCardContainer = styled(StyledExpressiveCard, {
+export const SkeletonCardContainer = styled(StyledCard, {
   shouldForwardProp: (prop) =>
     prop !== "isGhost" && prop !== "isInteractive" && prop !== "opacity",
 })<{

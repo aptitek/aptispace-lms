@@ -1,14 +1,16 @@
 import type { HTMLAttributes, ReactNode } from "react";
+import type { SxProps, Theme } from "@mui/material/styles";
 
-export interface ExpressiveCardProps extends HTMLAttributes<HTMLDivElement> {
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
   isInteractive?: boolean;
   isSelected?: boolean;
   variant?: "elevated" | "elevation" | "outlined" | "dashed";
   className?: string;
+  sx?: SxProps<Theme>;
 }
 
-export interface GhostFabOverlayProps extends HTMLAttributes<HTMLDivElement> {
+export interface FabOverlayProps extends HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
   className?: string;
 }

@@ -223,25 +223,29 @@ describe("Sidebar Component", () => {
     expect(screen.getByTestId("role-icon-admin")).toBeDefined();
   });
 
-  it("renders correctly in auth variant without tabs or status trigger", () => {
+  it("renders correctly in ghost variant without tabs, logo, or status trigger", () => {
     renderSidebar({
-      variant: "auth",
+      variant: "ghost",
       "data-testid": "auth-sidebar",
     });
 
     const sidebar = screen.getByTestId("auth-sidebar");
     expect(sidebar).toBeDefined();
-    expect(screen.getByTestId("sidebar-favicon")).toBeDefined();
+    expect(screen.queryByTestId("sidebar-favicon")).toBeNull();
     expect(screen.queryByRole("tablist")).toBeNull();
     expect(screen.queryByTestId("sidebar-status-slot")).toBeNull();
     expect(screen.getByTestId("sidebar-language-toggle")).toBeDefined();
     expect(screen.getByTestId("sidebar-theme-toggle")).toBeDefined();
+    const bottomSection = screen.getByTestId("sidebar-bottom-section");
+    expect(bottomSection).toBeDefined();
+    const computedStyle = window.getComputedStyle(bottomSection);
+    expect(computedStyle.borderTopStyle).toBe("none");
   });
 
-  it("renders auth variant with logged-in user and handles logout", () => {
+  it("renders ghost variant with logged-in user and handles logout", () => {
     const onLogout = vi.fn();
     renderSidebar({
-      variant: "auth",
+      variant: "ghost",
       user: testStudentUser,
       onLogout,
       "data-testid": "auth-sidebar",

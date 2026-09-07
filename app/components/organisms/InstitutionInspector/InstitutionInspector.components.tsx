@@ -1,9 +1,9 @@
 import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
+import Card from "~/components/atoms/Card/Card";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import ToggleButton from "@mui/material/ToggleButton";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 import { alpha } from "@mui/material/styles";
 import AlternateEmailRoundedIcon from "@mui/icons-material/AlternateEmailRounded";
 import InfoOutlineRoundedIcon from "@mui/icons-material/InfoOutlineRounded";
@@ -22,8 +22,10 @@ export function InstitutionEmailPreviewBox({
     <Box
       sx={{
         p: 1.5,
-        borderRadius: (theme) => theme.shape.corners.small,
-        bgcolor: (theme) => theme.palette.surfaceContainer,
+        borderRadius: "12px",
+        bgcolor: (theme) =>
+          theme.palette.surfaceContainer ||
+          alpha(theme.palette.primary.main, 0.04),
         border: "1px dashed",
         borderColor: "divider",
         display: "flex",
@@ -65,6 +67,7 @@ export function InstitutionEmailCardHeader({
   onToggleConstraint: (checked: boolean) => void;
 }) {
   const { t } = useTranslation("common");
+  const activeTab = isConstrained ? "constrained" : "free";
 
   return (
     <Box
@@ -84,65 +87,64 @@ export function InstitutionEmailCardHeader({
         </Typography>
       </Box>
 
-      <ToggleButtonGroup
-        value={isConstrained ? "constrained" : "free"}
-        exclusive
-        onChange={(_, nextValue: string | null) => {
-          if (nextValue !== null) {
-            onToggleConstraint(nextValue === "constrained");
-          }
-        }}
-        fullWidth
-        size="small"
+      <Tabs
+        value={activeTab}
+        onChange={(_, nextVal) => onToggleConstraint(nextVal === "constrained")}
+        variant="fullWidth"
         aria-label={t("inspector.domainConstraint", "Domain Constraint")}
+        data-testid="inspector-domain-constraint-toggle"
         sx={{
+          minHeight: 40,
+          backgroundColor: (tRef) =>
+            tRef.palette.surfaceContainerHigh || tRef.palette.surfaceContainer,
+          borderRadius: "8px",
           p: 0.5,
-          borderRadius: (theme) => theme.shape.corners.medium,
-          bgcolor: (theme) => theme.palette.surfaceContainerHigh,
-          border: "1px solid",
-          borderColor: "divider",
-          "& .MuiToggleButtonGroup-grouped": {
-            border: 0,
-            borderRadius: (theme) => theme.shape.corners.small,
-            fontWeight: 600,
-            fontSize: "0.8rem",
-            textTransform: "none",
-            gap: 0.75,
+          "& .MuiTabs-indicator": {
+            height: "100%",
+            borderRadius: "8px",
+            backgroundColor: (tRef) =>
+              tRef.palette.surfaceContainerLowest ||
+              tRef.palette.background.paper,
+            boxShadow: "0 1px 4px rgba(0, 0, 0, 0.1)",
+            transition: "all 200ms cubic-bezier(0.2, 0, 0, 1)",
+            zIndex: 0,
+          },
+          "& .MuiTab-root": {
+            minHeight: 34,
             py: 0.5,
+            px: 1.5,
+            zIndex: 1,
+            borderRadius: "8px",
+            textTransform: "none",
+            fontWeight: 600,
+            fontSize: "0.8125rem",
             color: "text.secondary",
+            transition: "color 150ms ease",
+            gap: 0.75,
             "&.Mui-selected": {
-              bgcolor: (theme) =>
-                theme.palette.surfaceContainerLowest ||
-                theme.palette.background.paper,
               color: "primary.main",
-              boxShadow: (theme) => theme.shadows[1],
-              "&:hover": {
-                bgcolor: (theme) =>
-                  theme.palette.surfaceContainerLowest ||
-                  theme.palette.background.paper,
-              },
+              fontWeight: 700,
             },
           },
         }}
-        data-testid="inspector-domain-constraint-toggle"
       >
-        <ToggleButton
+        <Tab
           value="free"
+          icon={<PublicRoundedIcon sx={{ fontSize: 16 }} />}
+          iconPosition="start"
+          label={t("inspector.anyEmail", "Any Email")}
           disabled={disabled}
           data-testid="inspector-domain-free-toggle"
-        >
-          <PublicRoundedIcon sx={{ fontSize: 16 }} />
-          {t("inspector.anyEmail", "Any Email")}
-        </ToggleButton>
-        <ToggleButton
+        />
+        <Tab
           value="constrained"
+          icon={<LockOutlineRoundedIcon sx={{ fontSize: 16 }} />}
+          iconPosition="start"
+          label={t("inspector.domainConstraint", "Domain Constraint")}
           disabled={disabled}
           data-testid="inspector-domain-constrained-toggle"
-        >
-          <LockOutlineRoundedIcon sx={{ fontSize: 16 }} />
-          {t("inspector.domainConstraint", "Domain Constraint")}
-        </ToggleButton>
-      </ToggleButtonGroup>
+        />
+      </Tabs>
     </Box>
   );
 }
@@ -153,7 +155,7 @@ export function InstitutionFreeDomainNotice() {
     <Box
       sx={{
         p: 1.5,
-        borderRadius: (theme) => theme.shape.corners.small,
+        borderRadius: "12px",
         bgcolor: (theme) => alpha(theme.palette.info.main, 0.08),
         border: (theme) => `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
         display: "flex",
@@ -202,7 +204,7 @@ export function InstitutionConstrainedDomainFields({
   const { t } = useTranslation("common");
 
   return (
-    <>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       <TextField
         label={t("inspector.emailDomain", "Email Domain")}
         placeholder="e.g. aptitek.io"
@@ -236,7 +238,7 @@ export function InstitutionConstrainedDomainFields({
       />
 
       <InstitutionEmailPreviewBox previewEmail={previewEmail} />
-    </>
+    </Box>
   );
 }
 
@@ -269,13 +271,10 @@ export function InstitutionEmailCard({
       variant="outlined"
       sx={{
         p: 2,
-        borderRadius: (theme) => theme.shape.corners.largeIncreased,
+        borderRadius: "16px",
         display: "flex",
         flexDirection: "column",
-        gap: 1.5,
-        bgcolor: (theme) =>
-          theme.palette.surfaceContainerLow || theme.palette.background.paper,
-        border: (theme) => `1px solid ${theme.palette.divider}`,
+        gap: 2,
       }}
       data-testid="inspector-institution-email-card"
     >

@@ -20,10 +20,7 @@ import LoadingIndicator from "../../atoms/LoadingIndicator";
 import Tooltip from "@mui/material/Tooltip";
 import Avatar, { resolveAvatarShape } from "../../atoms/Avatar";
 import Badge from "../../atoms/Badge/Badge";
-import type {
-  EditableAvatarShape,
-  EditableAvatarSize,
-} from "./EditableAvatar.types";
+import type { ImageUploadShape, ImageUploadSize } from "./ImageUpload.types";
 import {
   MD3AvatarContainer,
   AvatarHoverOverlay,
@@ -35,14 +32,14 @@ import {
   HiddenFileInput,
   DragBadgeHint,
   HelperMessage,
-} from "./EditableAvatar.styles";
+} from "./ImageUpload.styles";
 
 export interface MD3AvatarProps {
   url: string;
   name?: string;
-  shape?: EditableAvatarShape;
+  shape?: ImageUploadShape;
   role?: string | null;
-  size?: EditableAvatarSize;
+  size?: ImageUploadSize;
   editable?: boolean;
   disableTooltip?: boolean;
   isModified: boolean;
@@ -142,8 +139,8 @@ function AvatarHoverLayer({
   label,
 }: {
   show: boolean;
-  shape?: EditableAvatarShape;
-  size?: EditableAvatarSize;
+  shape?: ImageUploadShape;
+  size?: ImageUploadSize;
   aspectRatio?: string;
   label: string;
 }) {
@@ -252,68 +249,52 @@ export function AvatarInputBar(props: AvatarInputBarProps) {
       ) : null}
 
       <InputPrefixIconHolder>
-        {props.isUploading ? (
-          <LoadingIndicator size={16} />
-        ) : (
-          <LinkRoundedIcon sx={{ fontSize: "18px" }} />
-        )}
+        <LinkRoundedIcon fontSize="small" />
       </InputPrefixIconHolder>
 
       <TextInput
         id={props.inputId}
-        type="text"
         value={props.value}
         placeholder={
           props.placeholder ||
-          t("avatar.urlPlaceholder", "Drop image, paste, or enter URL...")
+          t("avatar.pasteUrlOrDrag", "Paste image URL or drag & drop...")
+        }
+        aria-label={props.label || t("avatar.inputLabel", "Image URL")}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          props.onChange(e.target.value)
         }
         disabled={props.isUploading}
-        onChange={(event: ChangeEvent<HTMLInputElement>) =>
-          props.onChange(event.target.value)
-        }
-        onKeyDown={(keyEvent: KeyboardEvent<HTMLInputElement>) => {
-          if (keyEvent.key === "Escape" && props.isModified) props.onReset();
-        }}
-        aria-label={
-          props.label ||
-          t("avatar.inputAriaLabel", "Avatar image URL or drop area")
-        }
       />
 
       <ActionsContainer>
-        <Tooltip title={t("avatar.uploadFileTooltip", "Upload image file")}>
-          <span>
-            <ActionIconButton
-              type="button"
-              variantType="primary"
-              onClick={props.onBrowse}
-              disabled={props.isUploading}
-              aria-label={t("avatar.uploadFile", "Upload avatar file")}
-            >
-              <CloudUploadRoundedIcon sx={{ fontSize: "18px" }} />
-            </ActionIconButton>
-          </span>
-        </Tooltip>
+        <ActionIconButton
+          type="button"
+          onClick={props.onBrowse}
+          disabled={props.isUploading}
+          variantType="primary"
+          title={t("avatar.browseDevice", "Upload from device")}
+          aria-label={t("avatar.browseDevice", "Upload from device")}
+          size="small"
+        >
+          {props.isUploading ? (
+            <LoadingIndicator size={18} />
+          ) : (
+            <CloudUploadRoundedIcon sx={{ fontSize: 18 }} />
+          )}
+        </ActionIconButton>
 
         {props.isModified ? (
-          <Tooltip
-            title={t("avatar.resetToDefault", "Reset to default avatar")}
+          <ActionIconButton
+            type="button"
+            onClick={props.onReset}
+            disabled={props.isUploading}
+            variantType="danger"
+            title={t("avatar.resetToDefault", "Reset to default")}
+            aria-label={t("avatar.resetToDefault", "Reset to default")}
+            size="small"
           >
-            <span>
-              <ActionIconButton
-                type="button"
-                variantType="secondary"
-                onClick={props.onReset}
-                disabled={props.isUploading}
-                aria-label={t(
-                  "avatar.resetToDefault",
-                  "Reset avatar to default",
-                )}
-              >
-                <RestartAltRoundedIcon sx={{ fontSize: "18px" }} />
-              </ActionIconButton>
-            </span>
-          </Tooltip>
+            <RestartAltRoundedIcon sx={{ fontSize: 18 }} />
+          </ActionIconButton>
         ) : null}
 
         {props.extraActions}
@@ -342,12 +323,9 @@ export function SimpleEditModal({
       slotProps={{
         paper: {
           sx: {
-            borderRadius: "16px",
-            p: 1.5,
+            borderRadius: "12px",
+            p: 1,
             bgcolor: "background.paper",
-            backgroundImage: "none",
-            border: 1,
-            borderColor: "divider",
           },
         },
       }}
@@ -357,25 +335,20 @@ export function SimpleEditModal({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          p: 1.5,
-          fontWeight: 800,
           fontSize: "1rem",
+          fontWeight: 700,
+          p: 1.5,
         }}
       >
-        <span>{t("avatar.modalTitle", "Edit Profile Avatar")}</span>
-        <IconButton
-          onClick={onClose}
-          size="small"
-          aria-label={t("avatar.closeModal", "Close edit avatar dialog")}
-          sx={{ color: "text.secondary" }}
-        >
-          <CloseRoundedIcon sx={{ fontSize: "18px" }} />
+        <span>{t("avatar.editAvatar", "Edit Image")}</span>
+        <IconButton size="small" onClick={onClose} aria-label="Close">
+          <CloseRoundedIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
-      <DialogContent
-        sx={{ p: 1.5, display: "flex", flexDirection: "column", gap: 1.5 }}
-      >
-        {children}
+      <DialogContent sx={{ p: 1.5, pt: "6px !important" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+          {children}
+        </Box>
       </DialogContent>
     </Dialog>
   );
@@ -409,7 +382,7 @@ export function HiddenPicker({
   );
 }
 
-export function EditableAvatarModals({
+export function ImageUploadModals({
   isModalOpen,
   isImageOnly,
   onClose,

@@ -9,13 +9,13 @@ export const iconRules = {
       type: "problem",
       docs: {
         description:
-          "Disallow raw <svg> elements and custom SVG glyph paths for icons. Use standard Material Design 3 rounded icons or <MaterialSymbol /> instead.",
+          "Disallow raw <svg> elements and custom SVG glyph paths for icons. Use standard Material Design 3 rounded icons or <Icon /> instead.",
       },
       messages: {
         noRawSvgIcon:
-          "Raw <svg> elements for icons are forbidden. Use standard Material Design 3 rounded icons from '@mui/icons-material/*Rounded' or '<MaterialSymbol />' instead.",
+          "Raw <svg> elements for icons are forbidden. Use standard Material Design 3 rounded icons from '@mui/icons-material/*Rounded' or '<Icon />' instead.",
         noCustomStyledSvgIcon:
-          "Custom styled('svg') icon '{{name}}' is forbidden. Use standard Material Design 3 rounded icons or '<MaterialSymbol />' instead.",
+          "Custom styled('svg') icon '{{name}}' is forbidden. Use standard Material Design 3 rounded icons or '<Icon />' instead.",
         noCustomGlyphPath:
           "Hardcoding custom SVG icon path glyphs ('{{name}}') is forbidden. Use standard Material Design 3 rounded icons instead.",
       },

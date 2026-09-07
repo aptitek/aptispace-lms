@@ -132,7 +132,7 @@ function resolveStandardCardStyles(
   };
 }
 
-export const StyledExpressiveCard = styled("div", {
+export const StyledCard = styled("div", {
   shouldForwardProp: (prop) =>
     prop !== "isInteractive" && prop !== "isSelected" && prop !== "variant",
 })<{
@@ -146,7 +146,7 @@ export const StyledExpressiveCard = styled("div", {
   return resolveStandardCardStyles(theme, isInteractive, isSelected);
 });
 
-export const DashedSkeletonCard = styled(StyledExpressiveCard, {
+export const DashedSkeletonCard = styled(StyledCard, {
   shouldForwardProp: (prop) => prop !== "isInteractive",
 })<{ isInteractive?: boolean }>(({ theme, isInteractive }) => ({
   borderStyle: "dashed",
@@ -184,7 +184,7 @@ export const DashedSkeletonCard = styled(StyledExpressiveCard, {
   }),
 }));
 
-export const GhostFabOverlay = styled("div")({
+export const FabOverlay = styled("div")({
   position: "absolute",
   top: 0,
   left: 0,

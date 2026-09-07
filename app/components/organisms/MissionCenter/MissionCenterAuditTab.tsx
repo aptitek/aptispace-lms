@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import Box from "@mui/material/Box";
+import Card from "~/components/atoms/Card/Card";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
@@ -11,7 +12,6 @@ import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
-import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 
@@ -69,7 +69,6 @@ function filterAuditLog(
 export function MissionCenterAuditTab({
   auditLogs,
 }: MissionCenterAuditTabProps) {
-  const theme = useTheme();
   const { t } = useTranslation(["common"]);
 
   const [search, setSearch] = useState("");
@@ -354,12 +353,13 @@ export function MissionCenterAuditTab({
       </Box>
 
       {/* Audit Logs DataGrid */}
-      <Box
+      <Card
+        variant="outlined"
         sx={{
           width: "100%",
           height: 520,
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: (theme) => theme.shape.corners.largeIncreased,
+          borderRadius: "16px",
+          overflow: "hidden",
         }}
         data-testid="audit-logs-datagrid"
       >
@@ -381,11 +381,12 @@ export function MissionCenterAuditTab({
             ),
           }}
           sx={{
-            border: `1px solid ${theme.palette.divider}`,
-            borderRadius: (theme) => theme.shape.corners.largeIncreased,
+            border: "none",
+            borderRadius: 0,
+            height: "100%",
           }}
         />
-      </Box>
+      </Card>
 
       {/* JSON / Diff Modal */}
       {selectedAuditForModal && (

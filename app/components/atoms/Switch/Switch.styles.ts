@@ -138,7 +138,6 @@ export const SwitchThumb = styled(motion.span, {
 }>(({ theme, $cfg, $checked, $hasIcon: _hasIcon }) => {
   const onPrimary =
     theme.palette.primary.contrastText || theme.palette.common.white;
-  const outline = theme.palette.text.secondary;
 
   return {
     position: "absolute",
@@ -148,14 +147,18 @@ export const SwitchThumb = styled(motion.span, {
     alignItems: "center",
     justifyContent: "center",
     borderRadius: "50%",
-    backgroundColor: $checked ? onPrimary : outline,
+    backgroundColor: $checked ? onPrimary : theme.palette.text.secondary,
     color: $checked
       ? theme.palette.primary.main
-      : theme.palette.background.paper,
+      : theme.palette.surfaceContainerHighest || theme.palette.background.paper,
     pointerEvents: "none",
     zIndex: 3,
     boxShadow: "0 1px 3px rgba(0, 0, 0, 0.2)",
     ...theme.applyStyles("dark", {
+      ...(!$checked && {
+        backgroundColor:
+          theme.palette.action.active || theme.palette.text.primary,
+      }),
       boxShadow: "0 0 0 1px rgba(255, 255, 255, 0.12)",
     }),
     svg: {

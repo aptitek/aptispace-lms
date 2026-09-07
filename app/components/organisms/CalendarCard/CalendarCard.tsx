@@ -253,6 +253,9 @@ export const CalendarCard = forwardRef<HTMLDivElement, CalendarCardProps>(
     const chipVariantStyle = relativeInfo.isToday ? "filled" : "outlined";
     const chipSize = resolveChipSize(size);
 
+    const effectiveHeaderColor =
+      props.headerColor ?? (relativeInfo.isPast ? "default" : headerColor);
+
     return (
       <SheetCard
         ref={ref}
@@ -266,7 +269,7 @@ export const CalendarCard = forwardRef<HTMLDivElement, CalendarCardProps>(
         aria-label={ariaLabel || defaultAria}
         data-testid="calendar-card"
       >
-        <SheetHeader $size={size} $headerColor={headerColor}>
+        <SheetHeader $size={size} $headerColor={effectiveHeaderColor}>
           {showPerforations && <PerforationHoles $size={size} />}
           <MonthYearText $size={size} data-testid="calendar-card-month-year">
             {monthYear}

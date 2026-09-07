@@ -74,13 +74,21 @@ function resolveHeaderStyles(
   headerColor: CalendarCardHeaderColor,
 ) {
   if (headerColor === "default") {
+    const surfaceBg =
+      theme.palette.surfaceContainerHigh ||
+      theme.palette.surfaceContainer ||
+      theme.palette.background.paper;
     return {
-      backgroundColor: theme.palette.grey[200],
-      color: theme.palette.grey[900],
-      borderBottom: `1px solid ${alpha(theme.palette.divider, 0.15)}`,
+      backgroundColor: surfaceBg,
+      color: theme.palette.text.secondary,
+      borderBottom: `1px solid ${theme.palette.divider}`,
       ...theme.applyStyles("dark", {
-        backgroundColor: alpha(theme.palette.grey[800], 0.9),
-        color: theme.palette.grey[100],
+        backgroundColor:
+          theme.palette.surfaceContainerHigh ||
+          theme.palette.surfaceContainer ||
+          theme.palette.background.paper,
+        color: theme.palette.text.secondary,
+        borderBottom: `1px solid ${theme.palette.divider}`,
       }),
     };
   }

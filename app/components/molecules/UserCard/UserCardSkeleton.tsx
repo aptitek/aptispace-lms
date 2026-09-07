@@ -1,7 +1,7 @@
 import React from "react";
 import Skeleton from "@mui/material/Skeleton";
 import { useTranslation } from "react-i18next";
-import { GhostActionButton } from "~/components/atoms/GhostActionButton";
+import { FloatingActionButton } from "~/components/atoms/FloatingActionButton";
 import {
   SkeletonCardContainer,
   SkeletonCardContent,
@@ -12,7 +12,7 @@ import {
   SkeletonDetailsContainer,
   SkeletonNameBlock,
   SkeletonFooterRow,
-  GhostFabOverlay,
+  FabOverlay,
 } from "./UserCardSkeleton.styles";
 import type { UserCardSkeletonProps } from "./UserCard.types";
 
@@ -184,12 +184,13 @@ export function UserCardSkeleton(props: UserCardSkeletonProps) {
       </SkeletonCardContent>
 
       {config.isInteractive && (
-        <GhostFabOverlay>
-          <GhostActionButton
+        <FabOverlay>
+          <FloatingActionButton
             tooltip={resolvedTooltip}
+            onClick={props.onClick}
             testId={`${config.testId}-fab`}
           />
-        </GhostFabOverlay>
+        </FabOverlay>
       )}
     </SkeletonCardContainer>
   );

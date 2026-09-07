@@ -119,9 +119,6 @@ test.describe("Admin User Management & Inspector", () => {
       const options = page.getByRole("option");
       if ((await options.count()) > 0) {
         await options.first().click();
-        const addBtn = inspector.getByTestId("inspector-add-cohort-btn");
-        await expect(addBtn).toBeEnabled();
-        await addBtn.click();
       } else {
         // Close dropdown by pressing Escape
         await page.keyboard.press("Escape");

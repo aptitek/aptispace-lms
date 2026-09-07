@@ -1,2 +1,2 @@
-export { MaterialSymbol, type MaterialSymbolProps } from "./MaterialSymbol";
-export { default } from "./MaterialSymbol";
+export { Icon, type IconProps, type IconWeight } from "./Icon";
+export { default } from "./Icon";

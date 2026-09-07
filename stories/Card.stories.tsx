@@ -1,16 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import {
-  ExpressiveCard,
-  GhostFabOverlay,
-  DashedSkeletonCard,
-} from "~/components/atoms/ExpressiveCard";
-import { GhostActionButton } from "~/components/atoms/GhostActionButton";
+import { Card, FabOverlay, DashedSkeletonCard } from "~/components/atoms/Card";
 
 const meta = {
-  title: "Atoms/ExpressiveCard",
-  component: ExpressiveCard,
+  title: "Atoms/Card",
+  component: Card,
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
@@ -23,7 +18,7 @@ const meta = {
     isInteractive: { control: "boolean" },
     isSelected: { control: "boolean" },
   },
-} satisfies Meta<typeof ExpressiveCard>;
+} satisfies Meta<typeof Card>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -93,16 +88,18 @@ export const InteractiveAndSelected: Story = {
   },
 };
 
-export const DashedSkeletonWithGhostFab: Story = {
+export const DashedSkeleton: Story = {
   render: () => (
     <Box sx={{ width: 280, height: 160, position: "relative" }}>
       <DashedSkeletonCard isInteractive={true}>
         <Box sx={{ p: 3, opacity: 0.4, textAlign: "center" }}>
           <Typography variant="body2">Empty Slot</Typography>
         </Box>
-        <GhostFabOverlay>
-          <GhostActionButton tooltip="Create new item" />
-        </GhostFabOverlay>
+        <FabOverlay>
+          <Typography variant="caption" sx={{ fontWeight: 700 }}>
+            + Action
+          </Typography>
+        </FabOverlay>
       </DashedSkeletonCard>
     </Box>
   ),

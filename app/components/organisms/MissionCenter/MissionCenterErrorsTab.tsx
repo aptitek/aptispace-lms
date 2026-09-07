@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import Box from "@mui/material/Box";
+import Card from "~/components/atoms/Card/Card";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
@@ -9,7 +10,6 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Stack from "@mui/material/Stack";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import CleaningServicesRoundedIcon from "@mui/icons-material/CleaningServicesRounded";
-import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import {
   DataGrid,
@@ -94,7 +94,6 @@ export function MissionCenterErrorsTab({
   onClearResolved,
   isSubmitting = false,
 }: MissionCenterErrorsTabProps) {
-  const theme = useTheme();
   const { t } = useTranslation(["common"]);
 
   const [search, setSearch] = useState("");
@@ -379,15 +378,16 @@ export function MissionCenterErrorsTab({
         }}
       >
         {/* Left Table / DataGrid */}
-        <Box
+        <Card
+          variant="outlined"
           sx={{
             display: "flex",
             flexDirection: "column",
             gap: 1,
             width: "100%",
             height: 520,
-            backgroundColor: theme.palette.background.paper,
-            borderRadius: (theme) => theme.shape.corners.largeIncreased,
+            borderRadius: "16px",
+            overflow: "hidden",
           }}
           data-testid="errors-table"
         >
@@ -418,12 +418,13 @@ export function MissionCenterErrorsTab({
               ),
             }}
             sx={{
-              borderRadius: (theme) => theme.shape.corners.largeIncreased,
-              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: 0,
+              border: "none",
               cursor: "pointer",
+              height: "100%",
             }}
           />
-        </Box>
+        </Card>
 
         {/* Right Inspector: Featuring the User ProfileCard and Error Diagnostic */}
         {selectedReport && (

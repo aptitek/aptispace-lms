@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
-import EditableAvatar from "~/components/molecules/EditableAvatar/EditableAvatar";
+import ImageUpload from "~/components/molecules/ImageUpload/ImageUpload";
 import Chip from "~/components/atoms/Chip/Chip";
 import {
   formatUsernameSamplePreview,
@@ -219,7 +219,7 @@ export default function InstitutionInspector({
       maxHeight="800px"
       data-testid="institution-inspector-card"
     >
-      <EditableAvatar
+      <ImageUpload
         mode="image-only"
         value={form.logoUrl}
         defaultValue={institution.logoUrl || ""}

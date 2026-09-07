@@ -15,7 +15,6 @@ import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import SupervisorAccountRoundedIcon from "@mui/icons-material/SupervisorAccountRounded";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 import type {
@@ -32,7 +31,6 @@ import {
   EmptyCohortsMessage,
   QuickAddRow,
   StyledFormControl,
-  AddCohortButton,
   CohortOptionRow,
   CohortOptionLeft,
   SchoolLogoMini,
@@ -264,7 +262,7 @@ export interface StudentCohortAssignmentSectionProps {
   schoolMap: Map<string, SchoolConfig>;
   selectedCohortToAdd: string;
   setSelectedCohortToAdd: (cohortId: string) => void;
-  handleAdd: () => void;
+  handleAdd: (cohortId?: string) => void;
   onRemoveCohort: (payload: {
     studentId: string;
     cohortId: string;
@@ -278,7 +276,7 @@ export function StudentCohortAssignmentSection({
   availableToAdd,
   schoolMap,
   selectedCohortToAdd,
-  setSelectedCohortToAdd,
+  setSelectedCohortToAdd: _setSelectedCohortToAdd,
   handleAdd,
   onRemoveCohort,
   isSubmitting,
@@ -357,7 +355,7 @@ export function StudentCohortAssignmentSection({
       </CohortChipsList>
 
       <QuickAddRow>
-        <StyledFormControl size="small">
+        <StyledFormControl size="small" fullWidth>
           <InputLabel id="cohort-add-select-label">
             {t("common:inspector.addCohort", "Add to Cohort")}
           </InputLabel>
@@ -366,9 +364,12 @@ export function StudentCohortAssignmentSection({
             id="cohort-add-select"
             value={selectedCohortToAdd}
             label={t("common:inspector.addCohort", "Add to Cohort")}
-            onChange={(e: SelectChangeEvent<string>) =>
-              setSelectedCohortToAdd(e.target.value)
-            }
+            onChange={(e: SelectChangeEvent<string>) => {
+              const nextCohortId = e.target.value;
+              if (nextCohortId) {
+                handleAdd(nextCohortId);
+              }
+            }}
             disabled={isSubmitting || availableToAdd.length === 0}
             data-testid="inspector-cohort-add-select"
           >
@@ -417,22 +418,6 @@ export function StudentCohortAssignmentSection({
             })}
           </Select>
         </StyledFormControl>
-
-        <AddCohortButton
-          variant="contained"
-          onClick={handleAdd}
-          disabled={isSubmitting || !selectedCohortToAdd}
-          startIcon={
-            isSubmitting ? (
-              <CircularProgress size={14} color="inherit" />
-            ) : (
-              <AddRoundedIcon fontSize="small" />
-            )
-          }
-          data-testid="inspector-add-cohort-btn"
-        >
-          {t("common:inspector.addButton", "Add")}
-        </AddCohortButton>
       </QuickAddRow>
     </>
   );

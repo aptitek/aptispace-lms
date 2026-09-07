@@ -63,11 +63,12 @@ export function useInspectorCohortsState(
     );
   }, [assignedCohorts, cohorts]);
 
-  const handleAdd = () => {
-    if (!selectedCohortToAdd || !targetStudent) return;
+  const handleAdd = (cohortId?: string) => {
+    const idToAdd = cohortId || selectedCohortToAdd;
+    if (!idToAdd || !targetStudent) return;
     void onAddCohort({
       studentId: targetStudent.id,
-      cohortId: selectedCohortToAdd,
+      cohortId: idToAdd,
     });
     setSelectedCohortToAdd("");
   };

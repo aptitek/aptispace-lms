@@ -2,19 +2,19 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import EditableAvatar from "../app/components/molecules/EditableAvatar/EditableAvatar";
+import ImageUpload from "../app/components/molecules/ImageUpload/ImageUpload";
 
 import { ALL_35_M3_SHAPES } from "../app/components/atoms/Avatar";
 
-const meta: Meta<typeof EditableAvatar> = {
-  title: "Molecules/EditableAvatar",
-  component: EditableAvatar,
+const meta: Meta<typeof ImageUpload> = {
+  title: "Molecules/ImageUpload",
+  component: ImageUpload,
   parameters: {
     layout: "centered",
     docs: {
       description: {
         component:
-          "Material Design 3 Avatar with Image-Only Click-to-Edit Modal mode, on-avatar instant reset badge, drag-and-drop, clipboard paste, URL input, full 35 Expressive Shapes catalog support, and read-only normal avatar support.",
+          "Material Design 3 Avatar/Image with Image-Only Click-to-Edit Modal mode, on-avatar instant reset badge, drag-and-drop, clipboard paste, URL input, full 35 Expressive Shapes catalog support, and read-only normal avatar support.",
       },
     },
   },
@@ -41,22 +41,22 @@ const meta: Meta<typeof EditableAvatar> = {
         "asymmetric",
         "biometric",
       ],
-      description: "MD3 Avatar shape preset",
+      description: "MD3 shape preset",
     },
     size: {
       control: "select",
       options: ["sm", "md", "lg", "xl"],
-      description: "Size preset of the MD3 avatar",
+      description: "Size preset of the MD3 avatar/image",
     },
     editable: {
       control: "boolean",
-      description: "When false, renders as a normal read-only MD3 avatar",
+      description: "When false, renders as a normal read-only MD3 avatar/image",
     },
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof EditableAvatar>;
+type Story = StoryObj<typeof ImageUpload>;
 
 const sampleDefaultUrl =
   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80";
@@ -81,7 +81,7 @@ export const MD3ImageOnlyModal: Story = {
         gap: 1,
       }}
     >
-      <EditableAvatar {...args} />
+      <ImageUpload {...args} />
       <Typography variant="caption" color="text.secondary">
         Image-Only Mode (Click avatar to open modal)
       </Typography>
@@ -108,7 +108,7 @@ function OnAvatarResetDemoStory() {
         Avatar is modified from default. Notice the reset button badge directly
         on the avatar.
       </Typography>
-      <EditableAvatar
+      <ImageUpload
         value={avatarUrl}
         defaultValue={sampleDefaultUrl}
         onChange={(newUrl) => setAvatarUrl(newUrl)}
@@ -142,7 +142,7 @@ export const ReadOnlyNormalAvatar: Story = {
         gap: 1,
       }}
     >
-      <EditableAvatar {...args} />
+      <ImageUpload {...args} />
       <Typography variant="caption" color="text.secondary">
         ReadOnly Mode: standard pristine MD3 avatar
       </Typography>
@@ -169,7 +169,7 @@ export const MD3InitialsFallback: Story = {
         gap: 1,
       }}
     >
-      <EditableAvatar {...args} />
+      <ImageUpload {...args} />
       <Typography variant="caption" color="text.secondary">
         Initials Fallback (AM) with Click-to-Edit Modal
       </Typography>
@@ -189,7 +189,7 @@ export const InlineUnifiedMode: Story = {
   },
   render: (args) => (
     <Box sx={{ width: "500px", maxWidth: "100%", p: 2 }}>
-      <EditableAvatar {...args} />
+      <ImageUpload {...args} />
     </Box>
   ),
 };
@@ -204,7 +204,7 @@ export const BiometricBadgePortrait: Story = {
   },
   render: (args) => (
     <Box sx={{ width: "480px", maxWidth: "100%", p: 2 }}>
-      <EditableAvatar {...args} />
+      <ImageUpload {...args} />
     </Box>
   ),
 };
@@ -223,7 +223,7 @@ export const LandscapeLogoMode: Story = {
   },
   render: (args) => (
     <Box sx={{ width: 320, p: 2 }}>
-      <EditableAvatar {...args} />
+      <ImageUpload {...args} />
       <Typography
         variant="caption"
         color="text.secondary"

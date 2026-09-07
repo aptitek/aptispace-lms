@@ -105,7 +105,7 @@ export const QuickCreateHeader = styled(Box)(({ theme }) => ({
   fontSize: "0.75rem",
   fontWeight: 700,
   letterSpacing: "0.04em",
-  color: theme.palette.text.secondary,
+  color: theme.palette.text.primary,
   textTransform: "uppercase",
 }));
 

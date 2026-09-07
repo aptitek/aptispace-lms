@@ -3,14 +3,11 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import { resolveM3ShapeStyle } from "~/tokens/shapes";
-import type {
-  EditableAvatarShape,
-  EditableAvatarSize,
-} from "./EditableAvatar.types";
+import type { ImageUploadShape, ImageUploadSize } from "./ImageUpload.types";
 
 function calculateAvatarDimensions(
-  sizePreset: EditableAvatarSize = "md",
-  shapePreset: EditableAvatarShape = "circular",
+  sizePreset: ImageUploadSize = "md",
+  shapePreset: ImageUploadShape = "circular",
   customRatio?: string,
 ): {
   dimension: string;
@@ -23,7 +20,7 @@ function calculateAvatarDimensions(
   const isLandscape = shapePreset === "landscape";
 
   const sizeMap: Record<
-    EditableAvatarSize,
+    ImageUploadSize,
     {
       biometric: string;
       standard: string;
@@ -81,7 +78,7 @@ function calculateAvatarDimensions(
   };
 }
 
-export const EditableAvatarRoot = styled(Box, {
+export const ImageUploadRoot = styled(Box, {
   shouldForwardProp: (prop) => prop !== "isDisabled",
 })<{
   isDisabled?: boolean;
@@ -122,7 +119,7 @@ export const MainContainer = styled(Box, {
 }));
 
 function resolveContainerWidth(
-  avatarShape: EditableAvatarShape | undefined,
+  avatarShape: ImageUploadShape | undefined,
   isLandscape: boolean,
   dimension: number | string,
   customWidth?: number | string,
@@ -168,8 +165,8 @@ export const MD3AvatarContainer = styled(Box, {
     prop !== "customWidth" &&
     prop !== "customHeight",
 })<{
-  avatarShape?: EditableAvatarShape;
-  avatarSize?: EditableAvatarSize;
+  avatarShape?: ImageUploadShape;
+  avatarSize?: ImageUploadSize;
   isInteractive?: boolean;
   isDragging?: boolean;
   customRatio?: string;
@@ -238,8 +235,8 @@ export const AvatarHoverOverlay = styled(Box, {
   shouldForwardProp: (prop) =>
     prop !== "avatarShape" && prop !== "avatarSize" && prop !== "customRatio",
 })<{
-  avatarShape?: EditableAvatarShape;
-  avatarSize?: EditableAvatarSize;
+  avatarShape?: ImageUploadShape;
+  avatarSize?: ImageUploadSize;
   customRatio?: string;
 }>(({ theme, avatarShape, avatarSize, customRatio }) => {
   const { radius, clipPath } = calculateAvatarDimensions(

@@ -101,6 +101,35 @@ function getIconButtonDimension(size?: "small" | "medium" | "large"): number {
   return 48;
 }
 
+function scaleNormalizedPath(
+  pathStr: string,
+  bounds: { x: number; y: number; w: number; h: number },
+): string {
+  const { x, y, w, h } = bounds;
+  return pathStr.replace(
+    /([A-DF-Za-df-z])([^A-DF-Za-df-z]*)/g,
+    (_, cmd, coordsStr) => {
+      const trimmed = coordsStr.trim();
+      if (!trimmed) return cmd;
+      const nums = trimmed
+        .split(/[\s,]+/)
+        .filter(Boolean)
+        .map(Number);
+      const scaled: string[] = [];
+      for (let i = 0; i < nums.length; i += 2) {
+        if (i + 1 < nums.length) {
+          const px = Number((nums[i] * w + x).toFixed(3));
+          const py = Number((nums[i + 1] * h + y).toFixed(3));
+          scaled.push(`${px} ${py}`);
+        } else {
+          scaled.push(String(nums[i]));
+        }
+      }
+      return `${cmd}${scaled.join(" ")}`;
+    },
+  );
+}
+
 interface PathDataParams {
   expressiveDef?: ShapeDefinition;
   dimensions: { width: number; height: number };
@@ -116,8 +145,6 @@ function resolvePathData({
   outlineGap,
   borderThickness,
 }: PathDataParams): string {
-  if (expressiveDef) return expressiveDef.pathData;
-
   const halfStroke = borderThickness / 2;
   const bounds: RectBounds = {
     x: halfStroke,
@@ -125,8 +152,12 @@ function resolvePathData({
     w: dimensions.width + 2 * outlineGap,
     h: dimensions.height + 2 * outlineGap,
   };
-  const r = computedBorderRadius > 0 ? computedBorderRadius + outlineGap : 0;
 
+  if (expressiveDef) {
+    return scaleNormalizedPath(expressiveDef.pathData, bounds);
+  }
+
+  const r = computedBorderRadius > 0 ? computedBorderRadius + outlineGap : 0;
   return getRoundedRectPath(bounds, r);
 }
 
@@ -254,7 +285,6 @@ function useHoldGesture(
 }
 
 interface SvgOverlayProps {
-  isExpressivePolygon: boolean;
   pathD: string;
   paletteColor: string;
   borderThickness: number;
@@ -266,7 +296,6 @@ interface SvgOverlayProps {
 }
 
 function SvgOverlay({
-  isExpressivePolygon,
   pathD,
   paletteColor,
   borderThickness,
@@ -277,35 +306,6 @@ function SvgOverlay({
   opacity,
 }: SvgOverlayProps) {
   if (!pathD || outerWidth <= 0 || outerHeight <= 0) return null;
-
-  if (isExpressivePolygon) {
-    const minDim = Math.min(outerWidth, outerHeight);
-    const halfStrokeRatio = borderThickness / (2 * minDim);
-    const scaleFactor = Math.max(0.01, 1 - 2 * halfStrokeRatio);
-    const normalizedStrokeWidth = borderThickness / (minDim * scaleFactor);
-
-    return (
-      <SvgBorderContainer
-        color={paletteColor}
-        offset={totalOffset}
-        viewBox={`0 0 ${outerWidth} ${outerHeight}`}
-      >
-        <motion.path
-          d={pathD}
-          fill="none"
-          stroke={paletteColor}
-          strokeWidth={normalizedStrokeWidth}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          // eslint-disable-next-line no-restricted-syntax
-          style={{
-            pathLength: progress,
-            opacity,
-          }}
-        />
-      </SvgBorderContainer>
-    );
-  }
 
   return (
     <SvgBorderContainer
@@ -360,6 +360,43 @@ function resolveWrapperSx(
   return [shapeStyles, ...(Array.isArray(wrapperSx) ? wrapperSx : [wrapperSx])];
 }
 
+function computeEffectiveDimensions(
+  measured: { width: number; height: number },
+  isExpressivePolygon: boolean,
+  iconDim: number,
+) {
+  const fallback = isExpressivePolygon ? iconDim : 0;
+  return {
+    width: measured.width || fallback,
+    height: measured.height || fallback,
+  };
+}
+
+function useHoldPointerHandlers(
+  startHold: (e: React.PointerEvent<HTMLButtonElement>) => void,
+  cancelHold: () => void,
+  props: React.ComponentPropsWithoutRef<typeof StyledHoldButton>,
+) {
+  return {
+    onPointerDown: (e: React.PointerEvent<HTMLButtonElement>) => {
+      startHold(e);
+      props.onPointerDown?.(e);
+    },
+    onPointerUp: (e: React.PointerEvent<HTMLButtonElement>) => {
+      cancelHold();
+      props.onPointerUp?.(e);
+    },
+    onPointerLeave: (e: React.PointerEvent<HTMLButtonElement>) => {
+      cancelHold();
+      props.onPointerLeave?.(e);
+    },
+    onPointerCancel: (e: React.PointerEvent<HTMLButtonElement>) => {
+      cancelHold();
+      props.onPointerCancel?.(e);
+    },
+  };
+}
+
 export const HoldButton = React.forwardRef<HTMLButtonElement, HoldButtonProps>(
   (
     {
@@ -396,25 +433,32 @@ export const HoldButton = React.forwardRef<HTMLButtonElement, HoldButtonProps>(
     );
 
     const paletteColor = resolvePaletteColor(theme, color);
+    const iconDim = getIconButtonDimension(size);
     const expressiveDef = shape ? EXPRESSIVE_SHAPE_CATALOG[shape] : undefined;
     const resolvedShape = resolveShapeStyle(shape);
     const isExpressivePolygon = Boolean(expressiveDef);
     const hasShape = Boolean(shape);
-    const { totalOffset, outerWidth, outerHeight } = computeOuterBounds(
+
+    const effectiveDimensions = computeEffectiveDimensions(
       dimensions,
+      isExpressivePolygon,
+      iconDim,
+    );
+
+    const { totalOffset, outerWidth, outerHeight } = computeOuterBounds(
+      effectiveDimensions,
       outlineGap,
       borderThickness,
     );
 
     const pathD = resolvePathData({
       expressiveDef,
-      dimensions,
+      dimensions: effectiveDimensions,
       computedBorderRadius,
       outlineGap,
       borderThickness,
     });
 
-    const iconDim = getIconButtonDimension(size);
     const baseSx = buildButtonBaseSx(
       isExpressivePolygon,
       resolvedShape,
@@ -428,6 +472,12 @@ export const HoldButton = React.forwardRef<HTMLButtonElement, HoldButtonProps>(
       wrapperSx,
     );
 
+    const pointerHandlers = useHoldPointerHandlers(
+      startHold,
+      cancelHold,
+      props,
+    );
+
     return (
       <HoldButtonWrapper animate={buttonControls} sx={combinedWrapperSx}>
         {isExpressivePolygon && (
@@ -439,29 +489,13 @@ export const HoldButton = React.forwardRef<HTMLButtonElement, HoldButtonProps>(
           color={color}
           size={size}
           {...props}
-          onPointerDown={(e) => {
-            startHold(e);
-            props.onPointerDown?.(e);
-          }}
-          onPointerUp={(e) => {
-            cancelHold();
-            props.onPointerUp?.(e);
-          }}
-          onPointerLeave={(e) => {
-            cancelHold();
-            props.onPointerLeave?.(e);
-          }}
-          onPointerCancel={(e) => {
-            cancelHold();
-            props.onPointerCancel?.(e);
-          }}
+          {...pointerHandlers}
           sx={[baseSx, ...(Array.isArray(sx) ? sx : [sx])]}
         >
           {children}
         </StyledHoldButton>
 
         <SvgOverlay
-          isExpressivePolygon={isExpressivePolygon}
           pathD={pathD}
           paletteColor={paletteColor}
           borderThickness={borderThickness}

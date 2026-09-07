@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
-import EditableAvatar from "./EditableAvatar";
+import ImageUpload from "./ImageUpload";
 
-describe("EditableAvatar Component Molecule (MD3 Standard)", () => {
-  it("exports EditableAvatar component properly", () => {
-    expect(EditableAvatar).toBeDefined();
-    expect(typeof EditableAvatar).toBe("function");
-    expect(EditableAvatar.name).toBe("EditableAvatar");
+describe("ImageUpload Component Molecule (MD3 Standard)", () => {
+  it("exports ImageUpload component properly", () => {
+    expect(ImageUpload).toBeDefined();
+    expect(typeof ImageUpload).toBe("function");
+    expect(ImageUpload.name).toBe("ImageUpload");
   });
 
   it("supports MD3 shapes, image-only mode, and editable contracts", () => {
@@ -42,7 +42,7 @@ describe("EditableAvatar Component Molecule (MD3 Standard)", () => {
 
   it("resolves default shape to circular for both avatar and overlay when shape is omitted", () => {
     const { container } = render(
-      <EditableAvatar
+      <ImageUpload
         mode="image-only"
         value="https://example.com/avatar.jpg"
         name="Alex Mercer"
@@ -58,7 +58,7 @@ describe("EditableAvatar Component Molecule (MD3 Standard)", () => {
 
   it("propagates custom shape to avatar and overlay identically", () => {
     const { container } = render(
-      <EditableAvatar
+      <ImageUpload
         mode="image-only"
         value="https://example.com/avatar.jpg"
         shape="rounded"

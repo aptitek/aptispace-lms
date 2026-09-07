@@ -1,5 +1,6 @@
 @import "react-material-expressive/styles.css";
 @import "./tokens/tokens.css";
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap");
 
 @font-face {
   font-family: "Milkshake";
@@ -32,7 +33,7 @@ body {
 /* Material Design 3 Material Symbols Rounded */
 .material-symbols-rounded {
   font-family: "Material Symbols Rounded", sans-serif;
-  font-weight: 500;
+  font-weight: normal;
   font-style: normal;
   font-size: 24px;
   line-height: 1;
@@ -44,9 +45,4 @@ body {
   direction: ltr;
   -webkit-font-feature-settings: "liga";
   -webkit-font-smoothing: antialiased;
-  font-variation-settings:
-    "FILL" 0,
-    "wght" 500,
-    "GRAD" 0,
-    "opsz" 24;
 }

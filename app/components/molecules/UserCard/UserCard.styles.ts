@@ -1,10 +1,10 @@
 import { styled, alpha, type Theme } from "@mui/material/styles";
 import CardContent from "@mui/material/CardContent";
 import IconButton from "@mui/material/IconButton";
+import { StyledCard } from "../../atoms/Card";
 import { FONT_FAMILIES } from "~/tokens/typography";
-import { StyledExpressiveCard } from "../../atoms/ExpressiveCard";
 
-export const StyledCard = StyledExpressiveCard;
+export { StyledCard };
 
 export const StyledCardContent = styled(CardContent)(({ theme }) => ({
   display: "flex",

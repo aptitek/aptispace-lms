@@ -235,7 +235,10 @@ function SidebarBottom({
   onAction: () => void;
 }) {
   return (
-    <SidebarBottomSection data-testid="sidebar-bottom-section">
+    <SidebarBottomSection
+      $variant={variant}
+      data-testid="sidebar-bottom-section"
+    >
       <SidebarUserSection
         user={user}
         isExtended={isExtended}
@@ -250,7 +253,7 @@ function SidebarBottom({
           data-testid="sidebar-debug-theme-toggle"
         />
       </ToggleStackRow>
-      {variant !== "auth" && (
+      {variant !== "ghost" && (
         <StatusCenterSlot data-testid="sidebar-status-slot">
           <StatusGatewayTrigger showBadge={true} />
         </StatusCenterSlot>
@@ -385,7 +388,8 @@ export default function Sidebar({
     setIsFocused,
   } = useSidebarInteractions(hoverDelay);
 
-  const shouldShowTabs = showTabs !== undefined ? showTabs : variant !== "auth";
+  const shouldShowTabs =
+    showTabs !== undefined ? showTabs : variant !== "ghost";
   const visibleTabs = shouldShowTabs ? resolveVisibleTabs(tabs, user) : [];
   const activeTabId = resolveActiveTabId(location.pathname, visibleTabs);
 
@@ -427,10 +431,12 @@ export default function Sidebar({
         role="navigation"
         aria-label={t("nav.sidebarAria", "Primary navigation")}
       >
-        <SidebarLogoHeader
-          isExtended={isExtended}
-          onNavigate={(to) => navigate(to)}
-        />
+        {variant !== "ghost" && (
+          <SidebarLogoHeader
+            isExtended={isExtended}
+            onNavigate={(to) => navigate(to)}
+          />
+        )}
         <SidebarNavList
           tabs={visibleTabs}
           activeTabId={activeTabId}

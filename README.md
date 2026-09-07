@@ -115,7 +115,7 @@ aptispace-lms/
 ├── app/
 │   ├── components/
 │   │   ├── atoms/          # Primitive components (Avatar, Logo, Toggles, Guilloche, Galaxy)
-│   │   ├── molecules/      # Composite UI (EditableAvatar, EmailField, IdCard, DevImpersonator)
+│   │   ├── molecules/      # Composite UI (ImageUpload, EmailField, IdCard, DevImpersonator)
 │   │   ├── organisms/      # Feature blocks (Sidebar, LoginCard, OnboardingCard, StatusCenter)
 │   │   └── templates/      # Page layouts (AuthLayout)
 │   ├── config/             # Application configs, school data, admin allowances

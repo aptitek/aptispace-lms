@@ -105,7 +105,7 @@ export const Admin: Story = {
   },
 };
 
-export const WithEditableAvatar: Story = {
+export const WithImageUpload: Story = {
   args: {
     institutionName: "AptiSpace Academy",
     cohortName: "Web Development",

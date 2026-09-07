@@ -28,7 +28,7 @@ interface UserRoleAssignmentPanelProps {
   schoolMap: Map<string, SchoolConfig>;
   selectedCohortToAdd: string;
   setSelectedCohortToAdd: (cohortId: string) => void;
-  handleAdd: () => void;
+  handleAdd: (cohortId?: string) => void;
   onRemoveCohort?: (payload: {
     studentId: string;
     cohortId: string;

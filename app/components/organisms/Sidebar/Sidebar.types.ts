@@ -1,7 +1,7 @@
 import type { AuthUser } from "~/utils/auth";
 import type { HeaderTabItem } from "~/components/molecules/HeaderTabs/HeaderTabs.types";
 
-export type SidebarVariant = "default" | "auth";
+export type SidebarVariant = "default" | "ghost";
 
 export interface SidebarProps {
   variant?: SidebarVariant;

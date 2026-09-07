@@ -14,7 +14,7 @@ export const TAB_SPRING: Transition = M3_SPRINGS.tabIndicator;
 
 export const SidebarRail = styled(motion.aside, {
   shouldForwardProp: (prop) => prop !== "$isExtended" && prop !== "$variant",
-})<{ $isExtended: boolean; $variant?: "default" | "auth" }>(
+})<{ $isExtended: boolean; $variant?: "default" | "ghost" }>(
   ({ theme, $isExtended, $variant }) => ({
     position: "fixed",
     top: 0,
@@ -25,15 +25,13 @@ export const SidebarRail = styled(motion.aside, {
     display: "flex",
     flexDirection: "column",
     backgroundColor:
-      $variant === "auth"
-        ? alpha(
-            theme.palette.surfaceContainer || theme.palette.background.paper,
-            0.75,
-          )
+      $variant === "ghost"
+        ? "transparent"
         : theme.palette.surfaceContainer || theme.palette.background.paper,
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
-    borderRight: `1px solid ${theme.palette.divider}`,
+    backdropFilter: $variant === "ghost" ? "none" : "blur(20px)",
+    WebkitBackdropFilter: $variant === "ghost" ? "none" : "blur(20px)",
+    borderRight:
+      $variant === "ghost" ? "none" : `1px solid ${theme.palette.divider}`,
     boxSizing: "border-box",
     overflowX: "hidden",
     overflowY: "auto",
@@ -41,13 +39,19 @@ export const SidebarRail = styled(motion.aside, {
     "&::-webkit-scrollbar": {
       display: "none",
     },
-    boxShadow: $isExtended
-      ? `0 8px 32px ${alpha(theme.palette.common.black, 0.2)}`
-      : `0 2px 8px ${alpha(theme.palette.common.black, 0.05)}`,
+    boxShadow:
+      $variant === "ghost"
+        ? "none"
+        : $isExtended
+          ? `0 8px 32px ${alpha(theme.palette.common.black, 0.2)}`
+          : `0 2px 8px ${alpha(theme.palette.common.black, 0.05)}`,
     ...theme.applyStyles("dark", {
-      boxShadow: $isExtended
-        ? `0 12px 36px ${alpha(theme.palette.common.black, 0.55)}`
-        : `0 2px 10px ${alpha(theme.palette.common.black, 0.25)}`,
+      boxShadow:
+        $variant === "ghost"
+          ? "none"
+          : $isExtended
+            ? `0 12px 36px ${alpha(theme.palette.common.black, 0.55)}`
+            : `0 2px 10px ${alpha(theme.palette.common.black, 0.25)}`,
     }),
   }),
 );
@@ -215,14 +219,19 @@ export const TabLabelSlot = styled(motion.span)(({ theme }) => ({
   marginLeft: theme.spacing(1.5),
 }));
 
-export const SidebarBottomSection = styled(Box)(({ theme }) => ({
+export const SidebarBottomSection = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "$variant",
+})<{ $variant?: "default" | "ghost" }>(({ theme, $variant }) => ({
   marginTop: "auto",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   gap: theme.spacing(1.25),
   padding: theme.spacing(2, 1.25),
-  borderTop: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
+  borderTop:
+    $variant === "ghost"
+      ? "none"
+      : `1px solid ${alpha(theme.palette.divider, 0.6)}`,
   boxSizing: "border-box",
   width: "100%",
 }));

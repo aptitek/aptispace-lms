@@ -2,8 +2,8 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import { useTranslation } from "react-i18next";
-import { GhostActionButton } from "~/components/atoms/GhostActionButton";
-import { SkeletonCardContainer, GhostFabOverlay } from "./CohortCard.styles";
+import { FloatingActionButton } from "~/components/atoms/FloatingActionButton";
+import { SkeletonCardContainer, FabOverlay } from "./CohortCard.styles";
 
 export interface CohortCardSkeletonProps {
   /** Skeleton variant: "shimmer" for loading, "static" for empty placeholder, "ghost" for add card */
@@ -132,12 +132,12 @@ export function CohortCardSkeleton(props: CohortCardSkeletonProps) {
       </Box>
 
       {config.isInteractive && (
-        <GhostFabOverlay>
-          <GhostActionButton
+        <FabOverlay>
+          <FloatingActionButton
             tooltip={resolvedTooltip}
             testId="cohort-ghost-fab"
           />
-        </GhostFabOverlay>
+        </FabOverlay>
       )}
     </SkeletonCardContainer>
   );

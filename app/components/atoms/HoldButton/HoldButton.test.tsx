@@ -56,4 +56,27 @@ describe("HoldButton Atom", () => {
     const svg = container.querySelector("svg");
     expect(svg).not.toBeNull();
   });
+
+  it("renders expressive shape with properly scaled progress path", () => {
+    const onHoldComplete = vi.fn();
+
+    const { container } = render(
+      <ThemeProvider theme={appTheme}>
+        <HoldButton
+          onHoldComplete={onHoldComplete}
+          shape="4-sided-cookie"
+          data-testid="cookie-hold-btn"
+        >
+          Cookie Button
+        </HoldButton>
+      </ThemeProvider>,
+    );
+
+    const paths = container.querySelectorAll("svg path");
+    const overlayPath = paths[paths.length - 1];
+    expect(overlayPath).toBeDefined();
+    const d = overlayPath.getAttribute("d") || "";
+    // Scaled path coordinates should exceed 1.0 (they are scaled into pixel coordinates > 1)
+    expect(d).toMatch(/M\s*\d{2}/);
+  });
 });

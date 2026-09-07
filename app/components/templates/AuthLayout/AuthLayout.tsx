@@ -62,7 +62,7 @@ const ContentWrapper = styled("main")(({ theme }) => ({
 
 export default function AuthLayout({
   children,
-  sidebarVariant = "auth",
+  sidebarVariant = "ghost",
   user,
   onLogout,
   onReturnToAdmin,

@@ -1,19 +1,19 @@
 import { useRef, useId, type MouseEvent } from "react";
-import type { EditableAvatarProps } from "./EditableAvatar.types";
-import { useAvatarHandlers } from "./useAvatarHandlers";
+import type { ImageUploadProps } from "./ImageUpload.types";
+import { useImageUploadHandlers } from "./useImageUploadHandlers";
 import {
-  EditableAvatarRoot,
+  ImageUploadRoot,
   LabelText,
   MainContainer,
-} from "./EditableAvatar.styles";
+} from "./ImageUpload.styles";
 import {
   MD3AvatarDisplay,
   AvatarInputBar,
-  EditableAvatarModals,
+  ImageUploadModals,
   HiddenPicker,
-} from "./EditableAvatar.components";
+} from "./ImageUpload.components";
 
-export function EditableAvatar(props: EditableAvatarProps) {
+export function ImageUpload(props: ImageUploadProps) {
   const isEditable = props.editable !== false;
   const isImageOnly = props.mode === "image-only";
   const hasPreview = props.showPreview !== false;
@@ -36,7 +36,7 @@ export function EditableAvatar(props: EditableAvatarProps) {
     handleDrop,
     handlePaste,
     handleReset,
-  } = useAvatarHandlers({ ...props, editable: isEditable });
+  } = useImageUploadHandlers({ ...props, editable: isEditable });
 
   const handleAvatarClick = () => {
     if (isImageOnly) {
@@ -91,9 +91,9 @@ export function EditableAvatar(props: EditableAvatarProps) {
   const helperContent = (errorMessage || props.helperText) ?? undefined;
 
   return (
-    <EditableAvatarRoot
+    <ImageUploadRoot
       className={props.className}
-      data-testid={props.testId || "editable-avatar"}
+      data-testid={props.testId || "image-upload"}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -112,7 +112,7 @@ export function EditableAvatar(props: EditableAvatarProps) {
         </MainContainer>
       )}
 
-      <EditableAvatarModals
+      <ImageUploadModals
         isModalOpen={isModalOpen}
         isImageOnly={isImageOnly}
         onClose={() => setIsModalOpen(false)}
@@ -126,8 +126,8 @@ export function EditableAvatar(props: EditableAvatarProps) {
         isUploading={isUploading}
         onProcessFile={handleProcessFile}
       />
-    </EditableAvatarRoot>
+    </ImageUploadRoot>
   );
 }
 
-export default EditableAvatar;
+export default ImageUpload;

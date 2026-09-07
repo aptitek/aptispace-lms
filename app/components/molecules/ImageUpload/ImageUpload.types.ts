@@ -1,19 +1,19 @@
 import type { ReactNode } from "react";
 import type { AvatarShape } from "../../atoms/Avatar";
 
-export type EditableAvatarShape = AvatarShape;
+export type ImageUploadShape = AvatarShape;
 
-export type EditableAvatarSize = "sm" | "md" | "lg" | "xl";
+export type ImageUploadSize = "sm" | "md" | "lg" | "xl";
 
-export type EditableAvatarMode = "inline" | "image-only";
+export type ImageUploadMode = "inline" | "image-only";
 
-export interface EditableAvatarProps {
+export interface ImageUploadProps {
   /**
-   * Current avatar image URL (controlled mode)
+   * Current image URL (controlled mode)
    */
   value?: string;
   /**
-   * Default avatar image URL used for initial render and reset target
+   * Default image URL used for initial render and reset target
    */
   defaultValue?: string;
   /**
@@ -21,9 +21,9 @@ export interface EditableAvatarProps {
    */
   name?: string;
   /**
-   * Callback fired when the avatar image URL changes
+   * Callback fired when the image URL changes
    */
-  onChange?: (avatarUrl: string) => void;
+  onChange?: (imageUrl: string) => void;
   /**
    * Callback fired when the reset button is triggered
    */
@@ -31,44 +31,44 @@ export interface EditableAvatarProps {
   /**
    * Optional custom upload handler to send the file to Cloudflare R2
    */
-  onUpload?: (avatarFile: File) => Promise<string>;
+  onUpload?: (imageFile: File) => Promise<string>;
   /**
-   * API endpoint to handle avatar uploads (default: "/api/avatars/upload")
+   * API endpoint to handle image uploads (default: "/api/avatars/upload")
    */
   uploadEndpoint?: string;
   /**
    * UI display mode:
-   * - "inline": Side-by-side avatar preview and input field (default)
-   * - "image-only": Renders only the MD3 avatar; clicking opens a small modal to edit/upload
+   * - "inline": Side-by-side preview and input field (default)
+   * - "image-only": Renders only the MD3 avatar/image; clicking opens a small modal to edit/upload
    * @default "inline"
    */
-  mode?: EditableAvatarMode;
+  mode?: ImageUploadMode;
   /**
-   * Material Design 3 avatar shape preset
+   * Material Design 3 shape preset
    * @default "circular"
    */
-  shape?: EditableAvatarShape;
+  shape?: ImageUploadShape;
   /**
    * Optional role for role-based MD3 shape resolution (student -> pill, instructor -> ghost-ish, admin -> 9-sided-cookie)
    */
   role?: string | null;
   /**
-   * Avatar sizing preset (sm: 32px/40px, md: 48px/56px, lg: 72px/80px, xl: 96px/120px)
+   * Sizing preset (sm: 32px/40px, md: 48px/56px, lg: 72px/80px, xl: 96px/120px)
    * @default "md"
    */
-  size?: EditableAvatarSize;
+  size?: ImageUploadSize;
   /**
-   * Whether the avatar is editable. When false, acts as a normal read-only MD3 avatar.
+   * Whether the image is editable. When false, acts as a normal read-only MD3 avatar/image.
    * @default true
    */
   editable?: boolean;
   /**
-   * Whether to disable the hover tooltip over the avatar
+   * Whether to disable the hover tooltip over the image
    * @default false
    */
   disableTooltip?: boolean;
   /**
-   * Whether to render the integrated avatar preview (inline mode only)
+   * Whether to render the integrated preview (inline mode only)
    * @default true
    */
   showPreview?: boolean;

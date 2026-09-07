@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import MaterialSymbol from "~/components/atoms/Icon/MaterialSymbol";
+import Icon, { type IconWeight } from "~/components/atoms/Icon/Icon";
 
 const meta = {
-  title: "Atoms/MaterialSymbol",
-  component: MaterialSymbol,
+  title: "Atoms/Icon",
+  component: Icon,
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
@@ -15,11 +15,24 @@ const meta = {
     size: { control: "number" },
     weight: {
       control: "select",
-      options: [100, 200, 300, 400, 500, 600, 700],
+      options: [
+        100,
+        200,
+        300,
+        400,
+        500,
+        600,
+        700,
+        "thin",
+        "light",
+        "normal",
+        "medium",
+        "semibold",
+        "bold",
+      ],
     },
     fill: {
-      control: "radio",
-      options: [0, 1],
+      control: "boolean",
     },
     opsz: {
       control: "radio",
@@ -28,18 +41,25 @@ const meta = {
     color: { control: "color" },
   },
   args: {
-    name: "school",
+    name: "favorite",
+    size: 40,
+    weight: 500,
+    fill: false,
+    opsz: 40,
   },
-} satisfies Meta<typeof MaterialSymbol>;
+} satisfies Meta<typeof Icon>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    name: "school",
-    size: 32,
-    "aria-label": "School icon",
+    name: "favorite",
+    size: 40,
+    weight: 500,
+    fill: false,
+    opsz: 40,
+    "aria-label": "Favorite icon",
   },
 };
 
@@ -83,7 +103,7 @@ export const CommonSymbols: Story = {
               borderRadius: 2,
             }}
           >
-            <MaterialSymbol name={s.name} size={28} aria-label={s.label} />
+            <Icon name={s.name} size={28} aria-label={s.label} />
             <Typography variant="caption" sx={{ fontWeight: 600 }}>
               {s.name}
             </Typography>
@@ -99,7 +119,7 @@ export const OpticalSizes: Story = {
     <Box sx={{ display: "flex", gap: 3, alignItems: "flex-end", p: 2 }}>
       {[20, 24, 40, 48].map((size) => (
         <Box key={size} sx={{ textAlign: "center" }}>
-          <MaterialSymbol
+          <Icon
             name="stars"
             size={size}
             opsz={size}
@@ -121,44 +141,44 @@ export const WeightsAndFill: Story = {
         <Typography variant="body2" sx={{ width: 100, fontWeight: 700 }}>
           Weights:
         </Typography>
-        {[100, 300, 500, 700].map((w) => (
-          <Box key={w} sx={{ textAlign: "center" }}>
-            <MaterialSymbol
+        {([100, 300, 500, 700, "bold"] as IconWeight[]).map((w) => (
+          <Box key={String(w)} sx={{ textAlign: "center" }}>
+            <Icon
               name="favorite"
               size={32}
-              weight={w as 100 | 300 | 500 | 700}
+              weight={w}
               aria-label={`Favorite weight ${w}`}
             />
             <Typography variant="caption" sx={{ display: "block" }}>
-              w{w}
+              {w}
             </Typography>
           </Box>
         ))}
       </Box>
       <Box sx={{ display: "flex", gap: 3, alignItems: "center" }}>
         <Typography variant="body2" sx={{ width: 100, fontWeight: 700 }}>
-          Fill (0 vs 1):
+          Fill (false vs true):
         </Typography>
         <Box sx={{ textAlign: "center" }}>
-          <MaterialSymbol
+          <Icon
             name="bookmark"
             size={32}
-            fill={0}
+            fill={false}
             aria-label="Bookmark outline"
           />
           <Typography variant="caption" sx={{ display: "block" }}>
-            Outline (0)
+            Outline (false)
           </Typography>
         </Box>
         <Box sx={{ textAlign: "center" }}>
-          <MaterialSymbol
+          <Icon
             name="bookmark"
             size={32}
-            fill={1}
+            fill={true}
             aria-label="Bookmark filled"
           />
           <Typography variant="caption" sx={{ display: "block" }}>
-            Filled (1)
+            Filled (true)
           </Typography>
         </Box>
       </Box>

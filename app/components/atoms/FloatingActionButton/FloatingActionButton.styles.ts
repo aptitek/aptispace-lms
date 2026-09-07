@@ -1,7 +1,7 @@
 import { styled, alpha } from "@mui/material/styles";
 import IconButton from "@mui/material/IconButton";
 
-export const MD3FloatingActionButton = styled(IconButton)(({ theme }) => {
+export const StyledFloatingActionButton = styled(IconButton)(({ theme }) => {
   const primary = theme.palette.primary.main;
   const contrast = theme.palette.primary.contrastText;
 
@@ -26,3 +26,5 @@ export const MD3FloatingActionButton = styled(IconButton)(({ theme }) => {
     },
   };
 });
+
+export const MD3FloatingActionButton = StyledFloatingActionButton;

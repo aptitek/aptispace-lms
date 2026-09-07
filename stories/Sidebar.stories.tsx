@@ -50,9 +50,9 @@ export const ImpersonatedUser: Story = {
   },
 };
 
-export const AuthVariant: Story = {
+export const GhostVariant: Story = {
   args: {
-    variant: "auth",
+    variant: "ghost",
     user: null,
   },
 };

@@ -1,13 +1,9 @@
 import { styled, alpha } from "@mui/material/styles";
-import {
-  StyledExpressiveCard,
-  DashedSkeletonCard,
-  GhostFabOverlay,
-} from "../../atoms/ExpressiveCard";
+import { StyledCard, DashedSkeletonCard, FabOverlay } from "../../atoms/Card";
 
-export { GhostFabOverlay, DashedSkeletonCard };
+export { FabOverlay, DashedSkeletonCard };
 
-export const CardContainer = styled(StyledExpressiveCard)(({ theme }) => ({
+export const CardContainer = styled(StyledCard)(({ theme }) => ({
   padding: theme.spacing(3),
   alignItems: "center",
   justifyContent: "center",
@@ -43,7 +39,7 @@ export const SkeletonContainer = styled(DashedSkeletonCard)(({ theme }) => ({
   padding: theme.spacing(3),
 }));
 
-export const SkeletonCardContainer = styled(StyledExpressiveCard, {
+export const SkeletonCardContainer = styled(StyledCard, {
   shouldForwardProp: (prop) =>
     prop !== "isGhost" && prop !== "isInteractive" && prop !== "opacity",
 })<{

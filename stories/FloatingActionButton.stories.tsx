@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
-import GhostActionButton from "~/components/atoms/GhostActionButton";
+import FloatingActionButton from "~/components/atoms/FloatingActionButton";
 
 const meta = {
-  title: "Atoms/GhostActionButton",
-  component: GhostActionButton,
+  title: "Atoms/FloatingActionButton",
+  component: FloatingActionButton,
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
@@ -13,7 +13,7 @@ const meta = {
     tooltip: { control: "text" },
     onClick: { action: "clicked" },
   },
-} satisfies Meta<typeof GhostActionButton>;
+} satisfies Meta<typeof FloatingActionButton>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -45,7 +45,7 @@ export const InDashedContainer: Story = {
         position: "relative",
       }}
     >
-      <GhostActionButton {...args} />
+      <FloatingActionButton {...args} />
     </Box>
   ),
   args: {

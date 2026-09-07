@@ -220,8 +220,18 @@ export function DevQuickCreateSection({
   return (
     <QuickCreateSection>
       <QuickCreateHeader>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <PersonAddAlt1RoundedIcon sx={{ fontSize: 14 }} />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
+            color: "text.primary",
+            fontWeight: 700,
+          }}
+        >
+          <PersonAddAlt1RoundedIcon
+            sx={{ fontSize: 14, color: "primary.main" }}
+          />
           <span>{t("devTool.newAccount", "New Account")}</span>
         </Box>
         {isCreatingRole && (

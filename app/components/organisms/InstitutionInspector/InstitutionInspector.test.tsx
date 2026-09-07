@@ -134,4 +134,48 @@ describe("InstitutionInspector Organism", () => {
 
     expect(screen.getByText("Email Configuration")).toBeDefined();
   });
+
+  it("handles tab switching between Free and Constrained in InstitutionEmailCard", () => {
+    const onToggle = vi.fn();
+
+    const { rerender } = renderWithProviders(
+      <InstitutionEmailCard
+        emailDomain="aptitek.io"
+        usernamePattern="{f}{last}"
+        previewEmail="j.doe@aptitek.io"
+        disabled={false}
+        isConstrained={true}
+        onToggleConstraint={onToggle}
+        onFieldChange={vi.fn()}
+        onBlur={vi.fn()}
+      />,
+    );
+
+    const freeTab = screen.getByTestId("inspector-domain-free-toggle");
+    fireEvent.click(freeTab);
+    expect(onToggle).toHaveBeenCalledWith(false);
+
+    rerender(
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider theme={appTheme}>
+          <InstitutionEmailCard
+            emailDomain=""
+            usernamePattern="{f}{last}"
+            previewEmail=""
+            disabled={false}
+            isConstrained={false}
+            onToggleConstraint={onToggle}
+            onFieldChange={vi.fn()}
+            onBlur={vi.fn()}
+          />
+        </ThemeProvider>
+      </I18nextProvider>,
+    );
+
+    const constrainedTab = screen.getByTestId(
+      "inspector-domain-constrained-toggle",
+    );
+    fireEvent.click(constrainedTab);
+    expect(onToggle).toHaveBeenCalledWith(true);
+  });
 });

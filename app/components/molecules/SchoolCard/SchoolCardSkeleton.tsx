@@ -2,11 +2,11 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import { useTranslation } from "react-i18next";
-import { GhostActionButton } from "~/components/atoms/GhostActionButton";
+import { FloatingActionButton } from "~/components/atoms/FloatingActionButton";
 import {
   SkeletonCardContainer,
   LogoContainer,
-  GhostFabOverlay,
+  FabOverlay,
 } from "./SchoolCard.styles";
 
 export interface SchoolCardSkeletonProps {
@@ -127,12 +127,12 @@ export function SchoolCardSkeleton(props: SchoolCardSkeletonProps) {
       </Box>
 
       {config.isInteractive && (
-        <GhostFabOverlay>
-          <GhostActionButton
+        <FabOverlay>
+          <FloatingActionButton
             tooltip={resolvedTooltip}
             testId="school-ghost-fab"
           />
-        </GhostFabOverlay>
+        </FabOverlay>
       )}
     </SkeletonCardContainer>
   );

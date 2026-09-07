@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import UserInspector, { SchoolBadgeInline } from "./UserInspector";
 import type { UserCardData } from "../../molecules/UserCard/UserCard.types";
 import type { SchoolConfig } from "../../../types/institution";
@@ -102,5 +102,44 @@ describe("UserInspector Organism", () => {
     );
 
     expect(screen.getByTestId("inspector-user-card")).toBeDefined();
+  });
+
+  it("assigns cohort on selection directly without an add button", async () => {
+    const onAddCohort = vi.fn();
+    const extraCohorts: CohortWithInstitution[] = [
+      ...mockCohorts,
+      {
+        id: "cohort-2",
+        name: "Cohort 2026 Beta",
+        institutionId: "school-1",
+        startDate: "2026-09-01",
+      },
+    ];
+
+    render(
+      <UserInspector
+        user={mockStudent}
+        schools={mockSchools}
+        cohorts={extraCohorts}
+        onClose={vi.fn()}
+        onAddCohort={onAddCohort}
+      />,
+    );
+
+    // Verify there is no add button rendered
+    expect(screen.queryByTestId("inspector-add-cohort-btn")).toBeNull();
+
+    // Open the select dropdown
+    const select = screen.getByRole("combobox");
+    fireEvent.mouseDown(select);
+
+    // Click on the option for cohort-2
+    const option = await screen.findByTestId("cohort-option-cohort-2");
+    fireEvent.click(option);
+
+    expect(onAddCohort).toHaveBeenCalledWith({
+      studentId: mockStudent.id,
+      cohortId: "cohort-2",
+    });
   });
 });

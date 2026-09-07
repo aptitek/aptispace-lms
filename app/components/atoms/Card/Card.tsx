@@ -1,12 +1,8 @@
 import React, { forwardRef } from "react";
-import {
-  StyledExpressiveCard,
-  GhostFabOverlay,
-  DashedSkeletonCard,
-} from "./ExpressiveCard.styles";
-import type { ExpressiveCardProps } from "./ExpressiveCard.types";
+import { StyledCard } from "./Card.styles";
+import type { CardProps } from "./Card.types";
 
-export const ExpressiveCard = forwardRef<HTMLDivElement, ExpressiveCardProps>(
+export const Card = forwardRef<HTMLDivElement, CardProps>(
   (
     {
       children,
@@ -14,12 +10,13 @@ export const ExpressiveCard = forwardRef<HTMLDivElement, ExpressiveCardProps>(
       isSelected = false,
       variant = "elevated",
       className,
+      sx,
       ...props
     },
     ref,
   ) => {
     return (
-      <StyledExpressiveCard
+      <StyledCard
         ref={ref}
         isInteractive={isInteractive}
         isSelected={isSelected}
@@ -27,14 +24,15 @@ export const ExpressiveCard = forwardRef<HTMLDivElement, ExpressiveCardProps>(
         role={isInteractive ? "button" : undefined}
         tabIndex={isInteractive ? 0 : undefined}
         className={className}
+        sx={sx}
         {...props}
       >
         {children}
-      </StyledExpressiveCard>
+      </StyledCard>
     );
   },
 );
 
-ExpressiveCard.displayName = "ExpressiveCard";
+Card.displayName = "Card";
 
-export { GhostFabOverlay, DashedSkeletonCard };
+export default Card;

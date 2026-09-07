@@ -20,7 +20,7 @@ import Guilloche, {
   generateGuillocheMaskDataUrl,
 } from "../../molecules/Guilloche";
 import Electronics from "../../atoms/Electronics/Electronics";
-import EditableAvatar from "../../molecules/EditableAvatar/EditableAvatar";
+import ImageUpload from "../../molecules/ImageUpload/ImageUpload";
 import { getRoleConfig } from "../../../tokens/roles";
 import {
   generateUsernameFromPattern,
@@ -187,7 +187,7 @@ function FrontContent({
             data-no-flip="true"
           >
             {editableAvatar ? (
-              <EditableAvatar
+              <ImageUpload
                 mode="image-only"
                 value={avatarUrl}
                 name={internalFirstName}

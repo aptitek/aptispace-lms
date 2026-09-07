@@ -5,7 +5,7 @@ vi.mock("~/components/templates/AuthLayout/AuthLayout", () => ({
   default: ({ children }: { children: ReactNode }) => children,
 }));
 
-vi.mock("~/components/molecules/EditableAvatar/EditableAvatar", () => ({
+vi.mock("~/components/molecules/ImageUpload/ImageUpload", () => ({
   default: () => null,
 }));
 

@@ -77,7 +77,7 @@ export const SkeletonCardContainer = styled(Card, {
   };
 });
 
-export { GhostFabOverlay } from "../../atoms/ExpressiveCard";
+export { FabOverlay } from "../../atoms/Card";
 
 export const SkeletonCardContent = styled(CardContent)(({ theme }) => ({
   display: "flex",

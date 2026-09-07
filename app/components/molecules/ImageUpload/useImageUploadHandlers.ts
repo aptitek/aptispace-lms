@@ -7,7 +7,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useStatusCenter } from "~/utils/statusCenterContext";
 import { processImageToWebp } from "~/utils/imageProcessing";
-import type { UploadResponsePayload } from "./EditableAvatar.types";
+import type { UploadResponsePayload } from "./ImageUpload.types";
 
 async function defaultR2Uploader(
   targetFile: File,
@@ -25,7 +25,7 @@ async function defaultR2Uploader(
     const errorPayload = (await response
       .json()
       .catch(() => ({}))) as UploadResponsePayload;
-    throw new Error(errorPayload.error || "Avatar upload failed");
+    throw new Error(errorPayload.error || "Image upload failed");
   }
 
   const resultPayload = (await response.json()) as UploadResponsePayload;
@@ -50,7 +50,7 @@ function findClipboardImageFile(
   return null;
 }
 
-export interface UseAvatarHandlersOptions {
+export interface UseImageUploadHandlersOptions {
   value?: string;
   defaultValue?: string;
   onChange?: (nextUrl: string) => void;
@@ -60,7 +60,7 @@ export interface UseAvatarHandlersOptions {
   editable?: boolean;
 }
 
-export function useAvatarHandlers(options: UseAvatarHandlersOptions) {
+export function useImageUploadHandlers(options: UseImageUploadHandlersOptions) {
   const { t } = useTranslation("common");
   const { notifyError } = useStatusCenter();
   const {
@@ -103,9 +103,9 @@ export function useAvatarHandlers(options: UseAvatarHandlersOptions) {
         );
         setErrorMessage(invalidTypeMsg);
         notifyError(new Error(invalidTypeMsg), {
-          title: "Invalid Avatar Format",
+          title: "Invalid Image Format",
           errorCode: "INVALID_FILE_TYPE",
-          source: "avatar.upload",
+          source: "image.upload",
         });
         return;
       }
@@ -126,13 +126,13 @@ export function useAvatarHandlers(options: UseAvatarHandlersOptions) {
         const messageText =
           uploadError instanceof Error
             ? uploadError.message
-            : t("avatar.errors.uploadFailed", "Failed to upload avatar image");
+            : t("avatar.errors.uploadFailed", "Failed to upload image");
         setErrorMessage(messageText);
         notifyError(uploadError, {
-          title: "Avatar Upload Failed",
+          title: "Image Upload Failed",
           message: messageText,
           errorCode: "UPLOAD_FAILED",
-          source: "avatar.upload",
+          source: "image.upload",
         });
       } finally {
         setIsUploading(false);
