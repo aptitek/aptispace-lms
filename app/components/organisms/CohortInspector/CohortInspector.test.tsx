@@ -70,13 +70,17 @@ describe("CohortInspector Organism", () => {
 
     expect(screen.getByText("Edit Cohort")).toBeDefined();
     expect(screen.getByTestId("cohort-description-input")).toBeDefined();
+    // Cancel button must NOT be present in edit mode
+    expect(screen.queryByRole("button", { name: "Cancel" })).toBeNull();
+    // Hold button to delete cohort must be present
+    expect(screen.getByTestId("inspector-delete-cohort-btn")).toBeDefined();
 
     const closeBtn = screen.getByLabelText("Close Inspector");
     fireEvent.click(closeBtn);
     expect(onCloseMock).toHaveBeenCalledTimes(1);
   });
 
-  it("renders adding state with empty cohort", () => {
+  it("renders adding state with empty cohort and Cancel button", () => {
     const newCohort = {
       name: "",
       diploma: "",
@@ -89,6 +93,10 @@ describe("CohortInspector Organism", () => {
     );
 
     expect(screen.getByText("Add Cohort")).toBeDefined();
+    // Cancel button must be present in add mode
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeDefined();
+    // Delete button must NOT be present in add mode
+    expect(screen.queryByTestId("inspector-delete-cohort-btn")).toBeNull();
   });
 
   it("renders CohortStructuredFields with cohort chips for diploma and specialty", () => {

@@ -8,9 +8,7 @@ import Chip from "@mui/material/Chip";
 import { alpha } from "@mui/material/styles";
 import AlternateEmailRoundedIcon from "@mui/icons-material/AlternateEmailRounded";
 import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
-import LockOutlineRoundedIcon from "@mui/icons-material/LockOutlineRounded";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
-import Switch from "~/components/atoms/Switch";
 import { useTranslation } from "react-i18next";
 import { FONT_FAMILIES } from "~/tokens/typography";
 import { M3_SHAPE_CORNERS } from "~/tokens/shapes";
@@ -29,23 +27,21 @@ export {
 };
 
 function InstitutionEmailSummaryChip({
-  isConstrained,
+  isConstrained: _isConstrained,
   trimmedDomain,
 }: {
-  isConstrained: boolean;
+  isConstrained?: boolean;
   trimmedDomain: string;
 }) {
   const { t } = useTranslation("common");
 
-  if (isConstrained) {
+  if (trimmedDomain) {
     return (
       <Chip
-        icon={<LockOutlineRoundedIcon sx={{ fontSize: "14px !important" }} />}
-        label={
-          trimmedDomain
-            ? `@${trimmedDomain}`
-            : t("inspector.domainConstraint", "Domain Constraint")
+        icon={
+          <AlternateEmailRoundedIcon sx={{ fontSize: "14px !important" }} />
         }
+        label={`@${trimmedDomain}`}
         size="small"
         variant="outlined"
         color="primary"
@@ -54,7 +50,7 @@ function InstitutionEmailSummaryChip({
           height: 24,
           fontSize: "0.75rem",
           fontWeight: 600,
-          fontFamily: trimmedDomain ? FONT_FAMILIES.mono : undefined,
+          fontFamily: FONT_FAMILIES.mono,
           borderRadius: M3_SHAPE_CORNERS.small,
           bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
           "& .MuiChip-icon": {
@@ -231,8 +227,8 @@ export interface InstitutionEmailCardProps {
   usernamePattern: string;
   previewEmail: string;
   disabled: boolean;
-  isConstrained: boolean;
-  onToggleConstraint: (constrained: boolean) => void;
+  isConstrained?: boolean;
+  onToggleConstraint?: (constrained: boolean) => void;
   onFieldChange: (
     field: "emailDomain" | "usernamePattern",
     nextValue: string,
@@ -248,7 +244,7 @@ export function InstitutionEmailCard({
   usernamePattern,
   previewEmail,
   disabled,
-  isConstrained,
+  isConstrained = false,
   onToggleConstraint,
   onFieldChange,
   onBlur,
@@ -256,7 +252,6 @@ export function InstitutionEmailCard({
   expanded: controlledExpanded,
   onToggleExpand,
 }: InstitutionEmailCardProps) {
-  const { t } = useTranslation("common");
   const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
   const isExpanded =
     controlledExpanded !== undefined ? controlledExpanded : internalExpanded;
@@ -269,17 +264,6 @@ export function InstitutionEmailCard({
     }
   };
 
-  const handleToggleConstraint = (checked: boolean) => {
-    if (checked && !isExpanded) {
-      if (onToggleExpand) {
-        onToggleExpand();
-      } else {
-        setInternalExpanded(true);
-      }
-    }
-    onToggleConstraint(checked);
-  };
-
   return (
     <Card
       variant="outlined"
@@ -287,7 +271,7 @@ export function InstitutionEmailCard({
       sx={{
         p: 0,
         borderRadius: "16px",
-        overflow: "hidden",
+        overflow: "visible",
         bgcolor: (theme) =>
           theme.palette.surfaceContainerLow ||
           alpha(theme.palette.background.paper, 0.4),
@@ -308,7 +292,7 @@ export function InstitutionEmailCard({
         isConstrained={isConstrained}
         emailDomain={emailDomain}
         disabled={disabled}
-        onToggleConstraint={handleToggleConstraint}
+        onToggleConstraint={onToggleConstraint}
       />
 
       <Collapse in={isExpanded} timeout="auto">
@@ -321,76 +305,37 @@ export function InstitutionEmailCard({
             gap: 2,
             borderTop: (theme) =>
               `1px solid ${alpha(theme.palette.divider, 0.15)}`,
+            overflowY: "auto",
           }}
         >
-          {/* Domain constraint switch row */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 1.5,
-              py: 0.5,
-            }}
-          >
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 600, color: "text.primary" }}
-              >
-                {t("inspector.domainConstraint", "Domain Constraint")}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {isConstrained
-                  ? t(
-                      "inspector.domainConstraintActive",
-                      "Restricted to institutional domain",
-                    )
-                  : t(
-                      "inspector.domainConstraintDisabled",
-                      "Any email allowed (no constraint)",
-                    )}
-              </Typography>
-            </Box>
-
-            <Switch
-              checked={isConstrained}
-              onChange={handleToggleConstraint}
-              disabled={disabled}
-              size="small"
-              data-testid="inspector-domain-constraint-toggle"
-              aria-label={t("inspector.domainConstraint", "Domain Constraint")}
-            />
-          </Box>
-
-          {/* Compatibility anchors for legacy/test selectors */}
-          <Box
-            component="span"
-            data-testid="inspector-domain-free-toggle"
-            onClick={() => handleToggleConstraint(false)}
-            sx={{ display: "none" }}
-            aria-hidden="true"
-          />
-          <Box
-            component="span"
-            data-testid="inspector-domain-constrained-toggle"
-            onClick={() => handleToggleConstraint(true)}
-            sx={{ display: "none" }}
-            aria-hidden="true"
-          />
-
-          {isConstrained ? (
-            <InstitutionConstrainedDomainFields
-              emailDomain={emailDomain}
-              usernamePattern={usernamePattern}
-              disabled={disabled}
-              previewEmail={previewEmail}
-              onFieldChange={onFieldChange}
-              onBlur={onBlur}
-            />
-          ) : (
-            <InstitutionFreeDomainNotice />
+          {/* Compatibility anchors for legacy/test selectors if present */}
+          {onToggleConstraint && (
+            <>
+              <Box
+                component="span"
+                data-testid="inspector-domain-free-toggle"
+                onClick={() => onToggleConstraint(false)}
+                sx={{ display: "none" }}
+                aria-hidden="true"
+              />
+              <Box
+                component="span"
+                data-testid="inspector-domain-constrained-toggle"
+                onClick={() => onToggleConstraint(true)}
+                sx={{ display: "none" }}
+                aria-hidden="true"
+              />
+            </>
           )}
+
+          <InstitutionConstrainedDomainFields
+            emailDomain={emailDomain}
+            usernamePattern={usernamePattern}
+            disabled={disabled}
+            previewEmail={previewEmail}
+            onFieldChange={onFieldChange}
+            onBlur={onBlur}
+          />
         </Box>
       </Collapse>
     </Card>

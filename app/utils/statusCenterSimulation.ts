@@ -71,11 +71,10 @@ export function executeTelemetrySimulation(
     case "offline":
       setIsOnline(false);
       notify({
-        title: "GATEWAY CARRIER LOST",
-        message:
-          "Station connection flatlined. Operating on emergency cached telemetry.",
+        title: "NETWORK CONNECTION LOST",
+        message: "Network connection offline. Operating in cached mode.",
         severity: "critical",
-        source: "carrier-detect",
+        source: "network-monitor",
       });
       break;
     case "hydration":

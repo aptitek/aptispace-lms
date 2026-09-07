@@ -79,12 +79,12 @@ export default function MissionCenter({
               variant="h6"
               sx={{ fontWeight: 800, letterSpacing: "-0.01em" }}
             >
-              {t("common:admin.missionCenter.title", "MISSION CENTER")}
+              {t("common:admin.missionCenter.title", "OPERATIONS CENTER")}
             </Typography>
             <Typography variant="caption" sx={{ color: "text.secondary" }}>
               {t(
                 "common:admin.missionCenter.subtitle",
-                "Application telemetry, incident tracker, security sentinel & Cloudflare metrics",
+                "Application health, incident tracking, audit logs & infrastructure metrics",
               )}
             </Typography>
           </Box>
@@ -99,10 +99,7 @@ export default function MissionCenter({
             disabled={isSubmitting}
             data-testid="mission-center-refresh-btn"
           >
-            {t(
-              "common:admin.missionCenter.runDiagnostics",
-              "Run Diagnostics Probe",
-            )}
+            {t("common:admin.missionCenter.runDiagnostics", "Run Diagnostics")}
           </Button>
         )}
       </MissionCenterHeader>
@@ -193,7 +190,7 @@ export default function MissionCenter({
                 <span>
                   {t(
                     "common:admin.missionCenter.tabs.security",
-                    "Security Sentinel",
+                    "Security & Access",
                   )}
                 </span>
                 {missionData.securityIncidents.length > 0 && (

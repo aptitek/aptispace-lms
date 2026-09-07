@@ -33,7 +33,6 @@ import {
   FlightArcSvg,
   CountryMapZone,
   FlightPuck,
-  StateRippleLayer,
   ToggleWrapper,
   DisabledTooltipWrapper,
   PeekingAirplane,
@@ -405,18 +404,6 @@ export const MeridianSwitch = forwardRef<
       whileTap={isSwitchDisabled ? undefined : { scale: 0.96 }}
       {...restProps}
     >
-      <AnimatePresence>
-        {controller.isHovered && !isSwitchDisabled && (
-          <StateRippleLayer
-            $cfg={cfg}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={M3_SPRINGS.expressive.effects.fast}
-          />
-        )}
-      </AnimatePresence>
-
       <MeridianFlightTrajectory cfg={cfg} />
 
       <CountrySilhouettes

@@ -8,6 +8,8 @@ import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import ImageUpload from "~/components/molecules/ImageUpload/ImageUpload";
 import Chip from "~/components/atoms/Chip/Chip";
+import { HoldButton } from "~/components/atoms/HoldButton";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import {
   formatUsernameSamplePreview,
   DEFAULT_USERNAME_PATTERN,
@@ -102,27 +104,101 @@ interface InstitutionInspectorProps {
     emailDomain?: string;
     usernamePattern?: string;
   }) => void;
+  onDelete?: (institution: SchoolConfig) => void;
   isSubmitting?: boolean;
 }
 
-export default function InstitutionInspector({
+interface InstitutionInspectorActionsProps {
+  isEditing: boolean;
+  disabled: boolean;
+  institution: SchoolConfig;
+  onClose: () => void;
+  onCreate: () => void;
+  onDelete?: (institution: SchoolConfig) => void;
+  canCreate: boolean;
+}
+
+function InstitutionInspectorActions({
+  isEditing,
+  disabled,
   institution,
   onClose,
-  onSave,
-  isSubmitting,
-}: InstitutionInspectorProps) {
+  onCreate,
+  onDelete,
+  canCreate,
+}: InstitutionInspectorActionsProps) {
   const { t } = useTranslation("common");
-  const isEditing = Boolean(institution?.id);
-  const disabled = Boolean(isSubmitting);
 
+  if (isEditing) {
+    return (
+      <Box sx={{ mt: "auto", pt: 1, width: "100%" }}>
+        <HoldButton
+          variant="outlined"
+          color="error"
+          size="large"
+          holdTime={1000}
+          borderThickness={2}
+          outlineGap={3.5}
+          startIcon={<DeleteOutlineRoundedIcon />}
+          onHoldComplete={() => onDelete?.(institution)}
+          data-testid="inspector-delete-institution-btn"
+          wrapperSx={{ width: "100%" }}
+          sx={{
+            width: "100%",
+            height: "44px",
+            minHeight: "44px",
+            borderRadius: "12px",
+            borderWidth: "2px",
+            fontWeight: 700,
+            textTransform: "none",
+            whiteSpace: "nowrap",
+            "&:hover": { borderWidth: "2px" },
+          }}
+        >
+          {t("inspector.deleteSchool", "Delete School")}
+        </HoldButton>
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        mt: "auto",
+        display: "flex",
+        justifyContent: "flex-end",
+        gap: 2,
+      }}
+    >
+      <Button onClick={onClose} disabled={disabled}>
+        {t("inspector.cancel", "Cancel")}
+      </Button>
+      <Button
+        variant="contained"
+        onClick={onCreate}
+        disabled={disabled || !canCreate}
+      >
+        {t("inspector.create", "Create")}
+      </Button>
+    </Box>
+  );
+}
+
+function useInstitutionInspectorForm(
+  institution: SchoolConfig | null,
+  isEditing: boolean,
+  onSave: (payload: {
+    id?: string;
+    name: string;
+    slug: string;
+    type?: string;
+    logoUrl?: string;
+    emailDomain?: string;
+    usernamePattern?: string;
+  }) => void,
+) {
   const [form, setForm] = useState<InstitutionFormValues>(() =>
     buildInitialFormValues(institution),
-  );
-
-  const [isDomainConstrained, setIsDomainConstrained] = useState(() =>
-    Boolean(
-      institution?.emailDomain && institution.emailDomain.trim().length > 0,
-    ),
   );
 
   const currentInstitutionIdRef = useRef<string | undefined>(institution?.id);
@@ -139,7 +215,6 @@ export default function InstitutionInspector({
       const initial = buildInitialFormValues(institution);
       setForm(initial);
       savedValuesRef.current = initial;
-      setIsDomainConstrained(Boolean(initial.emailDomain));
     } else {
       savedValuesRef.current = buildInitialFormValues(institution);
     }
@@ -152,20 +227,6 @@ export default function InstitutionInspector({
       domain || DEFAULT_EMAIL_DOMAIN,
     );
   }, [form.usernamePattern, form.emailDomain]);
-
-  const handleToggleConstraint = (constrained: boolean) => {
-    setIsDomainConstrained(constrained);
-    if (!constrained) {
-      handleFieldChange("emailDomain", "");
-      triggerSave({ emailDomain: "" });
-    } else {
-      const nextDomain =
-        form.emailDomain.trim() ||
-        (form.slug ? `${form.slug}.io` : "institution.io");
-      handleFieldChange("emailDomain", nextDomain);
-      triggerSave({ emailDomain: nextDomain });
-    }
-  };
 
   const triggerSave = (updates?: Partial<InstitutionFormValues>) => {
     if (!isEditing || !institution?.id) return;
@@ -192,8 +253,29 @@ export default function InstitutionInspector({
     setForm((prev) => ({ ...prev, [field]: textValue }));
   };
 
+  return { form, preview, triggerSave, handleFieldChange };
+}
+
+export default function InstitutionInspector({
+  institution,
+  onClose,
+  onSave,
+  onDelete,
+  isSubmitting,
+}: InstitutionInspectorProps) {
+  const { t } = useTranslation("common");
+  const isEditing = Boolean(institution?.id);
+  const disabled = Boolean(isSubmitting);
+
+  const { form, preview, triggerSave, handleFieldChange } =
+    useInstitutionInspectorForm(institution, isEditing, onSave);
+
+  if (!institution) return null;
+
+  const canCreate = Boolean(form.name.trim() && form.slug.trim());
+
   const handleCreate = () => {
-    if (!form.name.trim() || !form.slug.trim()) return;
+    if (!canCreate) return;
     onSave({
       name: form.name.trim(),
       slug: form.slug.trim(),
@@ -203,8 +285,6 @@ export default function InstitutionInspector({
       usernamePattern: form.usernamePattern.trim() || undefined,
     });
   };
-
-  if (!institution) return null;
 
   return (
     <Inspector
@@ -286,33 +366,19 @@ export default function InstitutionInspector({
         usernamePattern={form.usernamePattern}
         previewEmail={preview.email}
         disabled={disabled}
-        isConstrained={isDomainConstrained}
-        onToggleConstraint={handleToggleConstraint}
         onFieldChange={handleFieldChange}
         onBlur={(field) => triggerSave({ [field]: form[field] })}
       />
 
-      {!isEditing && (
-        <Box
-          sx={{
-            mt: "auto",
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: 2,
-          }}
-        >
-          <Button onClick={onClose} disabled={disabled}>
-            {t("inspector.cancel", "Cancel")}
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleCreate}
-            disabled={disabled || !form.name.trim() || !form.slug.trim()}
-          >
-            {t("inspector.create", "Create")}
-          </Button>
-        </Box>
-      )}
+      <InstitutionInspectorActions
+        isEditing={isEditing}
+        disabled={disabled}
+        institution={institution}
+        onClose={onClose}
+        onCreate={handleCreate}
+        onDelete={onDelete}
+        canCreate={canCreate}
+      />
     </Inspector>
   );
 }

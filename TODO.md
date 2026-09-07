@@ -50,6 +50,12 @@
 [x] In security sentinel the various components are in pillshaped containeds instead of normal Cards
 [x] In planning the Calendar sidepannel should be collapse by default
 [x] The export-suscribe button in planning needs to be in the calendar sidepannel under the month view that way we can remove the page header
+[x] Email Configuration needs to have domain constraint rmoved and overflow to be able to scroll
+[x] Remove cancel from cohort edit panel
+[x] Add hold button to delete schools and cohorts
+[x] Remove awkward terminology like system nominal from the status center.
+[x] Simplify and generalise the mission center.
+[x] Language switch got a weird transparent circle in the bottom right when hover, remove it
 
 --- MANUAL TASKS ---
 

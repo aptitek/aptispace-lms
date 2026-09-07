@@ -102,17 +102,16 @@ export function useStatusCenterListeners({
 
     const handleOnline = () => {
       setIsOnline(true);
-      notifySuccess("Station gateway link restored. System telemetry online.");
+      notifySuccess("Network connection restored. All systems online.");
     };
 
     const handleOffline = () => {
       setIsOnline(false);
       notify({
-        title: "GATEWAY CARRIER LOST",
-        message:
-          "Network link disconnected. Flatline telemetry mode activated.",
+        title: "NETWORK CONNECTION LOST",
+        message: "Network connection disconnected. Offline mode activated.",
         severity: "critical",
-        source: "carrier-detect",
+        source: "network-monitor",
       });
     };
 

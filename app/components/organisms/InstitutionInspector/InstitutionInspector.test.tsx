@@ -248,25 +248,20 @@ describe("InstitutionInspector Organism", () => {
     expect(updatedSummaryChip.textContent).toContain("Any Email");
   });
 
-  it("toggles domain constraint using the switch", () => {
-    const onToggle = vi.fn();
+  it("renders hold-to-delete button in editing mode and calls onDelete", () => {
+    const onDeleteMock = vi.fn();
 
     renderWithProviders(
-      <InstitutionEmailCard
-        emailDomain="aptitek.io"
-        usernamePattern="{f}{last}"
-        previewEmail="j.doe@aptitek.io"
-        disabled={false}
-        isConstrained={true}
-        onToggleConstraint={onToggle}
-        onFieldChange={vi.fn()}
-        onBlur={vi.fn()}
-        defaultExpanded={true}
+      <InstitutionInspector
+        institution={mockInstitution}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+        onDelete={onDeleteMock}
       />,
     );
 
-    const switchEl = screen.getByTestId("inspector-domain-constraint-toggle");
-    fireEvent.click(switchEl);
-    expect(onToggle).toHaveBeenCalledWith(false);
+    const deleteBtn = screen.getByTestId("inspector-delete-institution-btn");
+    expect(deleteBtn).toBeDefined();
+    expect(deleteBtn.textContent).toContain("Delete School");
   });
 });

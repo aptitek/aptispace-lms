@@ -104,7 +104,7 @@ export function StatusTerminalCard() {
               {events.length === 0
                 ? t("systemStatus.noEvents", {
                     defaultValue:
-                      "No active diagnostic events. Carrier nominal.",
+                      "No active diagnostic events. All systems operational.",
                   })
                 : t("systemStatus.noFilteredEvents", {
                     defaultValue: "No diagnostic events match current filter.",

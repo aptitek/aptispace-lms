@@ -71,6 +71,7 @@ export interface CohortInspectorProps {
   cohort: CohortConfig | null;
   onClose: () => void;
   onSave: (payload: CohortSavePayload) => void;
+  onDelete?: (cohort: CohortConfig) => void;
   isSubmitting?: boolean;
 }
 
@@ -113,6 +114,7 @@ export default function CohortInspector({
   cohort,
   onClose,
   onSave,
+  onDelete,
   isSubmitting = false,
 }: CohortInspectorProps) {
   const { t } = useTranslation("common");
@@ -355,6 +357,8 @@ export default function CohortInspector({
         <CohortInspectorActions
           onClose={onClose}
           onCreate={handleCreate}
+          onDelete={onDelete}
+          cohort={cohort}
           isEditing={isEditing}
           disabled={isSubmitting}
           isSaveDisabled={!diploma.trim()}

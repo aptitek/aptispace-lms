@@ -197,7 +197,7 @@ describe("MissionCenter Organism", () => {
       <MissionCenter missionData={mockMissionData} onRefresh={onRefresh} />,
     );
 
-    expect(screen.getByText("MISSION CENTER")).toBeDefined();
+    expect(screen.getByText("OPERATIONS CENTER")).toBeDefined();
     expect(screen.getByTestId("subtab-audit")).toBeDefined();
     expect(screen.getByTestId("subtab-errors")).toBeDefined();
 
@@ -307,9 +307,7 @@ describe("MissionCenter Organism", () => {
   it("renders MissionCenterSecurityTab with empty security incidents", () => {
     renderWithProviders(<MissionCenterSecurityTab securityIncidents={[]} />);
     expect(
-      screen.getByText(
-        "Security Sentinel: Zero Active Vulnerabilities or Breaches",
-      ),
+      screen.getByText("Security & Access: Zero Active Incidents"),
     ).toBeDefined();
   });
 

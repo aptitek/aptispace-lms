@@ -123,8 +123,8 @@ export function InstitutionConstrainedDomainFields({
         size="small"
         disabled={disabled}
         helperText={t(
-          "inspector.domainConstraintHelper",
-          "Only email addresses matching this domain are authorized.",
+          "inspector.emailDomainHelper",
+          "Email domain for institutional accounts (optional).",
         )}
         data-testid="inspector-institution-domain"
       />

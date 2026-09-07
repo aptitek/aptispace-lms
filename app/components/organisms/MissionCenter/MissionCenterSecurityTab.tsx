@@ -272,21 +272,21 @@ function SecurityAlertBanner({ count }: { count: number }) {
   const title = hasIncidents
     ? t(
         "common:admin.missionCenter.securityAlertTitle",
-        "Active Sentinel: {{count}} Incidents Audited",
+        "Security Incidents: {{count}} Audited",
         { count },
       )
     : t(
         "common:admin.missionCenter.securityCleanTitle",
-        "Security Sentinel: Zero Active Vulnerabilities or Breaches",
+        "Security & Access: Zero Active Incidents",
       );
   const desc = hasIncidents
     ? t(
         "common:admin.missionCenter.securityAlertDesc",
-        "Access control infractions, 403 Forbidden spikes, and sensitive administrative operations are tracked with full origin attribution.",
+        "Access control infractions, 403 Forbidden responses, and sensitive administrative operations are tracked with origin details.",
       )
     : t(
         "common:admin.missionCenter.securityCleanDesc",
-        "All access controls, role guards, and credentials integrity checks are nominal.",
+        "All access controls, role guards, and credentials integrity checks are normal and verified.",
       );
 
   return (

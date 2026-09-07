@@ -163,7 +163,10 @@ export function StatusTerminalHeader({
               setSimulationMenuAnchor(null);
             }}
           >
-            🟢 {t("systemStatus.simNominal", { defaultValue: "Nominal Sync" })}
+            🟢{" "}
+            {t("systemStatus.simNominal", {
+              defaultValue: "Operational Status",
+            })}
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -224,7 +227,7 @@ export function StatusTerminalHeader({
           >
             ⚪{" "}
             {t("systemStatus.simOffline", {
-              defaultValue: "Lost Carrier (Flatline)",
+              defaultValue: "Connection Lost (Offline)",
             })}
           </MenuItem>
         </Menu>

@@ -217,7 +217,7 @@ export function MissionCenterKpiCards({
             <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
               {t(
                 "common:admin.missionCenter.kpi.security",
-                "Security Sentinel",
+                "Security & Access",
               )}
             </Typography>
           </Box>

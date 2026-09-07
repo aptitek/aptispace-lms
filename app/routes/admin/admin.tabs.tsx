@@ -91,9 +91,7 @@ export function AdminTabsSection({
         iconPosition="start"
         label={
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <span>
-              {t("common:admin.tabs.missionCenter", "Mission Center")}
-            </span>
+            <span>{t("common:admin.tabs.missionCenter", "Operations")}</span>
             {openIssuesCount !== undefined && openIssuesCount > 0 ? (
               <Chip
                 label={openIssuesCount}
@@ -104,7 +102,7 @@ export function AdminTabsSection({
               />
             ) : (
               <Chip
-                label="Nominal"
+                label={t("common:admin.missionCenter.healthy", "Healthy")}
                 size="small"
                 color="success"
                 sx={{ height: 18, fontSize: "0.65rem", fontWeight: 700 }}

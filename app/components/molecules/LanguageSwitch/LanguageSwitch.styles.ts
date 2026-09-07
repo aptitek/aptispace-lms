@@ -92,24 +92,6 @@ export const FlightPuck = styled(motion.span, {
   }),
 }));
 
-export const StateRippleLayer = styled(motion.div, {
-  shouldForwardProp: filterDollarProp,
-})<{
-  $cfg: MeridianSizeConfig;
-}>(({ theme, $cfg }) => ({
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  width: $cfg.stateLayerSize,
-  height: $cfg.stateLayerSize,
-  borderRadius: "50%",
-  transform: "translate(-50%, -50%)",
-  pointerEvents: "none",
-  zIndex: 0,
-  backgroundColor: theme.palette.text.primary,
-  opacity: 0.12,
-}));
-
 export const ToggleWrapper = styled("div")(({ theme }) => ({
   display: "inline-flex",
   alignItems: "center",

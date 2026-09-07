@@ -78,7 +78,7 @@ describe("StatusTerminalCard Organism", () => {
     expect(screen.getByTestId("status-terminal-card")).toBeDefined();
     expect(screen.getByTestId("status-terminal-infrastructure")).toBeDefined();
     expect(
-      screen.getByText("No active diagnostic events. Carrier nominal."),
+      screen.getByText("No active diagnostic events. All systems operational."),
     ).toBeDefined();
   });
 

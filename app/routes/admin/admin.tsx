@@ -36,6 +36,7 @@ import AdminCohortsTabPanel from "./admin.cohorts-tab";
 import { AdminMissionCenterTabPanel } from "./admin.mission-tab";
 import { AdminUsersTabPanel } from "./admin.users-tab";
 import { AdminCoursesTabPanel } from "./admin.courses-tab";
+import { useAdminDeleteHandlers } from "./admin.delete-handlers";
 import type { Route } from "./+types/admin";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -332,36 +333,21 @@ export default function AdminManagement() {
     revalidator.revalidate();
   };
 
-  const handleDeleteUser = async (user: UserCardData) => {
-    const userName = `${user.firstName} ${user.familyName}`.trim();
-    try {
-      fetcher.submit(
-        { intent: "delete-user", studentId: user.id },
-        { method: "post" },
-      );
-      if (selectedUser?.id === user.id) {
-        setSelectedUser(null);
-      }
-      notifySuccess(
-        t("common:userDeleted", {
-          name: userName,
-          defaultValue: `${userName} has been deleted successfully.`,
-        }),
-      );
-    } catch (err: unknown) {
-      notifyError(err, {
-        title: t("errors:errorTitle", "System Diagnostic Alert"),
-        message: t("common:userDeleteFailed", {
-          defaultValue: "Failed to delete user.",
-        }),
-        contextData: {
-          studentId: user.id,
-          role: user.role,
-          name: userName,
-        },
-      });
-    }
-  };
+  const { handleDeleteUser, handleDeleteInstitution, handleDeleteCohort } =
+    useAdminDeleteHandlers({
+      fetcher,
+      t,
+      notifySuccess,
+      notifyError,
+      selectedUser,
+      setSelectedUser,
+      selectedSchool,
+      setSelectedSchool,
+      selectedSchoolForEdit,
+      setSelectedSchoolForEdit,
+      selectedCohortForEdit,
+      setSelectedCohortForEdit,
+    });
 
   const handleImpersonate = async (user: UserCardData) => {
     const userName = `${user.firstName} ${user.familyName}`.trim();
@@ -486,6 +472,8 @@ export default function AdminManagement() {
           onCloseCohortEdit: () => setSelectedCohortForEdit(null),
           onSaveInstitution: handleSaveInstitution,
           onSaveCohort: handleSaveCohort,
+          onDeleteInstitution: handleDeleteInstitution,
+          onDeleteCohort: handleDeleteCohort,
           isSubmitting: fetcher.state !== "idle",
         }}
         missionCenterProps={

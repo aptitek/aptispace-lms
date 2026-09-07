@@ -66,6 +66,8 @@ export interface AdminCohortsTabPanelProps {
     year?: number | null;
     tags?: string[];
   }) => void;
+  onDeleteInstitution?: (school: SchoolConfig) => void;
+  onDeleteCohort?: (cohort: CohortConfig) => void;
   isSubmitting: boolean;
 }
 
@@ -85,6 +87,8 @@ export function AdminCohortsTabPanel({
   onCloseCohortEdit,
   onSaveInstitution,
   onSaveCohort,
+  onDeleteInstitution,
+  onDeleteCohort,
   isSubmitting,
 }: AdminCohortsTabPanelProps) {
   const { t } = useTranslation("common");
@@ -390,6 +394,7 @@ export function AdminCohortsTabPanel({
               institution={selectedSchoolForEdit}
               onClose={onCloseSchoolEdit}
               onSave={onSaveInstitution}
+              onDelete={onDeleteInstitution}
               isSubmitting={isSubmitting}
             />
           )}
@@ -399,6 +404,7 @@ export function AdminCohortsTabPanel({
               cohort={selectedCohortForEdit}
               onClose={onCloseCohortEdit}
               onSave={onSaveCohort}
+              onDelete={onDeleteCohort}
               isSubmitting={isSubmitting}
             />
           )}
