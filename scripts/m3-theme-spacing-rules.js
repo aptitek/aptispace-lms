@@ -385,4 +385,229 @@ export const spacingRules = {
       };
     },
   },
+
+  "enforce-minimum-touch-target": {
+    meta: {
+      type: "problem",
+      docs: {
+        description:
+          "Enforce Material Design 3 and WCAG 2.5.5 minimum 48x48 dp touch target boundary on interactive elements (buttons, icon buttons, touch targets), even when inner visual elements are smaller.",
+      },
+      schema: [
+        {
+          type: "object",
+          properties: {
+            allowed: { type: "array", items: { type: "string" } },
+            allowDense: { type: "boolean" },
+          },
+          additionalProperties: false,
+        },
+      ],
+      messages: {
+        noSub48TouchTarget:
+          "Interactive element '{{name}}' has touch target dimension '{{value}}' below MD3/WCAG 48x48 dp minimum. Ensure a minimum touch target of 48px (e.g. 'minWidth: 48', 'minHeight: 48', or 'M3_DIMENSIONS.touchTarget') even if the visual element is smaller.",
+      },
+    },
+    create(context) {
+      const options = context.options?.[0] || {};
+      const allowedList = new Set(
+        (options.allowed || []).map((x) => String(x).toLowerCase().trim()),
+      );
+      const minThreshold = options.allowDense ? 40 : 48;
+      const filename = context.filename || "";
+
+      const isTokenOrTest =
+        filename.includes("tokens/spacing") ||
+        filename.includes("tokens/theme") ||
+        filename.includes(".test.") ||
+        filename.includes(".spec.");
+
+      const INTERACTIVE_TAG_NAMES = new Set([
+        "button",
+        "a",
+        "iconbutton",
+        "buttonbase",
+        "fab",
+        "floatingactionbutton",
+        "ghostactionbutton",
+        "holdbutton",
+        "touchtarget",
+        "toucharea",
+        "tab",
+        "switch",
+        "checkbox",
+        "radio",
+      ]);
+
+      function isInteractiveTag(tagName) {
+        if (!tagName || typeof tagName !== "string") return false;
+        return INTERACTIVE_TAG_NAMES.has(tagName.toLowerCase());
+      }
+
+      function isInteractiveElement(jsxElementNode) {
+        const opening = jsxElementNode.openingElement;
+        if (!opening) return false;
+        const tagName = opening.name?.name;
+        if (isInteractiveTag(tagName)) return true;
+
+        for (const attr of opening.attributes || []) {
+          if (attr.type === "JSXAttribute") {
+            const attrName = attr.name?.name;
+            if (attrName === "onClick") return true;
+            if (
+              attrName === "role" &&
+              attr.value?.type === "Literal" &&
+              (attr.value.value === "button" || attr.value.value === "tab")
+            ) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      function isAllowed(val) {
+        if (val === null || val === undefined) return false;
+        const strVal = String(val).trim().toLowerCase();
+        if (allowedList.has(strVal)) return true;
+        return Array.from(allowedList).some(
+          (pat) => pat && strVal.includes(pat),
+        );
+      }
+
+      function extractDimensionNumber(node) {
+        if (!node) return null;
+        if (node.type === "Literal") {
+          if (typeof node.value === "number") return node.value;
+          if (typeof node.value === "string") {
+            const match = /^(\d+(?:\.\d+)?)px$/i.exec(node.value.trim());
+            if (match) return parseFloat(match[1]);
+          }
+        }
+        return null;
+      }
+
+      function inspectInteractiveDimensions(objNode, targetName) {
+        if (!objNode || objNode.type !== "ObjectExpression") return;
+
+        let has48MinWidth = false;
+        let has48MinHeight = false;
+
+        const subThresholdDimensions = [];
+
+        for (const prop of objNode.properties || []) {
+          if (prop.type !== "Property") continue;
+          const key = prop.key?.name || prop.key?.value;
+          if (typeof key !== "string") continue;
+
+          const num = extractDimensionNumber(prop.value);
+          const rawText = context.sourceCode
+            ? context.sourceCode.getText(prop.value)
+            : String(num);
+
+          if (isAllowed(rawText) || (num !== null && isAllowed(num))) continue;
+
+          if (key === "minWidth" || key === "min-width") {
+            if (num !== null && num >= minThreshold) has48MinWidth = true;
+            else if (num !== null && num < minThreshold) {
+              subThresholdDimensions.push({ prop, key, num, raw: rawText });
+            }
+          } else if (key === "minHeight" || key === "min-height") {
+            if (num !== null && num >= minThreshold) has48MinHeight = true;
+            else if (num !== null && num < minThreshold) {
+              subThresholdDimensions.push({ prop, key, num, raw: rawText });
+            }
+          } else if (key === "width" || key === "height") {
+            if (num !== null && num < minThreshold) {
+              subThresholdDimensions.push({ prop, key, num, raw: rawText });
+            }
+          }
+        }
+
+        for (const item of subThresholdDimensions) {
+          // If it was width/height < 48 but minWidth/minHeight >= 48 was explicitly specified, that's valid!
+          if (
+            (item.key === "width" && has48MinWidth) ||
+            (item.key === "height" && has48MinHeight)
+          ) {
+            continue;
+          }
+
+          context.report({
+            node: item.prop,
+            messageId: "noSub48TouchTarget",
+            data: {
+              name: targetName,
+              value: item.raw,
+            },
+          });
+        }
+      }
+
+      function extractStyledObject(arg) {
+        if (!arg) return null;
+        if (arg.type === "ObjectExpression") return arg;
+        if (
+          (arg.type === "ArrowFunctionExpression" ||
+            arg.type === "FunctionExpression") &&
+          arg.body?.type === "ObjectExpression"
+        ) {
+          return arg.body;
+        }
+        return null;
+      }
+
+      function inspectStyledOrVariable(node) {
+        if (node.type !== "CallExpression") return;
+        const callee = node.callee;
+        const isStyled =
+          callee?.name === "styled" || callee?.callee?.name === "styled";
+        if (!isStyled) return;
+
+        const styledArg =
+          callee.name === "styled"
+            ? node.arguments?.[0]
+            : callee.arguments?.[0];
+        const targetName = styledArg?.name || styledArg?.value || "Component";
+        if (
+          !isInteractiveTag(targetName) &&
+          !/Button|Fab|TouchTarget|Interactive/i.test(targetName)
+        ) {
+          return;
+        }
+
+        for (const arg of node.arguments || []) {
+          const obj = extractStyledObject(arg);
+          if (obj) inspectInteractiveDimensions(obj, targetName);
+        }
+      }
+
+      return {
+        JSXElement(node) {
+          if (isTokenOrTest) return;
+          if (!isInteractiveElement(node)) return;
+
+          const tagName =
+            node.openingElement.name?.name || "InteractiveElement";
+
+          for (const attr of node.openingElement.attributes || []) {
+            if (attr.type === "JSXAttribute") {
+              const attrName = attr.name?.name;
+              if (attrName === "sx" || attrName === "style") {
+                const expr = attr.value?.expression;
+                if (expr?.type === "ObjectExpression") {
+                  inspectInteractiveDimensions(expr, tagName);
+                }
+              }
+            }
+          }
+        },
+
+        CallExpression(node) {
+          if (isTokenOrTest) return;
+          inspectStyledOrVariable(node);
+        },
+      };
+    },
+  },
 };

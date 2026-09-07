@@ -439,6 +439,9 @@ export default tseslint.config(
       "m3-theme/enforce-shape-tokens": "error",
       "m3-theme/enforce-spacing-tokens": "error",
       "m3-theme/enforce-typography-tokens": "error",
+      "m3-theme/enforce-elevation-levels": "off",
+      "m3-theme/enforce-state-layers": "off",
+      "m3-theme/enforce-minimum-touch-target": "off",
 
       // --- Design Tokens & MUI Theme / Styled Primitives Enforcement ---
       "no-restricted-imports": [
@@ -849,6 +852,9 @@ export default tseslint.config(
       "m3-theme/enforce-shape-tokens": "off",
       "m3-theme/enforce-spacing-tokens": "off",
       "m3-theme/enforce-typography-tokens": "off",
+      "m3-theme/enforce-elevation-levels": "off",
+      "m3-theme/enforce-state-layers": "off",
+      "m3-theme/enforce-minimum-touch-target": "off",
     },
   },
 
@@ -888,6 +894,9 @@ export default tseslint.config(
       "m3-theme/enforce-shape-tokens": "off",
       "m3-theme/enforce-spacing-tokens": "off",
       "m3-theme/enforce-typography-tokens": "off",
+      "m3-theme/enforce-elevation-levels": "off",
+      "m3-theme/enforce-state-layers": "off",
+      "m3-theme/enforce-minimum-touch-target": "off",
       "sonarjs/no-duplicate-string": "off",
       "sonarjs/cognitive-complexity": "off",
       "sonarjs/no-identical-functions": "off",
@@ -944,6 +953,9 @@ export default tseslint.config(
       "m3-theme/enforce-shape-tokens": "off",
       "m3-theme/enforce-spacing-tokens": "off",
       "m3-theme/enforce-typography-tokens": "off",
+      "m3-theme/enforce-elevation-levels": "off",
+      "m3-theme/enforce-state-layers": "off",
+      "m3-theme/enforce-minimum-touch-target": "off",
       complexity: "off",
       "sonarjs/no-duplicate-string": "off",
       "sonarjs/cognitive-complexity": "off",

@@ -6,6 +6,20 @@ const spacingEslint = new ESLint({
     {
       rules: {
         "m3-theme/enforce-spacing-tokens": "error",
+        "m3-theme/enforce-minimum-touch-target": "error",
+      },
+    },
+  ],
+});
+
+const spacingDenseEslint = new ESLint({
+  overrideConfig: [
+    {
+      rules: {
+        "m3-theme/enforce-minimum-touch-target": [
+          "error",
+          { allowDense: true },
+        ],
       },
     },
   ],
@@ -18,6 +32,10 @@ const spacingAllowedEslint = new ESLint({
         "m3-theme/enforce-spacing-tokens": [
           "error",
           { allowed: ["11px", "77"] },
+        ],
+        "m3-theme/enforce-minimum-touch-target": [
+          "error",
+          { allowed: ["24px", "32"] },
         ],
       },
     },
@@ -127,6 +145,95 @@ export function Card() {
     });
     const violations = result?.messages.filter(
       (m) => m.ruleId === "m3-theme/enforce-spacing-tokens",
+    );
+    expect(violations).toHaveLength(0);
+  });
+});
+
+describe("m3-theme/enforce-minimum-touch-target", () => {
+  it("reports interactive elements with touch target dimensions below 48x48 dp", async () => {
+    const code = `import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
+import { styled } from "@mui/material/styles";
+
+export const SmallAction = styled(IconButton)({
+  minWidth: 32,
+  minHeight: 32,
+});
+
+export function Actions() {
+  return (
+    <div>
+      <IconButton sx={{ width: 24, height: 24 }} />
+      <button style={{ minWidth: "36px" }} />
+      <div role="button" sx={{ width: 30, height: 30 }} />
+    </div>
+  );
+}`;
+    const [result] = await spacingEslint.lintText(code, {
+      filePath: "app/components/molecules/ActionGroup/ActionGroup.tsx",
+    });
+    const violations = result?.messages.filter(
+      (m) => m.ruleId === "m3-theme/enforce-minimum-touch-target",
+    );
+    expect(violations.length).toBeGreaterThanOrEqual(4);
+    expect(violations[0]?.message).toContain("below MD3/WCAG 48x48 dp minimum");
+  });
+
+  it("permits 48x48 dp minimum touch targets and explicit 48px containers", async () => {
+    const code = `import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
+import { styled } from "@mui/material/styles";
+import { M3_DIMENSIONS } from "~/tokens/spacing";
+
+export const FabButton = styled(IconButton)({
+  width: 48,
+  height: 48,
+});
+
+export function ProperButtons() {
+  return (
+    <div>
+      {/* 24px icon visually inside 48px touch target */}
+      <IconButton sx={{ width: 24, height: 24, minWidth: 48, minHeight: 48 }} />
+      <Button sx={{ minHeight: M3_DIMENSIONS.touchTarget }} />
+      <button style={{ minWidth: 48, minHeight: 48 }} />
+    </div>
+  );
+}`;
+    const [result] = await spacingEslint.lintText(code, {
+      filePath: "app/components/molecules/ActionGroup/ActionGroup.tsx",
+    });
+    const violations = result?.messages.filter(
+      (m) => m.ruleId === "m3-theme/enforce-minimum-touch-target",
+    );
+    expect(violations).toHaveLength(0);
+  });
+
+  it("permits dense 40px touch targets when allowDense is enabled", async () => {
+    const code = `import IconButton from "@mui/material/IconButton";
+export function DenseAction() {
+  return <IconButton sx={{ minWidth: 40, minHeight: 40 }} />;
+}`;
+    const [result] = await spacingDenseEslint.lintText(code, {
+      filePath: "app/components/molecules/ActionGroup/ActionGroup.tsx",
+    });
+    const violations = result?.messages.filter(
+      (m) => m.ruleId === "m3-theme/enforce-minimum-touch-target",
+    );
+    expect(violations).toHaveLength(0);
+  });
+
+  it("permits custom dimensions added to the allowed whitelist option", async () => {
+    const code = `import IconButton from "@mui/material/IconButton";
+export function CustomSmall() {
+  return <IconButton sx={{ width: "24px", minWidth: 32 }} />;
+}`;
+    const [result] = await spacingAllowedEslint.lintText(code, {
+      filePath: "app/components/molecules/ActionGroup/ActionGroup.tsx",
+    });
+    const violations = result?.messages.filter(
+      (m) => m.ruleId === "m3-theme/enforce-minimum-touch-target",
     );
     expect(violations).toHaveLength(0);
   });

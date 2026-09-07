@@ -55,3 +55,19 @@ export function createDebugHighlightShadows(): Shadows {
 
   return shadows;
 }
+
+/**
+ * Material Design 3 Elevation Levels (0 to 5).
+ * MD3 restricts elevation to 5 strict levels (plus level 0 for flat surfaces).
+ */
+export const M3_ELEVATION_LEVELS = [0, 1, 2, 3, 4, 5] as const;
+export type M3ElevationLevel = (typeof M3_ELEVATION_LEVELS)[number];
+
+export const M3_ELEVATIONS = {
+  level0: 0,
+  level1: 1,
+  level2: 2,
+  level3: 3,
+  level4: 4,
+  level5: 5,
+} as const;
