@@ -143,7 +143,14 @@ vi.mock("@mui/x-data-grid", async (importOriginal) => {
             <div
               key={row.id}
               data-testid={`datagrid-row-${row.id}`}
+              role="button"
+              tabIndex={0}
               onClick={() => onRowClick?.({ row })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  onRowClick?.({ row });
+                }
+              }}
             >
               {columns.map((col: any) => {
                 let cellValue = row[col.field];

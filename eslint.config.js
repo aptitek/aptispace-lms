@@ -235,6 +235,12 @@ export default tseslint.config(
     },
   },
 
+  // 2c. JSX Accessibility (a11y) Recommended Configuration
+  {
+    ...jsxA11yPlugin.flatConfigs.recommended,
+    files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+  },
+
   // 3. Global Language Options & Settings
   {
     files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
@@ -274,7 +280,6 @@ export default tseslint.config(
     plugins: {
       react: reactPlugin,
       "react-hooks": reactHooksPlugin,
-      "jsx-a11y": jsxA11yPlugin,
       boundaries: boundariesPlugin,
       "m3-theme": m3ThemePlugin,
     },
@@ -342,6 +347,7 @@ export default tseslint.config(
       // --- JSX Accessibility (a11y) - WCAG 2.1 AA Enforced ---
       "jsx-a11y/alt-text": "error",
       "jsx-a11y/anchor-has-content": "error",
+      "jsx-a11y/anchor-is-valid": "error",
       "jsx-a11y/aria-props": "error",
       "jsx-a11y/aria-proptypes": "error",
       "jsx-a11y/aria-role": "error",
@@ -355,6 +361,55 @@ export default tseslint.config(
       "jsx-a11y/no-noninteractive-element-to-interactive-role": "error",
       "jsx-a11y/interactive-supports-focus": "error",
       "jsx-a11y/tabindex-no-positive": "error",
+      "jsx-a11y/click-events-have-key-events": "error",
+      "jsx-a11y/no-static-element-interactions": "error",
+      "jsx-a11y/no-noninteractive-element-interactions": "error",
+      "jsx-a11y/mouse-events-have-key-events": "error",
+      "jsx-a11y/label-has-associated-control": "error",
+      "jsx-a11y/control-has-associated-label": [
+        "warn",
+        {
+          ignoreElements: [
+            "audio",
+            "canvas",
+            "embed",
+            "input",
+            "textarea",
+            "tr",
+            "video",
+          ],
+          ignoreRoles: [
+            "grid",
+            "listbox",
+            "menu",
+            "menubar",
+            "radiogroup",
+            "row",
+            "tablist",
+            "toolbar",
+            "tree",
+            "treegrid",
+          ],
+          includeRoles: [
+            "button",
+            "link",
+            "checkbox",
+            "menuitem",
+            "menuitemcheckbox",
+            "menuitemradio",
+            "option",
+            "radio",
+            "switch",
+            "tab",
+          ],
+        },
+      ],
+      "jsx-a11y/no-autofocus": [
+        "warn",
+        {
+          ignoreNonDOM: true,
+        },
+      ],
 
       // --- TypeScript Strictness ---
       "@typescript-eslint/no-explicit-any": "error",
@@ -905,6 +960,8 @@ export default tseslint.config(
       "sonarjs/no-hardcoded-ip": "off",
       "sonarjs/pseudo-random": "off",
       "sonarjs/no-floating-point-equality": "off",
+      "jsx-a11y/click-events-have-key-events": "off",
+      "jsx-a11y/no-static-element-interactions": "off",
     },
   },
 

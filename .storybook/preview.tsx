@@ -42,6 +42,21 @@ const preview: Preview = {
             enabled: true,
           },
           {
+            // Enforce accessible names for buttons
+            id: "button-name",
+            enabled: true,
+          },
+          {
+            // Enforce accessible names for links
+            id: "link-name",
+            enabled: true,
+          },
+          {
+            // Enforce form control labels
+            id: "label",
+            enabled: true,
+          },
+          {
             // Enforce valid ARIA roles
             id: "aria-roles",
             enabled: true,

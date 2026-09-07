@@ -2,6 +2,8 @@ import {
   forwardRef,
   useState,
   useCallback,
+  useRef,
+  useEffect,
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
@@ -266,6 +268,7 @@ interface ControllerConfig {
 
 function useMeridianController(config: ControllerConfig) {
   const [isHovered, setIsHovered] = useState(false);
+  const flightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [flightState, setFlightState] = useState<{
     isFlying: boolean;
     direction: "to-fr" | "to-en";
@@ -273,6 +276,14 @@ function useMeridianController(config: ControllerConfig) {
     isFlying: false,
     direction: "to-fr",
   });
+
+  useEffect(() => {
+    return () => {
+      if (flightTimerRef.current) {
+        clearTimeout(flightTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleFlight = useCallback(() => {
     if (config.disabled) return;
@@ -282,7 +293,10 @@ function useMeridianController(config: ControllerConfig) {
 
     setFlightState({ isFlying: true, direction });
     config.onLanguageChange?.(nextLang);
-    setTimeout(() => {
+    if (flightTimerRef.current) {
+      clearTimeout(flightTimerRef.current);
+    }
+    flightTimerRef.current = setTimeout(() => {
       setFlightState((prev) => ({ ...prev, isFlying: false }));
     }, 300);
   }, [config]);
