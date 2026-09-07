@@ -1,5 +1,5 @@
 export {
-  default as LoadingIndicator,
+  LoadingIndicator,
+  default,
   type LoadingIndicatorProps,
 } from "./LoadingIndicator";
-export { default } from "./LoadingIndicator";

@@ -281,23 +281,62 @@ export const ColorVariants: Story = {
 
 export const RoleChips: Story = {
   render: () => (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="subtitle2" sx={{ color: "text.secondary" }}>
-        Role Presets (Shaped + Colored + Icon)
-      </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 1.5,
-          alignItems: "center",
-        }}
-      >
-        <Chip userRole="student" size="small" />
-        <Chip userRole="instructor" size="small" />
-        <Chip userRole="admin" size="small" />
-        <Chip userRole="all" size="small" />
-        <Chip userRole="admin" variant="outlined" size="small" />
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box>
+        <Typography variant="subtitle2" sx={{ mb: 1, color: "text.secondary" }}>
+          Role Presets — Small (Shaped + Colored + Icon)
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 1.5,
+            alignItems: "center",
+          }}
+        >
+          <Chip userRole="student" size="small" />
+          <Chip userRole="instructor" size="small" />
+          <Chip userRole="admin" size="small" />
+          <Chip userRole="all" size="small" />
+          <Chip userRole="admin" variant="outlined" size="small" />
+        </Box>
+      </Box>
+
+      <Box>
+        <Typography variant="subtitle2" sx={{ mb: 1, color: "text.secondary" }}>
+          Role Presets — Medium Size
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 1.5,
+            alignItems: "center",
+          }}
+        >
+          <Chip userRole="student" size="medium" />
+          <Chip userRole="instructor" size="medium" />
+          <Chip userRole="admin" size="medium" />
+          <Chip userRole="all" size="medium" />
+        </Box>
+      </Box>
+
+      <Box>
+        <Typography variant="subtitle2" sx={{ mb: 1, color: "text.secondary" }}>
+          Role Presets — Without Icon
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 1.5,
+            alignItems: "center",
+          }}
+        >
+          <Chip userRole="student" showIcon={false} size="small" />
+          <Chip userRole="instructor" showIcon={false} size="small" />
+          <Chip userRole="admin" showIcon={false} size="small" />
+        </Box>
       </Box>
     </Box>
   ),

@@ -356,6 +356,7 @@ export default function OnboardingPage() {
   return (
     <AuthLayout
       headerMode="full"
+      isOnboarding={true}
       user={headerUser}
       onLogout={handleLogout}
       showGalaxy={false}

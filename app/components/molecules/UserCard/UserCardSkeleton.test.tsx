@@ -5,18 +5,17 @@ import { ThemeProvider } from "@mui/material/styles";
 import { I18nextProvider } from "react-i18next";
 import i18n from "~/i18n";
 import { appTheme } from "~/tokens/theme";
-import UserCardSkeleton, { EntityCardSkeleton } from "./UserCardSkeleton";
+import UserCardSkeleton from "./UserCardSkeleton";
 
 describe("UserCardSkeleton Molecule", () => {
   afterEach(() => {
     cleanup();
   });
 
-  it("exports UserCardSkeleton and EntityCardSkeleton components properly", () => {
+  it("exports UserCardSkeleton component properly", () => {
     expect(UserCardSkeleton).toBeDefined();
     expect(typeof UserCardSkeleton).toBe("function");
     expect(UserCardSkeleton.name).toBe("UserCardSkeleton");
-    expect(EntityCardSkeleton).toBe(UserCardSkeleton);
   });
 
   it("renders loading shimmer skeleton by default", () => {

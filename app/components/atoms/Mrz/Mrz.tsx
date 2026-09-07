@@ -93,5 +93,4 @@ export function Mrz({
   );
 }
 
-export const MrzZone = Mrz;
 export default Mrz;

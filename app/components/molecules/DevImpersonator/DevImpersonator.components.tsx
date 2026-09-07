@@ -12,7 +12,6 @@ import LoadingIndicator from "~/components/atoms/LoadingIndicator";
 import Select from "~/components/atoms/Select/Select";
 import type { SelectOption } from "~/components/atoms/Select/Select.types";
 import Filter from "~/components/molecules/Filter/Filter";
-import RoleChip from "../RoleChip/RoleChip";
 import { getRoleConfig } from "~/tokens/roles";
 import type { AccountDefinition, UserRole } from "~/utils/auth";
 import type { UserCardData } from "../UserCard/UserCard.types";
@@ -140,7 +139,7 @@ export function DevAccountItem({
           <AccountMeta>
             <span>{account.email}</span>
             <span>•</span>
-            <RoleChip
+            <Chip
               userRole={account.role}
               size="small"
               testId={`role-chip-${account.id}`}
@@ -203,17 +202,17 @@ export function DevQuickCreateSection({
     {
       value: "student",
       label: t("devTool.roles.student", "Student"),
-      chip: <RoleChip userRole="student" size="small" />,
+      chip: <Chip userRole="student" size="small" />,
     },
     {
       value: "instructor",
       label: t("devTool.roles.instructor", "Instructor"),
-      chip: <RoleChip userRole="instructor" size="small" />,
+      chip: <Chip userRole="instructor" size="small" />,
     },
     {
       value: "admin",
       label: t("devTool.roles.admin", "Admin"),
-      chip: <RoleChip userRole="admin" size="small" />,
+      chip: <Chip userRole="admin" size="small" />,
     },
   ];
 
@@ -350,17 +349,17 @@ export function DevFilterSection({
           {
             value: "student",
             label: `${t("devTool.roles.student", "Student")} (${roleCounts.student})`,
-            chip: <RoleChip userRole="student" size="small" />,
+            chip: <Chip userRole="student" size="small" />,
           },
           {
             value: "instructor",
             label: `${t("devTool.roles.instructor", "Instructor")} (${roleCounts.instructor})`,
-            chip: <RoleChip userRole="instructor" size="small" />,
+            chip: <Chip userRole="instructor" size="small" />,
           },
           {
             value: "admin",
             label: `${t("devTool.roles.admin", "Admin")} (${roleCounts.admin})`,
-            chip: <RoleChip userRole="admin" size="small" />,
+            chip: <Chip userRole="admin" size="small" />,
           },
         ]}
       />

@@ -1,12 +1,11 @@
 import { describe, it, expect } from "vitest";
 import React from "react";
-import Mrz, { MrzZone } from "./Mrz";
+import Mrz from "./Mrz";
 
 describe("Mrz UI Atom Component", () => {
-  it("exports Mrz component and backwards-compatible alias", () => {
+  it("exports Mrz component properly", () => {
     expect(Mrz).toBeDefined();
     expect(typeof Mrz).toBe("function");
-    expect(MrzZone).toBe(Mrz);
   });
 
   it("instantiates default Mrz element properly", () => {

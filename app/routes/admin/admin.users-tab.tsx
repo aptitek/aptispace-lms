@@ -5,7 +5,7 @@ import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 import type { AuthUser } from "~/utils/auth";
 import Filter from "~/components/molecules/Filter/Filter";
-import RoleChip from "~/components/molecules/RoleChip/RoleChip";
+import Chip from "~/components/atoms/Chip/Chip";
 import InstitutionLogo from "~/components/molecules/InstitutionLogo/InstitutionLogo";
 import UserGrid from "~/components/organisms/UserGrid/UserGrid";
 import UserInspector from "~/components/organisms/UserInspector/UserInspector";
@@ -131,18 +131,18 @@ export function AdminUsersTabPanel({
             minWidth={170}
             testId="filter-role-select"
             options={[
-              { value: "all", chip: <RoleChip userRole="all" size="small" /> },
+              { value: "all", chip: <Chip userRole="all" size="small" /> },
               {
                 value: "student",
-                chip: <RoleChip userRole="student" size="small" />,
+                chip: <Chip userRole="student" size="small" />,
               },
               {
                 value: "instructor",
-                chip: <RoleChip userRole="instructor" size="small" />,
+                chip: <Chip userRole="instructor" size="small" />,
               },
               {
                 value: "admin",
-                chip: <RoleChip userRole="admin" size="small" />,
+                chip: <Chip userRole="admin" size="small" />,
               },
             ]}
           />

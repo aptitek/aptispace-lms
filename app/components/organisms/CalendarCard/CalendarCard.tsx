@@ -307,5 +307,4 @@ export const CalendarCard = forwardRef<HTMLDivElement, CalendarCardProps>(
 
 CalendarCard.displayName = "CalendarCard";
 
-export const CalendarSheet = CalendarCard;
 export default CalendarCard;

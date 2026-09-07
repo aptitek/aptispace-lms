@@ -1,4 +1,4 @@
-import { memo, Fragment } from "react";
+import { memo } from "react";
 import { styled } from "@mui/material/styles";
 import {
   ALL_EXPRESSIVE_SHAPES,
@@ -21,21 +21,13 @@ export const ShapeDefs = memo(function ShapeDefs() {
           const shape = EXPRESSIVE_SHAPE_CATALOG[shapeKey];
           if (!shape?.pathData) return null;
           return (
-            <Fragment key={shapeKey}>
-              <clipPath
-                id={`avatar-shape-${shapeKey}`}
-                clipPathUnits="objectBoundingBox"
-              >
-                <path d={shape.pathData} />
-              </clipPath>
-              {/* Legacy alias support */}
-              <clipPath
-                id={`m3-shape-${shapeKey}`}
-                clipPathUnits="objectBoundingBox"
-              >
-                <path d={shape.pathData} />
-              </clipPath>
-            </Fragment>
+            <clipPath
+              key={shapeKey}
+              id={`avatar-shape-${shapeKey}`}
+              clipPathUnits="objectBoundingBox"
+            >
+              <path d={shape.pathData} />
+            </clipPath>
           );
         })}
       </defs>
@@ -43,5 +35,4 @@ export const ShapeDefs = memo(function ShapeDefs() {
   );
 });
 
-export const M3ShapeDefs = ShapeDefs;
 export default ShapeDefs;

@@ -76,6 +76,3 @@ export interface PhysicsCardProps extends Omit<CardProps, "children"> {
    */
   isTransparent?: boolean;
 }
-
-// Backwards-compatible alias for existing code
-export type PhysicCardProps = PhysicsCardProps;

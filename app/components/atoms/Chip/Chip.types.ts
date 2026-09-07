@@ -34,6 +34,11 @@ export interface BaseChipProps {
   userRole?: RoleType | "all" | string | null;
 
   /**
+   * Alias for userRole.
+   */
+  role?: RoleType | "all" | string | null;
+
+  /**
    * Whether to display the preset's associated icon (defaults to true).
    */
   showIcon?: boolean;

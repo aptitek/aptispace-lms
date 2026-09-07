@@ -406,8 +406,4 @@ export function PhysicsCard({
     </Box>
   );
 }
-
-// Backwards-compatible alias
-/* eslint-disable-next-line id-denylist */
-export const PhysicCard = PhysicsCard;
 export default PhysicsCard;

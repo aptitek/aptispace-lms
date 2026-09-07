@@ -108,8 +108,6 @@ export function resolveUserCardLabels(
   };
 }
 
-export const resolveEntityCardLabels = resolveUserCardLabels;
-
 export function resolveCardTestId(
   testId?: string,
   hasEntityProp?: boolean,

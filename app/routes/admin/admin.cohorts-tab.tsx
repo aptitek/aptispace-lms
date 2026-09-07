@@ -4,9 +4,9 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 import type { CohortWithInstitution } from "~/components/organisms/StudentInspector/StudentInspector.types";
-import SchoolCard, {
-  SchoolCardSkeleton,
-} from "~/components/molecules/SchoolCard/SchoolCard";
+import InstitutionCard, {
+  InstitutionCardSkeleton,
+} from "~/components/molecules/InstitutionCard/InstitutionCard";
 import CohortCard, {
   CohortCardSkeleton,
 } from "~/components/molecules/CohortCard/CohortCard";
@@ -339,7 +339,7 @@ export function AdminCohortsTabPanel({
 
           <MD3CollectionGrid data-testid="schools-zone">
             {filteredSchools.map((school) => (
-              <SchoolCard
+              <InstitutionCard
                 key={school.id || school.name}
                 school={school}
                 studentCount={
@@ -353,7 +353,10 @@ export function AdminCohortsTabPanel({
                 onClick={onSchoolClick}
               />
             ))}
-            <SchoolCardSkeleton variant="ghost" onClick={onCreateNewSchool} />
+            <InstitutionCardSkeleton
+              variant="ghost"
+              onClick={onCreateNewSchool}
+            />
           </MD3CollectionGrid>
         </Box>
 

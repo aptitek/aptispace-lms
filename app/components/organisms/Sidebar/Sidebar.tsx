@@ -37,7 +37,7 @@ import {
 } from "./Sidebar.styles";
 import { SidebarProfileModal } from "./SidebarProfileModal";
 import { SidebarUserSection } from "./SidebarUserSection";
-import type { SidebarProps } from "./Sidebar.types";
+import type { SidebarProps, SidebarVariant } from "./Sidebar.types";
 
 export const DEFAULT_HOVER_EXPAND_DELAY_MS = 0;
 
@@ -224,12 +224,14 @@ function SidebarNavList({
 function SidebarBottom({
   variant,
   user,
+  isOnboarding,
   isExtended,
   onOpenProfile,
   onAction,
 }: {
   variant?: SidebarProps["variant"];
   user?: SidebarProps["user"];
+  isOnboarding?: boolean;
   isExtended: boolean;
   onOpenProfile: () => void;
   onAction: () => void;
@@ -241,6 +243,8 @@ function SidebarBottom({
     >
       <SidebarUserSection
         user={user}
+        variant={variant}
+        isOnboarding={isOnboarding}
         isExtended={isExtended}
         onOpenProfile={onOpenProfile}
         onAction={onAction}
@@ -282,7 +286,7 @@ function executeSidebarAction(
   }
 }
 
-function useSidebarInteractions(hoverDelay: number) {
+function useSidebarInteractions(hoverDelay: number, enabled: boolean = true) {
   const [isHovered, setIsHovered] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -298,7 +302,7 @@ function useSidebarInteractions(hoverDelay: number) {
   }, []);
 
   useEffect(() => {
-    if (!isClicked) return;
+    if (!isClicked || !enabled) return;
 
     const handleDocumentClick = (event: MouseEvent) => {
       if (railRef.current && !railRef.current.contains(event.target as Node)) {
@@ -319,9 +323,10 @@ function useSidebarInteractions(hoverDelay: number) {
       document.removeEventListener("mousedown", handleDocumentClick);
       document.removeEventListener("keydown", handleDocumentKeyDown);
     };
-  }, [isClicked]);
+  }, [isClicked, enabled]);
 
   const handleMouseEnter = () => {
+    if (!enabled) return;
     if (hoverTimerRef.current) {
       clearTimeout(hoverTimerRef.current);
     }
@@ -335,6 +340,7 @@ function useSidebarInteractions(hoverDelay: number) {
   };
 
   const handleMouseLeave = () => {
+    if (!enabled) return;
     if (hoverTimerRef.current) {
       clearTimeout(hoverTimerRef.current);
       hoverTimerRef.current = null;
@@ -343,6 +349,7 @@ function useSidebarInteractions(hoverDelay: number) {
   };
 
   const handleClick = () => {
+    if (!enabled) return;
     if (hoverTimerRef.current) {
       clearTimeout(hoverTimerRef.current);
       hoverTimerRef.current = null;
@@ -352,11 +359,69 @@ function useSidebarInteractions(hoverDelay: number) {
 
   return {
     railRef,
-    isExtended: isHovered || isFocused || isClicked,
+    isExtended: enabled ? isHovered || isFocused || isClicked : false,
     handleMouseEnter,
     handleMouseLeave,
     handleClick,
-    setIsFocused,
+    setIsFocused: (focused: boolean) => {
+      if (enabled) {
+        setIsFocused(focused);
+      } else {
+        setIsFocused(false);
+      }
+    },
+  };
+}
+
+function resolveIsOnboarding(propIsOnboarding?: boolean, pathname = "") {
+  if (propIsOnboarding !== undefined) return propIsOnboarding;
+  return pathname === "/onboarding" || pathname.startsWith("/onboarding");
+}
+
+function resolveSidebarDisplay(
+  variant: SidebarVariant,
+  user?: AuthUser | null,
+  showTabs?: boolean,
+  tabs: HeaderTabItem[] = DEFAULT_HEADER_TABS,
+) {
+  const isConnected = Boolean(user);
+  const resolvedVariant: SidebarVariant = isConnected ? "default" : variant;
+  const isGhost = resolvedVariant === "ghost";
+  const shouldShowTabs = showTabs !== undefined ? showTabs : !isGhost;
+  const visibleTabs = shouldShowTabs ? resolveVisibleTabs(tabs, user) : [];
+
+  return {
+    resolvedVariant,
+    isGhost,
+    visibleTabs,
+  };
+}
+
+function buildRailEventHandlers(
+  isGhost: boolean,
+  railRef: React.RefObject<HTMLDivElement | null>,
+  handlers: {
+    handleMouseEnter: () => void;
+    handleMouseLeave: () => void;
+    handleClick: () => void;
+    setIsFocused: (nextFocused: boolean) => void;
+  },
+) {
+  if (isGhost) return {};
+
+  return {
+    onMouseEnter: handlers.handleMouseEnter,
+    onMouseLeave: handlers.handleMouseLeave,
+    onHoverStart: handlers.handleMouseEnter,
+    onHoverEnd: handlers.handleMouseLeave,
+    onClick: handlers.handleClick,
+    onTap: handlers.handleClick,
+    onFocus: () => handlers.setIsFocused(true),
+    onBlur: (e: React.FocusEvent<HTMLDivElement>) => {
+      if (!railRef.current?.contains(e.relatedTarget as Node)) {
+        handlers.setIsFocused(false);
+      }
+    },
   };
 }
 
@@ -366,6 +431,7 @@ export default function Sidebar({
   tabs = DEFAULT_HEADER_TABS,
   showTabs,
   hoverDelay = DEFAULT_HOVER_EXPAND_DELAY_MS,
+  isOnboarding: propIsOnboarding,
   onLogout,
   onReturnToAdmin,
   onUserUpdated,
@@ -377,6 +443,13 @@ export default function Sidebar({
   const navigate = useSafeNavigate();
   const layoutIdPrefix = useId();
 
+  const isOnboarding = resolveIsOnboarding(propIsOnboarding, location.pathname);
+  const { resolvedVariant, isGhost, visibleTabs } = resolveSidebarDisplay(
+    variant,
+    user,
+    showTabs,
+    tabs,
+  );
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const {
@@ -386,11 +459,8 @@ export default function Sidebar({
     handleMouseLeave,
     handleClick,
     setIsFocused,
-  } = useSidebarInteractions(hoverDelay);
+  } = useSidebarInteractions(hoverDelay, !isGhost);
 
-  const shouldShowTabs =
-    showTabs !== undefined ? showTabs : variant !== "ghost";
-  const visibleTabs = shouldShowTabs ? resolveVisibleTabs(tabs, user) : [];
   const activeTabId = resolveActiveTabId(location.pathname, visibleTabs);
 
   const handleTabClick = (tab: HeaderTabItem) => {
@@ -403,6 +473,13 @@ export default function Sidebar({
     executeSidebarAction(user, onReturnToAdmin, onLogout);
   };
 
+  const railHandlers = buildRailEventHandlers(isGhost, railRef, {
+    handleMouseEnter,
+    handleMouseLeave,
+    handleClick,
+    setIsFocused,
+  });
+
   return (
     <>
       <SidebarRail
@@ -410,28 +487,17 @@ export default function Sidebar({
         className={className}
         data-testid={dataTestId}
         $isExtended={isExtended}
-        $variant={variant}
+        $variant={resolvedVariant}
         initial={false}
         animate={{
           width: isExtended ? SIDEBAR_EXTENDED_WIDTH : SIDEBAR_COLLAPSED_WIDTH,
         }}
         transition={SIDEBAR_SPRING}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onHoverStart={handleMouseEnter}
-        onHoverEnd={handleMouseLeave}
-        onClick={handleClick}
-        onTap={handleClick}
-        onFocus={() => setIsFocused(true)}
-        onBlur={(e) => {
-          if (!railRef.current?.contains(e.relatedTarget as Node)) {
-            setIsFocused(false);
-          }
-        }}
         role="navigation"
         aria-label={t("nav.sidebarAria", "Primary navigation")}
+        {...railHandlers}
       >
-        {variant !== "ghost" && (
+        {!isGhost && (
           <SidebarLogoHeader
             isExtended={isExtended}
             onNavigate={(to) => navigate(to)}
@@ -445,15 +511,16 @@ export default function Sidebar({
           onTabClick={handleTabClick}
         />
         <SidebarBottom
-          variant={variant}
+          variant={resolvedVariant}
           user={user}
+          isOnboarding={isOnboarding}
           isExtended={isExtended}
           onOpenProfile={() => setIsProfileModalOpen(true)}
           onAction={handleAction}
         />
       </SidebarRail>
 
-      {user && (
+      {user && !isOnboarding && (
         <SidebarProfileModal
           user={user}
           isOpen={isProfileModalOpen}
@@ -464,3 +531,5 @@ export default function Sidebar({
     </>
   );
 }
+
+export { Sidebar };

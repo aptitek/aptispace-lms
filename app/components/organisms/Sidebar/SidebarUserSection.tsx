@@ -1,14 +1,13 @@
 import { useState } from "react";
-import Box from "@mui/material/Box";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
-import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import { useTranslation } from "react-i18next";
 import Tooltip from "~/components/atoms/Tooltip/Tooltip";
 import type { AuthUser } from "~/utils/auth";
-import { isUnnamedUser } from "~/components/atoms/Avatar/Avatar";
 import { M3_SPRINGS, M3_MOTION_DURATIONS } from "~/tokens/motion";
-import RoleChip from "~/components/molecules/RoleChip/RoleChip";
+import Chip from "~/components/atoms/Chip/Chip";
+import ProfileButton from "~/components/molecules/ProfileButton/ProfileButton";
+import type { SidebarVariant } from "./Sidebar.types";
 import {
   UserCardSlot,
   UserDetailsText,
@@ -16,81 +15,6 @@ import {
   LogoutActionButton,
   AdminReturnActionButton,
 } from "./Sidebar.styles";
-
-function computeUserInitials(name?: string): string | null {
-  if (!name || isUnnamedUser(name)) return null;
-  const tokens = name.trim().split(/\s+/).filter(Boolean);
-  if (tokens.length === 0) return null;
-  if (tokens.length === 1) {
-    return tokens[0].slice(0, 2).toUpperCase();
-  }
-  return (tokens[0][0] + tokens[tokens.length - 1][0]).toUpperCase();
-}
-
-function SidebarUserAvatarSlot({
-  user,
-  userInitials,
-  onClick,
-  onHover,
-}: {
-  user: AuthUser;
-  userInitials: string | null;
-  onClick: () => void;
-  onHover?: () => void;
-}) {
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      onMouseEnter={onHover}
-      onMouseOver={onHover}
-      aria-label={user.name || "User Profile"}
-      data-testid="sidebar-avatar-trigger"
-      sx={{
-        width: 40,
-        height: 40,
-        minWidth: 40,
-        minHeight: 40,
-        borderRadius: "50%",
-        border: "none",
-        padding: 0,
-        cursor: "pointer",
-        backgroundColor: "primary.main",
-        color: "primary.contrastText",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: 700,
-        fontSize: "0.875rem",
-        overflow: "hidden",
-        outline: "none",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-        transition: "transform 150ms ease",
-        "&:hover": {
-          transform: "scale(1.05)",
-        },
-        "&:focus-visible": {
-          outline: "2px solid currentColor",
-          outlineOffset: "2px",
-        },
-      }}
-    >
-      {user.avatarUrl ? (
-        <Box
-          component="img"
-          src={user.avatarUrl}
-          alt={user.name}
-          sx={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      ) : userInitials ? (
-        userInitials
-      ) : (
-        <PersonRoundedIcon sx={{ fontSize: 20 }} />
-      )}
-    </Box>
-  );
-}
 
 function SidebarUserActionButton({
   isImpersonating,
@@ -150,7 +74,7 @@ function SidebarUserDetails({
       transition={transition}
     >
       <UserNameHeading title={name}>{name || "User"}</UserNameHeading>
-      <RoleChip
+      <Chip
         userRole={role}
         size="small"
         testId="sidebar-user-role-badge"
@@ -175,13 +99,55 @@ function resolveActionLabel(
 
 export interface SidebarUserSectionProps {
   user?: AuthUser | null;
+  variant?: SidebarVariant;
+  isOnboarding?: boolean;
   isExtended: boolean;
   onOpenProfile: () => void;
   onAction: () => void;
 }
 
+function resolveActionTestId(isImpersonating: boolean) {
+  return isImpersonating
+    ? "sidebar-return-admin-button"
+    : "sidebar-logout-button";
+}
+
+interface OnboardingUserSlotProps {
+  user: AuthUser;
+  isEffectiveExtended: boolean;
+  isImpersonating: boolean;
+  onAction: () => void;
+}
+
+function OnboardingUserSlot({
+  user,
+  isEffectiveExtended,
+  isImpersonating,
+  onAction,
+}: OnboardingUserSlotProps) {
+  return (
+    <UserCardSlot
+      $isExtended={isEffectiveExtended}
+      data-testid="sidebar-user-card"
+      sx={{ justifyContent: isEffectiveExtended ? "flex-start" : "center" }}
+    >
+      <ProfileButton
+        user={user}
+        variant="logoutOnly"
+        extended={isEffectiveExtended}
+        onLogout={onAction}
+        onReturnToAdmin={onAction}
+        size={40}
+        actionTestId={resolveActionTestId(isImpersonating)}
+      />
+    </UserCardSlot>
+  );
+}
+
 export function SidebarUserSection({
   user,
+  variant,
+  isOnboarding = false,
   isExtended,
   onOpenProfile,
   onAction,
@@ -191,38 +157,54 @@ export function SidebarUserSection({
 
   if (!user) return null;
 
-  const isEffectiveExtended = isExtended || isSelfHovered;
+  const isGhost = variant === "ghost";
+  const isEffectiveExtended = !isGhost && (isExtended || isSelfHovered);
   const isImpersonating = Boolean(user.impersonating);
-  const userInitials = computeUserInitials(user.name);
   const actionLabel = resolveActionLabel(isImpersonating, t);
-  const tooltipPlacement = isEffectiveExtended ? "top" : "right";
+
+  if (isOnboarding) {
+    return (
+      <OnboardingUserSlot
+        user={user}
+        isEffectiveExtended={isEffectiveExtended}
+        isImpersonating={isImpersonating}
+        onAction={onAction}
+      />
+    );
+  }
+
+  const hoverHandlers = isGhost
+    ? {}
+    : {
+        onMouseEnter: () => setIsSelfHovered(true),
+        onMouseLeave: () => setIsSelfHovered(false),
+      };
 
   return (
     <UserCardSlot
       $isExtended={isEffectiveExtended}
       data-testid="sidebar-user-card"
-      onMouseEnter={() => setIsSelfHovered(true)}
+      {...hoverHandlers}
     >
-      <Tooltip
-        title={user.name || t("loginCard.profileAria", "Profile")}
-        placement={tooltipPlacement}
-        arrow
-      >
-        <div>
-          <SidebarUserAvatarSlot
-            user={user}
-            userInitials={userInitials}
-            onClick={onOpenProfile}
-            onHover={() => setIsSelfHovered(true)}
-          />
-        </div>
-      </Tooltip>
-
-      <SidebarUserDetails
-        name={user.name}
-        role={user.role}
-        isExtended={isEffectiveExtended}
+      <ProfileButton
+        user={user}
+        variant="default"
+        onLogout={onAction}
+        onReturnToAdmin={onAction}
+        onAvatarClick={onOpenProfile}
+        size={40}
+        avatarTestId="sidebar-avatar-trigger"
+        actionTestId={resolveActionTestId(isImpersonating)}
+        showSlidingPill={false}
       />
+
+      {!isGhost && (
+        <SidebarUserDetails
+          name={user.name}
+          role={user.role}
+          isExtended={isEffectiveExtended}
+        />
+      )}
 
       {isEffectiveExtended && (
         <SidebarUserActionButton

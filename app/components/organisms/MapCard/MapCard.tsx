@@ -167,5 +167,4 @@ export const MapCard = forwardRef<HTMLDivElement, MapCardProps>(
 );
 
 MapCard.displayName = "MapCard";
-export const MapSheet = MapCard;
 export default MapCard;

@@ -22,15 +22,16 @@ import Tooltip from "../../atoms/Tooltip/Tooltip";
 import { isUnnamedUser } from "../../atoms/Avatar/Avatar";
 import { getRoleConfig } from "~/tokens/roles";
 import { M3_MOTION_DURATIONS } from "~/tokens/motion";
-import { type HeaderUserAvatarProps } from "./HeaderUserAvatar.types";
+import { type ProfileButtonProps } from "./ProfileButton.types";
 import {
-  HeaderAvatarContainer,
+  ProfileButtonContainer,
   HiddenSvgClipDefs,
   AvatarMorphTrigger,
   AvatarInitialsFallback,
   SlidingPillTrack,
   RoundLogoutButton,
-} from "./HeaderUserAvatar.styles";
+  LogoutOnlyActionButton,
+} from "./ProfileButton.styles";
 
 function getRolePolygonShape(role?: string | null) {
   return getRoleConfig(role).polygonShape;
@@ -97,6 +98,7 @@ interface HeaderActionButtonSlotProps {
   role?: string | null;
   onClick: () => void;
   actionAria: string;
+  testId?: string;
 }
 
 function HeaderActionButtonSlot({
@@ -105,6 +107,7 @@ function HeaderActionButtonSlot({
   role,
   onClick,
   actionAria,
+  testId,
 }: HeaderActionButtonSlotProps) {
   const Icon = isImpersonating ? (
     <AdminPanelSettingsRoundedIcon sx={{ fontSize: "1.15rem" }} />
@@ -120,7 +123,10 @@ function HeaderActionButtonSlot({
       onClick={onClick}
       aria-label={actionAria}
       data-testid={
-        isImpersonating ? "header-return-admin-button" : "header-logout-button"
+        testId ||
+        (isImpersonating
+          ? "header-return-admin-button"
+          : "header-logout-button")
       }
       data-action={isImpersonating ? "return-to-admin" : "logout"}
       size="small"
@@ -130,20 +136,21 @@ function HeaderActionButtonSlot({
   );
 }
 
-export function HeaderUserAvatar({
-  user,
-  onLogout,
-  onReturnToAdmin,
-  onAvatarClick,
-  size = 40,
-  className,
-  testId = "header-user-avatar",
-}: HeaderUserAvatarProps) {
-  const { t } = useTranslation("auth");
-  const rawId = useId();
-  const clipId = `avatar-clip-${rawId.replace(/:/g, "")}`;
+interface ProfileMorphOptions {
+  role: string;
+  onMouseEnter?: (event: React.MouseEvent<HTMLDivElement>) => void;
+  onMouseLeave?: (event: React.MouseEvent<HTMLDivElement>) => void;
+}
 
-  const restPolygon = getRolePolygonShape(user.role);
+function useProfileMorph({
+  role,
+  onMouseEnter,
+  onMouseLeave,
+}: ProfileMorphOptions) {
+  const rawId = useId();
+  const clipId = `profile-avatar-clip-${rawId.replace(/:/g, "")}`;
+
+  const restPolygon = getRolePolygonShape(role);
   const restPath = useMemo(
     () => roundedPolygonToPath(restPolygon).toSvgPathData(),
     [restPolygon],
@@ -186,14 +193,16 @@ export function HeaderUserAvatar({
     [restPolygon],
   );
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (event: React.MouseEvent<HTMLDivElement>) => {
     setIsHovered(true);
     startMorph(true);
+    onMouseEnter?.(event);
   };
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = (event: React.MouseEvent<HTMLDivElement>) => {
     setIsHovered(false);
     if (!isFocused) startMorph(false);
+    onMouseLeave?.(event);
   };
 
   const handleFocus = () => {
@@ -216,9 +225,22 @@ export function HeaderUserAvatar({
     }
   };
 
-  const isMenuOpen = isHovered || isFocused;
-  const isImpersonating = Boolean(user.impersonating);
+  return {
+    clipId,
+    currentPathD,
+    isMenuOpen: isHovered || isFocused,
+    handleMouseEnter,
+    handleMouseLeave,
+    handleFocus,
+    handleBlur,
+    handleKeyDown,
+  };
+}
 
+function resolveActionDetails(
+  isImpersonating: boolean,
+  t: (key: string, defaultVal: string) => string,
+) {
   const actionLabel = isImpersonating
     ? t("loginCard.returnToAdmin", "Return to Admin Account")
     : t("loginCard.logoutAria", "Sign out of your account");
@@ -230,18 +252,145 @@ export function HeaderUserAvatar({
       )
     : t("loginCard.logoutAria", "Sign out of your account");
 
-  const handleActionClick = () => {
-    if (isImpersonating && onReturnToAdmin) {
-      onReturnToAdmin();
-      return;
-    }
-    onLogout?.();
-  };
+  return { actionLabel, actionAria };
+}
+
+function executeProfileAction(
+  isImpersonating: boolean,
+  onReturnToAdmin?: () => void,
+  onLogout?: () => void,
+) {
+  if (isImpersonating && onReturnToAdmin) {
+    onReturnToAdmin();
+    return;
+  }
+  onLogout?.();
+}
+
+function LogoutOnlyProfileButton({
+  user,
+  size = 40,
+  extended = false,
+  className,
+  testId = "profile-button",
+  actionTestId,
+  onLogout,
+  onReturnToAdmin,
+}: ProfileButtonProps) {
+  const { t } = useTranslation("auth");
+  const isImpersonating = Boolean(user.impersonating);
+  const { actionLabel, actionAria } = resolveActionDetails(
+    isImpersonating,
+    (k, d) => String(t(k, d)),
+  );
+
+  const handleActionClick = () =>
+    executeProfileAction(isImpersonating, onReturnToAdmin, onLogout);
+
+  const defaultActionTestId = isImpersonating
+    ? "header-return-admin-button"
+    : "header-logout-button";
+
+  const buttonContent = (
+    <LogoutOnlyActionButton
+      $size={size}
+      $extended={extended}
+      $isImpersonating={isImpersonating}
+      $role={user.role}
+      onClick={handleActionClick}
+      aria-label={actionAria}
+      data-testid={actionTestId || defaultActionTestId}
+      data-action={isImpersonating ? "return-to-admin" : "logout"}
+    >
+      {isImpersonating ? (
+        <AdminPanelSettingsRoundedIcon sx={{ fontSize: 20 }} />
+      ) : (
+        <LogoutRoundedIcon sx={{ fontSize: 20 }} />
+      )}
+      {extended && (
+        <Box
+          component="span"
+          sx={{
+            fontWeight: 600,
+            fontSize: "0.875rem",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {actionLabel}
+        </Box>
+      )}
+    </LogoutOnlyActionButton>
+  );
 
   return (
-    <HeaderAvatarContainer
+    <ProfileButtonContainer
+      $size={size}
+      $isOpen={false}
+      $variant="logoutOnly"
+      $extended={extended}
+      className={className}
+      data-testid={testId}
+    >
+      {extended ? (
+        buttonContent
+      ) : (
+        <Tooltip title={actionLabel} arrow placement="right">
+          {buttonContent}
+        </Tooltip>
+      )}
+    </ProfileButtonContainer>
+  );
+}
+
+function DefaultProfileButton({
+  user,
+  onLogout,
+  onReturnToAdmin,
+  onAvatarClick,
+  size = 40,
+  className,
+  testId = "profile-button",
+  avatarTestId,
+  actionTestId,
+  showSlidingPill = true,
+  onMouseEnter,
+  onMouseLeave,
+}: ProfileButtonProps) {
+  const { t } = useTranslation("auth");
+  const isImpersonating = Boolean(user.impersonating);
+  const { actionLabel, actionAria } = resolveActionDetails(
+    isImpersonating,
+    (k, d) => String(t(k, d)),
+  );
+
+  const handleActionClick = () =>
+    executeProfileAction(isImpersonating, onReturnToAdmin, onLogout);
+
+  const {
+    clipId,
+    currentPathD,
+    isMenuOpen,
+    handleMouseEnter,
+    handleMouseLeave,
+    handleFocus,
+    handleBlur,
+    handleKeyDown,
+  } = useProfileMorph({
+    role: user.role,
+    onMouseEnter,
+    onMouseLeave,
+  });
+
+  const defaultAvatarTestId = "header-avatar-trigger";
+
+  return (
+    <ProfileButtonContainer
       $size={size}
       $isOpen={isMenuOpen}
+      $variant="default"
+      $showSlidingPill={showSlidingPill}
       className={className}
       data-testid={testId}
       onMouseEnter={handleMouseEnter}
@@ -266,7 +415,7 @@ export function HeaderUserAvatar({
         aria-haspopup="true"
         aria-expanded={isMenuOpen}
         aria-label={user.name || actionAria}
-        data-testid="header-avatar-trigger"
+        data-testid={avatarTestId || defaultAvatarTestId}
         data-shape={resolveHeaderShapeName(user.role)}
       >
         <AvatarMediaSlot
@@ -277,27 +426,38 @@ export function HeaderUserAvatar({
         />
       </AvatarMorphTrigger>
 
-      <SlidingPillTrack
-        $isOpen={isMenuOpen}
-        $size={size}
-        data-testid="header-avatar-sliding-pill"
-        role="region"
-        aria-label={actionAria}
-      >
-        <Tooltip title={actionLabel} arrow placement="bottom">
-          <div>
-            <HeaderActionButtonSlot
-              isOpen={isMenuOpen}
-              isImpersonating={isImpersonating}
-              role={user.role}
-              onClick={handleActionClick}
-              actionAria={actionAria}
-            />
-          </div>
-        </Tooltip>
-      </SlidingPillTrack>
-    </HeaderAvatarContainer>
+      {showSlidingPill && (
+        <SlidingPillTrack
+          $isOpen={isMenuOpen}
+          $size={size}
+          data-testid="header-avatar-sliding-pill"
+          role="region"
+          aria-label={actionAria}
+        >
+          <Tooltip title={actionLabel} arrow placement="bottom">
+            <div>
+              <HeaderActionButtonSlot
+                isOpen={isMenuOpen}
+                isImpersonating={isImpersonating}
+                role={user.role}
+                onClick={handleActionClick}
+                actionAria={actionAria}
+                testId={actionTestId}
+              />
+            </div>
+          </Tooltip>
+        </SlidingPillTrack>
+      )}
+    </ProfileButtonContainer>
   );
 }
 
-export default HeaderUserAvatar;
+export function ProfileButton(props: ProfileButtonProps) {
+  if (props.variant === "logoutOnly") {
+    return <LogoutOnlyProfileButton {...props} />;
+  }
+
+  return <DefaultProfileButton {...props} />;
+}
+
+export default ProfileButton;

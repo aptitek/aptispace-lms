@@ -14,7 +14,6 @@ import PhysicsCard from "../../molecules/PhysicsCard/PhysicsCard";
 import HoloDecorator from "../../molecules/HoloDecorator/HoloDecorator";
 import Avatar from "../../atoms/Avatar/Avatar";
 import Chip from "../../atoms/Chip/Chip";
-import RoleChip from "../../molecules/RoleChip/RoleChip";
 import InstitutionLogo from "../../molecules/InstitutionLogo/InstitutionLogo";
 import Guilloche, {
   generateGuillocheMaskDataUrl,
@@ -235,7 +234,7 @@ function FrontContent({
             )}
           </Box>
 
-          <RoleChip
+          <Chip
             userRole={role}
             size="small"
             sx={{ width: "100%", fontWeight: "bold" }}
@@ -403,8 +402,13 @@ function useProfileCardFields(options: ProfileCardFieldsOptions) {
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     isEmailManuallyEdited.current = true;
-    setInternalEmailPrefix(e.target.value);
-    onChange?.("emailPrefix", e.target.value);
+    const rawValue = e.target.value;
+    const prefixValue =
+      emailDomain && rawValue.includes("@")
+        ? rawValue.split("@")[0].trim()
+        : rawValue;
+    setInternalEmailPrefix(prefixValue);
+    onChange?.("emailPrefix", prefixValue);
   };
 
   return {

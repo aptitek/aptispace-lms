@@ -11,6 +11,7 @@ export interface AuthLayoutProps {
   children: ReactNode;
   headerMode?: HeaderMode;
   sidebarVariant?: SidebarVariant;
+  isOnboarding?: boolean;
   user?: AuthUser | null;
   onLogout?: () => void;
   onReturnToAdmin?: () => void;
@@ -62,13 +63,18 @@ const ContentWrapper = styled("main")(({ theme }) => ({
 
 export default function AuthLayout({
   children,
-  sidebarVariant = "ghost",
+  headerMode: _headerMode,
+  sidebarVariant,
+  isOnboarding,
   user,
   onLogout,
   onReturnToAdmin,
   headerChildren,
   showGalaxy = true,
 }: AuthLayoutProps) {
+  const resolvedSidebarVariant: SidebarVariant =
+    sidebarVariant ?? (user ? "default" : "ghost");
+
   return (
     <LayoutRoot>
       {showGalaxy && (
@@ -85,8 +91,9 @@ export default function AuthLayout({
       )}
 
       <Sidebar
-        variant={sidebarVariant}
+        variant={resolvedSidebarVariant}
         user={user}
+        isOnboarding={isOnboarding}
         onLogout={onLogout}
         onReturnToAdmin={onReturnToAdmin}
         data-testid="auth-sidebar"

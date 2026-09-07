@@ -270,11 +270,3 @@ export const m3SharedComponents = {
   ...m3DatePickerComponents,
   ...m3DataGridComponents,
 };
-
-// Aliases for unified components ensuring clean backward compatibility
-export const m3TooltipDarkOverrides = m3TooltipOverrides;
-export const m3TooltipLightOverrides = m3TooltipOverrides;
-export const m3DatePickerDarkComponents = m3DatePickerComponents;
-export const m3DatePickerLightComponents = m3DatePickerComponents;
-export const m3DataGridDarkComponents = m3DataGridComponents;
-export const m3DataGridLightComponents = m3DataGridComponents;

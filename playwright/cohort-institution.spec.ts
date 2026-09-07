@@ -17,7 +17,7 @@ test.describe("Admin Cohort & Institution Management", () => {
     const instSlug = `starfleet-${timestamp}`;
 
     // Click on the Add Institution skeleton card
-    const addSchoolSkeleton = page.getByTestId("school-card-skeleton");
+    const addSchoolSkeleton = page.getByTestId("institution-card-skeleton");
     await expect(addSchoolSkeleton).toBeVisible();
     await addSchoolSkeleton.click();
 
@@ -38,11 +38,11 @@ test.describe("Admin Cohort & Institution Management", () => {
     await createBtn.click();
 
     // Verify newly created institution card appears in the schools zone
-    const newSchoolCard = schoolsZone.getByText(instName);
-    await expect(newSchoolCard).toBeVisible({ timeout: 10_000 });
+    const newInstitutionCard = schoolsZone.getByText(instName);
+    await expect(newInstitutionCard).toBeVisible({ timeout: 10_000 });
 
     // Click on the newly created institution to view its cohorts
-    await newSchoolCard.click();
+    await newInstitutionCard.click();
 
     // Verify cohorts section updates to target this school
     await expect(page.getByText(`Cohorts for ${instName}`)).toBeVisible();
@@ -53,7 +53,7 @@ test.describe("Admin Cohort & Institution Management", () => {
   }) => {
     // Select the default Aptitek school
     const aptitekSchool = page
-      .getByTestId(/^school-card-/)
+      .getByTestId(/^institution-card-/)
       .filter({ hasText: /aptitek/i })
       .first();
 
@@ -95,7 +95,7 @@ test.describe("Admin Cohort & Institution Management", () => {
 
   test("filters cohorts using the cohort filter bar", async ({ page }) => {
     // Select default school
-    const aptitekSchool = page.getByTestId(/^school-card-/).first();
+    const aptitekSchool = page.getByTestId(/^institution-card-/).first();
     await aptitekSchool.click();
 
     const filterBar = page.getByTestId("cohort-filter-bar");

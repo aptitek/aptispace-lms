@@ -399,5 +399,4 @@ export const UserCard = forwardRef<HTMLDivElement, UserCardProps>(
 );
 
 UserCard.displayName = "UserCard";
-export const EntityCard = UserCard;
 export default UserCard;

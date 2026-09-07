@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { ThemeProvider } from "@mui/material/styles";
 import { I18nextProvider } from "react-i18next";
 import i18n from "~/i18n";
@@ -69,5 +69,55 @@ describe("AuthLayout Template", () => {
     );
 
     expect(screen.getByTestId("extra-header-item")).toBeDefined();
+  });
+
+  it("renders non-ghost sidebar when user is connected", () => {
+    const testUser = {
+      id: "u-1",
+      name: "Arthur Dent",
+      email: "arthur@galaxy.org",
+      role: "student" as const,
+    };
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider theme={appTheme}>
+          <AuthLayout user={testUser}>
+            <div>Card</div>
+          </AuthLayout>
+        </ThemeProvider>
+      </I18nextProvider>,
+    );
+
+    // Connected user in AuthLayout renders full sidebar with favicon, tabs, status slot
+    expect(screen.getByTestId("sidebar-favicon")).toBeDefined();
+    expect(screen.getByTestId("header-tab-planning")).toBeDefined();
+    expect(screen.getByTestId("sidebar-status-slot")).toBeDefined();
+  });
+
+  it("replaces avatar with logout button when isOnboarding is true", () => {
+    const testUser = {
+      id: "u-1",
+      name: "Arthur Dent",
+      email: "arthur@galaxy.org",
+      role: "student" as const,
+    };
+    const onLogout = vi.fn();
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider theme={appTheme}>
+          <AuthLayout user={testUser} isOnboarding={true} onLogout={onLogout}>
+            <div>Card</div>
+          </AuthLayout>
+        </ThemeProvider>
+      </I18nextProvider>,
+    );
+
+    expect(screen.queryByTestId("sidebar-avatar-trigger")).toBeNull();
+    const logoutBtn = screen.getByTestId("sidebar-logout-button");
+    expect(logoutBtn).toBeDefined();
+    fireEvent.click(logoutBtn);
+    expect(onLogout).toHaveBeenCalled();
   });
 });

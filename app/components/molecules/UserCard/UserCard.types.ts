@@ -66,9 +66,3 @@ export interface UserCardSkeletonProps {
   testId?: string;
   style?: React.CSSProperties;
 }
-
-// Backwards compatibility aliases
-export type EntityCardData = UserCardData;
-export type EntityCardVariant = "elevation" | "outlined";
-export type EntityCardProps = UserCardProps;
-export type EntityCardSkeletonProps = UserCardSkeletonProps;

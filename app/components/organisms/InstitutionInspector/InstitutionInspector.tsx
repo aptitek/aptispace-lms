@@ -161,7 +161,7 @@ export default function InstitutionInspector({
     } else {
       const nextDomain =
         form.emailDomain.trim() ||
-        (form.slug ? `${form.slug}.edu` : "institution.edu");
+        (form.slug ? `${form.slug}.io` : "institution.io");
       handleFieldChange("emailDomain", nextDomain);
       triggerSave({ emailDomain: nextDomain });
     }

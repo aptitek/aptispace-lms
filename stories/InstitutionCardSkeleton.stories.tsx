@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import SchoolCardSkeleton from "../app/components/molecules/SchoolCard/SchoolCardSkeleton";
+import InstitutionCardSkeleton from "../app/components/molecules/InstitutionCard/InstitutionCardSkeleton";
 
-const meta: Meta<typeof SchoolCardSkeleton> = {
-  title: "Molecules/SchoolCardSkeleton",
-  component: SchoolCardSkeleton,
+const meta: Meta<typeof InstitutionCardSkeleton> = {
+  title: "Molecules/InstitutionCardSkeleton",
+  component: InstitutionCardSkeleton,
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
@@ -11,7 +11,7 @@ const meta: Meta<typeof SchoolCardSkeleton> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof SchoolCardSkeleton>;
+type Story = StoryObj<typeof InstitutionCardSkeleton>;
 
 export const LoadingShimmer: Story = {
   args: {
@@ -28,7 +28,7 @@ export const StaticPlaceholder: Story = {
   },
 };
 
-export const GhostAddSchool: Story = {
+export const GhostAddInstitution: Story = {
   args: {
     variant: "ghost",
     onClick: () => alert("Add Institution clicked"),

@@ -1,15 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import HeaderUserAvatar from "../app/components/molecules/HeaderUserAvatar/HeaderUserAvatar";
+import Box from "@mui/material/Box";
+import ProfileButton from "~/components/molecules/ProfileButton/ProfileButton";
 
-const meta: Meta<typeof HeaderUserAvatar> = {
-  title: "Molecules/HeaderUserAvatar",
-  component: HeaderUserAvatar,
+const meta: Meta<typeof ProfileButton> = {
+  title: "Molecules/ProfileButton",
+  component: ProfileButton,
   parameters: {
     layout: "centered",
     docs: {
       description: {
         component:
-          "Official 45-degree pill MD3 Expressive user avatar that morphs shape to circle on hover and slides out a pill with the round logoff or return-to-admin button to the right.",
+          "Official MD3 Expressive user profile button that morphs shape to circle on hover and slides out a pill with the round logoff or return-to-admin button, or renders as a logout-only variant for onboarding.",
       },
     },
   },
@@ -19,11 +20,20 @@ const meta: Meta<typeof HeaderUserAvatar> = {
       control: { type: "number", min: 32, max: 80, step: 4 },
       description: "Size of the avatar in pixels",
     },
+    variant: {
+      control: "radio",
+      options: ["default", "logoutOnly"],
+      description: "Profile button variant",
+    },
+    extended: {
+      control: "boolean",
+      description: "Whether logoutOnly variant is extended horizontally",
+    },
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof HeaderUserAvatar>;
+type Story = StoryObj<typeof ProfileButton>;
 
 export const WithInitials: Story = {
   args: {
@@ -33,7 +43,7 @@ export const WithInitials: Story = {
       email: "arthur@galaxy.org",
       role: "student",
     },
-    size: 44,
+    size: 40,
     onLogout: () => {
       console.warn("Logged out clicked");
     },
@@ -86,4 +96,40 @@ export const ImpersonatingMode: Story = {
       console.warn("Return to admin clicked");
     },
   },
+};
+
+export const LogoutOnlyCompact: Story = {
+  args: {
+    user: {
+      id: "student-1",
+      name: "Arthur Dent",
+      email: "arthur@galaxy.org",
+      role: "student",
+    },
+    variant: "logoutOnly",
+    size: 40,
+    extended: false,
+    onLogout: () => {
+      console.warn("Logged out clicked");
+    },
+  },
+};
+
+export const LogoutOnlyExtended: Story = {
+  render: () => (
+    <Box sx={{ width: 220, p: 2 }}>
+      <ProfileButton
+        user={{
+          id: "student-1",
+          name: "Arthur Dent",
+          email: "arthur@galaxy.org",
+          role: "student",
+        }}
+        variant="logoutOnly"
+        extended={true}
+        size={40}
+        onLogout={() => console.warn("Logout clicked")}
+      />
+    </Box>
+  ),
 };

@@ -9,6 +9,7 @@ export interface SidebarProps {
   tabs?: HeaderTabItem[];
   showTabs?: boolean;
   hoverDelay?: number;
+  isOnboarding?: boolean;
   onLogout?: () => void;
   onReturnToAdmin?: () => void;
   onUserUpdated?: (updatedUser: AuthUser) => void;

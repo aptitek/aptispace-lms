@@ -3,9 +3,7 @@ import Box from "@mui/material/Box";
 import type { AvatarShape } from "./Avatar.types";
 import {
   resolveShapeStyle,
-  resolveM3ShapeStyle,
   SHAPE_SCALE_RADIUS_MAP,
-  M3_SCALE_RADIUS_MAP,
   EXPRESSIVE_SHAPE_CATALOG,
   M3_EXPRESSIVE_CATALOG,
   ALL_EXPRESSIVE_SHAPES,
@@ -19,7 +17,6 @@ export {
   ALL_35_M3_SHAPES,
   SHAPE_SCALE_RADIUS_MAP,
 };
-export const MD3_SHAPE_SCALE_MAP = M3_SCALE_RADIUS_MAP;
 
 export function resolveAvatarShapeRadius(
   shape?: AvatarShape,
@@ -28,8 +25,6 @@ export function resolveAvatarShapeRadius(
   const resolved = resolveShapeStyle(shape, customRadius);
   return resolved.borderRadius;
 }
-
-export const resolveM3ShapeRadius = resolveAvatarShapeRadius;
 
 interface AvatarDimensionParams {
   isBiometric: boolean;
@@ -104,7 +99,7 @@ export const AvatarRoot = styled(Box, {
   shapePreset,
   customObjectFit,
 }) => {
-  const shapeStyle = resolveM3ShapeStyle(shapePreset, customRadius);
+  const shapeStyle = resolveShapeStyle(shapePreset, customRadius);
   const isLandscape = shapePreset === "landscape";
   const isBiometric = Boolean(
     shapePreset === "biometric" || (isPortrait && !shapePreset),

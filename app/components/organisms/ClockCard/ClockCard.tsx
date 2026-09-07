@@ -414,5 +414,4 @@ export {
   type ProgressColorStop,
 } from "./ClockCard.utils";
 
-export const TimeSheet = ClockCard;
 export default ClockCard;

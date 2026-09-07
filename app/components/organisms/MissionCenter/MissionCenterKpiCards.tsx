@@ -221,18 +221,23 @@ export function MissionCenterKpiCards({
               )}
             </Typography>
           </Box>
-          <Chip
-            label={
-              metrics.counts.securityIncidents > 0 ? "ATTENTION" : "SECURE"
-            }
-            size="small"
+          <Box
+            component="span"
             sx={{
-              fontWeight: 700,
-              fontSize: "0.7rem",
+              display: "inline-flex",
+              alignItems: "center",
+              px: 1,
+              py: 0.5,
+              borderRadius: (theme) => theme.shape.corners.small,
               bgcolor: securityColor,
               color: theme.palette.common.white,
+              fontWeight: 700,
+              fontSize: "0.7rem",
+              userSelect: "none",
             }}
-          />
+          >
+            {metrics.counts.securityIncidents > 0 ? "ATTENTION" : "SECURE"}
+          </Box>
         </Box>
 
         <Typography

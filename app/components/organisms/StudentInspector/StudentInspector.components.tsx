@@ -5,7 +5,6 @@ import Tooltip from "@mui/material/Tooltip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import Chip from "~/components/atoms/Chip/Chip";
-import RoleChip from "~/components/molecules/RoleChip/RoleChip";
 import InputLabel from "@mui/material/InputLabel";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -161,7 +160,7 @@ export function FacultyAccessPanel() {
         }}
       >
         <Box sx={{ display: "flex", gap: 1 }}>
-          <RoleChip
+          <Chip
             userRole="instructor"
             size="small"
             sx={{ fontWeight: 700 }}
@@ -230,7 +229,7 @@ export function AdminAccessPanel() {
         }}
       >
         <Box sx={{ display: "flex", gap: 1 }}>
-          <RoleChip
+          <Chip
             userRole="admin"
             size="small"
             sx={{ fontWeight: 700 }}

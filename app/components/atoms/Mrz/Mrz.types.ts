@@ -11,8 +11,3 @@ export interface MrzProps {
   className?: string;
   testId?: string;
 }
-
-/**
- * @deprecated Use MrzProps instead
- */
-export type MrzZoneProps = MrzProps;

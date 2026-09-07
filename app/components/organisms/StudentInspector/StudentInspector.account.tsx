@@ -9,7 +9,7 @@ import { alpha } from "@mui/material/styles";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import Avatar from "~/components/atoms/Avatar/Avatar";
-import RoleChip from "~/components/molecules/RoleChip/RoleChip";
+import Chip from "~/components/atoms/Chip/Chip";
 import type { UserCardData } from "../../molecules/UserCard/UserCard.types";
 
 export interface InspectorAccountSectionProps {
@@ -85,7 +85,7 @@ export function InspectorAccountSection({
             >
               {displayName}
             </Typography>
-            <RoleChip
+            <Chip
               userRole={targetStudent.role || "student"}
               size="small"
               sx={{ fontWeight: 700 }}

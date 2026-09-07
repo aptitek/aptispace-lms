@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
 import Filter from "../app/components/molecules/Filter";
-import RoleChip from "../app/components/molecules/RoleChip/RoleChip";
 import Chip from "../app/components/atoms/Chip/Chip";
 
 const meta = {
@@ -62,18 +61,18 @@ function DeclarativeFilterDemo() {
             onChange: setRole,
             minWidth: 170,
             options: [
-              { value: "all", chip: <RoleChip userRole="all" size="small" /> },
+              { value: "all", chip: <Chip userRole="all" size="small" /> },
               {
                 value: "student",
-                chip: <RoleChip userRole="student" size="small" />,
+                chip: <Chip userRole="student" size="small" />,
               },
               {
                 value: "instructor",
-                chip: <RoleChip userRole="instructor" size="small" />,
+                chip: <Chip userRole="instructor" size="small" />,
               },
               {
                 value: "admin",
-                chip: <RoleChip userRole="admin" size="small" />,
+                chip: <Chip userRole="admin" size="small" />,
               },
             ],
           },

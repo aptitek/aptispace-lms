@@ -24,7 +24,7 @@ export const LogoImage = styled("img")({
   objectFit: "contain",
 });
 
-export const SchoolName = styled("div")(({ theme }) => ({
+export const InstitutionName = styled("div")(({ theme }) => ({
   fontSize: "1.1rem",
   fontWeight: 700,
   color: theme.palette.text.primary,

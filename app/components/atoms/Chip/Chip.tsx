@@ -272,13 +272,40 @@ function resolveChipSlots(props: ChipVisuals) {
  * - Built-in presets for institution categories and user roles
  * - Micro-animations, subtle depth, and full dark mode support
  */
+function resolveEffectiveChipInputs(props: ChipProps) {
+  const {
+    institutionType,
+    institution,
+    userRole,
+    role,
+    testId,
+    "data-testid": dataTestId,
+    ...rest
+  } = props;
+
+  return {
+    effectiveInstitutionType: institutionType ?? institution,
+    effectiveUserRole: userRole ?? role,
+    effectiveTestId: dataTestId || testId,
+    rest,
+  };
+}
+
+function resolveDataShape(finalShape: ChipProps["shape"]) {
+  return typeof finalShape === "string" ? finalShape : undefined;
+}
+
 export const Chip = forwardRef<HTMLDivElement, ChipProps>(
   function Chip(props, ref) {
     const {
+      effectiveInstitutionType,
+      effectiveUserRole,
+      effectiveTestId,
+      rest,
+    } = resolveEffectiveChipInputs(props);
+
+    const {
       shape,
-      institutionType,
-      institution,
-      userRole,
       showIcon = true,
       image,
       imageAlt = "",
@@ -288,32 +315,30 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(
       mono = false,
       icon,
       label,
-      testId,
-      "data-testid": dataTestId,
       color,
-      ...rest
-    } = props;
+      ...domProps
+    } = rest;
 
     const { t } = useTranslation(["common", "auth"]);
     const translate = (key: string, defaultValue: string) =>
       String(t(key, defaultValue));
-    const effectiveInstitutionType = institutionType ?? institution;
+
     const labels = computePresetLabels(
       translate,
       effectiveInstitutionType,
-      userRole,
+      effectiveUserRole,
     );
 
     const presets = resolvePresets(
       {
         institutionType: effectiveInstitutionType,
-        userRole,
+        userRole: effectiveUserRole,
         showIcon,
         icon,
         label,
         shape,
         color,
-        testId: dataTestId || testId,
+        testId: effectiveTestId,
       },
       labels,
     );
@@ -327,7 +352,7 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(
     } = resolveFinalChipVisuals(presets, {
       shape,
       color,
-      testId: dataTestId || testId,
+      testId: effectiveTestId,
       icon,
       label,
     });
@@ -353,8 +378,8 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(
           icon={finalIcon as ReactElement | undefined}
           label={finalLabel}
           data-testid={resolvedTestId}
-          data-shape={typeof finalShape === "string" ? finalShape : undefined}
-          {...rest}
+          data-shape={resolveDataShape(finalShape)}
+          {...domProps}
         />
       </>
     );

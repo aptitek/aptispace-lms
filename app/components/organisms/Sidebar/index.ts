@@ -1,3 +1,3 @@
-export { default, default as Sidebar } from "./Sidebar";
+export { Sidebar, default } from "./Sidebar";
 export * from "./Sidebar.types";
 export * from "./Sidebar.styles";

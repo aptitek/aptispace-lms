@@ -5,33 +5,33 @@ import { ThemeProvider } from "@mui/material/styles";
 import { I18nextProvider } from "react-i18next";
 import i18n from "~/i18n";
 import { appTheme } from "~/tokens/theme";
-import SchoolCardSkeleton from "./SchoolCardSkeleton";
+import InstitutionCardSkeleton from "./InstitutionCardSkeleton";
 
-describe("SchoolCardSkeleton Molecule", () => {
+describe("InstitutionCardSkeleton Molecule", () => {
   afterEach(() => {
     cleanup();
   });
 
-  it("exports SchoolCardSkeleton component properly", () => {
-    expect(SchoolCardSkeleton).toBeDefined();
-    expect(typeof SchoolCardSkeleton).toBe("function");
-    expect(SchoolCardSkeleton.name).toBe("SchoolCardSkeleton");
+  it("exports InstitutionCardSkeleton component properly", () => {
+    expect(InstitutionCardSkeleton).toBeDefined();
+    expect(typeof InstitutionCardSkeleton).toBe("function");
+    expect(InstitutionCardSkeleton.name).toBe("InstitutionCardSkeleton");
   });
 
   it("renders loading shimmer skeleton by default when not ghost", () => {
     render(
       <I18nextProvider i18n={i18n}>
         <ThemeProvider theme={appTheme}>
-          <SchoolCardSkeleton testId="school-skeleton-loading" />
+          <InstitutionCardSkeleton testId="institution-skeleton-loading" />
         </ThemeProvider>
       </I18nextProvider>,
     );
 
-    const skeletonCard = screen.getByTestId("school-skeleton-loading");
+    const skeletonCard = screen.getByTestId("institution-skeleton-loading");
     expect(skeletonCard).toBeDefined();
     expect(skeletonCard.getAttribute("role")).toBe("presentation");
     expect(skeletonCard.getAttribute("aria-hidden")).toBe("true");
-    expect(screen.queryByTestId("school-ghost-fab")).toBeNull();
+    expect(screen.queryByTestId("institution-ghost-fab")).toBeNull();
   });
 
   it("renders interactive ghost button when variant='ghost' and onClick is provided", () => {
@@ -39,22 +39,22 @@ describe("SchoolCardSkeleton Molecule", () => {
     render(
       <I18nextProvider i18n={i18n}>
         <ThemeProvider theme={appTheme}>
-          <SchoolCardSkeleton
+          <InstitutionCardSkeleton
             variant="ghost"
             onClick={onAdd}
-            tooltipTitle="Add New School"
-            testId="school-skeleton-ghost"
+            tooltipTitle="Add New Institution"
+            testId="institution-skeleton-ghost"
           />
         </ThemeProvider>
       </I18nextProvider>,
     );
 
-    const skeletonCard = screen.getByTestId("school-skeleton-ghost");
+    const skeletonCard = screen.getByTestId("institution-skeleton-ghost");
     expect(skeletonCard).toBeDefined();
     expect(skeletonCard.getAttribute("role")).toBe("button");
-    expect(skeletonCard.getAttribute("aria-label")).toBe("Add New School");
+    expect(skeletonCard.getAttribute("aria-label")).toBe("Add New Institution");
 
-    const fab = screen.getByTestId("school-ghost-fab");
+    const fab = screen.getByTestId("institution-ghost-fab");
     expect(fab).toBeDefined();
 
     // Trigger click on container
@@ -70,17 +70,17 @@ describe("SchoolCardSkeleton Molecule", () => {
     render(
       <I18nextProvider i18n={i18n}>
         <ThemeProvider theme={appTheme}>
-          <SchoolCardSkeleton
+          <InstitutionCardSkeleton
             variant="static"
             animated={false}
-            testId="school-skeleton-static"
+            testId="institution-skeleton-static"
           />
         </ThemeProvider>
       </I18nextProvider>,
     );
 
-    const skeletonCard = screen.getByTestId("school-skeleton-static");
+    const skeletonCard = screen.getByTestId("institution-skeleton-static");
     expect(skeletonCard).toBeDefined();
-    expect(screen.queryByTestId("school-ghost-fab")).toBeNull();
+    expect(screen.queryByTestId("institution-ghost-fab")).toBeNull();
   });
 });

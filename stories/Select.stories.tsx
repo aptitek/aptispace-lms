@@ -4,7 +4,6 @@ import Box from "@mui/material/Box";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import Select from "~/components/atoms/Select/Select";
-import RoleChip from "~/components/molecules/RoleChip/RoleChip";
 import Chip from "~/components/atoms/Chip/Chip";
 
 const meta = {
@@ -65,15 +64,15 @@ function WithChipsDemo() {
           { value: "all", label: "All Roles" },
           {
             value: "student",
-            chip: <RoleChip userRole="student" size="small" />,
+            chip: <Chip userRole="student" size="small" />,
           },
           {
             value: "instructor",
-            chip: <RoleChip userRole="instructor" size="small" />,
+            chip: <Chip userRole="instructor" size="small" />,
           },
           {
             value: "admin",
-            chip: <RoleChip userRole="admin" size="small" />,
+            chip: <Chip userRole="admin" size="small" />,
           },
         ]}
       />

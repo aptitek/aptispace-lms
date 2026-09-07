@@ -97,7 +97,6 @@ export default function MissionCenter({
             startIcon={<RefreshRoundedIcon />}
             onClick={onRefresh}
             disabled={isSubmitting}
-            sx={{ borderRadius: 9999 }}
             data-testid="mission-center-refresh-btn"
           >
             {t(
@@ -202,7 +201,12 @@ export default function MissionCenter({
                     label={missionData.securityIncidents.length}
                     size="small"
                     color="warning"
-                    sx={{ height: 18, fontSize: "0.65rem", fontWeight: 800 }}
+                    sx={{
+                      height: 18,
+                      fontSize: "0.65rem",
+                      fontWeight: 800,
+                      borderRadius: (theme) => theme.shape.corners.small,
+                    }}
                   />
                 )}
               </Box>

@@ -7,9 +7,9 @@ import {
   SkeletonCardContainer,
   LogoContainer,
   FabOverlay,
-} from "./SchoolCard.styles";
+} from "./InstitutionCard.styles";
 
-export interface SchoolCardSkeletonProps {
+export interface InstitutionCardSkeletonProps {
   /** Skeleton variant: "shimmer" for loading, "static" for empty placeholder, "ghost" for add card */
   variant?: "shimmer" | "static" | "ghost";
   /** Optional flag to enable ghost add variant */
@@ -27,13 +27,13 @@ export interface SchoolCardSkeletonProps {
   style?: React.CSSProperties;
 }
 
-function isGhostMode(props: SchoolCardSkeletonProps): boolean {
+function isGhostMode(props: InstitutionCardSkeletonProps): boolean {
   if (props.isGhost || props.variant === "ghost") return true;
   if (props.onClick && props.variant !== "shimmer") return true;
   return false;
 }
 
-function resolveSchoolAnimation(
+function resolveInstitutionAnimation(
   variant: string,
   animated: boolean,
 ): "wave" | false {
@@ -43,12 +43,12 @@ function resolveSchoolAnimation(
   return "wave";
 }
 
-function resolveSchoolSkeletonConfig(props: SchoolCardSkeletonProps) {
+function resolveInstitutionSkeletonConfig(props: InstitutionCardSkeletonProps) {
   const isGhost = isGhostMode(props);
   const variant = props.variant || (isGhost ? "ghost" : "shimmer");
   const animated = props.animated !== false;
   const isInteractive = isGhost && Boolean(props.onClick);
-  const animation = resolveSchoolAnimation(variant, animated);
+  const animation = resolveInstitutionAnimation(variant, animated);
 
   return {
     isGhost,
@@ -56,13 +56,13 @@ function resolveSchoolSkeletonConfig(props: SchoolCardSkeletonProps) {
     animated,
     isInteractive,
     animation,
-    testId: props.testId || "school-card-skeleton",
+    testId: props.testId || "institution-card-skeleton",
   };
 }
 
-export function SchoolCardSkeleton(props: SchoolCardSkeletonProps) {
+export function InstitutionCardSkeleton(props: InstitutionCardSkeletonProps) {
   const { t } = useTranslation("common");
-  const config = resolveSchoolSkeletonConfig(props);
+  const config = resolveInstitutionSkeletonConfig(props);
   const resolvedTooltip =
     props.tooltipTitle || t("admin.addInstitution", "Add Institution");
 
@@ -130,7 +130,7 @@ export function SchoolCardSkeleton(props: SchoolCardSkeletonProps) {
         <FabOverlay>
           <FloatingActionButton
             tooltip={resolvedTooltip}
-            testId="school-ghost-fab"
+            testId="institution-ghost-fab"
           />
         </FabOverlay>
       )}
@@ -138,4 +138,4 @@ export function SchoolCardSkeleton(props: SchoolCardSkeletonProps) {
   );
 }
 
-export default SchoolCardSkeleton;
+export default InstitutionCardSkeleton;

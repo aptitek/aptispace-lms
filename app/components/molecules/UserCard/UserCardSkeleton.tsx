@@ -196,5 +196,4 @@ export function UserCardSkeleton(props: UserCardSkeletonProps) {
   );
 }
 
-export const EntityCardSkeleton = UserCardSkeleton;
 export default UserCardSkeleton;

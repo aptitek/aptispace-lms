@@ -4,23 +4,27 @@ import InstitutionLogo from "../InstitutionLogo/InstitutionLogo";
 import Chip from "~/components/atoms/Chip/Chip";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import type { SchoolConfig } from "~/types/institution";
-import { CardContainer, LogoContainer, SchoolName } from "./SchoolCard.styles";
 import {
-  SchoolCardSkeleton,
-  type SchoolCardSkeletonProps,
-} from "./SchoolCardSkeleton";
+  CardContainer,
+  LogoContainer,
+  InstitutionName,
+} from "./InstitutionCard.styles";
+import {
+  InstitutionCardSkeleton,
+  type InstitutionCardSkeletonProps,
+} from "./InstitutionCardSkeleton";
 
-export { SchoolCardSkeleton };
-export type { SchoolCardSkeletonProps };
+export { InstitutionCardSkeleton };
+export type { InstitutionCardSkeletonProps };
 
-export interface SchoolCardProps {
+export interface InstitutionCardProps {
   school: SchoolConfig;
   studentCount?: number;
   isSelected?: boolean;
   onClick?: (school: SchoolConfig) => void;
 }
 
-export const SchoolCard = forwardRef<HTMLDivElement, SchoolCardProps>(
+export const InstitutionCard = forwardRef<HTMLDivElement, InstitutionCardProps>(
   ({ school, studentCount = 0, isSelected, onClick }, ref) => {
     const isInteractive = Boolean(onClick);
 
@@ -59,7 +63,7 @@ export const SchoolCard = forwardRef<HTMLDivElement, SchoolCardProps>(
           onKeyDown={handleKeyDown}
           tabIndex={isInteractive ? 0 : undefined}
           role={isInteractive ? "button" : "article"}
-          data-testid={`school-card-${school.id}`}
+          data-testid={`institution-card-${school.id}`}
         >
           <LogoContainer>
             <InstitutionLogo
@@ -67,7 +71,7 @@ export const SchoolCard = forwardRef<HTMLDivElement, SchoolCardProps>(
               name={school.name}
               height={40}
               maxWidth={140}
-              testId={`school-card-logo-${school.id}`}
+              testId={`institution-card-logo-${school.id}`}
               fallback={
                 <SchoolRoundedIcon
                   sx={{ fontSize: 40, color: "text.secondary", opacity: 0.5 }}
@@ -75,18 +79,18 @@ export const SchoolCard = forwardRef<HTMLDivElement, SchoolCardProps>(
               }
             />
           </LogoContainer>
-          <SchoolName>{school.name}</SchoolName>
+          <InstitutionName>{school.name}</InstitutionName>
           <Chip
             institutionType={school.type || "academic"}
             size="small"
             variant="outlined"
-            testId={`school-card-chip-${school.id}`}
+            testId={`institution-card-chip-${school.id}`}
           />
         </CardContainer>
       </Badge>
     );
   },
 );
-SchoolCard.displayName = "SchoolCard";
+InstitutionCard.displayName = "InstitutionCard";
 
-export default SchoolCard;
+export default InstitutionCard;

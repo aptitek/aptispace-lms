@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
-import UserCard, { EntityCard } from "./UserCard";
+import UserCard from "./UserCard";
 import type { UserCardData, UserCardProps } from "./UserCard.types";
 
 afterEach(cleanup);
@@ -19,11 +19,10 @@ const mockStudent: UserCardData = {
 };
 
 describe("UserCard Molecule", () => {
-  it("exports UserCard and EntityCard components properly", () => {
+  it("exports UserCard component properly", () => {
     expect(UserCard).toBeDefined();
     expect(typeof UserCard).toBe("object"); // forwardRef
     expect(UserCard.displayName).toBe("UserCard");
-    expect(EntityCard).toBe(UserCard);
   });
 
   it("creates React element with appropriate props and user data", () => {

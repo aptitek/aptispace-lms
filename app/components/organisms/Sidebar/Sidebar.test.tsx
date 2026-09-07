@@ -223,7 +223,7 @@ describe("Sidebar Component", () => {
     expect(screen.getByTestId("role-icon-admin")).toBeDefined();
   });
 
-  it("renders correctly in ghost variant without tabs, logo, or status trigger", () => {
+  it("renders correctly in ghost variant when disconnected without tabs, logo, or status trigger and does not expand", () => {
     renderSidebar({
       variant: "ghost",
       "data-testid": "auth-sidebar",
@@ -240,9 +240,19 @@ describe("Sidebar Component", () => {
     expect(bottomSection).toBeDefined();
     const computedStyle = window.getComputedStyle(bottomSection);
     expect(computedStyle.borderTopStyle).toBe("none");
+
+    // Clicking rail should NOT expand sidebar in ghost mode when disconnected
+    fireEvent.click(sidebar);
+    expect(screen.queryByTestId("sidebar-favicon")).toBeNull();
+    expect(screen.queryByRole("tablist")).toBeNull();
+
+    // Hovering rail should NOT expand sidebar in ghost mode when disconnected
+    fireEvent.mouseEnter(sidebar);
+    expect(screen.queryByTestId("sidebar-favicon")).toBeNull();
+    expect(screen.queryByRole("tablist")).toBeNull();
   });
 
-  it("renders ghost variant with logged-in user and handles logout", () => {
+  it("is no longer ghost once connected and renders full sidebar with user, tabs, logo, and expands", () => {
     const onLogout = vi.fn();
     renderSidebar({
       variant: "ghost",
@@ -253,10 +263,54 @@ describe("Sidebar Component", () => {
 
     const sidebar = screen.getByTestId("auth-sidebar");
     expect(sidebar).toBeDefined();
+
+    // Once connected, sidebar is no longer ghost:
+    // Favicon/logo is displayed
+    expect(screen.getByTestId("sidebar-favicon")).toBeDefined();
+
+    // Tabs are displayed
+    expect(screen.getByTestId("header-tab-planning")).toBeDefined();
+
+    // Status center trigger is displayed
+    expect(screen.getByTestId("sidebar-status-slot")).toBeDefined();
+
+    // User section is present
     expect(screen.getByTestId("sidebar-user-card")).toBeDefined();
+
+    // Clicking rail extends sidebar and reveals logout button & role badge
     fireEvent.click(sidebar);
     const logoutBtn = screen.getByTestId("sidebar-logout-button");
+    expect(logoutBtn).toBeDefined();
+    expect(screen.getByTestId("sidebar-user-role-badge")).toBeDefined();
+
     fireEvent.click(logoutBtn);
     expect(onLogout).toHaveBeenCalled();
+  });
+
+  it("replaces the avatar with just the logout button on onboarding", () => {
+    const onLogout = vi.fn();
+    renderSidebar({
+      user: testStudentUser,
+      isOnboarding: true,
+      onLogout,
+      "data-testid": "app-sidebar",
+    });
+
+    const sidebar = screen.getByTestId("app-sidebar");
+    expect(sidebar).toBeDefined();
+
+    // Avatar must NOT be present on onboarding
+    expect(screen.queryByTestId("sidebar-avatar-trigger")).toBeNull();
+
+    // Logout button must be present directly in the collapsed sidebar
+    const logoutBtn = screen.getByTestId("sidebar-logout-button");
+    expect(logoutBtn).toBeDefined();
+
+    // Clicking logout button fires onLogout
+    fireEvent.click(logoutBtn);
+    expect(onLogout).toHaveBeenCalled();
+
+    // Profile modal should not be present
+    expect(screen.queryByTestId("sidebar-profile-card-modal")).toBeNull();
   });
 });

@@ -1,151 +1,30 @@
 import { useState, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Chip from "@mui/material/Chip";
-import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import Alert from "@mui/material/Alert";
-import AlertTitle from "@mui/material/AlertTitle";
 import ShieldRoundedIcon from "@mui/icons-material/ShieldRounded";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
-import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
-import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, alpha } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
-import {
-  DataGrid,
-  type GridColDef,
-  type GridRowSelectionModel,
-} from "@mui/x-data-grid";
 
 import type { SecurityIncidentItem } from "~/types/missionCenter";
-import { MissionCenterUserProfileCard } from "./MissionCenterUserProfileCard";
+import Card from "~/components/atoms/Card/Card";
 import { MissionCenterJsonModal } from "./MissionCenterJsonModal";
+import { SecurityBadge } from "./MissionCenterSecurityBadge";
+import { SecurityThreatPanel } from "./MissionCenterSecurityThreatPanel";
 import { FONT_FAMILIES, RECURSIVE_PRESETS } from "~/tokens/typography";
 
 export interface MissionCenterSecurityTabProps {
   securityIncidents: SecurityIncidentItem[];
 }
 
-interface ThreatPanelProps {
-  incident: SecurityIncidentItem;
-  onInspectPayload: (payload: unknown) => void;
-}
-
-function SecurityThreatPanel({ incident, onInspectPayload }: ThreatPanelProps) {
-  const theme = useTheme();
-  const { t } = useTranslation(["common"]);
-  const targetUser = incident.user || incident.actorUser || null;
-
-  return (
-    <Card
-      variant="outlined"
-      sx={{
-        p: 2.5,
-        borderRadius: (theme) => theme.shape.corners.largeIncreased,
-        backgroundColor: theme.palette.background.paper,
-        display: "flex",
-        flexDirection: "column",
-        gap: 2.5,
-        position: "sticky",
-        top: 24,
-      }}
-      data-testid="security-inspector-panel"
-    >
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 1,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <WarningRoundedIcon color="error" />
-          <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-            {t(
-              "common:admin.missionCenter.securityThreatIntel",
-              "Attributed User & Origin",
-            )}
-          </Typography>
-        </Box>
-        <Chip
-          label={incident.severity.toUpperCase()}
-          size="small"
-          color={incident.severity === "security" ? "error" : "warning"}
-          sx={{ fontWeight: 800, fontSize: "0.7rem" }}
-        />
-      </Box>
-
-      {/* User Grid Card of Bad User / Target User */}
-      <MissionCenterUserProfileCard
-        user={targetUser}
-        ipAddress={incident.ipAddress}
-        userAgent={incident.userAgent}
-        title={t(
-          "common:admin.missionCenter.badUserCardTitle",
-          "Attributed User Identity Card",
-        )}
-        isSecurityInfraction
-      />
-
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: 700,
-            textTransform: "uppercase",
-            color: "text.secondary",
-          }}
-        >
-          {t(
-            "common:admin.missionCenter.incidentDescription",
-            "Infraction Summary",
-          )}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 600,
-            p: 1.5,
-            borderRadius: (theme) => theme.shape.corners.small,
-            backgroundColor:
-              theme.palette.surfaceContainerHighest ||
-              theme.palette.background.paper,
-            fontFamily: FONT_FAMILIES.mono,
-            fontVariationSettings: RECURSIVE_PRESETS.mono,
-          }}
-        >
-          {incident.description}
-        </Typography>
-      </Box>
-
-      {(incident.rawError || incident.rawAudit) && (
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<VisibilityRoundedIcon />}
-          onClick={() =>
-            onInspectPayload(incident.rawError || incident.rawAudit)
-          }
-          sx={{ alignSelf: "flex-start" }}
-          data-testid="inspect-security-payload-btn"
-        >
-          {t(
-            "common:admin.missionCenter.inspectRawPayload",
-            "Inspect Security Raw Event",
-          )}
-        </Button>
-      )}
-    </Card>
-  );
-}
-
-interface SecurityIncidentTableProps {
-  securityIncidents: SecurityIncidentItem[];
-  selectedIncidentId: string | null;
-  onSelectIncident: (id: string) => void;
+function formatIncidentTime(timestamp?: string | Date): string {
+  if (!timestamp) return "";
+  const dateObj = timestamp instanceof Date ? timestamp : new Date(timestamp);
+  return dateObj.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
 function resolveUserDisplay(incident: SecurityIncidentItem): string {
@@ -158,195 +37,238 @@ function resolveUserDisplay(incident: SecurityIncidentItem): string {
   return "Anonymous / Unauthenticated";
 }
 
-function SecurityIncidentTable({
+interface IncidentCardItemProps {
+  incident: SecurityIncidentItem;
+  isSelected: boolean;
+  onSelect: () => void;
+}
+
+function IncidentCardItem({
+  incident,
+  isSelected,
+  onSelect,
+}: IncidentCardItemProps) {
+  const theme = useTheme();
+  const userLabel = resolveUserDisplay(incident);
+  const timeLabel = formatIncidentTime(incident.timestamp);
+  const isSecurity = incident.severity === "security";
+
+  return (
+    <Card
+      variant="outlined"
+      isInteractive
+      isSelected={isSelected}
+      onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
+      data-testid={`security-row-${incident.id}`}
+      sx={{
+        p: 2,
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
+        borderRadius: (theme) => theme.shape.corners.medium,
+        borderColor: isSelected
+          ? theme.palette.primary.main
+          : alpha(theme.palette.divider, 0.4),
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 1.5,
+          flexWrap: "wrap",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexWrap: "wrap",
+          }}
+        >
+          <SecurityBadge
+            label={incident.type.replace("_", " ")}
+            color={isSecurity ? "error" : "warning"}
+          />
+          <SecurityBadge
+            label={incident.severity}
+            color={isSecurity ? "error" : "warning"}
+          />
+        </Box>
+        {timeLabel && (
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              fontFamily: FONT_FAMILIES.mono,
+              fontVariationSettings: RECURSIVE_PRESETS.mono,
+              fontSize: "0.75rem",
+            }}
+          >
+            {timeLabel}
+          </Typography>
+        )}
+      </Box>
+
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            fontWeight: 700,
+            fontSize: "0.95rem",
+            color: isSelected ? "primary.main" : "text.primary",
+          }}
+        >
+          {incident.title}
+        </Typography>
+        {incident.description && (
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              fontSize: "0.82rem",
+              lineHeight: 1.45,
+            }}
+          >
+            {incident.description}
+          </Typography>
+        )}
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 1,
+          pt: 1,
+          borderTop: `1px solid ${alpha(theme.palette.divider, 0.3)}`,
+          flexWrap: "wrap",
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: 600,
+            color: "text.secondary",
+            fontSize: "0.78rem",
+          }}
+        >
+          {userLabel}
+        </Typography>
+
+        <Box
+          component="span"
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            px: 1,
+            py: 0.5,
+            borderRadius: (theme) => theme.shape.corners.small,
+            bgcolor: alpha(
+              theme.palette.surfaceContainerHighest ||
+                theme.palette.background.paper,
+              0.6,
+            ),
+            border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+            fontFamily: FONT_FAMILIES.mono,
+            fontVariationSettings: RECURSIVE_PRESETS.mono,
+            fontSize: "0.75rem",
+            color: "text.secondary",
+          }}
+        >
+          {incident.ipAddress || "Unknown IP"}
+        </Box>
+      </Box>
+    </Card>
+  );
+}
+
+interface SecurityIncidentCardListProps {
+  securityIncidents: SecurityIncidentItem[];
+  selectedIncidentId: string | null;
+  onSelectIncident: (id: string) => void;
+}
+
+function SecurityIncidentCardList({
   securityIncidents,
   selectedIncidentId,
   onSelectIncident,
-}: SecurityIncidentTableProps) {
-  const theme = useTheme();
+}: SecurityIncidentCardListProps) {
   const { t } = useTranslation(["common"]);
 
-  const rowSelectionModel: GridRowSelectionModel = useMemo(
-    () => ({
-      type: "include",
-      ids: new Set(selectedIncidentId ? [selectedIncidentId] : []),
-    }),
-    [selectedIncidentId],
-  );
-
-  const columns = useMemo<GridColDef<SecurityIncidentItem>[]>(
-    () => [
-      {
-        field: "type",
-        headerName: t("common:admin.missionCenter.type", "Type"),
-        width: 140,
-        renderCell: (params) => (
-          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
-            <Chip
-              label={params.value.replace("_", " ").toUpperCase()}
-              size="small"
-              color={params.row.severity === "security" ? "error" : "warning"}
-              sx={{ fontWeight: 700, fontSize: "0.68rem" }}
-            />
-          </Box>
-        ),
-      },
-      {
-        field: "title",
-        headerName: t(
-          "common:admin.missionCenter.incidentTitle",
-          "Incident Title",
-        ),
-        flex: 1.5,
-        minWidth: 180,
-        renderCell: (params) => {
-          const isSelected = params.row.id === selectedIncidentId;
-          return (
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                height: "100%",
-                minWidth: 0,
-              }}
-            >
-              <Typography
-                variant="body2"
-                noWrap
-                sx={{
-                  fontWeight: isSelected ? 700 : 500,
-                }}
-              >
-                {params.value}
-              </Typography>
-            </Box>
-          );
-        },
-      },
-      {
-        field: "user",
-        headerName: t(
-          "common:admin.missionCenter.attributedUser",
-          "Attributed User / Target",
-        ),
-        flex: 1.2,
-        minWidth: 150,
-        valueGetter: (_value, row) => resolveUserDisplay(row),
-        renderCell: (params) => (
-          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
-            <Typography variant="body2" noWrap sx={{ fontSize: "0.85rem" }}>
-              {resolveUserDisplay(params.row)}
-            </Typography>
-          </Box>
-        ),
-      },
-      {
-        field: "ipAddress",
-        headerName: t("common:admin.missionCenter.ipOrigin", "IP Origin"),
-        flex: 0.9,
-        minWidth: 110,
-        renderCell: (params) => (
-          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
-            <Typography
-              variant="body2"
-              sx={{
-                fontFamily: FONT_FAMILIES.mono,
-                fontVariationSettings: RECURSIVE_PRESETS.mono,
-                fontSize: "0.8rem",
-              }}
-            >
-              {params.value || "Unknown"}
-            </Typography>
-          </Box>
-        ),
-      },
-      {
-        field: "timestamp",
-        headerName: t("common:admin.missionCenter.time", "Time"),
-        width: 100,
-        valueFormatter: (value: string) =>
-          value
-            ? new Date(value).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-              })
-            : "",
-        renderCell: (params) => {
-          const dateStr = params.value
-            ? new Date(params.value).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-              })
-            : "";
-          return (
-            <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "text.secondary", fontSize: "0.78rem" }}
-              >
-                {dateStr}
-              </Typography>
-            </Box>
-          );
-        },
-      },
-    ],
-    [t, selectedIncidentId],
-  );
+  if (securityIncidents.length === 0) {
+    return (
+      <Card
+        variant="outlined"
+        sx={{
+          p: 5,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          gap: 1.5,
+          borderRadius: (theme) => theme.shape.corners.largeIncreased,
+        }}
+        data-testid="security-incidents-table"
+      >
+        <ShieldRoundedIcon color="success" sx={{ fontSize: 44 }} />
+        <Typography
+          variant="body2"
+          sx={{ fontWeight: 600, color: "text.secondary" }}
+        >
+          {t(
+            "common:admin.missionCenter.noSecurityIncidents",
+            "No security incidents or 403 infractions recorded.",
+          )}
+        </Typography>
+      </Card>
+    );
+  }
 
   return (
     <Box
       sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
         width: "100%",
-        height: 520,
-        borderRadius: (theme) => theme.shape.corners.largeIncreased,
-        backgroundColor: theme.palette.background.paper,
       }}
       data-testid="security-incidents-table"
     >
-      <DataGrid
-        rows={securityIncidents}
-        columns={columns}
-        rowSelectionModel={rowSelectionModel}
-        onRowSelectionModelChange={(newSelection) => {
-          if (newSelection.type === "include") {
-            const first = Array.from(newSelection.ids)[0];
-            if (first !== undefined) {
-              onSelectIncident(String(first));
-            }
-          }
-        }}
-        onRowClick={(params) => onSelectIncident(String(params.row.id))}
-        disableMultipleRowSelection
-        initialState={{
-          pagination: {
-            paginationModel: { pageSize: 8, page: 0 },
-          },
-        }}
-        pageSizeOptions={[5, 8, 15, 30]}
-        localeText={{
-          noRowsLabel: t(
-            "common:admin.missionCenter.noSecurityIncidents",
-            "No security incidents or 403 infractions recorded.",
-          ),
-        }}
-        sx={{
-          borderRadius: (theme) => theme.shape.corners.largeIncreased,
-          border: `1px solid ${theme.palette.divider}`,
-          cursor: "pointer",
-        }}
-      />
+      {securityIncidents.map((incident) => (
+        <IncidentCardItem
+          key={incident.id}
+          incident={incident}
+          isSelected={incident.id === selectedIncidentId}
+          onSelect={() => onSelectIncident(incident.id)}
+        />
+      ))}
     </Box>
   );
 }
 
 function SecurityAlertBanner({ count }: { count: number }) {
   const { t } = useTranslation(["common"]);
+  const theme = useTheme();
   const hasIncidents = count > 0;
-  const severity = hasIncidents ? "warning" : "success";
-  const icon = hasIncidents ? <SecurityRoundedIcon /> : <ShieldRoundedIcon />;
+  const statusColor = hasIncidents
+    ? theme.palette.warning.main
+    : theme.palette.success.main;
+  const icon = hasIncidents ? (
+    <SecurityRoundedIcon sx={{ color: statusColor, fontSize: 26 }} />
+  ) : (
+    <ShieldRoundedIcon sx={{ color: statusColor, fontSize: 26 }} />
+  );
   const title = hasIncidents
     ? t(
         "common:admin.missionCenter.securityAlertTitle",
@@ -368,15 +290,32 @@ function SecurityAlertBanner({ count }: { count: number }) {
       );
 
   return (
-    <Alert
-      severity={severity}
-      icon={icon}
-      sx={{ borderRadius: (theme) => theme.shape.corners.medium }}
+    <Card
+      variant="outlined"
+      sx={{
+        p: 2,
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 2,
+        borderRadius: (theme) => theme.shape.corners.medium,
+        borderColor: alpha(statusColor, 0.4),
+        backgroundColor: alpha(statusColor, 0.04),
+      }}
       data-testid="security-status-alert"
     >
-      <AlertTitle sx={{ fontWeight: 700 }}>{title}</AlertTitle>
-      {desc}
-    </Alert>
+      <Box sx={{ mt: 0.25, display: "flex", alignItems: "center" }}>{icon}</Box>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+        <Typography
+          variant="subtitle1"
+          sx={{ fontWeight: 700, color: statusColor }}
+        >
+          {title}
+        </Typography>
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          {desc}
+        </Typography>
+      </Box>
+    </Card>
   );
 }
 
@@ -413,7 +352,7 @@ export function MissionCenterSecurityTab({
         }}
       >
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          <SecurityIncidentTable
+          <SecurityIncidentCardList
             securityIncidents={securityIncidents}
             selectedIncidentId={selectedIncidentId}
             onSelectIncident={setSelectedIncidentId}
@@ -439,3 +378,4 @@ export function MissionCenterSecurityTab({
     </Box>
   );
 }
+export { SecurityBadge };

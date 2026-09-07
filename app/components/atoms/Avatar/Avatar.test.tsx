@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import Avatar, { isUnnamedUser } from "./Avatar";
 import { ISO_19794_5_CONSTANTS } from "./Avatar.types";
-import { resolveM3ShapeRadius } from "./Avatar.styles";
+import { resolveAvatarShapeRadius } from "./Avatar.styles";
 import { getRoleAvatarShape } from "~/tokens/shapes";
 
 describe("Avatar Component & MD3 Shape Scale", () => {
@@ -18,30 +18,30 @@ describe("Avatar Component & MD3 Shape Scale", () => {
   });
 
   it("resolves all standard MD3 shape scale tokens", () => {
-    expect(resolveM3ShapeRadius("none")).toBe("0px");
-    expect(resolveM3ShapeRadius("square")).toBe("0px");
-    expect(resolveM3ShapeRadius("extra-small")).toBe("4px");
-    expect(resolveM3ShapeRadius("extra-small-top")).toBe("4px 4px 0 0");
-    expect(resolveM3ShapeRadius("small")).toBe("8px");
-    expect(resolveM3ShapeRadius("medium")).toBe("12px");
-    expect(resolveM3ShapeRadius("rounded")).toBe("12px");
-    expect(resolveM3ShapeRadius("large")).toBe("16px");
-    expect(resolveM3ShapeRadius("large-end")).toBe("0 16px 16px 0");
-    expect(resolveM3ShapeRadius("large-top")).toBe("16px 16px 0 0");
-    expect(resolveM3ShapeRadius("large-start")).toBe("16px 0 0 16px");
-    expect(resolveM3ShapeRadius("extra-large")).toBe("28px");
-    expect(resolveM3ShapeRadius("extra-large-top")).toBe("28px 28px 0 0");
-    expect(resolveM3ShapeRadius("full")).toBe("9999px");
-    expect(resolveM3ShapeRadius("circular")).toBe("50%");
-    expect(resolveM3ShapeRadius("cut")).toBe("14px 2px 14px 2px");
-    expect(resolveM3ShapeRadius("asymmetric")).toBe("24px 6px 24px 6px");
-    expect(resolveM3ShapeRadius("biometric")).toBe("10px");
+    expect(resolveAvatarShapeRadius("none")).toBe("0px");
+    expect(resolveAvatarShapeRadius("square")).toBe("0px");
+    expect(resolveAvatarShapeRadius("extra-small")).toBe("4px");
+    expect(resolveAvatarShapeRadius("extra-small-top")).toBe("4px 4px 0 0");
+    expect(resolveAvatarShapeRadius("small")).toBe("8px");
+    expect(resolveAvatarShapeRadius("medium")).toBe("12px");
+    expect(resolveAvatarShapeRadius("rounded")).toBe("12px");
+    expect(resolveAvatarShapeRadius("large")).toBe("16px");
+    expect(resolveAvatarShapeRadius("large-end")).toBe("0 16px 16px 0");
+    expect(resolveAvatarShapeRadius("large-top")).toBe("16px 16px 0 0");
+    expect(resolveAvatarShapeRadius("large-start")).toBe("16px 0 0 16px");
+    expect(resolveAvatarShapeRadius("extra-large")).toBe("28px");
+    expect(resolveAvatarShapeRadius("extra-large-top")).toBe("28px 28px 0 0");
+    expect(resolveAvatarShapeRadius("full")).toBe("9999px");
+    expect(resolveAvatarShapeRadius("circular")).toBe("50%");
+    expect(resolveAvatarShapeRadius("cut")).toBe("14px 2px 14px 2px");
+    expect(resolveAvatarShapeRadius("asymmetric")).toBe("24px 6px 24px 6px");
+    expect(resolveAvatarShapeRadius("biometric")).toBe("10px");
   });
 
   it("supports custom string or numeric radius", () => {
-    expect(resolveM3ShapeRadius(undefined, 18)).toBe("18px");
-    expect(resolveM3ShapeRadius(undefined, "20px 4px")).toBe("20px 4px");
-    expect(resolveM3ShapeRadius(24)).toBe("24px");
+    expect(resolveAvatarShapeRadius(undefined, 18)).toBe("18px");
+    expect(resolveAvatarShapeRadius(undefined, "20px 4px")).toBe("20px 4px");
+    expect(resolveAvatarShapeRadius(24)).toBe("24px");
   });
 
   it("supports all 35 MD3 expressive shapes from catalog", () => {
@@ -84,7 +84,7 @@ describe("Avatar Component & MD3 Shape Scale", () => {
     ];
 
     for (const shape of expectedShapes) {
-      expect(resolveM3ShapeRadius(shape)).toBeDefined();
+      expect(resolveAvatarShapeRadius(shape)).toBeDefined();
     }
   });
 

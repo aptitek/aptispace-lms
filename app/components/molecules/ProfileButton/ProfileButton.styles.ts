@@ -3,26 +3,7 @@ import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import IconButton from "@mui/material/IconButton";
 import { M3_MOTION_DURATIONS, M3_MOTION_EASINGS } from "~/tokens/motion";
-
-export const HeaderAvatarContainer = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "$size" && prop !== "$isOpen",
-})<{ $size: number; $isOpen: boolean }>(({ $size }) => ({
-  position: "relative",
-  display: "inline-flex",
-  alignItems: "center",
-  height: $size,
-  width: $size + 44,
-  minWidth: $size + 44,
-  isolation: "isolate",
-}));
-
-export const HiddenSvgClipDefs = styled("svg")({
-  position: "absolute",
-  width: 0,
-  height: 0,
-  overflow: "hidden",
-  pointerEvents: "none",
-});
+import type { ProfileButtonVariant } from "./ProfileButton.types";
 
 const ROLE_KEY_MAP: Record<string, "admin" | "instructor" | "student"> = {
   admin: "admin",
@@ -34,7 +15,7 @@ const ROLE_KEY_MAP: Record<string, "admin" | "instructor" | "student"> = {
   student: "student",
 };
 
-export function getHeaderRoleColor(
+export function getProfileRoleColor(
   role: string | null | undefined,
   theme: Theme,
 ): string {
@@ -42,6 +23,59 @@ export function getHeaderRoleColor(
   const roleKey = ROLE_KEY_MAP[normalized] || "student";
   return theme.palette.roles[roleKey];
 }
+
+export const ProfileButtonContainer = styled(Box, {
+  shouldForwardProp: (prop) =>
+    prop !== "$size" &&
+    prop !== "$isOpen" &&
+    prop !== "$variant" &&
+    prop !== "$extended" &&
+    prop !== "$showSlidingPill",
+})<{
+  $size: number;
+  $isOpen: boolean;
+  $variant?: ProfileButtonVariant;
+  $extended?: boolean;
+  $showSlidingPill?: boolean;
+}>(({ theme, $size, $isOpen, $variant, $extended, $showSlidingPill }) => {
+  if ($variant === "logoutOnly") {
+    return {
+      position: "relative",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: $extended ? "flex-start" : "center",
+      height: $size,
+      width: $extended ? "100%" : $size,
+      minWidth: $extended ? "100%" : $size,
+      boxSizing: "border-box",
+    };
+  }
+
+  const hasSlidingPill = $showSlidingPill !== false;
+
+  return {
+    position: "relative",
+    display: "inline-flex",
+    alignItems: "center",
+    height: $size,
+    width: hasSlidingPill && $isOpen ? $size + 44 : $size,
+    minWidth: $size,
+    isolation: "isolate",
+    boxSizing: "border-box",
+    transition: theme.transitions.create(["width"], {
+      duration: M3_MOTION_DURATIONS.medium3,
+      easing: M3_MOTION_EASINGS.css.standard,
+    }),
+  };
+});
+
+export const HiddenSvgClipDefs = styled("svg")({
+  position: "absolute",
+  width: 0,
+  height: 0,
+  overflow: "hidden",
+  pointerEvents: "none",
+});
 
 export const AvatarMorphTrigger = styled(ButtonBase, {
   shouldForwardProp: (prop) =>
@@ -52,7 +86,7 @@ export const AvatarMorphTrigger = styled(ButtonBase, {
   $clipId,
   $role,
 }) => {
-  const roleColor = getHeaderRoleColor($role, theme);
+  const roleColor = getProfileRoleColor($role, theme);
 
   return {
     position: "relative",
@@ -93,7 +127,7 @@ export const AvatarMorphTrigger = styled(ButtonBase, {
 export const AvatarInitialsFallback = styled(Box, {
   shouldForwardProp: (prop) => prop !== "$role",
 })<{ $role?: string | null }>(({ theme, $role }) => {
-  const roleColor = getHeaderRoleColor($role, theme);
+  const roleColor = getProfileRoleColor($role, theme);
 
   return {
     width: "100%",
@@ -160,7 +194,7 @@ export const RoundLogoutButton = styled(IconButton, {
   $isImpersonating,
   $role,
 }) => {
-  const roleColor = getHeaderRoleColor($role, theme);
+  const roleColor = getProfileRoleColor($role, theme);
   const accentColor = $isImpersonating ? roleColor : theme.palette.error.main;
 
   return {
@@ -192,6 +226,57 @@ export const RoundLogoutButton = styled(IconButton, {
       outline: `2px solid ${
         $isImpersonating ? roleColor : theme.palette.primary.main
       }`,
+      outlineOffset: "2px",
+    },
+  };
+});
+
+export const LogoutOnlyActionButton = styled(ButtonBase, {
+  shouldForwardProp: (prop) =>
+    prop !== "$size" &&
+    prop !== "$extended" &&
+    prop !== "$isImpersonating" &&
+    prop !== "$role",
+})<{
+  $size: number;
+  $extended?: boolean;
+  $isImpersonating?: boolean;
+  $role?: string | null;
+}>(({ theme, $size, $extended, $isImpersonating, $role }) => {
+  const roleColor = getProfileRoleColor($role, theme);
+  const actionColor = $isImpersonating ? roleColor : theme.palette.error.main;
+
+  return {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: $extended ? "flex-start" : "center",
+    width: $extended ? "100%" : $size,
+    height: $size,
+    minWidth: $size,
+    minHeight: $size,
+    borderRadius: $extended ? "9999px" : "50%",
+    padding: $extended ? theme.spacing(0, 1.5) : 0,
+    gap: theme.spacing(1.5),
+    border: `1px solid ${alpha(actionColor, $isImpersonating ? 0.35 : 0.25)}`,
+    cursor: "pointer",
+    backgroundColor: alpha(actionColor, 0.08),
+    color: actionColor,
+    outline: "none",
+    boxSizing: "border-box",
+    transition: theme.transitions.create(
+      ["background-color", "border-color", "transform", "color"],
+      {
+        duration: M3_MOTION_DURATIONS.medium2,
+        easing: M3_MOTION_EASINGS.css.standard,
+      },
+    ),
+    "&:hover": {
+      backgroundColor: alpha(actionColor, 0.18),
+      borderColor: actionColor,
+      transform: $extended ? "none" : "scale(1.05)",
+    },
+    "&:focus-visible": {
+      outline: `2px solid ${actionColor}`,
       outlineOffset: "2px",
     },
   };

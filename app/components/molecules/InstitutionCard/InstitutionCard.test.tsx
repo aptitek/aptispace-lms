@@ -5,7 +5,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { I18nextProvider } from "react-i18next";
 import i18n from "~/i18n";
 import { appTheme } from "~/tokens/theme";
-import SchoolCard, { SchoolCardSkeleton } from "./SchoolCard";
+import InstitutionCard, { InstitutionCardSkeleton } from "./InstitutionCard";
 import type { SchoolConfig } from "~/types/institution";
 
 const mockSchool: SchoolConfig = {
@@ -15,7 +15,7 @@ const mockSchool: SchoolConfig = {
   type: "academic",
 };
 
-describe("SchoolCard Molecule", () => {
+describe("InstitutionCard Molecule", () => {
   afterEach(() => {
     cleanup();
   });
@@ -26,7 +26,11 @@ describe("SchoolCard Molecule", () => {
     render(
       <I18nextProvider i18n={i18n}>
         <ThemeProvider theme={appTheme}>
-          <SchoolCard school={mockSchool} studentCount={42} onClick={onClick} />
+          <InstitutionCard
+            school={mockSchool}
+            studentCount={42}
+            onClick={onClick}
+          />
         </ThemeProvider>
       </I18nextProvider>,
     );
@@ -45,7 +49,7 @@ describe("SchoolCard Molecule", () => {
     render(
       <I18nextProvider i18n={i18n}>
         <ThemeProvider theme={appTheme}>
-          <SchoolCard school={mockSchool} onClick={onClick} />
+          <InstitutionCard school={mockSchool} onClick={onClick} />
         </ThemeProvider>
       </I18nextProvider>,
     );
@@ -55,18 +59,18 @@ describe("SchoolCard Molecule", () => {
     expect(onClick).toHaveBeenCalledWith(mockSchool);
   });
 
-  it("renders SchoolCardSkeleton with ghost action button when interactive", () => {
+  it("renders InstitutionCardSkeleton with ghost action button when interactive", () => {
     const onAdd = vi.fn();
 
     render(
       <I18nextProvider i18n={i18n}>
         <ThemeProvider theme={appTheme}>
-          <SchoolCardSkeleton onClick={onAdd} />
+          <InstitutionCardSkeleton onClick={onAdd} />
         </ThemeProvider>
       </I18nextProvider>,
     );
 
-    const fab = screen.getByTestId("school-ghost-fab");
+    const fab = screen.getByTestId("institution-ghost-fab");
     expect(fab).toBeDefined();
     fireEvent.click(fab);
     expect(onAdd).toHaveBeenCalled();

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Box from "@mui/material/Box";
 import {
-  SchoolCard,
-  SchoolCardSkeleton,
-} from "~/components/molecules/SchoolCard/SchoolCard";
+  InstitutionCard,
+  InstitutionCardSkeleton,
+} from "~/components/molecules/InstitutionCard";
 import type { SchoolConfig } from "~/types/institution";
 
 const mockAcademicSchool: SchoolConfig = {
@@ -25,8 +25,8 @@ const mockCompanySchool: SchoolConfig = {
 };
 
 const meta = {
-  title: "Molecules/SchoolCard",
-  component: SchoolCard,
+  title: "Molecules/InstitutionCard",
+  component: InstitutionCard,
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
@@ -41,7 +41,7 @@ const meta = {
   args: {
     school: mockAcademicSchool,
   },
-} satisfies Meta<typeof SchoolCard>;
+} satisfies Meta<typeof InstitutionCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -91,10 +91,12 @@ export const Interactive: Story = {
 
 export const SkeletonInteractiveAdd: Story = {
   render: () => (
-    <SchoolCardSkeleton onClick={() => alert("Add School triggered")} />
+    <InstitutionCardSkeleton
+      onClick={() => alert("Add Institution triggered")}
+    />
   ),
 };
 
 export const SkeletonStaticLoading: Story = {
-  render: () => <SchoolCardSkeleton />,
+  render: () => <InstitutionCardSkeleton />,
 };

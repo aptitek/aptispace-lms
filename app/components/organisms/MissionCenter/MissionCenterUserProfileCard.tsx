@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Chip from "@mui/material/Chip";
+import { alpha } from "@mui/material/styles";
 import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
 import DevicesRoundedIcon from "@mui/icons-material/DevicesRounded";
 import PersonOffRoundedIcon from "@mui/icons-material/PersonOffRounded";
@@ -63,19 +63,34 @@ function NetworkOriginCard({
           </Typography>
         </Box>
         {ipAddress ? (
-          <Chip
-            label={ipAddress}
-            size="small"
-            color={isSecurity ? "error" : "default"}
-            variant="outlined"
+          <Box
+            component="span"
             sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              px: 1,
+              py: 0.5,
+              borderRadius: (theme) => theme.shape.corners.small,
+              border: 1,
+              borderColor: (theme) =>
+                isSecurity
+                  ? alpha(theme.palette.error.main, 0.4)
+                  : alpha(theme.palette.divider, 0.4),
+              backgroundColor: (theme) =>
+                isSecurity
+                  ? alpha(theme.palette.error.main, 0.08)
+                  : alpha(theme.palette.text.primary, 0.04),
+              color: isSecurity ? "error.main" : "text.primary",
               fontFamily: FONT_FAMILIES.mono,
               fontVariationSettings: RECURSIVE_PRESETS.mono,
               fontWeight: 700,
               fontSize: "0.75rem",
+              userSelect: "none",
             }}
             data-testid="user-ip-badge"
-          />
+          >
+            {ipAddress}
+          </Box>
         ) : (
           <Typography variant="caption" sx={{ color: "text.secondary" }}>
             Not captured

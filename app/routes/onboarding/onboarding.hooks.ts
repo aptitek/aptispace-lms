@@ -70,7 +70,10 @@ export function useOnboardingProfile(options: UseOnboardingProfileOptions) {
           next.familyName = value.toUpperCase();
         } else if (field === "emailPrefix" || field === "email") {
           if (emailDomain) {
-            const cleanPrefix = value.trim();
+            const raw = value.trim();
+            const cleanPrefix = raw.includes("@")
+              ? raw.split("@")[0].trim()
+              : raw;
             const cleanDomain = emailDomain.replace(/^@+/, "");
             next.email = cleanPrefix ? `${cleanPrefix}@${cleanDomain}` : "";
           } else {
