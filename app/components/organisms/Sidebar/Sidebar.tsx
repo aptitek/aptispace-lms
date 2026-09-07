@@ -39,7 +39,7 @@ import { SidebarProfileModal } from "./SidebarProfileModal";
 import { SidebarUserSection } from "./SidebarUserSection";
 import type { SidebarProps } from "./Sidebar.types";
 
-export const DEFAULT_HOVER_EXPAND_DELAY_MS = 1200;
+export const DEFAULT_HOVER_EXPAND_DELAY_MS = 0;
 
 function isPathMatching(pathname: string, matchPaths: string[]): boolean {
   return matchPaths.some((target) => {
@@ -414,7 +414,10 @@ export default function Sidebar({
         transition={SIDEBAR_SPRING}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onHoverStart={handleMouseEnter}
+        onHoverEnd={handleMouseLeave}
         onClick={handleClick}
+        onTap={handleClick}
         onFocus={() => setIsFocused(true)}
         onBlur={(e) => {
           if (!railRef.current?.contains(e.relatedTarget as Node)) {

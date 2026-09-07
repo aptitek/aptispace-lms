@@ -203,6 +203,8 @@ export default tseslint.config(
       "debug-storybook.log",
       "**/coverage/**",
       "**/.scannerwork/**",
+      "**/test-results/**",
+      "**/playwright-report/**",
     ],
   },
 
@@ -975,7 +977,16 @@ export default tseslint.config(
     },
   },
 
-  // 6c. React Component Test File Enforcement (.test.tsx mandatory for components to enforce DOM mounting)
+  // 6c. Playwright E2E Tests
+  {
+    files: ["playwright/**/*.{ts,tsx,js,jsx}"],
+    rules: {
+      "sonarjs/no-fixed-wait-in-tests": "off",
+      "vitest/expect-expect": "off",
+    },
+  },
+
+  // 6d. React Component Test File Enforcement (.test.tsx mandatory for components to enforce DOM mounting)
   {
     files: ["app/components/**/*.test.ts", "app/components/**/*.spec.ts"],
     rules: {

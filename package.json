@@ -7,6 +7,7 @@
     "dev": "wireit",
     "lint": "wireit",
     "test": "wireit",
+    "test:unit": "wireit",
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
@@ -26,7 +27,9 @@
     "sonar:server": "docker compose -f docker-compose.sonar.yml up -d",
     "sonar:down": "docker compose -f docker-compose.sonar.yml down",
     "knip": "wireit",
-    "knip:fix": "knip --fix --allow-remove-files"
+    "knip:fix": "knip --fix --allow-remove-files",
+    "test:e2e": "wireit",
+    "test:e2e:ui": "playwright test --ui"
   },
   "wireit": {
     "db:generate": {
@@ -82,7 +85,7 @@
         "db:seed:local"
       ]
     },
-    "test": {
+    "test:unit": {
       "command": "vitest run",
       "env": {
         "NODE_OPTIONS": "--no-deprecation"
@@ -97,6 +100,32 @@
         "package.json"
       ],
       "output": []
+    },
+    "test:e2e": {
+      "command": "playwright test",
+      "dependencies": [
+        "db:setup:local"
+      ],
+      "env": {
+        "NODE_OPTIONS": "--no-deprecation"
+      },
+      "files": [
+        "playwright/**/*",
+        "playwright.config.ts",
+        "app/**/*",
+        "package.json",
+        "tsconfig.json"
+      ],
+      "output": [
+        "playwright-report/**/*",
+        "test-results/**/*"
+      ]
+    },
+    "test": {
+      "dependencies": [
+        "test:unit",
+        "test:e2e"
+      ]
     },
     "test:coverage": {
       "command": "vitest run --coverage --project components --project server-and-utils",
@@ -159,7 +188,9 @@
         "react-router.config.ts",
         "vite.config.ts"
       ],
-      "output": []
+      "output": [
+        ".react-router/types/**/*"
+      ]
     },
     "build": {
       "command": "react-router build",
@@ -256,6 +287,7 @@
     "@commitlint/config-conventional": "^21.2.2",
     "@eslint/css": "^2.0.0",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
     "@react-router/dev": "^8",
     "@sonar/scan": "^5.0.0",
     "@storybook/addon-a11y": "^10.6.0",

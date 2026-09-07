@@ -18,5 +18,6 @@
     "duplicates": "off",
     "exports": "off",
     "types": "off"
-  }
+  },
+  "ignoreUnresolved": ["^\\./\\+types(/.*)?$"]
 }

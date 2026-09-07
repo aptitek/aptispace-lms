@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
@@ -30,16 +31,20 @@ function SidebarUserAvatarSlot({
   user,
   userInitials,
   onClick,
+  onHover,
 }: {
   user: AuthUser;
   userInitials: string | null;
   onClick: () => void;
+  onHover?: () => void;
 }) {
   return (
     <Box
       component="button"
       type="button"
       onClick={onClick}
+      onMouseEnter={onHover}
+      onMouseOver={onHover}
       aria-label={user.name || "User Profile"}
       data-testid="sidebar-avatar-trigger"
       sx={{
@@ -182,16 +187,22 @@ export function SidebarUserSection({
   onAction,
 }: SidebarUserSectionProps) {
   const { t } = useTranslation("auth");
+  const [isSelfHovered, setIsSelfHovered] = useState(false);
 
   if (!user) return null;
 
+  const isEffectiveExtended = isExtended || isSelfHovered;
   const isImpersonating = Boolean(user.impersonating);
   const userInitials = computeUserInitials(user.name);
   const actionLabel = resolveActionLabel(isImpersonating, t);
-  const tooltipPlacement = isExtended ? "top" : "right";
+  const tooltipPlacement = isEffectiveExtended ? "top" : "right";
 
   return (
-    <UserCardSlot $isExtended={isExtended} data-testid="sidebar-user-card">
+    <UserCardSlot
+      $isExtended={isEffectiveExtended}
+      data-testid="sidebar-user-card"
+      onMouseEnter={() => setIsSelfHovered(true)}
+    >
       <Tooltip
         title={user.name || t("loginCard.profileAria", "Profile")}
         placement={tooltipPlacement}
@@ -202,6 +213,7 @@ export function SidebarUserSection({
             user={user}
             userInitials={userInitials}
             onClick={onOpenProfile}
+            onHover={() => setIsSelfHovered(true)}
           />
         </div>
       </Tooltip>
@@ -209,10 +221,10 @@ export function SidebarUserSection({
       <SidebarUserDetails
         name={user.name}
         role={user.role}
-        isExtended={isExtended}
+        isExtended={isEffectiveExtended}
       />
 
-      {isExtended && (
+      {isEffectiveExtended && (
         <SidebarUserActionButton
           isImpersonating={isImpersonating}
           actionLabel={actionLabel}

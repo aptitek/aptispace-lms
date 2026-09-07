@@ -12,7 +12,8 @@ const isTestOrStorybook =
   ) ||
   Boolean(
     process.env.npm_lifecycle_event?.includes("storybook") ||
-    process.env.npm_lifecycle_event?.includes("test"),
+    (process.env.npm_lifecycle_event?.includes("test") &&
+      !process.env.npm_lifecycle_event?.includes("e2e")),
   );
 
 function cloudflareDevPlugin() {
