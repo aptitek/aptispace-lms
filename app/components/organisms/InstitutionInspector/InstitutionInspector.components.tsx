@@ -269,6 +269,7 @@ export function InstitutionEmailCard({
   return (
     <Card
       variant="outlined"
+      isNested
       sx={{
         p: 2,
         borderRadius: "16px",

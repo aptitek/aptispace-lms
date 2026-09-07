@@ -51,24 +51,31 @@ interface AvatarMediaSlotProps {
   avatarUrl?: string;
   name?: string;
   role?: string | null;
-  fallbackAria: string;
+  fallbackAria?: string;
 }
 
 function AvatarMediaSlot({
   avatarUrl,
   name,
   role,
-  fallbackAria,
+  fallbackAria: _fallbackAria,
 }: AvatarMediaSlotProps) {
+  const [hasImgError, setHasImgError] = useState(false);
   const initials = computeUserInitials(name);
 
-  if (avatarUrl) {
+  useEffect(() => {
+    setHasImgError(false);
+  }, [avatarUrl]);
+
+  if (avatarUrl && !hasImgError) {
     return (
       <Box
         component="img"
         src={avatarUrl}
-        alt={name || fallbackAria}
+        alt=""
+        aria-hidden="true"
         loading="lazy"
+        onError={() => setHasImgError(true)}
       />
     );
   }

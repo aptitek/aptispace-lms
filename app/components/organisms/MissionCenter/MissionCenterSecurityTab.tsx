@@ -71,7 +71,7 @@ function IncidentCardItem({
         display: "flex",
         flexDirection: "column",
         gap: 1.5,
-        borderRadius: (theme) => theme.shape.corners.medium,
+        borderRadius: "16px",
         borderColor: isSelected
           ? theme.palette.primary.main
           : alpha(theme.palette.divider, 0.4),
@@ -217,7 +217,7 @@ function SecurityIncidentCardList({
           justifyContent: "center",
           textAlign: "center",
           gap: 1.5,
-          borderRadius: (theme) => theme.shape.corners.largeIncreased,
+          borderRadius: "16px",
         }}
         data-testid="security-incidents-table"
       >
@@ -297,7 +297,7 @@ function SecurityAlertBanner({ count }: { count: number }) {
         display: "flex",
         alignItems: "flex-start",
         gap: 2,
-        borderRadius: (theme) => theme.shape.corners.medium,
+        borderRadius: "16px",
         borderColor: alpha(statusColor, 0.4),
         backgroundColor: alpha(statusColor, 0.04),
       }}

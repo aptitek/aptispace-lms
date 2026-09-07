@@ -23,6 +23,7 @@ export interface CohortCardProps {
   cohort: CohortConfig;
   studentCount?: number;
   isSelected?: boolean;
+  isNested?: boolean;
   onClick?: (cohort: CohortConfig) => void;
 }
 
@@ -43,23 +44,41 @@ function resolveStartYear(dateString?: string | Date): number | null {
 }
 
 function resolveCohortDateRange(
-  start?: string | Date,
-  end?: string | Date,
-): string {
-  const startDate = formatCohortDate(start);
-  const endDate = formatCohortDate(end);
+  start?: string | Date | null,
+  end?: string | Date | null,
+) {
+  const startDate = formatCohortDate(start ?? undefined);
+  const endDate = formatCohortDate(end ?? undefined);
   if (startDate && endDate) {
     return `${startDate} - ${endDate}`;
   }
   return startDate || endDate || "No dates set";
 }
 
+function resolveBadgeContent(studentCount?: number) {
+  const count = studentCount ?? 0;
+  return {
+    badgeContent: count > 0 ? count : undefined,
+    invisible: count <= 0,
+  };
+}
+
+function resolveCardA11y(isInteractive: boolean, isSelected?: boolean) {
+  return {
+    tabIndex: isInteractive ? 0 : undefined,
+    role: isInteractive ? ("button" as const) : ("article" as const),
+    ariaSelected: isInteractive ? Boolean(isSelected) : undefined,
+    dataSelected: isSelected ? "true" : undefined,
+  };
+}
+
 export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
-  ({ cohort, studentCount = 0, isSelected, onClick }, ref) => {
+  (props, ref) => {
+    const { cohort, studentCount, isSelected, isNested, onClick } = props;
     const isInteractive = Boolean(onClick);
 
     const handleClick = () => {
-      if (onClick) onClick(cohort);
+      onClick?.(cohort);
     };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -71,11 +90,13 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
 
     const startYear = resolveStartYear(cohort.startDate);
     const dateRange = resolveCohortDateRange(cohort.startDate, cohort.endDate);
+    const badge = resolveBadgeContent(studentCount);
+    const a11y = resolveCardA11y(isInteractive, isSelected);
 
     return (
       <Badge
-        badgeContent={studentCount > 0 ? studentCount : undefined}
-        invisible={!studentCount || studentCount <= 0}
+        badgeContent={badge.badgeContent}
+        invisible={badge.invisible}
         color="secondary"
         max={9999}
         sx={{
@@ -92,12 +113,13 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
           ref={ref}
           isInteractive={isInteractive}
           isSelected={isSelected}
+          isNested={Boolean(isNested)}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
-          tabIndex={isInteractive ? 0 : undefined}
-          role={isInteractive ? "button" : "article"}
-          aria-selected={isInteractive ? Boolean(isSelected) : undefined}
-          data-selected={isSelected ? "true" : undefined}
+          tabIndex={a11y.tabIndex}
+          role={a11y.role}
+          aria-selected={a11y.ariaSelected}
+          data-selected={a11y.dataSelected}
           data-testid={`cohort-card-${cohort.id}`}
         >
           <Box

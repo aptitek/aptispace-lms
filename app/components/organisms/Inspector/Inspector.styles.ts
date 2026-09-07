@@ -17,6 +17,11 @@ export const InspectorContainer = styled(Card, {
   backgroundColor:
     theme.palette.surfaceContainer || theme.palette.background.paper,
   borderColor: theme.palette.divider,
+  "& .MuiCard-root, & [data-testid$='-card'], & [data-testid='inspector-user-card'], & [data-testid='inspector-institution-email-card'], & [data-testid='cohort-year-card']":
+    {
+      boxShadow: "none",
+      borderColor: "transparent",
+    },
 }));
 
 export const InspectorHeaderBox = styled(Box)(() => ({

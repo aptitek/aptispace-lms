@@ -46,8 +46,8 @@ import {
   type InstructorOption,
   type SessionOption,
 } from "./planning.types";
-import { PlanningHero } from "./planning.hero";
 import { CalendarHeaderTooltips } from "./planning.tooltips";
+import { PlanningSidepanelAction } from "./planning.sidepanel-action";
 import {
   CalendarSkeleton,
   CalendarErrorState,
@@ -299,16 +299,13 @@ export default function Planning() {
 
   return (
     <PlanningLayout
-      hero={
-        <PlanningHero
-          userRole={loaderData.user.role}
-          isAdmin={isAdmin}
-          onOpenExport={() => setIsExportModalOpen(true)}
-        />
-      }
       calendar={
         <CalendarFrame ref={calendarFrameRef}>
           <CalendarHeaderTooltips containerRef={calendarFrameRef} />
+          <PlanningSidepanelAction
+            containerRef={calendarFrameRef}
+            onOpenExport={() => setIsExportModalOpen(true)}
+          />
           {loadError ? (
             <CalendarErrorState
               onRetry={loadScheduler}
@@ -333,6 +330,7 @@ export default function Planning() {
               onEventEditingStart={handleEventEditingStart}
               views={["day", "week", "month", "agenda"]}
               defaultView="week"
+              defaultPreferences={{ isSidePanelOpen: false }}
               readOnly={!isAdmin}
               areEventsDraggable={isAdmin}
               areEventsResizable={isAdmin}

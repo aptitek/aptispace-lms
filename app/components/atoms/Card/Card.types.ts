@@ -5,6 +5,7 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
   isInteractive?: boolean;
   isSelected?: boolean;
+  isNested?: boolean;
   variant?: "elevated" | "elevation" | "outlined" | "dashed";
   className?: string;
   sx?: SxProps<Theme>;

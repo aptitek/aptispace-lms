@@ -116,6 +116,7 @@ export default function UserInspector({
           user={targetUser}
           school={activeSchool}
           cohort={activeCohort}
+          isNested={true}
           variant="outlined"
           interactive={false}
           editableGithub={true}

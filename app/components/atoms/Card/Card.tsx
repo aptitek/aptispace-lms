@@ -8,6 +8,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       children,
       isInteractive = false,
       isSelected = false,
+      isNested = false,
       variant = "elevated",
       className,
       sx,
@@ -20,6 +21,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         isInteractive={isInteractive}
         isSelected={isSelected}
+        isNested={isNested}
         variant={variant}
         role={isInteractive ? "button" : undefined}
         tabIndex={isInteractive ? 0 : undefined}

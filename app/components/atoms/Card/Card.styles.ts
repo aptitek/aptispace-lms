@@ -5,7 +5,7 @@ function resolveDashedCardStyles(theme: Theme, isInteractive?: boolean) {
   return {
     position: "relative" as const,
     width: "100%",
-    minWidth: "260px",
+    minWidth: "220px",
     maxWidth: "100%",
     borderRadius: "16px",
     padding: theme.spacing(3),
@@ -37,10 +37,10 @@ function resolveDashedCardStyles(theme: Theme, isInteractive?: boolean) {
         transform: "translateY(-3px)",
         borderColor: primary,
         backgroundColor: alpha(primary, 0.04),
-        boxShadow: `0 0 0 1px ${alpha(primary, 0.35)}`,
+        boxShadow: `0 8px 24px -4px ${alpha(primary, 0.15)}`,
         "& .md3-ghost-fab": {
           transform: "scale(1.1)",
-          boxShadow: `0 0 0 2px ${alpha(primary, 0.55)}`,
+          boxShadow: `0 8px 20px -2px ${alpha(primary, 0.55)}, 0 4px 10px -1px ${alpha(theme.palette.common.black, 0.25)}`,
         },
       },
       "&:focus-visible": {
@@ -58,20 +58,32 @@ function resolveDashedCardStyles(theme: Theme, isInteractive?: boolean) {
         "&:hover": {
           borderColor: primary,
           backgroundColor: alpha(primary, 0.08),
-          boxShadow: `0 0 0 1px ${alpha(primary, 0.5)}`,
+          boxShadow: `0 8px 24px -4px ${alpha(primary, 0.25)}`,
         },
       }),
     }),
   };
 }
 
-function resolveStandardSurface(theme: Theme, isSelected?: boolean) {
+function resolveStandardSurface(
+  theme: Theme,
+  isSelected?: boolean,
+  isNested?: boolean,
+) {
   const primary = theme.palette.primary.main;
   const bg = isSelected
     ? alpha(primary, 0.08)
-    : theme.palette.surfaceContainerLow || theme.palette.background.paper;
-  const border = `1px solid ${isSelected ? primary : alpha(theme.palette.divider, 0.2)}`;
-  const shadow = isSelected ? `0 0 0 1px ${primary}` : theme.shadows[1];
+    : isNested
+      ? alpha(
+          theme.palette.surfaceContainerLowest ||
+            theme.palette.background.paper,
+          0.5,
+        )
+      : theme.palette.surfaceContainerLow || theme.palette.background.paper;
+  const border = isNested
+    ? "none"
+    : `1px solid ${isSelected ? primary : alpha(theme.palette.divider, 0.2)}`;
+  const shadow = "none";
   return { bg, border, shadow };
 }
 
@@ -81,7 +93,7 @@ function resolveInteractiveHover(theme: Theme, isSelected?: boolean) {
     "&:hover": {
       transform: "translateY(-3px)",
       borderColor: isSelected ? primary : alpha(primary, 0.5),
-      boxShadow: `0 0 0 1px ${primary}`,
+      boxShadow: "none",
     },
     "&:focus-visible": {
       outline: `2px solid ${primary}`,
@@ -90,13 +102,23 @@ function resolveInteractiveHover(theme: Theme, isSelected?: boolean) {
   };
 }
 
-function resolveStandardDarkStyles(theme: Theme, isSelected?: boolean) {
+function resolveStandardDarkStyles(
+  theme: Theme,
+  isSelected?: boolean,
+  isNested?: boolean,
+) {
   const primary = theme.palette.primary.main;
   return {
     backgroundColor: isSelected
       ? alpha(primary, 0.16)
-      : theme.palette.surfaceContainerLow || theme.palette.background.paper,
-    boxShadow: isSelected ? `0 0 0 1px ${primary}` : theme.shadows[1],
+      : isNested
+        ? alpha(
+            theme.palette.surfaceContainerLowest ||
+              theme.palette.background.paper,
+            0.4,
+          )
+        : theme.palette.surfaceContainerLow || theme.palette.background.paper,
+    boxShadow: "none",
   };
 }
 
@@ -104,21 +126,26 @@ function resolveStandardCardStyles(
   theme: Theme,
   isInteractive?: boolean,
   isSelected?: boolean,
+  isNested?: boolean,
 ) {
-  const { bg, border, shadow } = resolveStandardSurface(theme, isSelected);
+  const { bg, border, shadow } = resolveStandardSurface(
+    theme,
+    isSelected,
+    isNested,
+  );
 
   return {
     position: "relative" as const,
     width: "100%",
-    minWidth: "260px",
+    minWidth: isNested ? "auto" : "220px",
     maxWidth: "100%",
     borderRadius: "16px",
     boxSizing: "border-box" as const,
     display: "flex",
     flexDirection: "column" as const,
     backgroundColor: bg,
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
+    backdropFilter: isNested ? "none" : "blur(12px)",
+    WebkitBackdropFilter: isNested ? "none" : "blur(12px)",
     border,
     boxShadow: shadow,
     cursor: isInteractive ? "pointer" : "default",
@@ -128,22 +155,29 @@ function resolveStandardCardStyles(
     ),
     userSelect: "none" as const,
     ...(isInteractive && resolveInteractiveHover(theme, isSelected)),
-    ...theme.applyStyles("dark", resolveStandardDarkStyles(theme, isSelected)),
+    ...theme.applyStyles(
+      "dark",
+      resolveStandardDarkStyles(theme, isSelected, isNested),
+    ),
   };
 }
 
 export const StyledCard = styled("div", {
   shouldForwardProp: (prop) =>
-    prop !== "isInteractive" && prop !== "isSelected" && prop !== "variant",
+    prop !== "isInteractive" &&
+    prop !== "isSelected" &&
+    prop !== "isNested" &&
+    prop !== "variant",
 })<{
   isInteractive?: boolean;
   isSelected?: boolean;
+  isNested?: boolean;
   variant?: "elevated" | "elevation" | "outlined" | "dashed";
-}>(({ theme, isInteractive, isSelected, variant = "elevated" }) => {
+}>(({ theme, isInteractive, isSelected, isNested, variant = "elevated" }) => {
   if (variant === "dashed") {
     return resolveDashedCardStyles(theme, isInteractive);
   }
-  return resolveStandardCardStyles(theme, isInteractive, isSelected);
+  return resolveStandardCardStyles(theme, isInteractive, isSelected, isNested);
 });
 
 export const DashedSkeletonCard = styled(StyledCard, {

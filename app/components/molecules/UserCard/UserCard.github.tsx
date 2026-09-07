@@ -119,7 +119,7 @@ export function CompactGithubChip({
       }}
     >
       <Chip
-        icon={<GitHubIcon sx={{ fontSize: 15 }} data-testid="octocat-icon" />}
+        icon={<GitHubIcon sx={{ fontSize: 13 }} data-testid="octocat-icon" />}
         label={formatGithubHandle(entity.githubUsername)}
         size="small"
         variant="outlined"
@@ -134,8 +134,8 @@ export function CompactGithubChip({
             : undefined
         }
         sx={{
-          height: 24,
-          fontSize: "0.75rem",
+          height: 22,
+          fontSize: "0.7rem",
           fontWeight: 600,
           backgroundColor: "background.paper",
           border: (theme: { palette: { divider: string } }) =>

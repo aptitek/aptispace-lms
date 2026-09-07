@@ -216,6 +216,7 @@ export function MissionCenterUserProfileCard({
           interactive={false}
           showDelete={false}
           showImpersonate={showImpersonate}
+          isNested={true}
           variant="outlined"
           testId="mission-center-entity-card"
         />

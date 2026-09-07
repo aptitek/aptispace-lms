@@ -114,7 +114,7 @@ export const NetworkMetaCard = styled(Box)(({ theme }) => ({
   flexDirection: "column",
   gap: theme.spacing(1),
   padding: theme.spacing(2),
-  borderRadius: theme.shape.borderRadius,
+  borderRadius: "16px",
   backgroundColor: alpha(theme.palette.primary.main, 0.04),
   border: `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
 }));

@@ -1,17 +1,18 @@
-import { styled, alpha } from "@mui/material/styles";
+import { styled, alpha, type Theme } from "@mui/material/styles";
 import { StyledCard, DashedSkeletonCard, FabOverlay } from "../../atoms/Card";
 
 export { FabOverlay, DashedSkeletonCard };
 
 export const CardContainer = styled(StyledCard)(({ theme }) => ({
-  padding: theme.spacing(3),
+  padding: theme.spacing(1.25, 1.5),
+  minWidth: "220px",
   alignItems: "center",
   justifyContent: "center",
-  gap: theme.spacing(2),
+  gap: theme.spacing(1.25),
 }));
 
 export const LogoContainer = styled("div")({
-  height: "60px",
+  height: "44px",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -25,7 +26,7 @@ export const LogoImage = styled("img")({
 });
 
 export const InstitutionName = styled("div")(({ theme }) => ({
-  fontSize: "1.1rem",
+  fontSize: "0.95rem",
   fontWeight: 700,
   color: theme.palette.text.primary,
   textAlign: "center",
@@ -35,36 +36,61 @@ export const InstitutionName = styled("div")(({ theme }) => ({
   textOverflow: "ellipsis",
 }));
 
+function getSkeletonBg(theme: Theme, isGhost?: boolean) {
+  return isGhost
+    ? alpha(theme.palette.background.paper, 0.45)
+    : theme.palette.background.paper;
+}
+
+function getSkeletonBorder(theme: Theme, isGhost?: boolean) {
+  return isGhost
+    ? `1.5px dashed ${alpha(theme.palette.divider, 0.35)}`
+    : `1px solid ${alpha(theme.palette.divider, 0.4)}`;
+}
+
 export const SkeletonContainer = styled(DashedSkeletonCard)(({ theme }) => ({
-  padding: theme.spacing(3),
+  padding: theme.spacing(1.25, 1.5),
 }));
 
 export const SkeletonCardContainer = styled(StyledCard, {
   shouldForwardProp: (prop) =>
-    prop !== "isGhost" && prop !== "isInteractive" && prop !== "opacity",
+    prop !== "animated" &&
+    prop !== "opacity" &&
+    prop !== "isGhost" &&
+    prop !== "isInteractive",
 })<{
+  animated?: boolean;
+  opacity?: number;
   isGhost?: boolean;
   isInteractive?: boolean;
-  opacity?: number;
-}>(({ theme, isGhost, isInteractive, opacity }) => {
+}>(({ theme, opacity, isGhost, isInteractive }) => {
   const primary = theme.palette.primary.main;
+  const bg = getSkeletonBg(theme, isGhost);
+  const border = getSkeletonBorder(theme, isGhost);
+
   return {
-    padding: theme.spacing(3),
-    alignItems: "center",
-    justifyContent: "center",
-    gap: theme.spacing(2),
     position: "relative",
     width: "100%",
+    minWidth: "220px",
+    maxWidth: "100%",
+    borderRadius: "16px",
+    display: "flex",
+    flexDirection: "column",
     boxSizing: "border-box",
-    cursor: isInteractive ? "pointer" : "default",
-    pointerEvents: isInteractive ? "auto" : "none",
+    padding: theme.spacing(1.25, 1.5),
+    alignItems: "center",
+    justifyContent: "center",
+    gap: theme.spacing(1.25),
     opacity: opacity ?? 1,
-    border: isGhost
-      ? `2px dashed ${alpha(primary, 0.35)}`
-      : `1px solid ${alpha(theme.palette.divider, 0.4)}`,
-    backgroundColor: isGhost
-      ? "transparent"
-      : theme.palette.surfaceContainerLow || theme.palette.background.paper,
+    pointerEvents: isInteractive ? "auto" : "none",
+    cursor: isInteractive ? "pointer" : "default",
+    backgroundColor: bg,
+    border,
+    boxShadow: "none",
+    backdropFilter: isGhost ? "blur(8px)" : undefined,
+    WebkitBackdropFilter: isGhost ? "blur(8px)" : undefined,
+    overflow: "hidden",
+    userSelect: "none",
     transition: theme.transitions.create(
       ["transform", "box-shadow", "border-color", "background-color"],
       { duration: theme.transitions.duration.shorter },
@@ -75,11 +101,22 @@ export const SkeletonCardContainer = styled(StyledCard, {
         borderColor: primary,
         backgroundColor: alpha(primary, 0.04),
         boxShadow: `0 8px 24px -4px ${alpha(primary, 0.15)}`,
+        "& .md3-ghost-fab": {
+          transform: "scale(1.1)",
+          boxShadow: `0 8px 20px -2px ${alpha(primary, 0.55)}, 0 4px 10px -1px ${alpha(theme.palette.common.black, 0.25)}`,
+        },
       },
       "&:focus-visible": {
         outline: `2px solid ${primary}`,
         outlineOffset: "2px",
       },
+    }),
+    ...theme.applyStyles("dark", {
+      backgroundColor: isGhost
+        ? alpha(theme.palette.background.paper, 0.35)
+        : theme.palette.background.paper,
+      borderColor: isGhost ? alpha(theme.palette.divider, 0.25) : undefined,
+      boxShadow: "none",
     }),
   };
 });

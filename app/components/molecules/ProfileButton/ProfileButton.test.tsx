@@ -131,4 +131,32 @@ describe("ProfileButton Molecule (MD3 Morphing Avatar & Logout Button)", () => {
     expect(onReturnToAdmin).toHaveBeenCalledTimes(1);
     expect(onLogout).not.toHaveBeenCalled();
   });
+
+  it("falls back to initials when avatar image fails to load", () => {
+    const userWithImage = {
+      ...mockUser,
+      name: "Sarah Connor",
+      avatarUrl: "https://example.com/broken.jpg",
+    };
+
+    renderWithTheme(
+      <ProfileButton
+        user={userWithImage}
+        variant="default"
+        avatarTestId="test-avatar-trigger"
+      />,
+    );
+
+    const trigger = screen.getByTestId("test-avatar-trigger");
+    const img = trigger.querySelector("img");
+    expect(img).not.toBeNull();
+
+    // Trigger image error
+    fireEvent.error(img!);
+
+    // Should switch from img to initials "SC", not "Sarah Connor"
+    expect(trigger.querySelector("img")).toBeNull();
+    expect(trigger.textContent).toContain("SC");
+    expect(trigger.textContent).not.toContain("Sarah");
+  });
 });

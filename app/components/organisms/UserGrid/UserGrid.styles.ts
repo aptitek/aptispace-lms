@@ -79,7 +79,7 @@ export const GridSearchField = styled(TextField)(({ theme }) => {
 export const MD3CollectionGrid = styled("div")(({ theme }) => ({
   display: "grid",
   width: "100%",
-  gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
   gap: theme.spacing(2),
   justifyItems: "stretch",
   alignItems: "stretch",

@@ -1,15 +1,16 @@
-import { styled, alpha } from "@mui/material/styles";
+import { styled, alpha, type Theme } from "@mui/material/styles";
 import { StyledCard, DashedSkeletonCard, FabOverlay } from "../../atoms/Card";
 
 export { FabOverlay, DashedSkeletonCard };
 
 export const CardContainer = styled(StyledCard)(({ theme }) => ({
-  padding: theme.spacing(2.5),
-  gap: theme.spacing(1),
+  padding: theme.spacing(1.25, 1.5),
+  minWidth: "220px",
+  gap: theme.spacing(0.75),
 }));
 
 export const CohortName = styled("div")(({ theme }) => ({
-  fontSize: "1.05rem",
+  fontSize: "1rem",
   fontWeight: 700,
   color: theme.palette.text.primary,
   whiteSpace: "nowrap",
@@ -18,14 +19,14 @@ export const CohortName = styled("div")(({ theme }) => ({
 }));
 
 export const CohortDescription = styled("div")(({ theme }) => ({
-  fontSize: "0.85rem",
+  fontSize: "0.8125rem",
   color: theme.palette.text.secondary,
-  lineHeight: 1.4,
+  lineHeight: 1.35,
   display: "-webkit-box",
   WebkitLineClamp: 2,
   WebkitBoxOrient: "vertical",
   overflow: "hidden",
-  minHeight: "2.8em",
+  minHeight: "2.4em",
 }));
 
 export const CohortHeaderRow = styled("div")({
@@ -40,7 +41,7 @@ export const CohortMetaRow = styled("div")(({ theme }) => ({
   alignItems: "center",
   justifyContent: "space-between",
   marginTop: "auto",
-  paddingTop: theme.spacing(1),
+  paddingTop: theme.spacing(0.75),
   borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
   fontSize: "0.75rem",
   color: theme.palette.text.secondary,
@@ -51,40 +52,65 @@ export const CohortMetaRow = styled("div")(({ theme }) => ({
 export const CohortDates = styled("div")(({ theme }) => ({
   fontSize: "0.75rem",
   color: theme.palette.text.disabled,
-  marginTop: theme.spacing(1),
+  marginTop: theme.spacing(0.5),
   fontWeight: 600,
   textTransform: "uppercase",
   letterSpacing: "0.05em",
 }));
 
+function getSkeletonBg(theme: Theme, isGhost?: boolean) {
+  return isGhost
+    ? alpha(theme.palette.background.paper, 0.45)
+    : theme.palette.background.paper;
+}
+
+function getSkeletonBorder(theme: Theme, isGhost?: boolean) {
+  return isGhost
+    ? `1.5px dashed ${alpha(theme.palette.divider, 0.35)}`
+    : `1px solid ${alpha(theme.palette.divider, 0.4)}`;
+}
+
 export const SkeletonContainer = styled(DashedSkeletonCard)(({ theme }) => ({
-  padding: theme.spacing(2.5),
+  padding: theme.spacing(1.25, 1.5),
 }));
 
 export const SkeletonCardContainer = styled(StyledCard, {
   shouldForwardProp: (prop) =>
-    prop !== "isGhost" && prop !== "isInteractive" && prop !== "opacity",
+    prop !== "animated" &&
+    prop !== "opacity" &&
+    prop !== "isGhost" &&
+    prop !== "isInteractive",
 })<{
+  animated?: boolean;
+  opacity?: number;
   isGhost?: boolean;
   isInteractive?: boolean;
-  opacity?: number;
-}>(({ theme, isGhost, isInteractive, opacity }) => {
-  const secondary = theme.palette.secondary.main;
+}>(({ theme, opacity, isGhost, isInteractive }) => {
+  const primary = theme.palette.primary.main;
+  const bg = getSkeletonBg(theme, isGhost);
+  const border = getSkeletonBorder(theme, isGhost);
+
   return {
-    padding: theme.spacing(2.5),
-    gap: theme.spacing(1),
     position: "relative",
     width: "100%",
+    minWidth: "220px",
+    maxWidth: "100%",
+    borderRadius: "16px",
+    display: "flex",
+    flexDirection: "column",
     boxSizing: "border-box",
-    cursor: isInteractive ? "pointer" : "default",
-    pointerEvents: isInteractive ? "auto" : "none",
+    padding: theme.spacing(1.25, 1.5),
+    gap: theme.spacing(0.75),
     opacity: opacity ?? 1,
-    border: isGhost
-      ? `2px dashed ${alpha(secondary, 0.35)}`
-      : `1px solid ${alpha(theme.palette.divider, 0.4)}`,
-    backgroundColor: isGhost
-      ? "transparent"
-      : theme.palette.surfaceContainerLow || theme.palette.background.paper,
+    pointerEvents: isInteractive ? "auto" : "none",
+    cursor: isInteractive ? "pointer" : "default",
+    backgroundColor: bg,
+    border,
+    boxShadow: "none",
+    backdropFilter: isGhost ? "blur(8px)" : undefined,
+    WebkitBackdropFilter: isGhost ? "blur(8px)" : undefined,
+    overflow: "hidden",
+    userSelect: "none",
     transition: theme.transitions.create(
       ["transform", "box-shadow", "border-color", "background-color"],
       { duration: theme.transitions.duration.shorter },
@@ -92,14 +118,25 @@ export const SkeletonCardContainer = styled(StyledCard, {
     ...(isInteractive && {
       "&:hover": {
         transform: "translateY(-3px)",
-        borderColor: secondary,
-        backgroundColor: alpha(secondary, 0.04),
-        boxShadow: `0 8px 24px -4px ${alpha(secondary, 0.15)}`,
+        borderColor: primary,
+        backgroundColor: alpha(primary, 0.04),
+        boxShadow: `0 8px 24px -4px ${alpha(primary, 0.15)}`,
+        "& .md3-ghost-fab": {
+          transform: "scale(1.1)",
+          boxShadow: `0 8px 20px -2px ${alpha(primary, 0.55)}, 0 4px 10px -1px ${alpha(theme.palette.common.black, 0.25)}`,
+        },
       },
       "&:focus-visible": {
-        outline: `2px solid ${secondary}`,
+        outline: `2px solid ${primary}`,
         outlineOffset: "2px",
       },
+    }),
+    ...theme.applyStyles("dark", {
+      backgroundColor: isGhost
+        ? alpha(theme.palette.background.paper, 0.35)
+        : theme.palette.background.paper,
+      borderColor: isGhost ? alpha(theme.palette.divider, 0.25) : undefined,
+      boxShadow: "none",
     }),
   };
 });

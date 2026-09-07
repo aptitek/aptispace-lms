@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import Avatar, { isUnnamedUser } from "./Avatar";
+import Avatar, { isUnnamedUser, getAvatarInitials } from "./Avatar";
 import { ISO_19794_5_CONSTANTS } from "./Avatar.types";
 import { resolveAvatarShapeRadius } from "./Avatar.styles";
 import { getRoleAvatarShape } from "~/tokens/shapes";
@@ -104,5 +104,41 @@ describe("Avatar Component & MD3 Shape Scale", () => {
     expect(getRoleAvatarShape("instructor")).toBe("ghost-ish");
     expect(getRoleAvatarShape("admin")).toBe("9-sided-cookie");
     expect(getRoleAvatarShape(undefined)).toBe("pill");
+  });
+
+  it("extracts 2-letter uppercase initials instead of full name", () => {
+    expect(getAvatarInitials("Arthur Dent")).toBe("AD");
+    expect(getAvatarInitials("Ford Prefect")).toBe("FP");
+    expect(getAvatarInitials("Zaphod")).toBe("ZA");
+    expect(getAvatarInitials("Tricia Marie McMillan")).toBe("TM");
+    expect(getAvatarInitials("student")).toBeNull();
+    expect(getAvatarInitials(undefined, "Arthur Dent")).toBe("AD");
+  });
+
+  it("falls back to initials when image fails to load", async () => {
+    const { render, screen, fireEvent } =
+      await import("@testing-library/react");
+    render(
+      <Avatar
+        src="https://invalid-domain.test/broken-avatar.png"
+        name="Arthur Dent"
+        alt="Arthur Dent"
+        testId="test-avatar"
+      />,
+    );
+
+    // Initially, image is rendered
+    const img = screen.getByRole("img");
+    expect(img).toBeDefined();
+
+    // Trigger image error
+    fireEvent.error(img);
+
+    // Image is removed, fallback initials container is rendered with initials "AD" instead of full name
+    expect(screen.queryByRole("img")).toBeNull();
+    const initialsHolder = screen.getByTestId("avatar-initials-holder");
+    expect(initialsHolder).toBeDefined();
+    expect(initialsHolder.textContent).toBe("AD");
+    expect(initialsHolder.textContent).not.toBe("Arthur Dent");
   });
 });

@@ -131,10 +131,10 @@ export function UserCardSkeleton(props: UserCardSkeletonProps) {
           <SkeletonAvatarContainer>
             <Skeleton
               variant="rectangular"
-              width={80}
-              height={80}
+              width={56}
+              height={56}
               animation={config.animation}
-              sx={{ borderRadius: "16px" }}
+              sx={{ borderRadius: "12px" }}
             />
           </SkeletonAvatarContainer>
 
@@ -150,7 +150,7 @@ export function UserCardSkeleton(props: UserCardSkeletonProps) {
               <Skeleton
                 variant="text"
                 width="85%"
-                height={20}
+                height={18}
                 animation={config.animation}
                 sx={{ borderRadius: "4px" }}
               />
@@ -167,15 +167,15 @@ export function UserCardSkeleton(props: UserCardSkeletonProps) {
             <SkeletonFooterRow>
               <Skeleton
                 variant="rounded"
-                width={75}
+                width={70}
                 height={20}
                 animation={config.animation}
-                sx={{ borderRadius: "8px" }}
+                sx={{ borderRadius: "4px" }}
               />
               <Skeleton
                 variant="circular"
-                width={24}
-                height={24}
+                width={22}
+                height={22}
                 animation={config.animation}
               />
             </SkeletonFooterRow>

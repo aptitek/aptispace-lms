@@ -158,8 +158,8 @@ function CompactAvatarSlot({
         src={entity.avatarUrl}
         role={role}
         shape={roleConfig.avatarShape}
-        width={80}
-        height={80}
+        width={56}
+        height={56}
         isPortrait={false}
         testId="compact-avatar"
       />
@@ -262,7 +262,7 @@ function CompactStudentDetailsSlot({
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 0.75,
+            gap: 0.5,
             flexShrink: 0,
           }}
         >
@@ -274,7 +274,7 @@ function CompactStudentDetailsSlot({
                 aria-label={impersonateLabel}
                 data-testid="compact-impersonate-btn"
               >
-                <LoginRoundedIcon sx={{ fontSize: 14 }} />
+                <LoginRoundedIcon sx={{ fontSize: 13 }} />
               </ImpersonateIconButton>
             </Tooltip>
           )}
@@ -295,18 +295,18 @@ function CompactStudentDetailsSlot({
                   aria-label={deleteLabel}
                   data-testid="compact-delete-btn"
                   wrapperSx={{
-                    width: 24,
-                    height: 24,
-                    minWidth: 24,
-                    maxWidth: 24,
-                    minHeight: 24,
-                    maxHeight: 24,
+                    width: 22,
+                    height: 22,
+                    minWidth: 22,
+                    maxWidth: 22,
+                    minHeight: 22,
+                    maxHeight: 22,
                     flexShrink: 0,
                     display: "inline-flex",
                   }}
                   sx={deleteHoldButtonSx}
                 >
-                  <DeleteOutlineRoundedIcon sx={{ fontSize: 14 }} />
+                  <DeleteOutlineRoundedIcon sx={{ fontSize: 13 }} />
                 </HoldButton>
               </DeleteHoldWrapper>
             </Tooltip>
@@ -317,29 +317,57 @@ function CompactStudentDetailsSlot({
   );
 }
 
+function resolveUserCardTarget(
+  user?: UserCardProps["user"],
+  entity?: UserCardProps["entity"],
+) {
+  return user ?? entity;
+}
+
+function normalizeUserCardProps(props: UserCardProps) {
+  return {
+    targetUser: resolveUserCardTarget(props.user, props.entity),
+    school: props.school ?? DEFAULT_SCHOOL,
+    cohort: props.cohort,
+    variant: props.variant ?? "elevation",
+    onClick: props.onClick,
+    onImpersonate: props.onImpersonate,
+    showImpersonate: props.showImpersonate !== false,
+    onDelete: props.onDelete,
+    showDelete: props.showDelete !== false,
+    interactive: props.interactive !== false,
+    isSelected: Boolean(props.isSelected),
+    isNested: Boolean(props.isNested),
+    editableGithub: Boolean(props.editableGithub),
+    onUpdateGithub: props.onUpdateGithub,
+    className: props.className,
+    testId: props.testId,
+    style: props.style,
+  };
+}
+
 export const UserCard = forwardRef<HTMLDivElement, UserCardProps>(
   (props, ref) => {
     const {
-      user,
-      entity,
-      school = DEFAULT_SCHOOL,
+      targetUser,
+      school,
       cohort,
-      variant = "elevation",
+      variant,
       onClick,
       onImpersonate,
-      showImpersonate = true,
+      showImpersonate,
       onDelete,
-      showDelete = true,
-      interactive = true,
-      isSelected = false,
-      editableGithub = false,
+      showDelete,
+      interactive,
+      isSelected,
+      isNested,
+      editableGithub,
       onUpdateGithub,
       className,
       testId,
       style,
-    } = props;
+    } = normalizeUserCardProps(props);
 
-    const targetUser = user ?? entity;
     const { isInteractive, handleClick, handleKeyDown } =
       resolveCardInteractivity(interactive, onClick, targetUser);
 
@@ -355,6 +383,7 @@ export const UserCard = forwardRef<HTMLDivElement, UserCardProps>(
         variant={variant}
         isInteractive={isInteractive}
         isSelected={isSelected}
+        isNested={isNested}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         tabIndex={a11y.tabIndex}

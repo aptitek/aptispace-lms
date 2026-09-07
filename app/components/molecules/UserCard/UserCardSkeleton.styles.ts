@@ -33,7 +33,7 @@ export const SkeletonCardContainer = styled(Card, {
   return {
     position: "relative",
     width: "100%",
-    minWidth: "260px",
+    minWidth: "220px",
     maxWidth: "100%",
     borderRadius: "16px",
     display: "flex",
@@ -44,6 +44,7 @@ export const SkeletonCardContainer = styled(Card, {
     cursor: isInteractive ? "pointer" : "default",
     backgroundColor: bg,
     border,
+    boxShadow: "none",
     backdropFilter: isGhost ? "blur(8px)" : undefined,
     WebkitBackdropFilter: isGhost ? "blur(8px)" : undefined,
     overflow: "hidden",
@@ -73,6 +74,7 @@ export const SkeletonCardContainer = styled(Card, {
         ? alpha(theme.palette.background.paper, 0.35)
         : theme.palette.background.paper,
       borderColor: isGhost ? alpha(theme.palette.divider, 0.25) : undefined,
+      boxShadow: "none",
     }),
   };
 });
@@ -82,10 +84,10 @@ export { FabOverlay } from "../../atoms/Card";
 export const SkeletonCardContent = styled(CardContent)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  gap: theme.spacing(1.25),
-  padding: theme.spacing(1.5, 2, 2),
+  gap: theme.spacing(1),
+  padding: theme.spacing(1.25, 1.5, 1.25),
   "&:last-child": {
-    paddingBottom: theme.spacing(2),
+    paddingBottom: theme.spacing(1.25),
   },
 }));
 
@@ -107,17 +109,17 @@ export const SkeletonHeaderBadges = styled("div")(({ theme }) => ({
 export const SkeletonBodyRow = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  gap: theme.spacing(2),
+  gap: theme.spacing(1.5),
   width: "100%",
   minWidth: 0,
 }));
 
 export const SkeletonAvatarContainer = styled("div")({
   position: "relative",
-  width: "80px",
-  height: "80px",
-  minWidth: "80px",
-  maxWidth: "80px",
+  width: "56px",
+  height: "56px",
+  minWidth: "56px",
+  maxWidth: "56px",
   flexShrink: 0,
   display: "flex",
   alignItems: "center",
@@ -128,10 +130,10 @@ export const SkeletonDetailsContainer = styled("div")({
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
-  minHeight: "80px",
+  minHeight: "56px",
   minWidth: 0,
   flex: 1,
-  gap: "4px",
+  gap: "2px",
 });
 
 export const SkeletonNameBlock = styled("div")({

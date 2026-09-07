@@ -21,11 +21,15 @@ export interface InstitutionCardProps {
   school: SchoolConfig;
   studentCount?: number;
   isSelected?: boolean;
+  isNested?: boolean;
   onClick?: (school: SchoolConfig) => void;
 }
 
 export const InstitutionCard = forwardRef<HTMLDivElement, InstitutionCardProps>(
-  ({ school, studentCount = 0, isSelected, onClick }, ref) => {
+  (
+    { school, studentCount = 0, isSelected, isNested = false, onClick },
+    ref,
+  ) => {
     const isInteractive = Boolean(onClick);
 
     const handleClick = () => {
@@ -59,6 +63,7 @@ export const InstitutionCard = forwardRef<HTMLDivElement, InstitutionCardProps>(
           ref={ref}
           isInteractive={isInteractive}
           isSelected={isSelected}
+          isNested={isNested}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
           tabIndex={isInteractive ? 0 : undefined}
@@ -69,12 +74,12 @@ export const InstitutionCard = forwardRef<HTMLDivElement, InstitutionCardProps>(
             <InstitutionLogo
               logoUrl={school.logoUrl}
               name={school.name}
-              height={40}
-              maxWidth={140}
+              height={36}
+              maxWidth={120}
               testId={`institution-card-logo-${school.id}`}
               fallback={
                 <SchoolRoundedIcon
-                  sx={{ fontSize: 40, color: "text.secondary", opacity: 0.5 }}
+                  sx={{ fontSize: 36, color: "text.secondary", opacity: 0.5 }}
                 />
               }
             />

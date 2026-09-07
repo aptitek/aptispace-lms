@@ -50,6 +50,7 @@ export interface UserCardProps {
   onUpdateGithub?: (userId: string, newGithubUsername: string) => void;
   interactive?: boolean;
   isSelected?: boolean;
+  isNested?: boolean;
   className?: string;
   testId?: string;
   style?: React.CSSProperties;

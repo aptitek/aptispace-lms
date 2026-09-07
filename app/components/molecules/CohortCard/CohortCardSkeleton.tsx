@@ -135,6 +135,7 @@ export function CohortCardSkeleton(props: CohortCardSkeletonProps) {
         <FabOverlay>
           <FloatingActionButton
             tooltip={resolvedTooltip}
+            onClick={props.onClick}
             testId="cohort-ghost-fab"
           />
         </FabOverlay>

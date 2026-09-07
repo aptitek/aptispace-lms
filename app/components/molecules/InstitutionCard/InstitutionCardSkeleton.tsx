@@ -130,6 +130,7 @@ export function InstitutionCardSkeleton(props: InstitutionCardSkeletonProps) {
         <FabOverlay>
           <FloatingActionButton
             tooltip={resolvedTooltip}
+            onClick={props.onClick}
             testId="institution-ghost-fab"
           />
         </FabOverlay>

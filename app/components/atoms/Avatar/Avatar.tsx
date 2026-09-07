@@ -1,4 +1,4 @@
-import { forwardRef, type ReactNode } from "react";
+import { forwardRef, useState, useEffect, type ReactNode } from "react";
 import Box from "@mui/material/Box";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import { type AvatarProps } from "./Avatar.types";
@@ -22,7 +22,7 @@ export function isUnnamedUser(name?: string): boolean {
   return false;
 }
 
-function getAvatarInitials(name?: string, alt?: string): string | null {
+export function getAvatarInitials(name?: string, alt?: string): string | null {
   const target = name?.trim() || (alt && alt !== "Avatar" ? alt.trim() : "");
   if (!target || isUnnamedUser(target)) return null;
   const parts = target.split(/\s+/).filter(Boolean);
@@ -36,23 +36,44 @@ function getAvatarInitials(name?: string, alt?: string): string | null {
 interface RenderAvatarContentOptions {
   src?: string;
   alt?: string;
+  hasImgError?: boolean;
+  onImgError?: () => void;
   children?: ReactNode;
   initials?: string | null;
   placeholderIcon?: ReactNode;
 }
 
 function renderAvatarContent(options: RenderAvatarContentOptions): ReactNode {
-  const { src, alt, children, initials, placeholderIcon } = options;
-  if (src) {
+  const {
+    src,
+    alt,
+    hasImgError,
+    onImgError,
+    children,
+    initials,
+    placeholderIcon,
+  } = options;
+
+  if (src && !hasImgError) {
     return (
-      <Box component="img" src={src} alt={alt ?? "Avatar"} loading="lazy" />
+      <Box
+        component="img"
+        src={src}
+        alt={alt ?? "Avatar"}
+        loading="lazy"
+        onError={onImgError}
+      />
     );
   }
   if (children) {
     return children;
   }
   if (initials) {
-    return <FallbackAvatarHolder>{initials}</FallbackAvatarHolder>;
+    return (
+      <FallbackAvatarHolder data-testid="avatar-initials-holder">
+        {initials}
+      </FallbackAvatarHolder>
+    );
   }
   if (placeholderIcon) {
     return <FallbackAvatarHolder>{placeholderIcon}</FallbackAvatarHolder>;
@@ -73,14 +94,7 @@ export function resolveAvatarShape(
   return "circular";
 }
 
-function resolveAvatarInitials(
-  shape: AvatarProps["shape"],
-  name?: string,
-  alt?: string,
-) {
-  if (shape === "landscape" && name) {
-    return name;
-  }
+export function resolveAvatarInitials(name?: string, alt?: string) {
   return getAvatarInitials(name, alt);
 }
 
@@ -107,12 +121,20 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
       overlay,
     } = props;
 
+    const [hasImgError, setHasImgError] = useState(false);
+
+    useEffect(() => {
+      setHasImgError(false);
+    }, [src]);
+
     const resolvedShape = resolveAvatarShape(shape, role);
-    const initials = resolveAvatarInitials(resolvedShape, name, alt);
+    const initials = resolveAvatarInitials(name, alt);
     const resolvedTestId = testId ?? dataTestId ?? "avatar";
     const content = renderAvatarContent({
       src,
       alt,
+      hasImgError,
+      onImgError: () => setHasImgError(true),
       children,
       initials,
       placeholderIcon,
