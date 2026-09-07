@@ -43,6 +43,13 @@
 [x] In User inspector, the cohort assignement needs to hapen on selection, no need for add button
 [x] MissionCenter main table needs to be in a card not a pill
 [x] Better contrast in devImpersonator for new account text
+[ ] EntityCards have all a double border. Please avoid double nested comtainers.
+[ ] Make the Skeleton cards unified in style by keeping the UserCardSkeleton one as example.
+[ ] Avatar needs Initials as fallback when there's a problem rendering the image not the full name
+[ ] Make the institution and cohort cards more compact
+[ ] In security sentinel the various components are in pillshaped containeds instead of normal Cards
+[ ] In planning the Calendar sidepannel should be collapse by default
+[ ] The export-suscribe button in planning needs to be in the calendar sidepannel under the month view that way we can remove the page header
 
 --- MANUAL TASKS ---
 

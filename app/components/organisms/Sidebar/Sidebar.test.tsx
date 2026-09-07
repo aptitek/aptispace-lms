@@ -1,12 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
-import {
-  render,
-  screen,
-  fireEvent,
-  cleanup,
-  act,
-} from "@testing-library/react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { ThemeProvider } from "@mui/material/styles";
 import { I18nextProvider } from "react-i18next";
 import i18n from "~/i18n";
@@ -42,7 +36,6 @@ function renderSidebar(props: React.ComponentProps<typeof Sidebar>) {
 describe("Sidebar Component", () => {
   afterEach(() => {
     cleanup();
-    vi.useRealTimers();
   });
 
   it("renders with regular student user, shows favicon, tab icons, and bottom controls", () => {
@@ -74,70 +67,53 @@ describe("Sidebar Component", () => {
     expect(statusSlot).toBeDefined();
   });
 
-  it("waits for hover delay before extending and cancels if mouse leaves early", () => {
-    vi.useFakeTimers();
+  it("keeps sidebar rail non-extensible and expands ProfileButton logout button on hover", () => {
     const onLogout = vi.fn();
     renderSidebar({
       user: testStudentUser,
       onLogout,
-      hoverDelay: 1200,
       "data-testid": "app-sidebar",
     });
 
     const sidebar = screen.getByTestId("app-sidebar");
+    expect(sidebar).toBeDefined();
 
-    // Mouse enters: immediately, it should NOT be extended yet
-    fireEvent.mouseEnter(sidebar);
-    expect(screen.queryByTestId("sidebar-logout-button")).toBeNull();
+    const profileContainer = screen.getByTestId("profile-button");
+    expect(profileContainer).toBeDefined();
 
-    // Mouse leaves after 400ms (before 1200ms delay)
-    act(() => {
-      vi.advanceTimersByTime(400);
-    });
-    fireEvent.mouseLeave(sidebar);
-
-    // Fast-forward past 1200ms: still should NOT be extended
-    act(() => {
-      vi.advanceTimersByTime(1200);
-    });
-    expect(screen.queryByTestId("sidebar-logout-button")).toBeNull();
-
-    // Now mouse enters and stays for full delay
-    fireEvent.mouseEnter(sidebar);
-    act(() => {
-      vi.advanceTimersByTime(1200);
-    });
-
-    // Now it should be extended!
+    // Hovering the profile button extends the logout button
+    fireEvent.mouseEnter(profileContainer);
     const logoutBtn = screen.getByTestId("sidebar-logout-button");
     expect(logoutBtn).toBeDefined();
+
     fireEvent.click(logoutBtn);
     expect(onLogout).toHaveBeenCalled();
+
+    // Mouse leave collapses the logout button
+    fireEvent.mouseLeave(profileContainer);
   });
 
-  it("extends immediately on click without waiting for hover delay and collapses on click outside", () => {
-    vi.useFakeTimers();
+  it("expands logo smoothly on hover and collapses on mouse leave", () => {
     renderSidebar({
       user: testStudentUser,
-      hoverDelay: 2000,
       "data-testid": "app-sidebar",
     });
 
-    const sidebar = screen.getByTestId("app-sidebar");
+    const logoLink = screen.getByTestId("sidebar-logo-link");
+    expect(logoLink).toBeDefined();
+    const logoText = screen.getByTestId("sidebar-logo-text");
+    expect(logoText).toBeDefined();
+    expect(logoText.textContent).toContain("AptiSpace");
 
-    // Initially collapsed
-    expect(screen.queryByTestId("sidebar-logout-button")).toBeNull();
+    // Hovering logo extends it
+    fireEvent.mouseEnter(logoLink);
+    expect(logoLink).toBeDefined();
 
-    // Clicking rail immediately extends it!
-    fireEvent.click(sidebar);
-    expect(screen.getByTestId("sidebar-logout-button")).toBeDefined();
-
-    // Clicking outside collapses it back
-    fireEvent.mouseDown(document.body);
-    expect(screen.queryByTestId("sidebar-logout-button")).toBeNull();
+    // Mouse leave collapses it
+    fireEvent.mouseLeave(logoLink);
   });
 
-  it("renders admin tab when user has admin role", () => {
+  it("renders admin tab when user has admin role and expands on hover", () => {
     const adminUser: AuthUser = {
       id: "admin-1",
       name: "Trillian Astra",
@@ -152,19 +128,24 @@ describe("Sidebar Component", () => {
 
     const adminTab = screen.getByTestId("header-tab-admin");
     expect(adminTab).toBeDefined();
+
+    // Hovering the tab expands into O= Text =)
+    fireEvent.mouseEnter(adminTab);
+    expect(adminTab.textContent).toContain("Admin");
+
+    fireEvent.mouseLeave(adminTab);
   });
 
-  it("renders return to admin button when user is impersonating", () => {
+  it("renders return to admin button on hover when user is impersonating", () => {
     const onReturnToAdmin = vi.fn();
     renderSidebar({
       user: testImpersonatedUser,
       onReturnToAdmin,
-      hoverDelay: 0,
       "data-testid": "app-sidebar",
     });
 
-    const sidebar = screen.getByTestId("app-sidebar");
-    fireEvent.mouseEnter(sidebar);
+    const profileContainer = screen.getByTestId("profile-button");
+    fireEvent.mouseEnter(profileContainer);
 
     const returnBtn = screen.getByTestId("sidebar-return-admin-button");
     expect(returnBtn).toBeDefined();
@@ -184,23 +165,17 @@ describe("Sidebar Component", () => {
     expect(screen.getByTestId("sidebar-profile-card-modal")).toBeDefined();
   });
 
-  it("renders role badge for student user when extended", () => {
+  it("configures student role shape on avatar", () => {
     renderSidebar({
       user: testStudentUser,
-      hoverDelay: 0,
       "data-testid": "app-sidebar",
     });
 
-    const sidebar = screen.getByTestId("app-sidebar");
-    fireEvent.mouseEnter(sidebar);
-
-    const roleBadge = screen.getByTestId("sidebar-user-role-badge");
-    expect(roleBadge).toBeDefined();
-    expect(roleBadge.textContent).toContain("STUDENT");
-    expect(screen.getByTestId("role-icon-student")).toBeDefined();
+    const avatarTrigger = screen.getByTestId("sidebar-avatar-trigger");
+    expect(avatarTrigger.getAttribute("data-shape")).toBe("pill");
   });
 
-  it("renders role badge for admin user when extended", () => {
+  it("configures admin role shape on avatar", () => {
     const adminUser: AuthUser = {
       id: "admin-1",
       name: "Trillian Astra",
@@ -210,17 +185,11 @@ describe("Sidebar Component", () => {
 
     renderSidebar({
       user: adminUser,
-      hoverDelay: 0,
       "data-testid": "app-sidebar",
     });
 
-    const sidebar = screen.getByTestId("app-sidebar");
-    fireEvent.mouseEnter(sidebar);
-
-    const roleBadge = screen.getByTestId("sidebar-user-role-badge");
-    expect(roleBadge).toBeDefined();
-    expect(roleBadge.textContent).toContain("ADMIN");
-    expect(screen.getByTestId("role-icon-admin")).toBeDefined();
+    const avatarTrigger = screen.getByTestId("sidebar-avatar-trigger");
+    expect(avatarTrigger.getAttribute("data-shape")).toBe("9-sided-cookie");
   });
 
   it("renders correctly in ghost variant when disconnected without tabs, logo, or status trigger and does not expand", () => {
@@ -241,18 +210,17 @@ describe("Sidebar Component", () => {
     const computedStyle = window.getComputedStyle(bottomSection);
     expect(computedStyle.borderTopStyle).toBe("none");
 
-    // Clicking rail should NOT expand sidebar in ghost mode when disconnected
+    // Rail should remain non-extensible in ghost mode when disconnected
     fireEvent.click(sidebar);
     expect(screen.queryByTestId("sidebar-favicon")).toBeNull();
     expect(screen.queryByRole("tablist")).toBeNull();
 
-    // Hovering rail should NOT expand sidebar in ghost mode when disconnected
     fireEvent.mouseEnter(sidebar);
     expect(screen.queryByTestId("sidebar-favicon")).toBeNull();
     expect(screen.queryByRole("tablist")).toBeNull();
   });
 
-  it("is no longer ghost once connected and renders full sidebar with user, tabs, logo, and expands", () => {
+  it("is no longer ghost once connected and renders full sidebar with user, tabs, logo, and profile button", () => {
     const onLogout = vi.fn();
     renderSidebar({
       variant: "ghost",
@@ -277,11 +245,11 @@ describe("Sidebar Component", () => {
     // User section is present
     expect(screen.getByTestId("sidebar-user-card")).toBeDefined();
 
-    // Clicking rail extends sidebar and reveals logout button & role badge
-    fireEvent.click(sidebar);
+    // Hovering profile button reveals logout button
+    const profileContainer = screen.getByTestId("profile-button");
+    fireEvent.mouseEnter(profileContainer);
     const logoutBtn = screen.getByTestId("sidebar-logout-button");
     expect(logoutBtn).toBeDefined();
-    expect(screen.getByTestId("sidebar-user-role-badge")).toBeDefined();
 
     fireEvent.click(logoutBtn);
     expect(onLogout).toHaveBeenCalled();
