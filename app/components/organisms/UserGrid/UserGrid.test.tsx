@@ -6,7 +6,7 @@ import { I18nextProvider } from "react-i18next";
 import i18n from "~/i18n";
 import { appTheme } from "~/tokens/theme";
 import UserGrid from "./UserGrid";
-import type { UserCardData } from "../UserCard/UserCard.types";
+import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 
 afterEach(cleanup);
 

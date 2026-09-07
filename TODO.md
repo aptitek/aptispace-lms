@@ -28,7 +28,7 @@
 [x] Make the wavy animation in Clock card on hover only
 [x] Fix ClockCard color for progress
 [x] Make the github chip optionally editable by admins in the usercard
-[ ] Make an institution and cohort card component with skeleton mirroring the usercard.
+[x] Make an institution and cohort card component with skeleton mirroring the usercard.
 [x] Student Inspector will use the userCard component with editable github chip
 [x] Student Inspector should be renamed UserInspector and add the Cohort and Institution Inspectors as well. Make a generic Inspector using a card + fields + buttons
 [ ] MapCard needs a overhaul

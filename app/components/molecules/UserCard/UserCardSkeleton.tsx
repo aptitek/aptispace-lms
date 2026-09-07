@@ -18,17 +18,42 @@ import type { UserCardSkeletonProps } from "./UserCard.types";
 
 export type { UserCardSkeletonProps };
 
-function resolveSkeletonState(
-  isGhost: boolean,
-  variant: "shimmer" | "static",
+function isGhostMode(props: UserCardSkeletonProps): boolean {
+  if (props.isGhost || props.variant === "ghost") return true;
+  if (props.onClick && props.variant !== "shimmer") return true;
+  return false;
+}
+
+function resolveUserCardAnimation(
+  variant: string,
   animated: boolean,
-  opacity?: number,
-) {
-  const isStatic = isGhost || variant === "static" || !animated;
-  const animation: false | "wave" | "pulse" = isStatic ? false : "wave";
-  const finalOpacity = isGhost ? 1 : opacity;
+  isGhost: boolean,
+): false | "wave" {
+  if (isGhost || !animated || variant !== "shimmer") {
+    return false;
+  }
+  return "wave";
+}
+
+function resolveUserCardSkeletonConfig(props: UserCardSkeletonProps) {
+  const isGhost = isGhostMode(props);
+  const variant = props.variant || (isGhost ? "ghost" : "shimmer");
+  const animated = props.animated !== false;
+  const isInteractive = isGhost && Boolean(props.onClick);
+  const animation = resolveUserCardAnimation(variant, animated, isGhost);
+  const finalOpacity = isGhost ? 1 : props.opacity;
   const contentOpacity = isGhost ? 0.35 : 1;
-  return { isStatic, animation, finalOpacity, contentOpacity };
+
+  return {
+    isGhost,
+    variant,
+    animated,
+    isInteractive,
+    animation,
+    finalOpacity,
+    contentOpacity,
+    testId: props.testId || "user-card-skeleton",
+  };
 }
 
 function createSkeletonKeyHandler(
@@ -43,43 +68,36 @@ function createSkeletonKeyHandler(
   };
 }
 
-export function UserCardSkeleton({
-  variant = "shimmer",
-  animated = true,
-  opacity,
-  isGhost = false,
-  onClick,
-  tooltipTitle,
-  className,
-  testId = "user-card-skeleton",
-  style,
-}: UserCardSkeletonProps) {
+export function UserCardSkeleton(props: UserCardSkeletonProps) {
   const { t } = useTranslation(["common", "admin"]);
-  const isInteractive = Boolean(onClick);
-  const state = resolveSkeletonState(isGhost, variant, animated, opacity);
-  const resolvedTooltip = tooltipTitle || t("common:admin.addUser", "Add User");
-  const handleKeyDown = createSkeletonKeyHandler(isInteractive, onClick);
+  const config = resolveUserCardSkeletonConfig(props);
+  const resolvedTooltip =
+    props.tooltipTitle || t("common:admin.addUser", "Add User");
+  const handleKeyDown = createSkeletonKeyHandler(
+    config.isInteractive,
+    props.onClick,
+  );
 
   return (
     <SkeletonCardContainer
       variant="outlined"
-      animated={!state.isStatic}
-      isGhost={isGhost}
-      isInteractive={isInteractive}
-      opacity={state.finalOpacity}
-      onClick={onClick}
+      animated={config.animation !== false}
+      isGhost={config.isGhost}
+      isInteractive={config.isInteractive}
+      opacity={config.finalOpacity}
+      onClick={config.isInteractive ? props.onClick : undefined}
       onKeyDown={handleKeyDown}
-      role={isInteractive ? "button" : "presentation"}
-      tabIndex={isInteractive ? 0 : undefined}
-      aria-label={isInteractive ? resolvedTooltip : undefined}
-      className={className}
-      style={style}
-      data-testid={testId}
-      aria-hidden={!isInteractive}
+      role={config.isInteractive ? "button" : "presentation"}
+      tabIndex={config.isInteractive ? 0 : undefined}
+      aria-label={config.isInteractive ? resolvedTooltip : undefined}
+      className={props.className}
+      style={props.style}
+      data-testid={config.testId}
+      aria-hidden={!config.isInteractive}
     >
       <SkeletonCardContent
         sx={{
-          opacity: state.contentOpacity,
+          opacity: config.contentOpacity,
           pointerEvents: "none",
         }}
       >
@@ -88,7 +106,7 @@ export function UserCardSkeleton({
             variant="rounded"
             width={65}
             height={16}
-            animation={state.animation}
+            animation={config.animation}
             sx={{ borderRadius: "4px" }}
           />
           <SkeletonHeaderBadges>
@@ -96,14 +114,14 @@ export function UserCardSkeleton({
               variant="rounded"
               width={72}
               height={20}
-              animation={state.animation}
+              animation={config.animation}
               sx={{ borderRadius: "9999px" }}
             />
             <Skeleton
               variant="rounded"
               width={40}
               height={20}
-              animation={state.animation}
+              animation={config.animation}
               sx={{ borderRadius: "9999px" }}
             />
           </SkeletonHeaderBadges>
@@ -115,7 +133,7 @@ export function UserCardSkeleton({
               variant="rectangular"
               width={80}
               height={80}
-              animation={state.animation}
+              animation={config.animation}
               sx={{ borderRadius: "16px" }}
             />
           </SkeletonAvatarContainer>
@@ -126,14 +144,14 @@ export function UserCardSkeleton({
                 variant="text"
                 width="60%"
                 height={14}
-                animation={state.animation}
+                animation={config.animation}
                 sx={{ borderRadius: "4px" }}
               />
               <Skeleton
                 variant="text"
                 width="85%"
                 height={20}
-                animation={state.animation}
+                animation={config.animation}
                 sx={{ borderRadius: "4px" }}
               />
             </SkeletonNameBlock>
@@ -142,7 +160,7 @@ export function UserCardSkeleton({
               variant="text"
               width="90%"
               height={12}
-              animation={state.animation}
+              animation={config.animation}
               sx={{ borderRadius: "4px" }}
             />
 
@@ -151,25 +169,25 @@ export function UserCardSkeleton({
                 variant="rounded"
                 width={75}
                 height={20}
-                animation={state.animation}
+                animation={config.animation}
                 sx={{ borderRadius: "8px" }}
               />
               <Skeleton
                 variant="circular"
                 width={24}
                 height={24}
-                animation={state.animation}
+                animation={config.animation}
               />
             </SkeletonFooterRow>
           </SkeletonDetailsContainer>
         </SkeletonBodyRow>
       </SkeletonCardContent>
 
-      {isInteractive && (
+      {config.isInteractive && (
         <GhostFabOverlay>
           <GhostActionButton
             tooltip={resolvedTooltip}
-            testId={`${testId}-fab`}
+            testId={`${config.testId}-fab`}
           />
         </GhostFabOverlay>
       )}

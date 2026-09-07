@@ -56,7 +56,7 @@ export interface UserCardProps {
 }
 
 export interface UserCardSkeletonProps {
-  variant?: "shimmer" | "static";
+  variant?: "shimmer" | "static" | "ghost";
   animated?: boolean;
   opacity?: number;
   isGhost?: boolean;

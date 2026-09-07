@@ -7,7 +7,7 @@ import type { AuthUser } from "~/utils/auth";
 import Filter from "~/components/molecules/Filter/Filter";
 import RoleChip from "~/components/molecules/RoleChip/RoleChip";
 import InstitutionLogo from "~/components/molecules/InstitutionLogo/InstitutionLogo";
-import UserGrid from "~/components/molecules/UserGrid/UserGrid";
+import UserGrid from "~/components/organisms/UserGrid/UserGrid";
 import UserInspector from "~/components/organisms/UserInspector/UserInspector";
 import { TabPanelContainer, MainColumn, SideColumn } from "./admin.styles";
 

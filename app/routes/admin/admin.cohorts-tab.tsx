@@ -353,7 +353,7 @@ export function AdminCohortsTabPanel({
                 onClick={onSchoolClick}
               />
             ))}
-            <SchoolCardSkeleton onClick={onCreateNewSchool} />
+            <SchoolCardSkeleton variant="ghost" onClick={onCreateNewSchool} />
           </MD3CollectionGrid>
         </Box>
 
@@ -461,7 +461,7 @@ export function AdminCohortsTabPanel({
                   onClick={onCohortClick}
                 />
               ))}
-              <CohortCardSkeleton onClick={onCreateNewCohort} />
+              <CohortCardSkeleton variant="ghost" onClick={onCreateNewCohort} />
             </MD3CollectionGrid>
           </Box>
         )}

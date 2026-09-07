@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import type { UserGridProps } from "./UserGrid.types";
-import type { UserCardData } from "../UserCard/UserCard.types";
+import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 
 export function matchesStudentSearch(
   student: UserCardData,

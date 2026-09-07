@@ -6,16 +6,18 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import PeopleAltRoundedIcon from "@mui/icons-material/PeopleAltRounded";
-import UserCard from "../UserCard/UserCard";
-import UserCardSkeleton from "../UserCard/UserCardSkeleton";
+import UserCard from "~/components/molecules/UserCard/UserCard";
+import UserCardSkeleton from "~/components/molecules/UserCard/UserCardSkeleton";
 import type { UserGridProps } from "./UserGrid.types";
-import type { UserCardData } from "../UserCard/UserCard.types";
+import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
-import {
-  useUserGridLogic,
-  STATIC_PLACEHOLDER_KEYS,
-  SKELETON_SLOT_KEYS,
-} from "./UserGrid.helpers";
+import UserGridSkeleton, {
+  type UserGridSkeletonProps,
+} from "./UserGridSkeleton";
+
+export { UserGridSkeleton };
+export type { UserGridSkeletonProps };
+import { useUserGridLogic, STATIC_PLACEHOLDER_KEYS } from "./UserGrid.helpers";
 import {
   GridContainer,
   ControlsHeader,
@@ -27,7 +29,6 @@ import {
   EmptyGridContainer,
   EmptyStateWrapper,
   EmptyPlaceholderGrid,
-  LoadingSentinel,
 } from "./UserGrid.styles";
 
 interface GridSearchInputProps {
@@ -207,27 +208,6 @@ function EmptyGridState({
   );
 }
 
-interface LoadingSkeletonZoneProps {
-  count: number;
-}
-
-function LoadingSkeletonZone({ count }: LoadingSkeletonZoneProps) {
-  const keys = SKELETON_SLOT_KEYS.slice(0, count);
-
-  return (
-    <MD3CollectionGrid data-testid="grid-skeleton-loading-zone">
-      {keys.map((slotKey) => (
-        <UserCardSkeleton
-          key={slotKey}
-          variant="shimmer"
-          animated={true}
-          testId={slotKey}
-        />
-      ))}
-    </MD3CollectionGrid>
-  );
-}
-
 interface UserCardsZoneProps {
   students: UserCardData[];
   selectedStudentId?: string | null;
@@ -284,6 +264,7 @@ function UserCardsZone({
       ))}
       {shouldRenderGhost && (
         <UserCardSkeleton
+          variant="ghost"
           isGhost
           onClick={onAddUser}
           tooltipTitle={addUserTooltip}
@@ -372,10 +353,7 @@ function GridBody({
         addUserTooltip={addUserTooltip}
       />
       {lazy && visibleCount < filteredStudents.length && (
-        <LoadingSentinel
-          ref={sentinelRef}
-          data-testid="lazy-loading-sentinel"
-        />
+        <UserGridSkeleton isLazy count={0} sentinelRef={sentinelRef} />
       )}
     </>
   );
@@ -409,7 +387,11 @@ export function UserGrid(props: UserGridProps) {
       )}
 
       {logic.isLoading ? (
-        <LoadingSkeletonZone count={logic.skeletonCount} />
+        <UserGridSkeleton
+          count={logic.skeletonCount}
+          showHeader={false}
+          testId="user-grid-loading-skeletons"
+        />
       ) : (
         <GridBody
           filteredStudents={logic.filteredStudents}

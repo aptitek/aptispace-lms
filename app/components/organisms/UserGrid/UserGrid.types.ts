@@ -1,5 +1,5 @@
 import type React from "react";
-import type { UserCardData } from "../UserCard/UserCard.types";
+import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
 import type { SchoolConfig, CohortConfig } from "~/types/institution";
 
 export interface UserGridProps {

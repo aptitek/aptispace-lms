@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import UserGrid from "../app/components/molecules/UserGrid/UserGrid";
+import UserGrid from "../app/components/organisms/UserGrid/UserGrid";
 
 const meta: Meta<typeof UserGrid> = {
-  title: "Molecules/UserGrid",
+  title: "Organisms/UserGrid",
   component: UserGrid,
   tags: ["autodocs"],
   parameters: {

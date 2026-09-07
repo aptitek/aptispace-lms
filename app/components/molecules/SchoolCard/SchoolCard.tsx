@@ -1,20 +1,17 @@
 import { forwardRef } from "react";
-import { useTranslation } from "react-i18next";
 import Badge from "~/components/atoms/Badge/Badge";
 import InstitutionLogo from "../InstitutionLogo/InstitutionLogo";
 import Chip from "~/components/atoms/Chip/Chip";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
-import Box from "@mui/material/Box";
 import type { SchoolConfig } from "~/types/institution";
-import Skeleton from "@mui/material/Skeleton";
-import { GhostActionButton } from "~/components/atoms/GhostActionButton";
+import { CardContainer, LogoContainer, SchoolName } from "./SchoolCard.styles";
 import {
-  CardContainer,
-  LogoContainer,
-  SchoolName,
-  SkeletonContainer,
-  GhostFabOverlay,
-} from "./SchoolCard.styles";
+  SchoolCardSkeleton,
+  type SchoolCardSkeletonProps,
+} from "./SchoolCardSkeleton";
+
+export { SchoolCardSkeleton };
+export type { SchoolCardSkeletonProps };
 
 export interface SchoolCardProps {
   school: SchoolConfig;
@@ -44,7 +41,6 @@ export const SchoolCard = forwardRef<HTMLDivElement, SchoolCardProps>(
         invisible={!studentCount || studentCount <= 0}
         color="primary"
         max={9999}
-
         sx={{
           width: "100%",
           display: "block",
@@ -92,63 +88,5 @@ export const SchoolCard = forwardRef<HTMLDivElement, SchoolCardProps>(
   },
 );
 SchoolCard.displayName = "SchoolCard";
-
-export function SchoolCardSkeleton({ onClick }: { onClick?: () => void }) {
-  const { t } = useTranslation("common");
-  const isInteractive = Boolean(onClick);
-  const tooltipTitle = t("admin.addInstitution", "Add Institution");
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (isInteractive && (event.key === "Enter" || event.key === " ")) {
-      event.preventDefault();
-      onClick?.();
-    }
-  };
-
-  return (
-    <SkeletonContainer
-      isInteractive={isInteractive}
-      onClick={onClick}
-      onKeyDown={handleKeyDown}
-      role={isInteractive ? "button" : "presentation"}
-      tabIndex={isInteractive ? 0 : undefined}
-      aria-label={isInteractive ? tooltipTitle : undefined}
-      data-testid="school-card-skeleton"
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 2,
-          opacity: 0.35,
-          width: "100%",
-          pointerEvents: "none",
-        }}
-      >
-        <LogoContainer>
-          <Skeleton
-            variant="rounded"
-            width={100}
-            height={40}
-            sx={{ borderRadius: "8px" }}
-          />
-        </LogoContainer>
-        <Skeleton
-          variant="text"
-          width="60%"
-          height={22}
-          sx={{ borderRadius: "4px" }}
-        />
-      </Box>
-
-      {isInteractive && (
-        <GhostFabOverlay>
-          <GhostActionButton tooltip={tooltipTitle} testId="school-ghost-fab" />
-        </GhostFabOverlay>
-      )}
-    </SkeletonContainer>
-  );
-}
 
 export default SchoolCard;

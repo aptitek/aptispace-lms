@@ -1,21 +1,23 @@
 import { forwardRef } from "react";
-import { useTranslation } from "react-i18next";
 import Badge from "~/components/atoms/Badge/Badge";
 import Box from "@mui/material/Box";
 import type { CohortConfig } from "~/types/institution";
-import Skeleton from "@mui/material/Skeleton";
-import { GhostActionButton } from "~/components/atoms/GhostActionButton";
 import {
   CardContainer,
   CohortDescription,
   CohortDates,
-  SkeletonContainer,
-  GhostFabOverlay,
 } from "./CohortCard.styles";
 
 import Chip from "@mui/material/Chip";
 
 import SegmentedChip from "~/components/molecules/SegmentedChip/SegmentedChip";
+import {
+  CohortCardSkeleton,
+  type CohortCardSkeletonProps,
+} from "./CohortCardSkeleton";
+
+export { CohortCardSkeleton };
+export type { CohortCardSkeletonProps };
 
 export interface CohortCardProps {
   cohort: CohortConfig;
@@ -76,7 +78,6 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
         invisible={!studentCount || studentCount <= 0}
         color="secondary"
         max={9999}
-
         sx={{
           width: "100%",
           display: "block",
@@ -141,72 +142,5 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
   },
 );
 CohortCard.displayName = "CohortCard";
-
-export function CohortCardSkeleton({ onClick }: { onClick?: () => void }) {
-  const { t } = useTranslation("common");
-  const isInteractive = Boolean(onClick);
-  const tooltipTitle = t("admin.addCohort", "Add Cohort");
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (isInteractive && (event.key === "Enter" || event.key === " ")) {
-      event.preventDefault();
-      onClick?.();
-    }
-  };
-
-  return (
-    <SkeletonContainer
-      isInteractive={isInteractive}
-      onClick={onClick}
-      onKeyDown={handleKeyDown}
-      role={isInteractive ? "button" : "presentation"}
-      tabIndex={isInteractive ? 0 : undefined}
-      aria-label={isInteractive ? tooltipTitle : undefined}
-      data-testid="cohort-card-skeleton"
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 1,
-          opacity: 0.35,
-          width: "100%",
-          pointerEvents: "none",
-        }}
-      >
-        <Skeleton
-          variant="text"
-          width="50%"
-          height={24}
-          sx={{ borderRadius: "4px" }}
-        />
-        <Skeleton
-          variant="text"
-          width="85%"
-          height={16}
-          sx={{ borderRadius: "4px" }}
-        />
-        <Skeleton
-          variant="text"
-          width="60%"
-          height={16}
-          sx={{ borderRadius: "4px" }}
-        />
-        <Skeleton
-          variant="text"
-          width="40%"
-          height={14}
-          sx={{ mt: 1, borderRadius: "4px" }}
-        />
-      </Box>
-
-      {isInteractive && (
-        <GhostFabOverlay>
-          <GhostActionButton tooltip={tooltipTitle} testId="cohort-ghost-fab" />
-        </GhostFabOverlay>
-      )}
-    </SkeletonContainer>
-  );
-}
 
 export default CohortCard;
