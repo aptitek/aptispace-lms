@@ -1,8 +1,12 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
+import { render, screen, cleanup } from "@testing-library/react";
+import { ThemeProvider } from "@mui/material/styles";
+import { appTheme } from "~/tokens/theme";
 import { AdminLayout } from "./AdminLayout";
-import type { AdminLayoutProps } from "./AdminLayout.types";
 import type { AuthUser } from "~/utils/auth";
+
+afterEach(cleanup);
 
 describe("AdminLayout Template", () => {
   const mockUser: AuthUser = {
@@ -19,21 +23,24 @@ describe("AdminLayout Template", () => {
     expect(typeof AdminLayout).toBe("function");
   });
 
-  it("creates React element with required props", () => {
+  it("renders with tabs and child workspace content", () => {
     const onLogout = vi.fn();
-    const element = React.createElement(
-      AdminLayout,
-      {
-        user: mockUser,
-        onLogout,
-        tabs: React.createElement("div", null, "Tabs"),
-      },
-      React.createElement("div", null, "Workspace Content"),
+    render(
+      <ThemeProvider theme={appTheme}>
+        <AdminLayout
+          user={mockUser}
+          onLogout={onLogout}
+          tabs={<div data-testid="mock-tabs">Admin Tabs</div>}
+        >
+          <div data-testid="mock-workspace">Admin Workspace Content</div>
+        </AdminLayout>
+      </ThemeProvider>,
     );
 
-    expect(element).toBeDefined();
-    const props = element.props as AdminLayoutProps;
-    expect(props.user).toBe(mockUser);
-    expect(props.onLogout).toBe(onLogout);
+    expect(screen.getByTestId("admin-layout-root")).toBeDefined();
+    expect(screen.getByTestId("mock-tabs")).toBeDefined();
+    expect(screen.getByText("Admin Tabs")).toBeDefined();
+    expect(screen.getByTestId("mock-workspace")).toBeDefined();
+    expect(screen.getByText("Admin Workspace Content")).toBeDefined();
   });
 });

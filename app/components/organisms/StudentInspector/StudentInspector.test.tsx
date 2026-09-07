@@ -1,12 +1,32 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import React from "react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { ThemeProvider } from "@mui/material/styles";
+import { I18nextProvider } from "react-i18next";
+import i18n from "~/i18n";
+import { appTheme } from "~/tokens/theme";
 import StudentInspector from "./StudentInspector";
 import {
   SchoolBadgeInline,
   InspectorAccountSection,
 } from "./StudentInspector.components";
+import {
+  InspectorImpersonateButton,
+  InspectorDeleteButton,
+} from "./StudentInspector.actions";
 import type { UserCardData } from "../../molecules/UserCard/UserCard.types";
 import type { SchoolConfig } from "../../../types/institution";
 import type { CohortWithInstitution } from "./StudentInspector.types";
+
+afterEach(cleanup);
+
+function renderWithProviders(ui: React.ReactElement) {
+  return render(
+    <I18nextProvider i18n={i18n}>
+      <ThemeProvider theme={appTheme}>{ui}</ThemeProvider>
+    </I18nextProvider>,
+  );
+}
 
 const mockSchools: SchoolConfig[] = [
   {
@@ -65,90 +85,93 @@ const mockStudent: UserCardData = {
 };
 
 describe("StudentInspector Organism", () => {
-  it("exports StudentInspector and SchoolBadgeInline components properly", () => {
+  it("exports StudentInspector and subcomponents properly", () => {
     expect(StudentInspector).toBeDefined();
     expect(typeof StudentInspector).toBe("function");
-    expect(StudentInspector.name).toBe("StudentInspector");
     expect(SchoolBadgeInline).toBeDefined();
-    expect(typeof SchoolBadgeInline).toBe("function");
     expect(InspectorAccountSection).toBeDefined();
-    expect(typeof InspectorAccountSection).toBe("function");
+    expect(InspectorImpersonateButton).toBeDefined();
+    expect(InspectorDeleteButton).toBeDefined();
   });
 
-  it("handles student inspector props and callbacks configuration", () => {
+  it("renders StudentInspector with student data and close button", () => {
+    const onClose = vi.fn();
     const onAddCohort = vi.fn();
     const onRemoveCohort = vi.fn();
-    const onStudentUpdated = vi.fn();
-    const onUpdateGithub = vi.fn();
-    const onClose = vi.fn();
-    const onImpersonate = vi.fn();
-    const onDelete = vi.fn();
 
-    const props = {
-      student: mockStudent,
-      schools: mockSchools,
-      cohorts: mockCohorts,
-      onClose,
-      onAddCohort,
-      onRemoveCohort,
-      onStudentUpdated,
-      onUpdateGithub,
-      onImpersonate,
-      onDelete,
-      isSubmitting: false,
-    };
+    renderWithProviders(
+      <StudentInspector
+        student={mockStudent}
+        schools={mockSchools}
+        cohorts={mockCohorts}
+        onClose={onClose}
+        onAddCohort={onAddCohort}
+        onRemoveCohort={onRemoveCohort}
+      />,
+    );
 
-    expect(props.student.id).toBe("student-123");
-    expect(props.student.firstName).toBe("Ada");
-    expect(props.student.familyName).toBe("LOVELACE");
-    expect(props.student.githubUsername).toBe("adalovelace");
-    expect(props.schools).toHaveLength(2);
-    expect(props.cohorts).toHaveLength(3);
-    expect(typeof props.onClose).toBe("function");
-    expect(typeof props.onAddCohort).toBe("function");
-    expect(typeof props.onRemoveCohort).toBe("function");
-    expect(typeof props.onStudentUpdated).toBe("function");
-    expect(typeof props.onUpdateGithub).toBe("function");
-    expect(typeof props.onImpersonate).toBe("function");
-    expect(typeof props.onDelete).toBe("function");
+    expect(screen.getByTestId("inspector-user-card")).toBeDefined();
+    expect(screen.getByText("Ada")).toBeDefined();
+    expect(screen.getByText("LOVELACE")).toBeDefined();
+
+    // Close button
+    const closeBtn = screen.getByTestId("inspector-close-btn");
+    fireEvent.click(closeBtn);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("handles instructor and admin entity inspection props", () => {
-    const mockInstructor: UserCardData = {
-      id: "inst-1",
-      firstName: "Sarah",
-      familyName: "CONNOR",
-      email: "sarah.connor@aptitek.io",
-      role: "instructor",
-    };
+  it("renders InspectorAccountSection and updates GitHub username on Enter", () => {
+    const onUpdateGithub = vi.fn();
 
-    const mockAdmin: UserCardData = {
-      id: "adm-1",
-      firstName: "Ada",
-      familyName: "LOVELACE",
-      email: "ada.lovelace@aptitek.io",
-      role: "admin",
-    };
+    renderWithProviders(
+      <InspectorAccountSection
+        targetStudent={mockStudent}
+        onUpdateGithub={onUpdateGithub}
+      />,
+    );
 
-    const instProps = {
-      student: mockInstructor,
-      schools: mockSchools,
-      cohorts: mockCohorts,
-      onClose: vi.fn(),
-      onAddCohort: vi.fn(),
-      onRemoveCohort: vi.fn(),
-    };
+    expect(screen.getByText("Ada LOVELACE")).toBeDefined();
+    const input = screen.getByDisplayValue("adalovelace");
+    fireEvent.change(input, { target: { value: "ada-new" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(onUpdateGithub).toHaveBeenCalledWith("student-123", "ada-new");
+  });
 
-    const admProps = {
-      student: mockAdmin,
-      schools: mockSchools,
-      cohorts: mockCohorts,
-      onClose: vi.fn(),
-      onAddCohort: vi.fn(),
-      onRemoveCohort: vi.fn(),
-    };
+  it("renders InspectorImpersonateButton and handles click", () => {
+    const onImpersonate = vi.fn();
 
-    expect(instProps.student.role).toBe("instructor");
-    expect(admProps.student.role).toBe("admin");
+    renderWithProviders(
+      <InspectorImpersonateButton
+        targetStudent={mockStudent}
+        onImpersonate={onImpersonate}
+      />,
+    );
+
+    const btn = screen.getByTestId("inspector-impersonate-btn-standalone");
+    fireEvent.click(btn);
+    expect(onImpersonate).toHaveBeenCalledWith(mockStudent);
+  });
+
+  it("renders InspectorDeleteButton", () => {
+    const onDelete = vi.fn();
+
+    renderWithProviders(
+      <InspectorDeleteButton targetStudent={mockStudent} onDelete={onDelete} />,
+    );
+
+    expect(screen.getByTestId("inspector-delete-btn-standalone")).toBeDefined();
+  });
+
+  it("renders SchoolBadgeInline with school config and fallback", () => {
+    const { unmount } = renderWithProviders(
+      <SchoolBadgeInline school={mockSchools[0]} testId="school-badge-1" />,
+    );
+    expect(screen.getByTestId("school-badge-1-logo")).toBeDefined();
+    unmount();
+
+    renderWithProviders(
+      <SchoolBadgeInline schoolName="Custom Academy" testId="school-badge-2" />,
+    );
+    expect(screen.getByText("Custom Academy")).toBeDefined();
   });
 });

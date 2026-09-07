@@ -356,4 +356,5 @@ export const EmailField = forwardRef<HTMLDivElement, EmailFieldProps>(
 );
 
 export const FixedDomainEmailField = EmailField;
+EmailField.displayName = "EmailField";
 export default EmailField;

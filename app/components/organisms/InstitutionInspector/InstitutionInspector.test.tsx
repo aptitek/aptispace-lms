@@ -1,13 +1,27 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { ThemeProvider } from "@mui/material/styles";
+import { I18nextProvider } from "react-i18next";
+import i18n from "~/i18n";
+import { appTheme } from "~/tokens/theme";
 import InstitutionInspector from "./InstitutionInspector";
 import {
   InstitutionEmailCard,
-  InstitutionEmailCardHeader,
   InstitutionFreeDomainNotice,
   InstitutionConstrainedDomainFields,
 } from "./InstitutionInspector.components";
 import type { SchoolConfig } from "~/types/institution";
+
+afterEach(cleanup);
+
+function renderWithProviders(ui: React.ReactElement) {
+  return render(
+    <I18nextProvider i18n={i18n}>
+      <ThemeProvider theme={appTheme}>{ui}</ThemeProvider>
+    </I18nextProvider>,
+  );
+}
 
 describe("InstitutionInspector Organism", () => {
   const mockInstitution: SchoolConfig = {
@@ -16,6 +30,8 @@ describe("InstitutionInspector Organism", () => {
     slug: "aptitek",
     type: "academic",
     logoUrl: "/aptitek-logo.svg",
+    emailDomain: "aptitek.io",
+    usernamePattern: "{f}{last}",
   };
 
   it("exports InstitutionInspector component properly", () => {
@@ -24,143 +40,98 @@ describe("InstitutionInspector Organism", () => {
     expect(InstitutionInspector.name).toBe("InstitutionInspector");
   });
 
-  it("creates React element with institution props for editing", () => {
+  it("returns null when institution is null", () => {
+    const { container } = renderWithProviders(
+      <InstitutionInspector
+        institution={null}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+      />,
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("renders editing state with institution data", () => {
     const onCloseMock = vi.fn();
     const onSaveMock = vi.fn();
 
-    const element = React.createElement(InstitutionInspector, {
-      institution: mockInstitution,
-      onClose: onCloseMock,
-      onSave: onSaveMock,
-      isSubmitting: false,
-    });
+    renderWithProviders(
+      <InstitutionInspector
+        institution={mockInstitution}
+        onClose={onCloseMock}
+        onSave={onSaveMock}
+      />,
+    );
 
-    expect(element).toBeDefined();
-    expect(element.props.institution).toEqual(mockInstitution);
-    expect(element.props.onClose).toBe(onCloseMock);
-    expect(element.props.onSave).toBe(onSaveMock);
-    expect(element.props.isSubmitting).toBe(false);
+    expect(screen.getByTestId("institution-inspector-card")).toBeDefined();
+    expect(screen.getByDisplayValue("Aptitek Institute")).toBeDefined();
+    expect(screen.getByDisplayValue("aptitek")).toBeDefined();
   });
 
-  it("creates React element with add institution mode (no id)", () => {
+  it("renders add institution mode with Create and Cancel buttons", () => {
     const newInstitution = {
       name: "",
       slug: "",
+      type: "academic",
     } as unknown as SchoolConfig;
 
-    const element = React.createElement(InstitutionInspector, {
-      institution: newInstitution,
-      onClose: vi.fn(),
-      onSave: vi.fn(),
-      isSubmitting: true,
-    });
+    const onClose = vi.fn();
 
-    expect(element).toBeDefined();
-    expect(element.props.institution?.id).toBeUndefined();
-    expect(element.props.isSubmitting).toBe(true);
+    renderWithProviders(
+      <InstitutionInspector
+        institution={newInstitution}
+        onClose={onClose}
+        onSave={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Add Institution")).toBeDefined();
+    const cancelBtn = screen.getByText("Cancel");
+    fireEvent.click(cancelBtn);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("handles institution with emailDomain and usernamePattern", () => {
-    const customInstitution: SchoolConfig = {
-      id: "school-2",
-      name: "Custom School",
-      slug: "custom",
-      type: "company",
-      emailDomain: "custom.edu",
-      usernamePattern: "{f}{last}",
-    };
-
-    const element = React.createElement(InstitutionInspector, {
-      institution: customInstitution,
-      onClose: vi.fn(),
-      onSave: vi.fn(),
-    });
-
-    expect(element).toBeDefined();
-    expect(element.props.institution?.emailDomain).toBe("custom.edu");
-    expect(element.props.institution?.usernamePattern).toBe("{f}{last}");
+  it("renders InstitutionFreeDomainNotice component", () => {
+    renderWithProviders(<InstitutionFreeDomainNotice />);
+    expect(screen.getByText("Empty = Any Email")).toBeDefined();
+    expect(screen.getByTestId("inspector-free-domain-notice")).toBeDefined();
   });
 
-  it("handles institution without emailDomain (free personal email)", () => {
-    const aptitekInstitution: SchoolConfig = {
-      id: "school-aptitek",
-      name: "Aptitek",
-      slug: "aptitek",
-      type: "company",
-      emailDomain: "",
-    };
+  it("renders InstitutionConstrainedDomainFields component", () => {
+    const onFieldChange = vi.fn();
+    const onBlur = vi.fn();
 
-    const element = React.createElement(InstitutionInspector, {
-      institution: aptitekInstitution,
-      onClose: vi.fn(),
-      onSave: vi.fn(),
-    });
+    renderWithProviders(
+      <InstitutionConstrainedDomainFields
+        emailDomain="aptitek.io"
+        usernamePattern="{f}{last}"
+        previewEmail="j.doe@aptitek.io"
+        disabled={false}
+        onFieldChange={onFieldChange}
+        onBlur={onBlur}
+      />,
+    );
 
-    expect(element).toBeDefined();
-    expect(element.props.institution?.emailDomain).toBe("");
+    expect(screen.getByDisplayValue("aptitek.io")).toBeDefined();
+    expect(screen.getByText("j.doe@aptitek.io")).toBeDefined();
   });
 
-  describe("InstitutionEmailCard component", () => {
-    it("exports InstitutionEmailCard and subcomponents", () => {
-      expect(InstitutionEmailCard).toBeDefined();
-      expect(InstitutionFreeDomainNotice).toBeDefined();
-      expect(InstitutionConstrainedDomainFields).toBeDefined();
-    });
+  it("renders InstitutionEmailCard with constraint toggle", () => {
+    const onToggle = vi.fn();
 
-    it("renders with domain constraint enabled", () => {
-      const onToggle = vi.fn();
-      const onChange = vi.fn();
-      const onBlur = vi.fn();
+    renderWithProviders(
+      <InstitutionEmailCard
+        emailDomain="aptitek.io"
+        usernamePattern="{f}{last}"
+        previewEmail="j.doe@aptitek.io"
+        disabled={false}
+        isConstrained={true}
+        onToggleConstraint={onToggle}
+        onFieldChange={vi.fn()}
+        onBlur={vi.fn()}
+      />,
+    );
 
-      const element = React.createElement(InstitutionEmailCard, {
-        emailDomain: "42.fr",
-        usernamePattern: "{first}.{last}",
-        previewEmail: "john.doe@42.fr",
-        disabled: false,
-        isConstrained: true,
-        onToggleConstraint: onToggle,
-        onFieldChange: onChange,
-        onBlur,
-      });
-
-      expect(element).toBeDefined();
-      expect(element.props.isConstrained).toBe(true);
-      expect(element.props.emailDomain).toBe("42.fr");
-    });
-
-    it("renders with domain constraint disabled (empty = any email)", () => {
-      const onToggle = vi.fn();
-      const onChange = vi.fn();
-      const onBlur = vi.fn();
-
-      const element = React.createElement(InstitutionEmailCard, {
-        emailDomain: "",
-        usernamePattern: "{first}.{last}",
-        previewEmail: "user@any-domain.com",
-        disabled: false,
-        isConstrained: false,
-        onToggleConstraint: onToggle,
-        onFieldChange: onChange,
-        onBlur,
-      });
-
-      expect(element).toBeDefined();
-      expect(element.props.isConstrained).toBe(false);
-      expect(element.props.emailDomain).toBe("");
-    });
-
-    it("renders InstitutionEmailCardHeader with MUI toggle props", () => {
-      const onToggle = vi.fn();
-      const headerElement = React.createElement(InstitutionEmailCardHeader, {
-        isConstrained: true,
-        disabled: false,
-        onToggleConstraint: onToggle,
-      });
-
-      expect(headerElement).toBeDefined();
-      expect(headerElement.props.isConstrained).toBe(true);
-      expect(headerElement.props.disabled).toBe(false);
-      expect(headerElement.props.onToggleConstraint).toBe(onToggle);
-    });
+    expect(screen.getByText("Email Configuration")).toBeDefined();
   });
 });

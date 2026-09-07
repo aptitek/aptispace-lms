@@ -1,5 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
+import type * as MuiDataGridType from "@mui/x-data-grid";
 import MissionCenter from "./MissionCenter";
 import { MissionCenterKpiCards } from "./MissionCenterKpiCards";
 import { MissionCenterAuditTab } from "./MissionCenterAuditTab";
@@ -116,92 +118,206 @@ const mockMissionData: MissionCenterData = {
   openIssuesCount: 1,
 };
 
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { ThemeProvider } from "@mui/material/styles";
+import { I18nextProvider } from "react-i18next";
+import i18n from "~/i18n";
+import { appTheme } from "~/tokens/theme";
+
+vi.mock("@mui/x-data-grid", async (importOriginal) => {
+  const actual = await importOriginal<typeof MuiDataGridType>();
+  return {
+    ...actual,
+    DataGrid: (props: any) => {
+      const { rows = [], columns = [], onRowClick, localeText } = props;
+      if (!rows.length) {
+        return (
+          <div data-testid="mock-datagrid-empty">
+            {localeText?.noRowsLabel || "No rows"}
+          </div>
+        );
+      }
+      return (
+        <div data-testid="mock-datagrid">
+          {rows.map((row: any) => (
+            <div
+              key={row.id}
+              data-testid={`datagrid-row-${row.id}`}
+              onClick={() => onRowClick?.({ row })}
+            >
+              {columns.map((col: any) => {
+                let cellValue = row[col.field];
+                if (col.valueGetter) {
+                  cellValue = col.valueGetter(cellValue, row);
+                }
+                if (col.renderCell) {
+                  return (
+                    <span key={col.field}>
+                      {col.renderCell({ row, value: cellValue })}
+                    </span>
+                  );
+                }
+                return (
+                  <span key={col.field}>
+                    {typeof cellValue === "object"
+                      ? JSON.stringify(cellValue)
+                      : String(cellValue ?? "")}
+                  </span>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      );
+    },
+  };
+});
+
+afterEach(cleanup);
+
+function renderWithProviders(ui: React.ReactElement) {
+  return render(
+    <I18nextProvider i18n={i18n}>
+      <ThemeProvider theme={appTheme}>{ui}</ThemeProvider>
+    </I18nextProvider>,
+  );
+}
+
 describe("MissionCenter Organism", () => {
-  it("renders MissionCenter main cockpit component", () => {
-    const el = React.createElement(MissionCenter, {
-      missionData: mockMissionData,
-    });
-    expect(el).toBeDefined();
+  it("renders MissionCenter main cockpit component and switches tabs", () => {
+    const onRefresh = vi.fn();
+    renderWithProviders(
+      <MissionCenter missionData={mockMissionData} onRefresh={onRefresh} />,
+    );
+
+    expect(screen.getByText("MISSION CENTER")).toBeDefined();
+    expect(screen.getByTestId("subtab-audit")).toBeDefined();
+    expect(screen.getByTestId("subtab-errors")).toBeDefined();
+
+    // Click tab 1: Error Reports
+    fireEvent.click(screen.getByTestId("subtab-errors"));
+    expect(
+      screen.getAllByText("403 Forbidden on /api/admin/system")[0],
+    ).toBeDefined();
+
+    // Click refresh button
+    const refreshBtn = screen.getByTestId("mission-center-refresh-btn");
+    fireEvent.click(refreshBtn);
+    expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
   it("renders MissionCenterKpiCards component", () => {
-    const el = React.createElement(MissionCenterKpiCards, {
-      metrics: mockMissionData.metrics,
-    });
-    expect(el).toBeDefined();
+    const onSelectTab = vi.fn();
+    renderWithProviders(
+      <MissionCenterKpiCards
+        metrics={mockMissionData.metrics}
+        onSelectTab={onSelectTab}
+      />,
+    );
+
+    expect(screen.getByText("Cloud Infrastructure")).toBeDefined();
+    expect(screen.getByText("Active Incidents")).toBeDefined();
+    fireEvent.click(screen.getByTestId("kpi-infrastructure"));
+    expect(onSelectTab).toHaveBeenCalledWith(3);
   });
 
   it("renders MissionCenterAuditTab component", () => {
-    const el = React.createElement(MissionCenterAuditTab, {
-      auditLogs: mockMissionData.auditLogs,
-    });
-    expect(el).toBeDefined();
+    renderWithProviders(
+      <MissionCenterAuditTab auditLogs={mockMissionData.auditLogs} />,
+    );
+
+    expect(screen.getByText("System ADMIN")).toBeDefined();
   });
 
   it("renders MissionCenterErrorsTab component", () => {
-    const el = React.createElement(MissionCenterErrorsTab, {
-      errorReports: mockMissionData.errorReports,
-      onUpdateStatus: vi.fn(),
-      onDeleteReport: vi.fn(),
-      onClearResolved: vi.fn(),
-    });
-    expect(el).toBeDefined();
+    const onUpdateStatus = vi.fn();
+    const onDeleteReport = vi.fn();
+    const onClearResolved = vi.fn();
+
+    renderWithProviders(
+      <MissionCenterErrorsTab
+        errorReports={mockMissionData.errorReports}
+        onUpdateStatus={onUpdateStatus}
+        onDeleteReport={onDeleteReport}
+        onClearResolved={onClearResolved}
+      />,
+    );
+
+    expect(
+      screen.getAllByText("403 Forbidden on /api/admin/system")[0],
+    ).toBeDefined();
   });
 
   it("renders MissionCenterSecurityTab component", () => {
-    const el = React.createElement(MissionCenterSecurityTab, {
-      securityIncidents: mockMissionData.securityIncidents,
-    });
-    expect(el).toBeDefined();
+    renderWithProviders(
+      <MissionCenterSecurityTab
+        securityIncidents={mockMissionData.securityIncidents}
+      />,
+    );
+
+    expect(screen.getByText("403 Forbidden Access Attempt")).toBeDefined();
   });
 
   it("renders MissionCenterMetricsTab component", () => {
-    const el = React.createElement(MissionCenterMetricsTab, {
-      metrics: mockMissionData.metrics,
-    });
-    expect(el).toBeDefined();
+    renderWithProviders(
+      <MissionCenterMetricsTab metrics={mockMissionData.metrics} />,
+    );
+
+    expect(screen.getByText("Cloudflare D1")).toBeDefined();
+    expect(screen.getByText("Cloudflare R2")).toBeDefined();
+    expect(screen.getByText("Platform User Demographics")).toBeDefined();
   });
 
   it("renders MissionCenterUserProfileCard with user and IP origin", () => {
-    const el = React.createElement(MissionCenterUserProfileCard, {
-      user: mockMissionData.errorReports[0].user,
-      ipAddress: "192.168.1.50",
-      userAgent: "Mozilla/5.0 TestBrowser",
-      title: "Attributed User Profile Card",
-      isSecurityInfraction: true,
-    });
-    expect(el).toBeDefined();
+    renderWithProviders(
+      <MissionCenterUserProfileCard
+        user={mockMissionData.errorReports[0].user}
+        ipAddress="192.168.1.50"
+        userAgent="Mozilla/5.0 TestBrowser"
+        title="Attributed User Profile Card"
+        isSecurityInfraction={true}
+      />,
+    );
+
+    expect(screen.getByText("Attributed User Profile Card")).toBeDefined();
+    expect(screen.getByText("192.168.1.50")).toBeDefined();
   });
 
   it("renders MissionCenterAuditTab with empty logs", () => {
-    const el = React.createElement(MissionCenterAuditTab, {
-      auditLogs: [],
-    });
-    expect(el).toBeDefined();
+    renderWithProviders(<MissionCenterAuditTab auditLogs={[]} />);
+    expect(
+      screen.getByText("No audit log records match the current filters."),
+    ).toBeDefined();
   });
 
   it("renders MissionCenterErrorsTab with empty error reports", () => {
-    const el = React.createElement(MissionCenterErrorsTab, {
-      errorReports: [],
-    });
-    expect(el).toBeDefined();
+    renderWithProviders(<MissionCenterErrorsTab errorReports={[]} />);
+    expect(
+      screen.getByText("No error incidents found matching criteria."),
+    ).toBeDefined();
   });
 
   it("renders MissionCenterSecurityTab with empty security incidents", () => {
-    const el = React.createElement(MissionCenterSecurityTab, {
-      securityIncidents: [],
-    });
-    expect(el).toBeDefined();
+    renderWithProviders(<MissionCenterSecurityTab securityIncidents={[]} />);
+    expect(
+      screen.getByText(
+        "Security Sentinel: Zero Active Vulnerabilities or Breaches",
+      ),
+    ).toBeDefined();
   });
 
   it("renders MissionCenterUserProfileCard for anonymous visitor", () => {
-    const el = React.createElement(MissionCenterUserProfileCard, {
-      user: null,
-      ipAddress: "10.0.0.1",
-      userAgent: "Mozilla/5.0 Anonymous",
-      title: "Anonymous Visitor",
-      isSecurityInfraction: false,
-    });
-    expect(el).toBeDefined();
+    renderWithProviders(
+      <MissionCenterUserProfileCard
+        user={null}
+        ipAddress="10.0.0.1"
+        userAgent="Mozilla/5.0 Anonymous"
+        title="Anonymous Visitor"
+        isSecurityInfraction={false}
+      />,
+    );
+
+    expect(screen.getByText("Anonymous Visitor")).toBeDefined();
+    expect(screen.getByText("10.0.0.1")).toBeDefined();
   });
 });

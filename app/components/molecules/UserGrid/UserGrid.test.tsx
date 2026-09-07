@@ -1,7 +1,14 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { ThemeProvider } from "@mui/material/styles";
+import { I18nextProvider } from "react-i18next";
+import i18n from "~/i18n";
+import { appTheme } from "~/tokens/theme";
 import UserGrid from "./UserGrid";
 import type { UserCardData } from "../UserCard/UserCard.types";
+
+afterEach(cleanup);
 
 const sampleStudents: UserCardData[] = [
   {
@@ -39,17 +46,13 @@ const sampleInstructors: UserCardData[] = [
   },
 ];
 
-const sampleAdmins: UserCardData[] = [
-  {
-    id: "admin-1",
-    firstName: "Arthur",
-    familyName: "DENT",
-    email: "arthur.dent@aptitek.io",
-    role: "admin",
-    githubUsername: "adent",
-    isProfileComplete: true,
-  },
-];
+function renderWithProviders(ui: React.ReactElement) {
+  return render(
+    <I18nextProvider i18n={i18n}>
+      <ThemeProvider theme={appTheme}>{ui}</ThemeProvider>
+    </I18nextProvider>,
+  );
+}
 
 describe("UserGrid Molecule", () => {
   it("exports UserGrid component properly", () => {
@@ -58,84 +61,94 @@ describe("UserGrid Molecule", () => {
     expect(UserGrid.name).toBe("UserGrid");
   });
 
-  it("creates React element with students list and configuration props", () => {
+  it("renders students list and header title with count badge", () => {
     const onStudentClick = vi.fn();
-    const onImpersonate = vi.fn();
-    const onDelete = vi.fn();
-    const element = React.createElement(UserGrid, {
-      students: sampleStudents,
-      columns: 3,
-      gap: 4,
-      onStudentClick,
-      onImpersonate,
-      showImpersonate: true,
-      onDelete,
-      showDelete: true,
-      title: "Active Students",
-    });
+    renderWithProviders(
+      <UserGrid
+        students={sampleStudents}
+        title="Active Students"
+        onStudentClick={onStudentClick}
+      />,
+    );
 
-    expect(element).toBeDefined();
-    expect(element.props.students).toHaveLength(2);
-    expect(element.props.columns).toBe(3);
-    expect(element.props.gap).toBe(4);
-    expect(element.props.title).toBe("Active Students");
-    expect(element.props.showImpersonate).toBe(true);
-    expect(element.props.showDelete).toBe(true);
-    expect(typeof element.props.onStudentClick).toBe("function");
-    expect(typeof element.props.onImpersonate).toBe("function");
-    expect(typeof element.props.onDelete).toBe("function");
+    expect(screen.getByTestId("user-grid-title")).toBeDefined();
+    expect(screen.getByText("Active Students")).toBeDefined();
+    expect(screen.getByText("Alice")).toBeDefined();
+    expect(screen.getByText("Bob")).toBeDefined();
   });
 
-  it("supports instructor userType and customized search placeholder and empty state props", () => {
-    const element = React.createElement(UserGrid, {
-      students: sampleInstructors,
-      userType: "instructor",
-      title: "Registered Instructors",
-      searchPlaceholder: "Search instructors...",
-      emptyMessage: "No instructors available",
-      emptyPlaceholderCount: 4,
-      lazy: true,
-      pageSize: 3,
-    });
+  it("filters users when searching in the search bar", () => {
+    renderWithProviders(
+      <UserGrid
+        students={sampleStudents}
+        title="Searchable Directory"
+        showSearch={true}
+      />,
+    );
 
-    expect(element.props.userType).toBe("instructor");
-    expect(element.props.title).toBe("Registered Instructors");
-    expect(element.props.searchPlaceholder).toBe("Search instructors...");
-    expect(element.props.emptyMessage).toBe("No instructors available");
-    expect(element.props.emptyPlaceholderCount).toBe(4);
-    expect(element.props.lazy).toBe(true);
-    expect(element.props.pageSize).toBe(3);
+    const searchInput = screen.getByTestId("user-grid-search");
+    expect(searchInput).toBeDefined();
+
+    // Filter to Alice
+    fireEvent.change(searchInput, { target: { value: "Alice" } });
+    expect(screen.getByText("Alice")).toBeDefined();
+    expect(screen.queryByText("Bob")).toBeNull();
+
+    // Clear search
+    const clearBtn = screen.getByTestId("clear-search-btn");
+    fireEvent.click(clearBtn);
+    expect(screen.getByText("Bob")).toBeDefined();
   });
 
-  it("supports admin userType configuration", () => {
-    const element = React.createElement(UserGrid, {
-      students: sampleAdmins,
-      userType: "admin",
-      title: "Registered Administrators",
-    });
+  it("shows empty state when no users match search", () => {
+    renderWithProviders(
+      <UserGrid
+        students={sampleStudents}
+        title="Students"
+        showSearch={true}
+        emptyMessage="No matching users found"
+      />,
+    );
 
-    expect(element.props.userType).toBe("admin");
-    expect(element.props.title).toBe("Registered Administrators");
-    expect(element.props.students[0].role).toBe("admin");
+    const searchInput = screen.getByTestId("user-grid-search");
+    fireEvent.change(searchInput, { target: { value: "NonexistentPerson" } });
+
+    expect(screen.getByTestId("user-grid-empty-state")).toBeDefined();
+    expect(screen.getByText("No matching users found")).toBeDefined();
   });
 
-  it("supports skeleton loading state configuration", () => {
-    const element = React.createElement(UserGrid, {
-      students: [],
-      isLoading: true,
-      skeletonCount: 6,
-    });
+  it("renders skeletons when isLoading is true", () => {
+    renderWithProviders(
+      <UserGrid students={[]} isLoading={true} skeletonCount={3} />,
+    );
 
-    expect(element.props.isLoading).toBe(true);
-    expect(element.props.skeletonCount).toBe(6);
+    expect(screen.getByTestId("grid-skeleton-loading-zone")).toBeDefined();
+    expect(screen.getByTestId("sk-slot-1")).toBeDefined();
   });
 
-  it("supports hiding the controls header via showHeader prop", () => {
-    const element = React.createElement(UserGrid, {
-      students: sampleStudents,
-      showHeader: false,
-    });
+  it("supports instructor userType and clicking user card", () => {
+    const onStudentClick = vi.fn();
+    renderWithProviders(
+      <UserGrid
+        students={sampleInstructors}
+        userType="instructor"
+        title="Instructors"
+        onStudentClick={onStudentClick}
+      />,
+    );
 
-    expect(element.props.showHeader).toBe(false);
+    expect(screen.getByText("Sarah")).toBeDefined();
+    const card = screen.getByTestId("user-card-inst-1");
+    fireEvent.click(card);
+    expect(onStudentClick).toHaveBeenCalledWith(sampleInstructors[0]);
+  });
+
+  it("supports hiding controls header via showHeader=false", () => {
+    renderWithProviders(
+      <UserGrid students={sampleStudents} showHeader={false} />,
+    );
+
+    expect(screen.queryByTestId("user-grid-title")).toBeNull();
+    expect(screen.queryByTestId("user-count-badge")).toBeNull();
   });
 });

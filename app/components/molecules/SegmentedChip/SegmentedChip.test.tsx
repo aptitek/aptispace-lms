@@ -1,7 +1,21 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { ThemeProvider } from "@mui/material/styles";
+import { I18nextProvider } from "react-i18next";
+import i18n from "~/i18n";
+import { appTheme } from "~/tokens/theme";
 import SegmentedChip from "./SegmentedChip";
-import type { SegmentedChipProps } from "./SegmentedChip.types";
+
+afterEach(cleanup);
+
+function renderWithTheme(ui: React.ReactElement) {
+  return render(
+    <I18nextProvider i18n={i18n}>
+      <ThemeProvider theme={appTheme}>{ui}</ThemeProvider>
+    </I18nextProvider>,
+  );
+}
 
 describe("SegmentedChip Molecule Component", () => {
   it("exports SegmentedChip component properly", () => {
@@ -10,87 +24,102 @@ describe("SegmentedChip Molecule Component", () => {
     expect(SegmentedChip.displayName).toBe("SegmentedChip");
   });
 
-  it("creates React element with generic segments list", () => {
-    const element = React.createElement(SegmentedChip, {
-      segments: [
-        { label: "BUILD", bold: true, background: "#22c55e", color: "#fff" },
-        { label: "passing" },
-        { label: "v2.4.0", mono: true },
-      ],
-      size: "small",
-    });
+  it("renders with segments list and formats labels", () => {
+    renderWithTheme(
+      <SegmentedChip
+        segments={[
+          { label: "BUILD", bold: true, background: "#22c55e", color: "#fff" },
+          { label: "passing" },
+          { label: "v2.4.0", mono: true },
+        ]}
+        size="small"
+        data-testid="build-chip"
+      />,
+    );
 
-    expect(element).toBeDefined();
-    const props = element.props as SegmentedChipProps;
-    expect(props.segments).toHaveLength(3);
-    expect(props.size).toBe("small");
+    expect(screen.getByText("BUILD")).toBeDefined();
+    expect(screen.getByText("passing")).toBeDefined();
+    expect(screen.getByText("v2.4.0")).toBeDefined();
   });
 
-  it("creates React element with leading and items shorthand", () => {
-    const element = React.createElement(SegmentedChip, {
-      leading: { label: "STATUS", bold: true },
-      items: ["Healthy", "99.9%"],
-      variant: "filled",
-    });
+  it("renders with leading and items shorthand", () => {
+    renderWithTheme(
+      <SegmentedChip
+        leading={{ label: "STATUS", bold: true }}
+        items={["Healthy", "99.9%"]}
+        variant="filled"
+      />,
+    );
 
-    expect(element).toBeDefined();
-    const props = element.props as SegmentedChipProps;
-    expect(props.leading).toBeDefined();
-    expect(props.items).toHaveLength(2);
-    expect(props.variant).toBe("filled");
+    expect(screen.getByText("STATUS")).toBeDefined();
+    expect(screen.getByText("Healthy")).toBeDefined();
+    expect(screen.getByText("99.9%")).toBeDefined();
   });
 
-  it("supports structured cohort data for domain compatibility", () => {
+  it("renders structured cohort data correctly with diploma, year and tags", () => {
     const cohortData = {
       diploma: "Master",
       year: 2026,
       tags: ["AI", "Robotics"],
     };
 
-    const element = React.createElement(SegmentedChip, {
-      cohort: cohortData,
-      size: "medium",
-      testId: "my-cohort-chip",
-    });
+    renderWithTheme(
+      <SegmentedChip
+        cohort={cohortData}
+        size="medium"
+        testId="cohort-segmented-chip"
+      />,
+    );
 
-    expect(element).toBeDefined();
-    const props = element.props as SegmentedChipProps;
-    expect(props.cohort).toEqual(cohortData);
-    expect(props.testId).toBe("my-cohort-chip");
+    expect(screen.getByTestId("cohort-segmented-chip")).toBeDefined();
+    expect(screen.getByText("M2026")).toBeDefined();
+    expect(screen.getByText("AI")).toBeDefined();
+    expect(screen.getByText("Robotics")).toBeDefined();
   });
 
-  it("supports delete action and interactive click handlers", () => {
+  it("handles click and delete interactions", () => {
     const handleClick = vi.fn();
     const handleDelete = vi.fn();
 
-    const element = React.createElement(SegmentedChip, {
-      segments: [{ label: "Role" }, { label: "Student" }],
-      onClick: handleClick,
-      onDelete: handleDelete,
-      shape: "bun",
-    });
+    renderWithTheme(
+      <SegmentedChip
+        segments={[{ label: "Role" }, { label: "Student" }]}
+        onClick={handleClick}
+        onDelete={handleDelete}
+        shape="bun"
+        testId="interactive-chip"
+      />,
+    );
 
-    expect(element).toBeDefined();
-    const props = element.props as SegmentedChipProps;
-    expect(props.onClick).toBe(handleClick);
-    expect(props.onDelete).toBe(handleDelete);
-    expect(props.shape).toBe("bun");
+    const chip = screen.getByTestId("interactive-chip");
+    fireEvent.click(chip);
+    expect(handleClick).toHaveBeenCalledTimes(1);
+
+    const deleteBtn = screen.getByLabelText(/delete|remove/i);
+    fireEvent.click(deleteBtn);
+    expect(handleDelete).toHaveBeenCalledTimes(1);
   });
 
-  it("supports various sizes and shape presets", () => {
-    const smallElement = React.createElement(SegmentedChip, {
-      segments: ["A", "B"],
-      size: "small",
-      shape: "pill",
-    });
-    expect(smallElement.props.size).toBe("small");
+  it("renders various sizes and shape presets", () => {
+    const { unmount } = renderWithTheme(
+      <SegmentedChip
+        segments={["Small", "Pill"]}
+        size="small"
+        shape="pill"
+        testId="small-chip"
+      />,
+    );
+    expect(screen.getByTestId("small-chip")).toBeDefined();
+    unmount();
 
-    const largeElement = React.createElement(SegmentedChip, {
-      segments: ["A", "B"],
-      size: "large",
-      shape: "asymmetric",
-    });
-    expect(largeElement.props.size).toBe("large");
-    expect(largeElement.props.shape).toBe("asymmetric");
+    renderWithTheme(
+      <SegmentedChip
+        segments={["Large", "Asymmetric"]}
+        size="large"
+        shape="asymmetric"
+        testId="large-chip"
+      />,
+    );
+    expect(screen.getByTestId("large-chip")).toBeDefined();
   });
 });

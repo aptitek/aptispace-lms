@@ -1,57 +1,135 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import React from "react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { ThemeProvider } from "@mui/material/styles";
+import { I18nextProvider } from "react-i18next";
+import i18n from "~/i18n";
+import { appTheme } from "~/tokens/theme";
 import EmailField from "./EmailField";
 
-describe("EmailField Component Molecule", () => {
+afterEach(cleanup);
+
+function renderWithProviders(ui: React.ReactElement) {
+  return render(
+    <I18nextProvider i18n={i18n}>
+      <ThemeProvider theme={appTheme}>{ui}</ThemeProvider>
+    </I18nextProvider>,
+  );
+}
+
+describe("EmailField Molecule", () => {
   it("exports EmailField properly", () => {
     expect(EmailField).toBeDefined();
-    expect(typeof EmailField).toBe("object"); // forwardRef component
+    expect(EmailField.displayName).toBe("EmailField");
   });
 
-  it("handles default domain and normalizes prefix/domain props", () => {
-    const props = {
-      defaultValue: "john.doe",
-      domain: "@aptitek.io",
-      placeholder: "username",
-      variant: "outlined" as const,
-      size: "medium" as const,
-      name: "email",
-      autoComplete: "email",
-    };
+  it("renders with default domain and accepts typing", () => {
+    const onEmailChange = vi.fn();
+    const onChange = vi.fn();
 
-    expect(props.defaultValue).toBe("john.doe");
-    expect(props.domain).toBe("@aptitek.io");
-    expect(props.placeholder).toBe("username");
-    expect(props.variant).toBe("outlined");
-    expect(props.size).toBe("medium");
-    expect(props.name).toBe("email");
-    expect(props.autoComplete).toBe("email");
+    renderWithProviders(
+      <EmailField
+        domain="@aptispace.com"
+        placeholder="username"
+        onEmailChange={onEmailChange}
+        onChange={onChange}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText("username") as HTMLInputElement;
+    expect(input).toBeDefined();
+    expect(screen.getByText("aptispace.com")).toBeDefined();
+
+    fireEvent.change(input, { target: { value: "john.doe" } });
+    expect(input.value).toBe("john.doe");
+    expect(onEmailChange).toHaveBeenCalledWith(
+      "john.doe@aptispace.com",
+      "john.doe",
+    );
+    expect(onChange).toHaveBeenCalledWith("john.doe@aptispace.com");
   });
 
-  it("supports filled variant and error states", () => {
-    const errorProps = {
-      value: "invalid space",
-      domain: "aptitek.io",
-      variant: "filled" as const,
-      size: "large" as const,
-      error: true,
-      helperText: "Invalid username identifier",
-    };
+  it("strips domain from input if user pastes full email with @", () => {
+    const onEmailChange = vi.fn();
 
-    expect(errorProps.error).toBe(true);
-    expect(errorProps.variant).toBe("filled");
-    expect(errorProps.size).toBe("large");
-    expect(errorProps.helperText).toContain("Invalid username");
+    renderWithProviders(
+      <EmailField
+        domain="aptitek.io"
+        placeholder="username"
+        onEmailChange={onEmailChange}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText("username") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "alice.martin@aptitek.io" } });
+
+    expect(input.value).toBe("alice.martin");
+    expect(onEmailChange).toHaveBeenCalledWith(
+      "alice.martin@aptitek.io",
+      "alice.martin",
+    );
   });
 
-  it("supports disabled and read-only configurations", () => {
-    const disabledProps = {
-      value: "instructor.smith",
-      domain: "aptispace.com",
-      disabled: true,
-      showClearButton: false,
-    };
+  it("handles clearing the field using the clear button", () => {
+    const onEmailChange = vi.fn();
 
-    expect(disabledProps.disabled).toBe(true);
-    expect(disabledProps.showClearButton).toBe(false);
+    renderWithProviders(
+      <EmailField
+        defaultValue="bob.sponge"
+        domain="aptispace.com"
+        showClearButton={true}
+        onEmailChange={onEmailChange}
+      />,
+    );
+
+    const clearButton = screen.getByLabelText("Clear prefix");
+    expect(clearButton).toBeDefined();
+
+    fireEvent.click(clearButton);
+    expect(onEmailChange).toHaveBeenCalledWith("", "");
+  });
+
+  it("renders controlled value correctly", () => {
+    const { rerender } = renderWithProviders(
+      <EmailField value="first.val" domain="aptispace.com" />,
+    );
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    expect(input.value).toBe("first.val");
+
+    rerender(
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider theme={appTheme}>
+          <EmailField value="updated.val" domain="aptispace.com" />
+        </ThemeProvider>
+      </I18nextProvider>,
+    );
+
+    expect(input.value).toBe("updated.val");
+  });
+
+  it("supports errorText and helperText props", () => {
+    renderWithProviders(
+      <EmailField
+        error={true}
+        errorText="Invalid username format"
+        domain="aptispace.com"
+      />,
+    );
+
+    expect(screen.getByText("Invalid username format")).toBeDefined();
+  });
+
+  it("supports disabled state", () => {
+    renderWithProviders(
+      <EmailField
+        disabled={true}
+        defaultValue="locked.user"
+        domain="aptispace.com"
+      />,
+    );
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    expect(input.disabled).toBe(true);
   });
 });
