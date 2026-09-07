@@ -26,13 +26,26 @@
 [ ] Make all component have a skeleton version if it is a good practice
 [x] Remove YearRangePicker. It has been replaced by NumberPicker
 [x] Make the wavy animation in Clock card on hover only
-[ ] Fix ClockCard color for progress
+[x] Fix ClockCard color for progress
 [x] Make the github chip optionally editable by admins in the usercard
 [ ] Make an institution and cohort card component with skeleton mirroring the usercard.
 [x] Student Inspector will use the userCard component with editable github chip
 [x] Student Inspector should be renamed UserInspector and add the Cohort and Institution Inspectors as well. Make a generic Inspector using a card + fields + buttons
 [ ] MapCard needs a overhaul
 [ ] Find where to make a specialty editor
+[ ] Rename EditableAvatar to ImageUpload
+[ ] HoldButton expressive shapes do not display progress
+[ ] Switch uses bad color for the circle when off
+[ ] Rename ExpressiveCard to Card
+[ ] Rename GhostActionButton to FloatingActionButton
+[ ] MaterialSymbol renamed to Icon and fix the props like weight fill, etc
+[ ] CalendarCard uses out of theme color for the title in Past Event
+[ ] Sidebar needs to not display background and logo in auth mode (renamed ghost variant)
+[ ] In InstitutionInspector the emailconfiguration should use a card as container instead of a pill shaped container.
+[ ] In InstitutionInspector the emailConfiguration needs to use tabs with animations instead of buttons.
+[ ] In User inspector, the cohort assignement needs to hapen on selection, no need for add button
+[ ] MissionCenter main table needs to be in a card not a pill
+[ ] Better contrast in devImpersonator for new account text
 
 --- MANUAL TASKS ---
 
@@ -40,8 +53,9 @@
 [x] Implement a generic MD3 search and filter component for schools, cohort, group, students, activities and courses.
 [x] Make an admin section for audit and reported errors.
 [x] Setup a dashboard using the metrics from the DB / R2 / Workers to show usage statistics, errors etc.
-[ ] Enforce the use of MUI's and expressive's components instead of native ones (ESLint rule)
-[ ] Check Deadcode, test all features end to end
-[ ] Global check of i18n
-[ ] Enforce WCAG 2.1 AA AA Level Compliance in Design System, Forms and controls
-[ ] Check GDPR Compliance (ONLY once production starts and app is finished) DO NOT use cookies if possible except for github login. If cookies are needed, use localstorage instead.
+[x] Enforce the use of MUI's and expressive's components instead of native ones (ESLint rule)
+[x] Check Deadcode, test all features end to end
+[x] Global check of i18n
+[x] Enforce WCAG 2.1 AA AA Level Compliance in Design System, Forms and controls
+[x] Check GDPR Compliance (ONLY once production starts and app is finished) DO NOT use cookies if possible except for github login. If cookies are needed, use localstorage instead.
+[ ] Allow for delete account somewhere for users with holdbutton and confirm modal

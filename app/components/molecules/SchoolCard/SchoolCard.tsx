@@ -40,9 +40,11 @@ export const SchoolCard = forwardRef<HTMLDivElement, SchoolCardProps>(
 
     return (
       <Badge
-        badgeContent={studentCount}
+        badgeContent={studentCount > 0 ? studentCount : undefined}
+        invisible={!studentCount || studentCount <= 0}
         color="primary"
         max={9999}
+
         sx={{
           width: "100%",
           display: "block",

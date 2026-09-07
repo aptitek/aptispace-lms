@@ -72,9 +72,11 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
 
     return (
       <Badge
-        badgeContent={studentCount}
+        badgeContent={studentCount > 0 ? studentCount : undefined}
+        invisible={!studentCount || studentCount <= 0}
         color="secondary"
         max={9999}
+
         sx={{
           width: "100%",
           display: "block",

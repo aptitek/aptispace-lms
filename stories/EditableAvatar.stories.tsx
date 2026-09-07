@@ -208,3 +208,29 @@ export const BiometricBadgePortrait: Story = {
     </Box>
   ),
 };
+
+export const LandscapeLogoMode: Story = {
+  args: {
+    mode: "image-only",
+    defaultValue: "/aptitek-logo.svg",
+    name: "Aptitek Institute",
+    shape: "landscape",
+    size: "lg",
+    width: "100%",
+    height: 80,
+    objectFit: "contain",
+    editable: true,
+  },
+  render: (args) => (
+    <Box sx={{ width: 320, p: 2 }}>
+      <EditableAvatar {...args} />
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ display: "block", mt: 1, textAlign: "center" }}
+      >
+        Landscape Logo Mode (as used in InstitutionInspector)
+      </Typography>
+    </Box>
+  ),
+};

@@ -1,9 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { styled } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import ThemeSwitch, {
   ZenithSwitch,
 } from "~/components/molecules/ThemeSwitch/ThemeSwitch";
+import DebugThemeSwitch from "~/components/molecules/ThemeSwitch/DebugThemeSwitch";
 
 const meta = {
   title: "Molecules/ThemeSwitch",
@@ -136,3 +139,26 @@ export const InteractiveZenithSwitchPlayground: StoryObj<typeof ZenithSwitch> =
   {
     render: () => <InteractivePlayground />,
   };
+
+export const DebugThemeSwitchShowcase: Story = {
+  render: () => (
+    <Box
+      sx={{
+        p: 3,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        alignItems: "center",
+      }}
+    >
+      <Typography variant="body2" color="text.secondary">
+        Dev-Only M3 Neon Debug Switch with BugReport thumb icon
+      </Typography>
+      <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+        <DebugThemeSwitch size="small" forceShow={true} />
+        <DebugThemeSwitch size="medium" forceShow={true} />
+        <DebugThemeSwitch size="large" forceShow={true} />
+      </Box>
+    </Box>
+  ),
+};

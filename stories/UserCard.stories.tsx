@@ -99,3 +99,72 @@ export const AdminRole: Story = {
     },
   },
 };
+
+export const EditableGithub: Story = {
+  args: {
+    user: {
+      id: "student-edit-gh",
+      firstName: "Elena",
+      familyName: "ROSTOVA",
+      email: "elena.rostova@aptitek.io",
+      role: "student",
+      githubUsername: "erostova",
+      cohortName: "Cohort 2026",
+      isProfileComplete: true,
+    },
+    editableGithub: true,
+    onUpdateGithub: (userId, newHandle) => {
+      alert(`Updated user ${userId} GitHub handle to: ${newHandle}`);
+    },
+  },
+};
+
+export const WithActionButtons: Story = {
+  args: {
+    user: {
+      id: "student-actions",
+      firstName: "Lucas",
+      familyName: "BERNARD",
+      email: "lucas.bernard@aptitek.io",
+      role: "student",
+      cohortName: "Cohort 2026",
+      isProfileComplete: true,
+    },
+    showImpersonate: true,
+    onImpersonate: (u) => alert(`Impersonating: ${u.firstName}`),
+    showDelete: true,
+    onDelete: (u) => alert(`Delete requested: ${u.firstName}`),
+  },
+};
+
+export const OutlinedVariant: Story = {
+  args: {
+    user: {
+      id: "student-outlined",
+      firstName: "Camille",
+      familyName: "DUPONT",
+      email: "camille.dupont@aptitek.io",
+      role: "student",
+      cohortName: "Cohort 2026",
+      isProfileComplete: true,
+    },
+    variant: "outlined",
+  },
+};
+
+export const InteractiveSelected: Story = {
+  args: {
+    user: {
+      id: "student-selected",
+      firstName: "Gabriel",
+      familyName: "MOREL",
+      email: "gabriel.morel@aptitek.io",
+      role: "student",
+      cohortName: "Cohort 2026",
+      isProfileComplete: true,
+    },
+    interactive: true,
+    isSelected: true,
+    onClick: (u) => alert(`Clicked card: ${u.firstName}`),
+  },
+};
