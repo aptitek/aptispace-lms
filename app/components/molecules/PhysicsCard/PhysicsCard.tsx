@@ -161,6 +161,7 @@ function PhysicsCardFront({
           bgcolor: alpha(theme.palette.background.paper, 0.45),
           backdropFilter: "blur(20px) saturate(160%)",
           border: `1px solid ${alpha(theme.palette.common.black, 0.14)}`,
+          backgroundClip: "padding-box",
           boxShadow: `0 16px 40px -8px ${alpha(theme.palette.common.black, 0.16)}, inset 0 0 0 1px ${alpha(theme.palette.common.white, 0.7)}`,
           ...theme.applyStyles("dark", {
             bgcolor: alpha(theme.palette.background.default, 0.3),
@@ -234,6 +235,7 @@ function PhysicsCardBack({
           bgcolor: alpha(theme.palette.background.paper, 0.45),
           backdropFilter: "blur(20px) saturate(160%)",
           border: `1px solid ${alpha(theme.palette.common.black, 0.14)}`,
+          backgroundClip: "padding-box",
           boxShadow: `0 16px 40px -8px ${alpha(theme.palette.common.black, 0.16)}, inset 0 0 0 1px ${alpha(theme.palette.common.white, 0.7)}`,
           ...theme.applyStyles("dark", {
             bgcolor: alpha(theme.palette.background.default, 0.3),

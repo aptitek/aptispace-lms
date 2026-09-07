@@ -26,6 +26,13 @@ export const ModalCardSurface = styled(Card)(({ theme }) => ({
   flexDirection: "column",
   borderRadius: theme.spacing(1.5),
   border: `1px solid ${theme.palette.divider}`,
+  backgroundClip: "padding-box",
   overflow: "hidden",
   backgroundColor: theme.palette.background.paper,
+  boxShadow:
+    "0 12px 36px -6px rgba(0, 0, 0, 0.15), 0 4px 12px -2px rgba(0, 0, 0, 0.08)",
+  ...theme.applyStyles("dark", {
+    boxShadow:
+      "0 16px 48px -8px rgba(0, 0, 0, 0.6), 0 4px 16px -2px rgba(0, 0, 0, 0.4)",
+  }),
 }));

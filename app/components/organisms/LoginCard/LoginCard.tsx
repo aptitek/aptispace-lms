@@ -30,6 +30,7 @@ const CardContainer = styled("div")(({ theme }) => {
     borderRadius: radius * 2,
     backgroundColor: theme.palette.background.paper,
     border: `1px solid ${theme.palette.divider}`,
+    backgroundClip: "padding-box",
     boxShadow: `0 24px 48px ${theme.palette.action.focus}`,
     backdropFilter: "blur(16px)",
     display: "flex",

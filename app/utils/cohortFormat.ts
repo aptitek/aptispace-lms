@@ -181,7 +181,7 @@ export const DIPLOMA_COLORS: Record<
   DiplomaColorTheme
 > = {
   C: {
-    // Certification: Teal
+    // Certification: Grey
     main: "var(--color-diploma-c)",
     light: "var(--color-diploma-c)",
     dark: "var(--color-diploma-c)",
@@ -189,7 +189,7 @@ export const DIPLOMA_COLORS: Record<
     border: "var(--color-diploma-c)",
   },
   F: {
-    // Formation: Amber / Orange
+    // Formation: Blue
     main: "var(--color-diploma-f)",
     light: "var(--color-diploma-f)",
     dark: "var(--color-diploma-f)",
@@ -197,7 +197,7 @@ export const DIPLOMA_COLORS: Record<
     border: "var(--color-diploma-f)",
   },
   L: {
-    // Licence: Fresh Emerald Green
+    // Licence: Green
     main: "var(--color-diploma-l)",
     light: "var(--color-diploma-l)",
     dark: "var(--color-diploma-l)",
@@ -205,15 +205,15 @@ export const DIPLOMA_COLORS: Record<
     border: "var(--color-diploma-l)",
   },
   B: {
-    // Bachelor: Electric Sapphire Blue
+    // Bachelor: Yellow
     main: "var(--color-diploma-b)",
     light: "var(--color-diploma-b)",
     dark: "var(--color-diploma-b)",
-    text: "var(--color-flag-fr-white)",
+    text: "var(--color-diploma-b-text, var(--color-solarized-base03))",
     border: "var(--color-diploma-b)",
   },
   M: {
-    // Master: Royal Violet
+    // Master: Pink
     main: "var(--color-diploma-m)",
     light: "var(--color-diploma-m)",
     dark: "var(--color-diploma-m)",
@@ -221,7 +221,7 @@ export const DIPLOMA_COLORS: Record<
     border: "var(--color-diploma-m)",
   },
   D: {
-    // Doctorate: Rose Crimson
+    // Doctorate: Purple
     main: "var(--color-diploma-d)",
     light: "var(--color-diploma-d)",
     dark: "var(--color-diploma-d)",

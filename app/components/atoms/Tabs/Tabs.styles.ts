@@ -78,7 +78,8 @@ function getVerticalTabStyles(theme: Theme): CSSObject {
     overflow: "visible !important",
     flexShrink: "0 !important",
     backgroundColor: "transparent",
-    border: "none",
+    border: "1px solid transparent",
+    backgroundClip: "padding-box",
     transition: theme.transitions.create(
       [
         "width",
@@ -107,12 +108,12 @@ function getVerticalTabStyles(theme: Theme): CSSObject {
       width: "max-content !important",
       minWidth: "max-content !important",
       paddingRight: theme.spacing(2),
-      backgroundColor: alpha(theme.palette.background.paper, 0.96),
-      backdropFilter: "blur(16px)",
-      WebkitBackdropFilter: "blur(16px)",
-      border: "none",
-      boxShadow: `0 0 0 1px ${theme.palette.divider}, 0 4px 16px ${alpha(theme.palette.common.black, 0.14)}`,
-      zIndex: 50,
+      backgroundColor:
+        theme.palette.surfaceContainerHigh || theme.palette.background.paper,
+      border: `1px solid ${theme.palette.divider}`,
+      backgroundClip: "padding-box",
+      boxShadow: `0 4px 16px ${alpha(theme.palette.common.black, 0.14)}`,
+      zIndex: 100,
       "& .MuiTab-labelSlot": {
         opacity: 1,
         maxWidth: 240,

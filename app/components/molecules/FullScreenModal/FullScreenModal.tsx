@@ -81,7 +81,7 @@ export function FullScreenModal({
             ]}
           >
             {asCard ? (
-              <ModalCardSurface elevation={12}>{children}</ModalCardSurface>
+              <ModalCardSurface elevation={0}>{children}</ModalCardSurface>
             ) : (
               children
             )}

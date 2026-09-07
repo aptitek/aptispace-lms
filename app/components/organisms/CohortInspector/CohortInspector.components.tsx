@@ -23,6 +23,7 @@ import {
   type AcademicPeriodType,
   calculateDurationMonths,
 } from "~/utils/academicYear";
+import { M3_SHAPE_CORNER_STRINGS } from "~/tokens/shapes";
 
 export {
   CohortStructuredFields,
@@ -86,13 +87,13 @@ export function CohortDateModeToggle({
       aria-label={t("inspector.dateModeAria", "Date selection mode")}
       sx={{
         p: 0.5,
-        borderRadius: (theme) => theme.shape.corners.medium,
+        borderRadius: M3_SHAPE_CORNER_STRINGS.small,
         bgcolor: (theme) => theme.palette.surfaceContainerHigh,
         border: "1px solid",
         borderColor: "divider",
         "& .MuiToggleButtonGroup-grouped": {
           border: 0,
-          borderRadius: (theme) => theme.shape.corners.small,
+          borderRadius: M3_SHAPE_CORNER_STRINGS.extraSmall,
           fontWeight: 600,
           fontSize: "0.8rem",
           textTransform: "none",
@@ -282,8 +283,9 @@ export function CohortScheduleCard({
       variant="outlined"
       sx={{
         p: 2,
-        borderRadius: (theme) => theme.shape.corners.largeIncreased,
+        borderRadius: M3_SHAPE_CORNER_STRINGS.large,
         borderColor: "divider",
+        border: "1px solid",
         bgcolor: (theme) =>
           theme.palette.surfaceContainerLow || theme.palette.background.paper,
         display: "flex",
@@ -348,7 +350,7 @@ export function CohortDurationBanner({
       sx={{
         px: 1.5,
         py: 0.75,
-        borderRadius: (theme) => theme.shape.corners.small,
+        borderRadius: M3_SHAPE_CORNER_STRINGS.small,
         bgcolor: (theme) => theme.palette.surfaceContainerHigh,
         display: "flex",
         alignItems: "center",

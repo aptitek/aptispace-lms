@@ -18,9 +18,14 @@ import {
   parseCohortName,
   DIPLOMA_OPTIONS,
   COMMON_SPECIALTY_TAGS,
-  getSpecialtySlug,
 } from "~/utils/cohortFormat";
 import { normalizeInstitutionType } from "~/tokens/institutions";
+import {
+  matchesCohortFilter,
+  isCohortCardSelected,
+  renderDiplomaFilterChip,
+  renderSpecialtyFilterChip,
+} from "./admin.cohorts-tab.helpers";
 import {
   TabPanelContainer,
   MainColumn,
@@ -62,101 +67,6 @@ export interface AdminCohortsTabPanelProps {
     tags?: string[];
   }) => void;
   isSubmitting: boolean;
-}
-
-interface CohortFilterOptions {
-  cohortStartYearMin: number | null;
-  cohortStartYearMax: number | null;
-  cohortDiplomaFilter: string;
-  cohortYearFilter: string | number;
-  cohortTagFilter: string;
-  cohortSearchQuery: string;
-}
-
-function matchesCohortDateRange(
-  startDate?: string | Date | null,
-  minYear?: number | null,
-  maxYear?: number | null,
-): boolean {
-  if (minYear == null && maxYear == null) return true;
-  if (!startDate) return false;
-  const yr = new Date(startDate).getFullYear();
-  if (isNaN(yr)) return false;
-  if (minYear != null && yr < minYear) return false;
-  if (maxYear != null && yr > maxYear) return false;
-  return true;
-}
-
-function matchesCohortSearch(
-  c: CohortWithInstitution,
-  tags: string[],
-  query: string,
-): boolean {
-  if (!query.trim()) return true;
-  const q = query.toLowerCase().trim();
-  const nameMatch = (c.name || "").toLowerCase().includes(q);
-  const descMatch = Boolean(c.description?.toLowerCase().includes(q));
-  const tagMatch = tags.some((t) => t.toLowerCase().includes(q));
-  return nameMatch || descMatch || tagMatch;
-}
-
-function matchesCohortDiploma(diploma: string, filter: string): boolean {
-  if (filter === "all") return true;
-  return diploma === filter.toUpperCase();
-}
-
-function matchesCohortYear(year: number, filter: string | number): boolean {
-  if (filter === "all" || filter === "") return true;
-  return year === Number(filter);
-}
-
-function matchesCohortTag(tags: string[], filter: string): boolean {
-  if (filter === "all") return true;
-  const lowerFilter = filter.toLowerCase();
-  return tags.some((t) => t.toLowerCase() === lowerFilter);
-}
-
-function extractCohortFilterAttributes(c: CohortWithInstitution) {
-  const parsed = parseCohortName(c.name);
-  const diploma = (c.diploma || parsed.diploma || "").trim().toUpperCase();
-  const year = c.year ?? parsed.year ?? 0;
-  const tags = c.tags && c.tags.length > 0 ? c.tags : parsed.tags;
-  return { diploma, year, tags };
-}
-
-function matchesCohortFilter(
-  c: CohortWithInstitution,
-  options: CohortFilterOptions,
-): boolean {
-  if (
-    !matchesCohortDateRange(
-      c.startDate,
-      options.cohortStartYearMin,
-      options.cohortStartYearMax,
-    )
-  ) {
-    return false;
-  }
-
-  const { diploma, year, tags } = extractCohortFilterAttributes(c);
-
-  if (!matchesCohortDiploma(diploma, options.cohortDiplomaFilter)) return false;
-  if (!matchesCohortYear(year, options.cohortYearFilter)) return false;
-  if (!matchesCohortTag(tags, options.cohortTagFilter)) return false;
-  return matchesCohortSearch(c, tags, options.cohortSearchQuery);
-}
-
-function isCohortCardSelected(
-  cohort: CohortWithInstitution,
-  selectedCohort: CohortWithInstitution | null,
-): boolean {
-  if (!selectedCohort) return false;
-  if (selectedCohort.id && cohort.id) {
-    return selectedCohort.id === cohort.id;
-  }
-  return Boolean(
-    selectedCohort.name && cohort.name && selectedCohort.name === cohort.name,
-  );
 }
 
 export function AdminCohortsTabPanel({
@@ -374,16 +284,19 @@ export function AdminCohortsTabPanel({
                 label={t("diplomas.title", "Diploma")}
                 value={cohortDiplomaFilter}
                 onChange={setCohortDiplomaFilter}
-                minWidth={150}
+                minWidth={180}
                 testId="cohort-diploma-filter"
+                renderValue={(selectedDiploma) =>
+                  renderDiplomaFilterChip(selectedDiploma, t)
+                }
                 options={[
                   {
                     value: "all",
-                    label: <em>{t("diplomas.all", "All Diplomas")}</em>,
+                    chip: renderDiplomaFilterChip("all", t),
                   },
                   ...DIPLOMA_OPTIONS.map((opt) => ({
                     value: opt.code,
-                    label: `${opt.code} – ${t(opt.labelKey, opt.defaultLabel)}`,
+                    chip: renderDiplomaFilterChip(opt.code, t),
                   })),
                 ]}
               />
@@ -402,19 +315,19 @@ export function AdminCohortsTabPanel({
                 label={t("filterBar.tag", "Specialty")}
                 value={cohortTagFilter}
                 onChange={setCohortTagFilter}
-                minWidth={160}
+                minWidth={180}
                 testId="cohort-tag-filter"
+                renderValue={(selectedTag) =>
+                  renderSpecialtyFilterChip(selectedTag, t)
+                }
                 options={[
                   {
                     value: "all",
-                    label: <em>{t("filterBar.allTags", "All Specialties")}</em>,
+                    chip: renderSpecialtyFilterChip("all", t),
                   },
                   ...allCohortTags.map((tag) => ({
                     value: tag,
-                    label: t(
-                      `cohortTags.${getSpecialtySlug(tag)}`,
-                      tag.toUpperCase(),
-                    ),
+                    chip: renderSpecialtyFilterChip(tag, t),
                   })),
                 ]}
               />

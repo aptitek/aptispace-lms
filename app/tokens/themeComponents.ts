@@ -24,9 +24,10 @@ export const m3TooltipOverrides = {
     padding: "6px 10px",
     boxShadow:
       theme.palette.mode === "dark"
-        ? theme.shadows[2] || "0 0 0 1px rgba(255, 255, 255, 0.1)"
+        ? "0 4px 14px rgba(0, 0, 0, 0.45)"
         : "0 4px 14px rgba(0, 0, 0, 0.15)",
     border: `1px solid ${theme.palette.divider}`,
+    backgroundClip: "padding-box",
     backdropFilter: "blur(8px)",
   }),
   arrow: ({ theme }: { theme: Theme }) => ({
@@ -42,9 +43,10 @@ export const m3DatePickerComponents = {
         borderRadius: M3_SHAPE_CORNERS.largeIncreased,
         backgroundColor: theme.palette.background.paper,
         border: `1px solid ${theme.palette.divider}`,
+        backgroundClip: "padding-box",
         boxShadow:
           theme.palette.mode === "dark"
-            ? theme.shadows[4] || "0 0 0 1px rgba(255, 255, 255, 0.14)"
+            ? "0px 12px 32px rgba(0, 0, 0, 0.5)"
             : "0px 8px 32px rgba(0, 0, 0, 0.12)",
       }),
     },

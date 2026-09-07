@@ -44,8 +44,15 @@ const SnackbarRoot = styled(motion.div)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   color: theme.palette.text.primary,
   border: `1px solid ${theme.palette.divider}`,
+  backgroundClip: "padding-box",
   backdropFilter: "blur(16px)",
-  boxShadow: theme.shadows[8],
+  WebkitBackdropFilter: "blur(16px)",
+  boxShadow:
+    "0 8px 24px -4px rgba(0, 0, 0, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.08)",
+  ...theme.applyStyles("dark", {
+    boxShadow:
+      "0 12px 32px -4px rgba(0, 0, 0, 0.5), 0 4px 12px -2px rgba(0, 0, 0, 0.3)",
+  }),
 }));
 
 const IconBox = styled("div", {

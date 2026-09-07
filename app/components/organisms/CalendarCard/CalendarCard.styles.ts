@@ -130,6 +130,7 @@ export const SheetCard = styled("div", {
     borderRadius: "16px",
     backgroundColor: alpha(theme.palette.background.paper, 0.95),
     border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+    backgroundClip: "padding-box",
     boxShadow:
       "0 6px 18px -4px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)",
     backdropFilter: "blur(12px)",
@@ -143,7 +144,7 @@ export const SheetCard = styled("div", {
       { duration: theme.transitions.duration.shorter },
     ),
     ...theme.applyStyles("dark", {
-      boxShadow: `0 6px 20px -4px rgba(0, 0, 0, 0.45), 0 0 0 1px ${alpha(theme.palette.divider, 0.2)}`,
+      boxShadow: "0 6px 20px -4px rgba(0, 0, 0, 0.45)",
     }),
     ...($isInteractive && {
       "&:hover": {

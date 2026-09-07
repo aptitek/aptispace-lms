@@ -107,6 +107,10 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
       position: "relative",
     },
   "& .MuiEventCalendar-timeGridEvent": {
+    "--time-grid-event-column-gap": "2px !important",
+    left: "calc(((100% - var(--time-grid-event-column-gap)) / var(--columns-count)) * (var(--first-index) - 1) + 1px) !important",
+    right:
+      "calc(((100% - var(--time-grid-event-column-gap)) * (var(--columns-count) - var(--last-index))) / var(--columns-count) + 1px) !important",
     borderRadius: "8px !important",
     boxShadow: `0 3px 12px -2px ${alpha(theme.palette.common.black, 0.14)}, 0 1px 4px 0 ${alpha(theme.palette.common.black, 0.08)} !important`,
     ...theme.applyStyles("dark", {
@@ -128,7 +132,7 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
     top: "0 !important",
     bottom: "0 !important",
     left: "0 !important",
-    width: "8px !important",
+    width: "4px !important",
     borderRadius: "0 !important",
     boxShadow: `1px 0 0 0 ${alpha(theme.palette.common.black, 0.18)} !important`,
     ...theme.applyStyles("dark", {
@@ -140,7 +144,7 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
       top: "0 !important",
       bottom: "0 !important",
       left: "0 !important",
-      width: "8px !important",
+      width: "4px !important",
       borderRadius: "0 !important",
     },
   "& .event-remote, & [data-palette='blue']": {
@@ -200,8 +204,9 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
       letterSpacing: "-0.01em",
     },
   "& .MuiEventCalendar-timeGridEventTitle": {
-    paddingRight: "20px !important",
-    wordBreak: "break-word",
+    paddingRight: "16px !important",
+    wordBreak: "normal !important",
+    overflowWrap: "anywhere !important",
     lineHeight: "1.25 !important",
     fontSize: "0.75rem !important",
   },
@@ -252,21 +257,21 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
     },
   "& .MuiEventCalendar-timeGridEvent.event-remote, & .MuiEventCalendar-timeGridEvent.event-in-person, & .MuiEventCalendar-timeGridEvent[data-palette='blue'], & .MuiEventCalendar-timeGridEvent[data-palette='green']":
     {
-      padding: "6px 6px 6px 16px !important",
+      padding: "6px 6px 6px 10px !important",
       "&[data-under-hour='true']": {
         paddingTop: "2px !important",
         paddingBottom: "2px !important",
-        paddingLeft: "16px !important",
+        paddingLeft: "10px !important",
       },
       "&[data-under-fifteen-minutes='true']": {
         paddingTop: "0 !important",
         paddingBottom: "0 !important",
-        paddingLeft: "12px !important",
+        paddingLeft: "8px !important",
       },
     },
   "& .MuiEventCalendar-dayGridEvent.event-remote, & .MuiEventCalendar-dayGridEvent.event-in-person, & .MuiEventCalendar-dayGridEvent[data-palette='blue'], & .MuiEventCalendar-dayGridEvent[data-palette='green']":
     {
-      paddingRight: "24px !important",
+      paddingRight: "20px !important",
     },
   "& .MuiEventCalendar-agendaViewEventListItem .event-remote, & .MuiEventCalendar-agendaViewEventListItem .event-in-person, & .MuiEventCalendar-agendaViewEventListItem [data-palette='blue'], & .MuiEventCalendar-agendaViewEventListItem [data-palette='green']":
     {

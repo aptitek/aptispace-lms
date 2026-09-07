@@ -128,6 +128,38 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   };
 }
 
+async function deletePlanningClassApi(
+  id: string | number,
+): Promise<"ok" | "failed" | "error"> {
+  try {
+    const apiResponse = await fetch("/api/classes", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    return apiResponse.ok ? "ok" : "failed";
+  } catch {
+    return "error";
+  }
+}
+
+async function updatePlanningClassTimeApi(
+  id: string | number,
+  startTime: string,
+  endTime: string,
+): Promise<"ok" | "failed" | "error"> {
+  try {
+    const apiResponse = await fetch("/api/classes", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, startTime, endTime }),
+    });
+    return apiResponse.ok ? "ok" : "failed";
+  } catch {
+    return "error";
+  }
+}
+
 export default function Planning() {
   const { t } = useTranslation("common");
   const loaderData = useLoaderData<PlanningLoaderData>();
@@ -174,12 +206,82 @@ export default function Planning() {
     return classesState.map(mapClassToSchedulerEvent);
   }, [classesState]);
 
+  const handleClassesDeleted = useCallback(
+    async (deletedClasses: ClassWithDetails[]) => {
+      const deletedIds = new Set(deletedClasses.map((d) => d.id));
+      setClassesState((prev) => prev.filter((c) => !deletedIds.has(c.id)));
+      setSelectedClass((prev) =>
+        prev && deletedIds.has(prev.id) ? null : prev,
+      );
+
+      for (const del of deletedClasses) {
+        const result = await deletePlanningClassApi(del.id);
+        if (result === "ok") {
+          setSnackbarMessage(t("planning.messages.deleted"));
+        } else {
+          setClassesState((prev) => [...prev, del]);
+          setSnackbarMessage(
+            t(
+              result === "failed"
+                ? "planning.messages.deleteFailed"
+                : "planning.messages.deleteError",
+            ),
+          );
+        }
+      }
+    },
+    [t],
+  );
+
+  const handleClassMoved = useCallback(
+    async (ne: SchedulerEvent, orig: ClassWithDetails) => {
+      setClassesState((prev) =>
+        prev.map((c) =>
+          c.id === ne.id
+            ? {
+                ...c,
+                startTime: new Date(ne.start),
+                endTime: new Date(ne.end),
+              }
+            : c,
+        ),
+      );
+
+      const result = await updatePlanningClassTimeApi(ne.id, ne.start, ne.end);
+      if (result === "ok") {
+        setSnackbarMessage(t("planning.messages.updated"));
+      } else {
+        setClassesState((prev) =>
+          prev.map((c) => (c.id === orig.id ? orig : c)),
+        );
+        setSnackbarMessage(
+          t(
+            result === "failed"
+              ? "planning.messages.updateFailed"
+              : "planning.messages.updateError",
+          ),
+        );
+      }
+    },
+    [t],
+  );
+
   const handleEventsChange = useCallback(
     async (
       newEvents: SchedulerEvent[],
       _eventDetails: SchedulerChangeEventDetails,
     ) => {
       if (!isAdmin) return;
+
+      const newEventIds = new Set(newEvents.map((ne) => String(ne.id)));
+      const deletedClasses = classesState.filter(
+        (c) => !newEventIds.has(String(c.id)),
+      );
+
+      if (deletedClasses.length > 0) {
+        await handleClassesDeleted(deletedClasses);
+        return;
+      }
 
       for (const ne of newEvents) {
         const orig = classesState.find((c) => c.id === ne.id);
@@ -189,47 +291,12 @@ export default function Planning() {
         const origEndIso = new Date(orig.endTime).toISOString();
 
         if (origStartIso !== ne.start || origEndIso !== ne.end) {
-          setClassesState((prev) =>
-            prev.map((c) =>
-              c.id === ne.id
-                ? {
-                    ...c,
-                    startTime: new Date(ne.start),
-                    endTime: new Date(ne.end),
-                  }
-                : c,
-            ),
-          );
-
-          try {
-            const apiResponse = await fetch("/api/classes", {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                id: ne.id,
-                startTime: ne.start,
-                endTime: ne.end,
-              }),
-            });
-            if (!apiResponse.ok) {
-              setClassesState((prev) =>
-                prev.map((c) => (c.id === orig.id ? orig : c)),
-              );
-              setSnackbarMessage(t("planning.messages.updateFailed"));
-            } else {
-              setSnackbarMessage(t("planning.messages.updated"));
-            }
-          } catch {
-            setClassesState((prev) =>
-              prev.map((c) => (c.id === orig.id ? orig : c)),
-            );
-            setSnackbarMessage(t("planning.messages.updateError"));
-          }
+          await handleClassMoved(ne, orig);
           break;
         }
       }
     },
-    [isAdmin, classesState, t],
+    [isAdmin, classesState, handleClassesDeleted, handleClassMoved],
   );
 
   const handleEventEditingStart = useCallback(

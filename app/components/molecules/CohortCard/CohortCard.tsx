@@ -129,6 +129,7 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
               justifyContent: "space-between",
               gap: 1,
               mb: 0.5,
+              pr: badge.invisible ? 0 : 3.5,
             }}
           >
             <SegmentedChip

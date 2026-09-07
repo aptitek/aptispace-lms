@@ -64,6 +64,7 @@ export const SheetCard = styled("article", {
     borderRadius: "20px",
     backgroundColor: alpha(theme.palette.background.paper, 0.96),
     border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+    backgroundClip: "padding-box",
     boxShadow: `0 8px 24px -4px ${alpha(theme.palette.common.black, 0.08)}, 0 2px 6px -1px ${alpha(theme.palette.common.black, 0.04)}`,
     backdropFilter: "blur(16px)",
     WebkitBackdropFilter: "blur(16px)",
@@ -77,9 +78,9 @@ export const SheetCard = styled("article", {
     ...theme.applyStyles("dark", {
       backgroundColor: alpha(theme.palette.background.paper, 0.94),
       borderColor: alpha(theme.palette.divider, 0.25),
-      boxShadow: `0 10px 28px -6px ${alpha(theme.palette.common.black, 0.5)}, 0 0 0 1px ${alpha(theme.palette.divider, 0.12)}`,
+      boxShadow: `0 10px 28px -6px ${alpha(theme.palette.common.black, 0.5)}`,
       "&:hover": {
-        boxShadow: `0 14px 36px -6px ${alpha(theme.palette.primary.main, 0.28)}, 0 0 0 1px ${alpha(theme.palette.primary.main, 0.35)}`,
+        boxShadow: `0 14px 36px -6px ${alpha(theme.palette.primary.main, 0.28)}`,
       },
     }),
     "@media (max-width: 768px)": {

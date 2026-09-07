@@ -91,7 +91,7 @@ describe("CohortInspector Organism", () => {
     expect(screen.getByText("Add Cohort")).toBeDefined();
   });
 
-  it("renders CohortStructuredFields and handles changes", () => {
+  it("renders CohortStructuredFields with cohort chips for diploma and specialty", () => {
     const onDiplomaChange = vi.fn();
     const onYearChange = vi.fn();
     const onTagsChange = vi.fn();
@@ -108,6 +108,10 @@ describe("CohortInspector Organism", () => {
     );
 
     expect(screen.getByDisplayValue("2")).toBeDefined();
+    // SegmentedChip for diploma displays Master
+    expect(screen.getAllByText("Master").length).toBeGreaterThanOrEqual(1);
+    // SegmentedChip for specialty displays IA tag
+    expect(screen.getAllByText("IA").length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders CohortDateModeToggle and toggles mode", () => {

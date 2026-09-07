@@ -178,4 +178,95 @@ describe("InstitutionInspector Organism", () => {
     fireEvent.click(constrainedTab);
     expect(onToggle).toHaveBeenCalledWith(true);
   });
+
+  it("handles header click to expand and collapse the extensible card", () => {
+    const onToggle = vi.fn();
+
+    renderWithProviders(
+      <InstitutionEmailCard
+        emailDomain="aptitek.io"
+        usernamePattern="{f}{last}"
+        previewEmail="j.doe@aptitek.io"
+        disabled={false}
+        isConstrained={true}
+        onToggleConstraint={onToggle}
+        onFieldChange={vi.fn()}
+        onBlur={vi.fn()}
+        defaultExpanded={false}
+      />,
+    );
+
+    const header = screen.getByTestId("inspector-email-card-header");
+    expect(header.getAttribute("aria-expanded")).toBe("false");
+
+    // Click header to expand
+    fireEvent.click(header);
+    expect(header.getAttribute("aria-expanded")).toBe("true");
+
+    // Click header to collapse
+    fireEvent.click(header);
+    expect(header.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("displays the correct summary chip for constrained and unconstrained states", () => {
+    const { rerender } = renderWithProviders(
+      <InstitutionEmailCard
+        emailDomain="aptitek.io"
+        usernamePattern="{f}{last}"
+        previewEmail="j.doe@aptitek.io"
+        disabled={false}
+        isConstrained={true}
+        onToggleConstraint={vi.fn()}
+        onFieldChange={vi.fn()}
+        onBlur={vi.fn()}
+      />,
+    );
+
+    const summaryChip = screen.getByTestId("inspector-email-card-summary-chip");
+    expect(summaryChip.textContent).toContain("@aptitek.io");
+
+    rerender(
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider theme={appTheme}>
+          <InstitutionEmailCard
+            emailDomain=""
+            usernamePattern="{f}{last}"
+            previewEmail=""
+            disabled={false}
+            isConstrained={false}
+            onToggleConstraint={vi.fn()}
+            onFieldChange={vi.fn()}
+            onBlur={vi.fn()}
+          />
+        </ThemeProvider>
+      </I18nextProvider>,
+    );
+
+    const updatedSummaryChip = screen.getByTestId(
+      "inspector-email-card-summary-chip",
+    );
+    expect(updatedSummaryChip.textContent).toContain("Any Email");
+  });
+
+  it("toggles domain constraint using the switch", () => {
+    const onToggle = vi.fn();
+
+    renderWithProviders(
+      <InstitutionEmailCard
+        emailDomain="aptitek.io"
+        usernamePattern="{f}{last}"
+        previewEmail="j.doe@aptitek.io"
+        disabled={false}
+        isConstrained={true}
+        onToggleConstraint={onToggle}
+        onFieldChange={vi.fn()}
+        onBlur={vi.fn()}
+        defaultExpanded={true}
+      />,
+    );
+
+    const switchEl = screen.getByTestId("inspector-domain-constraint-toggle");
+    fireEvent.click(switchEl);
+    expect(onToggle).toHaveBeenCalledWith(false);
+  });
 });

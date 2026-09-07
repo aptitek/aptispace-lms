@@ -1,12 +1,12 @@
 import { useState, useEffect, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import InputAdornment from "@mui/material/InputAdornment";
-import Chip from "@mui/material/Chip";
 import Autocomplete from "@mui/material/Autocomplete";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
@@ -15,6 +15,7 @@ import {
   COMMON_SPECIALTY_TAGS,
   getSpecialtySlug,
 } from "~/utils/cohortFormat";
+import { M3_SHAPE_CORNER_STRINGS } from "~/tokens/shapes";
 import SegmentedChip from "../../molecules/SegmentedChip/SegmentedChip";
 
 export interface CohortStructuredFieldsProps {
@@ -77,14 +78,37 @@ export function CohortStructuredFields({
     }
   };
 
+  const renderDiplomaChip = (diplomaCode: unknown) => {
+    const code = String(diplomaCode || "");
+    if (!code) {
+      return (
+        <SegmentedChip
+          segments={[{ label: t("diplomas.none", "No Diploma") }]}
+          size="small"
+        />
+      );
+    }
+    const opt = DIPLOMA_OPTIONS.find((o) => o.code === code);
+    return (
+      <SegmentedChip
+        cohort={{
+          diploma: code,
+          tags: opt ? [t(opt.labelKey, opt.defaultLabel)] : undefined,
+        }}
+        size="small"
+      />
+    );
+  };
+
   return (
-    <Box
+    <Card
+      variant="outlined"
       sx={{
         display: "flex",
         flexDirection: "column",
         gap: 2,
         p: 2,
-        borderRadius: (theme) => theme.shape.corners.largeIncreased,
+        borderRadius: M3_SHAPE_CORNER_STRINGS.large,
         bgcolor: (theme) =>
           theme.palette.surfaceContainerLow || theme.palette.background.paper,
         border: "1px solid",
@@ -100,7 +124,7 @@ export function CohortStructuredFields({
           alignItems: "center",
           justifyContent: "center",
           p: 2,
-          borderRadius: (theme) => theme.shape.corners.medium,
+          borderRadius: M3_SHAPE_CORNER_STRINGS.medium,
           bgcolor: (theme) =>
             theme.palette.surfaceContainerHigh ||
             theme.palette.surfaceContainer,
@@ -139,13 +163,31 @@ export function CohortStructuredFields({
           fullWidth
           size="small"
           data-testid="cohort-diploma-input"
+          slotProps={{
+            inputLabel: { shrink: true },
+            select: {
+              displayEmpty: true,
+              renderValue: (selectedVal) => renderDiplomaChip(selectedVal),
+            },
+          }}
         >
-          <MenuItem value="">
-            <em>{t("diplomas.none", "No Diploma")}</em>
+          <MenuItem
+            value=""
+            aria-label={t("diplomas.none", "No Diploma")}
+            data-testid="cohort-diploma-option-none"
+            sx={{ py: 0.75 }}
+          >
+            {renderDiplomaChip("")}
           </MenuItem>
           {DIPLOMA_OPTIONS.map((opt) => (
-            <MenuItem key={opt.code} value={opt.code}>
-              {opt.code} – {t(opt.labelKey, opt.defaultLabel)}
+            <MenuItem
+              key={opt.code}
+              value={opt.code}
+              aria-label={`${opt.code} – ${t(opt.labelKey, opt.defaultLabel)}`}
+              data-testid={`cohort-diploma-option-${opt.code}`}
+              sx={{ py: 0.75 }}
+            >
+              {renderDiplomaChip(opt.code)}
             </MenuItem>
           ))}
         </TextField>
@@ -223,19 +265,50 @@ export function CohortStructuredFields({
         value={tags}
         onChange={(_, newTags) => onTagsChange(newTags)}
         disabled={disabled}
+        renderOption={(props, option) => {
+          const { key, ...liProps } = props;
+          const slug = getSpecialtySlug(option);
+          const localized = t(`specialties.${slug}`, option);
+          const segments =
+            localized.toLowerCase() !== option.toLowerCase()
+              ? [{ label: option, bold: true }, { label: localized }]
+              : [{ label: option, bold: true }];
+          return (
+            <Box
+              component="li"
+              key={key}
+              {...liProps}
+              sx={{
+                py: 0.75,
+                px: 1.5,
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <SegmentedChip segments={segments} size="small" />
+            </Box>
+          );
+        }}
         renderValue={(value, getItemProps) =>
           value.map((tag: string, index: number) => {
-            const { key, ...itemProps } = getItemProps({ index });
+            const { key, onDelete, ...itemProps } = getItemProps({ index });
             const slug = getSpecialtySlug(tag);
             const localized = t(`specialties.${slug}`, tag);
-            const chipLabel = localized !== tag ? `${tag} (${localized})` : tag;
+            const segments =
+              localized.toLowerCase() !== tag.toLowerCase()
+                ? [{ label: tag, bold: true }, { label: localized }]
+                : [{ label: tag, bold: true }];
             return (
-              <Chip
+              <SegmentedChip
                 key={key}
-                variant="filled"
+                segments={segments}
                 size="small"
-                label={chipLabel}
-                color="primary"
+                onDelete={
+                  disabled
+                    ? undefined
+                    : () =>
+                        onDelete(undefined as unknown as React.SyntheticEvent)
+                }
                 {...itemProps}
               />
             );
@@ -246,15 +319,19 @@ export function CohortStructuredFields({
             {...params}
             size="small"
             label={t("specialties.title", "Subject / Specialty")}
-            placeholder={t(
-              "specialties.addTagPlaceholder",
-              "Add specialty tag (e.g. AI, Dev, Cyber...)",
-            )}
+            placeholder={
+              tags.length === 0
+                ? t(
+                    "specialties.addTagPlaceholder",
+                    "Add specialty tag (e.g. AI, Dev, Cyber...)",
+                  )
+                : undefined
+            }
             data-testid="cohort-tags-input"
           />
         )}
       />
-    </Box>
+    </Card>
   );
 }
 

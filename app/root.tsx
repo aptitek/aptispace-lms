@@ -13,8 +13,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
+import Card from "./components/atoms/Card/Card";
 import Chip from "./components/atoms/Chip/Chip";
 import Stack from "@mui/material/Stack";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
@@ -189,18 +189,11 @@ function ErrorBoundaryContent({ error }: { error: unknown }) {
         backgroundColor: "background.default",
       }}
     >
-      <Paper
-        elevation={2}
+      <Card
         sx={{
           maxWidth: 600,
           width: "100%",
           p: { xs: 3, sm: 4 },
-          borderRadius: (theme) => theme.shape.corners.largeIncreased,
-          border: 1,
-          borderColor: "divider",
-          backgroundColor: "background.paper",
-          display: "flex",
-          flexDirection: "column",
           gap: 2,
         }}
       >
@@ -259,7 +252,7 @@ function ErrorBoundaryContent({ error }: { error: unknown }) {
             sx={{
               mt: 2,
               p: 2,
-              borderRadius: (theme) => theme.shape.corners.small,
+              borderRadius: "8px",
               backgroundColor: (theme) =>
                 theme.palette.surfaceContainerHighest ||
                 theme.palette.background.default,
@@ -269,12 +262,16 @@ function ErrorBoundaryContent({ error }: { error: unknown }) {
               fontSize: "0.75rem",
               overflowX: "auto",
               maxHeight: 240,
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-all",
+              border: 1,
+              borderColor: "divider",
             }}
           >
             <code>{errorInfo.stack}</code>
           </Box>
         )}
-      </Paper>
+      </Card>
     </Box>
   );
 }

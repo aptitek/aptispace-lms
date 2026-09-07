@@ -21,6 +21,7 @@ export interface SwitchSizeConfig {
   mapHeight: number;
   planeSize: number;
   flagSize: number;
+  puckSize: number;
   arcPeakY: number;
   arcBaseY: number;
 }
@@ -42,6 +43,7 @@ export const SWITCH_SIZE_CONFIGS: Record<SwitchSize, SwitchSizeConfig> = {
     mapHeight: 16,
     planeSize: 13,
     flagSize: 15,
+    puckSize: 20,
     arcPeakY: 2,
     arcBaseY: 22,
   },
@@ -61,6 +63,7 @@ export const SWITCH_SIZE_CONFIGS: Record<SwitchSize, SwitchSizeConfig> = {
     mapHeight: 20,
     planeSize: 16,
     flagSize: 18,
+    puckSize: 24,
     arcPeakY: 3,
     arcBaseY: 27,
   },
@@ -80,6 +83,7 @@ export const SWITCH_SIZE_CONFIGS: Record<SwitchSize, SwitchSizeConfig> = {
     mapHeight: 25,
     planeSize: 21,
     flagSize: 23,
+    puckSize: 30,
     arcPeakY: 4,
     arcBaseY: 34,
   },

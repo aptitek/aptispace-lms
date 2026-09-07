@@ -18,6 +18,7 @@ function resolveDashedCardStyles(theme: Theme, isInteractive?: boolean) {
     borderStyle: "dashed",
     borderWidth: "1.5px",
     borderColor: alpha(theme.palette.divider, 0.35),
+    backgroundClip: "padding-box",
     backgroundColor: alpha(
       theme.palette.surfaceContainerLow || theme.palette.background.paper,
       0.5,
@@ -147,6 +148,7 @@ function resolveStandardCardStyles(
     backdropFilter: isNested ? "none" : "blur(12px)",
     WebkitBackdropFilter: isNested ? "none" : "blur(12px)",
     border,
+    backgroundClip: "padding-box",
     boxShadow: shadow,
     cursor: isInteractive ? "pointer" : "default",
     transition: theme.transitions.create(

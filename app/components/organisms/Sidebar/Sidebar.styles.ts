@@ -72,12 +72,11 @@ export const LogoLink = styled(motion.a, {
   cursor: "pointer",
   outline: "none",
   position: "relative",
-  zIndex: 60,
+  zIndex: 100,
   backgroundColor: $isHovered
-    ? alpha(theme.palette.background.paper, 0.96)
+    ? theme.palette.surfaceContainerHigh || theme.palette.background.paper
     : "transparent",
-  backdropFilter: $isHovered ? "blur(16px)" : "none",
-  WebkitBackdropFilter: $isHovered ? "blur(16px)" : "none",
+  backgroundClip: "padding-box",
   border: $isHovered
     ? `1px solid ${theme.palette.divider}`
     : "1px solid transparent",
