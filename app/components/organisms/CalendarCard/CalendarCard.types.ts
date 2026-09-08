@@ -89,6 +89,38 @@ export interface CalendarCardProps {
   style?: CSSProperties;
 
   /**
+   * Whether the calendar card is editable via date picker on click.
+   * @default false
+   */
+  editable?: boolean;
+
+  /**
+   * Callback fired when a new date is selected via the date picker.
+   */
+  onDateChange?: (newDate: Dayjs) => void;
+
+  /**
+   * Alias for onDateChange for standard form / input compatibility.
+   */
+  onChange?: (newDate: Dayjs) => void;
+
+  /**
+   * Whether the calendar card interaction is disabled.
+   * @default false
+   */
+  disabled?: boolean;
+
+  /**
+   * Optional minimum selectable date for the date picker.
+   */
+  minDate?: Date | string | number | Dayjs;
+
+  /**
+   * Optional maximum selectable date for the date picker.
+   */
+  maxDate?: Date | string | number | Dayjs;
+
+  /**
    * Click handler if the calendar card is interactive.
    */
   onClick?: () => void;

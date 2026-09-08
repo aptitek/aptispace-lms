@@ -35,6 +35,15 @@ const meta: Meta<typeof CalendarCard> = {
       options: ["primary", "secondary", "error", "default"],
       description: "Color theme for the top binder strip",
     },
+    editable: {
+      control: "boolean",
+      description:
+        "Whether the calendar card is editable via date picker on click",
+    },
+    disabled: {
+      control: "boolean",
+      description: "Whether interaction is disabled",
+    },
     showChip: {
       control: "boolean",
       description: "Whether to render the relative time chip",
@@ -54,6 +63,64 @@ export default meta;
 type Story = StoryObj<typeof CalendarCard>;
 
 const baseDate = new Date();
+
+export const InteractiveDatePicker: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Click the card to open MUI's DatePicker. Selecting a new date tears off the current sheet with an expressive physics animation and replaces it with the new values.",
+      },
+    },
+  },
+  args: {
+    date: baseDate,
+    editable: true,
+    size: "medium",
+    showChip: true,
+    headerColor: "primary",
+  },
+};
+
+function ControlledCalendarStory() {
+  const [selectedDate, setSelectedDate] = React.useState(dayjs(baseDate));
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+      }}
+    >
+      <CalendarCard
+        date={selectedDate}
+        editable
+        headerColor="primary"
+        onDateChange={(newD) => setSelectedDate(newD)}
+      />
+      <Typography
+        variant="body2"
+        sx={{ color: "text.secondary", fontWeight: 600 }}
+      >
+        Selected Date: {selectedDate.format("dddd, MMMM D, YYYY")}
+      </Typography>
+    </Box>
+  );
+}
+
+export const ControlledWithLiveFeedback: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Demonstrates controlled mode with live feedback displaying the selected date value from onDateChange.",
+      },
+    },
+  },
+  render: () => <ControlledCalendarStory />,
+};
 
 export const Today: Story = {
   args: {

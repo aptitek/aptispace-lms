@@ -1,14 +1,18 @@
 import { styled, alpha, type Theme } from "@mui/material/styles";
+import { motion, type Variants } from "framer-motion";
+import { M3_SPRINGS } from "~/tokens/motion";
 import type {
   CalendarCardSize,
   CalendarCardOrientation,
   CalendarCardHeaderColor,
 } from "./CalendarCard.types";
+import { FAB_SIZE_CONFIG, resolveFabColors } from "./CalendarCard.utils";
 
 interface StyledCardProps {
   $size: CalendarCardSize;
   $orientation: CalendarCardOrientation;
   $isInteractive?: boolean;
+  $disabled?: boolean;
 }
 
 interface StyledHeaderProps {
@@ -110,12 +114,69 @@ function resolveHeaderStyles(
   };
 }
 
+function resolveInteractiveStateStyles(
+  theme: Theme,
+  isInteractive?: boolean,
+  disabled?: boolean,
+) {
+  if (disabled) {
+    return {
+      opacity: 0.5,
+      cursor: "not-allowed",
+      pointerEvents: "none" as const,
+    };
+  }
+
+  if (!isInteractive) {
+    return {
+      cursor: "default",
+    };
+  }
+
+  return {
+    cursor: "pointer",
+    "&:focus-visible": {
+      outline: `2px solid ${theme.palette.primary.main}`,
+      outlineOffset: "2px",
+    },
+    "&:hover": {
+      transform: "translateY(-3px)",
+      borderColor: alpha(theme.palette.primary.main, 0.5),
+      boxShadow: `0 12px 24px -6px ${alpha(theme.palette.primary.main, 0.25)}`,
+      "& .calendar-card-fab": {
+        transform: "scale(1.08)",
+        boxShadow: `0 6px 16px -2px ${alpha(theme.palette.primary.main, 0.5)}`,
+      },
+      ...theme.applyStyles("dark", {
+        boxShadow: `0 12px 28px -6px ${alpha(theme.palette.primary.main, 0.35)}`,
+      }),
+    },
+    "&:active": {
+      transform: "translateY(-1px) scale(0.98)",
+    },
+  };
+}
+
 export const SheetCard = styled("div", {
   shouldForwardProp: (prop) =>
-    prop !== "$size" && prop !== "$orientation" && prop !== "$isInteractive",
-})<StyledCardProps>(({ theme, $size, $orientation, $isInteractive }) => {
+    prop !== "$size" &&
+    prop !== "$orientation" &&
+    prop !== "$isInteractive" &&
+    prop !== "$disabled",
+})<StyledCardProps>(({
+  theme,
+  $size,
+  $orientation,
+  $isInteractive,
+  $disabled,
+}) => {
   const isHorizontal = $orientation === "horizontal";
   const cfg = SIZE_CONFIG[$size];
+  const interactiveStyles = resolveInteractiveStateStyles(
+    theme,
+    $isInteractive,
+    $disabled,
+  );
 
   return {
     position: "relative",
@@ -137,30 +198,121 @@ export const SheetCard = styled("div", {
     WebkitBackdropFilter: "blur(12px)",
     overflow: "hidden",
     boxSizing: "border-box",
-    cursor: $isInteractive ? "pointer" : "default",
     userSelect: "none",
+    outline: "none",
     transition: theme.transitions.create(
-      ["transform", "box-shadow", "border-color"],
+      ["transform", "box-shadow", "border-color", "opacity"],
       { duration: theme.transitions.duration.shorter },
     ),
     ...theme.applyStyles("dark", {
       boxShadow: "0 6px 20px -4px rgba(0, 0, 0, 0.45)",
     }),
-    ...($isInteractive && {
-      "&:hover": {
-        transform: "translateY(-3px)",
-        borderColor: alpha(theme.palette.primary.main, 0.5),
-        boxShadow: `0 12px 24px -6px ${alpha(theme.palette.primary.main, 0.25)}`,
-        ...theme.applyStyles("dark", {
-          boxShadow: `0 12px 28px -6px ${alpha(theme.palette.primary.main, 0.35)}`,
-        }),
-      },
-      "&:active": {
-        transform: "translateY(-1px)",
-      },
-    }),
+    ...interactiveStyles,
   };
 });
+
+export const SheetMotionContainer = styled(motion.div, {
+  shouldForwardProp: (prop) => prop !== "$size" && prop !== "$orientation",
+})<{ $size: CalendarCardSize; $orientation: CalendarCardOrientation }>(({
+  theme,
+  $orientation,
+}) => {
+  const isHorizontal = $orientation === "horizontal";
+
+  return {
+    display: "flex",
+    flexDirection: isHorizontal ? "row" : "column",
+    alignItems: isHorizontal ? "center" : "stretch",
+    width: "100%",
+    height: "100%",
+    flex: 1,
+    backgroundColor: alpha(theme.palette.background.paper, 0.98),
+    borderRadius: "inherit",
+    transformOrigin: "top center",
+    willChange: "transform, opacity",
+  };
+});
+
+interface StyledFabProps {
+  $size: CalendarCardSize;
+  $headerColor: CalendarCardHeaderColor;
+  $disabled?: boolean;
+}
+
+export const CalendarCardFab = styled("div", {
+  shouldForwardProp: (prop) =>
+    prop !== "$size" && prop !== "$headerColor" && prop !== "$disabled",
+})<StyledFabProps>(({ theme, $size, $headerColor, $disabled }) => {
+  const cfg = FAB_SIZE_CONFIG[$size];
+  const colors = resolveFabColors(theme, $headerColor);
+
+  return {
+    position: "absolute",
+    bottom: cfg.bottom,
+    right: cfg.right,
+    width: cfg.size,
+    height: cfg.size,
+    borderRadius: cfg.borderRadius,
+    backgroundColor: colors.bg,
+    color: colors.color,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 12,
+    boxShadow: `0 3px 10px -2px ${colors.shadowColor}, 0 2px 5px -1px rgba(0, 0, 0, 0.18)`,
+    cursor: $disabled ? "not-allowed" : "pointer",
+    opacity: $disabled ? 0.38 : 1,
+    pointerEvents: $disabled ? "none" : "auto",
+    transition: theme.transitions.create(
+      ["transform", "box-shadow", "background-color", "opacity"],
+      { duration: theme.transitions.duration.shorter },
+    ),
+    "& svg": {
+      fontSize: cfg.iconSize,
+      color: "inherit",
+    },
+    "&:hover": {
+      backgroundColor: colors.hoverBg,
+      transform: "scale(1.1)",
+      boxShadow: `0 6px 16px -2px ${colors.shadowColor}, 0 3px 8px -1px rgba(0, 0, 0, 0.25)`,
+    },
+    "&:active": {
+      transform: "scale(0.94)",
+    },
+  };
+});
+
+export const SHEET_TEAR_VARIANTS: Variants = {
+  initial: (shouldReduceMotion: boolean) => ({
+    opacity: shouldReduceMotion ? 0 : 0.85,
+    scale: shouldReduceMotion ? 1 : 0.98,
+    y: 0,
+    rotate: 0,
+    zIndex: 1,
+  }),
+  animate: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    rotate: 0,
+    zIndex: 1,
+    transition: M3_SPRINGS.expressive.spatial.default,
+  },
+  exit: (shouldReduceMotion: boolean) => ({
+    opacity: 0,
+    scale: shouldReduceMotion ? 1 : 0.94,
+    y: shouldReduceMotion ? 0 : 48,
+    rotate: shouldReduceMotion ? 0 : 5,
+    zIndex: 3,
+    boxShadow: shouldReduceMotion
+      ? "none"
+      : "0 14px 28px -4px rgba(0, 0, 0, 0.22)",
+    transition: {
+      duration: shouldReduceMotion ? 0.15 : 0.24,
+      ease: [0.32, 0, 0.67, 0] as const,
+    },
+  }),
+};
 
 export const SheetHeader = styled("div", {
   shouldForwardProp: (prop) => prop !== "$size" && prop !== "$headerColor",
@@ -208,6 +360,7 @@ export const PerforationHoles = styled("div", {
     right: 0,
     pointerEvents: "none",
     height: cfg.holeSize,
+    zIndex: 10,
     "&::before, &::after": {
       content: '""',
       position: "absolute",
@@ -286,12 +439,13 @@ export const WeekdayName = styled("span", {
 });
 
 export const ChipWrapper = styled("div", {
-  shouldForwardProp: (prop) => prop !== "$size" && prop !== "$orientation",
-})<{ $size: CalendarCardSize; $orientation: CalendarCardOrientation }>(({
-  theme,
-  $size,
-  $orientation,
-}) => {
+  shouldForwardProp: (prop) =>
+    prop !== "$size" && prop !== "$orientation" && prop !== "$isEditable",
+})<{
+  $size: CalendarCardSize;
+  $orientation: CalendarCardOrientation;
+  $isEditable?: boolean;
+}>(({ theme, $size, $orientation, $isEditable }) => {
   const isHorizontal = $orientation === "horizontal";
 
   return {
@@ -302,6 +456,12 @@ export const ChipWrapper = styled("div", {
     padding: isHorizontal
       ? theme.spacing(1, 1.5, 1, 0)
       : theme.spacing(0, 1, 1.25),
+    paddingRight:
+      $isEditable && !isHorizontal
+        ? $size === "small"
+          ? "16px"
+          : "22px"
+        : undefined,
     transform: $size === "small" ? "scale(0.88)" : "none",
     transformOrigin: isHorizontal ? "center left" : "top center",
     "& .MuiChip-root": {
