@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -19,7 +19,7 @@ import Chip from "./components/atoms/Chip/Chip";
 import Stack from "@mui/material/Stack";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import TerminalRoundedIcon from "@mui/icons-material/TerminalRounded";
-import { useTranslation } from "react-i18next";
+import { useTranslation, I18nextProvider } from "react-i18next";
 
 import type { Route } from "./+types/root";
 import { getThemeByMode } from "./tokens/theme";
@@ -81,8 +81,7 @@ dayjs.updateLocale("fr", {
   weekdaysMin: ["Di", "Lu", "Ma", "Me", "Je", "Ve", "Sa"],
 });
 
-import { LANGUAGE_STORAGE_KEY } from "./i18n";
-import "~/i18n";
+import i18n, { LANGUAGE_STORAGE_KEY } from "./i18n";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -105,8 +104,9 @@ export const links: Route.LinksFunction = () => [
 
 function AppThemeContainer({ children }: { children: React.ReactNode }) {
   const { mode } = useThemeMode();
-  const { i18n } = useTranslation();
-  const currentLang = i18n.resolvedLanguage || i18n.language || "en";
+  const { i18n: i18nInstance } = useTranslation();
+  const currentLang =
+    i18nInstance.resolvedLanguage || i18nInstance.language || "en";
   const adapterLocale = currentLang.startsWith("fr") ? "fr" : "en";
   const theme = useMemo(() => getThemeByMode(mode), [mode]);
 
@@ -134,8 +134,20 @@ function AppThemeContainer({ children }: { children: React.ReactNode }) {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { i18n } = useTranslation();
-  const currentLang = i18n.resolvedLanguage || i18n.language || "en";
+  const { i18n: i18nInstance } = useTranslation();
+  const [currentLang, setCurrentLang] = useState<string>(
+    () => i18nInstance.resolvedLanguage || i18nInstance.language || "en",
+  );
+
+  useEffect(() => {
+    const handleLanguageChanged = (lng: string) => {
+      setCurrentLang(lng);
+    };
+    i18nInstance.on("languageChanged", handleLanguageChanged);
+    return () => {
+      i18nInstance.off("languageChanged", handleLanguageChanged);
+    };
+  }, [i18nInstance]);
 
   // The first render must match the SSR'd snapshot, so i18n starts at "en" on both
   // sides. Apply the saved / browser-detected language preference only after mount.
@@ -152,10 +164,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
       if (nav.startsWith("fr")) detected = "fr";
       else if (nav.startsWith("en")) detected = "en";
     }
-    if (detected && detected !== i18n.language) {
-      void i18n.changeLanguage(detected);
+    if (detected && detected !== i18nInstance.language) {
+      void i18nInstance.changeLanguage(detected);
     }
-  }, [i18n]);
+  }, [i18nInstance]);
 
   return (
     <html lang={currentLang}>
@@ -166,11 +178,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <ThemeModeProvider>
-          <StatusCenterProvider>
-            <AppThemeContainer>{children}</AppThemeContainer>
-          </StatusCenterProvider>
-        </ThemeModeProvider>
+        <I18nextProvider i18n={i18n}>
+          <ThemeModeProvider>
+            <StatusCenterProvider>
+              <AppThemeContainer>{children}</AppThemeContainer>
+            </StatusCenterProvider>
+          </ThemeModeProvider>
+        </I18nextProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

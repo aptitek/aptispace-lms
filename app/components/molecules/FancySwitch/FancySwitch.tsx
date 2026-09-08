@@ -102,7 +102,9 @@ function useSwitchInteraction(options: SwitchInteractionOptions) {
     };
   }, [isToggling, toggleDurationMs]);
 
-  const handleClick = () => {
+  const handleClick = (e?: React.MouseEvent | React.KeyboardEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     if (disabled) return;
     const nextChecked = !checked;
     setToggleDirection(nextChecked ? "forward" : "backward");

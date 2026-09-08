@@ -1,13 +1,13 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { M3_SPRINGS } from "~/tokens/motion";
+import { LANGUAGE_STORAGE_KEY, type SupportedLanguage } from "~/i18n";
 import FancySwitch from "../FancySwitch";
 import { ToggleWrapper } from "../FancySwitch.styles";
 import type {
   LanguageSwitchProps,
   MeridianSwitchProps,
-  SupportedLanguage,
 } from "../FancySwitch.types";
 import {
   UkFlag,
@@ -16,8 +16,6 @@ import {
   CountrySilhouettes,
   MeridianFlightTrajectory,
 } from "../FancySwitch.glyphs";
-
-const LANGUAGE_STORAGE_KEY = "aptispace_lng";
 
 function resolveCurrentLanguage(
   propLang: SupportedLanguage | undefined,
@@ -52,7 +50,10 @@ export const MeridianSwitch = forwardRef<
   } = props;
 
   const { t, i18n } = useTranslation("common");
-  const currentLang = resolveCurrentLanguage(language, i18n.language);
+  const currentLang = resolveCurrentLanguage(
+    language,
+    i18n.resolvedLanguage || i18n.language,
+  );
   const isFrench = currentLang === "fr";
   const ariaLabel = getLanguageAriaLabel(isFrench, t);
 
@@ -123,8 +124,23 @@ export function LanguageSwitch({
   "data-testid": dataTestId = "language-toggle",
 }: LanguageSwitchProps) {
   const { i18n, t } = useTranslation("common");
+  const [currentLang, setCurrentLang] = useState<SupportedLanguage>(() => {
+    const lang = i18n.resolvedLanguage || i18n.language;
+    return lang?.startsWith("fr") ? "fr" : "en";
+  });
+
+  useEffect(() => {
+    const onLangChanged = (lng: string) => {
+      setCurrentLang(lng.startsWith("fr") ? "fr" : "en");
+    };
+    i18n.on("languageChanged", onLangChanged);
+    return () => {
+      i18n.off("languageChanged", onLangChanged);
+    };
+  }, [i18n]);
 
   const handleLanguageChange = (nextLang: SupportedLanguage) => {
+    setCurrentLang(nextLang);
     void i18n.changeLanguage(nextLang);
     if (typeof document !== "undefined") {
       document.documentElement.lang = nextLang;
@@ -143,6 +159,7 @@ export function LanguageSwitch({
       aria-label={t("language.toggleLabel", "Select language")}
     >
       <MeridianSwitch
+        language={currentLang}
         size={size}
         disabled={disabled}
         data-testid={dataTestId}
