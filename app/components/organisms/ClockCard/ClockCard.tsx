@@ -5,6 +5,7 @@ import { Progress } from "react-material-expressive";
 import { useTheme, alpha } from "@mui/material/styles";
 
 import Tooltip from "../../atoms/Tooltip";
+import { ClockDialNeedles, ClockCenterHub } from "../../atoms/AnalogClock";
 import type {
   ClockCardProps,
   ClockCardSize,
@@ -21,7 +22,6 @@ import {
   SheetCard,
   ClockMedallion,
   ClockSvg,
-  MotionHandGroup,
   ConnectedCard,
   DigitalIntervalRow,
   DigitalIntervalText,
@@ -31,9 +31,6 @@ import {
   ClockCardChip,
   ProgressContainer,
   SPRING_TRANSITION,
-  HOUR_SPRING_TRANSITION,
-  MINUTE_SPRING_TRANSITION,
-  DOT_SPRING_TRANSITION,
 } from "./ClockCard.styles";
 
 const DEFAULT_TIME_PROPS = {
@@ -158,90 +155,6 @@ function DetailsSectionContent({
   );
 }
 
-interface ClockDialNeedlesProps {
-  intervalInfo: TimeIntervalInfo;
-  activeColor: string;
-  isHovered: boolean;
-}
-
-function ClockDialNeedles({
-  intervalInfo,
-  activeColor,
-  isHovered,
-}: ClockDialNeedlesProps) {
-  const ghostColor = alpha(activeColor, 0.38);
-
-  return (
-    <>
-      {/* End Time Dot: Ghostly accent dot at the same distance from center as the hour needle */}
-      <motion.circle
-        cx={intervalInfo.endDot.x}
-        cy={intervalInfo.endDot.y}
-        r={3.2}
-        fill={ghostColor}
-        animate={{
-          scale: isHovered ? 1.2 : 1,
-          opacity: isHovered ? 0.6 : 1,
-        }}
-        transition={DOT_SPRING_TRANSITION}
-        data-testid="time-sheet-end-dot"
-      />
-
-      {/* Start Hour Needle: Shorter & sturdier, springs to end hour on hover */}
-      <MotionHandGroup
-        initial={{
-          rotate: isHovered
-            ? intervalInfo.targetEndHourAngle
-            : intervalInfo.startHourAngle,
-        }}
-        animate={{
-          rotate: isHovered
-            ? intervalInfo.targetEndHourAngle
-            : intervalInfo.startHourAngle,
-        }}
-        transition={HOUR_SPRING_TRANSITION}
-        data-testid="time-sheet-hour-needle"
-      >
-        <line
-          x1="50"
-          y1="50"
-          x2="50"
-          y2="26"
-          stroke={activeColor}
-          strokeWidth="4.8"
-          strokeLinecap="round"
-        />
-      </MotionHandGroup>
-
-      {/* Start Minute Needle: Longer & sleeker, springs to end minute on hover */}
-      <MotionHandGroup
-        initial={{
-          rotate: isHovered
-            ? intervalInfo.targetEndMinuteAngle
-            : intervalInfo.startMinuteAngle,
-        }}
-        animate={{
-          rotate: isHovered
-            ? intervalInfo.targetEndMinuteAngle
-            : intervalInfo.startMinuteAngle,
-        }}
-        transition={MINUTE_SPRING_TRANSITION}
-        data-testid="time-sheet-minute-needle"
-      >
-        <line
-          x1="50"
-          y1="50"
-          x2="50"
-          y2="16"
-          stroke={activeColor}
-          strokeWidth="3.2"
-          strokeLinecap="round"
-        />
-      </MotionHandGroup>
-    </>
-  );
-}
-
 export const ClockCard = forwardRef<HTMLDivElement, ClockCardProps>(
   function ClockCard(props, ref) {
     const config = { ...DEFAULT_TIME_PROPS, ...props };
@@ -352,18 +265,22 @@ export const ClockCard = forwardRef<HTMLDivElement, ClockCardProps>(
             )}
 
             <ClockDialNeedles
-              intervalInfo={intervalInfo}
+              startHourAngle={intervalInfo.startHourAngle}
+              startMinuteAngle={intervalInfo.startMinuteAngle}
+              targetEndHourAngle={intervalInfo.targetEndHourAngle}
+              targetEndMinuteAngle={intervalInfo.targetEndMinuteAngle}
+              endDot={intervalInfo.endDot}
               activeColor={activeColor}
               isHovered={isHovered}
+              hourTestId="time-sheet-hour-needle"
+              minuteTestId="time-sheet-minute-needle"
+              endDotTestId="time-sheet-end-dot"
             />
 
             {/* Center Pivot Hub (matching Material You widget) */}
-            <circle cx="50" cy="50" r="4.2" fill={activeColor} />
-            <circle
-              cx="50"
-              cy="50"
-              r="1.8"
-              fill={theme.palette.background.paper}
+            <ClockCenterHub
+              color={activeColor}
+              innerColor={theme.palette.background.paper}
             />
           </ClockSvg>
         </ClockMedallion>

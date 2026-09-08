@@ -1,12 +1,4 @@
-import {
-  forwardRef,
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-  type KeyboardEvent,
-  type MouseEvent,
-} from "react";
+import { forwardRef } from "react";
 import {
   motion,
   AnimatePresence,
@@ -15,7 +7,6 @@ import {
   type Transition,
 } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import Tooltip from "~/components/atoms/Tooltip";
 import { LANGUAGE_STORAGE_KEY, type SupportedLanguage } from "~/i18n";
 import {
   UkFlag,
@@ -27,17 +18,14 @@ import {
 import {
   type SwitchSize,
   type MeridianSizeConfig,
-  MERIDIAN_SIZE_CONFIGS,
   FLIGHT_SPRING,
-  MeridianTrack,
   FlightArcSvg,
   CountryMapZone,
-  FlightPuck,
   ToggleWrapper,
-  DisabledTooltipWrapper,
   PeekingAirplane,
 } from "./LanguageSwitch.styles";
 import { M3_SPRINGS } from "~/tokens/motion";
+import FancySwitch from "~/components/molecules/FancySwitch";
 
 export type { SwitchSize, MeridianSizeConfig };
 
@@ -58,12 +46,6 @@ export interface LanguageSwitchProps {
   size?: SwitchSize;
   disabled?: boolean;
   "data-testid"?: string;
-}
-
-function resolveMeridianConfig(size?: SwitchSize): MeridianSizeConfig {
-  return (
-    MERIDIAN_SIZE_CONFIGS[size ?? "medium"] ?? MERIDIAN_SIZE_CONFIGS.medium
-  );
 }
 
 function getLanguageAriaLabel(
@@ -126,12 +108,14 @@ function FlightAirplane({
   cfg,
   isFrench,
   isHovered,
-  flightState,
+  isFlying,
+  flightDirection,
 }: {
   cfg: MeridianSizeConfig;
   isFrench: boolean;
   isHovered: boolean;
-  flightState: { isFlying: boolean; direction: "to-fr" | "to-en" };
+  isFlying: boolean;
+  flightDirection: "forward" | "backward";
 }) {
   const leftCenterX = cfg.padX - 2 + cfg.puckSize / 2;
   const rightCenterX = cfg.padX - 2 + cfg.travelX + cfg.puckSize / 2;
@@ -147,8 +131,8 @@ function FlightAirplane({
   let animateProps: TargetAndTransition;
   let transitionProps: Transition;
 
-  if (flightState.isFlying) {
-    const isToFr = flightState.direction === "to-fr";
+  if (isFlying) {
+    const isToFr = flightDirection === "forward";
     const startX = isToFr ? leftPeekX : rightPeekX;
     const endX = isToFr ? cfg.width - cfg.padX : 0;
     const initialRot = isToFr ? 90 : -90;
@@ -231,109 +215,6 @@ function FlagGraphic({
   );
 }
 
-function FlightPuckWithFlag({
-  cfg,
-  isFrench,
-  isFlying,
-}: {
-  cfg: MeridianSizeConfig;
-  isFrench: boolean;
-  isFlying: boolean;
-}) {
-  return (
-    <FlightPuck
-      $cfg={cfg}
-      data-testid="flight-puck"
-      animate={{
-        x: isFrench ? cfg.travelX : 0,
-        scale: isFlying ? 1.08 : 1,
-      }}
-      transition={FLIGHT_SPRING}
-    >
-      <FlagGraphic isFrench={isFrench} flagSize={cfg.flagSize} />
-    </FlightPuck>
-  );
-}
-
-interface ControllerConfig {
-  disabled: boolean;
-  currentLang: SupportedLanguage;
-  onLanguageChange?: (lang: SupportedLanguage) => void;
-  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
-  onKeyDown?: (e: KeyboardEvent<HTMLButtonElement>) => void;
-  onMouseEnter?: (e: MouseEvent<HTMLButtonElement>) => void;
-  onMouseLeave?: (e: MouseEvent<HTMLButtonElement>) => void;
-}
-
-function useMeridianController(config: ControllerConfig) {
-  const [isHovered, setIsHovered] = useState(false);
-  const flightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [flightState, setFlightState] = useState<{
-    isFlying: boolean;
-    direction: "to-fr" | "to-en";
-  }>({
-    isFlying: false,
-    direction: "to-fr",
-  });
-
-  useEffect(() => {
-    return () => {
-      if (flightTimerRef.current) {
-        clearTimeout(flightTimerRef.current);
-      }
-    };
-  }, []);
-
-  const handleFlight = useCallback(() => {
-    if (config.disabled) return;
-    const isCurrentlyFrench = config.currentLang === "fr";
-    const nextLang: SupportedLanguage = isCurrentlyFrench ? "en" : "fr";
-    const direction: "to-fr" | "to-en" = isCurrentlyFrench ? "to-en" : "to-fr";
-
-    setFlightState({ isFlying: true, direction });
-    config.onLanguageChange?.(nextLang);
-    if (flightTimerRef.current) {
-      clearTimeout(flightTimerRef.current);
-    }
-    flightTimerRef.current = setTimeout(() => {
-      setFlightState((prev) => ({ ...prev, isFlying: false }));
-    }, 300);
-  }, [config]);
-
-  const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
-    config.onClick?.(e);
-    if (!e.defaultPrevented) handleFlight();
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
-    config.onKeyDown?.(e);
-    if (!e.defaultPrevented && (e.key === " " || e.key === "Enter")) {
-      e.preventDefault();
-      handleFlight();
-    }
-  };
-
-  const handleMouseEnter = (e: MouseEvent<HTMLButtonElement>) => {
-    setIsHovered(true);
-    config.onMouseEnter?.(e);
-  };
-
-  const handleMouseLeave = (e: MouseEvent<HTMLButtonElement>) => {
-    setIsHovered(false);
-    config.onMouseLeave?.(e);
-  };
-
-  return {
-    isHovered,
-    isFlying: flightState.isFlying,
-    flightState,
-    handleClick,
-    handleKeyDown,
-    handleMouseEnter,
-    handleMouseLeave,
-  };
-}
-
 function resolveCurrentLanguage(
   languageProp: SupportedLanguage | undefined,
   i18nLang: string | undefined,
@@ -345,7 +226,7 @@ function resolveCurrentLanguage(
 
 /**
  * Meridian Language Switch
- * Travel between countries with country map silhouettes, peeking flight airplane, and animated flag puck indicator.
+ * Powered by generic FancySwitch.
  */
 export const MeridianSwitch = forwardRef<
   HTMLButtonElement,
@@ -356,85 +237,65 @@ export const MeridianSwitch = forwardRef<
     size = "medium",
     onLanguageChange,
     disabled = false,
-    className,
-    "data-testid": dataTestId,
-    onClick,
-    onKeyDown,
-    onMouseEnter,
-    onMouseLeave,
+    className = "",
+    "data-testid": dataTestId = "meridian-language-switch",
     ...restProps
   } = props;
 
   const { t, i18n } = useTranslation("common");
   const currentLang = resolveCurrentLanguage(language, i18n.language);
   const isFrench = currentLang === "fr";
-  const cfg = resolveMeridianConfig(size);
-  const isSwitchDisabled = Boolean(disabled);
-
-  const controller = useMeridianController({
-    disabled: isSwitchDisabled,
-    currentLang,
-    onLanguageChange,
-    onClick,
-    onKeyDown,
-    onMouseEnter,
-    onMouseLeave,
-  });
-
   const ariaLabel = getLanguageAriaLabel(isFrench, t);
 
-  const trackNode = (
-    <MeridianTrack
-      ref={ref}
-      type="button"
-      role="switch"
-      aria-checked={isFrench}
-      aria-label={ariaLabel}
-      disabled={isSwitchDisabled}
-      $cfg={cfg}
-      $checked={false}
-      $disabled={isSwitchDisabled}
-      className={className ?? ""}
-      data-testid={dataTestId ?? "meridian-language-switch"}
-      data-lang={currentLang}
-      onClick={controller.handleClick}
-      onKeyDown={controller.handleKeyDown}
-      onMouseEnter={controller.handleMouseEnter}
-      onMouseLeave={controller.handleMouseLeave}
-      whileTap={isSwitchDisabled ? undefined : { scale: 0.96 }}
-      {...restProps}
-    >
-      <MeridianFlightTrajectory cfg={cfg} />
-
-      <CountrySilhouettes
-        cfg={cfg}
-        isFrench={isFrench}
-        isHovered={controller.isHovered}
-      />
-
-      <FlightAirplane
-        cfg={cfg}
-        isFrench={isFrench}
-        isHovered={controller.isHovered && !isSwitchDisabled}
-        flightState={controller.flightState}
-      />
-
-      <FlightPuckWithFlag
-        cfg={cfg}
-        isFrench={isFrench}
-        isFlying={controller.isFlying}
-      />
-    </MeridianTrack>
-  );
+  const handleToggle = (nextChecked: boolean) => {
+    const nextLang: SupportedLanguage = nextChecked ? "fr" : "en";
+    onLanguageChange?.(nextLang);
+  };
 
   return (
-    <Tooltip title={ariaLabel} placement="bottom">
-      {isSwitchDisabled ? (
-        <DisabledTooltipWrapper>{trackNode}</DisabledTooltipWrapper>
-      ) : (
-        trackNode
+    <FancySwitch
+      ref={ref}
+      checked={isFrench}
+      onChange={handleToggle}
+      size={size}
+      disabled={disabled}
+      ariaLabel={ariaLabel}
+      tooltipTitle={ariaLabel}
+      className={className}
+      data-testid={dataTestId}
+      data-lang={currentLang}
+      bimodal={true}
+      thumbSpring={FLIGHT_SPRING}
+      thumbContent={({ cfg }) => (
+        <FlagGraphic isFrench={isFrench} flagSize={cfg.flagSize} />
       )}
-    </Tooltip>
+      peekingElement={({
+        isHovered,
+        isToggling,
+        toggleDirection,
+        cfg,
+        disabled: isDis,
+      }) => (
+        <FlightAirplane
+          cfg={cfg}
+          isFrench={isFrench}
+          isHovered={isHovered && !isDis}
+          isFlying={isToggling}
+          flightDirection={toggleDirection}
+        />
+      )}
+      backgroundDecorations={({ cfg, isHovered }) => (
+        <>
+          <MeridianFlightTrajectory cfg={cfg} />
+          <CountrySilhouettes
+            cfg={cfg}
+            isFrench={isFrench}
+            isHovered={isHovered}
+          />
+        </>
+      )}
+      {...restProps}
+    />
   );
 });
 

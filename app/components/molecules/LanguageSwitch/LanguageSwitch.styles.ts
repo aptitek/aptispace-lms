@@ -1,20 +1,29 @@
+import React, { forwardRef } from "react";
 import { styled } from "@mui/material/styles";
-import { motion, type Transition } from "framer-motion";
+import { motion, type HTMLMotionProps, type Transition } from "framer-motion";
 import { M3_SPRINGS } from "~/tokens/motion";
+import {
+  type SwitchSize,
+  type SwitchSizeConfig as MeridianSizeConfig,
+  SWITCH_SIZE_CONFIGS as MERIDIAN_SIZE_CONFIGS,
+  FancyTrack as MeridianTrack,
+  FancyThumb as FlightPuck,
+  DisabledTooltipWrapper,
+  ToggleWrapper,
+  filterDollarProp,
+} from "~/components/molecules/FancySwitch";
 
-import type {
-  SwitchSize,
-  SwitchSizeConfig as MeridianSizeConfig,
-} from "~/components/atoms/Switch";
 export type { SwitchSize, MeridianSizeConfig };
-export { SWITCH_SIZE_CONFIGS as MERIDIAN_SIZE_CONFIGS } from "~/components/atoms/Switch";
+export {
+  MERIDIAN_SIZE_CONFIGS,
+  MeridianTrack,
+  FlightPuck,
+  DisabledTooltipWrapper,
+  ToggleWrapper,
+  filterDollarProp,
+};
 
 export const FLIGHT_SPRING: Transition = M3_SPRINGS.flightPuck;
-
-export const filterDollarProp = (prop: PropertyKey) =>
-  typeof prop === "string" && !prop.startsWith("$");
-
-export { SwitchTrack as MeridianTrack } from "~/components/atoms/Switch";
 
 export const FlightArcSvg = styled("svg")({
   position: "absolute",
@@ -45,9 +54,17 @@ export const CountryMapZone = styled("div", {
   pointerEvents: "none",
 }));
 
-export const PeekingAirplane = styled(motion.div, {
-  shouldForwardProp: filterDollarProp,
-})<{
+interface PeekingAirplaneProps extends HTMLMotionProps<"div"> {
+  $cfg?: MeridianSizeConfig;
+}
+
+const CleanAirplaneDiv = forwardRef<HTMLDivElement, PeekingAirplaneProps>(
+  ({ $cfg: _c, ...props }, ref) =>
+    React.createElement(motion.div, { ref, ...props }),
+);
+CleanAirplaneDiv.displayName = "CleanAirplaneDiv";
+
+export const PeekingAirplane = styled(CleanAirplaneDiv)<{
   $cfg: MeridianSizeConfig;
 }>(({ theme, $cfg }) => ({
   position: "absolute",
@@ -68,36 +85,3 @@ export const PeekingAirplane = styled(motion.div, {
     filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4))",
   }),
 }));
-
-export const FlightPuck = styled(motion.span, {
-  shouldForwardProp: filterDollarProp,
-})<{
-  $cfg: MeridianSizeConfig;
-}>(({ theme, $cfg }) => ({
-  position: "absolute",
-  top: $cfg.padY - 2,
-  left: $cfg.padX - 2,
-  width: $cfg.puckSize,
-  height: $cfg.puckSize,
-  borderRadius: "50%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 4,
-  cursor: "inherit",
-  backgroundColor: theme.palette.primary.main,
-  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.2)",
-  ...theme.applyStyles("dark", {
-    boxShadow: "0 0 0 1px rgba(255, 255, 255, 0.12)",
-  }),
-}));
-
-export const ToggleWrapper = styled("div")(({ theme }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: theme.spacing(0.75),
-}));
-
-export const DisabledTooltipWrapper = styled("span")({
-  display: "inline-flex",
-});

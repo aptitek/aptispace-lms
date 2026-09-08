@@ -1,13 +1,7 @@
-import {
-  forwardRef,
-  useState,
-  useCallback,
-  type KeyboardEvent,
-  type MouseEvent,
-} from "react";
+import { forwardRef } from "react";
 import { motion, AnimatePresence, type HTMLMotionProps } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import Tooltip from "~/components/atoms/Tooltip/Tooltip";
+import { useTheme } from "@mui/material/styles";
 import { useThemeMode } from "~/utils/themeContext";
 import type { ThemeMode } from "~/tokens/theme";
 import {
@@ -19,19 +13,16 @@ import {
 import {
   type SwitchSize,
   type SwitchSizeConfig,
-  SIZE_CONFIGS,
   SPRING_TRANSITION,
   PEEK_SPRING,
-  SwitchTrack,
   ArcOverlaySvg,
-  CelestialThumb,
   HorizonPeekWrapper,
   StateRippleLayer,
   IconFlexWrapper,
   ToggleWrapper,
-  DisabledTooltipWrapper,
 } from "./ThemeSwitch.styles";
 import { M3_SPRINGS } from "~/tokens/motion";
+import FancySwitch from "~/components/molecules/FancySwitch";
 
 export type { SwitchSize, SwitchSizeConfig };
 
@@ -39,7 +30,7 @@ export interface ZenithSwitchProps extends Omit<
   HTMLMotionProps<"button">,
   "size" | "onChange" | "onToggle" | "children"
 > {
-  checked?: boolean; // true = dark mode (Moon at Zenith), false = light mode (Sun at Zenith)
+  checked?: boolean; // true = dark mode, false = light mode
   mode?: ThemeMode;
   size?: SwitchSize;
   onChange?: (checked: boolean) => void;
@@ -175,136 +166,9 @@ function resolveIsDark(
   return true;
 }
 
-interface SwitchControllerConfig {
-  disabled: boolean;
-  isDark: boolean;
-  onToggle?: (checked: boolean) => void;
-  onChange?: (checked: boolean) => void;
-  onChangeMode?: (mode: ThemeMode) => void;
-  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
-  onKeyDown?: (e: KeyboardEvent<HTMLButtonElement>) => void;
-  onMouseEnter?: (e: MouseEvent<HTMLButtonElement>) => void;
-  onMouseLeave?: (e: MouseEvent<HTMLButtonElement>) => void;
-}
-
-function useZenithSwitchController(config: SwitchControllerConfig) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [isPressed, setIsPressed] = useState(false);
-
-  const handleToggleAction = useCallback(() => {
-    if (config.disabled) return;
-    const nextDark = !config.isDark;
-    config.onToggle?.(nextDark);
-    config.onChange?.(nextDark);
-    config.onChangeMode?.(nextDark ? "dark" : "light");
-  }, [config]);
-
-  const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
-    config.onClick?.(e);
-    if (!e.defaultPrevented) handleToggleAction();
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
-    config.onKeyDown?.(e);
-    if (!e.defaultPrevented && (e.key === " " || e.key === "Enter")) {
-      e.preventDefault();
-      handleToggleAction();
-    }
-  };
-
-  const handleMouseEnter = (e: MouseEvent<HTMLButtonElement>) => {
-    setIsHovered(true);
-    config.onMouseEnter?.(e);
-  };
-
-  const handleMouseLeave = (e: MouseEvent<HTMLButtonElement>) => {
-    setIsHovered(false);
-    setIsPressed(false);
-    config.onMouseLeave?.(e);
-  };
-
-  const handleMouseDown = () => setIsPressed(true);
-  const handleMouseUp = () => setIsPressed(false);
-
-  return {
-    isHovered,
-    isPressed,
-    handleClick,
-    handleKeyDown,
-    handleMouseEnter,
-    handleMouseLeave,
-    handleMouseDown,
-    handleMouseUp,
-  };
-}
-
-function SwitchRippleIndicator({
-  isHovered,
-  disabled,
-  cfg,
-  isDark,
-}: {
-  isHovered: boolean;
-  disabled: boolean;
-  cfg: SwitchSizeConfig;
-  isDark: boolean;
-}) {
-  if (!isHovered || disabled) return null;
-  return (
-    <StateRippleLayer
-      $cfg={cfg}
-      $isDark={isDark}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      transition={M3_SPRINGS.expressive.effects.fast}
-    />
-  );
-}
-
-function SwitchActiveThumb({
-  cfg,
-  isDark,
-  isPressed,
-}: {
-  cfg: SwitchSizeConfig;
-  isDark: boolean;
-  isPressed: boolean;
-}) {
-  return (
-    <CelestialThumb
-      $cfg={cfg}
-      $isDark={isDark}
-      animate={{
-        x: isDark ? 0 : cfg.travelX,
-        scaleX: isPressed ? 1.15 : 1,
-        scaleY: isPressed ? 0.92 : 1,
-      }}
-      transition={SPRING_TRANSITION}
-    >
-      <AnimatePresence mode="wait" initial={false}>
-        <ActiveZenithGlyph isDark={isDark} iconSize={cfg.thumbIconSize} />
-      </AnimatePresence>
-    </CelestialThumb>
-  );
-}
-
-function getZenithLabelText(
-  isDark: boolean,
-  t: (key: string, fallback: string) => string,
-): string {
-  return isDark
-    ? t("theme.switchToLight", "Switch to Light Mode")
-    : t("theme.switchToDark", "Switch to Dark Mode");
-}
-
-function resolveZenithConfig(size?: SwitchSize): SwitchSizeConfig {
-  return SIZE_CONFIGS[size ?? "medium"] ?? SIZE_CONFIGS.medium;
-}
-
 /**
  * Material Design 3 Celestial Zenith Switch
- * Renders the celestial day-night mechanics with orbital track, peeking preview, and active Zenith thumb.
+ * Powered by generic FancySwitch.
  */
 export const ZenithSwitch = forwardRef<HTMLButtonElement, ZenithSwitchProps>(
   (props, ref) => {
@@ -318,93 +182,73 @@ export const ZenithSwitch = forwardRef<HTMLButtonElement, ZenithSwitchProps>(
       disabled = false,
       className = "",
       "data-testid": dataTestId = "zenith-theme-switch",
-      onClick,
-      onKeyDown,
-      onMouseEnter,
-      onMouseLeave,
       ...restProps
     } = props;
 
+    const theme = useTheme();
     const { t } = useTranslation("common");
     const isDark = resolveIsDark(checked, mode);
-    const cfg = resolveZenithConfig(size);
-    const isSwitchDisabled = Boolean(disabled);
+    const labelText = isDark
+      ? t("theme.switchToLight", "Switch to Light Mode")
+      : t("theme.switchToDark", "Switch to Dark Mode");
 
-    const controller = useZenithSwitchController({
-      disabled: isSwitchDisabled,
-      isDark,
-      onToggle,
-      onChange,
-      onChangeMode,
-      onClick,
-      onKeyDown,
-      onMouseEnter,
-      onMouseLeave,
-    });
+    const handleToggle = (nextDark: boolean) => {
+      onToggle?.(nextDark);
+      onChange?.(nextDark);
+      onChangeMode?.(nextDark ? "dark" : "light");
+    };
 
-    const labelText = getZenithLabelText(isDark, t);
-    const tapAnimation = isSwitchDisabled ? undefined : { scale: 0.96 };
-
-    const trackNode = (
-      <SwitchTrack
+    return (
+      <FancySwitch
         ref={ref}
-        type="button"
-        role="switch"
-        aria-checked={isDark}
-        aria-label={labelText}
-        disabled={isSwitchDisabled}
-        $cfg={cfg}
-        $checked={false}
-        $disabled={isSwitchDisabled}
+        checked={isDark}
+        onChange={handleToggle}
+        size={size}
+        disabled={disabled}
+        ariaLabel={labelText}
+        tooltipTitle={labelText}
         className={className}
         data-testid={dataTestId}
         data-mode={isDark ? "dark" : "light"}
-        onClick={controller.handleClick}
-        onKeyDown={controller.handleKeyDown}
-        onMouseEnter={controller.handleMouseEnter}
-        onMouseLeave={controller.handleMouseLeave}
-        onMouseDown={controller.handleMouseDown}
-        onMouseUp={controller.handleMouseUp}
-        whileTap={tapAnimation}
-        {...restProps}
-      >
-        <AnimatePresence>
-          <SwitchRippleIndicator
-            isHovered={controller.isHovered}
-            disabled={isSwitchDisabled}
-            cfg={cfg}
-            isDark={isDark}
-          />
-        </AnimatePresence>
-
-        <CelestialArcLine cfg={cfg} />
-
-        <AnimatePresence>
-          {!isSwitchDisabled && (
-            <HorizonPeekPreview
-              isHovered={controller.isHovered}
-              isDark={isDark}
-              cfg={cfg}
-            />
-          )}
-        </AnimatePresence>
-
-        <SwitchActiveThumb
-          cfg={cfg}
-          isDark={isDark}
-          isPressed={controller.isPressed}
-        />
-      </SwitchTrack>
-    );
-
-    return (
-      <Tooltip title={labelText} placement="bottom">
-        {isSwitchDisabled ? (
-          <DisabledTooltipWrapper>{trackNode}</DisabledTooltipWrapper>
-        ) : (
-          trackNode
+        bimodal={true}
+        thumbReverseTravel={true}
+        thumbSpring={SPRING_TRANSITION}
+        customThumbColor={() =>
+          isDark ? theme.palette.primary.main : theme.palette.warning.main
+        }
+        thumbContent={({ cfg }) => (
+          <AnimatePresence mode="wait" initial={false}>
+            <ActiveZenithGlyph isDark={isDark} iconSize={cfg.thumbIconSize} />
+          </AnimatePresence>
         )}
-      </Tooltip>
+        peekingElement={({ isHovered, cfg, disabled: isDis }) =>
+          !isDis && (
+            <AnimatePresence>
+              <HorizonPeekPreview
+                isHovered={isHovered}
+                isDark={isDark}
+                cfg={cfg}
+              />
+            </AnimatePresence>
+          )
+        }
+        backgroundDecorations={({ cfg }) => <CelestialArcLine cfg={cfg} />}
+        overlayDecorations={({ isHovered, cfg, disabled: isDis }) => (
+          <AnimatePresence>
+            {isHovered && !isDis && (
+              <StateRippleLayer
+                $cfg={cfg}
+                $isDark={isDark}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={M3_SPRINGS.expressive.effects.fast}
+              />
+            )}
+          </AnimatePresence>
+        )}
+        {...restProps}
+      />
     );
   },
 );

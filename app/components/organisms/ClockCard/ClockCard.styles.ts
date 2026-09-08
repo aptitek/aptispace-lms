@@ -1,5 +1,5 @@
 import { styled, alpha, keyframes } from "@mui/material/styles";
-import { motion, type Transition } from "framer-motion";
+import type { Transition } from "framer-motion";
 import { M3_SPRINGS } from "~/tokens/motion";
 import Chip from "../../atoms/Chip";
 import { getContrastTextColor } from "./ClockCard.utils";
@@ -161,10 +161,7 @@ export const ClockSvg = styled("svg", {
   };
 });
 
-export const MotionHandGroup = styled(motion.g)(() => ({
-  transformBox: "view-box !important" as "view-box",
-  transformOrigin: "50% 50% !important",
-}));
+export { MotionHandGroup } from "../../atoms/AnalogClock";
 
 export const ConnectedCard = styled("div", {
   shouldForwardProp: (prop) => prop !== "$size" && prop !== "$orientation",

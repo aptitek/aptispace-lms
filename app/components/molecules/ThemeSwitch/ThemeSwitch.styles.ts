@@ -1,18 +1,30 @@
+import React, { forwardRef } from "react";
 import { styled } from "@mui/material/styles";
-import { motion, type Transition } from "framer-motion";
+import { motion, type HTMLMotionProps, type Transition } from "framer-motion";
 import { M3_SPRINGS } from "~/tokens/motion";
+import {
+  type SwitchSize,
+  type SwitchSizeConfig,
+  SWITCH_SIZE_CONFIGS,
+  FancyTrack as SwitchTrack,
+  FancyThumb as CelestialThumb,
+  DisabledTooltipWrapper,
+  ToggleWrapper,
+  filterDollarProp,
+} from "~/components/molecules/FancySwitch";
 
-import type { SwitchSize, SwitchSizeConfig } from "~/components/atoms/Switch";
 export type { SwitchSize, SwitchSizeConfig };
-export { SWITCH_SIZE_CONFIGS as SIZE_CONFIGS } from "~/components/atoms/Switch";
+export {
+  SWITCH_SIZE_CONFIGS as SIZE_CONFIGS,
+  SwitchTrack,
+  CelestialThumb,
+  DisabledTooltipWrapper,
+  ToggleWrapper,
+  filterDollarProp,
+};
 
 export const SPRING_TRANSITION: Transition = M3_SPRINGS.celestialThumb;
 export const PEEK_SPRING: Transition = M3_SPRINGS.celestialPeek;
-
-export const filterDollarProp = (prop: PropertyKey) =>
-  typeof prop === "string" && !prop.startsWith("$");
-
-export { SwitchTrack } from "~/components/atoms/Switch";
 
 export const ArcOverlaySvg = styled("svg")({
   position: "absolute",
@@ -24,35 +36,19 @@ export const ArcOverlaySvg = styled("svg")({
   zIndex: 1,
 });
 
-export const CelestialThumb = styled(motion.span, {
-  shouldForwardProp: filterDollarProp,
-})<{
-  $cfg: SwitchSizeConfig;
-  $isDark: boolean;
-}>(({ theme, $cfg, $isDark }) => ({
-  position: "absolute",
-  top: $cfg.padY - 2,
-  left: $cfg.padX - 2,
-  width: $cfg.thumbSize,
-  height: $cfg.thumbSize,
-  borderRadius: "50%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 3,
-  cursor: "inherit",
-  backgroundColor: $isDark
-    ? theme.palette.primary.main
-    : theme.palette.warning.main,
-  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.2)",
-  ...theme.applyStyles("dark", {
-    boxShadow: "0 0 0 1px rgba(255, 255, 255, 0.12)",
-  }),
-}));
+interface MotionDivProps extends HTMLMotionProps<"div"> {
+  $position?: "left" | "right";
+  $cfg?: SwitchSizeConfig;
+  $isDark?: boolean;
+}
 
-export const HorizonPeekWrapper = styled(motion.div, {
-  shouldForwardProp: filterDollarProp,
-})<{
+const CleanMotionDiv = forwardRef<HTMLDivElement, MotionDivProps>(
+  ({ $position: _p, $cfg: _c, $isDark: _d, ...props }, ref) =>
+    React.createElement(motion.div, { ref, ...props }),
+);
+CleanMotionDiv.displayName = "CleanMotionDiv";
+
+export const HorizonPeekWrapper = styled(CleanMotionDiv)<{
   $position: "left" | "right";
   $cfg: SwitchSizeConfig;
 }>(({ $position, $cfg }) => ({
@@ -68,9 +64,7 @@ export const HorizonPeekWrapper = styled(motion.div, {
   pointerEvents: "none",
 }));
 
-export const StateRippleLayer = styled(motion.div, {
-  shouldForwardProp: filterDollarProp,
-})<{
+export const StateRippleLayer = styled(CleanMotionDiv)<{
   $cfg: SwitchSizeConfig;
   $isDark: boolean;
 }>(({ theme, $cfg, $isDark }) => ({
@@ -92,14 +86,4 @@ export const IconFlexWrapper = styled("div")({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-});
-
-export const ToggleWrapper = styled("div")(({ theme }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: theme.spacing(0.75),
-}));
-
-export const DisabledTooltipWrapper = styled("span")({
-  display: "inline-flex",
 });
