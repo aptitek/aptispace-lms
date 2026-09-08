@@ -1,8 +1,16 @@
-import React, { forwardRef, useMemo, useState } from "react";
+import React, {
+  forwardRef,
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Progress } from "react-material-expressive";
 import { useTheme, alpha } from "@mui/material/styles";
+import dayjs, { type Dayjs } from "dayjs";
 
 import Tooltip from "../../atoms/Tooltip";
 import { ClockDialNeedles, ClockCenterHub } from "../../atoms/AnalogClock";
@@ -10,6 +18,8 @@ import type {
   ClockCardProps,
   ClockCardSize,
   TimeIntervalInfo,
+  TimeChangePayload,
+  HourFormat,
 } from "./ClockCard.types";
 import {
   computeTimeIntervalInfo,
@@ -32,12 +42,18 @@ import {
   ProgressContainer,
   SPRING_TRANSITION,
 } from "./ClockCard.styles";
+import {
+  ClockCardEditablePickers,
+  type ClockCardEditablePickersProps,
+} from "./ClockCardEditablePickers";
 
 const DEFAULT_TIME_PROPS = {
   size: "medium" as const,
   orientation: "horizontal" as const,
   color: "primary" as const,
   hourFormat: "auto" as const,
+  editable: false,
+  disabled: false,
 };
 
 function resolveActiveLocale(
@@ -58,14 +74,33 @@ function resolveChipSize(size: ClockCardSize): "small" | "medium" {
   return size === "large" ? "medium" : "small";
 }
 
+function resolveIs12Hour(
+  hourFormat?: HourFormat,
+  normLocale?: string,
+): boolean {
+  if (hourFormat === "12h") return true;
+  if (hourFormat === "24h") return false;
+  return !normLocale?.startsWith("fr");
+}
+
+function resolveActiveColor(
+  isHappeningNow: boolean,
+  progressColor: string,
+  primaryColor: string,
+): string {
+  return isHappeningNow ? progressColor : primaryColor;
+}
+
 function resolveAccessibleLabel(
   ariaLabel?: string,
   digitalRange?: string,
   chipLabel?: string | null,
+  editable?: boolean,
 ): string {
   if (ariaLabel) return ariaLabel;
-  if (chipLabel) return `Time interval: ${digitalRange}, ${chipLabel}`;
-  return `Time interval: ${digitalRange}`;
+  const prefix = editable ? "Editable time interval" : "Time interval";
+  if (chipLabel) return `${prefix}: ${digitalRange}, ${chipLabel}`;
+  return `${prefix}: ${digitalRange}`;
 }
 
 function useClockCardCalculations(
@@ -97,14 +132,122 @@ function useClockCardCalculations(
   return { intervalInfo, wavyArcPath, wavyArcPhases, cookiePath };
 }
 
+function useClockCardController(options: {
+  startTime: ClockCardProps["startTime"];
+  endTime: ClockCardProps["endTime"];
+  editable?: boolean;
+  disabled?: boolean;
+  onStartTimeChange?: (newStartTime: Dayjs) => void;
+  onEndTimeChange?: (newEndTime: Dayjs) => void;
+  onTimeChange?: (times: TimeChangePayload) => void;
+  onChange?: (times: TimeChangePayload) => void;
+}) {
+  const {
+    startTime,
+    endTime,
+    editable,
+    disabled,
+    onStartTimeChange,
+    onEndTimeChange,
+    onTimeChange,
+    onChange,
+  } = options;
+
+  const [currentStartTime, setCurrentStartTime] = useState<Dayjs>(() =>
+    dayjs(startTime),
+  );
+  const [currentEndTime, setCurrentEndTime] = useState<Dayjs>(() =>
+    dayjs(endTime),
+  );
+
+  const prevStartTimeRef = useRef(startTime);
+  const prevEndTimeRef = useRef(endTime);
+
+  useEffect(() => {
+    const prevStart = dayjs(prevStartTimeRef.current);
+    const nextStart = dayjs(startTime);
+    prevStartTimeRef.current = startTime;
+    if (
+      nextStart.isValid() &&
+      (!prevStart.isValid() || !prevStart.isSame(nextStart))
+    ) {
+      setCurrentStartTime(nextStart);
+    }
+  }, [startTime]);
+
+  useEffect(() => {
+    const prevEnd = dayjs(prevEndTimeRef.current);
+    const nextEnd = dayjs(endTime);
+    prevEndTimeRef.current = endTime;
+    if (nextEnd.isValid() && (!prevEnd.isValid() || !prevEnd.isSame(nextEnd))) {
+      setCurrentEndTime(nextEnd);
+    }
+  }, [endTime]);
+
+  const handleStartTimeChange = useCallback(
+    (newVal: Dayjs | null) => {
+      if (!newVal || !newVal.isValid() || (editable && disabled)) return;
+      setCurrentStartTime(newVal);
+      onStartTimeChange?.(newVal);
+      const payload: TimeChangePayload = {
+        startTime: newVal,
+        endTime: currentEndTime,
+      };
+      onTimeChange?.(payload);
+      onChange?.(payload);
+    },
+    [
+      editable,
+      disabled,
+      currentEndTime,
+      onStartTimeChange,
+      onTimeChange,
+      onChange,
+    ],
+  );
+
+  const handleEndTimeChange = useCallback(
+    (newVal: Dayjs | null) => {
+      if (!newVal || !newVal.isValid() || (editable && disabled)) return;
+      setCurrentEndTime(newVal);
+      onEndTimeChange?.(newVal);
+      const payload: TimeChangePayload = {
+        startTime: currentStartTime,
+        endTime: newVal,
+      };
+      onTimeChange?.(payload);
+      onChange?.(payload);
+    },
+    [
+      editable,
+      disabled,
+      currentStartTime,
+      onEndTimeChange,
+      onTimeChange,
+      onChange,
+    ],
+  );
+
+  return {
+    currentStartTime,
+    currentEndTime,
+    handleStartTimeChange,
+    handleEndTimeChange,
+  };
+}
+
 interface DetailsSectionContentProps {
   intervalInfo: TimeIntervalInfo;
   size: ClockCardSize;
+  editable?: boolean;
+  editablePickersProps: ClockCardEditablePickersProps;
 }
 
 function DetailsSectionContent({
   intervalInfo,
   size,
+  editable,
+  editablePickersProps,
 }: DetailsSectionContentProps) {
   const chipSize = resolveChipSize(size);
   const chipVariant = resolveChipVariant(intervalInfo.isHappeningNow);
@@ -114,14 +257,18 @@ function DetailsSectionContent({
 
   return (
     <>
-      <DigitalIntervalRow $isHappeningNow={intervalInfo.isHappeningNow}>
-        <DigitalIntervalText
-          $size={size}
-          data-testid="time-sheet-digital-interval"
-        >
-          {intervalInfo.digitalRange}
-        </DigitalIntervalText>
-      </DigitalIntervalRow>
+      {editable ? (
+        <ClockCardEditablePickers {...editablePickersProps} />
+      ) : (
+        <DigitalIntervalRow $isHappeningNow={intervalInfo.isHappeningNow}>
+          <DigitalIntervalText
+            $size={size}
+            data-testid="time-sheet-digital-interval"
+          >
+            {intervalInfo.digitalRange}
+          </DigitalIntervalText>
+        </DigitalIntervalRow>
+      )}
 
       <DetailsChipsRow>
         <DurationChip
@@ -170,12 +317,31 @@ export const ClockCard = forwardRef<HTMLDivElement, ClockCardProps>(
       style,
       onClick,
       ariaLabel,
+      editable,
+      disabled,
+      onStartTimeChange,
+      onEndTimeChange,
+      onTimeChange,
+      onChange,
+      timePickerProps,
     } = config;
 
     const theme = useTheme();
     const { i18n } = useTranslation();
     const normLocale = resolveActiveLocale(locale, i18n);
     const isFr = normLocale === "fr";
+    const is12Hour = resolveIs12Hour(hourFormat, normLocale);
+
+    const controller = useClockCardController({
+      startTime,
+      endTime,
+      editable,
+      disabled,
+      onStartTimeChange,
+      onEndTimeChange,
+      onTimeChange,
+      onChange,
+    });
 
     const calculationOptions = useMemo<ComputeTimeIntervalOptions>(
       () => ({
@@ -187,22 +353,43 @@ export const ClockCard = forwardRef<HTMLDivElement, ClockCardProps>(
     );
 
     const { intervalInfo, wavyArcPath, wavyArcPhases, cookiePath } =
-      useClockCardCalculations(startTime, endTime, calculationOptions);
+      useClockCardCalculations(
+        controller.currentStartTime,
+        controller.currentEndTime,
+        calculationOptions,
+      );
 
     const [internalHovered, setInternalHovered] = useState(false);
     const isHovered = config.isHovered ?? internalHovered;
 
     const primaryColor = theme.palette.primary.main;
-    const activeColor = intervalInfo.isHappeningNow
-      ? intervalInfo.progressColor
-      : primaryColor;
+    const activeColor = resolveActiveColor(
+      intervalInfo.isHappeningNow,
+      intervalInfo.progressColor,
+      primaryColor,
+    );
     const liveTooltip = isFr ? "En direct" : "Live";
 
     const accessibleLabel = resolveAccessibleLabel(
       ariaLabel,
       intervalInfo.digitalRange,
       intervalInfo.chipLabel,
+      editable,
     );
+
+    const editablePickersProps: ClockCardEditablePickersProps = {
+      size,
+      isHappeningNow: intervalInfo.isHappeningNow,
+      disabled,
+      currentStartTime: controller.currentStartTime,
+      currentEndTime: controller.currentEndTime,
+      onStartTimeChange: controller.handleStartTimeChange,
+      onEndTimeChange: controller.handleEndTimeChange,
+      isFr,
+      is12Hour,
+      normLocale,
+      timePickerProps,
+    };
 
     return (
       <SheetCard
@@ -289,6 +476,7 @@ export const ClockCard = forwardRef<HTMLDivElement, ClockCardProps>(
         <ConnectedCard
           $size={size}
           $orientation={orientation}
+          $isEditable={editable}
           data-testid="time-sheet-connected-card"
         >
           {intervalInfo.isHappeningNow && (
@@ -302,7 +490,12 @@ export const ClockCard = forwardRef<HTMLDivElement, ClockCardProps>(
             </Tooltip>
           )}
 
-          <DetailsSectionContent intervalInfo={intervalInfo} size={size} />
+          <DetailsSectionContent
+            intervalInfo={intervalInfo}
+            size={size}
+            editable={editable}
+            editablePickersProps={editablePickersProps}
+          />
         </ConnectedCard>
       </SheetCard>
     );

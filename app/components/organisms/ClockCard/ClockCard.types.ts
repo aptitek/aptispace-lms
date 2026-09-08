@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import type { Dayjs } from "dayjs";
+import type { TimePickerProps } from "@mui/x-date-pickers/TimePicker";
 
 export type ClockCardSize = "small" | "medium" | "large";
 export type ClockCardOrientation = "vertical" | "horizontal";
@@ -82,6 +83,49 @@ export interface ClockCardProps {
    * Optional controlled hover state (previewing needle animation to end time).
    */
   isHovered?: boolean;
+
+  /**
+   * Whether the clock card is editable via MUI TimePickers.
+   * When true, start and end times are rendered as interactive text fields.
+   * @default false
+   */
+  editable?: boolean;
+
+  /**
+   * Whether time picker interaction is disabled.
+   * @default false
+   */
+  disabled?: boolean;
+
+  /**
+   * Callback fired when start time changes.
+   */
+  onStartTimeChange?: (newStartTime: Dayjs) => void;
+
+  /**
+   * Callback fired when end time changes.
+   */
+  onEndTimeChange?: (newEndTime: Dayjs) => void;
+
+  /**
+   * Callback fired when either start or end time changes.
+   */
+  onTimeChange?: (times: TimeChangePayload) => void;
+
+  /**
+   * Alias for onTimeChange for standard form / input compatibility.
+   */
+  onChange?: (times: TimeChangePayload) => void;
+
+  /**
+   * Optional props forwarded to underlying MUI TimePicker components.
+   */
+  timePickerProps?: Partial<TimePickerProps>;
+}
+
+export interface TimeChangePayload {
+  startTime: Dayjs;
+  endTime: Dayjs;
 }
 
 export interface TimeIntervalInfo {

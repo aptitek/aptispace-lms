@@ -6,5 +6,6 @@ export type {
   ClockCardColor,
   HourFormat,
   TimeIntervalInfo,
+  TimeChangePayload,
 } from "./ClockCard.types";
 export * from "./ClockCard.utils";

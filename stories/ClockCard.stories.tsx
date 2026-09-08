@@ -41,6 +41,15 @@ const meta: Meta<typeof ClockCard> = {
       options: ["primary", "secondary", "error", "default"],
       description: "Header and accent color theme",
     },
+    editable: {
+      control: "boolean",
+      description:
+        "Whether the start and end times are editable via MUI TimePicker text fields",
+    },
+    disabled: {
+      control: "boolean",
+      description: "Whether editing is disabled",
+    },
   },
 };
 
@@ -309,5 +318,104 @@ export const DualNeedlesAndEndDotShowcase: Story = {
         </Box>
       </Box>
     );
+  },
+};
+
+export const Editable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable mode renders the start and end times as interactive MUI TimePicker text fields with clock popups. The analog clock needles, sweep arc, and duration chip update dynamically as you change times.",
+      },
+    },
+  },
+  args: {
+    startTime: now.hour(9).minute(0).second(0).toDate(),
+    endTime: now.hour(11).minute(30).second(0).toDate(),
+    referenceTime: now.hour(8).minute(0).second(0).toDate(),
+    editable: true,
+    size: "medium",
+    color: "primary",
+  },
+};
+
+function ControlledEditableStory() {
+  const [startVal, setStartVal] = React.useState(
+    now.hour(14).minute(0).second(0),
+  );
+  const [endVal, setEndVal] = React.useState(now.hour(17).minute(15).second(0));
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+      }}
+    >
+      <ClockCard
+        startTime={startVal}
+        endTime={endVal}
+        referenceTime={now.hour(12).minute(0).second(0)}
+        editable
+        onStartTimeChange={setStartVal}
+        onEndTimeChange={setEndVal}
+        size="medium"
+      />
+      <Typography variant="body2" color="text.secondary">
+        Selected interval: {startVal.format("h:mm A")} –{" "}
+        {endVal.format("h:mm A")}
+      </Typography>
+    </Box>
+  );
+}
+
+export const ControlledEditable: Story = {
+  render: () => <ControlledEditableStory />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Demonstrates controlled state synchronization with parent React state. Changing either time field updates the parent state and triggers live updates across the clock dial needles, duration chip, and wavy arc.",
+      },
+    },
+  },
+};
+
+export const EditableSizes: Story = {
+  render: () => (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        gap: 3,
+      }}
+    >
+      {(["small", "medium", "large"] as const).map((s) => (
+        <ClockCard
+          key={s}
+          startTime={now.hour(10).minute(0).second(0)}
+          endTime={now.hour(12).minute(30).second(0)}
+          referenceTime={now.hour(9).minute(0).second(0)}
+          editable
+          size={s}
+        />
+      ))}
+    </Box>
+  ),
+};
+
+export const EditableFrench24h: Story = {
+  args: {
+    startTime: now.hour(14).minute(30).second(0).toDate(),
+    endTime: now.hour(18).minute(0).second(0).toDate(),
+    referenceTime: now.hour(12).minute(0).second(0).toDate(),
+    editable: true,
+    locale: "fr",
+    hourFormat: "24h",
+    size: "medium",
   },
 };

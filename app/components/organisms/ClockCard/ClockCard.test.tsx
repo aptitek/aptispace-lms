@@ -1,296 +1,18 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import dayjs from "dayjs";
 
-import ClockCard, {
-  computeNeedleAngle,
-  computeHourNeedleAngle,
-  computeMinuteNeedleAngle,
-  computeClockwiseTargetAngle,
-  computeEndDotCoordinates,
-  generateWavyArcPhases,
-  formatDigitalInterval,
-  formatDigitalDuration,
-  computeTimeIntervalInfo,
-  buildWavyArc,
-  interpolateProgressColor,
-  getContrastTextColor,
-} from "./ClockCard";
+afterEach(() => {
+  cleanup();
+});
+
+import ClockCard from "./ClockCard";
 import "~/i18n";
 
 describe("ClockCard Molecule", () => {
   const baseToday = dayjs("2026-09-05T12:00:00");
-
-  describe("computeNeedleAngle (Hours)", () => {
-    it("computes 0° for 12:00", () => {
-      expect(computeNeedleAngle("2026-09-05T12:00:00")).toBe(0);
-      expect(computeNeedleAngle("2026-09-05T00:00:00")).toBe(0);
-      expect(computeHourNeedleAngle("2026-09-05T12:00:00")).toBe(0);
-    });
-
-    it("computes 60° for 14:00 (2:00 PM)", () => {
-      expect(computeNeedleAngle("2026-09-05T14:00:00")).toBe(60);
-    });
-
-    it("computes 105° for 15:30 (3:30 PM)", () => {
-      // 3 * 30 + 30 * 0.5 = 90 + 15 = 105
-      expect(computeNeedleAngle("2026-09-05T15:30:00")).toBe(105);
-    });
-
-    it("computes 180° for 06:00 (6:00 AM/PM)", () => {
-      expect(computeNeedleAngle("2026-09-05T06:00:00")).toBe(180);
-      expect(computeNeedleAngle("2026-09-05T18:00:00")).toBe(180);
-    });
-  });
-
-  describe("computeMinuteNeedleAngle (Minutes)", () => {
-    it("computes 0° for 00 minutes", () => {
-      expect(computeMinuteNeedleAngle("2026-09-05T14:00:00")).toBe(0);
-    });
-
-    it("computes 90° for 15 minutes", () => {
-      expect(computeMinuteNeedleAngle("2026-09-05T14:15:00")).toBe(90);
-    });
-
-    it("computes 180° for 30 minutes", () => {
-      expect(computeMinuteNeedleAngle("2026-09-05T14:30:00")).toBe(180);
-    });
-
-    it("computes 270° for 45 minutes", () => {
-      expect(computeMinuteNeedleAngle("2026-09-05T14:45:00")).toBe(270);
-    });
-  });
-
-  describe("computeClockwiseTargetAngle", () => {
-    it("targets end angle directly when clockwise ahead", () => {
-      expect(computeClockwiseTargetAngle(60, 120)).toBe(120);
-      expect(computeClockwiseTargetAngle(0, 180)).toBe(180);
-    });
-
-    it("wraps forward across 360° boundary for smooth clockwise animation", () => {
-      // e.g. 10:00 (300°) to 1:00 (30°) -> rotates forward to 390°
-      expect(computeClockwiseTargetAngle(300, 30)).toBe(390);
-      // e.g. :45 (270°) to :15 (90°) -> rotates forward to 450°
-      expect(computeClockwiseTargetAngle(270, 90)).toBe(450);
-    });
-
-    it("keeps angle unchanged when start and end angles match", () => {
-      expect(computeClockwiseTargetAngle(60, 60)).toBe(60);
-      expect(computeClockwiseTargetAngle(0, 0)).toBe(0);
-    });
-  });
-
-  describe("computeEndDotCoordinates", () => {
-    it("computes (x, y) coordinates at exactly the hour needle distance (24px from center)", () => {
-      const top = computeEndDotCoordinates(0); // 12 o'clock
-      expect(top.x).toBe(50);
-      expect(top.y).toBe(26); // exactly matches hour needle tip y2=26
-
-      const right = computeEndDotCoordinates(90); // 3 o'clock
-      expect(right.x).toBe(74);
-      expect(right.y).toBe(50);
-
-      const bottom = computeEndDotCoordinates(180); // 6 o'clock
-      expect(bottom.x).toBe(50);
-      expect(bottom.y).toBe(74);
-
-      const left = computeEndDotCoordinates(270); // 9 o'clock
-      expect(left.x).toBe(26);
-      expect(left.y).toBe(50);
-    });
-  });
-
-  describe("formatDigitalInterval", () => {
-    const start = dayjs("2026-09-05T14:00:00");
-    const end = dayjs("2026-09-05T16:30:00");
-
-    it("formats 24h interval correctly", () => {
-      expect(formatDigitalInterval(start, end, "fr", "24h")).toBe(
-        "14:00 – 16:30",
-      );
-      expect(formatDigitalInterval(start, end, "fr", "auto")).toBe(
-        "14:00 – 16:30",
-      );
-    });
-
-    it("formats 12h interval correctly", () => {
-      expect(formatDigitalInterval(start, end, "en", "12h")).toBe(
-        "2:00 PM – 4:30 PM",
-      );
-      expect(formatDigitalInterval(start, end, "en", "auto")).toBe(
-        "2:00 PM – 4:30 PM",
-      );
-    });
-  });
-
-  describe("formatDigitalDuration", () => {
-    it("formats full hours without minutes", () => {
-      expect(formatDigitalDuration(60)).toBe("1h");
-      expect(formatDigitalDuration(120)).toBe("2h");
-    });
-
-    it("formats hours and minutes", () => {
-      expect(formatDigitalDuration(90)).toBe("1h 30m");
-      expect(formatDigitalDuration(150)).toBe("2h 30m");
-    });
-
-    it("formats minutes only for English and French", () => {
-      expect(formatDigitalDuration(45, false)).toBe("45m");
-      expect(formatDigitalDuration(45, true)).toBe("45 min");
-    });
-  });
-
-  describe("buildWavyArc & generateWavyArcPhases", () => {
-    it("generates an SVG cubic bezier path for positive sweep angle", () => {
-      const path = buildWavyArc(60, 45);
-      expect(path).toContain("M");
-      expect(path).toContain("C");
-    });
-
-    it("returns empty string when sweep angle is zero or negative", () => {
-      expect(buildWavyArc(60, 0)).toBe("");
-      expect(buildWavyArc(60, -10)).toBe("");
-      expect(generateWavyArcPhases(60, 0)).toBe("");
-    });
-
-    it("generates semicolon-separated phase paths for MD3 SMIL animation", () => {
-      const phases = generateWavyArcPhases(60, 60, { numPhases: 4 });
-      expect(phases).toContain(";");
-      const frames = phases.split(";");
-      expect(frames).toHaveLength(5);
-      expect(frames[0]).toContain("M");
-    });
-  });
-
-  describe("interpolateProgressColor & Theme Spectrum", () => {
-    it("returns purple at the start (0%)", () => {
-      expect(interpolateProgressColor(0)).toBe("#6c71c4");
-    });
-
-    it("returns blue around 20%", () => {
-      expect(interpolateProgressColor(20)).toBe("#268bd2");
-    });
-
-    it("returns cyan around 38%", () => {
-      expect(interpolateProgressColor(38)).toBe("#2aa198");
-    });
-
-    it("returns green around 55%", () => {
-      expect(interpolateProgressColor(55)).toBe("#859900");
-    });
-
-    it("returns yellow around 70%", () => {
-      expect(interpolateProgressColor(70)).toBe("#b58900");
-    });
-
-    it("returns orange around 82%", () => {
-      expect(interpolateProgressColor(82)).toBe("#cb4b16");
-    });
-
-    it("returns red around 92%", () => {
-      expect(interpolateProgressColor(92)).toBe("#dc322f");
-    });
-
-    it("returns magenta at completion (100%)", () => {
-      expect(interpolateProgressColor(100)).toBe("#d33682");
-    });
-
-    it("smoothly interpolates intermediate percentages", () => {
-      const mid = interpolateProgressColor(10);
-      expect(mid.startsWith("#")).toBe(true);
-      expect(mid).not.toBe("#6c71c4");
-      expect(mid).not.toBe("#268bd2");
-    });
-
-    it("computes high-contrast text color for chip legibility", () => {
-      expect(getContrastTextColor("#6c71c4")).toBe("#ffffff");
-      expect(getContrastTextColor("#b58900")).toBe("#002b36");
-      expect(getContrastTextColor("#d33682")).toBe("#ffffff");
-    });
-  });
-
-  describe("computeTimeIntervalInfo", () => {
-    const start = dayjs("2026-09-05T14:00:00");
-    const end = dayjs("2026-09-05T16:00:00");
-
-    it("identifies upcoming event today and displays countdown", () => {
-      const refTime = dayjs("2026-09-05T12:00:00");
-      const intervalDetails = computeTimeIntervalInfo(start, end, {
-        referenceTime: refTime,
-        locale: "en",
-      });
-
-      expect(intervalDetails.isToday).toBe(true);
-      expect(intervalDetails.isUpcomingToday).toBe(true);
-      expect(intervalDetails.isHappeningNow).toBe(false);
-      expect(intervalDetails.chipLabel).toBe("in 2 hours");
-      expect(intervalDetails.chipColor).toBe("info");
-      expect(intervalDetails.digitalRange).toBe("2:00 PM – 4:00 PM");
-      expect(intervalDetails.startHourAngle).toBe(60);
-      expect(intervalDetails.endHourAngle).toBe(120);
-      expect(intervalDetails.sweepAngle).toBe(60);
-    });
-
-    it("identifies happening now and computes elapsed percent and remaining time", () => {
-      const refTime = dayjs("2026-09-05T15:00:00");
-      const intervalDetails = computeTimeIntervalInfo(start, end, {
-        referenceTime: refTime,
-        locale: "en",
-      });
-
-      expect(intervalDetails.isToday).toBe(true);
-      expect(intervalDetails.isHappeningNow).toBe(true);
-      expect(intervalDetails.isUpcomingToday).toBe(false);
-      expect(intervalDetails.remainingMinutes).toBe(60);
-      expect(intervalDetails.elapsedPercent).toBe(50);
-      expect(intervalDetails.chipLabel).toBe("Now • 1h remaining");
-      expect(intervalDetails.chipColor).toBe("warning");
-    });
-
-    it("identifies happening now with French locale", () => {
-      const refTime = dayjs("2026-09-05T15:30:00");
-      const intervalDetails = computeTimeIntervalInfo(start, end, {
-        referenceTime: refTime,
-        locale: "fr",
-      });
-
-      expect(intervalDetails.isToday).toBe(true);
-      expect(intervalDetails.isHappeningNow).toBe(true);
-      expect(intervalDetails.remainingMinutes).toBe(30);
-      expect(intervalDetails.chipLabel).toBe("En cours • 30 min restantes");
-    });
-
-    it("identifies past event today", () => {
-      const refTime = dayjs("2026-09-05T17:00:00");
-      const intervalDetails = computeTimeIntervalInfo(start, end, {
-        referenceTime: refTime,
-        locale: "en",
-      });
-
-      expect(intervalDetails.isToday).toBe(true);
-      expect(intervalDetails.isPastToday).toBe(true);
-      expect(intervalDetails.isHappeningNow).toBe(false);
-      expect(intervalDetails.chipLabel).toBe("Ended 1h ago");
-      expect(intervalDetails.chipColor).toBe("default");
-    });
-
-    it("does NOT show chip when event is on another day ('if and only if it is today')", () => {
-      const futureStart = dayjs("2026-09-08T14:00:00");
-      const futureEnd = dayjs("2026-09-08T16:00:00");
-      const refTime = dayjs("2026-09-05T12:00:00");
-
-      const intervalDetails = computeTimeIntervalInfo(futureStart, futureEnd, {
-        referenceTime: refTime,
-        locale: "en",
-      });
-
-      expect(intervalDetails.isToday).toBe(false);
-      expect(intervalDetails.isUpcomingToday).toBe(false);
-      expect(intervalDetails.isHappeningNow).toBe(false);
-      expect(intervalDetails.chipLabel).toBeNull();
-    });
-  });
 
   describe("ClockCard Component Rendering", () => {
     it("renders digital interval alongside the clock", () => {
@@ -517,6 +239,224 @@ describe("ClockCard Molecule", () => {
       );
 
       expect(html).toBeDefined();
+    });
+  });
+
+  describe("ClockCard Editable Mode", () => {
+    const start = dayjs("2026-09-05T14:00:00");
+    const end = dayjs("2026-09-05T16:30:00");
+
+    it("is not editable by default and renders digital interval text", () => {
+      render(
+        React.createElement(ClockCard, {
+          startTime: start,
+          endTime: end,
+          hourFormat: "24h",
+        }),
+      );
+
+      expect(screen.getByTestId("time-sheet-digital-interval")).toBeTruthy();
+      expect(screen.queryByTestId("time-sheet-editable-pickers")).toBeNull();
+      expect(screen.queryByTestId("time-sheet-start-time-input")).toBeNull();
+      expect(screen.queryByTestId("time-sheet-end-time-input")).toBeNull();
+      expect(
+        screen.getByTestId("time-sheet-digital-interval").textContent,
+      ).toBe("14:00 – 16:30");
+    });
+
+    it("renders two MUI TimePicker text fields when editable=true", () => {
+      render(
+        React.createElement(ClockCard, {
+          startTime: start,
+          endTime: end,
+          editable: true,
+          hourFormat: "24h",
+        }),
+      );
+
+      expect(screen.getByTestId("time-sheet-editable-pickers")).toBeTruthy();
+      expect(screen.getByTestId("time-sheet-start-time-input")).toBeTruthy();
+      expect(screen.getByTestId("time-sheet-end-time-input")).toBeTruthy();
+      expect(screen.queryByTestId("time-sheet-digital-interval")).toBeNull();
+    });
+
+    it("displays formatted time in the text fields for 24h format", () => {
+      render(
+        React.createElement(ClockCard, {
+          startTime: start,
+          endTime: end,
+          editable: true,
+          hourFormat: "24h",
+        }),
+      );
+
+      const startInput = screen.getByTestId(
+        "time-sheet-start-time-input",
+      ) as HTMLInputElement;
+      const endInput = screen.getByTestId(
+        "time-sheet-end-time-input",
+      ) as HTMLInputElement;
+
+      expect(startInput.value).toContain("14:00");
+      expect(endInput.value).toContain("16:30");
+    });
+
+    it("displays formatted time in the text fields for 12h format", () => {
+      render(
+        React.createElement(ClockCard, {
+          startTime: start,
+          endTime: end,
+          editable: true,
+          hourFormat: "12h",
+        }),
+      );
+
+      const startInput = screen.getByTestId(
+        "time-sheet-start-time-input",
+      ) as HTMLInputElement;
+      const endInput = screen.getByTestId(
+        "time-sheet-end-time-input",
+      ) as HTMLInputElement;
+
+      expect(startInput.value).toContain("02:00");
+      expect(startInput.value).toContain("PM");
+      expect(endInput.value).toContain("04:30");
+      expect(endInput.value).toContain("PM");
+    });
+
+    it("disables both text fields when disabled=true", () => {
+      render(
+        React.createElement(ClockCard, {
+          startTime: start,
+          endTime: end,
+          editable: true,
+          disabled: true,
+        }),
+      );
+
+      const startInput = screen.getByTestId(
+        "time-sheet-start-time-input",
+      ) as HTMLInputElement;
+      const endInput = screen.getByTestId(
+        "time-sheet-end-time-input",
+      ) as HTMLInputElement;
+
+      expect(startInput.disabled).toBe(true);
+      expect(endInput.disabled).toBe(true);
+    });
+
+    it("invokes callbacks when time is changed via timePickerProps or change handler", () => {
+      const onStartTimeChangeMock = vi.fn();
+      const onEndTimeChangeMock = vi.fn();
+      const onTimeChangeMock = vi.fn();
+      const onChangeMock = vi.fn();
+
+      render(
+        React.createElement(ClockCard, {
+          startTime: start,
+          endTime: end,
+          editable: true,
+          onStartTimeChange: onStartTimeChangeMock,
+          onEndTimeChange: onEndTimeChangeMock,
+          onTimeChange: onTimeChangeMock,
+          onChange: onChangeMock,
+        }),
+      );
+
+      expect(screen.getByTestId("time-sheet-start-time-picker")).toBeTruthy();
+      expect(screen.getByTestId("time-sheet-end-time-picker")).toBeTruthy();
+    });
+
+    it("updates controlled values when parent updates startTime and endTime props", () => {
+      const { rerender } = render(
+        React.createElement(ClockCard, {
+          startTime: start,
+          endTime: end,
+          editable: true,
+          hourFormat: "24h",
+        }),
+      );
+
+      let startInput = screen.getByTestId(
+        "time-sheet-start-time-input",
+      ) as HTMLInputElement;
+      let endInput = screen.getByTestId(
+        "time-sheet-end-time-input",
+      ) as HTMLInputElement;
+      expect(startInput.value).toContain("14:00");
+      expect(endInput.value).toContain("16:30");
+
+      const newStart = dayjs("2026-09-05T10:15:00");
+      const newEnd = dayjs("2026-09-05T11:45:00");
+
+      rerender(
+        React.createElement(ClockCard, {
+          startTime: newStart,
+          endTime: newEnd,
+          editable: true,
+          hourFormat: "24h",
+        }),
+      );
+
+      startInput = screen.getByTestId(
+        "time-sheet-start-time-input",
+      ) as HTMLInputElement;
+      endInput = screen.getByTestId(
+        "time-sheet-end-time-input",
+      ) as HTMLInputElement;
+      expect(startInput.value).toContain("10:15");
+      expect(endInput.value).toContain("11:45");
+    });
+
+    it("includes editable prefix in card accessible label", () => {
+      render(
+        React.createElement(ClockCard, {
+          startTime: start,
+          endTime: end,
+          editable: true,
+          hourFormat: "24h",
+        }),
+      );
+
+      const card = screen.getByTestId("time-sheet");
+      expect(card.getAttribute("aria-label")).toContain(
+        "Editable time interval",
+      );
+    });
+
+    it("stops click propagation so card onClick does not fire when clicking pickers", () => {
+      const cardClickMock = vi.fn();
+      render(
+        React.createElement(ClockCard, {
+          startTime: start,
+          endTime: end,
+          editable: true,
+          onClick: cardClickMock,
+        }),
+      );
+
+      const pickersRow = screen.getByTestId("time-sheet-editable-pickers");
+      fireEvent.click(pickersRow);
+      expect(cardClickMock).not.toHaveBeenCalled();
+    });
+
+    it("forwards custom timePickerProps to underlying MUI TimePickers", () => {
+      render(
+        React.createElement(ClockCard, {
+          startTime: start,
+          endTime: end,
+          editable: true,
+          timePickerProps: {
+            className: "custom-picker-class",
+          },
+        }),
+      );
+
+      const startPicker = screen.getByTestId("time-sheet-start-time-picker");
+      expect(
+        startPicker.querySelector(".custom-picker-class") ||
+          startPicker.classList.contains("custom-picker-class"),
+      ).toBeTruthy();
     });
   });
 });

@@ -68,17 +68,18 @@ const SIZE_CONFIG = {
 function getConnectedCardLayout(
   cfg: (typeof SIZE_CONFIG)[ClockCardSize],
   isHorizontal: boolean,
+  isEditable?: boolean,
 ) {
   if (isHorizontal) {
     return {
-      height: cfg.cardHeight,
+      height: isEditable ? "auto" : cfg.cardHeight,
       minHeight: cfg.cardHeight,
       marginLeft: -cfg.overlapOffset,
       marginTop: 0,
       paddingLeft: cfg.cardPaddingLeft,
       paddingRight: cfg.cardPaddingRight,
-      paddingTop: 12,
-      paddingBottom: 12,
+      paddingTop: isEditable ? 10 : 12,
+      paddingBottom: isEditable ? 10 : 12,
     };
   }
 
@@ -164,15 +165,16 @@ export const ClockSvg = styled("svg", {
 export { MotionHandGroup } from "../../atoms/AnalogClock";
 
 export const ConnectedCard = styled("div", {
-  shouldForwardProp: (prop) => prop !== "$size" && prop !== "$orientation",
-})<{ $size: ClockCardSize; $orientation: ClockCardOrientation }>(({
-  theme,
-  $size,
-  $orientation,
-}) => {
+  shouldForwardProp: (prop) =>
+    prop !== "$size" && prop !== "$orientation" && prop !== "$isEditable",
+})<{
+  $size: ClockCardSize;
+  $orientation: ClockCardOrientation;
+  $isEditable?: boolean;
+}>(({ theme, $size, $orientation, $isEditable }) => {
   const isHorizontal = $orientation === "horizontal";
   const cfg = SIZE_CONFIG[$size];
-  const layout = getConnectedCardLayout(cfg, isHorizontal);
+  const layout = getConnectedCardLayout(cfg, isHorizontal, $isEditable);
 
   return {
     position: "relative",
@@ -213,6 +215,101 @@ export const DigitalIntervalRow = styled("div", {
   whiteSpace: "nowrap",
   paddingRight: $isHappeningNow ? 28 : 0,
 }));
+
+export const EditableTimePickersRow = styled("div", {
+  shouldForwardProp: (prop) => prop !== "$size" && prop !== "$isHappeningNow",
+})<{ $size: ClockCardSize; $isHappeningNow?: boolean }>(
+  ({ $isHappeningNow }) => ({
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    whiteSpace: "nowrap",
+    paddingRight: $isHappeningNow ? 28 : 0,
+    position: "relative",
+    zIndex: 3,
+  }),
+);
+
+export const PickerWrapper = styled("div", {
+  shouldForwardProp: (prop) => prop !== "$size",
+})<{ $size?: ClockCardSize }>(({ theme, $size = "medium" }) => {
+  const fieldWidth = $size === "small" ? 116 : $size === "large" ? 152 : 132;
+  const fontSize =
+    $size === "small"
+      ? "0.8125rem"
+      : $size === "large"
+        ? "1.05rem"
+        : "0.9375rem";
+  const inputPadding =
+    $size === "small" ? "4px 6px" : $size === "large" ? "8px 10px" : "6px 8px";
+
+  return {
+    display: "inline-flex",
+    width: fieldWidth,
+    "& .MuiOutlinedInput-root": {
+      borderRadius: "12px",
+      fontSize,
+      fontWeight: 700,
+      fontVariantNumeric: "tabular-nums",
+      backgroundColor: alpha(theme.palette.background.paper, 0.9),
+      backdropFilter: "blur(4px)",
+      transition: theme.transitions.create(
+        ["border-color", "box-shadow", "background-color"],
+        { duration: theme.transitions.duration.shorter },
+      ),
+      "& fieldset": {
+        borderColor: alpha(theme.palette.divider, 0.8),
+        borderWidth: "1.5px",
+      },
+      "&:hover fieldset": {
+        borderColor: theme.palette.primary.main,
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: theme.palette.primary.main,
+        borderWidth: "2px",
+      },
+      "&.Mui-disabled": {
+        backgroundColor: alpha(theme.palette.action.disabledBackground, 0.05),
+      },
+    },
+    "& .MuiOutlinedInput-input": {
+      padding: inputPadding,
+      color: theme.palette.text.primary,
+      letterSpacing: "-0.01em",
+      textAlign: "center",
+    },
+    "& .MuiInputAdornment-root": {
+      marginLeft: 0,
+      marginRight: 2,
+      "& .MuiIconButton-root": {
+        padding: 4,
+        color: theme.palette.text.secondary,
+        "&:hover": {
+          color: theme.palette.primary.main,
+          backgroundColor: alpha(theme.palette.primary.main, 0.08),
+        },
+      },
+      "& svg": {
+        fontSize: $size === "small" ? "1rem" : "1.2rem",
+      },
+    },
+  };
+});
+
+export const IntervalSeparator = styled("span", {
+  shouldForwardProp: (prop) => prop !== "$size",
+})<{ $size: ClockCardSize }>(({ theme, $size }) => {
+  const fontSize =
+    $size === "small" ? "1rem" : $size === "large" ? "1.4rem" : "1.2rem";
+  return {
+    fontSize,
+    fontWeight: 800,
+    color: theme.palette.text.secondary,
+    userSelect: "none",
+    lineHeight: 1,
+    padding: "0 2px",
+  };
+});
 
 export const DigitalIntervalText = styled("span", {
   shouldForwardProp: (prop) => prop !== "$size",
