@@ -63,6 +63,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
+    entries: ["app/**/*.{ts,tsx}"],
     include: [
       "framer-motion",
       "@mui/icons-material/DarkModeRounded",

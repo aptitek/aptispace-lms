@@ -472,6 +472,14 @@ export const studentDecksRelations = relations(studentDecks, ({ one }) => ({
   }),
 }));
 
+export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
+  user: one(users, { fields: [auditLogs.userId], references: [users.id] }),
+}));
+
+export const errorReportsRelations = relations(errorReports, ({ one }) => ({
+  user: one(users, { fields: [errorReports.userId], references: [users.id] }),
+}));
+
 /* =========================================================================
  * Inferred Types
  * ========================================================================= */
