@@ -19,7 +19,12 @@ import {
   CalendarContentArea,
 } from "./planning.states";
 import { frFR, enUS } from "@mui/x-scheduler/locales";
-import { mapClassToSchedulerEvent, formatTimeRange } from "./planning.types";
+import {
+  mapClassToSchedulerEvent,
+  formatTimeRange,
+  extractTimesFromOccurrence,
+  toDatetimeLocalString,
+} from "./planning.types";
 import {
   createSvgDataUri,
   DEVICES_ICON_PATH,
@@ -370,6 +375,83 @@ describe("Planning Route", () => {
       const formattedFr = formatTimeRange(start, end, "fr");
       expect(formattedFr).toContain("Sept.");
       expect(formattedFr).toContain("Mar.");
+    });
+  });
+
+  describe("Calendar Cell Click & Event Creation", () => {
+    it("extracts times from time-column occurrence with at least 1 hour duration", () => {
+      const occurrence = {
+        key: "occurrence-placeholder",
+        id: "occurrence-placeholder",
+        displayTimezone: {
+          start: {
+            timestamp: 1789034400000,
+            value: "2026-09-10T08:00:00.000Z",
+          },
+          end: {
+            timestamp: 1789036200000,
+            value: "2026-09-10T08:30:00.000Z",
+          },
+        },
+      };
+
+      const times = extractTimesFromOccurrence(occurrence);
+      expect(times).not.toBeNull();
+      const startDate = new Date(1789034400000);
+      const expectedEndDate = new Date(1789034400000 + 3600000);
+
+      expect(times?.startTime).toBe(toDatetimeLocalString(startDate));
+      expect(times?.endTime).toBe(toDatetimeLocalString(expectedEndDate));
+    });
+
+    it("preserves dragged range duration if greater than 1 hour", () => {
+      const occurrence = {
+        key: "occurrence-placeholder",
+        id: "occurrence-placeholder",
+        displayTimezone: {
+          start: {
+            timestamp: 1789034400000,
+          },
+          end: {
+            timestamp: 1789041600000,
+          },
+        },
+      };
+
+      const times = extractTimesFromOccurrence(occurrence);
+      expect(times).not.toBeNull();
+      const startDate = new Date(1789034400000);
+      const expectedEndDate = new Date(1789041600000);
+
+      expect(times?.startTime).toBe(toDatetimeLocalString(startDate));
+      expect(times?.endTime).toBe(toDatetimeLocalString(expectedEndDate));
+    });
+
+    it("handles all-day or day-grid occurrences defaulting to 9:00 - 10:00", () => {
+      const occurrence = {
+        key: "occurrence-placeholder",
+        id: "occurrence-placeholder",
+        allDay: true,
+        displayTimezone: {
+          start: {
+            value: "2026-09-15T00:00:00.000Z",
+          },
+          end: {
+            value: "2026-09-15T23:59:59.999Z",
+          },
+        },
+      };
+
+      const times = extractTimesFromOccurrence(occurrence);
+      expect(times).not.toBeNull();
+      expect(times?.startTime).toContain("T09:00");
+      expect(times?.endTime).toContain("T10:00");
+    });
+
+    it("returns null for invalid or empty occurrences", () => {
+      expect(extractTimesFromOccurrence(null)).toBeNull();
+      expect(extractTimesFromOccurrence({})).toBeNull();
+      expect(extractTimesFromOccurrence({ displayTimezone: {} })).toBeNull();
     });
   });
 });

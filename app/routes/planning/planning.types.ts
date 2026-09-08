@@ -123,3 +123,86 @@ export function toDatetimeLocalString(date: Date): string {
   const mi = pad(date.getMinutes());
   return `${yr}-${mo}-${da}T${hr}:${mi}`;
 }
+
+export interface InitialFormTimes {
+  startTime: string;
+  endTime: string;
+}
+
+function getOccurrenceDate(
+  field?: { timestamp?: number; value?: string | Date },
+  fallback?: string | number | Date,
+): Date | null {
+  if (typeof field?.timestamp === "number") {
+    return new Date(field.timestamp);
+  }
+  if (field?.value) {
+    return new Date(field.value);
+  }
+  if (fallback) {
+    return new Date(fallback);
+  }
+  return null;
+}
+
+function computeRangeEnd(startDate: Date, endDate: Date | null): Date {
+  const defaultDurationMs = 60 * 60 * 1000;
+  if (!endDate || isNaN(endDate.getTime())) {
+    return new Date(startDate.getTime() + defaultDurationMs);
+  }
+  endDate.setSeconds(0, 0);
+  const diff = endDate.getTime() - startDate.getTime();
+  return new Date(startDate.getTime() + Math.max(defaultDurationMs, diff));
+}
+
+function isAllDayOccurrence(
+  startDate: Date,
+  endDate: Date | null,
+  allDay?: boolean,
+): boolean {
+  if (allDay) return true;
+  if (!endDate || isNaN(endDate.getTime())) return false;
+  return endDate.getTime() - startDate.getTime() >= 23 * 3600 * 1000;
+}
+
+function getDayRangeTimes(startDate: Date): InitialFormTimes {
+  const dayStart = new Date(startDate);
+  dayStart.setHours(9, 0, 0, 0);
+  const dayEnd = new Date(startDate);
+  dayEnd.setHours(10, 0, 0, 0);
+  return {
+    startTime: toDatetimeLocalString(dayStart),
+    endTime: toDatetimeLocalString(dayEnd),
+  };
+}
+
+export function extractTimesFromOccurrence(
+  occurrence: unknown,
+): InitialFormTimes | null {
+  if (!occurrence || typeof occurrence !== "object") return null;
+
+  const occ = occurrence as {
+    displayTimezone?: {
+      start?: { timestamp?: number; value?: string | Date };
+      end?: { timestamp?: number; value?: string | Date };
+    };
+    start?: string | number | Date;
+    end?: string | number | Date;
+    allDay?: boolean;
+  };
+
+  const startDate = getOccurrenceDate(occ.displayTimezone?.start, occ.start);
+  if (!startDate || isNaN(startDate.getTime())) return null;
+  startDate.setSeconds(0, 0);
+
+  const endDate = getOccurrenceDate(occ.displayTimezone?.end, occ.end);
+  if (isAllDayOccurrence(startDate, endDate, occ.allDay)) {
+    return getDayRangeTimes(startDate);
+  }
+
+  const finalEnd = computeRangeEnd(startDate, endDate);
+  return {
+    startTime: toDatetimeLocalString(startDate),
+    endTime: toDatetimeLocalString(finalEnd),
+  };
+}

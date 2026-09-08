@@ -41,9 +41,11 @@ import { PlanningLayout } from "~/components/templates/PlanningLayout";
 import { CalendarFrame } from "./planning.styles";
 import {
   mapClassToSchedulerEvent,
+  extractTimesFromOccurrence,
   type PlanningLoaderData,
   type InstructorOption,
   type SessionOption,
+  type InitialFormTimes,
 } from "./planning.types";
 import { CalendarHeaderTooltips } from "./planning.tooltips";
 import { PlanningSidepanelAction } from "./planning.sidepanel-action";
@@ -59,6 +61,7 @@ import {
 import {
   deletePlanningClassApi,
   updatePlanningClassTimeApi,
+  regeneratePlanningFeedTokenApi,
 } from "./planning.api";
 
 export { getSchedulerLocaleText, getSchedulerDateLocale, frCapitalized };
@@ -167,6 +170,8 @@ export default function Planning() {
   const [editingClass, setEditingClass] = useState<ClassWithDetails | null>(
     null,
   );
+  const [formInitialTimes, setFormInitialTimes] =
+    useState<InitialFormTimes | null>(null);
   const { notifySuccess, notifyError } = useStatusCenter();
 
   const isAdmin = loaderData.user.role === "admin";
@@ -289,7 +294,9 @@ export default function Planning() {
       eventDetails.cancel();
       if (eventDetails.reason === "creation") {
         if (isAdmin) {
+          const times = extractTimesFromOccurrence(occurrence);
           setEditingClass(null);
+          setFormInitialTimes(times);
           setIsFormModalOpen(true);
         }
       } else {
@@ -301,52 +308,35 @@ export default function Planning() {
   );
 
   const handleDeleteClass = async (id: string) => {
-    if (!isAdmin || !window.confirm(t("planning.messages.confirmDelete"))) {
+    if (!isAdmin || !window.confirm(t("planning.messages.confirmDelete")))
       return;
-    }
-
-    try {
-      const apiResponse = await fetch("/api/classes", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-      if (apiResponse.ok) {
-        setClassesState((prev) => prev.filter((c) => c.id !== id));
-        setSelectedClass(null);
-        notifySuccess(t("planning.messages.deleted"));
-      } else {
-        const errorMsg = t("planning.messages.deleteFailed");
-        notifyError(new Error(errorMsg), { message: errorMsg });
-      }
-    } catch (err) {
-      const errorMsg = t("planning.messages.deleteError");
-      notifyError(err, { message: errorMsg });
+    const result = await deletePlanningClassApi(id);
+    if (result === "ok") {
+      setClassesState((prev) => prev.filter((c) => c.id !== id));
+      setSelectedClass(null);
+      notifySuccess(t("planning.messages.deleted"));
+    } else {
+      const errorMsg = t(
+        result === "failed"
+          ? "planning.messages.deleteFailed"
+          : "planning.messages.deleteError",
+      );
+      notifyError(new Error(errorMsg), { message: errorMsg });
     }
   };
 
   const handleRegenerateToken = async () => {
-    if (!isAdmin || !window.confirm(t("planning.messages.confirmRegenerate"))) {
+    if (!isAdmin || !window.confirm(t("planning.messages.confirmRegenerate")))
       return;
-    }
-
-    try {
-      const apiResponse = await fetch("/api/classes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ intent: "REGENERATE_TOKEN" }),
+    const rotateResult = await regeneratePlanningFeedTokenApi();
+    if (rotateResult.ok) {
+      setFeedTokenState(rotateResult.feedToken);
+      notifySuccess(t("planning.messages.tokenRotated"));
+    } else {
+      const errorMsg = t("planning.messages.tokenRotateFailed");
+      notifyError(new Error(rotateResult.error || errorMsg), {
+        message: errorMsg,
       });
-      const resPayload = (await apiResponse.json()) as { feedToken?: string };
-      if (apiResponse.ok && resPayload.feedToken) {
-        setFeedTokenState(resPayload.feedToken);
-        notifySuccess(t("planning.messages.tokenRotated"));
-      } else {
-        const errorMsg = t("planning.messages.tokenRotateFailed");
-        notifyError(new Error(errorMsg), { message: errorMsg });
-      }
-    } catch (err) {
-      const errorMsg = t("planning.messages.tokenRotateError");
-      notifyError(err, { message: errorMsg });
     }
   };
 
@@ -370,6 +360,7 @@ export default function Planning() {
             isAdmin={isAdmin}
             onAddClass={() => {
               setEditingClass(null);
+              setFormInitialTimes(null);
               setIsFormModalOpen(true);
             }}
             onShowGrid={() => setShowEmptyGrid(true)}
@@ -407,6 +398,7 @@ export default function Planning() {
                 data-testid="planning-add-class-fab"
                 onClick={() => {
                   setEditingClass(null);
+                  setFormInitialTimes(null);
                   setIsFormModalOpen(true);
                 }}
                 sx={{
@@ -445,6 +437,7 @@ export default function Planning() {
               onClose={() => setSelectedClass(null)}
               onEdit={() => {
                 setEditingClass(selectedClass);
+                setFormInitialTimes(null);
                 setSelectedClass(null);
                 setIsFormModalOpen(true);
               }}
@@ -455,11 +448,13 @@ export default function Planning() {
           {isAdmin && isFormModalOpen && (
             <ClassFormDialog
               editingClass={editingClass}
+              initialTimes={formInitialTimes}
               sessions={loaderData.sessions}
               instructors={loaderData.instructors}
               onClose={() => {
                 setIsFormModalOpen(false);
                 setEditingClass(null);
+                setFormInitialTimes(null);
               }}
               onSaved={(savedClass) => {
                 if (editingClass) {
@@ -473,6 +468,7 @@ export default function Planning() {
                 }
                 setIsFormModalOpen(false);
                 setEditingClass(null);
+                setFormInitialTimes(null);
               }}
             />
           )}

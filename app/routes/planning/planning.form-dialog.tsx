@@ -20,10 +20,12 @@ import {
   toDatetimeLocalString,
   type InstructorOption,
   type SessionOption,
+  type InitialFormTimes,
 } from "./planning.types";
 
 export interface ClassFormDialogProps {
   editingClass: ClassWithDetails | null;
+  initialTimes?: InitialFormTimes | null;
   sessions: SessionOption[];
   instructors: InstructorOption[];
   onClose: () => void;
@@ -41,12 +43,18 @@ interface FormState {
   description: string;
 }
 
-function computeInitialTimes(editingClass: ClassWithDetails | null) {
+function computeInitialTimes(
+  editingClass: ClassWithDetails | null,
+  initialTimes?: InitialFormTimes | null,
+) {
   if (editingClass) {
     return {
       startTime: toDatetimeLocalString(new Date(editingClass.startTime)),
       endTime: toDatetimeLocalString(new Date(editingClass.endTime)),
     };
+  }
+  if (initialTimes?.startTime && initialTimes?.endTime) {
+    return initialTimes;
   }
   const now = Date.now();
   return {
@@ -57,10 +65,11 @@ function computeInitialTimes(editingClass: ClassWithDetails | null) {
 
 function getInitialFormState(
   editingClass: ClassWithDetails | null,
+  initialTimes: InitialFormTimes | null | undefined,
   firstSessionId: string,
   firstInstructorId: string,
 ): FormState {
-  const times = computeInitialTimes(editingClass);
+  const times = computeInitialTimes(editingClass, initialTimes);
   if (editingClass) {
     return {
       sessionId: editingClass.sessionId,
@@ -286,6 +295,7 @@ function FormFields({
 
 export function ClassFormDialog({
   editingClass,
+  initialTimes,
   sessions,
   instructors,
   onClose,
@@ -296,6 +306,7 @@ export function ClassFormDialog({
   const [formState, setFormState] = useState<FormState>(() =>
     getInitialFormState(
       editingClass,
+      initialTimes,
       sessions[0]?.id ?? "",
       instructors[0]?.id ?? "",
     ),
