@@ -528,6 +528,34 @@ describe("FancySwitch Component Suite", () => {
       expect(screen.getByTestId("peeking-pedestrian")).toBeDefined();
     });
 
+    it("renders holographic house and school icons and highlights them on hover", () => {
+      render(
+        <I18nextProvider i18n={i18n}>
+          <ThemeProvider theme={appTheme}>
+            <AttendanceSwitch
+              mode="in-person"
+              data-testid="holo-attendance-switch"
+            />
+          </ThemeProvider>
+        </I18nextProvider>,
+      );
+
+      const switchBtn = screen.getByTestId("holo-attendance-switch");
+      const houseIcon = screen.getByTestId("holo-house-icon");
+      const schoolIcon = screen.getByTestId("holo-school-icon");
+
+      expect(houseIcon).toBeDefined();
+      expect(schoolIcon).toBeDefined();
+
+      fireEvent.mouseEnter(switchBtn);
+      expect(screen.getByTestId("holo-house-icon")).toBeDefined();
+      expect(screen.getByTestId("holo-school-icon")).toBeDefined();
+
+      fireEvent.mouseLeave(switchBtn);
+      expect(screen.getByTestId("holo-house-icon")).toBeDefined();
+      expect(screen.getByTestId("holo-school-icon")).toBeDefined();
+    });
+
     it("does not toggle when disabled", () => {
       const onChangeMode = vi.fn();
       render(

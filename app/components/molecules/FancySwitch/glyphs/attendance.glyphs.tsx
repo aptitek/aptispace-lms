@@ -4,7 +4,7 @@ import type { TargetAndTransition, Transition } from "framer-motion";
 import PlaceRoundedIcon from "@mui/icons-material/PlaceRounded";
 import LaptopRoundedIcon from "@mui/icons-material/LaptopRounded";
 import DirectionsWalkRoundedIcon from "@mui/icons-material/DirectionsWalkRounded";
-import LanguageRoundedIcon from "@mui/icons-material/LanguageRounded";
+import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import { M3_SPRINGS } from "~/tokens/motion";
 import type { SwitchSizeConfig } from "~/components/atoms/Switch";
@@ -67,7 +67,8 @@ export const WalkingPedestrianGlyph: React.FC<{ size: number }> = ({
 export const HoloNetworkSilhouette: React.FC<{
   cfg: SwitchSizeConfig;
   isInPerson: boolean;
-}> = ({ cfg, isInPerson }) => {
+  isHovered?: boolean;
+}> = ({ cfg, isInPerson, isHovered = false }) => {
   const theme = useTheme();
   const iconSize = Math.round(cfg.thumbIconSize * 1.05);
 
@@ -77,8 +78,13 @@ export const HoloNetworkSilhouette: React.FC<{
         <HoloGlyphWrapper
           $active={!isInPerson}
           $activeColor={theme.palette.info.main}
+          $isHovered={isHovered}
         >
-          <HomeRoundedIcon sx={{ fontSize: iconSize }} aria-hidden="true" />
+          <HomeRoundedIcon
+            data-testid="holo-house-icon"
+            sx={{ fontSize: iconSize }}
+            aria-hidden="true"
+          />
         </HoloGlyphWrapper>
       </TrackHoloZone>
 
@@ -86,8 +92,13 @@ export const HoloNetworkSilhouette: React.FC<{
         <HoloGlyphWrapper
           $active={isInPerson}
           $activeColor={theme.palette.success.main}
+          $isHovered={isHovered}
         >
-          <LanguageRoundedIcon sx={{ fontSize: iconSize }} aria-hidden="true" />
+          <SchoolRoundedIcon
+            data-testid="holo-school-icon"
+            sx={{ fontSize: iconSize }}
+            aria-hidden="true"
+          />
         </HoloGlyphWrapper>
       </TrackHoloZone>
     </>

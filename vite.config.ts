@@ -75,6 +75,7 @@ export default defineConfig({
       "@mui/icons-material/LaptopRounded",
       "@mui/icons-material/DirectionsWalkRounded",
       "@mui/icons-material/HomeRounded",
+      "@mui/icons-material/SchoolRounded",
       "@emotion/react",
       "@emotion/styled",
       "@mui/material",

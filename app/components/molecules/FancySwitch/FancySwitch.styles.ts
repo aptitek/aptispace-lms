@@ -151,15 +151,26 @@ export const HoloGlyphWrapper = styled("div", {
 })<{
   $active: boolean;
   $activeColor: string;
-}>(({ theme, $active, $activeColor }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  color: $active ? $activeColor : theme.palette.text.secondary,
-  opacity: $active ? 0.38 : 0.12,
-  transition: `all ${M3_MOTION_DURATIONS.medium2}ms ${M3_MOTION_EASINGS.css.standard}`,
-  filter: $active ? `drop-shadow(0 0 2px ${$activeColor})` : "none",
-}));
+  $isHovered?: boolean;
+}>(({ theme, $active, $activeColor, $isHovered }) => {
+  const restingOpacity = $active ? 0.5 : 0.32;
+  const restingFilter = $active
+    ? `drop-shadow(0 0 3px ${$activeColor})`
+    : "none";
+
+  return {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: $active || $isHovered ? $activeColor : theme.palette.text.secondary,
+    opacity: $isHovered ? ($active ? 1 : 0.8) : restingOpacity,
+    transform: $isHovered ? "scale(1.15)" : "scale(1)",
+    transition: `all ${M3_MOTION_DURATIONS.medium2}ms ${M3_MOTION_EASINGS.css.standard}`,
+    filter: $isHovered
+      ? `drop-shadow(0 0 5px ${$activeColor}) drop-shadow(0 0 2px ${$activeColor})`
+      : restingFilter,
+  };
+});
 
 export const CountryMapZone = styled("div", {
   shouldForwardProp: filterDollarProp,

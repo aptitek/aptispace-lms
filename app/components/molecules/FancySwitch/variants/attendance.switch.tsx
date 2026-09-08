@@ -102,8 +102,12 @@ export const AttendanceSwitch = forwardRef<
           walkDirection={toggleDirection}
         />
       )}
-      backgroundDecorations={({ cfg }) => (
-        <HoloNetworkSilhouette cfg={cfg} isInPerson={isInPerson} />
+      backgroundDecorations={({ cfg, isHovered }) => (
+        <HoloNetworkSilhouette
+          cfg={cfg}
+          isInPerson={isInPerson}
+          isHovered={isHovered && !disabled}
+        />
       )}
       {...restProps}
     />
