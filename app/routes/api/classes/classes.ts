@@ -10,8 +10,8 @@ import {
   deleteClass,
   ensureCalendarFeedToken,
   regenerateCalendarFeedToken,
+  type NewClass,
 } from "~/services/classService";
-import type { NewClass } from "~/db/schema";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const auth = await authGuard(request, context);
@@ -37,12 +37,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   if (activeUser.role === "admin") {
     eligibleInstructors = await getEligibleInstructors(db);
-    availableSessions = await db.query.sessions.findMany({
-      with: {
-        course: true,
-        cohort: true,
-      },
-    });
+    availableSessions = [];
   }
 
   return Response.json({

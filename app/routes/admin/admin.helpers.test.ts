@@ -68,7 +68,6 @@ describe("Admin Helpers", () => {
     const mockInstitution = {
       id: "inst-1",
       name: "Aptitek",
-      slug: "aptitek",
       type: "academic" as const,
       logoUrl: null,
       emailDomain: null,
@@ -86,6 +85,9 @@ describe("Admin Helpers", () => {
         avatarUrl: null,
         githubId: "ghopper",
         githubEmail: "grace@aptitek.io",
+        calendarFeedToken: null,
+        isOnline: false,
+        lastSeenAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         affiliations: [
@@ -121,6 +123,9 @@ describe("Admin Helpers", () => {
         avatarUrl: null,
         githubId: "aturing",
         githubEmail: "alan@aptitek.io",
+        calendarFeedToken: null,
+        isOnline: false,
+        lastSeenAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         affiliations: [
@@ -151,6 +156,9 @@ describe("Admin Helpers", () => {
         avatarUrl: null,
         githubId: "alovelace",
         githubEmail: "ada@aptitek.io",
+        calendarFeedToken: null,
+        isOnline: false,
+        lastSeenAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         affiliations: [

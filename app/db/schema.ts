@@ -8,14 +8,13 @@ import {
 import { relations } from "drizzle-orm";
 
 /* =========================================================================
- * 1. Administration & Utilisateurs (Core)
+ * 1. Administration, Users & Status
  * ========================================================================= */
-
 export const users = sqliteTable("users", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  displayName: text("display_name"), // Defaults to FirstName + ' ' + LastName if not set
+  displayName: text("display_name"),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   avatarUrl: text("avatar_url"),
@@ -24,6 +23,8 @@ export const users = sqliteTable("users", {
   calendarFeedToken: text("calendar_feed_token")
     .unique()
     .$defaultFn(() => crypto.randomUUID()),
+  isOnline: integer("is_online", { mode: "boolean" }).notNull().default(false),
+  lastSeenAt: integer("last_seen_at", { mode: "timestamp" }),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -37,7 +38,6 @@ export const institutions = sqliteTable("institutions", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
   type: text("type", { enum: ["academic", "company"] })
     .notNull()
     .default("academic"),
@@ -59,9 +59,9 @@ export const cohorts = sqliteTable("cohorts", {
   institutionId: text("institution_id")
     .notNull()
     .references(() => institutions.id, { onDelete: "cascade" }),
-  diploma: text("diploma"), // "C", "F", "L", "B", "M", "D"
-  year: integer("year"), // 0 / null = no year, 1 = 1st year, etc.
-  tags: text("tags", { mode: "json" }).$type<string[]>(), // JSON array e.g. ["AI", "Dev"]
+  diploma: text("diploma"),
+  year: integer("year"),
+  tags: text("tags", { mode: "json" }).$type<string[]>(),
   description: text("description"),
   startDate: integer("start_date", { mode: "timestamp" }),
   endDate: integer("end_date", { mode: "timestamp" }),
@@ -73,7 +73,6 @@ export const cohorts = sqliteTable("cohorts", {
     .$defaultFn(() => new Date()),
 });
 
-// Remplace enrollments et memberships
 export const affiliations = sqliteTable("affiliations", {
   id: text("id")
     .primaryKey()
@@ -84,13 +83,14 @@ export const affiliations = sqliteTable("affiliations", {
   institutionId: text("institution_id")
     .notNull()
     .references(() => institutions.id, { onDelete: "cascade" }),
-  cohortId: text("cohort_id") // Optionnel : un prof ou un admin peut ne pas être lié à une cohorte
-    .references(() => cohorts.id, { onDelete: "set null" }),
-  email: text("email").notNull(), // Email spécifique à ce contexte (institutionnel ou personnel pour Aptitek)
+  cohortId: text("cohort_id").references(() => cohorts.id, {
+    onDelete: "set null",
+  }),
+  email: text("email").notNull(),
   role: text("role", { enum: ["admin", "instructor", "student"] })
     .notNull()
     .default("student"),
-  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true), // Permet de garder l'historique en cas de réorientation
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -100,120 +100,17 @@ export const affiliations = sqliteTable("affiliations", {
 });
 
 /* =========================================================================
- * 2. Ingénierie Pédagogique (Courses & Modules)
+ * 2. Groups (Team Aggregations & Collective Progression)
  * ========================================================================= */
-
-export const courses = sqliteTable("courses", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  title: text("title").notNull(),
-  description: text("description"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
-
-export const modules = sqliteTable("modules", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  courseId: text("course_id")
-    .notNull()
-    .references(() => courses.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  type: text("type", {
-    enum: ["lecture", "lab", "game", "evaluation", "project"],
-  }).notNull(),
-  contentUrl: text("content_url"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
-
-export const tags = sqliteTable("tags", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: text("name").notNull().unique(),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
-
-export const moduleTags = sqliteTable(
-  "module_tags",
-  {
-    moduleId: text("module_id")
-      .notNull()
-      .references(() => modules.id, { onDelete: "cascade" }),
-    tagId: text("tag_id")
-      .notNull()
-      .references(() => tags.id, { onDelete: "cascade" }),
-  },
-  (table) => [primaryKey({ columns: [table.moduleId, table.tagId] })],
-);
-
-/* =========================================================================
- * 3. Planification & Réalisation (Planning)
- * ========================================================================= */
-
-export const sessions = sqliteTable("sessions", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  courseId: text("course_id")
-    .notNull()
-    .references(() => courses.id, { onDelete: "cascade" }),
-  cohortId: text("cohort_id")
-    .notNull()
-    .references(() => cohorts.id, { onDelete: "cascade" }),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
-
-export const classes = sqliteTable("classes", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  sessionId: text("session_id")
-    .notNull()
-    .references(() => sessions.id, { onDelete: "cascade" }),
-  instructorId: text("instructor_id").references(() => users.id, {
-    onDelete: "set null",
-  }),
-  title: text("title").notNull(),
-  description: text("description"),
-  isRemote: integer("is_remote", { mode: "boolean" }).notNull().default(false),
-  startTime: integer("start_time", { mode: "timestamp" }).notNull(),
-  endTime: integer("end_time", { mode: "timestamp" }).notNull(),
-  location: text("location"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
-
 export const groups = sqliteTable("groups", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  sessionId: text("session_id")
+  cohortId: text("cohort_id")
     .notNull()
-    .references(() => sessions.id, { onDelete: "cascade" }),
+    .references(() => cohorts.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
+  currencyPoints: real("currency_points").notNull().default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -239,26 +136,18 @@ export const groupMembers = sqliteTable(
 );
 
 /* =========================================================================
- * 4. Rendus & Évaluations (Assessments)
+ * 3. Roguelike Modules & Activities (Replaces Courses/Sessions)
  * ========================================================================= */
-
-// La présence d'une soumission définit implicitement que le module est évalué
-export const submissions = sqliteTable("submissions", {
+export const modules = sqliteTable("modules", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  moduleId: text("module_id")
+  cohortId: text("cohort_id")
     .notNull()
-    .references(() => modules.id, { onDelete: "cascade" }),
-  userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
-  groupId: text("group_id").references(() => groups.id, {
-    onDelete: "set null",
-  }),
-  submissionUrl: text("submission_url").notNull(),
-  submissionType: text("submission_type", { enum: ["individual", "group"] })
-    .notNull()
-    .default("individual"),
-  submittedAt: integer("submitted_at", { mode: "timestamp" })
+    .references(() => cohorts.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
   updatedAt: integer("updated_at", { mode: "timestamp" })
@@ -266,35 +155,19 @@ export const submissions = sqliteTable("submissions", {
     .$defaultFn(() => new Date()),
 });
 
-export const DEFAULT_MAX_POINTS = 20;
-
-export const criteria = sqliteTable("criteria", {
+export const moduleActivities = sqliteTable("module_activities", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   moduleId: text("module_id")
     .notNull()
     .references(() => modules.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  maxPoints: real("max_points").notNull().default(DEFAULT_MAX_POINTS),
-  coefficient: real("coefficient").notNull().default(1),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
-
-export const grades = sqliteTable("grades", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  criteriaId: text("criteria_id")
-    .notNull()
-    .references(() => criteria.id, { onDelete: "cascade" }),
-  submissionId: text("submission_id")
-    .notNull()
-    .references(() => submissions.id, { onDelete: "cascade" }),
-  score: real("score").notNull(),
-  feedback: text("feedback"),
+  title: text("title").notNull(),
+  range: text("range", { enum: ["cohort", "group", "student"] }).notNull(),
+  pedagogicalValue: real("pedagogical_value").notNull().default(0),
+  rewardValue: real("reward_value").notNull().default(0),
+  powerValue: real("power_value").notNull().default(0),
+  resourceUrls: text("resource_urls", { mode: "json" }).$type<string[]>(),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -304,10 +177,108 @@ export const grades = sqliteTable("grades", {
 });
 
 /* =========================================================================
- * 5. Traçabilité (System)
+ * 4. Map State Machine & Progression
  * ========================================================================= */
+export const activityTransitions = sqliteTable("activity_transitions", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  fromActivityId: text("from_activity_id").references(
+    () => moduleActivities.id,
+    { onDelete: "cascade" },
+  ),
+  toActivityId: text("to_activity_id")
+    .notNull()
+    .references(() => moduleActivities.id, { onDelete: "cascade" }),
+});
 
-// Réservé aux actions lourdes / critiques (changements de notes, suppressions, etc.)
+export const mapPositions = sqliteTable("map_positions", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  activityId: text("activity_id")
+    .notNull()
+    .references(() => moduleActivities.id, { onDelete: "cascade" }),
+  cohortId: text("cohort_id").references(() => cohorts.id, {
+    onDelete: "cascade",
+  }),
+  groupId: text("group_id").references(() => groups.id, {
+    onDelete: "cascade",
+  }),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export const activityVotes = sqliteTable("activity_votes", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  groupId: text("group_id")
+    .notNull()
+    .references(() => groups.id, { onDelete: "cascade" }),
+  targetActivityId: text("target_activity_id")
+    .notNull()
+    .references(() => moduleActivities.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  vote: integer("vote", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+/* =========================================================================
+ * 5. Fights & Card Deck Mechanisms
+ * ========================================================================= */
+export const fights = sqliteTable("fights", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  activityId: text("activity_id")
+    .notNull()
+    .references(() => moduleActivities.id, { onDelete: "cascade" }),
+  enemyName: text("enemy_name").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export const fightPhases = sqliteTable("fight_phases", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  fightId: text("fight_id")
+    .notNull()
+    .references(() => fights.id, { onDelete: "cascade" }),
+  phaseOrder: integer("phase_order").notNull(),
+  powerRequired: real("power_required").notNull(),
+});
+
+export const studentDecks = sqliteTable(
+  "student_decks",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    activityId: text("activity_id")
+      .notNull()
+      .references(() => moduleActivities.id, { onDelete: "cascade" }),
+    acquiredAt: integer("acquired_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.activityId] })],
+);
+
+/* =========================================================================
+ * 6. System Traceability
+ * ========================================================================= */
 export const auditLogs = sqliteTable("audit_logs", {
   id: text("id")
     .primaryKey()
@@ -316,14 +287,13 @@ export const auditLogs = sqliteTable("audit_logs", {
   recordId: text("record_id").notNull(),
   action: text("action", { enum: ["INSERT", "UPDATE", "DELETE"] }).notNull(),
   userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
-  oldValues: text("old_values"), // JSON serialized
-  newValues: text("new_values"), // JSON serialized
+  oldValues: text("old_values"),
+  newValues: text("new_values"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
 });
 
-// Suivi télémétrique des erreurs, alertes et infractions de sécurité (403/401/500/exceptions)
 export const errorReports = sqliteTable("error_reports", {
   id: text("id")
     .primaryKey()
@@ -341,7 +311,7 @@ export const errorReports = sqliteTable("error_reports", {
   path: text("path"),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
-  contextData: text("context_data"), // Serialized JSON metadata
+  contextData: text("context_data"),
   userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
   status: text("status", {
     enum: ["open", "investigating", "resolved", "ignored"],
@@ -356,12 +326,11 @@ export const errorReports = sqliteTable("error_reports", {
 /* =========================================================================
  * Relations Definitions
  * ========================================================================= */
-
 export const usersRelations = relations(users, ({ many }) => ({
   affiliations: many(affiliations),
   groupMemberships: many(groupMembers),
-  submissions: many(submissions),
-  instructedClasses: many(classes),
+  deckCards: many(studentDecks),
+  mapPositions: many(mapPositions),
   auditLogs: many(auditLogs),
   errorReports: many(errorReports),
 }));
@@ -377,7 +346,9 @@ export const cohortsRelations = relations(cohorts, ({ one, many }) => ({
     references: [institutions.id],
   }),
   affiliations: many(affiliations),
-  sessions: many(sessions),
+  modules: many(modules),
+  groups: many(groups),
+  mapPositions: many(mapPositions),
 }));
 
 export const affiliationsRelations = relations(affiliations, ({ one }) => ({
@@ -392,64 +363,11 @@ export const affiliationsRelations = relations(affiliations, ({ one }) => ({
   }),
 }));
 
-export const coursesRelations = relations(courses, ({ many }) => ({
-  modules: many(modules),
-  sessions: many(sessions),
-}));
-
-export const modulesRelations = relations(modules, ({ one, many }) => ({
-  course: one(courses, {
-    fields: [modules.courseId],
-    references: [courses.id],
-  }),
-  moduleTags: many(moduleTags),
-  criteria: many(criteria),
-  submissions: many(submissions),
-}));
-
-export const tagsRelations = relations(tags, ({ many }) => ({
-  moduleTags: many(moduleTags),
-}));
-
-export const moduleTagsRelations = relations(moduleTags, ({ one }) => ({
-  module: one(modules, {
-    fields: [moduleTags.moduleId],
-    references: [modules.id],
-  }),
-  tag: one(tags, { fields: [moduleTags.tagId], references: [tags.id] }),
-}));
-
-export const sessionsRelations = relations(sessions, ({ one, many }) => ({
-  course: one(courses, {
-    fields: [sessions.courseId],
-    references: [courses.id],
-  }),
-  cohort: one(cohorts, {
-    fields: [sessions.cohortId],
-    references: [cohorts.id],
-  }),
-  classes: many(classes),
-  groups: many(groups),
-}));
-
-export const classesRelations = relations(classes, ({ one }) => ({
-  session: one(sessions, {
-    fields: [classes.sessionId],
-    references: [sessions.id],
-  }),
-  instructor: one(users, {
-    fields: [classes.instructorId],
-    references: [users.id],
-  }),
-}));
-
 export const groupsRelations = relations(groups, ({ one, many }) => ({
-  session: one(sessions, {
-    fields: [groups.sessionId],
-    references: [sessions.id],
-  }),
+  cohort: one(cohorts, { fields: [groups.cohortId], references: [cohorts.id] }),
   members: many(groupMembers),
-  submissions: many(submissions),
+  mapPositions: many(mapPositions),
+  activityVotes: many(activityVotes),
 }));
 
 export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
@@ -460,50 +378,103 @@ export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
   user: one(users, { fields: [groupMembers.userId], references: [users.id] }),
 }));
 
-export const submissionsRelations = relations(submissions, ({ one, many }) => ({
-  module: one(modules, {
-    fields: [submissions.moduleId],
-    references: [modules.id],
+export const modulesRelations = relations(modules, ({ one, many }) => ({
+  cohort: one(cohorts, {
+    fields: [modules.cohortId],
+    references: [cohorts.id],
   }),
-  user: one(users, { fields: [submissions.userId], references: [users.id] }),
+  activities: many(moduleActivities),
+}));
+
+export const moduleActivitiesRelations = relations(
+  moduleActivities,
+  ({ one, many }) => ({
+    module: one(modules, {
+      fields: [moduleActivities.moduleId],
+      references: [modules.id],
+    }),
+    outgoingTransitions: many(activityTransitions, {
+      relationName: "fromActivity",
+    }),
+    incomingTransitions: many(activityTransitions, {
+      relationName: "toActivity",
+    }),
+    fights: many(fights),
+    mapPositions: many(mapPositions),
+    deckCards: many(studentDecks),
+  }),
+);
+
+export const activityTransitionsRelations = relations(
+  activityTransitions,
+  ({ one }) => ({
+    fromActivity: one(moduleActivities, {
+      fields: [activityTransitions.fromActivityId],
+      references: [moduleActivities.id],
+      relationName: "fromActivity",
+    }),
+    toActivity: one(moduleActivities, {
+      fields: [activityTransitions.toActivityId],
+      references: [moduleActivities.id],
+      relationName: "toActivity",
+    }),
+  }),
+);
+
+export const mapPositionsRelations = relations(mapPositions, ({ one }) => ({
+  activity: one(moduleActivities, {
+    fields: [mapPositions.activityId],
+    references: [moduleActivities.id],
+  }),
+  cohort: one(cohorts, {
+    fields: [mapPositions.cohortId],
+    references: [cohorts.id],
+  }),
   group: one(groups, {
-    fields: [submissions.groupId],
+    fields: [mapPositions.groupId],
     references: [groups.id],
   }),
-  grades: many(grades),
+  user: one(users, { fields: [mapPositions.userId], references: [users.id] }),
 }));
 
-export const criteriaRelations = relations(criteria, ({ one, many }) => ({
-  module: one(modules, {
-    fields: [criteria.moduleId],
-    references: [modules.id],
+export const activityVotesRelations = relations(activityVotes, ({ one }) => ({
+  group: one(groups, {
+    fields: [activityVotes.groupId],
+    references: [groups.id],
   }),
-  grades: many(grades),
-}));
-
-export const gradesRelations = relations(grades, ({ one }) => ({
-  criterion: one(criteria, {
-    fields: [grades.criteriaId],
-    references: [criteria.id],
+  targetActivity: one(moduleActivities, {
+    fields: [activityVotes.targetActivityId],
+    references: [moduleActivities.id],
   }),
-  submission: one(submissions, {
-    fields: [grades.submissionId],
-    references: [submissions.id],
+  user: one(users, { fields: [activityVotes.userId], references: [users.id] }),
+}));
+
+export const fightsRelations = relations(fights, ({ one, many }) => ({
+  activity: one(moduleActivities, {
+    fields: [fights.activityId],
+    references: [moduleActivities.id],
+  }),
+  phases: many(fightPhases),
+}));
+
+export const fightPhasesRelations = relations(fightPhases, ({ one }) => ({
+  fight: one(fights, {
+    fields: [fightPhases.fightId],
+    references: [fights.id],
   }),
 }));
 
-export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
-  user: one(users, { fields: [auditLogs.userId], references: [users.id] }),
-}));
-
-export const errorReportsRelations = relations(errorReports, ({ one }) => ({
-  user: one(users, { fields: [errorReports.userId], references: [users.id] }),
+export const studentDecksRelations = relations(studentDecks, ({ one }) => ({
+  user: one(users, { fields: [studentDecks.userId], references: [users.id] }),
+  activity: one(moduleActivities, {
+    fields: [studentDecks.activityId],
+    references: [moduleActivities.id],
+  }),
 }));
 
 /* =========================================================================
  * Inferred Types
  * ========================================================================= */
-
 export type User = Omit<typeof users.$inferSelect, "calendarFeedToken"> & {
   calendarFeedToken?: string | null;
 };
@@ -518,38 +489,35 @@ export type NewCohort = typeof cohorts.$inferInsert;
 export type Affiliation = typeof affiliations.$inferSelect;
 export type NewAffiliation = typeof affiliations.$inferInsert;
 
-export type Course = typeof courses.$inferSelect;
-export type NewCourse = typeof courses.$inferInsert;
-
-export type Module = typeof modules.$inferSelect;
-export type NewModule = typeof modules.$inferInsert;
-
-export type Tag = typeof tags.$inferSelect;
-export type NewTag = typeof tags.$inferInsert;
-
-export type ModuleTag = typeof moduleTags.$inferSelect;
-export type NewModuleTag = typeof moduleTags.$inferInsert;
-
-export type Session = typeof sessions.$inferSelect;
-export type NewSession = typeof sessions.$inferInsert;
-
-export type Class = typeof classes.$inferSelect;
-export type NewClass = typeof classes.$inferInsert;
-
 export type Group = typeof groups.$inferSelect;
 export type NewGroup = typeof groups.$inferInsert;
 
 export type GroupMember = typeof groupMembers.$inferSelect;
 export type NewGroupMember = typeof groupMembers.$inferInsert;
 
-export type Submission = typeof submissions.$inferSelect;
-export type NewSubmission = typeof submissions.$inferInsert;
+export type Module = typeof modules.$inferSelect;
+export type NewModule = typeof modules.$inferInsert;
 
-export type Criterion = typeof criteria.$inferSelect;
-export type NewCriterion = typeof criteria.$inferInsert;
+export type ModuleActivity = typeof moduleActivities.$inferSelect;
+export type NewModuleActivity = typeof moduleActivities.$inferInsert;
 
-export type Grade = typeof grades.$inferSelect;
-export type NewGrade = typeof grades.$inferInsert;
+export type ActivityTransition = typeof activityTransitions.$inferSelect;
+export type NewActivityTransition = typeof activityTransitions.$inferInsert;
+
+export type MapPosition = typeof mapPositions.$inferSelect;
+export type NewMapPosition = typeof mapPositions.$inferInsert;
+
+export type ActivityVote = typeof activityVotes.$inferSelect;
+export type NewActivityVote = typeof activityVotes.$inferInsert;
+
+export type Fight = typeof fights.$inferSelect;
+export type NewFight = typeof fights.$inferInsert;
+
+export type FightPhase = typeof fightPhases.$inferSelect;
+export type NewFightPhase = typeof fightPhases.$inferInsert;
+
+export type StudentDeck = typeof studentDecks.$inferSelect;
+export type NewStudentDeck = typeof studentDecks.$inferInsert;
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type NewAuditLog = typeof auditLogs.$inferInsert;

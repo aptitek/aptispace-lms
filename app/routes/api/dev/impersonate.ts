@@ -70,14 +70,13 @@ function resolvePersonaFallback(
 
 async function ensureDefaultInstitution(db: Database) {
   let inst = await db.query.institutions.findFirst({
-    where: (i, { eq }) => eq(i.slug, "aptitek"),
+    where: (i, { eq }) => eq(i.name, "Aptitek"),
   });
   if (!inst) {
     const [created] = await db
       .insert(institutions)
       .values({
         name: "Aptitek",
-        slug: "aptitek",
         type: "academic",
         logoUrl: "/aptitek-logo.svg",
       })

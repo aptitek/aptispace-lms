@@ -1,22 +1,24 @@
 import { eq, or, inArray, and } from "drizzle-orm";
 import type { Database } from "../db/index";
-import {
-  classes,
-  sessions,
-  users,
-  affiliations,
-  type Class,
-  type NewClass,
-  type User,
-} from "../db/schema";
+import { users, affiliations, type User } from "../db/schema";
 import type { UserRole } from "../utils/auth";
 
-/**
- * Domain Invariant:
- * Calendar events in AptiSpace LMS model exclusively timetabled classes
- * linked to an academic session and assigned instructor.
- * Asynchronous pedagogical activities (modules, homework, projects) are NOT calendar events.
- */
+export interface Class {
+  id: string;
+  sessionId: string;
+  instructorId: string | null;
+  title: string;
+  description: string | null;
+  isRemote: boolean;
+  startTime: Date;
+  endTime: Date;
+  location: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type NewClass = Partial<Class>;
+
 export interface ClassWithDetails extends Class {
   session: {
     id: string;
@@ -56,179 +58,45 @@ export interface EligibleInstructor {
 }
 
 export async function getClassesForUser(
-  db: Database,
-  user: {
+  _db: Database,
+  _user: {
     id: string;
     role: UserRole | string;
     cohort?: { id?: string } | null;
     cohortId?: string | null;
   },
 ): Promise<ClassWithDetails[]> {
-  const role = user.role as UserRole;
-
-  // 1. Admin: View all classes across all courses, cohorts, and instructors
-  if (role === "admin") {
-    const rawClasses = await db.query.classes.findMany({
-      with: {
-        session: {
-          with: {
-            course: true,
-            cohort: true,
-          },
-        },
-        instructor: true,
-      },
-      orderBy: (c, { asc }) => [asc(c.startTime)],
-    });
-
-    return formatClassesWithInstructors(
-      db,
-      rawClasses as unknown as RawClassQuery[],
-    );
-  }
-
-  // 2. Instructor: View ONLY classes assigned to them
-  if (role === "instructor") {
-    const rawClasses = await db.query.classes.findMany({
-      where: eq(classes.instructorId, user.id),
-      with: {
-        session: {
-          with: {
-            course: true,
-            cohort: true,
-          },
-        },
-        instructor: true,
-      },
-      orderBy: (c, { asc }) => [asc(c.startTime)],
-    });
-
-    return formatClassesWithInstructors(
-      db,
-      rawClasses as unknown as RawClassQuery[],
-    );
-  }
-
-  // 3. Student: View ONLY classes for their affiliated cohort
-  const targetCohortId = user.cohort?.id || user.cohortId;
-
-  // If no cohort is directly supplied on user object, resolve from affiliations
-  let studentCohortId = targetCohortId;
-  if (!studentCohortId) {
-    const affils = await db
-      .select({ cohortId: affiliations.cohortId })
-      .from(affiliations)
-      .where(
-        and(eq(affiliations.userId, user.id), eq(affiliations.isActive, true)),
-      );
-    studentCohortId = affils.find((a) => a.cohortId)?.cohortId ?? null;
-  }
-
-  if (!studentCohortId) {
-    return [];
-  }
-
-  // Find all session IDs for student's cohort
-  const cohortSessions = await db
-    .select({ id: sessions.id })
-    .from(sessions)
-    .where(eq(sessions.cohortId, studentCohortId));
-
-  const sessionIds = cohortSessions.map((s) => s.id);
-  if (sessionIds.length === 0) {
-    return [];
-  }
-
-  const rawClasses = await db.query.classes.findMany({
-    where: inArray(classes.sessionId, sessionIds),
-    with: {
-      session: {
-        with: {
-          course: true,
-          cohort: true,
-        },
-      },
-      instructor: true,
-    },
-    orderBy: (c, { asc }) => [asc(c.startTime)],
-  });
-
-  return formatClassesWithInstructors(
-    db,
-    rawClasses as unknown as RawClassQuery[],
-  );
+  // Roguelike schema replaces legacy scheduled classes with async module activities
+  return [];
 }
 
-interface RawClassQuery extends Class {
-  session: {
-    id: string;
-    courseId: string;
-    cohortId: string;
-    course: {
-      id: string;
-      title: string;
-      description: string | null;
-    };
-    cohort: {
-      id: string;
-      diploma: string | null;
-      year: number | null;
-      description: string | null;
-    } | null;
-  };
-  instructor?: User | null;
+export async function getClassById(
+  _db: Database,
+  _id: string,
+): Promise<ClassWithDetails | null> {
+  return null;
 }
 
-async function formatClassesWithInstructors(
-  db: Database,
-  rawList: RawClassQuery[],
-): Promise<ClassWithDetails[]> {
-  if (rawList.length === 0) return [];
+export async function createClass(
+  _db: Database,
+  _input: Omit<NewClass, "createdAt" | "updatedAt">,
+): Promise<Class | null> {
+  return null;
+}
 
-  // Resolve emails for instructors
-  const instructorIds = Array.from(
-    new Set(rawList.map((c) => c.instructorId).filter(Boolean) as string[]),
-  );
+export async function updateClass(
+  _db: Database,
+  _id: string,
+  _input: Partial<Omit<NewClass, "id" | "createdAt" | "updatedAt">>,
+): Promise<Class | null> {
+  return null;
+}
 
-  const emailMap = new Map<string, { email: string; role: UserRole }>();
-  if (instructorIds.length > 0) {
-    const affils = await db
-      .select({
-        userId: affiliations.userId,
-        email: affiliations.email,
-        role: affiliations.role,
-      })
-      .from(affiliations)
-      .where(inArray(affiliations.userId, instructorIds));
-
-    for (const a of affils) {
-      emailMap.set(a.userId, { email: a.email, role: a.role as UserRole });
-    }
-  }
-
-  return rawList.map((c) => {
-    let instructorObj = null;
-    if (c.instructor) {
-      const affilInfo = emailMap.get(c.instructor.id);
-      const name =
-        c.instructor.displayName ||
-        `${c.instructor.firstName} ${c.instructor.lastName}`.trim();
-      instructorObj = {
-        id: c.instructor.id,
-        displayName: name,
-        firstName: c.instructor.firstName,
-        lastName: c.instructor.lastName,
-        avatarUrl: c.instructor.avatarUrl,
-        email: affilInfo?.email || c.instructor.githubEmail || null,
-        role: affilInfo?.role || "instructor",
-      };
-    }
-
-    return {
-      ...c,
-      instructor: instructorObj,
-    };
-  });
+export async function deleteClass(
+  _db: Database,
+  _id: string,
+): Promise<boolean> {
+  return false;
 }
 
 /**
@@ -285,69 +153,6 @@ export async function getEligibleInstructors(
   });
 }
 
-export async function getClassById(
-  db: Database,
-  id: string,
-): Promise<ClassWithDetails | null> {
-  const found = await db.query.classes.findFirst({
-    where: eq(classes.id, id),
-    with: {
-      session: {
-        with: {
-          course: true,
-          cohort: true,
-        },
-      },
-      instructor: true,
-    },
-  });
-
-  if (!found) return null;
-
-  const formatted = await formatClassesWithInstructors(db, [
-    found as unknown as RawClassQuery,
-  ]);
-  return formatted[0] || null;
-}
-
-export async function createClass(
-  db: Database,
-  input: Omit<NewClass, "createdAt" | "updatedAt">,
-): Promise<Class> {
-  const now = new Date();
-  const [created] = await db
-    .insert(classes)
-    .values({
-      ...input,
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning();
-  return created;
-}
-
-export async function updateClass(
-  db: Database,
-  id: string,
-  input: Partial<Omit<NewClass, "id" | "createdAt" | "updatedAt">>,
-): Promise<Class | null> {
-  const now = new Date();
-  const [updated] = await db
-    .update(classes)
-    .set({
-      ...input,
-      updatedAt: now,
-    })
-    .where(eq(classes.id, id))
-    .returning();
-  return updated || null;
-}
-
-export async function deleteClass(db: Database, id: string): Promise<boolean> {
-  const result = await db.delete(classes).where(eq(classes.id, id)).returning();
-  return result.length > 0;
-}
-
 export async function getUserByCalendarFeedToken(
   db: Database,
   token: string,
@@ -362,7 +167,6 @@ export async function getUserByCalendarFeedToken(
 
   if (!foundUser) return null;
 
-  // Resolve user's active affiliation role and cohort
   const [affil] = await db
     .select()
     .from(affiliations)

@@ -196,6 +196,8 @@ describe("Onboarding Route Security - Domain Enforcement", () => {
       avatarUrl: null,
       githubId: null,
       githubEmail: null,
+      isOnline: false,
+      lastSeenAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -209,6 +211,8 @@ describe("Onboarding Route Security - Domain Enforcement", () => {
         avatarUrl: null,
         githubId: null,
         githubEmail: null,
+        isOnline: false,
+        lastSeenAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -249,6 +253,8 @@ describe("Onboarding Route Security - Domain Enforcement", () => {
         avatarUrl: null,
         githubId: null,
         githubEmail: null,
+        isOnline: false,
+        lastSeenAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

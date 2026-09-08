@@ -1,38 +1,36 @@
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { Database } from "./index";
 import {
   institutions,
   cohorts,
   users,
   affiliations,
-  courses,
-  modules,
-  tags,
-  moduleTags,
-  criteria,
-  sessions,
-  classes,
   groups,
   groupMembers,
-  submissions,
-  grades,
+  modules,
+  moduleActivities,
+  activityTransitions,
+  mapPositions,
+  activityVotes,
+  fights,
+  fightPhases,
+  studentDecks,
   auditLogs,
   errorReports,
 } from "./schema";
 
 export async function resetDatabase(db: Database) {
-  // Delete in reverse dependency order
-  await db.delete(grades);
-  await db.delete(submissions);
-  await db.delete(criteria);
-  await db.delete(moduleTags);
-  await db.delete(tags);
+  // Delete in reverse foreign-key dependency order
+  await db.delete(studentDecks);
+  await db.delete(fightPhases);
+  await db.delete(fights);
+  await db.delete(activityVotes);
+  await db.delete(mapPositions);
+  await db.delete(activityTransitions);
+  await db.delete(moduleActivities);
   await db.delete(modules);
   await db.delete(groupMembers);
   await db.delete(groups);
-  await db.delete(classes);
-  await db.delete(sessions);
-  await db.delete(courses);
   await db.delete(affiliations);
   await db.delete(cohorts);
   await db.delete(auditLogs);
@@ -48,7 +46,11 @@ async function seedUsers(
   institutionId: string,
   cohortId: string,
   now: Date,
-): Promise<{ adminUserId: string; instructorUserId: string }> {
+): Promise<{
+  adminUserId: string;
+  instructorUserId: string;
+  studentUserId: string;
+}> {
   const existingAdmin = await db
     .select()
     .from(users)
@@ -67,6 +69,8 @@ async function seedUsers(
         githubId: "admin-sarah",
         avatarUrl: "/avatars/seed-sarah.webp",
         calendarFeedToken: "feed-token-admin-sarah-1234",
+        isOnline: false,
+        lastSeenAt: now,
         createdAt: now,
         updatedAt: now,
       })
@@ -110,6 +114,8 @@ async function seedUsers(
         githubId: "instructor-alex",
         avatarUrl: "/avatars/seed-alex.webp",
         calendarFeedToken: "feed-token-instructor-alex-5678",
+        isOnline: false,
+        lastSeenAt: now,
         createdAt: now,
         updatedAt: now,
       })
@@ -141,6 +147,7 @@ async function seedUsers(
     .where(eq(users.githubEmail, "cadet.elena@aptitek.io"))
     .limit(1);
 
+  let studentUserId: string;
   if (existingStudent.length === 0) {
     const [student] = await db
       .insert(users)
@@ -152,10 +159,13 @@ async function seedUsers(
         githubId: "student-elena",
         avatarUrl: "/avatars/seed-elena.webp",
         calendarFeedToken: "feed-token-student-elena-9012",
+        isOnline: false,
+        lastSeenAt: now,
         createdAt: now,
         updatedAt: now,
       })
       .returning();
+    studentUserId = student.id;
 
     await db.insert(affiliations).values({
       userId: student.id,
@@ -168,135 +178,137 @@ async function seedUsers(
       updatedAt: now,
     });
   } else {
+    studentUserId = existingStudent[0].id;
     if (!existingStudent[0].avatarUrl) {
       await db
         .update(users)
         .set({ avatarUrl: "/avatars/seed-elena.webp", updatedAt: now })
-        .where(eq(users.id, existingStudent[0].id));
+        .where(eq(users.id, studentUserId));
     }
   }
 
-  return { adminUserId, instructorUserId };
+  return { adminUserId, instructorUserId, studentUserId };
 }
 
-async function seedClassesForSession(
-  db: Database,
-  sessionId: string,
-  adminUserId: string,
-  instructorUserId: string,
-): Promise<void> {
-  const now = new Date();
-  const existingClasses = await db
+async function seedRoguelikeModule(params: {
+  db: Database;
+  cohortId: string;
+  studentUserId: string;
+  groupId: string;
+  now: Date;
+}) {
+  const { db, cohortId, studentUserId, groupId, now } = params;
+  const existingModules = await db
     .select()
-    .from(classes)
-    .where(eq(classes.sessionId, sessionId))
+    .from(modules)
+    .where(eq(modules.cohortId, cohortId))
     .limit(1);
 
-  if (existingClasses.length > 0) return;
+  if (existingModules.length > 0) return;
 
-  const baseDate = new Date();
-  const dayOfWeek = baseDate.getDay();
-  const distanceToMonday = (dayOfWeek + 6) % 7;
-  const monday = new Date(baseDate);
-  monday.setDate(baseDate.getDate() - distanceToMonday);
-  monday.setHours(9, 0, 0, 0);
+  const [mod] = await db
+    .insert(modules)
+    .values({
+      cohortId,
+      title: "Roguelike Core Protocol",
+      description:
+        "Primary cybernetic mission tree: Map progression, team encounters, and system defense.",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
 
-  const makeDate = (
-    dayOffset: number,
-    startHour: number,
-    durationHours: number,
-  ) => {
-    const s = new Date(monday);
-    s.setDate(monday.getDate() + dayOffset);
-    s.setHours(startHour, 0, 0, 0);
-    const e = new Date(s);
-    e.setHours(startHour + durationHours, 0, 0, 0);
-    return { startTime: s, endTime: e };
-  };
+  const [act1] = await db
+    .insert(moduleActivities)
+    .values({
+      moduleId: mod.id,
+      title: "Orientation & Node Verification",
+      range: "student",
+      pedagogicalValue: 10,
+      rewardValue: 50,
+      powerValue: 5,
+      resourceUrls: ["https://aptitek.io/manuals/orientation"],
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
 
-  const d1 = makeDate(0, 9, 2.5);
-  const d2 = makeDate(1, 14, 3);
-  const d3 = makeDate(2, 10, 2);
-  const d4 = makeDate(3, 15, 2.5);
-  const d5 = makeDate(4, 11, 2);
+  const [act2] = await db
+    .insert(moduleActivities)
+    .values({
+      moduleId: mod.id,
+      title: "Edge Network Infrastructure Raid",
+      range: "group",
+      pedagogicalValue: 25,
+      rewardValue: 150,
+      powerValue: 20,
+      resourceUrls: ["https://aptitek.io/manuals/edge-networks"],
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
 
-  await db.insert(classes).values([
-    {
-      sessionId,
-      instructorId: instructorUserId,
-      title: "Cloud Infrastructure & Edge Computing",
-      description:
-        "Core architectures, Cloudflare Workers, edge caching, and KV/D1 databases.",
-      isRemote: false,
-      startTime: d1.startTime,
-      endTime: d1.endTime,
-      location: "Amphitheater Turing",
+  const [act3] = await db
+    .insert(moduleActivities)
+    .values({
+      moduleId: mod.id,
+      title: "Sentinel Overlord Boss Encounter",
+      range: "cohort",
+      pedagogicalValue: 50,
+      rewardValue: 500,
+      powerValue: 100,
+      resourceUrls: ["https://aptitek.io/manuals/sentinel-encounter"],
       createdAt: now,
       updatedAt: now,
-    },
-    {
-      sessionId,
-      instructorId: instructorUserId,
-      title: "Microservices & Distributed Systems Lab",
-      description:
-        "Hands-on lab deploying decoupled microservices and event queues.",
-      isRemote: false,
-      startTime: d2.startTime,
-      endTime: d2.endTime,
-      location: "Lab Room Kepler-12",
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      sessionId,
-      instructorId: adminUserId,
-      title: "Fullstack Architecture & GraphQL Workshop",
-      description:
-        "Interactive session on schema design, resolvers, and subscriptions.",
-      isRemote: true,
-      startTime: d3.startTime,
-      endTime: d3.endTime,
-      location: "Online (Teams / Virtual Campus)",
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      sessionId,
-      instructorId: instructorUserId,
-      title: "Database Indexing & Query Tuning Lab",
-      description:
-        "Optimizing SQL query plans, SQLite internal B-Trees, and indexes.",
-      isRemote: false,
-      startTime: d4.startTime,
-      endTime: d4.endTime,
-      location: "Lab Room Kepler-12",
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      sessionId,
-      instructorId: adminUserId,
-      title: "Midterm Architectural Assessment",
-      description:
-        "Individual oral presentation and evaluation of system designs.",
-      isRemote: true,
-      startTime: d5.startTime,
-      endTime: d5.endTime,
-      location: "Online (Oral Examination)",
-      createdAt: now,
-      updatedAt: now,
-    },
+    })
+    .returning();
+
+  // Activity Transitions: act1 -> act2 -> act3
+  await db.insert(activityTransitions).values([
+    { fromActivityId: act1.id, toActivityId: act2.id },
+    { fromActivityId: act2.id, toActivityId: act3.id },
   ]);
+
+  // Fight for Boss Encounter
+  const [bossFight] = await db
+    .insert(fights)
+    .values({
+      activityId: act3.id,
+      enemyName: "Sentinel Overlord Prime",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+
+  await db.insert(fightPhases).values([
+    { fightId: bossFight.id, phaseOrder: 1, powerRequired: 30 },
+    { fightId: bossFight.id, phaseOrder: 2, powerRequired: 70 },
+  ]);
+
+  // Initial Student Map Position & Deck Card
+  await db.insert(mapPositions).values({
+    activityId: act1.id,
+    cohortId,
+    groupId,
+    userId: studentUserId,
+    updatedAt: now,
+  });
+
+  await db.insert(studentDecks).values({
+    userId: studentUserId,
+    activityId: act1.id,
+    acquiredAt: now,
+  });
 }
 
 export async function seedDatabase(db: Database) {
   const now = new Date();
 
-  // 1. Institution
+  // 1. Institution (Note: no slug)
   const existingInst = await db
     .select()
     .from(institutions)
-    .where(eq(institutions.slug, "aptitek"))
+    .where(eq(institutions.name, "Aptitek"))
     .limit(1);
 
   let institutionId: string;
@@ -307,7 +319,6 @@ export async function seedDatabase(db: Database) {
       .insert(institutions)
       .values({
         name: "Aptitek",
-        slug: "aptitek",
         type: "academic",
         logoUrl: "/aptitek-logo.svg",
         emailDomain: null,
@@ -319,11 +330,11 @@ export async function seedDatabase(db: Database) {
     institutionId = inst.id;
   }
 
-  // 2. Cohorts
+  // 2. Cohort
   const existingCohort = await db
     .select()
     .from(cohorts)
-    .where(and(eq(cohorts.diploma, "M"), eq(cohorts.year, 1)))
+    .where(eq(cohorts.institutionId, institutionId))
     .limit(1);
 
   let cohortId: string;
@@ -351,84 +362,41 @@ export async function seedDatabase(db: Database) {
     cohortId = cohort.id;
   }
 
-  // 3. Courses
-  let courseId: string;
-  const existingCourses = await db.select().from(courses).limit(1);
-  if (existingCourses.length === 0) {
-    const [course1] = await db
-      .insert(courses)
-      .values({
-        title: "Fullstack Web Engineering",
-        description:
-          "Comprehensive course covering React, TypeScript, serverless architecture, and databases.",
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-    courseId = course1.id;
+  // 3. Default Seed Users
+  const { studentUserId } = await seedUsers(db, institutionId, cohortId, now);
 
-    const [tagDev] = await db
-      .insert(tags)
-      .values({ name: "Web Development", createdAt: now })
-      .onConflictDoNothing()
-      .returning();
-
-    const [mod1] = await db
-      .insert(modules)
-      .values({
-        courseId: course1.id,
-        title: "Modern React & Component Systems",
-        type: "lecture",
-        contentUrl: "https://courses.aptitek.io/modules/react-systems",
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-
-    if (tagDev) {
-      await db
-        .insert(moduleTags)
-        .values({ moduleId: mod1.id, tagId: tagDev.id })
-        .onConflictDoNothing();
-    }
-  } else {
-    courseId = existingCourses[0].id;
-  }
-
-  // 4. Default Seed Users
-  const { adminUserId, instructorUserId } = await seedUsers(
-    db,
-    institutionId,
-    cohortId,
-    now,
-  );
-
-  // 5. Session & Classes
-  const existingSession = await db
+  // 4. Groups & Group Members
+  const existingGroup = await db
     .select()
-    .from(sessions)
-    .where(
-      and(eq(sessions.courseId, courseId), eq(sessions.cohortId, cohortId)),
-    )
+    .from(groups)
+    .where(eq(groups.cohortId, cohortId))
     .limit(1);
 
-  let sessionId: string;
-  if (existingSession.length === 0) {
-    const [newSession] = await db
-      .insert(sessions)
+  let groupId: string;
+  if (existingGroup.length > 0) {
+    groupId = existingGroup[0].id;
+  } else {
+    const [newGroup] = await db
+      .insert(groups)
       .values({
-        courseId,
         cohortId,
+        name: "Alpha Vanguard",
+        currencyPoints: 100,
         createdAt: now,
         updatedAt: now,
       })
       .returning();
-    sessionId = newSession.id;
-  } else {
-    sessionId = existingSession[0].id;
+    groupId = newGroup.id;
+
+    await db.insert(groupMembers).values({
+      groupId: newGroup.id,
+      userId: studentUserId,
+      joinedAt: now,
+    });
   }
 
-  await seedClassesForSession(db, sessionId, adminUserId, instructorUserId);
+  // 5. Roguelike Modules & Activities
+  await seedRoguelikeModule({ db, cohortId, studentUserId, groupId, now });
 
-  return { success: true, institutionId, cohortId, sessionId };
+  return { success: true, institutionId, cohortId, groupId };
 }

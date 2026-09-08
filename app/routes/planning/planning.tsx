@@ -114,18 +114,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       role: inst.role,
     }));
 
-    const rawSessions = await db.query.sessions.findMany({
-      with: {
-        course: true,
-        cohort: true,
-      },
-    });
-
-    availableSessions = rawSessions.map((s) => ({
-      id: s.id,
-      courseTitle: s.course.title,
-      cohortName: `${s.cohort.diploma} Year ${s.cohort.year}`,
-    }));
+    availableSessions = [];
   }
 
   return {

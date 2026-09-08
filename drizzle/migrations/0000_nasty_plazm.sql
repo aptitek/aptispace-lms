@@ -1,3 +1,23 @@
+CREATE TABLE `activity_transitions` (
+	`id` text PRIMARY KEY NOT NULL,
+	`from_activity_id` text,
+	`to_activity_id` text NOT NULL,
+	FOREIGN KEY (`from_activity_id`) REFERENCES `module_activities`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`to_activity_id`) REFERENCES `module_activities`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `activity_votes` (
+	`id` text PRIMARY KEY NOT NULL,
+	`group_id` text NOT NULL,
+	`target_activity_id` text NOT NULL,
+	`user_id` text NOT NULL,
+	`vote` integer DEFAULT true NOT NULL,
+	`created_at` integer NOT NULL,
+	FOREIGN KEY (`group_id`) REFERENCES `groups`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`target_activity_id`) REFERENCES `module_activities`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
 CREATE TABLE `affiliations` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
@@ -28,31 +48,15 @@ CREATE TABLE `audit_logs` (
 CREATE TABLE `cohorts` (
 	`id` text PRIMARY KEY NOT NULL,
 	`institution_id` text NOT NULL,
-	`name` text NOT NULL,
+	`diploma` text,
+	`year` integer,
+	`tags` text,
 	`description` text,
 	`start_date` integer,
 	`end_date` integer,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
 	FOREIGN KEY (`institution_id`) REFERENCES `institutions`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE TABLE `courses` (
-	`id` text PRIMARY KEY NOT NULL,
-	`title` text NOT NULL,
-	`description` text,
-	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE `criteria` (
-	`id` text PRIMARY KEY NOT NULL,
-	`module_id` text NOT NULL,
-	`name` text NOT NULL,
-	`max_points` real DEFAULT 20 NOT NULL,
-	`coefficient` real DEFAULT 1 NOT NULL,
-	`created_at` integer NOT NULL,
-	FOREIGN KEY (`module_id`) REFERENCES `modules`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `error_reports` (
@@ -73,16 +77,21 @@ CREATE TABLE `error_reports` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-CREATE TABLE `grades` (
+CREATE TABLE `fight_phases` (
 	`id` text PRIMARY KEY NOT NULL,
-	`criteria_id` text NOT NULL,
-	`submission_id` text NOT NULL,
-	`score` real NOT NULL,
-	`feedback` text,
+	`fight_id` text NOT NULL,
+	`phase_order` integer NOT NULL,
+	`power_required` real NOT NULL,
+	FOREIGN KEY (`fight_id`) REFERENCES `fights`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `fights` (
+	`id` text PRIMARY KEY NOT NULL,
+	`activity_id` text NOT NULL,
+	`enemy_name` text NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
-	FOREIGN KEY (`criteria_id`) REFERENCES `criteria`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`submission_id`) REFERENCES `submissions`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`activity_id`) REFERENCES `module_activities`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `group_members` (
@@ -96,93 +105,85 @@ CREATE TABLE `group_members` (
 --> statement-breakpoint
 CREATE TABLE `groups` (
 	`id` text PRIMARY KEY NOT NULL,
-	`session_id` text NOT NULL,
+	`cohort_id` text NOT NULL,
 	`name` text NOT NULL,
+	`currency_points` real DEFAULT 0 NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
-	FOREIGN KEY (`session_id`) REFERENCES `sessions`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`cohort_id`) REFERENCES `cohorts`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `institutions` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
-	`slug` text NOT NULL,
 	`type` text DEFAULT 'academic' NOT NULL,
 	`logo_url` text,
+	`email_domain` text,
+	`username_pattern` text DEFAULT '{first}.{last}',
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `institutions_slug_unique` ON `institutions` (`slug`);--> statement-breakpoint
-CREATE TABLE `module_tags` (
+CREATE TABLE `map_positions` (
+	`id` text PRIMARY KEY NOT NULL,
+	`activity_id` text NOT NULL,
+	`cohort_id` text,
+	`group_id` text,
+	`user_id` text,
+	`updated_at` integer NOT NULL,
+	FOREIGN KEY (`activity_id`) REFERENCES `module_activities`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`cohort_id`) REFERENCES `cohorts`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`group_id`) REFERENCES `groups`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `module_activities` (
+	`id` text PRIMARY KEY NOT NULL,
 	`module_id` text NOT NULL,
-	`tag_id` text NOT NULL,
-	PRIMARY KEY(`module_id`, `tag_id`),
-	FOREIGN KEY (`module_id`) REFERENCES `modules`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`tag_id`) REFERENCES `tags`(`id`) ON UPDATE no action ON DELETE cascade
+	`title` text NOT NULL,
+	`range` text NOT NULL,
+	`pedagogical_value` real DEFAULT 0 NOT NULL,
+	`reward_value` real DEFAULT 0 NOT NULL,
+	`power_value` real DEFAULT 0 NOT NULL,
+	`resource_urls` text,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	FOREIGN KEY (`module_id`) REFERENCES `modules`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `modules` (
 	`id` text PRIMARY KEY NOT NULL,
-	`course_id` text NOT NULL,
-	`title` text NOT NULL,
-	`type` text NOT NULL,
-	`content_url` text,
-	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL,
-	FOREIGN KEY (`course_id`) REFERENCES `courses`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE TABLE `seances` (
-	`id` text PRIMARY KEY NOT NULL,
-	`session_id` text NOT NULL,
-	`start_time` integer NOT NULL,
-	`end_time` integer NOT NULL,
-	`location` text,
-	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL,
-	FOREIGN KEY (`session_id`) REFERENCES `sessions`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE TABLE `sessions` (
-	`id` text PRIMARY KEY NOT NULL,
-	`course_id` text NOT NULL,
 	`cohort_id` text NOT NULL,
+	`title` text NOT NULL,
+	`description` text,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
-	FOREIGN KEY (`course_id`) REFERENCES `courses`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`cohort_id`) REFERENCES `cohorts`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `submissions` (
-	`id` text PRIMARY KEY NOT NULL,
-	`module_id` text NOT NULL,
-	`user_id` text,
-	`group_id` text,
-	`submission_url` text NOT NULL,
-	`submission_type` text DEFAULT 'individual' NOT NULL,
-	`submitted_at` integer NOT NULL,
-	`updated_at` integer NOT NULL,
-	FOREIGN KEY (`module_id`) REFERENCES `modules`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null,
-	FOREIGN KEY (`group_id`) REFERENCES `groups`(`id`) ON UPDATE no action ON DELETE set null
+CREATE TABLE `student_decks` (
+	`user_id` text NOT NULL,
+	`activity_id` text NOT NULL,
+	`acquired_at` integer NOT NULL,
+	PRIMARY KEY(`user_id`, `activity_id`),
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`activity_id`) REFERENCES `module_activities`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `tags` (
-	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
-	`created_at` integer NOT NULL
-);
---> statement-breakpoint
-CREATE UNIQUE INDEX `tags_name_unique` ON `tags` (`name`);--> statement-breakpoint
 CREATE TABLE `users` (
 	`id` text PRIMARY KEY NOT NULL,
 	`display_name` text,
 	`first_name` text NOT NULL,
 	`last_name` text NOT NULL,
+	`avatar_url` text,
 	`github_id` text,
+	`github_email` text,
+	`calendar_feed_token` text,
+	`is_online` integer DEFAULT false NOT NULL,
+	`last_seen_at` integer,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `users_github_id_unique` ON `users` (`github_id`);
+CREATE UNIQUE INDEX `users_github_id_unique` ON `users` (`github_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `users_calendar_feed_token_unique` ON `users` (`calendar_feed_token`);

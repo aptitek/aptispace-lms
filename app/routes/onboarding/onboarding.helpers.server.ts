@@ -76,9 +76,8 @@ async function findExistingInstitutionId(
   schoolId?: string,
 ): Promise<string | undefined> {
   if (!schoolId) return undefined;
-  const slugCandidate = schoolId.replace(/^school-/, "");
   const inst = await db.query.institutions.findFirst({
-    where: (i, { eq, or }) => or(eq(i.id, schoolId), eq(i.slug, slugCandidate)),
+    where: (i, { eq, or }) => or(eq(i.id, schoolId), eq(i.name, schoolId)),
   });
   return inst?.id;
 }
@@ -98,7 +97,6 @@ async function resolveTargetInstitutionId(
     .insert(institutions)
     .values({
       name: "Aptitek",
-      slug: "aptitek",
       type: "academic",
       logoUrl: "/aptitek-logo.svg",
       createdAt: now,
@@ -374,7 +372,7 @@ function resolveUserSchool(
           institution?: {
             id: string;
             name: string;
-            slug: string;
+            slug?: string | null;
             logoUrl?: string | null;
             emailDomain?: string | null;
             usernamePattern?: string | null;
@@ -389,7 +387,9 @@ function resolveUserSchool(
     return {
       id: primaryAffil.institution.id,
       name: primaryAffil.institution.name,
-      slug: primaryAffil.institution.slug,
+      slug:
+        primaryAffil.institution.slug ||
+        primaryAffil.institution.name.toLowerCase().replace(/\s+/g, "-"),
       logoUrl: primaryAffil.institution.logoUrl || undefined,
       emailDomain: primaryAffil.institution.emailDomain || "",
       usernamePattern:

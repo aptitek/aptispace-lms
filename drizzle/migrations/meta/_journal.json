@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1788158216987,
-      "tag": "0000_regular_jazinda",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1788371193391,
-      "tag": "0001_add_cohort_fields",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1788375353931,
-      "tag": "0002_remove_cohort_name",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1788389452124,
-      "tag": "0003_add_github_email",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1788417821343,
-      "tag": "0004_add_avatar_url",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1788503875927,
-      "tag": "0005_short_swordsman",
+      "when": 1788855773901,
+      "tag": "0000_nasty_plazm",
       "breakpoints": true
     }
   ]

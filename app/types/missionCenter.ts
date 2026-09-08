@@ -90,10 +90,8 @@ export interface SystemMetricsData {
     admins: number;
     institutions: number;
     cohorts: number;
-    courses: number;
+    groups: number;
     modules: number;
-    submissions: number;
-    grades: number;
     auditLogs: number;
     totalErrors: number;
     openErrors: number;

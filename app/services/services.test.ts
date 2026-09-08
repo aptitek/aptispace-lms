@@ -8,24 +8,10 @@ import {
   createAffiliation,
   getAffiliationsForUser,
 } from "./userService";
-import {
-  createCourse,
-  getCourseById,
-  createModule,
-  addCriteriaToModule,
-} from "./courseService";
-import {
-  createSession,
-  createClass,
-  createGroup,
-  addUserToGroup,
-} from "./sessionService";
-import {
-  createSubmission,
-  gradeSubmission,
-  logAudit,
-  logImpersonatedAudit,
-} from "./assessmentService";
+import { createCourse, getCourseById } from "./courseService";
+import { createModule, getModuleById } from "./moduleService";
+import { createGroup, addUserToGroup } from "./groupService";
+import { logAudit, logImpersonatedAudit } from "./assessmentService";
 import {
   getAllInstitutions,
   getAllCohorts,
@@ -91,18 +77,18 @@ describe("Backend Database & Service Architecture", () => {
     expect(schema.institutions).toBeDefined();
     expect(schema.cohorts).toBeDefined();
     expect(schema.affiliations).toBeDefined();
-    expect(schema.courses).toBeDefined();
-    expect(schema.modules).toBeDefined();
-    expect(schema.tags).toBeDefined();
-    expect(schema.moduleTags).toBeDefined();
-    expect(schema.sessions).toBeDefined();
-    expect(schema.classes).toBeDefined();
     expect(schema.groups).toBeDefined();
     expect(schema.groupMembers).toBeDefined();
-    expect(schema.submissions).toBeDefined();
-    expect(schema.criteria).toBeDefined();
-    expect(schema.grades).toBeDefined();
+    expect(schema.modules).toBeDefined();
+    expect(schema.moduleActivities).toBeDefined();
+    expect(schema.activityTransitions).toBeDefined();
+    expect(schema.mapPositions).toBeDefined();
+    expect(schema.activityVotes).toBeDefined();
+    expect(schema.fights).toBeDefined();
+    expect(schema.fightPhases).toBeDefined();
+    expect(schema.studentDecks).toBeDefined();
     expect(schema.auditLogs).toBeDefined();
+    expect(schema.errorReports).toBeDefined();
   });
 
   it("seeds the database successfully without throwing", async () => {
@@ -284,7 +270,11 @@ describe("Backend Database & Service Architecture", () => {
           where: () => ({
             limit: () =>
               Promise.resolve([
-                { id: "course-1", title: "Orbital Navigation" },
+                {
+                  id: "course-1",
+                  title: "Orbital Navigation",
+                  cohortId: "cohort-1",
+                },
               ]),
           }),
         }),
@@ -293,15 +283,12 @@ describe("Backend Database & Service Architecture", () => {
         values: (recordValues: Record<string, unknown>) => ({
           returning: () =>
             Promise.resolve([{ id: "course-1", ...recordValues }]),
-          onConflictDoNothing: () => ({
-            returning: () =>
-              Promise.resolve([{ id: "tag-1", ...recordValues }]),
-          }),
         }),
       }),
     } as unknown as ReturnType<typeof getDb>;
 
     const course = await createCourse(mockDb, {
+      cohortId: "cohort-1",
       title: "Orbital Navigation",
       description: "Flight mechanics",
     });
@@ -310,116 +297,57 @@ describe("Backend Database & Service Architecture", () => {
     const fetchedCourse = await getCourseById(mockDb, "course-1");
     expect(fetchedCourse?.id).toBe("course-1");
 
-    const courseModule = await createModule(
-      mockDb,
-      {
-        courseId: "course-1",
-        title: "Docking Protocol",
-        type: "lab",
-      },
-      ["Physics"],
-    );
+    const courseModule = await createModule(mockDb, {
+      cohortId: "cohort-1",
+      title: "Docking Protocol",
+      description: "Physics lab",
+    });
     expect(courseModule.id).toBe("course-1");
 
-    const criteriaList = await addCriteriaToModule(mockDb, "mod-1", [
-      { name: "Precision", maxPoints: 20 },
-    ]);
-    expect(criteriaList).toHaveLength(1);
+    const fetchedModule = await getModuleById(mockDb, "course-1");
+    expect(fetchedModule?.id).toBe("course-1");
   });
 
-  it("executes session, class, and group domain operations", async () => {
+  it("executes group domain operations", async () => {
     const mockDb = {
       insert: () => ({
         values: (recordValues: Record<string, unknown>) => ({
           returning: () =>
-            Promise.resolve([{ id: "session-1", ...recordValues }]),
-          onConflictDoNothing: () =>
-            Promise.resolve([{ id: "member-1", ...recordValues }]),
+            Promise.resolve([{ id: "group-1", ...recordValues }]),
+          onConflictDoNothing: () => ({
+            returning: () =>
+              Promise.resolve([{ id: "member-1", ...recordValues }]),
+          }),
         }),
       }),
     } as unknown as ReturnType<typeof getDb>;
 
-    const session = await createSession(mockDb, {
-      courseId: "course-1",
-      cohortId: "cohort-1",
-    });
-    expect(session.id).toBe("session-1");
-
-    const classItem = await createClass(mockDb, {
-      sessionId: "session-1",
-      title: "Distributed Systems Class",
-      isRemote: false,
-      startTime: new Date(),
-      endTime: new Date(),
-      location: "Room 1",
-    });
-    expect(classItem.id).toBe("session-1");
-
     const group = await createGroup(
       mockDb,
       {
-        sessionId: "session-1",
+        cohortId: "cohort-1",
         name: "Squadron Alpha",
       },
       ["user-1"],
     );
-    expect(group.id).toBe("session-1");
+    expect(group.id).toBe("group-1");
 
     await addUserToGroup(mockDb, "group-1", "user-2");
   });
 
-  it("executes assessment, grading, and audit log domain operations", async () => {
+  it("executes audit log domain operations", async () => {
     const mockDb = {
-      select: () => ({
-        from: () => ({
-          where: () =>
-            Promise.resolve([
-              {
-                id: "grade-1",
-                submissionId: "sub-1",
-                criteriaId: "crit-1",
-                score: 15,
-                feedback: "Good",
-              },
-            ]),
-        }),
-      }),
       insert: () => ({
         values: (recordValues: Record<string, unknown>) => ({
           returning: () =>
             Promise.resolve([{ id: "record-1", ...recordValues }]),
         }),
       }),
-      update: () => ({
-        set: (updateValues: Record<string, unknown>) => ({
-          where: () => ({
-            returning: () =>
-              Promise.resolve([{ id: "grade-1", ...updateValues }]),
-          }),
-        }),
-      }),
     } as unknown as ReturnType<typeof getDb>;
 
-    const submission = await createSubmission(mockDb, {
-      moduleId: "mod-1",
-      userId: "user-1",
-      submissionUrl: "https://github.com/test",
-      submissionType: "individual",
-    });
-    expect(submission.id).toBe("record-1");
-
-    const grade = await gradeSubmission(mockDb, {
-      submissionId: "sub-1",
-      criteriaId: "crit-1",
-      score: 19,
-      feedback: "Improved",
-      graderUserId: "instructor-1",
-    });
-    expect(grade.score).toBe(19);
-
     const audit = await logAudit(mockDb, {
-      tableName: "grades",
-      recordId: "grade-1",
+      tableName: "modules",
+      recordId: "mod-1",
       action: "UPDATE",
       userId: "instructor-1",
     });

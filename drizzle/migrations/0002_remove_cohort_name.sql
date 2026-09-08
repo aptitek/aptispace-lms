@@ -1,1 +1,0 @@
-ALTER TABLE `cohorts` DROP COLUMN `name`;

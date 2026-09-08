@@ -30,144 +30,22 @@ describe("classService", () => {
     cohortId: "cohort-1",
   };
 
-  const mockClass1 = {
-    id: "class-1",
-    sessionId: "session-1",
-    instructorId: "user-instructor-1",
-    title: "Distributed Systems",
-    isRemote: false,
-    startTime: new Date("2026-09-07T09:00:00Z"),
-    endTime: new Date("2026-09-07T11:30:00Z"),
-    location: "Amphitheater Turing",
-    session: {
-      id: "session-1",
-      courseId: "course-1",
-      cohortId: "cohort-1",
-      course: {
-        id: "course-1",
-        title: "Fullstack Architecture",
-        description: null,
-      },
-      cohort: { id: "cohort-1", diploma: "M", year: 1, description: null },
-    },
-    instructor: {
-      id: "user-instructor-1",
-      firstName: "Alex",
-      lastName: "Mercer",
-      displayName: "Alex Mercer",
-      githubEmail: "alex@aptitek.io",
-      avatarUrl: null,
-    },
-  };
-
-  const mockClass2 = {
-    id: "class-2",
-    sessionId: "session-2",
-    instructorId: "user-admin-1",
-    title: "Executive Architecture",
-    isRemote: true,
-    startTime: new Date("2026-09-08T14:00:00Z"),
-    endTime: new Date("2026-09-08T16:00:00Z"),
-    location: "Studio Ada",
-    session: {
-      id: "session-2",
-      courseId: "course-2",
-      cohortId: "cohort-2",
-      course: { id: "course-2", title: "Leadership", description: null },
-      cohort: { id: "cohort-2", diploma: "M", year: 2, description: null },
-    },
-    instructor: {
-      id: "user-admin-1",
-      firstName: "Sarah",
-      lastName: "Connor",
-      displayName: "Sarah Connor",
-      githubEmail: "admin@aptitek.io",
-      avatarUrl: null,
-    },
-  };
-
-  it("returns all classes for admin users", async () => {
-    const mockDb = {
-      query: {
-        classes: {
-          findMany: vi.fn().mockResolvedValue([mockClass1, mockClass2]),
-        },
-      },
-      select: vi.fn().mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([
-            {
-              userId: "user-instructor-1",
-              email: "alex@aptitek.io",
-              role: "instructor",
-            },
-            {
-              userId: "user-admin-1",
-              email: "admin@aptitek.io",
-              role: "admin",
-            },
-          ]),
-        }),
-      }),
-    };
-
-    const results = await getClassesForUser(
-      mockDb as unknown as Database,
-      mockAdmin,
-    );
-    expect(results).toHaveLength(2);
-    expect(results[0].title).toBe("Distributed Systems");
-    expect(results[1].title).toBe("Executive Architecture");
+  it("returns classes for admin users (empty in roguelike schema)", async () => {
+    const mockDb = {} as Database;
+    const results = await getClassesForUser(mockDb, mockAdmin);
+    expect(results).toHaveLength(0);
   });
 
-  it("returns only assigned classes for instructors", async () => {
-    const mockDb = {
-      query: {
-        classes: {
-          findMany: vi.fn().mockResolvedValue([mockClass1]),
-        },
-      },
-      select: vi.fn().mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([
-            {
-              userId: "user-instructor-1",
-              email: "alex@aptitek.io",
-              role: "instructor",
-            },
-          ]),
-        }),
-      }),
-    };
-
-    const results = await getClassesForUser(
-      mockDb as unknown as Database,
-      mockInstructor,
-    );
-    expect(results).toHaveLength(1);
-    expect(results[0].instructorId).toBe("user-instructor-1");
+  it("returns classes for instructors (empty in roguelike schema)", async () => {
+    const mockDb = {} as Database;
+    const results = await getClassesForUser(mockDb, mockInstructor);
+    expect(results).toHaveLength(0);
   });
 
-  it("returns only cohort classes for students", async () => {
-    const mockDb = {
-      select: vi.fn().mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ id: "session-1" }]),
-        }),
-      }),
-      query: {
-        classes: {
-          findMany: vi.fn().mockResolvedValue([mockClass1]),
-        },
-      },
-    };
-
-    const results = await getClassesForUser(
-      mockDb as unknown as Database,
-      mockStudent,
-    );
-    expect(results).toHaveLength(1);
-    expect(results[0].session.cohortId).toBe("cohort-1");
+  it("returns classes for students (empty in roguelike schema)", async () => {
+    const mockDb = {} as Database;
+    const results = await getClassesForUser(mockDb, mockStudent);
+    expect(results).toHaveLength(0);
   });
 
   it("filters eligible instructors to admin and instructor roles", async () => {

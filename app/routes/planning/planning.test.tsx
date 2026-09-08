@@ -102,17 +102,7 @@ describe("Planning Route", () => {
       >,
     );
     vi.spyOn(dbModule, "getDatabaseFromContext").mockReturnValue({
-      query: {
-        sessions: {
-          findMany: vi.fn().mockResolvedValue([
-            {
-              id: "session-1",
-              course: { title: "Fullstack Architecture" },
-              cohort: { diploma: "M", year: 1 },
-            },
-          ]),
-        },
-      },
+      query: {},
     } as unknown as dbModule.Database);
 
     vi.spyOn(classService, "getClassesForUser").mockResolvedValue([]);
@@ -141,7 +131,7 @@ describe("Planning Route", () => {
     expect(result.feedToken).toBe("feed-token-123");
     expect(result.user.role).toBe(mockAdmin.role);
     expect(result.instructors).toHaveLength(1);
-    expect(result.sessions).toHaveLength(1);
+    expect(result.sessions).toHaveLength(0);
   });
 
   it("exports Planning component", () => {

@@ -30,6 +30,9 @@ describe("Admin Route - Mission Center", () => {
           githubEmail: "admin@aptitek.io",
           createdAt: new Date(),
           updatedAt: new Date(),
+          calendarFeedToken: null,
+          isOnline: false,
+          lastSeenAt: null,
           affiliations: [],
         },
       });
@@ -70,6 +73,9 @@ describe("Admin Route - Mission Center", () => {
           githubEmail: "admin@aptitek.io",
           createdAt: new Date(),
           updatedAt: new Date(),
+          calendarFeedToken: null,
+          isOnline: false,
+          lastSeenAt: null,
           affiliations: [],
         },
       });
@@ -124,6 +130,9 @@ describe("Admin Route - Mission Center", () => {
           githubEmail: "admin@aptitek.io",
           createdAt: new Date(),
           updatedAt: new Date(),
+          calendarFeedToken: null,
+          isOnline: false,
+          lastSeenAt: null,
           affiliations: [],
         },
       });
@@ -177,6 +186,9 @@ describe("Admin Route - Mission Center", () => {
           githubEmail: "admin@aptitek.io",
           createdAt: new Date(),
           updatedAt: new Date(),
+          calendarFeedToken: null,
+          isOnline: false,
+          lastSeenAt: null,
           affiliations: [],
         },
       });

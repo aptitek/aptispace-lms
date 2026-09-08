@@ -42,6 +42,9 @@ describe("API Profile Endpoint (/api/profile)", () => {
           avatarUrl: "/avatars/buzz.webp",
           githubId: "buzz",
           githubEmail: "buzz@aptitek.io",
+          calendarFeedToken: null,
+          isOnline: false,
+          lastSeenAt: null,
           createdAt: new Date(),
           updatedAt: new Date(),
           affiliations: [

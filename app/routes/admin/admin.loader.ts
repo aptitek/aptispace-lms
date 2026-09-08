@@ -40,7 +40,7 @@ export async function loadAdminDashboardData(
   const schools: SchoolConfig[] = dbInstitutions.map((inst) => ({
     id: inst.id,
     name: inst.name,
-    slug: inst.slug,
+    slug: inst.name.toLowerCase().replace(/\s+/g, "-"),
     type: inst.type,
     logoUrl: inst.logoUrl,
     emailDomain: inst.emailDomain ?? undefined,

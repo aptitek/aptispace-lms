@@ -58,6 +58,9 @@ describe("API Users Endpoint (/api/users)", () => {
         avatarUrl: null,
         githubId: "neil",
         githubEmail: "neil@aptitek.io",
+        calendarFeedToken: null,
+        isOnline: false,
+        lastSeenAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         affiliations: [

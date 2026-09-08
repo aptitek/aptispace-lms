@@ -46,7 +46,7 @@ export async function createInstitution(
   db: Database,
   params: {
     name: string;
-    slug: string;
+    slug?: string;
     type?: "academic" | "company";
     logoUrl?: string;
     emailDomain?: string;
@@ -58,7 +58,6 @@ export async function createInstitution(
     .insert(institutions)
     .values({
       name: params.name,
-      slug: params.slug,
       type: params.type,
       logoUrl: params.logoUrl,
       emailDomain: params.emailDomain,
@@ -102,7 +101,6 @@ export async function updateInstitution(
     .update(institutions)
     .set({
       name: params.name ?? existing.name,
-      slug: params.slug ?? existing.slug,
       type: params.type ?? existing.type,
       logoUrl: params.logoUrl !== undefined ? params.logoUrl : existing.logoUrl,
       emailDomain:

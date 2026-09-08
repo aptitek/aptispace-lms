@@ -1,9 +1,140 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "28c72ea0-a967-413b-a0f8-8d0577e772e1",
+  "id": "44cddfcf-c164-4b28-bd6b-18def24d8113",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
+    "activity_transitions": {
+      "name": "activity_transitions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "from_activity_id": {
+          "name": "from_activity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "to_activity_id": {
+          "name": "to_activity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "activity_transitions_from_activity_id_module_activities_id_fk": {
+          "name": "activity_transitions_from_activity_id_module_activities_id_fk",
+          "tableFrom": "activity_transitions",
+          "tableTo": "module_activities",
+          "columnsFrom": ["from_activity_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "activity_transitions_to_activity_id_module_activities_id_fk": {
+          "name": "activity_transitions_to_activity_id_module_activities_id_fk",
+          "tableFrom": "activity_transitions",
+          "tableTo": "module_activities",
+          "columnsFrom": ["to_activity_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "activity_votes": {
+      "name": "activity_votes",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "group_id": {
+          "name": "group_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target_activity_id": {
+          "name": "target_activity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "vote": {
+          "name": "vote",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "activity_votes_group_id_groups_id_fk": {
+          "name": "activity_votes_group_id_groups_id_fk",
+          "tableFrom": "activity_votes",
+          "tableTo": "groups",
+          "columnsFrom": ["group_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "activity_votes_target_activity_id_module_activities_id_fk": {
+          "name": "activity_votes_target_activity_id_module_activities_id_fk",
+          "tableFrom": "activity_votes",
+          "tableTo": "module_activities",
+          "columnsFrom": ["target_activity_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "activity_votes_user_id_users_id_fk": {
+          "name": "activity_votes_user_id_users_id_fk",
+          "tableFrom": "activity_votes",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "affiliations": {
       "name": "affiliations",
       "columns": {
@@ -200,11 +331,25 @@
           "notNull": true,
           "autoincrement": false
         },
-        "name": {
-          "name": "name",
+        "diploma": {
+          "name": "diploma",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "year": {
+          "name": "year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tags": {
+          "name": "tags",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "description": {
@@ -250,115 +395,6 @@
           "tableFrom": "cohorts",
           "tableTo": "institutions",
           "columnsFrom": ["institution_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "courses": {
-      "name": "courses",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "criteria": {
-      "name": "criteria",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "module_id": {
-          "name": "module_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "max_points": {
-          "name": "max_points",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 20
-        },
-        "coefficient": {
-          "name": "coefficient",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 1
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "criteria_module_id_modules_id_fk": {
-          "name": "criteria_module_id_modules_id_fk",
-          "tableFrom": "criteria",
-          "tableTo": "modules",
-          "columnsFrom": ["module_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -489,8 +525,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "grades": {
-      "name": "grades",
+    "fight_phases": {
+      "name": "fight_phases",
       "columns": {
         "id": {
           "name": "id",
@@ -499,32 +535,66 @@
           "notNull": true,
           "autoincrement": false
         },
-        "criteria_id": {
-          "name": "criteria_id",
+        "fight_id": {
+          "name": "fight_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "submission_id": {
-          "name": "submission_id",
-          "type": "text",
+        "phase_order": {
+          "name": "phase_order",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "score": {
-          "name": "score",
+        "power_required": {
+          "name": "power_required",
           "type": "real",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fight_phases_fight_id_fights_id_fk": {
+          "name": "fight_phases_fight_id_fights_id_fk",
+          "tableFrom": "fight_phases",
+          "tableTo": "fights",
+          "columnsFrom": ["fight_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "fights": {
+      "name": "fights",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
         },
-        "feedback": {
-          "name": "feedback",
+        "activity_id": {
+          "name": "activity_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "enemy_name": {
+          "name": "enemy_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         },
         "created_at": {
@@ -544,20 +614,11 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "grades_criteria_id_criteria_id_fk": {
-          "name": "grades_criteria_id_criteria_id_fk",
-          "tableFrom": "grades",
-          "tableTo": "criteria",
-          "columnsFrom": ["criteria_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "grades_submission_id_submissions_id_fk": {
-          "name": "grades_submission_id_submissions_id_fk",
-          "tableFrom": "grades",
-          "tableTo": "submissions",
-          "columnsFrom": ["submission_id"],
+        "fights_activity_id_module_activities_id_fk": {
+          "name": "fights_activity_id_module_activities_id_fk",
+          "tableFrom": "fights",
+          "tableTo": "module_activities",
+          "columnsFrom": ["activity_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -632,8 +693,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "session_id": {
-          "name": "session_id",
+        "cohort_id": {
+          "name": "cohort_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -645,6 +706,14 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "currency_points": {
+          "name": "currency_points",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
         },
         "created_at": {
           "name": "created_at",
@@ -663,11 +732,11 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "groups_session_id_sessions_id_fk": {
-          "name": "groups_session_id_sessions_id_fk",
+        "groups_cohort_id_cohorts_id_fk": {
+          "name": "groups_cohort_id_cohorts_id_fk",
           "tableFrom": "groups",
-          "tableTo": "sessions",
-          "columnsFrom": ["session_id"],
+          "tableTo": "cohorts",
+          "columnsFrom": ["cohort_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -694,13 +763,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "slug": {
-          "name": "slug",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "type": {
           "name": "type",
           "type": "text",
@@ -716,6 +778,21 @@
           "notNull": false,
           "autoincrement": false
         },
+        "email_domain": {
+          "name": "email_domain",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "username_pattern": {
+          "name": "username_pattern",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'{first}.{last}'"
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -731,31 +808,53 @@
           "autoincrement": false
         }
       },
-      "indexes": {
-        "institutions_slug_unique": {
-          "name": "institutions_slug_unique",
-          "columns": ["slug"],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "module_tags": {
-      "name": "module_tags",
+    "map_positions": {
+      "name": "map_positions",
       "columns": {
-        "module_id": {
-          "name": "module_id",
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "activity_id": {
+          "name": "activity_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "tag_id": {
-          "name": "tag_id",
+        "cohort_id": {
+          "name": "cohort_id",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "group_id": {
+          "name": "group_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -763,31 +862,137 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "module_tags_module_id_modules_id_fk": {
-          "name": "module_tags_module_id_modules_id_fk",
-          "tableFrom": "module_tags",
+        "map_positions_activity_id_module_activities_id_fk": {
+          "name": "map_positions_activity_id_module_activities_id_fk",
+          "tableFrom": "map_positions",
+          "tableTo": "module_activities",
+          "columnsFrom": ["activity_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "map_positions_cohort_id_cohorts_id_fk": {
+          "name": "map_positions_cohort_id_cohorts_id_fk",
+          "tableFrom": "map_positions",
+          "tableTo": "cohorts",
+          "columnsFrom": ["cohort_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "map_positions_group_id_groups_id_fk": {
+          "name": "map_positions_group_id_groups_id_fk",
+          "tableFrom": "map_positions",
+          "tableTo": "groups",
+          "columnsFrom": ["group_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "map_positions_user_id_users_id_fk": {
+          "name": "map_positions_user_id_users_id_fk",
+          "tableFrom": "map_positions",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "module_activities": {
+      "name": "module_activities",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "module_id": {
+          "name": "module_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "range": {
+          "name": "range",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "pedagogical_value": {
+          "name": "pedagogical_value",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "reward_value": {
+          "name": "reward_value",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "power_value": {
+          "name": "power_value",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "resource_urls": {
+          "name": "resource_urls",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "module_activities_module_id_modules_id_fk": {
+          "name": "module_activities_module_id_modules_id_fk",
+          "tableFrom": "module_activities",
           "tableTo": "modules",
           "columnsFrom": ["module_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
-        },
-        "module_tags_tag_id_tags_id_fk": {
-          "name": "module_tags_tag_id_tags_id_fk",
-          "tableFrom": "module_tags",
-          "tableTo": "tags",
-          "columnsFrom": ["tag_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "module_tags_module_id_tag_id_pk": {
-          "columns": ["module_id", "tag_id"],
-          "name": "module_tags_module_id_tag_id_pk"
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
@@ -801,8 +1006,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "course_id": {
-          "name": "course_id",
+        "cohort_id": {
+          "name": "cohort_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -815,15 +1020,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "content_url": {
-          "name": "content_url",
+        "description": {
+          "name": "description",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -846,142 +1044,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "modules_course_id_courses_id_fk": {
-          "name": "modules_course_id_courses_id_fk",
+        "modules_cohort_id_cohorts_id_fk": {
+          "name": "modules_cohort_id_cohorts_id_fk",
           "tableFrom": "modules",
-          "tableTo": "courses",
-          "columnsFrom": ["course_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "seances": {
-      "name": "seances",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "session_id": {
-          "name": "session_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "start_time": {
-          "name": "start_time",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "end_time": {
-          "name": "end_time",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "location": {
-          "name": "location",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "seances_session_id_sessions_id_fk": {
-          "name": "seances_session_id_sessions_id_fk",
-          "tableFrom": "seances",
-          "tableTo": "sessions",
-          "columnsFrom": ["session_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "sessions": {
-      "name": "sessions",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "course_id": {
-          "name": "course_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "cohort_id": {
-          "name": "cohort_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "sessions_course_id_courses_id_fk": {
-          "name": "sessions_course_id_courses_id_fk",
-          "tableFrom": "sessions",
-          "tableTo": "courses",
-          "columnsFrom": ["course_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "sessions_cohort_id_cohorts_id_fk": {
-          "name": "sessions_cohort_id_cohorts_id_fk",
-          "tableFrom": "sessions",
           "tableTo": "cohorts",
           "columnsFrom": ["cohort_id"],
           "columnsTo": ["id"],
@@ -993,61 +1058,25 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "submissions": {
-      "name": "submissions",
+    "student_decks": {
+      "name": "student_decks",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "module_id": {
-          "name": "module_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "user_id": {
           "name": "user_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "group_id": {
-          "name": "group_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "submission_url": {
-          "name": "submission_url",
+        "activity_id": {
+          "name": "activity_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "submission_type": {
-          "name": "submission_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'individual'"
-        },
-        "submitted_at": {
-          "name": "submitted_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
+        "acquired_at": {
+          "name": "acquired_at",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -1056,72 +1085,31 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "submissions_module_id_modules_id_fk": {
-          "name": "submissions_module_id_modules_id_fk",
-          "tableFrom": "submissions",
-          "tableTo": "modules",
-          "columnsFrom": ["module_id"],
+        "student_decks_user_id_users_id_fk": {
+          "name": "student_decks_user_id_users_id_fk",
+          "tableFrom": "student_decks",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "submissions_user_id_users_id_fk": {
-          "name": "submissions_user_id_users_id_fk",
-          "tableFrom": "submissions",
-          "tableTo": "users",
-          "columnsFrom": ["user_id"],
+        "student_decks_activity_id_module_activities_id_fk": {
+          "name": "student_decks_activity_id_module_activities_id_fk",
+          "tableFrom": "student_decks",
+          "tableTo": "module_activities",
+          "columnsFrom": ["activity_id"],
           "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "submissions_group_id_groups_id_fk": {
-          "name": "submissions_group_id_groups_id_fk",
-          "tableFrom": "submissions",
-          "tableTo": "groups",
-          "columnsFrom": ["group_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "tags": {
-      "name": "tags",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+      "compositePrimaryKeys": {
+        "student_decks_user_id_activity_id_pk": {
+          "columns": ["user_id", "activity_id"],
+          "name": "student_decks_user_id_activity_id_pk"
         }
       },
-      "indexes": {
-        "tags_name_unique": {
-          "name": "tags_name_unique",
-          "columns": ["name"],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
@@ -1156,9 +1144,45 @@
           "notNull": true,
           "autoincrement": false
         },
+        "avatar_url": {
+          "name": "avatar_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "github_id": {
           "name": "github_id",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "github_email": {
+          "name": "github_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "calendar_feed_token": {
+          "name": "calendar_feed_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_online": {
+          "name": "is_online",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "last_seen_at": {
+          "name": "last_seen_at",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -1182,6 +1206,11 @@
         "users_github_id_unique": {
           "name": "users_github_id_unique",
           "columns": ["github_id"],
+          "isUnique": true
+        },
+        "users_calendar_feed_token_unique": {
+          "name": "users_calendar_feed_token_unique",
+          "columns": ["calendar_feed_token"],
           "isUnique": true
         }
       },

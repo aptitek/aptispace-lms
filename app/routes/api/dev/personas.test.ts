@@ -70,6 +70,9 @@ describe("API Dev Personas Endpoint (/api/dev/personas)", () => {
         avatarUrl: null,
         githubId: "ada",
         githubEmail: "ada@aptitek.io",
+        calendarFeedToken: null,
+        isOnline: false,
+        lastSeenAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         affiliations: [
