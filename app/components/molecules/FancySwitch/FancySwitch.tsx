@@ -1,132 +1,27 @@
+import React, { forwardRef, useState, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
+import Tooltip from "~/components/atoms/Tooltip/Tooltip";
 import {
-  forwardRef,
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-  type KeyboardEvent,
-  type MouseEvent,
-} from "react";
-import Tooltip from "~/components/atoms/Tooltip";
-import {
-  type FancySwitchProps,
-  type FancySwitchRenderState,
-} from "./FancySwitch.types";
-import {
+  type SwitchSize,
+  type SwitchSizeConfig,
   SWITCH_SIZE_CONFIGS,
   DEFAULT_THUMB_SPRING,
   FancyTrack,
   FancyThumb,
   DisabledTooltipWrapper,
 } from "./FancySwitch.styles";
+import type {
+  FancySwitchProps,
+  FancySwitchRenderState,
+} from "./FancySwitch.types";
 
-export function useFancySwitchController({
-  disabled,
-  checked,
-  onChange,
-  onToggle,
-  toggleDurationMs = 320,
-  onClick,
-  onKeyDown,
-  onMouseEnter,
-  onMouseLeave,
-  onMouseDown,
-  onMouseUp,
-}: {
-  disabled: boolean;
-  checked: boolean;
-  onChange?: (checked: boolean) => void;
-  onToggle?: (checked: boolean) => void;
-  toggleDurationMs?: number;
-  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
-  onKeyDown?: (e: KeyboardEvent<HTMLButtonElement>) => void;
-  onMouseEnter?: (e: MouseEvent<HTMLButtonElement>) => void;
-  onMouseLeave?: (e: MouseEvent<HTMLButtonElement>) => void;
-  onMouseDown?: (e: MouseEvent<HTMLButtonElement>) => void;
-  onMouseUp?: (e: MouseEvent<HTMLButtonElement>) => void;
-}) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [isPressed, setIsPressed] = useState(false);
-  const [isToggling, setIsToggling] = useState(false);
-  const [toggleDirection, setToggleDirection] = useState<
-    "forward" | "backward"
-  >("forward");
-  const toggleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (toggleTimerRef.current) clearTimeout(toggleTimerRef.current);
-    };
-  }, []);
-
-  const handleToggleAction = useCallback(() => {
-    if (disabled) return;
-    const nextChecked = !checked;
-    setToggleDirection(nextChecked ? "forward" : "backward");
-    setIsToggling(true);
-
-    if (toggleTimerRef.current) clearTimeout(toggleTimerRef.current);
-    toggleTimerRef.current = setTimeout(() => {
-      setIsToggling(false);
-    }, toggleDurationMs);
-
-    onChange?.(nextChecked);
-    onToggle?.(nextChecked);
-  }, [disabled, checked, toggleDurationMs, onChange, onToggle]);
-
-  const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
-    onClick?.(e);
-    if (!e.defaultPrevented) handleToggleAction();
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
-    onKeyDown?.(e);
-    if (!e.defaultPrevented && (e.key === " " || e.key === "Enter")) {
-      e.preventDefault();
-      handleToggleAction();
-    }
-  };
-
-  const handleMouseEnter = (e: MouseEvent<HTMLButtonElement>) => {
-    setIsHovered(true);
-    onMouseEnter?.(e);
-  };
-
-  const handleMouseLeave = (e: MouseEvent<HTMLButtonElement>) => {
-    setIsHovered(false);
-    setIsPressed(false);
-    onMouseLeave?.(e);
-  };
-
-  const handleMouseDown = (e: MouseEvent<HTMLButtonElement>) => {
-    setIsPressed(true);
-    onMouseDown?.(e);
-  };
-
-  const handleMouseUp = (e: MouseEvent<HTMLButtonElement>) => {
-    setIsPressed(false);
-    onMouseUp?.(e);
-  };
-
-  return {
-    isHovered,
-    isPressed,
-    isToggling,
-    toggleDirection,
-    handleToggleAction,
-    handleClick,
-    handleKeyDown,
-    handleMouseEnter,
-    handleMouseLeave,
-    handleMouseDown,
-    handleMouseUp,
-  };
-}
+export type { SwitchSize, SwitchSizeConfig };
+export { SWITCH_SIZE_CONFIGS };
 
 function resolveTargetThumbX(
   checked: boolean,
-  travelX: number,
   reverse: boolean,
+  travelX: number,
 ): number {
   if (reverse) {
     return checked ? 0 : travelX;
@@ -134,171 +29,261 @@ function resolveTargetThumbX(
   return checked ? travelX : 0;
 }
 
-function resolveThumbScale(isPressed: boolean) {
-  return {
-    scaleX: isPressed ? 1.14 : 1,
-    scaleY: isPressed ? 0.92 : 1,
-  };
+function resolveThumbScale(isPressed: boolean, isHovered: boolean): number {
+  if (isPressed) return 0.92;
+  if (isHovered) return 1.05;
+  return 1;
 }
 
 function wrapWithTooltip(
-  node: React.ReactElement,
-  tooltipTitle?: string,
+  content: React.ReactNode,
+  title?: string,
   disabled?: boolean,
 ): React.ReactElement {
-  if (!tooltipTitle) {
-    return node;
+  if (!title) {
+    return <>{content}</>;
   }
+  const node = disabled ? (
+    <DisabledTooltipWrapper tabIndex={0}>{content}</DisabledTooltipWrapper>
+  ) : (
+    (content as React.ReactElement)
+  );
+
   return (
-    <Tooltip title={tooltipTitle} placement="bottom">
-      {disabled ? (
-        <DisabledTooltipWrapper>{node}</DisabledTooltipWrapper>
-      ) : (
-        node
-      )}
+    <Tooltip title={title} placement="top" arrow>
+      {node}
     </Tooltip>
   );
 }
 
-const DEFAULT_FANCY_SWITCH_PROPS = {
-  size: "medium" as const,
-  disabled: false,
-  "data-testid": "fancy-switch",
-  bimodal: false,
-  thumbReverseTravel: false,
-  thumbSpring: DEFAULT_THUMB_SPRING,
-  toggleDurationMs: 320,
-};
-
-const TrackDecorations: React.FC<{
+function TrackDecorations({
+  state,
+  backgroundDecorations,
+  overlayDecorations,
+}: {
   state: FancySwitchRenderState;
   backgroundDecorations?: (state: FancySwitchRenderState) => React.ReactNode;
-  peekingElement?: (state: FancySwitchRenderState) => React.ReactNode;
   overlayDecorations?: (state: FancySwitchRenderState) => React.ReactNode;
-}> = ({ state, backgroundDecorations, peekingElement, overlayDecorations }) => (
-  <>
-    {backgroundDecorations ? backgroundDecorations(state) : null}
-    {peekingElement ? peekingElement(state) : null}
-    {overlayDecorations ? overlayDecorations(state) : null}
-  </>
-);
+}): React.ReactElement {
+  return (
+    <>
+      {backgroundDecorations?.(state)}
+      {overlayDecorations?.(state)}
+    </>
+  );
+}
+
+interface SwitchInteractionOptions {
+  checked: boolean;
+  disabled: boolean;
+  toggleDurationMs: number;
+  onChange?: (checked: boolean) => void;
+  onToggle?: (checked: boolean) => void;
+}
+
+function useSwitchInteraction(options: SwitchInteractionOptions) {
+  const { checked, disabled, toggleDurationMs, onChange, onToggle } = options;
+  const [isHovered, setIsHovered] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
+  const [toggleDirection, setToggleDirection] = useState<
+    "forward" | "backward"
+  >("forward");
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    if (isToggling) {
+      timer = setTimeout(() => {
+        setIsToggling(false);
+      }, toggleDurationMs);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [isToggling, toggleDurationMs]);
+
+  const handleClick = () => {
+    if (disabled) return;
+    const nextChecked = !checked;
+    setToggleDirection(nextChecked ? "forward" : "backward");
+    setIsToggling(true);
+    onChange?.(nextChecked);
+    onToggle?.(nextChecked);
+  };
+
+  const handleMouseEnter = () => {
+    if (!disabled) setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setIsPressed(false);
+  };
+
+  const handleMouseDown = () => {
+    if (!disabled) setIsPressed(true);
+  };
+
+  const handleMouseUp = () => {
+    setIsPressed(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      handleClick();
+    }
+  };
+
+  return {
+    isHovered,
+    isPressed,
+    isToggling,
+    toggleDirection,
+    handlers: {
+      onClick: handleClick,
+      onKeyDown: handleKeyDown,
+      onMouseEnter: handleMouseEnter,
+      onMouseLeave: handleMouseLeave,
+      onMouseDown: handleMouseDown,
+      onMouseUp: handleMouseUp,
+    },
+  };
+}
+
+interface NormalizedSwitchConfig {
+  cfg: SwitchSizeConfig;
+  disabled: boolean;
+  bimodal: boolean;
+  thumbReverseTravel: boolean;
+  thumbSpring: typeof DEFAULT_THUMB_SPRING;
+  toggleDurationMs: number;
+}
+
+function normalizeSwitchConfig(
+  props: FancySwitchProps,
+): NormalizedSwitchConfig {
+  const sizeKey = props.size ?? "medium";
+  return {
+    cfg: SWITCH_SIZE_CONFIGS[sizeKey] ?? SWITCH_SIZE_CONFIGS.medium,
+    disabled: Boolean(props.disabled),
+    bimodal: Boolean(props.bimodal),
+    thumbReverseTravel: Boolean(props.thumbReverseTravel),
+    thumbSpring: props.thumbSpring ?? DEFAULT_THUMB_SPRING,
+    toggleDurationMs: props.toggleDurationMs ?? 300,
+  };
+}
+
+const RESERVED_PROP_KEYS = new Set([
+  "checked",
+  "onChange",
+  "onToggle",
+  "size",
+  "disabled",
+  "ariaLabel",
+  "tooltipTitle",
+  "className",
+  "data-testid",
+  "bimodal",
+  "thumbContent",
+  "peekingElement",
+  "backgroundDecorations",
+  "overlayDecorations",
+  "thumbReverseTravel",
+  "thumbSpring",
+  "toggleDurationMs",
+  "customThumbColor",
+  "customTrackBackground",
+  "customTrackBorder",
+]);
+
+function getCleanRestProps(props: FancySwitchProps): Record<string, unknown> {
+  const clean: Record<string, unknown> = {};
+  for (const key of Object.keys(props)) {
+    if (!RESERVED_PROP_KEYS.has(key)) {
+      clean[key] = (props as unknown as Record<string, unknown>)[key];
+    }
+  }
+  return clean;
+}
 
 export const FancySwitch = forwardRef<HTMLButtonElement, FancySwitchProps>(
   (props, ref) => {
-    const config = { ...DEFAULT_FANCY_SWITCH_PROPS, ...props };
-    const {
-      checked,
-      onChange,
-      onToggle,
-      size,
-      disabled,
-      ariaLabel,
-      tooltipTitle,
-      className,
-      "data-testid": dataTestId,
-      bimodal,
-      thumbContent,
-      peekingElement,
-      backgroundDecorations,
-      overlayDecorations,
-      thumbReverseTravel,
-      thumbSpring,
-      toggleDurationMs,
-      customThumbColor,
-      customTrackBackground,
-      customTrackBorder,
-      onClick,
-      onKeyDown,
-      onMouseEnter,
-      onMouseLeave,
-      onMouseDown,
-      onMouseUp,
-      ...restProps
-    } = config;
+    const config = normalizeSwitchConfig(props);
+    const restProps = getCleanRestProps(props);
 
-    const cfg = SWITCH_SIZE_CONFIGS[size] ?? SWITCH_SIZE_CONFIGS.medium;
-    const isSwitchDisabled = Boolean(disabled);
-
-    const controller = useFancySwitchController({
-      disabled: isSwitchDisabled,
-      checked,
-      onChange,
-      onToggle,
-      toggleDurationMs,
-      onClick,
-      onKeyDown,
-      onMouseEnter,
-      onMouseLeave,
-      onMouseDown,
-      onMouseUp,
+    const interaction = useSwitchInteraction({
+      checked: props.checked,
+      disabled: config.disabled,
+      toggleDurationMs: config.toggleDurationMs,
+      onChange: props.onChange,
+      onToggle: props.onToggle,
     });
 
+    const targetX = resolveTargetThumbX(
+      props.checked,
+      config.thumbReverseTravel,
+      config.cfg.travelX,
+    );
+    const scale = resolveThumbScale(
+      interaction.isPressed,
+      interaction.isHovered,
+    );
+
     const renderState: FancySwitchRenderState = {
-      checked,
-      isHovered: controller.isHovered,
-      isPressed: controller.isPressed,
-      isToggling: controller.isToggling,
-      toggleDirection: controller.toggleDirection,
-      cfg,
-      disabled: isSwitchDisabled,
+      checked: props.checked,
+      isHovered: interaction.isHovered,
+      isPressed: interaction.isPressed,
+      isToggling: interaction.isToggling,
+      toggleDirection: interaction.toggleDirection,
+      cfg: config.cfg,
+      disabled: config.disabled,
     };
 
-    const targetThumbX = resolveTargetThumbX(
-      checked,
-      cfg.travelX,
-      thumbReverseTravel,
-    );
-    const thumbScale = resolveThumbScale(controller.isPressed);
+    const trackChecked = config.bimodal ? false : props.checked;
 
-    const trackNode = (
+    const trackElement = (
       <FancyTrack
         ref={ref}
         type="button"
         role="switch"
-        aria-checked={checked}
-        aria-label={ariaLabel}
-        disabled={isSwitchDisabled}
-        $cfg={cfg}
-        $checked={bimodal ? false : checked}
-        $disabled={isSwitchDisabled}
-        $customBackground={customTrackBackground?.(renderState)}
-        $customBorder={customTrackBorder?.(renderState)}
-        className={className}
-        data-testid={dataTestId}
-        onClick={controller.handleClick}
-        onKeyDown={controller.handleKeyDown}
-        onMouseEnter={controller.handleMouseEnter}
-        onMouseLeave={controller.handleMouseLeave}
-        onMouseDown={controller.handleMouseDown}
-        onMouseUp={controller.handleMouseUp}
-        whileTap={isSwitchDisabled ? undefined : { scale: 0.96 }}
+        aria-checked={props.checked}
+        aria-label={props.ariaLabel}
+        disabled={config.disabled}
+        className={props.className}
+        data-testid={props["data-testid"]}
+        $cfg={config.cfg}
+        $checked={trackChecked}
+        $disabled={config.disabled}
+        $customBackground={props.customTrackBackground?.(renderState)}
+        $customBorder={props.customTrackBorder?.(renderState)}
+        {...interaction.handlers}
         {...restProps}
       >
         <TrackDecorations
           state={renderState}
-          backgroundDecorations={backgroundDecorations}
-          peekingElement={peekingElement}
-          overlayDecorations={overlayDecorations}
+          backgroundDecorations={props.backgroundDecorations}
+          overlayDecorations={props.overlayDecorations}
         />
 
+        <AnimatePresence>{props.peekingElement?.(renderState)}</AnimatePresence>
+
         <FancyThumb
-          $cfg={cfg}
-          $checked={checked}
-          $customColor={customThumbColor?.(renderState)}
-          animate={{
-            x: targetThumbX,
-            ...thumbScale,
-          }}
-          transition={thumbSpring}
+          $cfg={config.cfg}
+          $checked={trackChecked}
+          $customColor={props.customThumbColor?.(renderState)}
+          animate={{ x: targetX, scale }}
+          transition={config.thumbSpring}
         >
-          {thumbContent(renderState)}
+          {props.thumbContent(renderState)}
         </FancyThumb>
       </FancyTrack>
     );
 
-    return wrapWithTooltip(trackNode, tooltipTitle, isSwitchDisabled);
+    return wrapWithTooltip(trackElement, props.tooltipTitle, config.disabled);
   },
 );
 
 FancySwitch.displayName = "FancySwitch";
+
 export default FancySwitch;

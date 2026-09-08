@@ -58,7 +58,7 @@ export default function DebugThemeSwitch({
             <BugReportRoundedIcon
               sx={{
                 fontSize: cfg.thumbIconSize,
-                color: checked ? "inherit" : "text.secondary",
+                color: checked ? "common.black" : "text.secondary",
               }}
             />
           )}
@@ -67,5 +67,3 @@ export default function DebugThemeSwitch({
     </Tooltip>
   );
 }
-
-export { DebugThemeSwitch as DebugThemeToggle };

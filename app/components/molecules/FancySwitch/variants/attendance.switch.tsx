@@ -1,33 +1,18 @@
-import { forwardRef } from "react";
-import { AnimatePresence, type HTMLMotionProps } from "framer-motion";
+import React, { forwardRef } from "react";
+import { AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@mui/material/styles";
-import FancySwitch, {
-  type SwitchSize,
-} from "~/components/molecules/FancySwitch";
+import FancySwitch from "../FancySwitch";
+import type {
+  AttendanceSwitchProps,
+  AttendanceMode,
+} from "../FancySwitch.types";
 import {
   MapPinDrop,
   RemoteHomeGlyph,
   HoloNetworkSilhouette,
   PeekingPedestrianCompanion,
-} from "./AttendanceGlyphs";
-
-export type AttendanceMode = "in-person" | "remote";
-
-export interface AttendanceSwitchProps extends Omit<
-  HTMLMotionProps<"button">,
-  "size" | "onChange" | "onToggle" | "children"
-> {
-  mode?: AttendanceMode;
-  checked?: boolean; // true = in-person, false = remote
-  onChangeMode?: (mode: AttendanceMode) => void;
-  onChange?: (checked: boolean) => void;
-  onToggle?: (checked: boolean) => void;
-  size?: SwitchSize;
-  disabled?: boolean;
-  className?: string;
-  "data-testid"?: string;
-}
+} from "../FancySwitch.glyphs";
 
 function resolveIsInPerson(
   checked: boolean | undefined,
@@ -38,12 +23,6 @@ function resolveIsInPerson(
   return true;
 }
 
-/**
- * In-Person / Remote Switch
- * - Bimodal switch with green for in-person and blue for remote (no ON/OFF state).
- * - A Map Pin drops from above for in-person; a workstation glyph for remote.
- * - Pedestrian peeks from under the switch circle like the airplane in LanguageSwitch and walks on toggle.
- */
 export const AttendanceSwitch = forwardRef<
   HTMLButtonElement,
   AttendanceSwitchProps
@@ -132,4 +111,3 @@ export const AttendanceSwitch = forwardRef<
 });
 
 AttendanceSwitch.displayName = "AttendanceSwitch";
-export default AttendanceSwitch;

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
 import React from "react";
 import {
   render,
@@ -40,6 +40,16 @@ function renderSidebar(props: React.ComponentProps<typeof Sidebar>) {
 }
 
 describe("Sidebar Component", () => {
+  beforeAll(() => {
+    if (typeof Animation !== "undefined" && Animation.prototype.cancel) {
+      const originalCancel = Animation.prototype.cancel;
+      Animation.prototype.cancel = function (this: Animation) {
+        this.finished?.catch(() => {});
+        return originalCancel.call(this);
+      };
+    }
+  });
+
   afterEach(() => {
     cleanup();
   });

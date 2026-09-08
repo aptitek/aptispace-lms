@@ -6,20 +6,19 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
-import { ZenithSwitch } from "~/components/molecules/ThemeSwitch/ThemeSwitch";
-import { MeridianSwitch } from "~/components/molecules/LanguageSwitch/LanguageSwitch";
 import {
+  ZenithSwitch,
+  MeridianSwitch,
   ClockFormatSwitch,
-  type ClockFormat,
-} from "~/components/molecules/ClockFormatSwitch";
-import {
   AttendanceSwitch,
+  type ClockFormat,
   type AttendanceMode,
-} from "~/components/molecules/AttendanceSwitch";
-import type { SwitchSize } from "~/components/atoms/Switch";
+  type SupportedLanguage,
+  type SwitchSize,
+} from "~/components/molecules/FancySwitch";
 
 const meta = {
-  title: "Molecules/FancySwitchSuite",
+  title: "Molecules/FancySwitch",
   parameters: {
     layout: "centered",
   },
@@ -57,7 +56,7 @@ const SIZE_PRESETS: SwitchSize[] = ["small", "medium", "large"];
 
 const AllFancySwitchesStoryComponent: React.FC = () => {
   const [isDark, setIsDark] = useState(false);
-  const [lang, setLang] = useState<"en" | "fr">("en");
+  const [lang, setLang] = useState<SupportedLanguage>("en");
   const [clockFormat, setClockFormat] = useState<ClockFormat>("12h");
   const [attendanceMode, setAttendanceMode] =
     useState<AttendanceMode>("in-person");
@@ -181,6 +180,46 @@ const AllFancySwitchesStoryComponent: React.FC = () => {
 
 export const AllFancySwitchesShowcase: StoryObj = {
   render: () => <AllFancySwitchesStoryComponent />,
+};
+
+const ThemeSwitchLightStoryComponent: React.FC = () => {
+  const [isDark, setIsDark] = useState(false);
+  return <ZenithSwitch checked={isDark} onChange={setIsDark} size="medium" />;
+};
+
+export const ThemeSwitchLight: StoryObj<typeof ZenithSwitch> = {
+  render: () => <ThemeSwitchLightStoryComponent />,
+};
+
+const ThemeSwitchDarkStoryComponent: React.FC = () => {
+  const [isDark, setIsDark] = useState(true);
+  return <ZenithSwitch checked={isDark} onChange={setIsDark} size="medium" />;
+};
+
+export const ThemeSwitchDark: StoryObj<typeof ZenithSwitch> = {
+  render: () => <ThemeSwitchDarkStoryComponent />,
+};
+
+const LanguageSwitchEnglishStoryComponent: React.FC = () => {
+  const [lang, setLang] = useState<SupportedLanguage>("en");
+  return (
+    <MeridianSwitch language={lang} onLanguageChange={setLang} size="medium" />
+  );
+};
+
+export const LanguageSwitchEnglish: StoryObj<typeof MeridianSwitch> = {
+  render: () => <LanguageSwitchEnglishStoryComponent />,
+};
+
+const LanguageSwitchFrenchStoryComponent: React.FC = () => {
+  const [lang, setLang] = useState<SupportedLanguage>("fr");
+  return (
+    <MeridianSwitch language={lang} onLanguageChange={setLang} size="medium" />
+  );
+};
+
+export const LanguageSwitchFrench: StoryObj<typeof MeridianSwitch> = {
+  render: () => <LanguageSwitchFrenchStoryComponent />,
 };
 
 const ClockSwitch12hStoryComponent: React.FC = () => {

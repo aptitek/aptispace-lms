@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import LanguageSwitch from "~/components/molecules/LanguageSwitch/LanguageSwitch";
-import ThemeSwitch from "~/components/molecules/ThemeSwitch/ThemeSwitch";
-import DebugThemeSwitch from "~/components/molecules/ThemeSwitch/DebugThemeSwitch";
+import {
+  LanguageSwitch,
+  ThemeSwitch,
+  DebugThemeSwitch,
+} from "~/components/molecules/FancySwitch";
 import StatusGatewayTrigger from "~/components/molecules/StatusCenter/StatusGatewayTrigger";
 import {
   DEFAULT_HEADER_TABS,

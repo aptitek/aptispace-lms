@@ -1,77 +1,21 @@
 import React from "react";
-import { styled, useTheme } from "@mui/material/styles";
-import {
-  motion,
-  type TargetAndTransition,
-  type Transition,
-} from "framer-motion";
+import { useTheme } from "@mui/material/styles";
+import type { TargetAndTransition, Transition } from "framer-motion";
 import PlaceRoundedIcon from "@mui/icons-material/PlaceRounded";
 import LaptopRoundedIcon from "@mui/icons-material/LaptopRounded";
 import DirectionsWalkRoundedIcon from "@mui/icons-material/DirectionsWalkRounded";
 import LanguageRoundedIcon from "@mui/icons-material/LanguageRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
-import {
-  M3_SPRINGS,
-  M3_MOTION_DURATIONS,
-  M3_MOTION_EASINGS,
-} from "~/tokens/motion";
+import { M3_SPRINGS } from "~/tokens/motion";
 import type { SwitchSizeConfig } from "~/components/atoms/Switch";
-import { PeekingPedestrianLayer } from "./AttendanceSwitch.styles";
+import {
+  GlyphMotionCenter,
+  PedestrianMirrorBox,
+  PeekingCompanionLayer,
+  TrackHoloZone,
+  HoloGlyphWrapper,
+} from "../FancySwitch.styles";
 
-const GlyphMotionCenter = styled(motion.div)({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-});
-
-const PedestrianMirrorBox = styled("div", {
-  shouldForwardProp: (prop) => prop !== "$isMirrored",
-})<{ $isMirrored: boolean }>(({ $isMirrored }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  transform: $isMirrored ? "scaleX(-1)" : "scaleX(1)",
-  transformOrigin: "center center",
-  transition: `transform ${M3_MOTION_DURATIONS.short4}ms ${M3_MOTION_EASINGS.css.standard}`,
-}));
-
-export const TrackHoloZone = styled("div", {
-  shouldForwardProp: (prop) => prop !== "$position" && prop !== "$cfg",
-})<{
-  $position: "left" | "right";
-  $cfg: SwitchSizeConfig;
-}>(({ $position, $cfg }) => ({
-  position: "absolute",
-  top: "50%",
-  [$position === "left" ? "left" : "right"]: $cfg.padX,
-  transform: "translateY(-50%)",
-  width: $cfg.thumbSize,
-  height: $cfg.thumbSize,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 1,
-  pointerEvents: "none",
-}));
-
-const HoloGlyphWrapper = styled("div", {
-  shouldForwardProp: (prop) => prop !== "$active" && prop !== "$activeColor",
-})<{
-  $active: boolean;
-  $activeColor: string;
-}>(({ theme, $active, $activeColor }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  color: $active ? $activeColor : theme.palette.text.secondary,
-  opacity: $active ? 0.38 : 0.12,
-  transition: `all ${M3_MOTION_DURATIONS.medium2}ms ${M3_MOTION_EASINGS.css.standard}`,
-  filter: $active ? `drop-shadow(0 0 2px ${$activeColor})` : "none",
-}));
-
-/**
- * MD3 Map Pin with drop-in animation from above (In-Person)
- */
 export const MapPinDrop: React.FC<{ size: number }> = ({ size }) => {
   return (
     <GlyphMotionCenter
@@ -94,9 +38,6 @@ export const MapPinDrop: React.FC<{ size: number }> = ({ size }) => {
   );
 };
 
-/**
- * MD3 Workstation / Laptop glyph (Remote)
- */
 export const RemoteHomeGlyph: React.FC<{ size: number }> = ({ size }) => {
   return (
     <GlyphMotionCenter
@@ -119,16 +60,10 @@ export const RemoteHomeGlyph: React.FC<{ size: number }> = ({ size }) => {
   );
 };
 
-/**
- * MD3 Walking pedestrian glyph
- */
 export const WalkingPedestrianGlyph: React.FC<{ size: number }> = ({
   size,
 }) => <DirectionsWalkRoundedIcon sx={{ fontSize: size }} aria-hidden="true" />;
 
-/**
- * Holographic MDI internet/network & home outline rendered in track background
- */
 export const HoloNetworkSilhouette: React.FC<{
   cfg: SwitchSizeConfig;
   isInPerson: boolean;
@@ -138,7 +73,6 @@ export const HoloNetworkSilhouette: React.FC<{
 
   return (
     <>
-      {/* Left zone: Remote Home Holo Outline */}
       <TrackHoloZone $position="left" $cfg={cfg}>
         <HoloGlyphWrapper
           $active={!isInPerson}
@@ -148,7 +82,6 @@ export const HoloNetworkSilhouette: React.FC<{
         </HoloGlyphWrapper>
       </TrackHoloZone>
 
-      {/* Right zone: In-Person / Internet Network Holo Outline */}
       <TrackHoloZone $position="right" $cfg={cfg}>
         <HoloGlyphWrapper
           $active={isInPerson}
@@ -161,11 +94,6 @@ export const HoloNetworkSilhouette: React.FC<{
   );
 };
 
-/**
- * Peeking Pedestrian Companion
- * Peeks from under the switch circle exactly like the airplane in LanguageSwitch.
- * When switching, animates walking across from under the circle to the other side!
- */
 export function PeekingPedestrianCompanion({
   cfg,
   isInPerson,
@@ -187,7 +115,6 @@ export function PeekingPedestrianCompanion({
 
   const leftTuckedX = leftCenterX - halfPed;
   const leftPeekX = leftTuckedX + peekOffset;
-
   const rightTuckedX = rightCenterX - halfPed;
   const rightPeekX = rightTuckedX - peekOffset;
 
@@ -224,12 +151,10 @@ export function PeekingPedestrianCompanion({
     transitionProps = M3_SPRINGS.standard.effects.fast;
   }
 
-  // Horizontally mirror the pedestrian when walking away from in-person (towards remote / left)
-  // or when resting/peeking while currently in-person (ready to walk away)
   const isMirrored = isWalking ? walkDirection === "backward" : isInPerson;
 
   return (
-    <PeekingPedestrianLayer
+    <PeekingCompanionLayer
       $size={pedSize}
       data-testid="peeking-pedestrian"
       initial={false}
@@ -242,6 +167,6 @@ export function PeekingPedestrianCompanion({
       >
         <WalkingPedestrianGlyph size={pedSize} />
       </PedestrianMirrorBox>
-    </PeekingPedestrianLayer>
+    </PeekingCompanionLayer>
   );
 }

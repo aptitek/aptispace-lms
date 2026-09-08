@@ -1,6 +1,10 @@
 import { styled } from "@mui/material/styles";
 import { motion, type Transition } from "framer-motion";
-import { M3_SPRINGS } from "~/tokens/motion";
+import {
+  M3_SPRINGS,
+  M3_MOTION_DURATIONS,
+  M3_MOTION_EASINGS,
+} from "~/tokens/motion";
 import {
   type SwitchSize,
   type SwitchSizeConfig,
@@ -121,4 +125,149 @@ export const ToggleWrapper = styled("div")(({ theme }) => ({
   display: "inline-flex",
   alignItems: "center",
   gap: theme.spacing(0.75),
+}));
+
+export const TrackHoloZone = styled("div", {
+  shouldForwardProp: filterDollarProp,
+})<{
+  $position: "left" | "right";
+  $cfg: SwitchSizeConfig;
+}>(({ $position, $cfg }) => ({
+  position: "absolute",
+  top: "50%",
+  [$position === "left" ? "left" : "right"]: $cfg.padX + 1,
+  transform: "translateY(-50%)",
+  width: $cfg.thumbSize,
+  height: $cfg.thumbSize,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 1,
+  pointerEvents: "none",
+}));
+
+export const HoloGlyphWrapper = styled("div", {
+  shouldForwardProp: filterDollarProp,
+})<{
+  $active: boolean;
+  $activeColor: string;
+}>(({ theme, $active, $activeColor }) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  color: $active ? $activeColor : theme.palette.text.secondary,
+  opacity: $active ? 0.38 : 0.12,
+  transition: `all ${M3_MOTION_DURATIONS.medium2}ms ${M3_MOTION_EASINGS.css.standard}`,
+  filter: $active ? `drop-shadow(0 0 2px ${$activeColor})` : "none",
+}));
+
+export const CountryMapZone = styled("div", {
+  shouldForwardProp: filterDollarProp,
+})<{
+  $position: "left" | "right";
+  $cfg: SwitchSizeConfig;
+}>(({ $position, $cfg }) => ({
+  position: "absolute",
+  top: "50%",
+  [$position === "left" ? "left" : "right"]: 1,
+  transform: "translateY(-50%)",
+  width: $cfg.mapWidth,
+  height: $cfg.mapHeight,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 1,
+  pointerEvents: "none",
+}));
+
+export const GlyphMotionCenter = styled(motion.div)({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+export const PedestrianMirrorBox = styled("div", {
+  shouldForwardProp: filterDollarProp,
+})<{ $isMirrored: boolean }>(({ $isMirrored }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transform: $isMirrored ? "scaleX(-1)" : "scaleX(1)",
+  transformOrigin: "center center",
+  transition: `transform ${M3_MOTION_DURATIONS.short4}ms ${M3_MOTION_EASINGS.css.standard}`,
+}));
+
+export const PeekingCompanionLayer = styled(motion.div, {
+  shouldForwardProp: filterDollarProp,
+})<{ $size: number }>(({ theme, $size }) => ({
+  position: "absolute",
+  top: "50%",
+  left: 0,
+  width: $size,
+  height: $size,
+  marginTop: -$size / 2,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 2,
+  pointerEvents: "none",
+  color: theme.palette.text.primary,
+  filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25))",
+}));
+
+export const InactiveDigitalSlot = styled("div", {
+  shouldForwardProp: filterDollarProp,
+})<{
+  $position: "left" | "right";
+  $cfg: SwitchSizeConfig;
+}>(({ $position, $cfg }) => ({
+  position: "absolute",
+  top: "50%",
+  [$position === "left" ? "left" : "right"]: $cfg.padX,
+  transform: "translateY(-50%)",
+  width: $cfg.thumbSize,
+  height: $cfg.thumbSize,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 1,
+  pointerEvents: "none",
+}));
+
+export const TransitClockWrapper = styled(motion.div)(() => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "100%",
+  height: "100%",
+}));
+
+export const ArcOverlaySvg = styled("svg")({
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  pointerEvents: "none",
+  zIndex: 1,
+});
+
+export const StateRippleLayer = styled(motion.div, {
+  shouldForwardProp: filterDollarProp,
+})<{
+  $cfg: SwitchSizeConfig;
+  $isDark: boolean;
+}>(({ theme, $cfg, $isDark }) => ({
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  width: $cfg.stateLayerSize,
+  height: $cfg.stateLayerSize,
+  borderRadius: "50%",
+  transform: "translate(-50%, -50%)",
+  pointerEvents: "none",
+  zIndex: 0,
+  backgroundColor: $isDark
+    ? theme.palette.action.hover
+    : theme.palette.action.selected,
 }));
