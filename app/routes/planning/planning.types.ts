@@ -54,7 +54,11 @@ export function mapClassToSchedulerEvent(c: {
   };
 }
 
-export function formatTimeRange(start: Date, end: Date): string {
+export function formatTimeRange(
+  start: Date,
+  end: Date,
+  locale?: string,
+): string {
   const timeOpts: Intl.DateTimeFormatOptions = {
     hour: "2-digit",
     minute: "2-digit",
@@ -64,9 +68,15 @@ export function formatTimeRange(start: Date, end: Date): string {
     month: "short",
     day: "numeric",
   };
-  const dateStr = start.toLocaleDateString(undefined, dateOpts);
-  const startStr = start.toLocaleTimeString(undefined, timeOpts);
-  const endStr = end.toLocaleTimeString(undefined, timeOpts);
+  let dateStr = start.toLocaleDateString(locale, dateOpts);
+  if (locale?.startsWith("fr")) {
+    dateStr = dateStr
+      .split(" ")
+      .map((w) => (w.length > 0 ? w[0].toUpperCase() + w.slice(1) : w))
+      .join(" ");
+  }
+  const startStr = start.toLocaleTimeString(locale, timeOpts);
+  const endStr = end.toLocaleTimeString(locale, timeOpts);
   return `${dateStr} • ${startStr} - ${endStr}`;
 }
 

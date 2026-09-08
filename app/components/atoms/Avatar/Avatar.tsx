@@ -9,6 +9,10 @@ import {
 } from "./Avatar.styles";
 import ShapeDefs from "./ShapeDefs";
 import { getRoleAvatarShape } from "~/tokens/shapes";
+import {
+  isDefaultGithubAvatarUrl,
+  isDefaultGithubAvatarImage,
+} from "~/utils/avatar";
 
 export function isUnnamedUser(name?: string): boolean {
   if (!name) return true;
@@ -37,7 +41,9 @@ interface RenderAvatarContentOptions {
   src?: string;
   alt?: string;
   hasImgError?: boolean;
+  isDefaultGithub?: boolean;
   onImgError?: () => void;
+  onDefaultGithubDetected?: () => void;
   children?: ReactNode;
   initials?: string | null;
   placeholderIcon?: ReactNode;
@@ -48,19 +54,46 @@ function renderAvatarContent(options: RenderAvatarContentOptions): ReactNode {
     src,
     alt,
     hasImgError,
+    isDefaultGithub,
     onImgError,
+    onDefaultGithubDetected,
     children,
     initials,
     placeholderIcon,
   } = options;
 
+  if (isDefaultGithub) {
+    return (
+      <FallbackAvatarHolder data-testid="avatar-placeholder-holder">
+        <PersonRoundedIcon data-testid="avatar-mdi-placeholder" />
+      </FallbackAvatarHolder>
+    );
+  }
+
   if (src && !hasImgError) {
     return (
       <Box
         component="img"
+        ref={(node: HTMLImageElement | null) => {
+          if (!node) return;
+          if (node.complete) {
+            if (node.naturalWidth === 0) {
+              onImgError?.();
+            } else if (isDefaultGithubAvatarImage(node)) {
+              onDefaultGithubDetected?.();
+            }
+          }
+        }}
         src={src}
         alt={alt ?? "Avatar"}
+        crossOrigin="anonymous"
         loading="lazy"
+        onLoad={(e) => {
+          const img = e.currentTarget;
+          if (isDefaultGithubAvatarImage(img)) {
+            onDefaultGithubDetected?.();
+          }
+        }}
         onError={onImgError}
       />
     );
@@ -122,9 +155,13 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
     } = props;
 
     const [hasImgError, setHasImgError] = useState(false);
+    const [isDefaultGithub, setIsDefaultGithub] = useState(() =>
+      isDefaultGithubAvatarUrl(src),
+    );
 
     useEffect(() => {
       setHasImgError(false);
+      setIsDefaultGithub(isDefaultGithubAvatarUrl(src));
     }, [src]);
 
     const resolvedShape = resolveAvatarShape(shape, role);
@@ -134,7 +171,9 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
       src,
       alt,
       hasImgError,
+      isDefaultGithub,
       onImgError: () => setHasImgError(true),
+      onDefaultGithubDetected: () => setIsDefaultGithub(true),
       children,
       initials,
       placeholderIcon,

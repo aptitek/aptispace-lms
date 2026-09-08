@@ -93,7 +93,7 @@ export function InstitutionCardSkeleton(props: InstitutionCardSkeletonProps) {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 2,
+          gap: (theme) => theme.spacing(1.25),
           opacity: config.isGhost ? 0.35 : 1,
           width: "100%",
           pointerEvents: "none",
@@ -103,19 +103,27 @@ export function InstitutionCardSkeleton(props: InstitutionCardSkeletonProps) {
           <Skeleton
             variant="rounded"
             width={100}
-            height={40}
+            height={36}
             animation={config.animation}
             sx={{ borderRadius: "8px" }}
           />
         </LogoContainer>
         <Skeleton
-          variant="text"
+          variant="rounded"
           width="60%"
-          height={22}
+          height={20}
           animation={config.animation}
           sx={{ borderRadius: "4px" }}
         />
-        {!config.isGhost && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "100%",
+            mt: 0.5,
+          }}
+        >
           <Skeleton
             variant="rounded"
             width={80}
@@ -123,7 +131,14 @@ export function InstitutionCardSkeleton(props: InstitutionCardSkeletonProps) {
             animation={config.animation}
             sx={{ borderRadius: "9999px" }}
           />
-        )}
+          <Skeleton
+            variant="rounded"
+            width={22}
+            height={22}
+            animation={config.animation}
+            sx={{ borderRadius: "4px" }}
+          />
+        </Box>
       </Box>
 
       {config.isInteractive && (

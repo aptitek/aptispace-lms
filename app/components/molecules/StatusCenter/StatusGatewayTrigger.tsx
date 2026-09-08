@@ -42,7 +42,7 @@ const TriggerIconButton = styled("button", {
   height: 32,
   padding: 0,
   backgroundColor: "transparent",
-  border: `1px solid transparent`,
+  border: "none",
   borderRadius: "50%",
   cursor: "pointer",
   outline: "none",
@@ -59,14 +59,12 @@ const TriggerIconButton = styled("button", {
 
   "&:hover": {
     backgroundColor: theme.palette.action.hover,
-    borderColor: theme.palette.divider,
     transform: "scale(1.08)",
-    boxShadow: theme.shadows[1],
   },
 
   "&:focus-visible": {
-    borderColor: theme.palette.primary.main,
-    boxShadow: `0 0 0 2px ${theme.palette.primary.main}66`,
+    outline: `2px solid ${theme.palette.primary.main}`,
+    outlineOffset: 2,
   },
 }));
 

@@ -33,6 +33,54 @@ import StatusSnackbar from "./components/molecules/StatusCenter/StatusSnackbar";
 import StatusTerminalCard from "./components/organisms/StatusCenter/StatusTerminalCard";
 import ShapeDefs from "./components/atoms/Avatar/ShapeDefs";
 import { isHydrationError } from "./utils/hydrationTracker";
+import dayjs from "dayjs";
+import updateLocale from "dayjs/plugin/updateLocale";
+import "dayjs/locale/fr";
+import "dayjs/locale/en";
+
+dayjs.extend(updateLocale);
+dayjs.updateLocale("fr", {
+  months: [
+    "Janvier",
+    "Février",
+    "Mars",
+    "Avril",
+    "Mai",
+    "Juin",
+    "Juillet",
+    "Août",
+    "Septembre",
+    "Octobre",
+    "Novembre",
+    "Décembre",
+  ],
+  monthsShort: [
+    "Janv.",
+    "Févr.",
+    "Mars",
+    "Avr.",
+    "Mai",
+    "Juin",
+    "Juil.",
+    "Août",
+    "Sept.",
+    "Oct.",
+    "Nov.",
+    "Déc.",
+  ],
+  weekdays: [
+    "Dimanche",
+    "Lundi",
+    "Mardi",
+    "Mercredi",
+    "Jeudi",
+    "Vendredi",
+    "Samedi",
+  ],
+  weekdaysShort: ["Dim.", "Lun.", "Mar.", "Mer.", "Jeu.", "Ven.", "Sam."],
+  weekdaysMin: ["Di", "Lu", "Ma", "Me", "Je", "Ve", "Sa"],
+});
+
 import { LANGUAGE_STORAGE_KEY } from "./i18n";
 import "~/i18n";
 import "./app.css";
@@ -57,11 +105,24 @@ export const links: Route.LinksFunction = () => [
 
 function AppThemeContainer({ children }: { children: React.ReactNode }) {
   const { mode } = useThemeMode();
+  const { i18n } = useTranslation();
+  const currentLang = i18n.resolvedLanguage || i18n.language || "en";
+  const adapterLocale = currentLang.startsWith("fr") ? "fr" : "en";
   const theme = useMemo(() => getThemeByMode(mode), [mode]);
+
+  dayjs.locale(adapterLocale);
+
+  useEffect(() => {
+    dayjs.locale(adapterLocale);
+  }, [adapterLocale]);
 
   return (
     <ThemeProvider theme={theme}>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <LocalizationProvider
+        key={adapterLocale}
+        dateAdapter={AdapterDayjs}
+        adapterLocale={adapterLocale}
+      >
         <CssBaseline />
         <ShapeDefs />
         {children}

@@ -6,13 +6,20 @@ vi.mock("@mui/x-scheduler/event-calendar", () => ({
     React.createElement("div", { "data-testid": "event-calendar" }),
 }));
 
-import Planning, { meta, loader } from "./planning";
+import Planning, {
+  meta,
+  loader,
+  getSchedulerLocaleText,
+  getSchedulerDateLocale,
+} from "./planning";
 import {
   CalendarSkeleton,
   CalendarErrorState,
   CalendarEmptyState,
+  CalendarContentArea,
 } from "./planning.states";
-import { mapClassToSchedulerEvent } from "./planning.types";
+import { frFR, enUS } from "@mui/x-scheduler/locales";
+import { mapClassToSchedulerEvent, formatTimeRange } from "./planning.types";
 import {
   createSvgDataUri,
   DEVICES_ICON_PATH,
@@ -219,6 +226,150 @@ describe("Planning Route", () => {
       expect(devicesUri).toContain("%23ffffff");
       expect(locationUri).toContain('url("data:image/svg+xml,');
       expect(locationUri).toContain("%23ffffff");
+    });
+  });
+
+  describe("CalendarContentArea", () => {
+    it("renders CalendarErrorState when loadError is true", () => {
+      const element = CalendarContentArea({
+        loadError: true,
+        onRetry: vi.fn(),
+        feedToken: "token-123",
+        userId: "user-1",
+        hasCalendarComponent: true,
+        classesCount: 2,
+        showEmptyGrid: false,
+        isAdmin: true,
+        onAddClass: vi.fn(),
+        onShowGrid: vi.fn(),
+        children: React.createElement("div", {
+          "data-testid": "calendar-content",
+        }),
+      });
+
+      expect(element).toBeDefined();
+      expect(element.type).toBe(CalendarErrorState);
+    });
+
+    it("renders CalendarSkeleton when calendar component is not yet loaded", () => {
+      const element = CalendarContentArea({
+        loadError: false,
+        onRetry: vi.fn(),
+        feedToken: "token-123",
+        userId: "user-1",
+        hasCalendarComponent: false,
+        classesCount: 2,
+        showEmptyGrid: false,
+        isAdmin: true,
+        onAddClass: vi.fn(),
+        onShowGrid: vi.fn(),
+        children: React.createElement("div", {
+          "data-testid": "calendar-content",
+        }),
+      });
+
+      expect(element).toBeDefined();
+      expect(element.type).toBe(CalendarSkeleton);
+    });
+
+    it("renders CalendarEmptyState when classesCount is 0 and showEmptyGrid is false", () => {
+      const element = CalendarContentArea({
+        loadError: false,
+        onRetry: vi.fn(),
+        feedToken: "token-123",
+        userId: "user-1",
+        hasCalendarComponent: true,
+        classesCount: 0,
+        showEmptyGrid: false,
+        isAdmin: true,
+        onAddClass: vi.fn(),
+        onShowGrid: vi.fn(),
+        children: React.createElement("div", {
+          "data-testid": "calendar-content",
+        }),
+      });
+
+      expect(element).toBeDefined();
+      expect(element.type).toBe(CalendarEmptyState);
+    });
+
+    it("renders children when calendar is loaded and classes exist", () => {
+      const child = React.createElement("div", {
+        "data-testid": "calendar-content",
+      });
+      const element = CalendarContentArea({
+        loadError: false,
+        onRetry: vi.fn(),
+        feedToken: "token-123",
+        userId: "user-1",
+        hasCalendarComponent: true,
+        classesCount: 2,
+        showEmptyGrid: false,
+        isAdmin: true,
+        onAddClass: vi.fn(),
+        onShowGrid: vi.fn(),
+        children: child,
+      });
+
+      expect(element).toBeDefined();
+      expect(element.props.children).toBe(child);
+    });
+  });
+
+  describe("Calendar i18n Locales", () => {
+    it("provides French and English locale text for EventCalendar", () => {
+      expect(
+        frFR.components.MuiEventCalendar.defaultProps.localeText.today,
+      ).toBe("Aujourd'hui");
+      expect(
+        enUS.components.MuiEventCalendar.defaultProps.localeText.today,
+      ).toBe("Today");
+      expect(
+        frFR.components.MuiEventCalendar.defaultProps.localeText.week,
+      ).toBe("Semaine");
+      expect(
+        enUS.components.MuiEventCalendar.defaultProps.localeText.week,
+      ).toBe("Week");
+    });
+
+    it("resolves scheduler locale text dynamically based on active language", () => {
+      expect(getSchedulerLocaleText("fr")).toBe(
+        frFR.components.MuiEventCalendar.defaultProps.localeText,
+      );
+      expect(getSchedulerLocaleText("fr-FR")).toBe(
+        frFR.components.MuiEventCalendar.defaultProps.localeText,
+      );
+      expect(getSchedulerLocaleText("en")).toBe(
+        enUS.components.MuiEventCalendar.defaultProps.localeText,
+      );
+    });
+
+    it("provides date-fns locales with capitalized French months and weekdays", () => {
+      const frLocale = getSchedulerDateLocale("fr");
+      const enLocale = getSchedulerDateLocale("en");
+
+      expect(frLocale.code).toBe("fr");
+      expect(enLocale.code).toBe("en-US");
+
+      // Verify capitalization is kept for French months and days
+      expect(frLocale.localize?.month(8, { width: "wide" })).toBe("Septembre");
+      expect(frLocale.localize?.month(8, { width: "abbreviated" })).toBe(
+        "Sept.",
+      );
+      expect(frLocale.localize?.day(2, { width: "wide" })).toBe("Mardi");
+      expect(frLocale.localize?.day(2, { width: "abbreviated" })).toBe("Mar.");
+
+      // Verify English remains standard
+      expect(enLocale.localize?.month(8, { width: "wide" })).toBe("September");
+    });
+
+    it("formats time ranges with capitalized French date parts", () => {
+      const start = new Date("2026-09-08T09:00:00.000Z");
+      const end = new Date("2026-09-08T11:00:00.000Z");
+
+      const formattedFr = formatTimeRange(start, end, "fr");
+      expect(formattedFr).toContain("Sept.");
+      expect(formattedFr).toContain("Mar.");
     });
   });
 });

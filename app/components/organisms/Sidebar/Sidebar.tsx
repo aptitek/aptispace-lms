@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import LanguageSwitch from "~/components/molecules/LanguageSwitch/LanguageSwitch";
@@ -13,6 +13,7 @@ import type { HeaderTabItem } from "~/components/molecules/HeaderTabs/HeaderTabs
 import { logout, stopImpersonation, type AuthUser } from "~/utils/auth";
 import { M3_SPRINGS, M3_MOTION_DURATIONS } from "~/tokens/motion";
 import { Tabs, Tab } from "~/components/atoms/Tabs";
+import HoloDecorator from "~/components/molecules/HoloDecorator/HoloDecorator";
 import {
   SidebarRail,
   SidebarHeader,
@@ -83,18 +84,32 @@ function SidebarLogoHeader({
         $isHovered={isHovered}
         data-testid="sidebar-logo-link"
         aria-label={t("meta.appName", "AptiSpace LMS")}
+        initial={false}
+        animate={{
+          width: isHovered ? 196 : 48,
+          paddingLeft: 6,
+          paddingRight: isHovered ? 18 : 6,
+          paddingTop: 5,
+          paddingBottom: 5,
+        }}
+        transition={M3_SPRINGS.expressive.spatial.default}
       >
         <LogoFaviconImg
           src="/favicon.svg"
           alt="AptiSpace"
           data-testid="sidebar-favicon"
+          initial={false}
+          animate={{
+            scale: isHovered ? 1.05 : 1,
+          }}
+          transition={M3_SPRINGS.expressive.effects.fast}
         />
         <LogoTextReveal
           initial={false}
           animate={{
             opacity: isHovered ? 1 : 0,
-            width: isHovered ? "auto" : 0,
             x: isHovered ? 0 : -8,
+            marginLeft: isHovered ? 10 : 0,
           }}
           transition={
             isHovered
@@ -103,8 +118,12 @@ function SidebarLogoHeader({
           }
           data-testid="sidebar-logo-text"
         >
-          <AptiSpan>Apti</AptiSpan>
-          <SpaceSpan>Space</SpaceSpan>
+          <HoloDecorator active={isHovered}>
+            <AptiSpan>Apti</AptiSpan>
+          </HoloDecorator>
+          <HoloDecorator active={isHovered}>
+            <SpaceSpan>Space</SpaceSpan>
+          </HoloDecorator>
         </LogoTextReveal>
       </LogoLink>
     </SidebarHeader>
@@ -189,11 +208,9 @@ function SidebarBottom({
           data-testid="sidebar-debug-theme-toggle"
         />
       </ToggleStackRow>
-      {variant !== "ghost" && (
-        <StatusCenterSlot data-testid="sidebar-status-slot">
-          <StatusGatewayTrigger showBadge={true} />
-        </StatusCenterSlot>
-      )}
+      <StatusCenterSlot data-testid="sidebar-status-slot">
+        <StatusGatewayTrigger showBadge={true} />
+      </StatusCenterSlot>
     </SidebarBottomSection>
   );
 }
@@ -258,10 +275,44 @@ export default function Sidebar({
   const location = useSafeLocation();
   const navigate = useSafeNavigate();
 
+  const [currentUser, setCurrentUser] = useState<AuthUser | null | undefined>(
+    user,
+  );
+
+  useEffect(() => {
+    setCurrentUser(user);
+  }, [user]);
+
+  const currentUserId = currentUser?.id;
+  useEffect(() => {
+    if (!currentUserId) return;
+    const handleGlobalUserUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<
+        Partial<AuthUser> & { id: string }
+      >;
+      if (customEvent.detail && customEvent.detail.id === currentUserId) {
+        setCurrentUser((prev) =>
+          prev ? { ...prev, ...customEvent.detail } : prev,
+        );
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("app:user-updated", handleGlobalUserUpdated);
+      return () => {
+        window.removeEventListener("app:user-updated", handleGlobalUserUpdated);
+      };
+    }
+  }, [currentUserId]);
+
+  const handleUserUpdated = (updatedUser: AuthUser) => {
+    setCurrentUser(updatedUser);
+    onUserUpdated?.(updatedUser);
+  };
+
   const isOnboarding = resolveIsOnboarding(propIsOnboarding, location.pathname);
   const { resolvedVariant, isGhost, visibleTabs } = resolveSidebarDisplay(
     variant,
-    user,
+    currentUser,
     showTabs,
     tabs,
   );
@@ -276,7 +327,7 @@ export default function Sidebar({
   };
 
   const handleAction = () => {
-    executeSidebarAction(user, onReturnToAdmin, onLogout);
+    executeSidebarAction(currentUser, onReturnToAdmin, onLogout);
   };
 
   return (
@@ -296,19 +347,19 @@ export default function Sidebar({
         />
         <SidebarBottom
           variant={resolvedVariant}
-          user={user}
+          user={currentUser}
           isOnboarding={isOnboarding}
           onOpenProfile={() => setIsProfileModalOpen(true)}
           onAction={handleAction}
         />
       </SidebarRail>
 
-      {user && !isOnboarding && (
+      {currentUser && !isOnboarding && (
         <SidebarProfileModal
-          user={user}
+          user={currentUser}
           isOpen={isProfileModalOpen}
           onClose={() => setIsProfileModalOpen(false)}
-          onUserUpdated={onUserUpdated}
+          onUserUpdated={handleUserUpdated}
         />
       )}
     </>

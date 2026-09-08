@@ -19,24 +19,17 @@ import {
 } from "~/utils/auth";
 import { isUserProfileComplete } from "~/services/userService";
 import { useStatusCenter } from "~/utils/statusCenterContext";
+import { buildGithubAvatarUrl } from "~/utils/avatar";
 import type { UserCardData } from "~/components/molecules/UserCard/UserCard.types";
-import type { SchoolConfig, CohortConfig } from "~/types/institution";
+import type { SchoolConfig } from "~/types/institution";
 import type { CohortWithInstitution } from "~/components/organisms/StudentInspector/StudentInspector.types";
 import { loadAdminDashboardData } from "./admin.loader";
 import { dispatchAdminAction } from "./admin.actions";
-import {
-  matchesUserFilters,
-  buildCohortSubmitData,
-  buildInstitutionSubmitData,
-  mergeUpdatedUser,
-  type CohortSavePayload,
-} from "./admin.helpers";
+import { matchesUserFilters, mergeUpdatedUser } from "./admin.helpers";
 import AdminTabsSection, { type AdminTabKey } from "./admin.tabs";
-import AdminCohortsTabPanel from "./admin.cohorts-tab";
-import { AdminMissionCenterTabPanel } from "./admin.mission-tab";
-import { AdminUsersTabPanel } from "./admin.users-tab";
-import { AdminCoursesTabPanel } from "./admin.courses-tab";
+import { AdminTabContent } from "./admin.tab-content";
 import { useAdminDeleteHandlers } from "./admin.delete-handlers";
+import { useAdminCohortEditorHandlers } from "./admin.cohort-editor-handlers";
 import type { Route } from "./+types/admin";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -93,29 +86,31 @@ function resolveTabFromPath(pathname: string): AdminTabKey {
   return "users";
 }
 
-interface AdminTabContentProps {
-  activeTab: AdminTabKey;
-  usersProps: React.ComponentProps<typeof AdminUsersTabPanel>;
-  cohortsProps: React.ComponentProps<typeof AdminCohortsTabPanel>;
-  missionCenterProps?: React.ComponentProps<typeof AdminMissionCenterTabPanel>;
+interface UserPatchDetail {
+  id: string;
+  avatarUrl?: string;
+  githubUsername?: string;
 }
 
-function AdminTabContent({
-  activeTab,
-  usersProps,
-  cohortsProps,
-  missionCenterProps,
-}: AdminTabContentProps) {
-  if (activeTab === "cohorts") {
-    return <AdminCohortsTabPanel {...cohortsProps} />;
-  }
-  if (activeTab === "mission-center" && missionCenterProps) {
-    return <AdminMissionCenterTabPanel {...missionCenterProps} />;
-  }
-  if (activeTab === "courses") {
-    return <AdminCoursesTabPanel />;
-  }
-  return <AdminUsersTabPanel {...usersProps} />;
+function patchUserCardData(
+  user: UserCardData,
+  detail: UserPatchDetail,
+): UserCardData {
+  if (user.id !== detail.id) return user;
+  return {
+    ...user,
+    ...(detail.avatarUrl !== undefined && { avatarUrl: detail.avatarUrl }),
+    ...(detail.githubUsername !== undefined && {
+      githubUsername: detail.githubUsername,
+    }),
+  };
+}
+
+function patchUserList(
+  userList: UserCardData[],
+  detail: UserPatchDetail,
+): UserCardData[] {
+  return userList.map((u) => patchUserCardData(u, detail));
 }
 
 export default function AdminManagement() {
@@ -129,6 +124,31 @@ export default function AdminManagement() {
 
   const activeTab = resolveTabFromPath(location.pathname);
   const [selectedUser, setSelectedUser] = useState<UserCardData | null>(null);
+  const [users, setUsers] = useState<UserCardData[]>(loaderData.users);
+
+  useEffect(() => {
+    setUsers(loaderData.users);
+  }, [loaderData.users]);
+
+  useEffect(() => {
+    const handleGlobalUserUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<UserPatchDetail>;
+      const detail = customEvent.detail;
+      if (!detail?.id) return;
+
+      setUsers((prev) => patchUserList(prev, detail));
+      setSelectedUser((prev) =>
+        prev ? patchUserCardData(prev, detail) : null,
+      );
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("app:user-updated", handleGlobalUserUpdated);
+      return () => {
+        window.removeEventListener("app:user-updated", handleGlobalUserUpdated);
+      };
+    }
+  }, []);
 
   // Filters
   const [roleFilter, setRoleFilter] = useState<string>("all");
@@ -149,12 +169,12 @@ export default function AdminManagement() {
   const selectedUserId = selectedUser?.id;
   useEffect(() => {
     if (selectedUserId) {
-      const fresh = loaderData.users.find((s) => s.id === selectedUserId);
+      const fresh = users.find((s) => s.id === selectedUserId);
       if (fresh) {
         setSelectedUser(fresh);
       }
     }
-  }, [loaderData.users, selectedUserId]);
+  }, [users, selectedUserId]);
 
   const selectedCohortEditId = selectedCohortForEdit?.id;
   useEffect(() => {
@@ -195,83 +215,23 @@ export default function AdminManagement() {
     setSelectedUser(user);
   };
 
-  const handleSchoolClick = (school: SchoolConfig) => {
-    setSelectedSchool(school);
-    setSelectedSchoolForEdit(school);
-    setSelectedCohortForEdit(null);
-  };
-
-  const handleCreateNewSchool = () => {
-    const draftSchool: SchoolConfig = {
-      id: "",
-      name: "",
-      slug: "",
-      logoUrl: "",
-    };
-    setSelectedSchoolForEdit(draftSchool);
-    setSelectedSchool(null);
-    setSelectedCohortForEdit(null);
-  };
-
-  const handleCohortClick = (cohort: CohortConfig) => {
-    setSelectedCohortForEdit(cohort as CohortWithInstitution);
-    setSelectedSchoolForEdit(null);
-  };
-
-  const handleCreateNewCohort = () => {
-    if (!selectedSchool?.id) return;
-    const draftCohort: CohortWithInstitution = {
-      name: "",
-      description: "",
-      institutionId: selectedSchool.id,
-    };
-    setSelectedCohortForEdit(draftCohort);
-    setSelectedSchoolForEdit(null);
-  };
-
-  const handleSaveInstitution = (payload: {
-    id?: string;
-    name: string;
-    slug: string;
-    type?: string;
-    logoUrl?: string;
-    emailDomain?: string;
-    usernamePattern?: string;
-  }) => {
-    const submitPayload = buildInstitutionSubmitData(payload);
-    fetcher.submit(submitPayload, { method: "post" });
-    if (!payload.id) {
-      setSelectedSchoolForEdit(null);
-    } else if (selectedSchoolForEdit) {
-      setSelectedSchoolForEdit((prev) =>
-        prev ? { ...prev, ...payload } : null,
-      );
-    }
-  };
-
-  const handleSaveCohort = (payload: CohortSavePayload) => {
-    const institutionId =
-      selectedSchool?.id || selectedCohortForEdit?.institutionId;
-    if (!institutionId) {
-      notifyError(new Error("No institution selected"));
-      return;
-    }
-    const submitPayload = buildCohortSubmitData(institutionId, payload);
-    fetcher.submit(submitPayload, { method: "post" });
-    if (!payload.id) {
-      setSelectedCohortForEdit(null);
-    } else if (selectedCohortForEdit) {
-      setSelectedCohortForEdit((prev) =>
-        prev
-          ? {
-              ...prev,
-              ...payload,
-              description: payload.description ?? "",
-            }
-          : null,
-      );
-    }
-  };
+  const {
+    handleSchoolClick,
+    handleCreateNewSchool,
+    handleCohortClick,
+    handleCreateNewCohort,
+    handleSaveInstitution,
+    handleSaveCohort,
+  } = useAdminCohortEditorHandlers({
+    fetcher,
+    notifyError,
+    selectedSchool,
+    setSelectedSchool,
+    selectedSchoolForEdit,
+    setSelectedSchoolForEdit,
+    selectedCohortForEdit,
+    setSelectedCohortForEdit,
+  });
 
   const handleCloseInspector = () => {
     setSelectedUser(null);
@@ -304,22 +264,49 @@ export default function AdminManagement() {
 
   const handleUpdateStudentGithub = (studentId: string, githubId: string) => {
     const trimmed = githubId.trim();
-    setSelectedUser((prev) => {
-      if (!prev || prev.id !== studentId) return prev;
-      return {
-        ...prev,
-        githubUsername: trimmed || undefined,
-        avatarUrl: trimmed
-          ? `https://avatars.githubusercontent.com/u/${trimmed}?v=4`
-          : prev.avatarUrl,
-      };
-    });
+    const newAvatarUrl = trimmed ? buildGithubAvatarUrl(trimmed) : undefined;
+    const patchDetail: UserPatchDetail = {
+      id: studentId,
+      githubUsername: trimmed || undefined,
+      avatarUrl: newAvatarUrl,
+    };
+
+    setSelectedUser((prev) =>
+      prev ? patchUserCardData(prev, patchDetail) : null,
+    );
+    setUsers((prev) => patchUserList(prev, patchDetail));
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("app:user-updated", { detail: patchDetail }),
+      );
+    }
+
     fetcher.submit(
-      {
-        intent: "update-user",
-        studentId,
-        githubId: trimmed,
-      },
+      { intent: "update-user", studentId, githubId: trimmed },
+      { method: "post" },
+    );
+  };
+
+  const handleUpdateStudentAvatar = (studentId: string, avatarUrl: string) => {
+    const patchDetail: UserPatchDetail = {
+      id: studentId,
+      avatarUrl,
+    };
+
+    setSelectedUser((prev) =>
+      prev ? patchUserCardData(prev, patchDetail) : null,
+    );
+    setUsers((prev) => patchUserList(prev, patchDetail));
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("app:user-updated", { detail: patchDetail }),
+      );
+    }
+
+    fetcher.submit(
+      { intent: "update-user", studentId, avatarUrl },
       { method: "post" },
     );
   };
@@ -390,7 +377,7 @@ export default function AdminManagement() {
   };
 
   const filteredUsers = useMemo(() => {
-    return loaderData.users.filter((user) =>
+    return users.filter((user) =>
       matchesUserFilters(user, {
         role: roleFilter,
         school: schoolFilter,
@@ -401,7 +388,7 @@ export default function AdminManagement() {
       }),
     );
   }, [
-    loaderData.users,
+    users,
     roleFilter,
     schoolFilter,
     cohortFilter,
@@ -454,6 +441,7 @@ export default function AdminManagement() {
           onRemoveCohort: handleRemoveCohort,
           onStudentUpdated: handleStudentUpdated,
           onUpdateGithub: handleUpdateStudentGithub,
+          onUpdateAvatar: handleUpdateStudentAvatar,
           isSubmitting: fetcher.state !== "idle",
         }}
         cohortsProps={{

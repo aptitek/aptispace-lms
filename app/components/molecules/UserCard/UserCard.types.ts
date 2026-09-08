@@ -48,6 +48,8 @@ export interface UserCardProps {
   showDelete?: boolean;
   editableGithub?: boolean;
   onUpdateGithub?: (userId: string, newGithubUsername: string) => void;
+  editableAvatar?: boolean;
+  onUpdateAvatar?: (userId: string, newAvatarUrl: string) => void;
   interactive?: boolean;
   isSelected?: boolean;
   isNested?: boolean;

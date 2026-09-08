@@ -1,6 +1,6 @@
 import { styled, alpha, type Theme } from "@mui/material/styles";
-import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import { StyledCard } from "../../atoms/Card";
 
 function getSkeletonBg(theme: Theme, isGhost?: boolean) {
   return isGhost
@@ -14,7 +14,7 @@ function getSkeletonBorder(theme: Theme, isGhost?: boolean) {
     : undefined;
 }
 
-export const SkeletonCardContainer = styled(Card, {
+export const SkeletonCardContainer = styled(StyledCard, {
   shouldForwardProp: (prop) =>
     prop !== "animated" &&
     prop !== "opacity" &&
@@ -129,7 +129,7 @@ export const SkeletonAvatarContainer = styled("div")({
 export const SkeletonDetailsContainer = styled("div")({
   display: "flex",
   flexDirection: "column",
-  justifyContent: "space-between",
+  justifyContent: "center",
   minHeight: "56px",
   minWidth: 0,
   flex: 1,
@@ -148,8 +148,9 @@ export const SkeletonFooterRow = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  gap: theme.spacing(1),
+  gap: theme.spacing(0.75),
+  width: "100%",
+  minWidth: 0,
   marginTop: "auto",
   paddingTop: theme.spacing(0.25),
-  minWidth: 0,
 }));

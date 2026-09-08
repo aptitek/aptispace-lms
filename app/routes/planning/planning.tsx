@@ -8,8 +8,6 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useLoaderData, type LoaderFunctionArgs } from "react-router";
 import { alpha } from "@mui/material/styles";
-import Alert from "@mui/material/Alert";
-import Snackbar from "@mui/material/Snackbar";
 import Fab from "@mui/material/Fab";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 
@@ -37,6 +35,7 @@ import {
 } from "~/services/classService";
 
 // Shared submodules
+import { useStatusCenter } from "~/utils/statusCenterContext";
 import Tooltip from "~/components/atoms/Tooltip/Tooltip";
 import { PlanningLayout } from "~/components/templates/PlanningLayout";
 import { CalendarFrame } from "./planning.styles";
@@ -48,14 +47,21 @@ import {
 } from "./planning.types";
 import { CalendarHeaderTooltips } from "./planning.tooltips";
 import { PlanningSidepanelAction } from "./planning.sidepanel-action";
-import {
-  CalendarSkeleton,
-  CalendarErrorState,
-  CalendarEmptyState,
-} from "./planning.states";
+import { CalendarContentArea } from "./planning.states";
 import { ClassDetailsDialog } from "./planning.details-dialog";
 import { ClassFormDialog } from "./planning.form-dialog";
 import { CalendarExportDialog } from "./planning.export-dialog";
+import {
+  getSchedulerLocaleText,
+  getSchedulerDateLocale,
+  frCapitalized,
+} from "./planning.locales";
+import {
+  deletePlanningClassApi,
+  updatePlanningClassTimeApi,
+} from "./planning.api";
+
+export { getSchedulerLocaleText, getSchedulerDateLocale, frCapitalized };
 
 export function meta() {
   return [
@@ -128,40 +134,18 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   };
 }
 
-async function deletePlanningClassApi(
-  id: string | number,
-): Promise<"ok" | "failed" | "error"> {
-  try {
-    const apiResponse = await fetch("/api/classes", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
-    return apiResponse.ok ? "ok" : "failed";
-  } catch {
-    return "error";
-  }
-}
-
-async function updatePlanningClassTimeApi(
-  id: string | number,
-  startTime: string,
-  endTime: string,
-): Promise<"ok" | "failed" | "error"> {
-  try {
-    const apiResponse = await fetch("/api/classes", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, startTime, endTime }),
-    });
-    return apiResponse.ok ? "ok" : "failed";
-  } catch {
-    return "error";
-  }
-}
-
 export default function Planning() {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
+  const currentLang = i18n.resolvedLanguage || i18n.language || "en";
+  const schedulerLocaleText = useMemo(
+    () => getSchedulerLocaleText(currentLang),
+    [currentLang],
+  );
+  const schedulerDateLocale = useMemo(
+    () => getSchedulerDateLocale(currentLang),
+    [currentLang],
+  );
+
   const loaderData = useLoaderData<PlanningLoaderData>();
   const [classesState, setClassesState] = useState<ClassWithDetails[]>(
     loaderData.classes,
@@ -183,7 +167,7 @@ export default function Planning() {
   const [editingClass, setEditingClass] = useState<ClassWithDetails | null>(
     null,
   );
-  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+  const { notifySuccess, notifyError } = useStatusCenter();
 
   const isAdmin = loaderData.user.role === "admin";
 
@@ -217,20 +201,19 @@ export default function Planning() {
       for (const del of deletedClasses) {
         const result = await deletePlanningClassApi(del.id);
         if (result === "ok") {
-          setSnackbarMessage(t("planning.messages.deleted"));
+          notifySuccess(t("planning.messages.deleted"));
         } else {
           setClassesState((prev) => [...prev, del]);
-          setSnackbarMessage(
-            t(
-              result === "failed"
-                ? "planning.messages.deleteFailed"
-                : "planning.messages.deleteError",
-            ),
+          const errorMsg = t(
+            result === "failed"
+              ? "planning.messages.deleteFailed"
+              : "planning.messages.deleteError",
           );
+          notifyError(new Error(errorMsg), { message: errorMsg });
         }
       }
     },
-    [t],
+    [t, notifySuccess, notifyError],
   );
 
   const handleClassMoved = useCallback(
@@ -249,21 +232,20 @@ export default function Planning() {
 
       const result = await updatePlanningClassTimeApi(ne.id, ne.start, ne.end);
       if (result === "ok") {
-        setSnackbarMessage(t("planning.messages.updated"));
+        notifySuccess(t("planning.messages.updated"));
       } else {
         setClassesState((prev) =>
           prev.map((c) => (c.id === orig.id ? orig : c)),
         );
-        setSnackbarMessage(
-          t(
-            result === "failed"
-              ? "planning.messages.updateFailed"
-              : "planning.messages.updateError",
-          ),
+        const errorMsg = t(
+          result === "failed"
+            ? "planning.messages.updateFailed"
+            : "planning.messages.updateError",
         );
+        notifyError(new Error(errorMsg), { message: errorMsg });
       }
     },
-    [t],
+    [t, notifySuccess, notifyError],
   );
 
   const handleEventsChange = useCallback(
@@ -332,12 +314,14 @@ export default function Planning() {
       if (apiResponse.ok) {
         setClassesState((prev) => prev.filter((c) => c.id !== id));
         setSelectedClass(null);
-        setSnackbarMessage(t("planning.messages.deleted"));
+        notifySuccess(t("planning.messages.deleted"));
       } else {
-        setSnackbarMessage(t("planning.messages.deleteFailed"));
+        const errorMsg = t("planning.messages.deleteFailed");
+        notifyError(new Error(errorMsg), { message: errorMsg });
       }
-    } catch {
-      setSnackbarMessage(t("planning.messages.deleteError"));
+    } catch (err) {
+      const errorMsg = t("planning.messages.deleteError");
+      notifyError(err, { message: errorMsg });
     }
   };
 
@@ -355,12 +339,14 @@ export default function Planning() {
       const resPayload = (await apiResponse.json()) as { feedToken?: string };
       if (apiResponse.ok && resPayload.feedToken) {
         setFeedTokenState(resPayload.feedToken);
-        setSnackbarMessage(t("planning.messages.tokenRotated"));
+        notifySuccess(t("planning.messages.tokenRotated"));
       } else {
-        setSnackbarMessage(t("planning.messages.tokenRotateFailed"));
+        const errorMsg = t("planning.messages.tokenRotateFailed");
+        notifyError(new Error(errorMsg), { message: errorMsg });
       }
-    } catch {
-      setSnackbarMessage(t("planning.messages.tokenRotateError"));
+    } catch (err) {
+      const errorMsg = t("planning.messages.tokenRotateError");
+      notifyError(err, { message: errorMsg });
     }
   };
 
@@ -373,40 +359,42 @@ export default function Planning() {
             containerRef={calendarFrameRef}
             onOpenExport={() => setIsExportModalOpen(true)}
           />
-          {loadError ? (
-            <CalendarErrorState
-              onRetry={loadScheduler}
-              feedToken={feedTokenState}
-              userId={loaderData.user.id}
-            />
-          ) : !CalendarComponent ? (
-            <CalendarSkeleton />
-          ) : classesState.length === 0 && !showEmptyGrid ? (
-            <CalendarEmptyState
-              isAdmin={isAdmin}
-              onAddClass={() => {
-                setEditingClass(null);
-                setIsFormModalOpen(true);
-              }}
-              onShowGrid={() => setShowEmptyGrid(true)}
-            />
-          ) : (
-            <CalendarComponent
-              events={schedulerEvents}
-              onEventsChange={handleEventsChange}
-              onEventEditingStart={handleEventEditingStart}
-              views={["day", "week", "month", "agenda"]}
-              defaultView="week"
-              defaultPreferences={{ isSidePanelOpen: false }}
-              readOnly={!isAdmin}
-              areEventsDraggable={isAdmin}
-              areEventsResizable={isAdmin}
-              sx={{
-                height: "760px",
-                fontFamily: "inherit",
-              }}
-            />
-          )}
+          <CalendarContentArea
+            loadError={loadError}
+            onRetry={loadScheduler}
+            feedToken={feedTokenState}
+            userId={loaderData.user.id}
+            hasCalendarComponent={Boolean(CalendarComponent)}
+            classesCount={classesState.length}
+            showEmptyGrid={showEmptyGrid}
+            isAdmin={isAdmin}
+            onAddClass={() => {
+              setEditingClass(null);
+              setIsFormModalOpen(true);
+            }}
+            onShowGrid={() => setShowEmptyGrid(true)}
+          >
+            {CalendarComponent && (
+              <CalendarComponent
+                key={currentLang}
+                events={schedulerEvents}
+                localeText={schedulerLocaleText}
+                dateLocale={schedulerDateLocale}
+                onEventsChange={handleEventsChange}
+                onEventEditingStart={handleEventEditingStart}
+                views={["day", "week", "month", "agenda"]}
+                defaultView="week"
+                defaultPreferences={{ isSidePanelOpen: false }}
+                readOnly={!isAdmin}
+                areEventsDraggable={isAdmin}
+                areEventsResizable={isAdmin}
+                sx={{
+                  height: "760px",
+                  fontFamily: "inherit",
+                }}
+              />
+            )}
+          </CalendarContentArea>
           {isAdmin && (
             <Tooltip
               title={t("planning.addClass", "Add Class")}
@@ -478,10 +466,10 @@ export default function Planning() {
                   setClassesState((prev) =>
                     prev.map((c) => (c.id === savedClass.id ? savedClass : c)),
                   );
-                  setSnackbarMessage(t("planning.messages.updated"));
+                  notifySuccess(t("planning.messages.updated"));
                 } else {
                   setClassesState((prev) => [...prev, savedClass]);
-                  setSnackbarMessage(t("planning.messages.created"));
+                  notifySuccess(t("planning.messages.created"));
                 }
                 setIsFormModalOpen(false);
                 setEditingClass(null);
@@ -496,25 +484,9 @@ export default function Planning() {
             isAdmin={isAdmin}
             userId={loaderData.user.id}
             onRegenerateToken={handleRegenerateToken}
-            onNotify={(msg) => setSnackbarMessage(msg)}
+            onNotify={(msg) => notifySuccess(msg)}
           />
         </>
-      }
-      feedback={
-        <Snackbar
-          open={Boolean(snackbarMessage)}
-          autoHideDuration={4000}
-          onClose={() => setSnackbarMessage(null)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            onClose={() => setSnackbarMessage(null)}
-            severity="success"
-            sx={{ borderRadius: "16px", fontWeight: 600 }}
-          >
-            {snackbarMessage}
-          </Alert>
-        </Snackbar>
       }
     />
   );

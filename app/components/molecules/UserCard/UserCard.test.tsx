@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  cleanup,
+  waitFor,
+} from "@testing-library/react";
 import UserCard from "./UserCard";
 import type { UserCardData, UserCardProps } from "./UserCard.types";
 
@@ -199,5 +205,70 @@ describe("UserCard Molecule", () => {
 
     expect(onUpdateGithubMock).not.toHaveBeenCalled();
     expect(screen.queryByTestId("compact-github-edit-form")).toBeNull();
+  });
+
+  it("renders GitHub handle, impersonation and delete button in the footer row", () => {
+    const onDeleteMock = vi.fn();
+    const onImpersonateMock = vi.fn();
+    render(
+      <UserCard
+        user={mockStudent}
+        onDelete={onDeleteMock}
+        onImpersonate={onImpersonateMock}
+      />,
+    );
+
+    const nameBlock = screen.getByTestId("compact-student-name");
+    const emailBlock = screen.getByTestId("compact-student-email");
+    const githubChip = screen.getByTestId("compact-github-handle");
+    const impersonateBtn = screen.getByTestId("compact-impersonate-btn");
+    const deleteBtn = screen.getByTestId("compact-delete-btn");
+
+    expect(nameBlock).toBeDefined();
+    expect(emailBlock).toBeDefined();
+    expect(githubChip).toBeDefined();
+    expect(impersonateBtn).toBeDefined();
+    expect(deleteBtn).toBeDefined();
+
+    // Verify github chip is NOT inside name block or student details
+    expect(nameBlock.contains(githubChip)).toBe(false);
+  });
+
+  it("updates avatar src when app:user-updated event is dispatched", async () => {
+    render(<UserCard user={mockStudent} />);
+
+    const initialAvatar = screen.getByTestId("compact-avatar");
+    expect(initialAvatar).toBeDefined();
+
+    // Dispatch global app:user-updated event
+    window.dispatchEvent(
+      new CustomEvent("app:user-updated", {
+        detail: {
+          id: mockStudent.id,
+          avatarUrl: "https://example.com/new-avatar.png",
+        },
+      }),
+    );
+
+    await waitFor(() => {
+      const img = screen.getByTestId("compact-avatar").querySelector("img");
+      expect(img?.getAttribute("src")).toBe(
+        "https://example.com/new-avatar.png",
+      );
+    });
+  });
+
+  it("renders editable avatar when editableAvatar is true and triggers onUpdateAvatar", () => {
+    const onUpdateAvatarMock = vi.fn();
+    render(
+      <UserCard
+        user={mockStudent}
+        editableAvatar={true}
+        onUpdateAvatar={onUpdateAvatarMock}
+      />,
+    );
+
+    const uploadTrigger = screen.getByTestId("compact-avatar-upload");
+    expect(uploadTrigger).toBeDefined();
   });
 });

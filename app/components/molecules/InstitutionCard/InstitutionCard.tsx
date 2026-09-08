@@ -4,10 +4,17 @@ import InstitutionLogo from "../InstitutionLogo/InstitutionLogo";
 import Chip from "~/components/atoms/Chip/Chip";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import type { SchoolConfig } from "~/types/institution";
+import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
+import { useTranslation } from "react-i18next";
+import { HoldButton } from "~/components/atoms/HoldButton";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import {
   CardContainer,
   LogoContainer,
   InstitutionName,
+  DeleteHoldWrapper,
+  deleteHoldButtonSx,
 } from "./InstitutionCard.styles";
 import {
   InstitutionCardSkeleton,
@@ -23,13 +30,22 @@ export interface InstitutionCardProps {
   isSelected?: boolean;
   isNested?: boolean;
   onClick?: (school: SchoolConfig) => void;
+  onDelete?: (school: SchoolConfig) => void;
 }
 
 export const InstitutionCard = forwardRef<HTMLDivElement, InstitutionCardProps>(
   (
-    { school, studentCount = 0, isSelected, isNested = false, onClick },
+    {
+      school,
+      studentCount = 0,
+      isSelected,
+      isNested = false,
+      onClick,
+      onDelete,
+    },
     ref,
   ) => {
+    const { t } = useTranslation("common");
     const isInteractive = Boolean(onClick);
 
     const handleClick = () => {
@@ -42,6 +58,11 @@ export const InstitutionCard = forwardRef<HTMLDivElement, InstitutionCardProps>(
         handleClick();
       }
     };
+
+    const deleteLabel = t("common:deleteSchool", {
+      name: school.name,
+      defaultValue: `Hold to delete ${school.name}`,
+    });
 
     return (
       <Badge
@@ -85,12 +106,55 @@ export const InstitutionCard = forwardRef<HTMLDivElement, InstitutionCardProps>(
             />
           </LogoContainer>
           <InstitutionName>{school.name}</InstitutionName>
-          <Chip
-            institutionType={school.type || "academic"}
-            size="small"
-            variant="outlined"
-            testId={`institution-card-chip-${school.id}`}
-          />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: onDelete ? "space-between" : "center",
+              width: "100%",
+              mt: 0.5,
+            }}
+          >
+            <Chip
+              institutionType={school.type || "academic"}
+              size="small"
+              variant="outlined"
+              testId={`institution-card-chip-${school.id}`}
+            />
+
+            {onDelete && (
+              <Tooltip title={deleteLabel} arrow placement="top">
+                <DeleteHoldWrapper
+                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                  onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+                >
+                  <HoldButton
+                    color="error"
+                    size="small"
+                    holdTime={1000}
+                    borderThickness={1.5}
+                    outlineGap={2}
+                    onHoldComplete={() => onDelete(school)}
+                    aria-label={deleteLabel}
+                    data-testid={`institution-delete-btn-${school.id}`}
+                    wrapperSx={{
+                      width: 22,
+                      height: 22,
+                      minWidth: 22,
+                      maxWidth: 22,
+                      minHeight: 22,
+                      maxHeight: 22,
+                      flexShrink: 0,
+                      display: "inline-flex",
+                    }}
+                    sx={deleteHoldButtonSx}
+                  >
+                    <DeleteOutlineRoundedIcon sx={{ fontSize: 13 }} />
+                  </HoldButton>
+                </DeleteHoldWrapper>
+              </Tooltip>
+            )}
+          </Box>
         </CardContainer>
       </Badge>
     );

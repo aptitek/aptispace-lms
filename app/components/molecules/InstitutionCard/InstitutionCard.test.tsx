@@ -75,4 +75,21 @@ describe("InstitutionCard Molecule", () => {
     fireEvent.click(fab);
     expect(onAdd).toHaveBeenCalled();
   });
+
+  it("renders delete button when onDelete is provided", () => {
+    const onDelete = vi.fn();
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider theme={appTheme}>
+          <InstitutionCard school={mockSchool} onDelete={onDelete} />
+        </ThemeProvider>
+      </I18nextProvider>,
+    );
+
+    const deleteBtn = screen.getByTestId(
+      `institution-delete-btn-${mockSchool.id}`,
+    );
+    expect(deleteBtn).toBeDefined();
+  });
 });

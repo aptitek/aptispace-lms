@@ -14,6 +14,7 @@ import {
 } from "~/utils/session.server";
 
 import { isAdminGithubUser } from "~/config/admins";
+import { buildGithubAvatarUrl } from "~/utils/avatar";
 
 const OAUTH_STATE_COOKIE = "oauth_state";
 
@@ -85,6 +86,7 @@ async function resolveUserProfile(code: string | null) {
         githubUsername: profile.login,
         userName: profile.name || profile.login,
         userEmail: profile.email || `${profile.login}@users.noreply.github.com`,
+        avatarUrl: profile.avatarUrl,
         accessToken: token,
       };
     }
@@ -103,8 +105,10 @@ async function createNewGitHubUser(
   db: Database,
   profile: {
     githubUserId: string;
+    githubUsername?: string;
     userName: string;
     userEmail: string;
+    avatarUrl?: string;
   },
   role: "admin" | "student",
 ) {
@@ -112,13 +116,17 @@ async function createNewGitHubUser(
   const fallbackFirstName = role === "admin" ? "Admin" : "Student";
   const resolvedFirstName = firstName || fallbackFirstName;
   const resolvedLastName = (restName.join(" ") || "User").toUpperCase();
+  const avatarUrl =
+    profile.avatarUrl ||
+    buildGithubAvatarUrl(profile.githubUsername || profile.githubUserId);
+
   const created = await createUser(db, {
     firstName: resolvedFirstName,
     lastName: resolvedLastName,
     displayName: `${resolvedFirstName} ${resolvedLastName}`.trim(),
     githubId: profile.githubUserId,
     githubEmail: profile.userEmail,
-    avatarUrl: `https://avatars.githubusercontent.com/u/${profile.githubUserId}?v=4`,
+    avatarUrl,
   });
 
   const inst = await db.query.institutions.findFirst();

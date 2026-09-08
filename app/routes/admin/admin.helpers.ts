@@ -5,6 +5,7 @@ import type {
 import type { AuthUser, UserRole } from "~/utils/auth";
 import type { getAllUsersWithAffiliations } from "~/services/userService";
 import { getCohortDisplayName } from "~/utils/cohortFormat";
+import { buildGithubAvatarUrl } from "~/utils/avatar";
 
 export type DbUserWithAffil = Awaited<
   ReturnType<typeof getAllUsersWithAffiliations>
@@ -126,10 +127,7 @@ function resolveStudentCohortDetails(
 
 function resolveStudentAvatar(dbUser: DbUserWithAffil): string | undefined {
   if (dbUser.avatarUrl) return dbUser.avatarUrl;
-  if (dbUser.githubId) {
-    return `https://avatars.githubusercontent.com/u/${dbUser.githubId}?v=4`;
-  }
-  return undefined;
+  return buildGithubAvatarUrl(dbUser.githubId);
 }
 
 function resolveStudentEmail(

@@ -46,17 +46,17 @@ export const SidebarRail = styled(motion.aside, {
   }),
 }));
 
-export const SidebarHeader = styled(Box)(({ theme }) => ({
+export const SidebarHeader = styled(Box)({
   display: "flex",
   alignItems: "center",
   height: "72px",
   minHeight: "72px",
-  paddingLeft: theme.spacing(1.75),
+  paddingLeft: "12px",
   boxSizing: "border-box",
   width: "100%",
   position: "relative",
   overflow: "visible",
-}));
+});
 
 export const LogoLink = styled(motion.a, {
   shouldForwardProp: (prop) => prop !== "$isHovered",
@@ -64,27 +64,39 @@ export const LogoLink = styled(motion.a, {
   display: "inline-flex",
   alignItems: "center",
   height: 48,
-  minWidth: 44,
-  padding: $isHovered ? theme.spacing(0.5, 2, 0.5, 0.75) : theme.spacing(0.75),
+  minWidth: 48,
+  flexShrink: 0,
   borderRadius: 9999,
   textDecoration: "none",
   userSelect: "none",
   cursor: "pointer",
   outline: "none",
   position: "relative",
-  zIndex: 100,
+  zIndex: 1300,
+  boxSizing: "border-box",
+  overflow: "hidden",
+  whiteSpace: "nowrap",
   backgroundColor: $isHovered
-    ? theme.palette.surfaceContainerHigh || theme.palette.background.paper
+    ? alpha(theme.palette.background.paper, 0.96)
     : "transparent",
-  backgroundClip: "padding-box",
+  backdropFilter: $isHovered ? "blur(16px)" : "none",
+  WebkitBackdropFilter: $isHovered ? "blur(16px)" : "none",
   border: $isHovered
     ? `1px solid ${theme.palette.divider}`
     : "1px solid transparent",
   boxShadow: $isHovered
-    ? `0 4px 16px ${alpha(theme.palette.common.black, 0.14)}`
+    ? `0 4px 20px ${alpha(theme.palette.common.black, 0.14)}`
     : "none",
+  ...theme.applyStyles("dark", {
+    backgroundColor: $isHovered
+      ? alpha(theme.palette.background.paper, 0.92)
+      : "transparent",
+    boxShadow: $isHovered
+      ? `0 4px 24px ${alpha(theme.palette.common.black, 0.45)}, 0 0 0 1px rgba(255, 255, 255, 0.08)`
+      : "none",
+  }),
   transition: theme.transitions.create(
-    ["background-color", "border-color", "box-shadow", "padding"],
+    ["background-color", "border-color", "box-shadow"],
     {
       duration: M3_MOTION_DURATIONS.medium3,
       easing: M3_MOTION_EASINGS.css.standard,
@@ -97,24 +109,25 @@ export const LogoLink = styled(motion.a, {
   },
 }));
 
-export const LogoFaviconImg = styled("img")({
+export const LogoFaviconImg = styled(motion.img)({
   width: 36,
   height: 36,
   minWidth: 36,
   minHeight: 36,
   objectFit: "contain",
   display: "block",
+  flexShrink: 0,
 });
 
 export const LogoTextReveal = styled(motion.div)({
-  display: "flex",
+  display: "inline-flex",
   flexDirection: "row",
   alignItems: "center",
   lineHeight: 1,
   fontSize: "1.5rem",
   whiteSpace: "nowrap",
   overflow: "hidden",
-  marginLeft: "10px",
+  flexShrink: 0,
 });
 
 export const AptiSpan = styled("span")(({ theme }) => ({
@@ -185,11 +198,9 @@ export const ToggleStackRow = styled(Box)(({ theme }) => ({
   flexWrap: "wrap",
 }));
 
-export const StatusCenterSlot = styled(Box)(({ theme }) => ({
+export const StatusCenterSlot = styled(Box)({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   width: "100%",
-  paddingTop: theme.spacing(0.75),
-  borderTop: `1px dashed ${alpha(theme.palette.divider, 0.5)}`,
-}));
+});

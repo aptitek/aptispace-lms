@@ -1,4 +1,5 @@
 import type { CohortConfig } from "../types/institution";
+import { resolveUserAvatarUrl } from "./avatar";
 
 export type UserRole = "admin" | "student" | "instructor";
 
@@ -413,13 +414,11 @@ function resolveDbUserAvatar(
   fallbackAvatar?: string | null,
   githubId?: string | null,
 ): string | undefined {
-  return (
-    fallbackAvatar ||
-    primaryAffil?.avatarUrl ||
-    (githubId
-      ? `https://avatars.githubusercontent.com/u/${githubId}?v=4`
-      : undefined)
-  );
+  return resolveUserAvatarUrl({
+    avatarUrl: fallbackAvatar,
+    affiliationAvatarUrl: primaryAffil?.avatarUrl,
+    githubIdOrUsername: githubId,
+  });
 }
 
 function mapDbUserToAuth(

@@ -2,7 +2,6 @@ import React from "react";
 import { styled, useTheme, type Theme } from "@mui/material/styles";
 import { motion, AnimatePresence } from "framer-motion";
 import { M3_SPRINGS } from "~/tokens/motion";
-import { FONT_FAMILIES } from "~/tokens/typography";
 import { useTranslation } from "react-i18next";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
@@ -39,7 +38,7 @@ const SnackbarRoot = styled(motion.div)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: theme.spacing(1.5),
-  padding: theme.spacing(1.5, 2),
+  padding: theme.spacing(1.25, 2),
   borderRadius: 12,
   backgroundColor: theme.palette.background.paper,
   color: theme.palette.text.primary,
@@ -72,30 +71,22 @@ const IconBox = styled("div", {
 
 const ContentContainer = styled("div")({
   display: "flex",
-  flexDirection: "column",
+  alignItems: "center",
   flex: 1,
   minWidth: 0,
 });
 
-const TitleText = styled("span")({
-  fontSize: "0.8125rem",
-  fontWeight: 700,
-  lineHeight: 1.3,
-  letterSpacing: "0.02em",
-  fontFamily: FONT_FAMILIES.brand,
-  color: "inherit",
-});
-
 const MessageText = styled("span")(({ theme }) => ({
-  fontSize: "0.75rem",
-  fontWeight: 400,
+  fontSize: "0.8125rem",
+  fontWeight: 500,
   lineHeight: 1.4,
-  color: theme.palette.text.secondary,
+  color: theme.palette.text.primary,
   overflow: "hidden",
   textOverflow: "ellipsis",
   display: "-webkit-box",
   WebkitLineClamp: 2,
   WebkitBoxOrient: "vertical",
+  wordBreak: "break-word",
 }));
 
 const ActionGroup = styled("div")(({ theme }) => ({
@@ -174,11 +165,17 @@ export function StatusSnackbar({
         exit={{ opacity: 0, y: 24, scale: 0.96 }}
         transition={M3_SPRINGS.snackbar}
       >
-        <IconBox color={severityDetails.color}>{severityDetails.icon}</IconBox>
+        <IconBox
+          color={severityDetails.color}
+          data-testid="status-snackbar-icon"
+        >
+          {severityDetails.icon}
+        </IconBox>
 
         <ContentContainer>
-          <TitleText>{activeEvent.title}</TitleText>
-          <MessageText>{activeEvent.message}</MessageText>
+          <MessageText data-testid="status-snackbar-message">
+            {activeEvent.message || activeEvent.title}
+          </MessageText>
         </ContentContainer>
 
         <ActionGroup>

@@ -81,4 +81,27 @@ describe("CohortCard Molecule", () => {
     });
     expect(selectedElement.props.isSelected).toBe(true);
   });
+
+  it("renders delete button when onDelete is provided", async () => {
+    const { render, screen } = await import("@testing-library/react");
+    const { ThemeProvider } = await import("@mui/material/styles");
+    const { I18nextProvider } = await import("react-i18next");
+    const i18n = (await import("~/i18n")).default;
+    const { appTheme } = await import("~/tokens/theme");
+
+    const onDelete = vi.fn();
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider theme={appTheme}>
+          <CohortCard cohort={mockCohortWithDate} onDelete={onDelete} />
+        </ThemeProvider>
+      </I18nextProvider>,
+    );
+
+    const deleteBtn = screen.getByTestId(
+      `cohort-delete-btn-${mockCohortWithDate.id}`,
+    );
+    expect(deleteBtn).toBeDefined();
+  });
 });

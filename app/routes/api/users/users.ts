@@ -10,7 +10,8 @@ import {
 } from "~/services/userService";
 import { institutions, cohorts } from "~/db/schema";
 import { getDatabaseFromContext, type Database } from "~/db";
-import type { UserRole } from "~/utils/auth";
+import { type UserRole } from "~/utils/auth";
+import { resolveUserAvatarUrl } from "~/utils/avatar";
 import { logImpersonatedAudit } from "~/services/assessmentService";
 
 export interface FormattedAccount {
@@ -27,6 +28,7 @@ export interface FormattedAccount {
   badge: string;
   title: string;
   githubUsername?: string;
+  avatarUrl?: string;
 }
 
 function resolveRoleBadge(role: UserRole): string {
@@ -97,6 +99,10 @@ export function formatAccountFromDb(
     badge: resolveRoleBadge(role),
     title: resolveRoleTitle(role, isComplete),
     githubUsername: user.githubId ?? undefined,
+    avatarUrl: resolveUserAvatarUrl({
+      avatarUrl: user.avatarUrl,
+      githubIdOrUsername: user.githubId,
+    }),
   };
 }
 

@@ -1,4 +1,5 @@
 import React from "react";
+import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import { useTranslation } from "react-i18next";
 import { FloatingActionButton } from "~/components/atoms/FloatingActionButton";
@@ -141,46 +142,63 @@ export function UserCardSkeleton(props: UserCardSkeletonProps) {
           <SkeletonDetailsContainer>
             <SkeletonNameBlock>
               <Skeleton
-                variant="text"
+                variant="rounded"
                 width="60%"
-                height={14}
+                height={16}
                 animation={config.animation}
                 sx={{ borderRadius: "4px" }}
               />
               <Skeleton
-                variant="text"
+                variant="rounded"
                 width="85%"
-                height={18}
+                height={19}
                 animation={config.animation}
                 sx={{ borderRadius: "4px" }}
               />
             </SkeletonNameBlock>
 
             <Skeleton
-              variant="text"
+              variant="rounded"
               width="90%"
-              height={12}
+              height={16}
               animation={config.animation}
               sx={{ borderRadius: "4px" }}
             />
-
-            <SkeletonFooterRow>
-              <Skeleton
-                variant="rounded"
-                width={70}
-                height={20}
-                animation={config.animation}
-                sx={{ borderRadius: "4px" }}
-              />
-              <Skeleton
-                variant="circular"
-                width={22}
-                height={22}
-                animation={config.animation}
-              />
-            </SkeletonFooterRow>
           </SkeletonDetailsContainer>
         </SkeletonBodyRow>
+
+        <SkeletonFooterRow>
+          <Skeleton
+            variant="rounded"
+            width={80}
+            height={22}
+            animation={config.animation}
+            sx={{ borderRadius: "12px" }}
+          />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              flexShrink: 0,
+            }}
+          >
+            <Skeleton
+              variant="rounded"
+              width={22}
+              height={22}
+              animation={config.animation}
+              sx={{ borderRadius: "4px" }}
+            />
+            <Skeleton
+              variant="rounded"
+              width={22}
+              height={22}
+              animation={config.animation}
+              sx={{ borderRadius: "4px" }}
+            />
+          </Box>
+        </SkeletonFooterRow>
       </SkeletonCardContent>
 
       {config.isInteractive && (

@@ -65,6 +65,7 @@ async function seedUsers(
         displayName: "Sarah Connor",
         githubEmail: "admin@aptitek.io",
         githubId: "admin-sarah",
+        avatarUrl: "/avatars/seed-sarah.webp",
         calendarFeedToken: "feed-token-admin-sarah-1234",
         createdAt: now,
         updatedAt: now,
@@ -83,6 +84,12 @@ async function seedUsers(
     });
   } else {
     adminUserId = existingAdmin[0].id;
+    if (!existingAdmin[0].avatarUrl) {
+      await db
+        .update(users)
+        .set({ avatarUrl: "/avatars/seed-sarah.webp", updatedAt: now })
+        .where(eq(users.id, adminUserId));
+    }
   }
 
   const existingInstructor = await db
@@ -101,6 +108,7 @@ async function seedUsers(
         displayName: "Alex Mercer",
         githubEmail: "alex.mercer@aptitek.io",
         githubId: "instructor-alex",
+        avatarUrl: "/avatars/seed-alex.webp",
         calendarFeedToken: "feed-token-instructor-alex-5678",
         createdAt: now,
         updatedAt: now,
@@ -119,6 +127,12 @@ async function seedUsers(
     });
   } else {
     instructorUserId = existingInstructor[0].id;
+    if (!existingInstructor[0].avatarUrl) {
+      await db
+        .update(users)
+        .set({ avatarUrl: "/avatars/seed-alex.webp", updatedAt: now })
+        .where(eq(users.id, instructorUserId));
+    }
   }
 
   const existingStudent = await db
@@ -136,6 +150,7 @@ async function seedUsers(
         displayName: "Elena Rostova",
         githubEmail: "cadet.elena@aptitek.io",
         githubId: "student-elena",
+        avatarUrl: "/avatars/seed-elena.webp",
         calendarFeedToken: "feed-token-student-elena-9012",
         createdAt: now,
         updatedAt: now,
@@ -152,6 +167,13 @@ async function seedUsers(
       createdAt: now,
       updatedAt: now,
     });
+  } else {
+    if (!existingStudent[0].avatarUrl) {
+      await db
+        .update(users)
+        .set({ avatarUrl: "/avatars/seed-elena.webp", updatedAt: now })
+        .where(eq(users.id, existingStudent[0].id));
+    }
   }
 
   return { adminUserId, instructorUserId };

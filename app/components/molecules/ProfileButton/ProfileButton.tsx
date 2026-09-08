@@ -22,6 +22,10 @@ import Tooltip from "../../atoms/Tooltip/Tooltip";
 import { isUnnamedUser } from "../../atoms/Avatar/Avatar";
 import { getRoleConfig } from "~/tokens/roles";
 import { M3_MOTION_DURATIONS } from "~/tokens/motion";
+import {
+  isDefaultGithubAvatarUrl,
+  isDefaultGithubAvatarImage,
+} from "~/utils/avatar";
 import { type ProfileButtonProps } from "./ProfileButton.types";
 import {
   ProfileButtonContainer,
@@ -60,21 +64,52 @@ function AvatarMediaSlot({
   role,
   fallbackAria: _fallbackAria,
 }: AvatarMediaSlotProps) {
+  const isKnownDefault = isDefaultGithubAvatarUrl(avatarUrl);
   const [hasImgError, setHasImgError] = useState(false);
+  const [isDefaultGithub, setIsDefaultGithub] = useState(isKnownDefault);
   const initials = computeUserInitials(name);
 
   useEffect(() => {
     setHasImgError(false);
+    setIsDefaultGithub(isDefaultGithubAvatarUrl(avatarUrl));
   }, [avatarUrl]);
+
+  if (isDefaultGithub) {
+    return (
+      <AvatarInitialsFallback
+        $role={role}
+        data-testid="profile-mdi-placeholder"
+      >
+        <PersonRoundedIcon />
+      </AvatarInitialsFallback>
+    );
+  }
 
   if (avatarUrl && !hasImgError) {
     return (
       <Box
         component="img"
+        ref={(node: HTMLImageElement | null) => {
+          if (!node) return;
+          if (node.complete) {
+            if (node.naturalWidth === 0) {
+              setHasImgError(true);
+            } else if (isDefaultGithubAvatarImage(node)) {
+              setIsDefaultGithub(true);
+            }
+          }
+        }}
         src={avatarUrl}
         alt=""
         aria-hidden="true"
+        crossOrigin="anonymous"
         loading="lazy"
+        onLoad={(e) => {
+          const img = e.currentTarget;
+          if (isDefaultGithubAvatarImage(img)) {
+            setIsDefaultGithub(true);
+          }
+        }}
         onError={() => setHasImgError(true)}
       />
     );

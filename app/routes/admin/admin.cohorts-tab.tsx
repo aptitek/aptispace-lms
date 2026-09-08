@@ -265,6 +265,7 @@ export function AdminCohortsTabPanel({
                     selectedSchoolForEdit.id === school.id),
                 )}
                 onClick={onSchoolClick}
+                onDelete={onDeleteInstitution}
               />
             ))}
             <InstitutionCardSkeleton
@@ -379,6 +380,7 @@ export function AdminCohortsTabPanel({
                     selectedCohortForEdit,
                   )}
                   onClick={onCohortClick}
+                  onDelete={onDeleteCohort}
                 />
               ))}
               <CohortCardSkeleton variant="ghost" onClick={onCreateNewCohort} />

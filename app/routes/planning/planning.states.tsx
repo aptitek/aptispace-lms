@@ -13,7 +13,8 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ViewWeekRoundedIcon from "@mui/icons-material/ViewWeekRounded";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 
-export { CalendarSkeleton } from "./CalendarSkeleton";
+import { CalendarSkeleton } from "./CalendarSkeleton";
+export { CalendarSkeleton };
 
 export interface CalendarErrorStateProps {
   onRetry: () => void;
@@ -238,4 +239,55 @@ export function CalendarEmptyState({
       </Box>
     </Box>
   );
+}
+
+export interface CalendarContentAreaProps {
+  loadError: boolean;
+  onRetry: () => void;
+  feedToken: string;
+  userId: string;
+  hasCalendarComponent: boolean;
+  classesCount: number;
+  showEmptyGrid: boolean;
+  isAdmin: boolean;
+  onAddClass: () => void;
+  onShowGrid: () => void;
+  children: React.ReactNode;
+}
+
+export function CalendarContentArea({
+  loadError,
+  onRetry,
+  feedToken,
+  userId,
+  hasCalendarComponent,
+  classesCount,
+  showEmptyGrid,
+  isAdmin,
+  onAddClass,
+  onShowGrid,
+  children,
+}: CalendarContentAreaProps) {
+  if (loadError) {
+    return (
+      <CalendarErrorState
+        onRetry={onRetry}
+        feedToken={feedToken}
+        userId={userId}
+      />
+    );
+  }
+  if (!hasCalendarComponent) {
+    return <CalendarSkeleton />;
+  }
+  if (classesCount === 0 && !showEmptyGrid) {
+    return (
+      <CalendarEmptyState
+        isAdmin={isAdmin}
+        onAddClass={onAddClass}
+        onShowGrid={onShowGrid}
+      />
+    );
+  }
+  return <>{children}</>;
 }

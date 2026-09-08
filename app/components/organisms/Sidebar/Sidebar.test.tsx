@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  cleanup,
+  waitFor,
+} from "@testing-library/react";
 import { ThemeProvider } from "@mui/material/styles";
 import { I18nextProvider } from "react-i18next";
 import i18n from "~/i18n";
@@ -101,6 +107,8 @@ describe("Sidebar Component", () => {
 
     const logoLink = screen.getByTestId("sidebar-logo-link");
     expect(logoLink).toBeDefined();
+    const favicon = screen.getByTestId("sidebar-favicon");
+    expect(favicon).toBeDefined();
     const logoText = screen.getByTestId("sidebar-logo-text");
     expect(logoText).toBeDefined();
     expect(logoText.textContent).toContain("AptiSpace");
@@ -111,6 +119,15 @@ describe("Sidebar Component", () => {
 
     // Mouse leave collapses it
     fireEvent.mouseLeave(logoLink);
+    expect(logoLink).toBeDefined();
+
+    // Focusing logo extends it (keyboard accessibility)
+    fireEvent.focus(logoLink);
+    expect(logoLink).toBeDefined();
+
+    // Blurring logo collapses it
+    fireEvent.blur(logoLink);
+    expect(logoLink).toBeDefined();
   });
 
   it("renders admin tab when user has admin role and expands on hover", () => {
@@ -192,7 +209,7 @@ describe("Sidebar Component", () => {
     expect(avatarTrigger.getAttribute("data-shape")).toBe("9-sided-cookie");
   });
 
-  it("renders correctly in ghost variant when disconnected without tabs, logo, or status trigger and does not expand", () => {
+  it("renders correctly in ghost variant when disconnected without tabs or logo, but with status trigger and does not expand", () => {
     renderSidebar({
       variant: "ghost",
       "data-testid": "auth-sidebar",
@@ -202,7 +219,7 @@ describe("Sidebar Component", () => {
     expect(sidebar).toBeDefined();
     expect(screen.queryByTestId("sidebar-favicon")).toBeNull();
     expect(screen.queryByRole("tablist")).toBeNull();
-    expect(screen.queryByTestId("sidebar-status-slot")).toBeNull();
+    expect(screen.getByTestId("sidebar-status-slot")).toBeDefined();
     expect(screen.getByTestId("sidebar-language-toggle")).toBeDefined();
     expect(screen.getByTestId("sidebar-theme-toggle")).toBeDefined();
     const bottomSection = screen.getByTestId("sidebar-bottom-section");
@@ -280,5 +297,33 @@ describe("Sidebar Component", () => {
 
     // Profile modal should not be present
     expect(screen.queryByTestId("sidebar-profile-card-modal")).toBeNull();
+  });
+
+  it("updates the sidebar avatar in real-time when app:user-updated event is received", async () => {
+    renderSidebar({
+      user: testStudentUser,
+      "data-testid": "app-sidebar",
+    });
+
+    const initialAvatar = screen.getByTestId("sidebar-avatar-trigger");
+    expect(initialAvatar).toBeDefined();
+
+    window.dispatchEvent(
+      new CustomEvent("app:user-updated", {
+        detail: {
+          id: testStudentUser.id,
+          avatarUrl: "https://example.com/new-avatar.webp",
+        },
+      }),
+    );
+
+    await waitFor(() => {
+      const img = screen
+        .getByTestId("sidebar-avatar-trigger")
+        .querySelector("img");
+      expect(img?.getAttribute("src")).toBe(
+        "https://example.com/new-avatar.webp",
+      );
+    });
   });
 });

@@ -140,3 +140,35 @@ export const SkeletonCardContainer = styled(StyledCard, {
     }),
   };
 });
+
+export const DeleteHoldWrapper = styled("span")({
+  display: "inline-flex",
+  width: "22px",
+  height: "22px",
+  flexShrink: 0,
+});
+
+export const deleteHoldButtonSx = {
+  width: "22px",
+  height: "22px",
+  minWidth: "22px",
+  maxWidth: "22px",
+  minHeight: "22px",
+  maxHeight: "22px",
+  p: 0,
+  padding: "4px",
+  borderRadius: "4px",
+  boxSizing: "border-box" as const,
+  color: "error.main",
+  backgroundColor: (theme: Theme) => alpha(theme.palette.error.main, 0.1),
+  border: (theme: Theme) => `1px solid ${alpha(theme.palette.error.main, 0.3)}`,
+  "&:hover": {
+    backgroundColor: (theme: Theme) => alpha(theme.palette.error.main, 0.2),
+    borderColor: "error.main",
+    color: "error.main",
+    transform: "scale(1.08)",
+  },
+  "& .MuiSvgIcon-root": {
+    fontSize: "13px",
+  },
+};

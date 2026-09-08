@@ -88,47 +88,88 @@ export function CohortCardSkeleton(props: CohortCardSkeletonProps) {
         sx={{
           display: "flex",
           flexDirection: "column",
-          gap: 1,
+          height: "100%",
+          gap: (theme) => theme.spacing(0.75),
           opacity: config.isGhost ? 0.35 : 1,
           width: "100%",
           pointerEvents: "none",
         }}
       >
-        <Skeleton
-          variant="rounded"
-          width={120}
-          height={24}
-          animation={config.animation}
-          sx={{ borderRadius: "9999px" }}
-        />
-        <Skeleton
-          variant="text"
-          width="50%"
-          height={24}
-          animation={config.animation}
-          sx={{ borderRadius: "4px" }}
-        />
-        <Skeleton
-          variant="text"
-          width="85%"
-          height={16}
-          animation={config.animation}
-          sx={{ borderRadius: "4px" }}
-        />
-        <Skeleton
-          variant="text"
-          width="60%"
-          height={16}
-          animation={config.animation}
-          sx={{ borderRadius: "4px" }}
-        />
-        <Skeleton
-          variant="text"
-          width="40%"
-          height={14}
-          animation={config.animation}
-          sx={{ mt: 1, borderRadius: "4px" }}
-        />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1,
+            mb: 0.5,
+          }}
+        >
+          <Skeleton
+            variant="rounded"
+            width={120}
+            height={24}
+            animation={config.animation}
+            sx={{ borderRadius: "8px" }}
+          />
+          <Skeleton
+            variant="rounded"
+            width={48}
+            height={22}
+            animation={config.animation}
+            sx={{ borderRadius: "9999px" }}
+          />
+        </Box>
+
+        <Box
+          sx={{
+            fontSize: "0.8125rem",
+            minHeight: "2.4em",
+            display: "flex",
+            flexDirection: "column",
+            gap: "4px",
+          }}
+        >
+          <Skeleton
+            variant="rounded"
+            width="90%"
+            height={13}
+            animation={config.animation}
+            sx={{ borderRadius: "4px" }}
+          />
+          <Skeleton
+            variant="rounded"
+            width="65%"
+            height={13}
+            animation={config.animation}
+            sx={{ borderRadius: "4px" }}
+          />
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "100%",
+            mt: "auto",
+            pt: 0.5,
+          }}
+        >
+          <Skeleton
+            variant="rounded"
+            width={110}
+            height={14}
+            animation={config.animation}
+            sx={{ borderRadius: "4px" }}
+          />
+          <Skeleton
+            variant="rounded"
+            width={22}
+            height={22}
+            animation={config.animation}
+            sx={{ borderRadius: "4px" }}
+          />
+        </Box>
       </Box>
 
       {config.isInteractive && (

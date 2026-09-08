@@ -79,6 +79,8 @@ export default function UserInspector({
   onImpersonate,
   onDelete,
   onUpdateGithub,
+  editableAvatar = true,
+  onUpdateAvatar,
   isSubmitting = false,
   className,
   "data-testid": dataTestId = "user-inspector",
@@ -121,6 +123,8 @@ export default function UserInspector({
           interactive={false}
           editableGithub={true}
           onUpdateGithub={onUpdateGithub}
+          editableAvatar={editableAvatar}
+          onUpdateAvatar={onUpdateAvatar}
           showImpersonate={false}
           showDelete={false}
           testId="inspector-user-card"

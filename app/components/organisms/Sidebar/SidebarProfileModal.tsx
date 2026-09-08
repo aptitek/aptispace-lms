@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import FullScreenModal from "~/components/molecules/FullScreenModal/FullScreenModal";
 import ProfileCard from "~/components/organisms/ProfileCard/ProfileCard";
@@ -87,9 +87,28 @@ export function SidebarProfileModal({
 }: SidebarProfileModalProps) {
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl);
 
+  useEffect(() => {
+    setAvatarUrl(user.avatarUrl);
+  }, [user.avatarUrl]);
+
   const handleAvatarChange = (newUrl: string) => {
     setAvatarUrl(newUrl);
-    onUserUpdated?.({ ...user, avatarUrl: newUrl });
+    const updatedUser = { ...user, avatarUrl: newUrl };
+    onUserUpdated?.(updatedUser);
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("app:user-updated", {
+          detail: { id: user.id, avatarUrl: newUrl },
+        }),
+      );
+    }
+
+    void fetch("/api/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: user.id, avatarUrl: newUrl }),
+    }).catch(() => {});
   };
 
   const parsed = parseUserNames(user.name);

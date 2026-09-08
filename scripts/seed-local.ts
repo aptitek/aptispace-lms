@@ -24,6 +24,48 @@ async function main() {
     process.stdout.write(
       `✅ Local D1 database seeded successfully: ${JSON.stringify(result)}\n`,
     );
+
+    interface LocalR2Bucket {
+      put(
+        key: string,
+        value: unknown,
+        options?: { httpMetadata?: { contentType?: string } },
+      ): Promise<unknown>;
+    }
+
+    const bucket = (proxy.env as { AVATARS_BUCKET?: LocalR2Bucket })
+      .AVATARS_BUCKET;
+    if (bucket) {
+      process.stdout.write(
+        "📦 Uploading seed avatars to local R2 AVATARS_BUCKET...\n",
+      );
+      const fs = await import("node:fs/promises");
+      const avatarFiles = [
+        "seed-sarah.webp",
+        "seed-alex.webp",
+        "seed-elena.webp",
+        "seed-cadet.webp",
+      ];
+      for (const filename of avatarFiles) {
+        const filePath = path.resolve(
+          process.cwd(),
+          "public/avatars",
+          filename,
+        );
+        try {
+          const data = await fs.readFile(filePath);
+          await bucket.put(`avatars/${filename}`, data, {
+            httpMetadata: { contentType: "image/webp" },
+          });
+          await bucket.put(filename, data, {
+            httpMetadata: { contentType: "image/webp" },
+          });
+          process.stdout.write(`  ✓ Uploaded ${filename} to R2\n`);
+        } catch (readErr) {
+          process.stdout.write(`  ⚠ Could not load ${filename}: ${readErr}\n`);
+        }
+      }
+    }
   } finally {
     await proxy.dispose();
   }

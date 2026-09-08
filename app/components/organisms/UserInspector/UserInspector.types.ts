@@ -25,6 +25,8 @@ export interface UserInspectorProps {
   onDelete?: (student: UserCardData) => void;
   onStudentUpdated?: (updatedUser: AuthUser) => void;
   onUpdateGithub?: (studentId: string, githubId: string) => void;
+  editableAvatar?: boolean;
+  onUpdateAvatar?: (studentId: string, avatarUrl: string) => void;
   isSubmitting?: boolean;
   className?: string;
   "data-testid"?: string;

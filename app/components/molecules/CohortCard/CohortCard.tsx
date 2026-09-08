@@ -1,11 +1,17 @@
 import { forwardRef } from "react";
 import Badge from "~/components/atoms/Badge/Badge";
 import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
+import { useTranslation } from "react-i18next";
+import { HoldButton } from "~/components/atoms/HoldButton";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import type { CohortConfig } from "~/types/institution";
 import {
   CardContainer,
   CohortDescription,
   CohortDates,
+  DeleteHoldWrapper,
+  deleteHoldButtonSx,
 } from "./CohortCard.styles";
 
 import Chip from "@mui/material/Chip";
@@ -25,6 +31,7 @@ export interface CohortCardProps {
   isSelected?: boolean;
   isNested?: boolean;
   onClick?: (cohort: CohortConfig) => void;
+  onDelete?: (cohort: CohortConfig) => void;
 }
 
 function formatCohortDate(dateString?: string | Date): string {
@@ -74,7 +81,9 @@ function resolveCardA11y(isInteractive: boolean, isSelected?: boolean) {
 
 export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
   (props, ref) => {
-    const { cohort, studentCount, isSelected, isNested, onClick } = props;
+    const { cohort, studentCount, isSelected, isNested, onClick, onDelete } =
+      props;
+    const { t } = useTranslation("common");
     const isInteractive = Boolean(onClick);
 
     const handleClick = () => {
@@ -92,6 +101,11 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
     const dateRange = resolveCohortDateRange(cohort.startDate, cohort.endDate);
     const badge = resolveBadgeContent(studentCount);
     const a11y = resolveCardA11y(isInteractive, isSelected);
+
+    const deleteLabel = t("common:deleteCohort", {
+      name: cohort.name || "cohort",
+      defaultValue: `Hold to delete ${cohort.name || "cohort"}`,
+    });
 
     return (
       <Badge
@@ -158,7 +172,52 @@ export const CohortCard = forwardRef<HTMLDivElement, CohortCardProps>(
           <CohortDescription>
             {cohort.description || "No description provided."}
           </CohortDescription>
-          <CohortDates>{dateRange}</CohortDates>
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              mt: "auto",
+              pt: 0.5,
+            }}
+          >
+            <CohortDates sx={{ mt: 0 }}>{dateRange}</CohortDates>
+
+            {onDelete && (
+              <Tooltip title={deleteLabel} arrow placement="top">
+                <DeleteHoldWrapper
+                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                  onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+                >
+                  <HoldButton
+                    color="error"
+                    size="small"
+                    holdTime={1000}
+                    borderThickness={1.5}
+                    outlineGap={2}
+                    onHoldComplete={() => onDelete(cohort)}
+                    aria-label={deleteLabel}
+                    data-testid={`cohort-delete-btn-${cohort.id}`}
+                    wrapperSx={{
+                      width: 22,
+                      height: 22,
+                      minWidth: 22,
+                      maxWidth: 22,
+                      minHeight: 22,
+                      maxHeight: 22,
+                      flexShrink: 0,
+                      display: "inline-flex",
+                    }}
+                    sx={deleteHoldButtonSx}
+                  >
+                    <DeleteOutlineRoundedIcon sx={{ fontSize: 13 }} />
+                  </HoldButton>
+                </DeleteHoldWrapper>
+              </Tooltip>
+            )}
+          </Box>
         </CardContainer>
       </Badge>
     );

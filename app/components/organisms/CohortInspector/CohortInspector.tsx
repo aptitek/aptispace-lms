@@ -117,7 +117,14 @@ export default function CohortInspector({
   onDelete,
   isSubmitting = false,
 }: CohortInspectorProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
+  const adapterLocale = (
+    i18n.resolvedLanguage ||
+    i18n.language ||
+    "en"
+  ).startsWith("fr")
+    ? "fr"
+    : "en";
   const isEditing = Boolean(cohort?.id);
 
   const [description, setDescription] = useState("");
@@ -308,7 +315,11 @@ export default function CohortInspector({
   if (!cohort) return null;
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
+    <LocalizationProvider
+      key={adapterLocale}
+      dateAdapter={AdapterDayjs}
+      adapterLocale={adapterLocale}
+    >
       <Inspector data-testid="cohort-inspector-card">
         <CohortInspectorHeader isEditing={isEditing} onClose={onClose} />
 

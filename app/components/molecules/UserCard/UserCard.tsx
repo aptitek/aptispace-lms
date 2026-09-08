@@ -1,9 +1,9 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import Box from "@mui/material/Box";
 import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import Avatar from "../../atoms/Avatar/Avatar";
+import ImageUpload from "../ImageUpload/ImageUpload";
 import Chip from "../../atoms/Chip/Chip";
 import SegmentedChip from "../SegmentedChip/SegmentedChip";
 import Badge from "../../atoms/Badge/Badge";
@@ -38,6 +38,7 @@ import {
   StudentFamilyName,
   StudentEmail,
   CardFooterRow,
+  CardActionGroup,
   ImpersonateIconButton,
   DeleteHoldWrapper,
   deleteHoldButtonSx,
@@ -139,10 +140,16 @@ function CompactAvatarSlot({
   entity,
   displayName,
   role,
+  avatarUrl,
+  editableAvatar,
+  onUpdateAvatar,
 }: {
   entity: UserCardData;
   displayName: string;
   role: UserRole;
+  avatarUrl?: string;
+  editableAvatar?: boolean;
+  onUpdateAvatar?: (userId: string, newAvatarUrl: string) => void;
 }) {
   const { t } = useTranslation(["auth", "common"]);
   const roleConfig = getRoleConfig(role);
@@ -150,19 +157,52 @@ function CompactAvatarSlot({
     `auth:devTool.roles.${roleConfig.label.toLowerCase()}`,
     roleConfig.label,
   );
+  const resolvedAvatarUrl = avatarUrl ?? entity.avatarUrl;
+
+  const handleAvatarUpload = (newUrl: string) => {
+    onUpdateAvatar?.(entity.id, newUrl);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("app:user-updated", {
+          detail: { id: entity.id, avatarUrl: newUrl },
+        }),
+      );
+    }
+  };
 
   return (
-    <AvatarContainer data-testid="compact-avatar-container">
-      <Avatar
-        name={displayName}
-        src={entity.avatarUrl}
-        role={role}
-        shape={roleConfig.avatarShape}
-        width={56}
-        height={56}
-        isPortrait={false}
-        testId="compact-avatar"
-      />
+    <AvatarContainer
+      data-testid="compact-avatar-container"
+      onClick={
+        editableAvatar
+          ? (e: React.MouseEvent) => e.stopPropagation()
+          : undefined
+      }
+    >
+      {editableAvatar ? (
+        <ImageUpload
+          mode="image-only"
+          value={resolvedAvatarUrl}
+          shape={roleConfig.avatarShape}
+          role={role}
+          size="md"
+          editable={true}
+          onChange={handleAvatarUpload}
+          name={displayName}
+          testId="compact-avatar-upload"
+        />
+      ) : (
+        <Avatar
+          name={displayName}
+          src={resolvedAvatarUrl}
+          role={role}
+          shape={roleConfig.avatarShape}
+          width={56}
+          height={56}
+          isPortrait={false}
+          testId="compact-avatar"
+        />
+      )}
       <Tooltip title={roleLabel} arrow placement="top">
         <FloatingBadge data-testid="compact-role-badge">
           <Badge
@@ -179,32 +219,49 @@ function CompactAvatarSlot({
   );
 }
 
-interface CompactDetailsProps {
+function CompactStudentDetailsSlot({ entity }: { entity: UserCardData }) {
+  const { t } = useTranslation(["auth", "common"]);
+  const firstName = entity.firstName;
+  const familyName = (entity.familyName ?? "").toUpperCase();
+  const emailText =
+    entity.email || t("auth:noInstitutionalEmail", "No institutional email");
+
+  return (
+    <StudentDetails>
+      <StudentNameBlock data-testid="compact-student-name">
+        <StudentFirstName data-testid="compact-first-name">
+          {firstName}
+        </StudentFirstName>
+        <StudentFamilyName data-testid="compact-family-name">
+          {familyName}
+        </StudentFamilyName>
+      </StudentNameBlock>
+
+      <StudentEmail data-testid="compact-student-email">
+        {emailText}
+      </StudentEmail>
+    </StudentDetails>
+  );
+}
+
+interface CompactActionsSlotProps {
   entity: UserCardData;
   displayName: string;
   showImpersonate?: boolean;
   onImpersonate?: (entity: UserCardData) => void;
   showDelete?: boolean;
   onDelete?: (entity: UserCardData) => void;
-  editableGithub?: boolean;
-  onUpdateGithub?: (userId: string, newGithubUsername: string) => void;
 }
 
-function CompactStudentDetailsSlot({
+function CompactActionsSlot({
   entity,
   displayName,
   showImpersonate = true,
   onImpersonate,
   showDelete = true,
   onDelete,
-  editableGithub = false,
-  onUpdateGithub,
-}: CompactDetailsProps) {
+}: CompactActionsSlotProps) {
   const { t } = useTranslation(["auth", "common"]);
-  const firstName = entity.firstName;
-  const familyName = (entity.familyName ?? "").toUpperCase();
-  const emailText =
-    entity.email || t("auth:noInstitutionalEmail", "No institutional email");
   const impersonateLabel = t("auth:impersonateUser", {
     name: displayName,
     defaultValue: `Impersonate ${displayName}`,
@@ -236,84 +293,57 @@ function CompactStudentDetailsSlot({
     }
   };
 
+  const hasAnyActions = showImpersonate || (showDelete && Boolean(onDelete));
+  if (!hasAnyActions) return null;
+
   return (
-    <StudentDetails>
-      <StudentNameBlock data-testid="compact-student-name">
-        <StudentFirstName data-testid="compact-first-name">
-          {firstName}
-        </StudentFirstName>
-        <StudentFamilyName data-testid="compact-family-name">
-          {familyName}
-        </StudentFamilyName>
-      </StudentNameBlock>
+    <CardActionGroup data-testid="compact-actions-group">
+      {showImpersonate && (
+        <Tooltip title={impersonateLabel} arrow placement="top">
+          <ImpersonateIconButton
+            size="small"
+            onClick={handleImpersonateClick}
+            aria-label={impersonateLabel}
+            data-testid="compact-impersonate-btn"
+          >
+            <LoginRoundedIcon sx={{ fontSize: 13 }} />
+          </ImpersonateIconButton>
+        </Tooltip>
+      )}
 
-      <StudentEmail data-testid="compact-student-email">
-        {emailText}
-      </StudentEmail>
-
-      <CardFooterRow>
-        <CompactGithubChip
-          entity={entity}
-          editableGithub={editableGithub}
-          onUpdateGithub={onUpdateGithub}
-        />
-
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 0.5,
-            flexShrink: 0,
-          }}
-        >
-          {showImpersonate && (
-            <Tooltip title={impersonateLabel} arrow placement="top">
-              <ImpersonateIconButton
-                size="small"
-                onClick={handleImpersonateClick}
-                aria-label={impersonateLabel}
-                data-testid="compact-impersonate-btn"
-              >
-                <LoginRoundedIcon sx={{ fontSize: 13 }} />
-              </ImpersonateIconButton>
-            </Tooltip>
-          )}
-
-          {showDelete && onDelete && (
-            <Tooltip title={deleteLabel} arrow placement="top">
-              <DeleteHoldWrapper
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
-              >
-                <HoldButton
-                  color="error"
-                  size="small"
-                  holdTime={1000}
-                  borderThickness={1.5}
-                  outlineGap={2}
-                  onHoldComplete={() => onDelete(entity)}
-                  aria-label={deleteLabel}
-                  data-testid="compact-delete-btn"
-                  wrapperSx={{
-                    width: 22,
-                    height: 22,
-                    minWidth: 22,
-                    maxWidth: 22,
-                    minHeight: 22,
-                    maxHeight: 22,
-                    flexShrink: 0,
-                    display: "inline-flex",
-                  }}
-                  sx={deleteHoldButtonSx}
-                >
-                  <DeleteOutlineRoundedIcon sx={{ fontSize: 13 }} />
-                </HoldButton>
-              </DeleteHoldWrapper>
-            </Tooltip>
-          )}
-        </Box>
-      </CardFooterRow>
-    </StudentDetails>
+      {showDelete && onDelete && (
+        <Tooltip title={deleteLabel} arrow placement="top">
+          <DeleteHoldWrapper
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+          >
+            <HoldButton
+              color="error"
+              size="small"
+              holdTime={1000}
+              borderThickness={1.5}
+              outlineGap={2}
+              onHoldComplete={() => onDelete(entity)}
+              aria-label={deleteLabel}
+              data-testid="compact-delete-btn"
+              wrapperSx={{
+                width: 22,
+                height: 22,
+                minWidth: 22,
+                maxWidth: 22,
+                minHeight: 22,
+                maxHeight: 22,
+                flexShrink: 0,
+                display: "inline-flex",
+              }}
+              sx={deleteHoldButtonSx}
+            >
+              <DeleteOutlineRoundedIcon sx={{ fontSize: 13 }} />
+            </HoldButton>
+          </DeleteHoldWrapper>
+        </Tooltip>
+      )}
+    </CardActionGroup>
   );
 }
 
@@ -340,6 +370,8 @@ function normalizeUserCardProps(props: UserCardProps) {
     isNested: Boolean(props.isNested),
     editableGithub: Boolean(props.editableGithub),
     onUpdateGithub: props.onUpdateGithub,
+    editableAvatar: Boolean(props.editableAvatar),
+    onUpdateAvatar: props.onUpdateAvatar,
     className: props.className,
     testId: props.testId,
     style: props.style,
@@ -363,10 +395,46 @@ export const UserCard = forwardRef<HTMLDivElement, UserCardProps>(
       isNested,
       editableGithub,
       onUpdateGithub,
+      editableAvatar,
+      onUpdateAvatar,
       className,
       testId,
       style,
     } = normalizeUserCardProps(props);
+
+    const [currentAvatarUrl, setCurrentAvatarUrl] = useState(
+      targetUser?.avatarUrl,
+    );
+
+    useEffect(() => {
+      setCurrentAvatarUrl(targetUser?.avatarUrl);
+    }, [targetUser?.avatarUrl]);
+
+    const targetUserId = targetUser?.id;
+
+    useEffect(() => {
+      if (!targetUserId) return;
+      const handleGlobalUserUpdated = (event: Event) => {
+        const customEvent = event as CustomEvent<{
+          id: string;
+          avatarUrl?: string;
+        }>;
+        if (customEvent.detail && customEvent.detail.id === targetUserId) {
+          if (customEvent.detail.avatarUrl !== undefined) {
+            setCurrentAvatarUrl(customEvent.detail.avatarUrl);
+          }
+        }
+      };
+      if (typeof window !== "undefined") {
+        window.addEventListener("app:user-updated", handleGlobalUserUpdated);
+        return () => {
+          window.removeEventListener(
+            "app:user-updated",
+            handleGlobalUserUpdated,
+          );
+        };
+      }
+    }, [targetUserId]);
 
     const { isInteractive, handleClick, handleKeyDown } =
       resolveCardInteractivity(interactive, onClick, targetUser);
@@ -409,18 +477,31 @@ export const UserCard = forwardRef<HTMLDivElement, UserCardProps>(
               entity={targetUser}
               displayName={labels.displayName}
               role={labels.role}
+              avatarUrl={currentAvatarUrl}
+              editableAvatar={editableAvatar}
+              onUpdateAvatar={(userId, newUrl) => {
+                setCurrentAvatarUrl(newUrl);
+                onUpdateAvatar?.(userId, newUrl);
+              }}
             />
-            <CompactStudentDetailsSlot
+            <CompactStudentDetailsSlot entity={targetUser} />
+          </CardBodyRow>
+
+          <CardFooterRow>
+            <CompactGithubChip
+              entity={targetUser}
+              editableGithub={editableGithub}
+              onUpdateGithub={onUpdateGithub}
+            />
+            <CompactActionsSlot
               entity={targetUser}
               displayName={labels.displayName}
               showImpersonate={showImpersonate}
               onImpersonate={onImpersonate}
               showDelete={showDelete}
               onDelete={onDelete}
-              editableGithub={editableGithub}
-              onUpdateGithub={onUpdateGithub}
             />
-          </CardBodyRow>
+          </CardFooterRow>
         </StyledCardContent>
       </StyledCard>
     );

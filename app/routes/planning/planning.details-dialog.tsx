@@ -96,24 +96,27 @@ function InstructorInfo({ instructor, instructorLabel }: InstructorInfoProps) {
   );
 }
 
+interface FormatClassSnippetLabels {
+  course: string;
+  date: string;
+  location: string;
+  instructor: string;
+  virtualCampus: string;
+  locale?: string;
+}
+
 function formatClassSnippet(
   classItem: ClassWithDetails,
   start: Date,
   end: Date,
-  labels: {
-    course: string;
-    date: string;
-    location: string;
-    instructor: string;
-    virtualCampus: string;
-  },
+  labels: FormatClassSnippetLabels,
 ): string {
   const formatLabel = classItem.isRemote ? "Remote / Online" : "In-Person";
   const parts = [
     `${classItem.title}${classItem.isRemote ? " (Remote)" : ""}`,
     `Format: ${formatLabel}`,
     `${labels.course}: ${classItem.session.course.title}`,
-    `${labels.date}: ${formatTimeRange(start, end)}`,
+    `${labels.date}: ${formatTimeRange(start, end, labels.locale)}`,
     `${labels.location}: ${classItem.location || labels.virtualCampus}`,
     `${labels.instructor}: ${classItem.instructor?.displayName || labels.instructor}`,
   ];
@@ -200,7 +203,8 @@ function ClassScheduleCard({
   isRemote,
   location,
 }: ClassScheduleCardProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
+  const currentLang = i18n.resolvedLanguage || i18n.language || "en";
   const virtualLabel = t(
     "planning.details.virtualCampus",
     "Online (Virtual Campus)",
@@ -227,7 +231,8 @@ function ClassScheduleCard({
           sx={{ color: "primary.main" }}
         />
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          {formatTimeRange(start, end)} ({calculateDurationHours(start, end)})
+          {formatTimeRange(start, end, currentLang)} (
+          {calculateDurationHours(start, end)})
         </Typography>
       </Box>
 
@@ -263,7 +268,8 @@ export function ClassDetailsDialog({
   onEdit,
   onDelete,
 }: ClassDetailsDialogProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
+  const currentLang = i18n.resolvedLanguage || i18n.language || "en";
   const [copied, setCopied] = useState<boolean>(false);
   const start = new Date(classItem.startTime);
   const end = new Date(classItem.endTime);
@@ -276,6 +282,7 @@ export function ClassDetailsDialog({
         location: t("planning.form.locationLabel"),
         instructor: t("planning.details.instructor"),
         virtualCampus: t("planning.details.virtualCampus"),
+        locale: currentLang,
       }),
     );
     setCopied(true);

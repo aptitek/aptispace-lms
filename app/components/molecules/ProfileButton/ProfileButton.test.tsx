@@ -159,4 +159,31 @@ describe("ProfileButton Molecule (MD3 Morphing Avatar & Logout Button)", () => {
     expect(trigger.textContent).toContain("SC");
     expect(trigger.textContent).not.toContain("Sarah");
   });
+
+  it("falls back to solarized MDI user icon when default GitHub avatar is supplied", () => {
+    const userWithDefaultGithub = {
+      ...mockUser,
+      name: "Cadet Elena",
+      avatarUrl: "https://avatars.githubusercontent.com/u/0?v=4",
+    };
+
+    const { container } = renderWithTheme(
+      <ProfileButton
+        user={userWithDefaultGithub}
+        variant="default"
+        avatarTestId="test-avatar-trigger-default"
+      />,
+    );
+
+    const trigger = container.querySelector(
+      '[data-testid="test-avatar-trigger-default"]',
+    );
+    expect(trigger).not.toBeNull();
+    // Should NOT render an <img> element
+    expect(trigger!.querySelector("img")).toBeNull();
+    // Should render MDI placeholder fallback, NOT initials
+    expect(
+      trigger!.querySelector('[data-testid="profile-mdi-placeholder"]'),
+    ).not.toBeNull();
+  });
 });

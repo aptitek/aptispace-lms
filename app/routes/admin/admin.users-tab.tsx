@@ -38,6 +38,7 @@ export interface AdminUsersTabPanelProps {
   onRemoveCohort: (params: { studentId: string; cohortId: string }) => void;
   onStudentUpdated: (updatedUser: AuthUser) => void;
   onUpdateGithub: (studentId: string, githubUsername: string) => void;
+  onUpdateAvatar?: (studentId: string, avatarUrl: string) => void;
   isSubmitting: boolean;
 }
 
@@ -68,6 +69,7 @@ export function AdminUsersTabPanel({
   onRemoveCohort,
   onStudentUpdated,
   onUpdateGithub,
+  onUpdateAvatar,
   isSubmitting,
 }: AdminUsersTabPanelProps) {
   const { t } = useTranslation(["common"]);
@@ -222,6 +224,7 @@ export function AdminUsersTabPanel({
             onRemoveCohort={onRemoveCohort}
             onStudentUpdated={onStudentUpdated}
             onUpdateGithub={onUpdateGithub}
+            onUpdateAvatar={onUpdateAvatar}
             onImpersonate={onImpersonate}
             onDelete={onDeleteUser}
             isSubmitting={isSubmitting}

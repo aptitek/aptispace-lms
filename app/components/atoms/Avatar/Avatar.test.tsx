@@ -141,4 +141,30 @@ describe("Avatar Component & MD3 Shape Scale", () => {
     expect(initialsHolder.textContent).toBe("AD");
     expect(initialsHolder.textContent).not.toBe("Arthur Dent");
   });
+
+  it("falls back to solarized MDI user icon instead of octocat or initials when default GitHub avatar URL is supplied", async () => {
+    const { render } = await import("@testing-library/react");
+    const { container } = render(
+      <Avatar
+        src="https://avatars.githubusercontent.com/u/0?v=4"
+        name="Cadet Elena"
+        alt="Cadet Elena"
+        testId="test-default-github-avatar"
+      />,
+    );
+
+    // Default GitHub avatar URL should NOT render an <img> tag
+    expect(container.querySelector("img")).toBeNull();
+
+    // Should NOT render initials holder
+    expect(
+      container.querySelector('[data-testid="avatar-initials-holder"]'),
+    ).toBeNull();
+
+    // Should render MDI user placeholder icon
+    const mdiIcon = container.querySelector(
+      '[data-testid="avatar-mdi-placeholder"]',
+    );
+    expect(mdiIcon).not.toBeNull();
+  });
 });

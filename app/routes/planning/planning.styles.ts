@@ -48,6 +48,10 @@ export const CalendarFrame = styled(Box)(({ theme }) => ({
     borderRadius: "28px",
     border: "none",
   },
+  "& .MuiEventCalendar-headerToolbarLabel, & .MuiEventCalendar-sidePanelDrawerTitle, & .MuiEventCalendar-miniCalendarMonthLabel":
+    {
+      textTransform: "capitalize",
+    },
   "& .MuiEventCalendar-headerToolbarSidePanelToggle svg, & .MuiEventCalendar-preferencesMenuButton svg":
     {
       pointerEvents: "none",

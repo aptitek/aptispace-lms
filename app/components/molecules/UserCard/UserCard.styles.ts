@@ -92,7 +92,7 @@ export const FloatingBadge = styled("div")({
 export const StudentDetails = styled("div")({
   display: "flex",
   flexDirection: "column",
-  justifyContent: "space-between",
+  justifyContent: "center",
   minHeight: "56px",
   minWidth: 0,
   flex: 1,
@@ -145,9 +145,17 @@ export const CardFooterRow = styled("div")(({ theme }) => ({
   alignItems: "center",
   justifyContent: "space-between",
   gap: theme.spacing(0.75),
+  width: "100%",
+  minWidth: 0,
   marginTop: "auto",
   paddingTop: theme.spacing(0.25),
-  minWidth: 0,
+}));
+
+export const CardActionGroup = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(0.5),
+  flexShrink: 0,
 }));
 
 export const ImpersonateIconButton = styled(IconButton)(({ theme }) => ({
