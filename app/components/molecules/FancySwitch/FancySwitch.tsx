@@ -193,8 +193,10 @@ const RESERVED_PROP_KEYS = new Set([
   "thumbSpring",
   "toggleDurationMs",
   "customThumbColor",
+  "customThumbShadow",
   "customTrackBackground",
   "customTrackBorder",
+  "customTrackShadow",
 ]);
 
 function getCleanRestProps(props: FancySwitchProps): Record<string, unknown> {
@@ -257,6 +259,7 @@ export const FancySwitch = forwardRef<HTMLButtonElement, FancySwitchProps>(
         $disabled={config.disabled}
         $customBackground={props.customTrackBackground?.(renderState)}
         $customBorder={props.customTrackBorder?.(renderState)}
+        $customShadow={props.customTrackShadow?.(renderState)}
         {...interaction.handlers}
         {...restProps}
       >
@@ -272,6 +275,7 @@ export const FancySwitch = forwardRef<HTMLButtonElement, FancySwitchProps>(
           $cfg={config.cfg}
           $checked={trackChecked}
           $customColor={props.customThumbColor?.(renderState)}
+          $customShadow={props.customThumbShadow?.(renderState)}
           animate={{ x: targetX, scale }}
           transition={config.thumbSpring}
         >

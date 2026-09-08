@@ -28,7 +28,16 @@ export const FancyTrack = styled(motion.button, {
   $disabled: boolean;
   $customBackground?: string;
   $customBorder?: string;
-}>(({ theme, $cfg, $checked, $disabled, $customBackground, $customBorder }) => {
+  $customShadow?: string;
+}>(({
+  theme,
+  $cfg,
+  $checked,
+  $disabled,
+  $customBackground,
+  $customBorder,
+  $customShadow,
+}) => {
   const primary = theme.palette.primary.main;
   const outline = theme.palette.text.secondary;
   const surfaceContainerHighest =
@@ -50,14 +59,15 @@ export const FancyTrack = styled(motion.button, {
     cursor: $disabled ? "not-allowed" : "pointer",
     boxSizing: "border-box",
     border: $customBorder ? `2px solid ${$customBorder}` : defaultBorder,
-    backgroundColor: $customBackground || defaultBackground,
+    background: $customBackground || defaultBackground,
+    boxShadow: $customShadow,
     opacity: $disabled ? 0.38 : 1,
     overflow: "hidden",
     outline: "none",
     userSelect: "none",
     WebkitTapHighlightColor: "transparent",
     transition:
-      "background-color 0.25s ease, border-color 0.25s ease, opacity 0.2s ease, box-shadow 0.25s ease",
+      "background 0.25s ease, border-color 0.25s ease, opacity 0.2s ease, box-shadow 0.25s ease",
 
     "&:focus-visible": {
       outline: "none",
@@ -72,8 +82,9 @@ export const FancyThumb = styled(motion.span, {
 })<{
   $cfg: SwitchSizeConfig;
   $customColor?: string;
+  $customShadow?: string;
   $checked: boolean;
-}>(({ theme, $cfg, $customColor, $checked }) => {
+}>(({ theme, $cfg, $customColor, $customShadow, $checked }) => {
   const onPrimary =
     theme.palette.primary.contrastText || theme.palette.common.white;
   const defaultBg = $checked ? onPrimary : theme.palette.primary.main;
@@ -90,10 +101,10 @@ export const FancyThumb = styled(motion.span, {
     justifyContent: "center",
     zIndex: 3,
     cursor: "inherit",
-    backgroundColor: $customColor || defaultBg,
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.22)",
+    background: $customColor || defaultBg,
+    boxShadow: $customShadow || "0 1px 3px rgba(0, 0, 0, 0.22)",
     ...theme.applyStyles("dark", {
-      boxShadow: "0 0 0 1px rgba(255, 255, 255, 0.14)",
+      boxShadow: $customShadow || "0 0 0 1px rgba(255, 255, 255, 0.14)",
     }),
   };
 });
@@ -253,7 +264,7 @@ export const TransitClockWrapper = styled(motion.div)(() => ({
   height: "100%",
 }));
 
-export const ArcOverlaySvg = styled("svg")({
+export const ArcOverlaySvg = styled("svg")(({ theme }) => ({
   position: "absolute",
   top: 0,
   left: 0,
@@ -261,7 +272,8 @@ export const ArcOverlaySvg = styled("svg")({
   height: "100%",
   pointerEvents: "none",
   zIndex: 1,
-});
+  color: theme.palette.text.secondary,
+}));
 
 export const StateRippleLayer = styled(motion.div, {
   shouldForwardProp: filterDollarProp,

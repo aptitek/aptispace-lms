@@ -1,6 +1,7 @@
 import React, { forwardRef } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "@mui/material/styles";
 import { M3_SPRINGS } from "~/tokens/motion";
 import { useThemeMode } from "~/utils/themeContext";
 import type { ThemeMode } from "~/tokens/theme";
@@ -47,6 +48,7 @@ export const ZenithSwitch = forwardRef<HTMLButtonElement, ZenithSwitchProps>(
       mode,
       checked,
       onToggle,
+      onChange,
       onChangeMode,
       size = "medium",
       disabled = false,
@@ -55,6 +57,7 @@ export const ZenithSwitch = forwardRef<HTMLButtonElement, ZenithSwitchProps>(
       ...restProps
     } = props;
 
+    const theme = useTheme();
     const { mode: contextMode } = useThemeMode();
     const { t } = useTranslation("common");
     const isDark = resolveIsDark(checked, mode, contextMode);
@@ -63,8 +66,15 @@ export const ZenithSwitch = forwardRef<HTMLButtonElement, ZenithSwitchProps>(
 
     const handleToggle = (nextChecked: boolean) => {
       onToggle?.(nextChecked);
+      onChange?.(nextChecked);
       onChangeMode?.(nextChecked ? "dark" : "light");
     };
+
+    const bgPaper = theme.palette.background.paper;
+    const bgDefault = theme.palette.background.default;
+    const primaryMain = theme.palette.primary.main;
+    const warningMain = theme.palette.warning.main;
+    const warningLight = theme.palette.warning.light;
 
     return (
       <FancySwitch
@@ -77,36 +87,68 @@ export const ZenithSwitch = forwardRef<HTMLButtonElement, ZenithSwitchProps>(
         tooltipTitle={tooltipTitle}
         className={className}
         data-testid={dataTestId}
+        data-mode={isDark ? "dark" : "light"}
+        bimodal={true}
+        thumbReverseTravel={true}
         thumbSpring={M3_SPRINGS.celestialThumb}
+        customTrackBackground={() =>
+          isDark
+            ? `linear-gradient(180deg, ${bgPaper} 0%, ${bgDefault} 100%)`
+            : `linear-gradient(180deg, ${bgDefault} 0%, ${bgPaper} 100%)`
+        }
+        customTrackBorder={({ isHovered }) =>
+          isHovered
+            ? isDark
+              ? primaryMain
+              : warningMain
+            : theme.palette.divider
+        }
+        customTrackShadow={({ isHovered }) =>
+          isDark
+            ? isHovered
+              ? `inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 12px ${primaryMain}`
+              : `0 0 0 1px ${theme.palette.divider}`
+            : isHovered
+              ? `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 12px ${warningLight}`
+              : "inset 0 1px 3px rgba(0, 0, 0, 0.15)"
+        }
+        customThumbColor={() =>
+          isDark
+            ? `linear-gradient(135deg, ${primaryMain} 0%, ${theme.palette.primary.dark} 100%)`
+            : `linear-gradient(135deg, ${warningLight} 0%, ${warningMain} 100%)`
+        }
+        customThumbShadow={() =>
+          isDark
+            ? `0 0 12px ${primaryMain}, 0 0 0 1px rgba(255, 255, 255, 0.2)`
+            : `0 0 14px ${warningLight}, 0 2px 5px rgba(0, 0, 0, 0.2)`
+        }
         thumbContent={({ cfg }) => (
-          <ActiveZenithGlyph isDark={isDark} iconSize={cfg.thumbIconSize} />
+          <AnimatePresence mode="wait" initial={false}>
+            <ActiveZenithGlyph isDark={isDark} iconSize={cfg.thumbIconSize} />
+          </AnimatePresence>
         )}
         peekingElement={({ isHovered, cfg, disabled: isDis }) =>
           !isDis && (
-            <AnimatePresence>
-              <HorizonPeekPreview
-                isHovered={isHovered}
-                isDark={isDark}
-                cfg={cfg}
-              />
-            </AnimatePresence>
+            <HorizonPeekPreview
+              isHovered={isHovered}
+              isDark={isDark}
+              cfg={cfg}
+            />
           )
         }
         backgroundDecorations={({ cfg }) => <CelestialArcLine cfg={cfg} />}
-        overlayDecorations={({ isHovered, cfg, disabled: isDis }) => (
-          <AnimatePresence>
-            {isHovered && !isDis && (
-              <StateRippleLayer
-                $cfg={cfg}
-                $isDark={isDark}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={M3_SPRINGS.expressive.effects.fast}
-              />
-            )}
-          </AnimatePresence>
-        )}
+        overlayDecorations={({ isHovered, cfg, disabled: isDis }) =>
+          isHovered && !isDis ? (
+            <StateRippleLayer
+              $cfg={cfg}
+              $isDark={isDark}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={M3_SPRINGS.expressive.effects.fast}
+            />
+          ) : null
+        }
         {...restProps}
       />
     );

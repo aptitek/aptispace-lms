@@ -52,8 +52,10 @@ export interface FancySwitchProps extends Omit<
 
   // Visual customization hooks
   customThumbColor?: (state: FancySwitchRenderState) => string | undefined;
+  customThumbShadow?: (state: FancySwitchRenderState) => string | undefined;
   customTrackBackground?: (state: FancySwitchRenderState) => string | undefined;
   customTrackBorder?: (state: FancySwitchRenderState) => string | undefined;
+  customTrackShadow?: (state: FancySwitchRenderState) => string | undefined;
 }
 
 export interface ZenithSwitchProps extends Omit<

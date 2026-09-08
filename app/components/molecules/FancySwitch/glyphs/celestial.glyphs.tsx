@@ -106,10 +106,10 @@ export const ActiveZenithGlyph: React.FC<{
 };
 
 export const HorizonPeekPreview: React.FC<{
-  isHovered: boolean;
   isDark: boolean;
   cfg: SwitchSizeConfig;
-}> = ({ isHovered, isDark, cfg }) => {
+  isHovered?: boolean;
+}> = ({ isDark, cfg, isHovered = true }) => {
   if (!isHovered) return null;
 
   return isDark ? (
