@@ -1,9 +1,19 @@
 import { describe, it, expect } from "vitest";
 import { ESLint } from "eslint";
 
+import m3ThemePlugin from "../../scripts/eslint-plugin-m3-theme.js";
+
 const stateEslint = new ESLint({
+  overrideConfigFile: true,
   overrideConfig: [
     {
+      files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+      languageOptions: {
+        parserOptions: { ecmaFeatures: { jsx: true } },
+      },
+      plugins: {
+        "m3-theme": m3ThemePlugin,
+      },
       rules: {
         "m3-theme/enforce-state-layers": "error",
       },
@@ -12,8 +22,16 @@ const stateEslint = new ESLint({
 });
 
 const stateAllowedEslint = new ESLint({
+  overrideConfigFile: true,
   overrideConfig: [
     {
+      files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+      languageOptions: {
+        parserOptions: { ecmaFeatures: { jsx: true } },
+      },
+      plugins: {
+        "m3-theme": m3ThemePlugin,
+      },
       rules: {
         "m3-theme/enforce-state-layers": [
           "error",

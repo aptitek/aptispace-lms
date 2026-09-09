@@ -2,9 +2,16 @@
 import { reactRouter } from "@react-router/dev/vite";
 import { defineConfig } from "vite";
 import path from "node:path";
+import os from "node:os";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { playwright } from "@vitest/browser-playwright";
 const dirname = import.meta.dirname;
+
+// Limit workers to 25% of available cores (max 8, min 2) to prevent CPU starvation
+const maxWorkers = Math.min(
+  8,
+  Math.max(2, Math.floor((os.availableParallelism?.() ?? 4) / 4)),
+);
 const isTestOrStorybook =
   Boolean(process.env.VITEST) ||
   process.argv.some(
@@ -107,6 +114,8 @@ export default defineConfig({
     noExternal: [/@mui\/x-scheduler/, /@atlaskit/],
   },
   test: {
+    maxWorkers,
+    pool: "threads",
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov", "html"],

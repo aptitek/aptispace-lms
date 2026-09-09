@@ -1,9 +1,19 @@
 import { describe, it, expect } from "vitest";
 import { ESLint } from "eslint";
 
+import m3ThemePlugin from "../../scripts/eslint-plugin-m3-theme.js";
+
 const spacingEslint = new ESLint({
+  overrideConfigFile: true,
   overrideConfig: [
     {
+      files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+      languageOptions: {
+        parserOptions: { ecmaFeatures: { jsx: true } },
+      },
+      plugins: {
+        "m3-theme": m3ThemePlugin,
+      },
       rules: {
         "m3-theme/enforce-spacing-tokens": "error",
         "m3-theme/enforce-minimum-touch-target": "error",
@@ -13,8 +23,16 @@ const spacingEslint = new ESLint({
 });
 
 const spacingDenseEslint = new ESLint({
+  overrideConfigFile: true,
   overrideConfig: [
     {
+      files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+      languageOptions: {
+        parserOptions: { ecmaFeatures: { jsx: true } },
+      },
+      plugins: {
+        "m3-theme": m3ThemePlugin,
+      },
       rules: {
         "m3-theme/enforce-minimum-touch-target": [
           "error",
@@ -26,8 +44,16 @@ const spacingDenseEslint = new ESLint({
 });
 
 const spacingAllowedEslint = new ESLint({
+  overrideConfigFile: true,
   overrideConfig: [
     {
+      files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+      languageOptions: {
+        parserOptions: { ecmaFeatures: { jsx: true } },
+      },
+      plugins: {
+        "m3-theme": m3ThemePlugin,
+      },
       rules: {
         "m3-theme/enforce-spacing-tokens": [
           "error",

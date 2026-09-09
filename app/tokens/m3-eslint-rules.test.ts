@@ -1,69 +1,62 @@
 import { describe, it, expect } from "vitest";
-import { ESLint } from "eslint";
+import { ESLint, type Linter } from "eslint";
+
+import m3ThemePlugin from "../../scripts/eslint-plugin-m3-theme.js";
+
+function createM3Eslint(rules: Linter.RulesRecord) {
+  return new ESLint({
+    overrideConfigFile: true,
+    overrideConfig: [
+      {
+        files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+        languageOptions: {
+          parserOptions: { ecmaFeatures: { jsx: true } },
+        },
+        plugins: {
+          "m3-theme": m3ThemePlugin,
+        },
+        rules,
+      },
+    ],
+  });
+}
 
 describe("Material Design 3 ESLint Theming Rules", () => {
-  const eslint = new ESLint({
-    overrideConfig: [
-      {
-        rules: {
-          "m3-theme/no-action-as-container-background": "error",
-          "m3-theme/allowed-theme-colors": [
-            "error",
-            { allowed: ["#00ff66", "rgba(0, 0, 0,"] },
-          ],
-          "m3-theme/no-static-role-colors": "error",
-          "m3-theme/no-alpha-paper-surface": "error",
-          "m3-theme/no-dark-mode-black-shadow": "error",
-          "m3-theme/no-hardcoded-box-shadow": "error",
-          "m3-theme/no-raw-svg-icons": "error",
-          "m3-theme/enforce-rounded-icons": "error",
-          "m3-theme/enforce-motion-tokens": "error",
-          "m3-theme/enforce-shape-tokens": "error",
-          "m3-theme/enforce-elevation-levels": "error",
-          "m3-theme/enforce-state-layers": "error",
-          "m3-theme/enforce-minimum-touch-target": "error",
-        },
-      },
+  const eslint = createM3Eslint({
+    "m3-theme/no-action-as-container-background": "error",
+    "m3-theme/allowed-theme-colors": [
+      "error",
+      { allowed: ["#00ff66", "rgba(0, 0, 0,"] },
+    ],
+    "m3-theme/no-static-role-colors": "error",
+    "m3-theme/no-alpha-paper-surface": "error",
+    "m3-theme/no-dark-mode-black-shadow": "error",
+    "m3-theme/no-hardcoded-box-shadow": "error",
+    "m3-theme/no-raw-svg-icons": "error",
+    "m3-theme/enforce-rounded-icons": "error",
+    "m3-theme/enforce-motion-tokens": "error",
+    "m3-theme/enforce-shape-tokens": "error",
+    "m3-theme/enforce-elevation-levels": "error",
+    "m3-theme/enforce-state-layers": "error",
+    "m3-theme/enforce-minimum-touch-target": "error",
+  });
+
+  const customAllowedEslint = createM3Eslint({
+    "m3-theme/no-action-as-container-background": [
+      "error",
+      { allowed: ["fuchsia", "custom-brand-bg"] },
     ],
   });
 
-  const customAllowedEslint = new ESLint({
-    overrideConfig: [
-      {
-        rules: {
-          "m3-theme/no-action-as-container-background": [
-            "error",
-            { allowed: ["fuchsia", "custom-brand-bg"] },
-          ],
-        },
-      },
+  const motionAllowedEslint = createM3Eslint({
+    "m3-theme/enforce-motion-tokens": [
+      "error",
+      { allowed: ["0.42", "custom-special-physics"] },
     ],
   });
 
-  const motionAllowedEslint = new ESLint({
-    overrideConfig: [
-      {
-        rules: {
-          "m3-theme/enforce-motion-tokens": [
-            "error",
-            { allowed: ["0.42", "custom-special-physics"] },
-          ],
-        },
-      },
-    ],
-  });
-
-  const shapeAllowedEslint = new ESLint({
-    overrideConfig: [
-      {
-        rules: {
-          "m3-theme/enforce-shape-tokens": [
-            "error",
-            { allowed: ["15px", "77"] },
-          ],
-        },
-      },
-    ],
+  const shapeAllowedEslint = createM3Eslint({
+    "m3-theme/enforce-shape-tokens": ["error", { allowed: ["15px", "77"] }],
   });
 
   describe("m3-theme/no-action-as-container-background (whitelist enforcement)", () => {

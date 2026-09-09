@@ -6,8 +6,11 @@
     "build": "wireit",
     "dev": "wireit",
     "lint": "wireit",
+    "lint:eslint": "wireit",
+    "lint:prettier": "wireit",
     "test": "wireit",
     "test:unit": "wireit",
+    "test:stories": "wireit",
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
@@ -86,16 +89,29 @@
       ]
     },
     "test:unit": {
-      "command": "vitest run",
+      "command": "vitest run --project components --project server-and-utils",
       "env": {
         "NODE_OPTIONS": "--no-deprecation"
       },
       "files": [
         "app/**/*",
         "test/**/*",
+        "vite.config.ts",
+        "tsconfig.json",
+        "package.json"
+      ],
+      "output": []
+    },
+    "test:stories": {
+      "command": "vitest run --project storybook",
+      "env": {
+        "NODE_OPTIONS": "--no-deprecation"
+      },
+      "files": [
+        "app/**/*",
         "stories/**/*",
         ".storybook/**/*",
-        "vitest.config.ts",
+        "vite.config.ts",
         "tsconfig.json",
         "package.json"
       ],
@@ -135,7 +151,7 @@
       "files": [
         "app/**/*",
         "test/**/*",
-        "vitest.config.ts",
+        "vite.config.ts",
         "tsconfig.json",
         "package.json"
       ],
@@ -168,17 +184,40 @@
         "storybook-static/**/*"
       ]
     },
-    "lint": {
-      "command": "eslint . && prettier . --write",
+    "lint:eslint": {
+      "command": "eslint --cache --cache-strategy content .",
+      "clean": false,
       "files": [
         "app/**/*",
         ".storybook/**/*",
         "stories/**/*",
+        "scripts/**/*",
+        "playwright/**/*",
         "eslint.config.js",
         "package.json",
         "tsconfig.json"
       ],
       "output": []
+    },
+    "lint:prettier": {
+      "command": "prettier --write --cache --cache-strategy content .",
+      "clean": false,
+      "files": [
+        "app/**/*",
+        ".storybook/**/*",
+        "stories/**/*",
+        "scripts/**/*",
+        "playwright/**/*",
+        "package.json",
+        "tsconfig.json"
+      ],
+      "output": []
+    },
+    "lint": {
+      "dependencies": [
+        "lint:eslint",
+        "lint:prettier"
+      ]
     },
     "typecheck": {
       "command": "react-router typegen && tsc",

@@ -1,9 +1,19 @@
 import { describe, it, expect } from "vitest";
 import { ESLint } from "eslint";
 
+import m3ThemePlugin from "../../scripts/eslint-plugin-m3-theme.js";
+
 const elevationEslint = new ESLint({
+  overrideConfigFile: true,
   overrideConfig: [
     {
+      files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+      languageOptions: {
+        parserOptions: { ecmaFeatures: { jsx: true } },
+      },
+      plugins: {
+        "m3-theme": m3ThemePlugin,
+      },
       rules: {
         "m3-theme/enforce-elevation-levels": "error",
         "m3-theme/no-arbitrary-z-index": "error",
@@ -14,8 +24,16 @@ const elevationEslint = new ESLint({
 });
 
 const elevationAllowedEslint = new ESLint({
+  overrideConfigFile: true,
   overrideConfig: [
     {
+      files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+      languageOptions: {
+        parserOptions: { ecmaFeatures: { jsx: true } },
+      },
+      plugins: {
+        "m3-theme": m3ThemePlugin,
+      },
       rules: {
         "m3-theme/enforce-elevation-levels": [
           "error",
