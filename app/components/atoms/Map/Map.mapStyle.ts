@@ -10,6 +10,50 @@ export const SOLARIZED_LIGHT_MAP_STYLE =
 export interface GetSolarizedMapStyleOptions {
   apiKey?: string;
   providerUrl?: string;
+  enable3dBuildings?: boolean;
+}
+
+function shouldReturnBaseStyle(options?: GetSolarizedMapStyleOptions): boolean {
+  if (!options) {
+    return true;
+  }
+  return (
+    !options.apiKey &&
+    !options.providerUrl &&
+    options.enable3dBuildings !== false
+  );
+}
+
+function applyCustomSource(
+  style: StyleSpecification,
+  options: GetSolarizedMapStyleOptions,
+) {
+  if (options.providerUrl) {
+    style.sources = {
+      ...style.sources,
+      openmaptiles: {
+        type: "vector",
+        url: options.providerUrl,
+      },
+    };
+  } else if (options.apiKey) {
+    style.sources = {
+      ...style.sources,
+      openmaptiles: {
+        type: "vector",
+        url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${options.apiKey}`,
+      },
+    };
+  }
+}
+
+function applyLayerFilters(
+  style: StyleSpecification,
+  options: GetSolarizedMapStyleOptions,
+) {
+  if (options.enable3dBuildings === false) {
+    style.layers = style.layers.filter((layer) => layer.id !== "building-3d");
+  }
 }
 
 /**
@@ -23,30 +67,14 @@ export function getSolarizedMapStyle(
   const base =
     mode === "dark" ? SOLARIZED_DARK_MAP_STYLE : SOLARIZED_LIGHT_MAP_STYLE;
 
-  if (!options?.apiKey && !options?.providerUrl) {
+  if (shouldReturnBaseStyle(options)) {
     return base;
   }
 
-  // Clone to avoid mutating static imports
   const customStyle: StyleSpecification = JSON.parse(JSON.stringify(base));
-
-  if (options.providerUrl) {
-    customStyle.sources = {
-      ...customStyle.sources,
-      openmaptiles: {
-        type: "vector",
-        url: options.providerUrl,
-      },
-    };
-  } else if (options.apiKey) {
-    // MapTiler standard vector tile TileJSON endpoint
-    customStyle.sources = {
-      ...customStyle.sources,
-      openmaptiles: {
-        type: "vector",
-        url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${options.apiKey}`,
-      },
-    };
+  if (options) {
+    applyLayerFilters(customStyle, options);
+    applyCustomSource(customStyle, options);
   }
 
   return customStyle;

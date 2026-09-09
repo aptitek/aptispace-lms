@@ -69,6 +69,37 @@ interface MapViewState {
   bearing: number;
 }
 
+function hasCoordsChanged(prev: MapViewState, next: MapViewState) {
+  return (
+    prev.lon !== next.lon || prev.lat !== next.lat || prev.zoom !== next.zoom
+  );
+}
+
+function syncMapCamera(
+  mapRef: RefObject<MapRef | null>,
+  target: MapViewState,
+  coordsChanged: boolean,
+) {
+  try {
+    if (!coordsChanged) {
+      mapRef.current?.easeTo({
+        pitch: target.pitch,
+        bearing: target.bearing,
+        duration: 1600,
+      });
+    } else {
+      mapRef.current?.flyTo({
+        center: [target.lon, target.lat],
+        zoom: target.zoom,
+        pitch: target.pitch,
+        bearing: target.bearing,
+      });
+    }
+  } catch {
+    // Map might not be fully initialized yet
+  }
+}
+
 function useMapCenterSync(
   mapRef: RefObject<MapRef | null>,
   target: MapViewState,
@@ -77,24 +108,13 @@ function useMapCenterSync(
 
   useEffect(() => {
     const prev = prevCenterRef.current;
-    if (
-      prev.lon !== target.lon ||
-      prev.lat !== target.lat ||
-      prev.zoom !== target.zoom ||
-      prev.pitch !== target.pitch ||
-      prev.bearing !== target.bearing
-    ) {
+    const coordsChanged = hasCoordsChanged(prev, target);
+    const anglesChanged =
+      prev.pitch !== target.pitch || prev.bearing !== target.bearing;
+
+    if (coordsChanged || anglesChanged) {
       prevCenterRef.current = target;
-      try {
-        mapRef.current?.flyTo({
-          center: [target.lon, target.lat],
-          zoom: target.zoom,
-          pitch: target.pitch,
-          bearing: target.bearing,
-        });
-      } catch {
-        // Map might not be fully initialized yet
-      }
+      syncMapCamera(mapRef, target, coordsChanged);
     }
   }, [target, mapRef]);
 }
@@ -137,21 +157,33 @@ function resolveAttribution(
   return attributionControl;
 }
 
+interface ResolvedStyleOpts {
+  tileProviderKey?: string;
+  providerUrl?: string;
+  enable3dBuildings?: boolean;
+}
+
 function useResolvedMapStyle(
   mapStyle: MapProps["mapStyle"],
   resolvedMode: "dark" | "light",
-  tileProviderKey?: string,
-  providerUrl?: string,
+  options?: ResolvedStyleOpts,
 ) {
   return useMemo(() => {
     if (mapStyle) {
       return mapStyle;
     }
     return getSolarizedMapStyle(resolvedMode, {
-      apiKey: tileProviderKey,
-      providerUrl,
+      apiKey: options?.tileProviderKey,
+      providerUrl: options?.providerUrl,
+      enable3dBuildings: options?.enable3dBuildings,
     });
-  }, [mapStyle, resolvedMode, tileProviderKey, providerUrl]);
+  }, [
+    mapStyle,
+    resolvedMode,
+    options?.tileProviderKey,
+    options?.providerUrl,
+    options?.enable3dBuildings,
+  ]);
 }
 
 function tryResizeMap(target?: { resize?: () => void }) {
@@ -182,6 +214,24 @@ function normalizeLayoutProps(props: MapProps) {
   };
 }
 
+function resolveThemeMode(
+  themeMode?: "dark" | "light",
+  theme?: unknown,
+  baseMode?: "dark" | "light",
+): "dark" | "light" {
+  if (themeMode) {
+    return themeMode;
+  }
+  const palette = theme
+    ? (theme as { palette?: { mode?: string } }).palette
+    : undefined;
+  const paletteMode = palette?.mode;
+  if (paletteMode === "light" || paletteMode === "dark") {
+    return paletteMode;
+  }
+  return baseMode ?? "light";
+}
+
 export const AtomicMap = forwardRef<MapRef, MapProps>((props, ref) => {
   const {
     coordinates,
@@ -205,6 +255,10 @@ export const AtomicMap = forwardRef<MapRef, MapProps>((props, ref) => {
     onClick,
     className,
     style,
+    initialPitch,
+    initialBearing,
+    enable3dBuildings,
+    preserveDrawingBuffer = true,
   } = props;
 
   const { zoom, pitch, bearing, maxPitch } = normalizeCameraProps(props);
@@ -218,21 +272,30 @@ export const AtomicMap = forwardRef<MapRef, MapProps>((props, ref) => {
   } = normalizeLayoutProps(props);
 
   const mapRef = useRef<MapRef | null>(null);
-  useImperativeHandle(ref, () => mapRef.current as MapRef, []);
+  useImperativeHandle(
+    ref,
+    () =>
+      new Proxy({} as MapRef, {
+        get: (_target, prop) => {
+          if (!mapRef.current) return undefined;
+          const propertyValue = (
+            mapRef.current as unknown as Record<string, unknown>
+          )[prop as string];
+          if (typeof propertyValue === "function") {
+            return (propertyValue as (...args: unknown[]) => unknown).bind(
+              mapRef.current,
+            );
+          }
+          return propertyValue;
+        },
+      }),
+    [],
+  );
   useWorkerUrl(workerUrl);
 
   const theme = useTheme();
-  const palette = theme
-    ? (theme as unknown as { palette?: { mode?: string } }).palette
-    : undefined;
-  const paletteMode = palette?.mode;
-
   const { baseMode } = useThemeMode();
-  const resolvedMode: "dark" | "light" =
-    themeMode ??
-    (paletteMode === "light" || paletteMode === "dark"
-      ? paletteMode
-      : (baseMode ?? "light"));
+  const resolvedMode = resolveThemeMode(themeMode, theme, baseMode);
 
   const { lon: resolvedLon, lat: resolvedLat } = resolveCoordinates(
     coordinates,
@@ -249,12 +312,11 @@ export const AtomicMap = forwardRef<MapRef, MapProps>((props, ref) => {
   });
   useMapInteractivity(mapRef, interactive);
 
-  const resolvedMapStyle = useResolvedMapStyle(
-    mapStyle,
-    resolvedMode,
+  const resolvedMapStyle = useResolvedMapStyle(mapStyle, resolvedMode, {
     tileProviderKey,
     providerUrl,
-  );
+    enable3dBuildings,
+  });
 
   const handleMapLoad = (e: MapEvent<unknown>) => {
     tryResizeMap(e.target as { resize?: () => void });
@@ -294,8 +356,8 @@ export const AtomicMap = forwardRef<MapRef, MapProps>((props, ref) => {
           longitude: resolvedLon,
           latitude: resolvedLat,
           zoom,
-          pitch,
-          bearing,
+          pitch: initialPitch ?? pitch,
+          bearing: initialBearing ?? bearing,
         }}
         maxPitch={maxPitch}
         mapStyle={resolvedMapStyle as unknown as maplibregl.StyleSpecification}
@@ -306,6 +368,11 @@ export const AtomicMap = forwardRef<MapRef, MapProps>((props, ref) => {
         dragRotate={interactive}
         pitchWithRotate={interactive}
         attributionControl={resolveAttribution(attributionControl)}
+        canvasContextAttributes={
+          preserveDrawingBuffer
+            ? { preserveDrawingBuffer: true, antialias: true }
+            : undefined
+        }
         styleDiffing={false}
         style={MAP_CANVAS_STYLE}
         onLoad={handleMapLoad}

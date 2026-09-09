@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useRef, type RefObject } from "react";
 import type { Variants } from "framer-motion";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
@@ -13,7 +13,7 @@ import {
   DEFAULT_MAP_PITCH,
   DEFAULT_MAP_BEARING,
 } from "~/components/atoms/Map";
-import { M3_SPRINGS } from "~/tokens/motion";
+import { M3_SPRINGS, M3_MOTION_DURATIONS } from "~/tokens/motion";
 import type {
   MapCardSize,
   MapCardOrientation,
@@ -25,10 +25,12 @@ import {
   UnifiedMapCanvas,
   MapCanvasContainer,
   PaperCreaseLayer,
-  CreaseLine,
+  AccordionOverlay,
   MapOverlayControls,
   MapControlButton,
 } from "./MapCard.styles";
+import { AccordionPaperGL } from "./AccordionPaperGL";
+import { useUnfoldLifecycle } from "./useUnfoldLifecycle";
 
 export interface MapCardViewportProps {
   coordinates?: MapCoordinates;
@@ -49,16 +51,15 @@ export interface MapCardViewportProps {
   onFoldChange?: (isFolded: boolean) => void;
 }
 
-const UNFOLD_VARIANTS: Variants = {
+// Zoom remains strictly consistent by maintaining scale: 1 across both states
+const CANVAS_VARIANTS: Variants = {
   folded: {
-    rotateY: -28,
-    rotateX: 6,
-    scale: 0.92,
-    transformOrigin: "left center",
+    rotateX: 0,
+    scale: 1,
+    transformOrigin: "center center",
     transition: M3_SPRINGS.mapFold,
   },
   unfolded: {
-    rotateY: 0,
     rotateX: 0,
     scale: 1,
     transformOrigin: "center center",
@@ -79,6 +80,109 @@ function normalizeViewportProps(props: MapCardViewportProps) {
     mapWidth: props.mapWidth ?? "narrow",
   };
 }
+
+interface AccordionOverlayContainerProps {
+  isFolded: boolean;
+  showOverlay: boolean;
+  snapshotUrl: string | null;
+  onUnfoldDone: () => void;
+  onClick?: () => void;
+}
+
+const AccordionOverlayContainer: React.FC<AccordionOverlayContainerProps> = ({
+  isFolded,
+  showOverlay,
+  snapshotUrl,
+  onUnfoldDone,
+  onClick,
+}) => {
+  if (!showOverlay) {
+    return null;
+  }
+
+  const pointerEvents = isFolded ? "auto" : "none";
+
+  return (
+    <AccordionOverlay
+      initial={false}
+      animate={{ opacity: showOverlay ? 1 : 0 }}
+      transition={{ duration: M3_MOTION_DURATIONS.s.medium1 }}
+      $pointerEvents={pointerEvents}
+      data-testid="accordion-overlay"
+    >
+      <AccordionPaperGL
+        isFolded={isFolded}
+        snapshotUrl={snapshotUrl}
+        onUnfoldDone={onUnfoldDone}
+        onClick={onClick}
+      />
+    </AccordionOverlay>
+  );
+};
+
+interface MapControlsProps {
+  isFolded: boolean;
+  mapRef: RefObject<MapRef | null>;
+  onToggleFold: () => void;
+  onResetZoom: () => void;
+}
+
+const MapControls: React.FC<MapControlsProps> = ({
+  isFolded,
+  mapRef,
+  onToggleFold,
+  onResetZoom,
+}) => {
+  const toggleTooltip = isFolded ? "Déplier la carte" : "Rejouer le dépliage";
+
+  return (
+    <MapOverlayControls data-testid="map-overlay-controls">
+      <Tooltip title={toggleTooltip} arrow placement="left">
+        <MapControlButton
+          onClick={onToggleFold}
+          size="small"
+          aria-label="Toggle fold"
+          data-testid="btn-toggle-fold"
+        >
+          <ReplayRoundedIcon sx={{ fontSize: 18 }} />
+        </MapControlButton>
+      </Tooltip>
+
+      <Tooltip title="Zoom avant" arrow placement="left">
+        <MapControlButton
+          onClick={() => mapRef.current?.zoomIn()}
+          size="small"
+          aria-label="Zoom in"
+          data-testid="btn-zoom-in"
+        >
+          <AddRoundedIcon sx={{ fontSize: 18 }} />
+        </MapControlButton>
+      </Tooltip>
+
+      <Tooltip title="Zoom arrière" arrow placement="left">
+        <MapControlButton
+          onClick={() => mapRef.current?.zoomOut()}
+          size="small"
+          aria-label="Zoom out"
+          data-testid="btn-zoom-out"
+        >
+          <RemoveRoundedIcon sx={{ fontSize: 18 }} />
+        </MapControlButton>
+      </Tooltip>
+
+      <Tooltip title="Réinitialiser" arrow placement="left">
+        <MapControlButton
+          onClick={onResetZoom}
+          size="small"
+          aria-label="Reset zoom"
+          data-testid="btn-reset-zoom"
+        >
+          <RestartAltRoundedIcon sx={{ fontSize: 18 }} />
+        </MapControlButton>
+      </Tooltip>
+    </MapOverlayControls>
+  );
+};
 
 export function MapCardViewport(props: MapCardViewportProps) {
   const {
@@ -104,67 +208,34 @@ export function MapCardViewport(props: MapCardViewportProps) {
   } = normalizeViewportProps(props);
 
   const mapRef = useRef<MapRef | null>(null);
-
-  const [isFolded, setIsFolded] = useState<boolean>(true);
-
   const effectiveCoords = coordinates ?? DEFAULT_CAMPUS_COORDINATES;
   const effectivePinLabel = pinLabel ?? roomPinLabel;
 
-  // Unfolding sequence on mount: starts folded, then unfolds smoothly
-  useEffect(() => {
-    if (initialFolded) {
-      setIsFolded(true);
-      return;
-    }
+  const currentPinColor = pinColor ?? "var(--color-solarized-green, #859900)";
 
-    setIsFolded(true);
-    const timer = setTimeout(() => {
-      setIsFolded(false);
-      onFoldChange?.(false);
-      setTimeout(() => {
-        mapRef.current?.resize();
-      }, 750);
-      setTimeout(() => {
-        mapRef.current?.resize();
-      }, 1200);
-    }, 300);
+  const {
+    isFolded,
+    hasMovedTo3D,
+    showOverlay,
+    snapshotUrl,
+    handleUnfoldDone,
+    handleToggleFold,
+    handleResetZoom,
+    handleMapLoad,
+  } = useUnfoldLifecycle({
+    initialFolded,
+    pitch,
+    bearing,
+    zoom,
+    effectiveCoords,
+    onFoldChange,
+    mapRef,
+  });
 
-    return () => clearTimeout(timer);
-  }, [initialFolded, onFoldChange]);
-
-  const handleToggleFold = () => {
-    setIsFolded((prev) => {
-      const next = !prev;
-      onFoldChange?.(next);
-      if (!next) {
-        setTimeout(() => {
-          mapRef.current?.resize();
-        }, 750);
-        setTimeout(() => {
-          mapRef.current?.resize();
-        }, 1200);
-      }
-      return next;
-    });
-  };
-
-  const handleZoomIn = () => {
-    mapRef.current?.zoomIn();
-  };
-
-  const handleZoomOut = () => {
-    mapRef.current?.zoomOut();
-  };
-
-  const handleResetZoom = () => {
-    mapRef.current?.flyTo({
-      center: [effectiveCoords.lon, effectiveCoords.lat],
-      zoom,
-      pitch,
-      bearing,
-    });
-    setIsFolded(false);
-  };
+  const foldState = isFolded ? "folded" : "unfolded";
+  const clickHandler = isFolded ? handleToggleFold : undefined;
+  const currentPitch = hasMovedTo3D ? pitch : 0;
+  const currentBearing = hasMovedTo3D ? bearing : 0;
 
   return (
     <MapPerspectiveWrapper
@@ -174,97 +245,55 @@ export function MapCardViewport(props: MapCardViewportProps) {
       data-testid="map-perspective-wrapper"
     >
       <UnifiedMapCanvas
-        animate={isFolded ? "folded" : "unfolded"}
+        animate={foldState}
         initial="folded"
-        variants={UNFOLD_VARIANTS}
+        variants={CANVAS_VARIANTS}
         $isFolded={isFolded}
         data-testid="folding-paper-canvas"
-        onClick={isFolded ? handleToggleFold : undefined}
+        onClick={clickHandler}
       >
         <MapCanvasContainer data-testid="maplibre-container">
           <Map
             ref={mapRef}
             coordinates={effectiveCoords}
             zoom={zoom}
-            pitch={pitch}
-            bearing={bearing}
+            initialPitch={0}
+            initialBearing={0}
+            pitch={currentPitch}
+            bearing={currentBearing}
+            enable3dBuildings={true}
             mapStyle={mapStyle}
             tileProviderKey={tileProviderKey}
             pinLabel={effectivePinLabel}
-            pinColor={pinColor ?? "var(--color-solarized-green, #859900)"}
+            pinColor={currentPinColor}
             pinAriaLabel={titleOsm}
             interactive={true}
             attributionControl={false}
             width="100%"
             height="100%"
-            onLoad={() => {
-              setTimeout(() => {
-                mapRef.current?.resize();
-              }, 200);
-              setTimeout(() => {
-                mapRef.current?.resize();
-              }, 500);
-            }}
+            onLoad={handleMapLoad}
             data-testid="maplibre-gl-map"
           />
         </MapCanvasContainer>
 
-        <PaperCreaseLayer $isFolded={isFolded} data-testid="paper-crease-layer">
-          <CreaseLine $leftPercent={33.33} />
-          <CreaseLine $leftPercent={66.66} />
-        </PaperCreaseLayer>
+        <AccordionOverlayContainer
+          isFolded={isFolded}
+          showOverlay={showOverlay}
+          snapshotUrl={snapshotUrl}
+          onUnfoldDone={handleUnfoldDone}
+          onClick={clickHandler}
+        />
+
+        <PaperCreaseLayer $isFolded={false} data-testid="paper-crease-layer" />
       </UnifiedMapCanvas>
 
       {showControls && (
-        <MapOverlayControls data-testid="map-overlay-controls">
-          <Tooltip
-            title={isFolded ? "Déplier la carte" : "Rejouer le dépliage"}
-            arrow
-            placement="left"
-          >
-            <MapControlButton
-              onClick={handleToggleFold}
-              size="small"
-              aria-label="Toggle fold"
-              data-testid="btn-toggle-fold"
-            >
-              <ReplayRoundedIcon sx={{ fontSize: 18 }} />
-            </MapControlButton>
-          </Tooltip>
-
-          <Tooltip title="Zoom avant" arrow placement="left">
-            <MapControlButton
-              onClick={handleZoomIn}
-              size="small"
-              aria-label="Zoom in"
-              data-testid="btn-zoom-in"
-            >
-              <AddRoundedIcon sx={{ fontSize: 18 }} />
-            </MapControlButton>
-          </Tooltip>
-
-          <Tooltip title="Zoom arrière" arrow placement="left">
-            <MapControlButton
-              onClick={handleZoomOut}
-              size="small"
-              aria-label="Zoom out"
-              data-testid="btn-zoom-out"
-            >
-              <RemoveRoundedIcon sx={{ fontSize: 18 }} />
-            </MapControlButton>
-          </Tooltip>
-
-          <Tooltip title="Réinitialiser" arrow placement="left">
-            <MapControlButton
-              onClick={handleResetZoom}
-              size="small"
-              aria-label="Reset zoom"
-              data-testid="btn-reset-zoom"
-            >
-              <RestartAltRoundedIcon sx={{ fontSize: 18 }} />
-            </MapControlButton>
-          </Tooltip>
-        </MapOverlayControls>
+        <MapControls
+          isFolded={isFolded}
+          mapRef={mapRef}
+          onToggleFold={handleToggleFold}
+          onResetZoom={handleResetZoom}
+        />
       )}
     </MapPerspectiveWrapper>
   );

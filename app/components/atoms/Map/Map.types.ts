@@ -59,6 +59,21 @@ export interface MapProps {
   maxPitch?: number;
 
   /**
+   * Initial camera pitch in degrees when map mounts (defaults to pitch).
+   */
+  initialPitch?: number;
+
+  /**
+   * Initial camera bearing in degrees when map mounts (defaults to bearing).
+   */
+  initialBearing?: number;
+
+  /**
+   * Whether to render 3D building extrusions in the vector tile style (default: true).
+   */
+  enable3dBuildings?: boolean;
+
+  /**
    * Custom style specification object or remote JSON URL (e.g. MapTiler, Stadia, Protomaps, OpenFreeMap).
    * If omitted, defaults to the built-in Solarized vector style (auto-switching light/dark).
    */
@@ -174,6 +189,11 @@ export interface MapProps {
    * Inline CSS properties for the wrapper element.
    */
   style?: CSSProperties;
+
+  /**
+   * Whether to preserve WebGL drawing buffer for canvas screenshots (default: true).
+   */
+  preserveDrawingBuffer?: boolean;
 
   /**
    * Test identifier for unit and e2e testing.

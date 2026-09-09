@@ -44,24 +44,44 @@ interface MockMarkerProps {
   latitude?: number;
 }
 
+const mockDataUrl =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+
+const mockCanvasObj = {
+  toDataURL: () => mockDataUrl,
+};
+
+const mockMapHandlers = {
+  dragPan: { enable: vi.fn(), disable: vi.fn() },
+  scrollZoom: { enable: vi.fn(), disable: vi.fn() },
+  doubleClickZoom: { enable: vi.fn(), disable: vi.fn() },
+  boxZoom: { enable: vi.fn(), disable: vi.fn() },
+};
+
+const createMockMapHandle = () => ({
+  zoomIn: vi.fn(),
+  zoomOut: vi.fn(),
+  flyTo: vi.fn(),
+  easeTo: vi.fn(),
+  resize: vi.fn(),
+  getCanvas: () => mockCanvasObj,
+  getMap: () => mockMapHandlers,
+});
+
 vi.mock("react-map-gl/maplibre", async () => {
   const actualReact = await vi.importActual<typeof ReactType>("react");
   const MockMap = actualReact.forwardRef<
-    { zoomIn: () => void; zoomOut: () => void; flyTo: () => void },
+    {
+      zoomIn: () => void;
+      zoomOut: () => void;
+      flyTo: () => void;
+      easeTo: () => void;
+      resize: () => void;
+      getCanvas?: () => { toDataURL: () => string };
+    },
     MockMapProps
   >(({ children, initialViewState }, ref) => {
-    actualReact.useImperativeHandle(ref, () => ({
-      zoomIn: vi.fn(),
-      zoomOut: vi.fn(),
-      flyTo: vi.fn(),
-      resize: vi.fn(),
-      getMap: () => ({
-        dragPan: { enable: vi.fn(), disable: vi.fn() },
-        scrollZoom: { enable: vi.fn(), disable: vi.fn() },
-        doubleClickZoom: { enable: vi.fn(), disable: vi.fn() },
-        boxZoom: { enable: vi.fn(), disable: vi.fn() },
-      }),
-    }));
+    actualReact.useImperativeHandle(ref, createMockMapHandle);
     return (
       <div
         data-testid="maplibre-gl-map"

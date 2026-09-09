@@ -8,6 +8,12 @@
   },
   "sprite": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm",
   "glyphs": "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
+  "light": {
+    "anchor": "viewport",
+    "color": "#93a1a1",
+    "intensity": 0.45,
+    "position": [1.15, 210, 45]
+  },
   "layers": [
     {
       "id": "background",
@@ -425,28 +431,37 @@
       "source-layer": "building",
       "paint": {
         "fill-antialias": true,
-        "fill-color": "#073642",
-        "fill-outline-color": "#586e75"
+        "fill-color": "#586e75",
+        "fill-outline-color": "#839496"
       }
     },
     {
-      "id": "building-top",
-      "type": "fill",
+      "id": "building-3d",
+      "type": "fill-extrusion",
       "source": "openmaptiles",
       "source-layer": "building",
+      "minzoom": 13,
       "paint": {
-        "fill-color": "#0c4654",
-        "fill-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0, 16, 1],
-        "fill-outline-color": "#586e75",
-        "fill-translate": [
+        "fill-extrusion-color": "#586e75",
+        "fill-extrusion-height": [
           "interpolate",
           ["linear"],
           ["zoom"],
+          13,
+          0,
           14,
-          ["literal", [0, 0]],
-          16,
-          ["literal", [-2, -2]]
-        ]
+          ["coalesce", ["get", "render_height"], ["get", "height"], 12]
+        ],
+        "fill-extrusion-base": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          13,
+          0,
+          14,
+          ["coalesce", ["get", "render_min_height"], ["get", "min_height"], 0]
+        ],
+        "fill-extrusion-opacity": 0.9
       }
     },
     {

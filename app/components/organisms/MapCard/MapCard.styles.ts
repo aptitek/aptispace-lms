@@ -337,6 +337,114 @@ export const CreaseLine = styled("div", {
 }));
 
 /**
+ * 3D Paper Accordion overlay container hosting the accordion panels
+ */
+export const AccordionOverlay = styled(motion.div, {
+  shouldForwardProp: (prop) => prop !== "$pointerEvents",
+})<{ $pointerEvents?: "auto" | "none" }>(({ $pointerEvents = "none" }) => ({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  transformStyle: "preserve-3d",
+  perspective: "1200px",
+  zIndex: 4,
+  pointerEvents: $pointerEvents,
+}));
+
+/**
+ * Individual hinged panel in the accordion brochure (alternating right/left hinges)
+ */
+export const AccordionPanel = styled(motion.div, {
+  shouldForwardProp: (prop) =>
+    prop !== "$index" && prop !== "$totalPanels" && prop !== "$panel",
+})<{ $index?: number; $totalPanels?: number; $panel?: string }>(({
+  $index = 0,
+  $totalPanels = 6,
+}) => {
+  const panelWidth = 100 / $totalPanels;
+  const isEven = $index % 2 === 0;
+  return {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    height: "100%",
+    left: `${$index * panelWidth}%`,
+    width: `${panelWidth + 0.08}%`,
+    overflow: "hidden",
+    transformStyle: "preserve-3d",
+    backfaceVisibility: "hidden",
+    transformOrigin: isEven ? "right center" : "left center",
+  };
+});
+
+/**
+ * Inner wrapper sized at (totalPanels * 100)% width, horizontally shifted per panel
+ */
+export const AccordionPanelContent = styled("div", {
+  shouldForwardProp: (prop) =>
+    prop !== "$index" && prop !== "$totalPanels" && prop !== "$panel",
+})<{ $index?: number; $totalPanels?: number; $panel?: string }>(
+  ({ $index = 0, $totalPanels = 6 }) => ({
+    position: "absolute",
+    top: 0,
+    height: "100%",
+    width: `${$totalPanels * 100}%`,
+    pointerEvents: "none",
+    left: `-${$index * 100}%`,
+  }),
+);
+
+/**
+ * Dynamic lighting shade simulating ambient occlusion & alternating fold shadows
+ */
+export const AccordionPanelShade = styled(motion.div, {
+  shouldForwardProp: (prop) => prop !== "$index" && prop !== "$panel",
+})<{ $index?: number; $panel?: string }>(({ $index = 0 }) => {
+  const isEven = $index % 2 === 0;
+  return {
+    position: "absolute",
+    inset: 0,
+    pointerEvents: "none",
+    zIndex: 2,
+    background: isEven
+      ? "linear-gradient(to right, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.22) 100%)"
+      : "linear-gradient(to right, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.02) 100%)",
+  };
+});
+
+/**
+ * High-definition crease line along the fold hinge with alternating mountain/valley appearance
+ */
+export const AccordionCreaseLine = styled("div", {
+  shouldForwardProp: (prop) =>
+    prop !== "$leftPercent" && prop !== "$isMountain",
+})<{ $leftPercent: number; $isMountain: boolean }>(
+  ({ $leftPercent, $isMountain }) => ({
+    position: "absolute",
+    left: `${$leftPercent}%`,
+    top: 0,
+    bottom: 0,
+    width: 2,
+    zIndex: 5,
+    pointerEvents: "none",
+    background: $isMountain
+      ? "linear-gradient(to right, rgba(255, 255, 255, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%)"
+      : "linear-gradient(to right, rgba(0, 0, 0, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%)",
+    boxShadow: $isMountain
+      ? "0 0 3px rgba(255, 255, 255, 0.25)"
+      : "0 0 3px rgba(0, 0, 0, 0.2)",
+  }),
+);
+
+// Backward-compatible aliases
+export const TrifoldOverlay = AccordionOverlay;
+export const TrifoldPanel = AccordionPanel;
+export const TrifoldPanelContent = AccordionPanelContent;
+export const TrifoldPanelShade = AccordionPanelShade;
+export const TrifoldHingeLine = AccordionCreaseLine;
+
+/**
  * Map overlay toolbar (controls for zoom in, zoom out, reset, replay fold)
  */
 export const MapOverlayControls = styled("div")(({ theme }) => ({
