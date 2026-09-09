@@ -10,4 +10,8 @@ export {
   SegmentItem,
   SegmentDivider,
   SegmentDeleteButton,
+  SegmentInlineInput,
+  SegmentContentWrapper,
 } from "./SegmentedChip.styles";
+export { SegmentEditableContent } from "./SegmentEditableContent";
+

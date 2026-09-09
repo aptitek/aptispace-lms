@@ -109,6 +109,11 @@ const meta: Meta<typeof MapCard> = {
       control: "text",
       description: "Optional API key for MapTiler / Protomaps vector tiles",
     },
+    editable: {
+      control: "boolean",
+      description:
+        "Enable interactive in-place editing for chips, address, badge, and instructions",
+    },
   },
 };
 
@@ -430,3 +435,60 @@ export const NoWebGLFallbackVertical: Story = {
     coordinates: { lat: 48.8584, lon: 2.2945 },
   },
 };
+
+function MapCardEditableDemo(cardProps: React.ComponentProps<typeof MapCard>) {
+  const [address, setAddress] = React.useState(cardProps.address);
+  const [coordinates, setCoordinates] = React.useState(cardProps.coordinates);
+  const [campus, setCampus] = React.useState(cardProps.campusName);
+  const [building, setBuilding] = React.useState(cardProps.buildingName);
+  const [room, setRoom] = React.useState(cardProps.room);
+  const [doorCode, setDoorCode] = React.useState(cardProps.doorCode);
+  const [hasBadge, setHasBadge] = React.useState(cardProps.hasBadge ?? true);
+  const [instructions, setInstructions] = React.useState(cardProps.instructions);
+
+  return (
+    <Box sx={{ width: 680, maxWidth: "100%" }}>
+      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
+        Mode édition : autocomplétion d&apos;adresse avec centrage dynamique de la carte, puces éditables, badge et consignes.
+      </Typography>
+      <MapCard
+        {...cardProps}
+        editable
+        address={address}
+        coordinates={coordinates}
+        campusName={campus}
+        buildingName={building}
+        room={room}
+        doorCode={doorCode}
+        hasBadge={hasBadge}
+        instructions={instructions}
+        onAddressChange={setAddress}
+        onCoordinatesChange={setCoordinates}
+        onCampusChange={setCampus}
+        onBuildingChange={setBuilding}
+        onRoomChange={setRoom}
+        onDoorCodeChange={setDoorCode}
+        onBadgeChange={setHasBadge}
+        onInstructionsChange={setInstructions}
+      />
+    </Box>
+  );
+}
+
+export const EditableMode: Story = {
+  args: {
+    editable: true,
+    address: "Rue Noetzlin, 91190 Gif-sur-Yvette, France",
+    campusName: "Campus Paris-Saclay",
+    buildingName: "Bâtiment Alan Turing",
+    room: "302",
+    doorCode: "*4829#",
+    hasBadge: true,
+    instructions: "Badge RFID requis aux portes vitrées après 18h.",
+    size: "medium",
+    orientation: "horizontal",
+    coordinates: { lat: 48.7118, lon: 2.1698 },
+  },
+  render: (args) => <MapCardEditableDemo {...args} />,
+};
+

@@ -1,7 +1,11 @@
 import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
-import { type ChipShape, resolveChipShape } from "~/tokens/shapes";
+import {
+  type ChipShape,
+  resolveChipShape,
+  M3_SHAPE_CORNERS,
+} from "~/tokens/shapes";
 import { FONT_FAMILIES } from "~/tokens/typography";
 import { M3_STROKES } from "~/tokens/spacing";
 import type {
@@ -171,6 +175,7 @@ interface StyledSegmentItemProps {
   $background?: string;
   $color?: string;
   $isClickable?: boolean;
+  $isEditable?: boolean;
   $isColumn?: boolean;
 }
 
@@ -205,6 +210,7 @@ export const SegmentItem = styled("span", {
       "$background",
       "$color",
       "$isClickable",
+      "$isEditable",
       "$isColumn",
     ].includes(prop as string),
 })<StyledSegmentItemProps>(({
@@ -215,6 +221,7 @@ export const SegmentItem = styled("span", {
   $background,
   $color,
   $isClickable,
+  $isEditable,
   $isColumn,
 }) => {
   const padding = resolveSegmentPadding($size, $bold, $isColumn);
@@ -236,13 +243,59 @@ export const SegmentItem = styled("span", {
     overflow: "hidden",
     textOverflow: "ellipsis",
     flexShrink: 0,
-    cursor: $isClickable ? "pointer" : "inherit",
+    cursor: $isEditable ? "text" : $isClickable ? "pointer" : "inherit",
+    transition: "background-color 0.15s ease, opacity 0.15s ease",
 
     ...($isClickable && {
       "&:hover": {
         opacity: 0.85,
       },
     }),
+
+    ...($isEditable && {
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.primary.main, 0.08),
+      },
+    }),
+  };
+});
+
+interface StyledSegmentInlineInputProps {
+  $size: SegmentedChipSize;
+  $bold?: boolean;
+  $mono?: boolean;
+  $color?: string;
+}
+
+export const SegmentInlineInput = styled("input", {
+  shouldForwardProp: (prop) =>
+    !["$size", "$bold", "$mono", "$color"].includes(prop as string),
+})<StyledSegmentInlineInputProps>(({ theme, $size, $bold, $mono, $color }) => {
+  const sizeConfig = SEGMENTED_CHIP_SIZE_MAP[$size];
+  const typography = resolveSegmentTypography($bold, $mono);
+
+  return {
+    ...typography,
+    fontSize: sizeConfig.fontSize,
+    color: $color || theme.palette.text.primary,
+    backgroundColor: alpha(theme.palette.background.paper, 0.95),
+    border: `${M3_STROKES.thin}px solid ${theme.palette.primary.main}`,
+    borderRadius: `${M3_SHAPE_CORNERS.extraSmall}px`,
+    padding: "0 4px",
+    margin: 0,
+    outline: "none",
+    boxSizing: "border-box",
+    height: sizeConfig.height - 6,
+    minHeight: sizeConfig.height - 6,
+    lineHeight: 1,
+    minWidth: "3ch",
+    maxWidth: "100%",
+    boxShadow: `0 0 0 1px ${alpha(theme.palette.primary.main, 0.25)}`,
+    transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+    "&:focus": {
+      borderColor: theme.palette.primary.main,
+      boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.35)}`,
+    },
   };
 });
 
@@ -275,3 +328,22 @@ export const SegmentDeleteButton = styled("span")(({ theme }) => ({
     color: theme.palette.error.main,
   },
 }));
+
+interface StyledSegmentContentWrapperProps {
+  $isEditable?: boolean;
+}
+
+export const SegmentContentWrapper = styled("span", {
+  shouldForwardProp: (prop) => prop !== "$isEditable",
+})<StyledSegmentContentWrapperProps>(({ $isEditable }) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 6,
+  cursor: $isEditable ? "text" : "inherit",
+  outline: "none",
+  "&:focus-visible": {
+    outline: "1px dashed currentColor",
+    borderRadius: `${M3_SHAPE_CORNERS.extraSmall}px`,
+  },
+}));
+

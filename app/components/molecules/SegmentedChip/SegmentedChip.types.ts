@@ -26,6 +26,12 @@ export interface ChipSegment {
   bold?: boolean;
   /** Monospace typography toggle */
   mono?: boolean;
+  /** Whether this segment can be edited in place (defaults to chip-level editable) */
+  editable?: boolean;
+  /** Callback fired when this segment's text is edited and committed */
+  onEdit?: (newLabel: string) => void;
+  /** Optional placeholder or title for the inline edit input */
+  editPlaceholder?: string;
   /** Optional click handler for this specific segment */
   onClick?: (event: React.MouseEvent) => void;
   /** Custom test ID for the segment */
@@ -109,6 +115,25 @@ export interface SegmentedChipProps {
    * Whether the chip and its actions are disabled.
    */
   disabled?: boolean;
+
+  /**
+   * Whether segments in the chip can be edited in place (defaults to false).
+   */
+  editable?: boolean;
+
+  /**
+   * Callback fired when any segment's label is edited and committed.
+   */
+  onSegmentEdit?: (
+    segmentIndex: number,
+    newLabel: string,
+    segment: ChipSegment,
+  ) => void;
+
+  /**
+   * User interaction trigger to start editing ("click" | "doubleClick"). Defaults to "click".
+   */
+  editTrigger?: "click" | "doubleClick";
 
   /**
    * Whether to render dividers between segments (defaults to true).

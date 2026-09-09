@@ -8,6 +8,7 @@ import MapCardWayfinding from "./MapCardWayfinding";
 import MapCardViewport from "./MapCardViewport";
 import MapCardFooter from "./MapCardFooter";
 import MapCardSkeleton from "./MapCardSkeleton";
+import { useMapCardEditableState } from "./useMapCardEditableState";
 
 function normalizeCardSettings(props: MapCardProps) {
   return {
@@ -19,6 +20,7 @@ function normalizeCardSettings(props: MapCardProps) {
     initialFolded: Boolean(props.initialFolded),
     showControls: Boolean(props.showControls),
     showInstructionBanner: Boolean(props.showInstructionBanner),
+    editable: Boolean(props.editable),
     testId: props.testId ?? "map-card",
   };
 }
@@ -53,6 +55,7 @@ export const MapCard = forwardRef<HTMLDivElement, MapCardProps>(
       roomNumber,
       doorCode,
       accessType,
+      hasBadge,
       instructions,
       title,
       chipOrientation,
@@ -64,6 +67,16 @@ export const MapCard = forwardRef<HTMLDivElement, MapCardProps>(
       onCopyDoorCode,
       onDirectionsClick,
       onFoldChange,
+      onAddressChange,
+      onCoordinatesChange,
+      customGeocodeService,
+      onBadgeChange,
+      onInstructionsChange,
+      onCampusChange,
+      onBuildingChange,
+      onFloorChange,
+      onRoomChange,
+      onDoorCodeChange,
     } = props;
 
     const {
@@ -75,6 +88,7 @@ export const MapCard = forwardRef<HTMLDivElement, MapCardProps>(
       initialFolded,
       showControls,
       showInstructionBanner,
+      editable,
       testId,
     } = normalizeCardSettings(props);
 
@@ -83,14 +97,57 @@ export const MapCard = forwardRef<HTMLDivElement, MapCardProps>(
 
     const [isCodeCopied, setIsCodeCopied] = useState<boolean>(false);
 
+    const {
+      localAddress,
+      localCoordinates,
+      localCampus,
+      localBuilding,
+      localFloor,
+      localRoom,
+      localDoorCode,
+      localInstructions,
+      localHasBadge,
+      handleAddressChange,
+      handleCoordinatesChange,
+      handleCampusChange,
+      handleBuildingChange,
+      handleFloorChange,
+      handleRoomChange,
+      handleDoorCodeChange,
+      handleBadgeChange,
+      handleInstructionsChange,
+    } = useMapCardEditableState({
+      address,
+      coordinates,
+      campusName,
+      buildingName,
+      floor,
+      room,
+      doorCode,
+      instructions,
+      hasBadge,
+      accessType,
+      onAddressChange,
+      onCoordinatesChange,
+      onCampusChange,
+      onBuildingChange,
+      onFloorChange,
+      onRoomChange,
+      onDoorCodeChange,
+      onBadgeChange,
+      onInstructionsChange,
+    });
+
+    const resolvedCoordinates = localCoordinates ?? coordinates;
+
     // Parse room string into structured components (floor, roomNumber, labels)
     const roomInfo = useMemo(
       () =>
-        parseRoomCode(room, floor, roomNumber, {
+        parseRoomCode(localRoom, localFloor, roomNumber, {
           locale: activeLocale,
           roomName,
         }),
-      [room, floor, roomNumber, activeLocale, roomName],
+      [localRoom, localFloor, roomNumber, activeLocale, roomName],
     );
 
     const handleCopyDoorCode = useCallback(async () => {
@@ -140,12 +197,12 @@ export const MapCard = forwardRef<HTMLDivElement, MapCardProps>(
         <CardBodyWrapper $size={size} $orientation={orientation}>
           {/* Left / Top side: Wayfinding with prominent segmented chip and optional access chip */}
           <MapCardWayfinding
-            campusName={campusName}
-            buildingName={buildingName}
+            campusName={localCampus}
+            buildingName={localBuilding}
             roomInfo={roomInfo}
-            doorCode={doorCode}
+            doorCode={localDoorCode}
             accessType={accessType}
-            instructions={instructions}
+            instructions={localInstructions}
             showInstructionBanner={showInstructionBanner}
             size={size}
             orientation={orientation}
@@ -153,13 +210,22 @@ export const MapCard = forwardRef<HTMLDivElement, MapCardProps>(
             isCodeCopied={isCodeCopied}
             onCopyDoorCode={handleCopyDoorCode}
             title={title}
+            editable={editable}
+            hasBadge={localHasBadge}
+            onBadgeChange={handleBadgeChange}
+            onInstructionsChange={handleInstructionsChange}
+            onCampusChange={handleCampusChange}
+            onBuildingChange={handleBuildingChange}
+            onFloorChange={handleFloorChange}
+            onRoomChange={handleRoomChange}
+            onDoorCodeChange={handleDoorCodeChange}
           >
             {children}
           </MapCardWayfinding>
 
           {/* Right / Top side: MapLibre vector map with 3D origami paper unfolding animation */}
           <MapCardViewport
-            coordinates={coordinates}
+            coordinates={resolvedCoordinates}
             zoom={zoom}
             pitch={pitch}
             bearing={bearing}
@@ -183,13 +249,17 @@ export const MapCard = forwardRef<HTMLDivElement, MapCardProps>(
 
         {/* Bottom Footer: Full address, copy button, and navigation FloatingActionButton */}
         <MapCardFooter
-          address={address}
-          coordinates={coordinates}
+          address={localAddress}
+          coordinates={resolvedCoordinates}
           onCopyAddress={onCopyAddress}
           onDirectionsClick={onDirectionsClick}
           copyLabel={labels.copyAddressLabel}
           copiedLabel={labels.copiedAddressLabel}
           navigateLabel={labels.getDirectionsLabel}
+          editable={editable}
+          onAddressChange={handleAddressChange}
+          onCoordinatesChange={handleCoordinatesChange}
+          customGeocodeService={customGeocodeService}
         />
       </SheetCard>
     );

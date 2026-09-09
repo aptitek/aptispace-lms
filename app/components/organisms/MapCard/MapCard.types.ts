@@ -5,6 +5,12 @@ export interface MapCoordinates {
   lon: number;
 }
 
+export interface AddressSuggestion {
+  label: string;
+  coordinates: MapCoordinates;
+  subLabel?: string;
+}
+
 export type AccessType = "code" | "badge" | "intercom" | "key" | "open";
 export type MapCardSize = "small" | "medium" | "large";
 export type MapCardOrientation = "horizontal" | "vertical";
@@ -98,6 +104,11 @@ export interface MapCardProps {
   accessType?: AccessType;
 
   /**
+   * Whether badge access is required. If omitted, inferred from accessType or instructions.
+   */
+  hasBadge?: boolean;
+
+  /**
    * Supplementary access instructions or wayfinding notes.
    */
   instructions?: string;
@@ -133,6 +144,63 @@ export interface MapCardProps {
    * @default false
    */
   showInstructionBanner?: boolean;
+
+  /**
+   * Whether the card is in editable mode.
+   * Enables in-place editing of wayfinding chips, address text field, badge switch, and instructions field.
+   * @default false
+   */
+  editable?: boolean;
+
+  /**
+   * Callback fired when the address is edited in editable mode.
+   */
+  onAddressChange?: (newAddress: string) => void;
+
+  /**
+   * Callback fired when coordinates change (via address autocompletion or geocoding).
+   */
+  onCoordinatesChange?: (coordinates: MapCoordinates) => void;
+
+  /**
+   * Optional custom geocoding service override for address autocompletion.
+   */
+  customGeocodeService?: (query: string) => Promise<AddressSuggestion[]>;
+
+  /**
+   * Callback fired when the badge requirement switch is toggled in editable mode.
+   */
+  onBadgeChange?: (hasBadge: boolean) => void;
+
+  /**
+   * Callback fired when access instructions are edited in editable mode.
+   */
+  onInstructionsChange?: (instructions: string) => void;
+
+  /**
+   * Callback fired when campus name is edited in editable mode.
+   */
+  onCampusChange?: (campusName: string) => void;
+
+  /**
+   * Callback fired when building name is edited in editable mode.
+   */
+  onBuildingChange?: (buildingName: string) => void;
+
+  /**
+   * Callback fired when floor is edited in editable mode.
+   */
+  onFloorChange?: (floor: string) => void;
+
+  /**
+   * Callback fired when room is edited in editable mode.
+   */
+  onRoomChange?: (room: string) => void;
+
+  /**
+   * Callback fired when door code is edited in editable mode.
+   */
+  onDoorCodeChange?: (doorCode: string) => void;
 
   /**
    * Language locale override ("en" | "fr").

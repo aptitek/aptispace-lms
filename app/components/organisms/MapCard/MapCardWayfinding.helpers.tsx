@@ -98,6 +98,8 @@ export interface LocationSegmentsOptions {
   buildingName?: string;
   iconSize: number;
   colors: AccessColorTheme;
+  onCampusChange?: (newCampus: string) => void;
+  onBuildingChange?: (newBuilding: string) => void;
 }
 
 export function buildLocationSegments(
@@ -105,7 +107,7 @@ export function buildLocationSegments(
 ): ChipSegment[] {
   const campus = options.campusName || "Campus";
   const building = options.buildingName || "Building";
-  const { iconSize, colors } = options;
+  const { iconSize, colors, onCampusChange, onBuildingChange } = options;
 
   return [
     {
@@ -117,6 +119,7 @@ export function buildLocationSegments(
       tooltip: campus,
       color: colors.primary,
       bold: true,
+      onEdit: onCampusChange,
       testId: "seg-campus",
     },
     {
@@ -130,6 +133,7 @@ export function buildLocationSegments(
       tooltip: building,
       color: colors.textPrimary,
       bold: true,
+      onEdit: onBuildingChange,
       testId: "seg-building",
     },
   ];
@@ -139,12 +143,14 @@ export interface HeroRoomSegmentsOptions {
   roomInfo: ParsedRoomInfo;
   iconSize: number;
   colors: AccessColorTheme;
+  onFloorChange?: (newFloor: string) => void;
+  onRoomChange?: (newRoom: string) => void;
 }
 
 export function buildHeroRoomSegments(
   options: HeroRoomSegmentsOptions,
 ): ChipSegment[] {
-  const { roomInfo, iconSize, colors } = options;
+  const { roomInfo, iconSize, colors, onFloorChange, onRoomChange } = options;
   const roomDisplay = roomInfo.roomName
     ? roomInfo.roomName
     : roomInfo.roomNumber || roomInfo.rawRoom;
@@ -163,6 +169,7 @@ export function buildHeroRoomSegments(
       background: alpha(colors.infoColor, 0.12),
       mono: true,
       bold: true,
+      onEdit: onFloorChange,
       testId: "seg-floor",
     },
     {
@@ -180,6 +187,7 @@ export function buildHeroRoomSegments(
       color: colors.primary,
       mono: !roomInfo.roomName,
       bold: true,
+      onEdit: onRoomChange,
       testId: "seg-room",
     },
   ];
@@ -189,6 +197,7 @@ interface DoorCodeSegmentOptions {
   doorCode?: string;
   isCodeCopied?: boolean;
   onCopyDoorCode?: () => void;
+  onDoorCodeChange?: (newDoorCode: string) => void;
   iconSize?: number;
   colors: AccessColorTheme;
 }
@@ -200,6 +209,7 @@ function createDoorCodeSegment(
     doorCode,
     isCodeCopied,
     onCopyDoorCode,
+    onDoorCodeChange,
     iconSize = 14,
     colors,
   } = options;
@@ -234,6 +244,7 @@ function createDoorCodeSegment(
     color: colors.warning,
     tooltip: "Digicode (Cliquer pour copier)",
     onClick: onCopyDoorCode,
+    onEdit: onDoorCodeChange,
     testId: "seg-doorcode",
   };
 }
@@ -242,7 +253,9 @@ function isBadgeAccess(
   accessType?: AccessType,
   instructions?: string,
   hasDoorCode?: boolean,
+  hasBadge?: boolean,
 ): boolean {
+  if (hasBadge !== undefined) return hasBadge;
   if (accessType === "badge") return true;
   if (instructions && /(badge|rfid|pass|carte)/i.test(instructions))
     return true;
@@ -253,6 +266,7 @@ interface AccessIconSegmentOptions {
   accessType?: AccessType;
   instructions?: string;
   hasDoorCode?: boolean;
+  hasBadge?: boolean;
   iconSize?: number;
   colors: AccessColorTheme;
 }
@@ -264,11 +278,12 @@ function createAccessIconSegment(
     accessType,
     instructions,
     hasDoorCode,
+    hasBadge,
     iconSize = 14,
     colors,
   } = options;
 
-  if (isBadgeAccess(accessType, instructions, hasDoorCode)) {
+  if (isBadgeAccess(accessType, instructions, hasDoorCode, hasBadge)) {
     const visuals = resolveAccessTypeVisuals("badge", colors);
     return {
       id: "badge",
@@ -305,6 +320,8 @@ export interface AccessSegmentsOptions {
   instructions?: string;
   isCodeCopied: boolean;
   onCopyDoorCode?: () => void;
+  onDoorCodeChange?: (newDoorCode: string) => void;
+  hasBadge?: boolean;
   iconSize: number;
   colors: AccessColorTheme;
 }
@@ -317,6 +334,7 @@ export function buildAccessSegments(
     doorCode: options.doorCode,
     isCodeCopied: options.isCodeCopied,
     onCopyDoorCode: options.onCopyDoorCode,
+    onDoorCodeChange: options.onDoorCodeChange,
     iconSize: options.iconSize,
     colors: options.colors,
   });
@@ -326,6 +344,7 @@ export function buildAccessSegments(
     accessType: options.accessType,
     instructions: options.instructions,
     hasDoorCode: Boolean(options.doorCode),
+    hasBadge: options.hasBadge,
     iconSize: options.iconSize,
     colors: options.colors,
   });

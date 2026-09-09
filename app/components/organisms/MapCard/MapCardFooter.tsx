@@ -6,8 +6,9 @@ import NavigationRoundedIcon from "@mui/icons-material/NavigationRounded";
 import Tooltip from "@mui/material/Tooltip";
 
 import FloatingActionButton from "~/components/atoms/FloatingActionButton";
-import type { MapCoordinates } from "./MapCard.types";
+import type { MapCoordinates, AddressSuggestion } from "./MapCard.types";
 import { buildDirectionsUrl } from "./MapCard.utils";
+import AddressAutocomplete from "./AddressAutocomplete";
 import {
   FooterActionsBar,
   AddressContainer,
@@ -24,6 +25,10 @@ export interface MapCardFooterProps {
   copyLabel?: string;
   copiedLabel?: string;
   navigateLabel?: string;
+  editable?: boolean;
+  onAddressChange?: (newAddress: string) => void;
+  onCoordinatesChange?: (coordinates: MapCoordinates) => void;
+  customGeocodeService?: (query: string) => Promise<AddressSuggestion[]>;
 }
 
 export function MapCardFooter({
@@ -34,6 +39,10 @@ export function MapCardFooter({
   copyLabel = "Copier l'adresse",
   copiedLabel = "Adresse copiée !",
   navigateLabel = "Naviguer avec le GPS",
+  editable = false,
+  onAddressChange,
+  onCoordinatesChange,
+  customGeocodeService,
 }: MapCardFooterProps) {
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
@@ -71,11 +80,21 @@ export function MapCardFooter({
           sx={{ fontSize: 20, color: "primary.main", flexShrink: 0 }}
           data-testid="address-icon"
         />
-        <Tooltip title={address} arrow placement="top-start">
-          <AddressLabelText data-testid="address-text">
-            {address}
-          </AddressLabelText>
-        </Tooltip>
+        {editable ? (
+          <AddressAutocomplete
+            address={address}
+            placeholder={copyLabel}
+            onAddressChange={onAddressChange}
+            onCoordinatesChange={onCoordinatesChange}
+            customGeocodeService={customGeocodeService}
+          />
+        ) : (
+          <Tooltip title={address} arrow placement="top-start">
+            <AddressLabelText data-testid="address-text">
+              {address}
+            </AddressLabelText>
+          </Tooltip>
+        )}
       </AddressContainer>
 
       <FooterButtonsGroup>

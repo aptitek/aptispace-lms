@@ -1,9 +1,13 @@
 import React, { useMemo } from "react";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
 import { useTheme, alpha } from "@mui/material/styles";
 import InfoOutlineRoundedIcon from "@mui/icons-material/InfoOutlineRounded";
+import BadgeRoundedIcon from "@mui/icons-material/BadgeRounded";
 
 import SegmentedChip from "~/components/molecules/SegmentedChip";
+import Switch from "~/components/atoms/Switch";
 import type { ChipSegment } from "~/components/molecules/SegmentedChip/SegmentedChip.types";
 import type {
   AccessType,
@@ -44,6 +48,15 @@ export interface MapCardWayfindingProps {
   onCopyDoorCode?: () => void;
   title?: string;
   children?: React.ReactNode;
+  editable?: boolean;
+  hasBadge?: boolean;
+  onBadgeChange?: (hasBadge: boolean) => void;
+  onInstructionsChange?: (instructions: string) => void;
+  onCampusChange?: (campusName: string) => void;
+  onBuildingChange?: (buildingName: string) => void;
+  onFloorChange?: (floor: string) => void;
+  onRoomChange?: (room: string) => void;
+  onDoorCodeChange?: (doorCode: string) => void;
 }
 
 interface LocationChipProps {
@@ -51,6 +64,7 @@ interface LocationChipProps {
   size: MapCardSize;
   orientation: "horizontal" | "vertical" | "responsive";
   borderColor: string;
+  editable?: boolean;
 }
 
 function LocationChipView({
@@ -58,6 +72,7 @@ function LocationChipView({
   size,
   orientation,
   borderColor,
+  editable,
 }: LocationChipProps) {
   const metrics = resolveLocationMetrics(size);
   const isColumn = orientation === "vertical";
@@ -71,6 +86,7 @@ function LocationChipView({
         shape="pill"
         orientation={orientation}
         borderColor={borderColor}
+        editable={editable}
         sx={{
           height: isColumn ? "auto" : metrics.height,
           fontSize: metrics.fontSize,
@@ -97,6 +113,7 @@ interface HeroRoomChipProps {
   size: MapCardSize;
   orientation: "horizontal" | "vertical" | "responsive";
   primaryColor: string;
+  editable?: boolean;
 }
 
 function HeroRoomChipView({
@@ -104,6 +121,7 @@ function HeroRoomChipView({
   size,
   orientation,
   primaryColor,
+  editable,
 }: HeroRoomChipProps) {
   const metrics = resolveHeroMetrics(size);
   const isColumn = orientation === "vertical";
@@ -118,6 +136,7 @@ function HeroRoomChipView({
         orientation={orientation}
         borderColor={alpha(primaryColor, 0.38)}
         bgColor={alpha(primaryColor, 0.04)}
+        editable={editable}
         sx={{
           boxShadow: `0 4px 14px -2px ${alpha(primaryColor, 0.22)}, 0 1px 3px rgba(0, 0, 0, 0.06)`,
           fontSize: metrics.fontSize,
@@ -151,6 +170,7 @@ interface AccessChipProps {
   size: MapCardSize;
   borderColor?: string;
   bgColor?: string;
+  editable?: boolean;
 }
 
 function AccessChipView({
@@ -158,6 +178,7 @@ function AccessChipView({
   size,
   borderColor,
   bgColor,
+  editable,
 }: AccessChipProps) {
   if (segments.length === 0) return null;
   const chipSize = size === "large" ? "medium" : "small";
@@ -171,6 +192,7 @@ function AccessChipView({
         shape="pill"
         borderColor={borderColor}
         bgColor={bgColor}
+        editable={editable}
         testId="optional-access-chip"
         data-testid="optional-access-chip"
       />
@@ -208,8 +230,17 @@ export function MapCardWayfinding(props: MapCardWayfindingProps) {
         buildingName: props.buildingName,
         iconSize: iconSizes.location,
         colors,
+        onCampusChange: props.onCampusChange,
+        onBuildingChange: props.onBuildingChange,
       }),
-    [props.campusName, props.buildingName, iconSizes.location, colors],
+    [
+      props.campusName,
+      props.buildingName,
+      iconSizes.location,
+      colors,
+      props.onCampusChange,
+      props.onBuildingChange,
+    ],
   );
 
   const heroRoomSegments = useMemo<ChipSegment[]>(
@@ -218,8 +249,16 @@ export function MapCardWayfinding(props: MapCardWayfindingProps) {
         roomInfo: props.roomInfo,
         iconSize: iconSizes.hero,
         colors,
+        onFloorChange: props.onFloorChange,
+        onRoomChange: props.onRoomChange,
       }),
-    [props.roomInfo, iconSizes.hero, colors],
+    [
+      props.roomInfo,
+      iconSizes.hero,
+      colors,
+      props.onFloorChange,
+      props.onRoomChange,
+    ],
   );
 
   const accessSegments = useMemo<ChipSegment[]>(() => {
@@ -229,6 +268,8 @@ export function MapCardWayfinding(props: MapCardWayfindingProps) {
       instructions: props.instructions,
       isCodeCopied: props.isCodeCopied,
       onCopyDoorCode: props.onCopyDoorCode,
+      onDoorCodeChange: props.onDoorCodeChange,
+      hasBadge: props.hasBadge,
       iconSize: iconSizes.secondary,
       colors,
     });
@@ -238,6 +279,8 @@ export function MapCardWayfinding(props: MapCardWayfindingProps) {
     props.instructions,
     props.isCodeCopied,
     props.onCopyDoorCode,
+    props.onDoorCodeChange,
+    props.hasBadge,
     iconSizes.secondary,
     colors,
   ]);
@@ -246,10 +289,10 @@ export function MapCardWayfinding(props: MapCardWayfindingProps) {
     () =>
       resolveAccessChipOutline(
         Boolean(props.doorCode),
-        Boolean(props.accessType || props.instructions),
+        Boolean(props.accessType || props.instructions || props.hasBadge),
         colors,
       ),
-    [props.doorCode, props.accessType, props.instructions, colors],
+    [props.doorCode, props.accessType, props.instructions, props.hasBadge, colors],
   );
 
   return (
@@ -271,6 +314,7 @@ export function MapCardWayfinding(props: MapCardWayfindingProps) {
           size={size}
           orientation={chipOrientation}
           borderColor={alpha(colors.primary, 0.22)}
+          editable={props.editable}
         />
 
         {/* Hero: Floor / Room prominent badge (like digital time in ClockCard!) */}
@@ -279,6 +323,7 @@ export function MapCardWayfinding(props: MapCardWayfindingProps) {
           size={size}
           orientation={chipOrientation}
           primaryColor={colors.primary}
+          editable={props.editable}
         />
 
         {/* Bottom: Optional Access Chip (Door code, Badge icon) */}
@@ -287,10 +332,82 @@ export function MapCardWayfinding(props: MapCardWayfindingProps) {
           size={size}
           borderColor={accessChipOutline.border}
           bgColor={accessChipOutline.bg}
+          editable={props.editable}
         />
       </ChipsStack>
 
-      {props.showInstructionBanner ? (
+      {/* Editable controls: Badge switch & Instructions textfield */}
+      {props.editable && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1.25,
+            mt: 1.5,
+            pt: 1.25,
+            borderTop: "1px dashed",
+            borderColor: "divider",
+            width: "100%",
+          }}
+          data-testid="wayfinding-editable-controls"
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 1,
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+              <BadgeRoundedIcon
+                sx={{ fontSize: 18, color: "secondary.main" }}
+              />
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.82rem",
+                  color: "text.primary",
+                }}
+              >
+                Badge
+              </Typography>
+            </Box>
+            <Switch
+              checked={Boolean(props.hasBadge)}
+              onChange={(checked) => props.onBadgeChange?.(checked)}
+              size="small"
+              data-testid="badge-switch"
+              aria-label="Badge"
+            />
+          </Box>
+
+          <TextField
+            size="small"
+            fullWidth
+            label="Instructions"
+            placeholder="Consignes d'accès..."
+            value={props.instructions ?? ""}
+            onChange={(event) =>
+              props.onInstructionsChange?.(event.target.value)
+            }
+            data-testid="instructions-field"
+            slotProps={{
+              htmlInput: {
+                "data-testid": "instructions-input",
+              },
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                fontSize: "0.82rem",
+              },
+            }}
+          />
+        </Box>
+      )}
+
+      {!props.editable && props.showInstructionBanner ? (
         <WayfindingInstructionNote text={props.instructions} />
       ) : null}
 
