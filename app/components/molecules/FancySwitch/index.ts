@@ -7,6 +7,7 @@ export {
   LanguageSwitch,
   ClockFormatSwitch,
   AttendanceSwitch,
+  BadgeAccessSwitch,
 } from "./FancySwitch.variants";
 
 export { default as DebugThemeSwitch } from "./DebugThemeSwitch";
@@ -21,9 +22,11 @@ export type {
   MeridianSwitchProps,
   ClockFormatSwitchProps,
   AttendanceSwitchProps,
+  BadgeAccessSwitchProps,
   SupportedLanguage,
   ClockFormat,
   AttendanceMode,
+  AccessStatus,
   SwitchSize,
   SwitchSizeConfig,
 } from "./FancySwitch.types";

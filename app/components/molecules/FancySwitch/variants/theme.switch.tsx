@@ -96,22 +96,7 @@ export const ZenithSwitch = forwardRef<HTMLButtonElement, ZenithSwitchProps>(
             ? `linear-gradient(180deg, ${bgPaper} 0%, ${bgDefault} 100%)`
             : `linear-gradient(180deg, ${bgDefault} 0%, ${bgPaper} 100%)`
         }
-        customTrackBorder={({ isHovered }) =>
-          isHovered
-            ? isDark
-              ? primaryMain
-              : warningMain
-            : theme.palette.divider
-        }
-        customTrackShadow={({ isHovered }) =>
-          isDark
-            ? isHovered
-              ? `inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 12px ${primaryMain}`
-              : `0 0 0 1px ${theme.palette.divider}`
-            : isHovered
-              ? `inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 12px ${warningLight}`
-              : "inset 0 1px 3px rgba(0, 0, 0, 0.15)"
-        }
+
         customThumbColor={() =>
           isDark
             ? `linear-gradient(135deg, ${primaryMain} 0%, ${theme.palette.primary.dark} 100%)`

@@ -11,9 +11,11 @@ import {
   MeridianSwitch,
   ClockFormatSwitch,
   AttendanceSwitch,
+  BadgeAccessSwitch,
   type ClockFormat,
   type AttendanceMode,
   type SupportedLanguage,
+  type AccessStatus,
   type SwitchSize,
 } from "~/components/molecules/FancySwitch";
 
@@ -60,6 +62,8 @@ const AllFancySwitchesStoryComponent: React.FC = () => {
   const [clockFormat, setClockFormat] = useState<ClockFormat>("12h");
   const [attendanceMode, setAttendanceMode] =
     useState<AttendanceMode>("in-person");
+  const [badgeAccessStatus, setBadgeAccessStatus] =
+    useState<AccessStatus>("locked");
   const [size, setSize] = useState<SwitchSize>("medium");
 
   return (
@@ -173,6 +177,27 @@ const AllFancySwitchesStoryComponent: React.FC = () => {
             data-testid="showcase-attendance-switch"
           />
         </SwitchRow>
+
+        <Divider />
+
+        <SwitchRow>
+          <LabelGroup>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+              Badge Access Control
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {badgeAccessStatus === "unlocked"
+                ? "Access Granted (Door Open, Unlocked Padlock)"
+                : "Secure Access (Door Closed, Locked Padlock, Tap Badge)"}
+            </Typography>
+          </LabelGroup>
+          <BadgeAccessSwitch
+            status={badgeAccessStatus}
+            onChangeStatus={setBadgeAccessStatus}
+            size={size}
+            data-testid="showcase-badge-access-switch"
+          />
+        </SwitchRow>
       </ShowcasePanel>
     </Box>
   );
@@ -268,4 +293,34 @@ const AttendanceSwitchRemoteStoryComponent: React.FC = () => {
 
 export const AttendanceSwitchRemote: StoryObj<typeof AttendanceSwitch> = {
   render: () => <AttendanceSwitchRemoteStoryComponent />,
+};
+
+const BadgeAccessLockedStoryComponent: React.FC = () => {
+  const [status, setStatus] = useState<AccessStatus>("locked");
+  return (
+    <BadgeAccessSwitch
+      status={status}
+      onChangeStatus={setStatus}
+      size="medium"
+    />
+  );
+};
+
+export const BadgeAccessLocked: StoryObj<typeof BadgeAccessSwitch> = {
+  render: () => <BadgeAccessLockedStoryComponent />,
+};
+
+const BadgeAccessUnlockedStoryComponent: React.FC = () => {
+  const [status, setStatus] = useState<AccessStatus>("unlocked");
+  return (
+    <BadgeAccessSwitch
+      status={status}
+      onChangeStatus={setStatus}
+      size="medium"
+    />
+  );
+};
+
+export const BadgeAccessUnlocked: StoryObj<typeof BadgeAccessSwitch> = {
+  render: () => <BadgeAccessUnlockedStoryComponent />,
 };

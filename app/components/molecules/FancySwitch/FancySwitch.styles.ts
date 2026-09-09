@@ -99,10 +99,18 @@ export const FancyThumb = styled(motion.span, {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    lineHeight: 0,
+    boxSizing: "border-box",
+    padding: 0,
+    margin: 0,
     zIndex: 3,
     cursor: "inherit",
     background: $customColor || defaultBg,
     boxShadow: $customShadow || "0 1px 3px rgba(0, 0, 0, 0.22)",
+    "& svg": {
+      display: "block",
+      flexShrink: 0,
+    },
     ...theme.applyStyles("dark", {
       boxShadow: $customShadow || "0 0 0 1px rgba(255, 255, 255, 0.14)",
     }),
@@ -143,19 +151,22 @@ export const TrackHoloZone = styled("div", {
 })<{
   $position: "left" | "right";
   $cfg: SwitchSizeConfig;
-}>(({ $position, $cfg }) => ({
-  position: "absolute",
-  top: "50%",
-  [$position === "left" ? "left" : "right"]: $cfg.padX + 1,
-  transform: "translateY(-50%)",
-  width: $cfg.thumbSize,
-  height: $cfg.thumbSize,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 1,
-  pointerEvents: "none",
-}));
+}>(({ $position, $cfg }) => {
+  const iconBoxSize = Math.round($cfg.thumbIconSize * 1.05);
+  return {
+    position: "absolute",
+    top: "50%",
+    [$position === "left" ? "left" : "right"]: Math.max(2, $cfg.padX - 1),
+    transform: "translateY(-50%)",
+    width: iconBoxSize,
+    height: iconBoxSize,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1,
+    pointerEvents: "none",
+  };
+});
 
 export const HoloGlyphWrapper = styled("div", {
   shouldForwardProp: filterDollarProp,
@@ -206,6 +217,15 @@ export const GlyphMotionCenter = styled(motion.div)({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
+  width: "100%",
+  height: "100%",
+  lineHeight: 0,
+  padding: 0,
+  margin: 0,
+  "& svg": {
+    display: "block",
+    flexShrink: 0,
+  },
 });
 
 export const PedestrianMirrorBox = styled("div", {
@@ -293,4 +313,57 @@ export const StateRippleLayer = styled(motion.div, {
   backgroundColor: $isDark
     ? theme.palette.action.hover
     : theme.palette.action.selected,
+}));
+
+export const DoorPortalPerspectiveBox = styled("div")({
+  position: "relative",
+  perspective: 400,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+export const DoorSwingPanel = styled(motion.div)({
+  transformOrigin: "left center",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+export const BadgeReaderWave = styled(motion.div, {
+  shouldForwardProp: filterDollarProp,
+})<{ $color: string; $size: number }>(({ $color, $size }) => ({
+  position: "absolute",
+  width: $size,
+  height: $size,
+  borderRadius: "50%",
+  border: `1.5px solid ${$color}`,
+  pointerEvents: "none",
+  zIndex: 1,
+}));
+
+export const AccessBadgePuck = styled(motion.div)({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35))",
+});
+
+export const CenteredMotionBox = styled(motion.div)({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "100%",
+  height: "100%",
+});
+
+export const BadgeScanRippleAnchor = styled(motion.div, {
+  shouldForwardProp: filterDollarProp,
+})<{ $x: number }>(({ $x }) => ({
+  position: "absolute",
+  top: "50%",
+  left: $x,
+  transform: "translate(-50%, -50%)",
+  pointerEvents: "none",
+  zIndex: 2,
 }));

@@ -18,9 +18,12 @@ export const ClockDigitPuckText = styled(motion.span, {
   color: theme.palette.common.white,
   userSelect: "none",
   pointerEvents: "none",
-  display: "inline-flex",
+  display: "flex",
   alignItems: "center",
   justifyContent: "center",
+  width: "100%",
+  height: "100%",
+  transform: "translateY(-0.5px)",
 }));
 
 export const ClockPuckDisplay: React.FC<{

@@ -8,6 +8,7 @@ export type { SwitchSize, SwitchSizeConfig };
 export type SupportedLanguage = "en" | "fr";
 export type ClockFormat = "12h" | "24h";
 export type AttendanceMode = "in-person" | "remote";
+export type AccessStatus = "locked" | "unlocked";
 
 export interface FancySwitchRenderState {
   checked: boolean;
@@ -120,6 +121,21 @@ export interface AttendanceSwitchProps extends Omit<
   mode?: AttendanceMode;
   checked?: boolean; // true = in-person, false = remote
   onChangeMode?: (mode: AttendanceMode) => void;
+  onChange?: (checked: boolean) => void;
+  onToggle?: (checked: boolean) => void;
+  size?: SwitchSize;
+  disabled?: boolean;
+  className?: string;
+  "data-testid"?: string;
+}
+
+export interface BadgeAccessSwitchProps extends Omit<
+  HTMLMotionProps<"button">,
+  "size" | "onChange" | "onToggle" | "children"
+> {
+  status?: AccessStatus;
+  checked?: boolean; // true = unlocked/granted, false = locked
+  onChangeStatus?: (status: AccessStatus) => void;
   onChange?: (checked: boolean) => void;
   onToggle?: (checked: boolean) => void;
   size?: SwitchSize;

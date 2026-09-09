@@ -11,6 +11,7 @@ import {
   GlyphMotionCenter,
   ArcOverlaySvg,
   PeekingAnchor,
+  CenteredMotionBox,
 } from "../FancySwitch.styles";
 
 export const HighContrastSunGlyph: React.FC<{ size: number }> = ({ size }) => {
@@ -20,6 +21,7 @@ export const HighContrastSunGlyph: React.FC<{ size: number }> = ({ size }) => {
       sx={{
         fontSize: size,
         color: theme.palette.common.white,
+        display: "block",
         filter: `drop-shadow(0 0 4px ${theme.palette.celestial.sun.glow})`,
       }}
       aria-hidden="true"
@@ -34,6 +36,7 @@ export const HighContrastMoonGlyph: React.FC<{ size: number }> = ({ size }) => {
       sx={{
         fontSize: size,
         color: theme.palette.common.white,
+        display: "block",
         filter: `drop-shadow(0 0 4px ${theme.palette.celestial.moon.glow})`,
       }}
       aria-hidden="true"
@@ -91,7 +94,7 @@ export const ActiveZenithGlyph: React.FC<{
       exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
       transition={M3_SPRINGS.expressive.effects.fast}
     >
-      <motion.div
+      <CenteredMotionBox
         animate={{ rotate: 360 }}
         transition={
           process.env.NODE_ENV === "test"
@@ -100,7 +103,7 @@ export const ActiveZenithGlyph: React.FC<{
         }
       >
         <HighContrastSunGlyph size={iconSize} />
-      </motion.div>
+      </CenteredMotionBox>
     </GlyphMotionCenter>
   );
 };

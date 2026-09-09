@@ -22,7 +22,7 @@ export const MapPinDrop: React.FC<{ size: number }> = ({ size }) => {
       key="in-person-pin"
       data-testid="map-pin-glyph"
       initial={{ y: -16, opacity: 0, scale: 0.6 }}
-      animate={{ y: 0, opacity: 1, scale: [0.6, 1.15, 1] }}
+      animate={{ y: -1.5, opacity: 1, scale: [0.6, 1.15, 1] }}
       exit={{ y: -16, opacity: 0, scale: 0.6 }}
       transition={M3_SPRINGS.expressive.spatial.fast}
     >
@@ -30,6 +30,7 @@ export const MapPinDrop: React.FC<{ size: number }> = ({ size }) => {
         sx={{
           fontSize: size,
           color: "common.white",
+          display: "block",
           filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))",
         }}
         aria-hidden="true"
@@ -44,7 +45,7 @@ export const RemoteHomeGlyph: React.FC<{ size: number }> = ({ size }) => {
       key="remote-laptop"
       data-testid="remote-laptop-glyph"
       initial={{ opacity: 0, scale: 0.6 }}
-      animate={{ opacity: 1, scale: 1 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.6 }}
       transition={M3_SPRINGS.expressive.effects.fast}
     >
@@ -52,6 +53,7 @@ export const RemoteHomeGlyph: React.FC<{ size: number }> = ({ size }) => {
         sx={{
           fontSize: size,
           color: "common.white",
+          display: "block",
           filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))",
         }}
         aria-hidden="true"
@@ -122,7 +124,7 @@ export function PeekingPedestrianCompanion({
   const leftCenterX = cfg.padX - 2 + cfg.thumbSize / 2;
   const rightCenterX = cfg.padX - 2 + cfg.travelX + cfg.thumbSize / 2;
   const halfPed = pedSize / 2;
-  const peekOffset = cfg.thumbSize * 0.72;
+  const peekOffset = cfg.thumbSize * 0.48;
 
   const leftTuckedX = leftCenterX - halfPed;
   const leftPeekX = leftTuckedX + peekOffset;
