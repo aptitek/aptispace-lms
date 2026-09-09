@@ -13,13 +13,17 @@ import type {
   ChipSegment,
 } from "./SegmentedChip.types";
 
-export function resolveDiploma(cohort: SegmentedChipProps["cohort"]): string | null {
+export function resolveDiploma(
+  cohort: SegmentedChipProps["cohort"],
+): string | null {
   if (cohort?.diploma) return cohort.diploma;
   if (!cohort?.name) return null;
   return parseCohortName(cohort.name).diploma;
 }
 
-export function resolveYear(cohort: SegmentedChipProps["cohort"]): number | null {
+export function resolveYear(
+  cohort: SegmentedChipProps["cohort"],
+): number | null {
   if (cohort?.year !== undefined && cohort.year !== null) {
     return Number(cohort.year);
   }
@@ -195,7 +199,9 @@ export function resolveDataAttributes(options: DataAttributesOptions) {
 export function createSpecialtyResolver(translationFn: TFunction) {
   return (tag: string) => {
     const slug = getSpecialtySlug(tag);
-    const translated = translationFn(`specialties.${slug}`, { defaultValue: tag });
+    const translated = translationFn(`specialties.${slug}`, {
+      defaultValue: tag,
+    });
     return translated !== tag ? translated : undefined;
   };
 }

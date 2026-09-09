@@ -14,4 +14,3 @@ export {
   SegmentContentWrapper,
 } from "./SegmentedChip.styles";
 export { SegmentEditableContent } from "./SegmentEditableContent";
-

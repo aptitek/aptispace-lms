@@ -204,14 +204,35 @@ export const EditableInPlace: Story = {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
         <Box>
-          <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 0.5, fontWeight: 700 }}>
-            Single-Click In-Place Editing (Press Enter or blur to save, Escape to cancel):
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              display: "block",
+              mb: 0.5,
+              fontWeight: 700,
+            }}
+          >
+            Single-Click In-Place Editing (Press Enter or blur to save, Escape
+            to cancel):
           </Typography>
-          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignItems: "center" }}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1.5,
+              flexWrap: "wrap",
+              alignItems: "center",
+            }}
+          >
             <SegmentedChip
               editable
               segments={[
-                { label: "STATUS", bold: true, background: "rgba(56, 189, 248, 0.15)", color: "#0284c7" },
+                {
+                  label: "STATUS",
+                  bold: true,
+                  background: "rgba(56, 189, 248, 0.15)",
+                  color: "#0284c7",
+                },
                 { label: "In Review" },
                 { label: "v1.2.0", mono: true },
               ]}
@@ -231,14 +252,36 @@ export const EditableInPlace: Story = {
         </Box>
 
         <Box>
-          <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 0.5, fontWeight: 700 }}>
-            Double-Click Editing &amp; Per-Segment Control (Leading segment locked, second segment editable):
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              display: "block",
+              mb: 0.5,
+              fontWeight: 700,
+            }}
+          >
+            Double-Click Editing &amp; Per-Segment Control (Leading segment
+            locked, second segment editable):
           </Typography>
-          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignItems: "center" }}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1.5,
+              flexWrap: "wrap",
+              alignItems: "center",
+            }}
+          >
             <SegmentedChip
               editTrigger="doubleClick"
               segments={[
-                { label: "LOCKED", bold: true, editable: false, background: "rgba(239, 68, 68, 0.15)", color: "#ef4444" },
+                {
+                  label: "LOCKED",
+                  bold: true,
+                  editable: false,
+                  background: "rgba(239, 68, 68, 0.15)",
+                  color: "#ef4444",
+                },
                 { label: "Double-click me to edit", editable: true },
               ]}
               size="medium"
@@ -249,4 +292,3 @@ export const EditableInPlace: Story = {
     );
   },
 };
-

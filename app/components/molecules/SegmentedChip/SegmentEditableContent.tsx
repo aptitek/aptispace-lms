@@ -92,8 +92,7 @@ function SegmentActiveInput(inputProps: SegmentActiveInputProps) {
         onClick={(event) => event.stopPropagation()}
         placeholder={segment.editPlaceholder}
         aria-label={
-          segment.editPlaceholder ||
-          `Edit segment ${segment.id ?? initialText}`
+          segment.editPlaceholder || `Edit segment ${segment.id ?? initialText}`
         }
         data-testid={`${testId}-input`}
       />

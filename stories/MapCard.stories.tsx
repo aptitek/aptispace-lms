@@ -444,12 +444,19 @@ function MapCardEditableDemo(cardProps: React.ComponentProps<typeof MapCard>) {
   const [room, setRoom] = React.useState(cardProps.room);
   const [doorCode, setDoorCode] = React.useState(cardProps.doorCode);
   const [hasBadge, setHasBadge] = React.useState(cardProps.hasBadge ?? true);
-  const [instructions, setInstructions] = React.useState(cardProps.instructions);
+  const [instructions, setInstructions] = React.useState(
+    cardProps.instructions,
+  );
 
   return (
     <Box sx={{ width: 680, maxWidth: "100%" }}>
-      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
-        Mode édition : autocomplétion d&apos;adresse avec centrage dynamique de la carte, puces éditables, badge et consignes.
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ display: "block", mb: 1 }}
+      >
+        Mode édition : autocomplétion d&apos;adresse avec centrage dynamique de
+        la carte, puces éditables, badge et consignes.
       </Typography>
       <MapCard
         {...cardProps}
@@ -491,4 +498,3 @@ export const EditableMode: Story = {
   },
   render: (args) => <MapCardEditableDemo {...args} />,
 };
-

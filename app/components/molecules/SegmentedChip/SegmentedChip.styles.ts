@@ -346,4 +346,3 @@ export const SegmentContentWrapper = styled("span", {
     borderRadius: `${M3_SHAPE_CORNERS.extraSmall}px`,
   },
 }));
-

@@ -317,4 +317,3 @@ describe("SegmentedChip Molecule Component", () => {
     expect(screen.queryByTestId("disabled-chip-seg-0-input")).toBeNull();
   });
 });
-

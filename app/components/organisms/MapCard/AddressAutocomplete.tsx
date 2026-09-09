@@ -43,7 +43,7 @@ export function AddressAutocomplete({
         const results = await searchAddressSuggestions(
           searchQuery,
           controller.signal,
-          customGeocodeService
+          customGeocodeService,
         );
         if (!controller.signal.aborted) {
           setOptions(results);
@@ -56,7 +56,7 @@ export function AddressAutocomplete({
         }
       }
     },
-    [customGeocodeService]
+    [customGeocodeService],
   );
 
   const handleInputChange = useCallback(
@@ -71,13 +71,13 @@ export function AddressAutocomplete({
         void fetchSuggestions(newInputValue);
       }, 250);
     },
-    [onAddressChange, fetchSuggestions]
+    [onAddressChange, fetchSuggestions],
   );
 
   const handleSelectOption = useCallback(
     (
       _event: React.SyntheticEvent,
-      selection: string | AddressSuggestion | null
+      selection: string | AddressSuggestion | null,
     ) => {
       if (!selection) {
         return;
@@ -96,7 +96,7 @@ export function AddressAutocomplete({
       onAddressChange?.(selection.label);
       onCoordinatesChange?.(selection.coordinates);
     },
-    [onAddressChange, onCoordinatesChange]
+    [onAddressChange, onCoordinatesChange],
   );
 
   useEffect(() => {
@@ -153,7 +153,12 @@ export function AddressAutocomplete({
             }}
           >
             <PlaceRoundedIcon
-              sx={{ fontSize: 16, color: "primary.main", mt: 0.25, flexShrink: 0 }}
+              sx={{
+                fontSize: 16,
+                color: "primary.main",
+                mt: 0.25,
+                flexShrink: 0,
+              }}
             />
             <Box sx={{ minWidth: 0, flex: 1 }}>
               <Typography

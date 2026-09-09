@@ -146,8 +146,7 @@ describe("MapCard Helpers & Specifications", () => {
       );
       expect(backgroundLayer).toBeDefined();
       const paint = backgroundLayer?.paint as
-        | Record<string, unknown>
-        | undefined;
+        Record<string, unknown> | undefined;
       expect(paint?.["background-color"]).toBe("#002b36");
     });
 
@@ -161,8 +160,7 @@ describe("MapCard Helpers & Specifications", () => {
       );
       expect(backgroundLayer).toBeDefined();
       const paint = backgroundLayer?.paint as
-        | Record<string, unknown>
-        | undefined;
+        Record<string, unknown> | undefined;
       expect(paint?.["background-color"]).toBe("#fdf6e3");
     });
 
@@ -171,8 +169,7 @@ describe("MapCard Helpers & Specifications", () => {
         apiKey: "maptiler-secret-key-123",
       });
       const source = customKeyStyle.sources.openmaptiles as
-        | { url?: string }
-        | undefined;
+        { url?: string } | undefined;
       expect(source?.url).toContain("key=maptiler-secret-key-123");
     });
 
@@ -181,8 +178,7 @@ describe("MapCard Helpers & Specifications", () => {
         providerUrl: "https://api.protomaps.com/tiles/v3.json",
       });
       const source = customUrlStyle.sources.openmaptiles as
-        | { url?: string }
-        | undefined;
+        { url?: string } | undefined;
       expect(source?.url).toBe("https://api.protomaps.com/tiles/v3.json");
     });
   });

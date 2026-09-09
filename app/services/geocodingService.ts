@@ -94,7 +94,7 @@ function formatLocationParts(properties?: PhotonFeature["properties"]): {
 }
 
 function normalizePhotonFeature(
-  feature: PhotonFeature
+  feature: PhotonFeature,
 ): AddressSuggestion | null {
   const coords = feature.geometry?.coordinates;
   if (!coords || coords.length < 2) {
@@ -125,7 +125,7 @@ function normalizePhotonFeature(
 
 async function fetchPhotonSuggestions(
   query: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<AddressSuggestion[]> {
   try {
     const encodedQuery = encodeURIComponent(query.trim());
@@ -157,7 +157,7 @@ async function fetchPhotonSuggestions(
 
 function mergeAddressSuggestions(
   presetList: AddressSuggestion[],
-  externalList: AddressSuggestion[]
+  externalList: AddressSuggestion[],
 ): AddressSuggestion[] {
   const combinedMap = new Map<string, AddressSuggestion>();
   for (const preset of presetList) {
@@ -175,7 +175,7 @@ function mergeAddressSuggestions(
 export async function searchAddressSuggestions(
   query: string,
   signal?: AbortSignal,
-  customGeocodeService?: (query: string) => Promise<AddressSuggestion[]>
+  customGeocodeService?: (query: string) => Promise<AddressSuggestion[]>,
 ): Promise<AddressSuggestion[]> {
   const trimmed = query.trim().toLowerCase();
   if (!trimmed) {
@@ -191,7 +191,11 @@ export async function searchAddressSuggestions(
   }
 
   const matchingPresets = PRESET_CAMPUS_ADDRESSES.filter((preset) => {
-    const fullText = (preset.label + " " + (preset.subLabel ?? "")).toLowerCase();
+    const fullText = (
+      preset.label +
+      " " +
+      (preset.subLabel ?? "")
+    ).toLowerCase();
     return fullText.includes(trimmed);
   });
 
@@ -199,7 +203,8 @@ export async function searchAddressSuggestions(
     return matchingPresets;
   }
 
-  const isBrowserEnv = typeof window !== "undefined" && typeof fetch === "function";
+  const isBrowserEnv =
+    typeof window !== "undefined" && typeof fetch === "function";
   if (!isBrowserEnv) {
     return matchingPresets;
   }
@@ -214,7 +219,7 @@ export async function searchAddressSuggestions(
 
 export async function geocodeAddress(
   query: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<MapCoordinates | null> {
   const suggestions = await searchAddressSuggestions(query, signal);
   if (suggestions.length > 0) {

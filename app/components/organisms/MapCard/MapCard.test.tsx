@@ -132,8 +132,6 @@ describe("MapCard Organism", () => {
     });
   });
 
-
-
   describe("Component Rendering", () => {
     it("renders prominent segmented chip with campus, building, floor, and room", () => {
       renderWithTheme(
@@ -493,6 +491,4 @@ describe("MapCard Organism", () => {
       expect(onRoomChange).toHaveBeenCalledWith("Amphi 1");
     });
   });
-
-
 });

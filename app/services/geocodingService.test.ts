@@ -31,7 +31,7 @@ describe("geocodingService", () => {
     const hasSorbonne = suggestions.some(
       (suggestion) =>
         suggestion.label.includes("Université") ||
-        (suggestion.subLabel && suggestion.subLabel.includes("Sorbonne"))
+        (suggestion.subLabel && suggestion.subLabel.includes("Sorbonne")),
     );
     expect(hasSorbonne).toBe(true);
   });
@@ -55,7 +55,7 @@ describe("geocodingService", () => {
     const suggestions = await searchAddressSuggestions(
       "Custom Campus",
       undefined,
-      mockCustomGeocode
+      mockCustomGeocode,
     );
 
     expect(mockCustomGeocode).toHaveBeenCalledWith("Custom Campus");

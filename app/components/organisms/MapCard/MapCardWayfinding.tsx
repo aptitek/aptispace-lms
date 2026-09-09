@@ -292,7 +292,13 @@ export function MapCardWayfinding(props: MapCardWayfindingProps) {
         Boolean(props.accessType || props.instructions || props.hasBadge),
         colors,
       ),
-    [props.doorCode, props.accessType, props.instructions, props.hasBadge, colors],
+    [
+      props.doorCode,
+      props.accessType,
+      props.instructions,
+      props.hasBadge,
+      colors,
+    ],
   );
 
   return (

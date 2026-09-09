@@ -1,16 +1,24 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  cleanup,
+} from "@testing-library/react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import AddressAutocomplete from "./AddressAutocomplete";
 import type { MapCoordinates } from "./MapCard.types";
 
 const testTheme = createTheme();
 
-function renderComponent(props: React.ComponentProps<typeof AddressAutocomplete>) {
+function renderComponent(
+  props: React.ComponentProps<typeof AddressAutocomplete>,
+) {
   return render(
     <ThemeProvider theme={testTheme}>
       <AddressAutocomplete {...props} />
-    </ThemeProvider>
+    </ThemeProvider>,
   );
 }
 
@@ -76,7 +84,7 @@ describe("AddressAutocomplete", () => {
       () => {
         expect(mockGeocode).toHaveBeenCalledWith("Sorbonne");
       },
-      { timeout: 1000 }
+      { timeout: 1000 },
     );
 
     // Open popup options
@@ -84,13 +92,15 @@ describe("AddressAutocomplete", () => {
     fireEvent.keyDown(input, { key: "ArrowDown" });
 
     await waitFor(() => {
-      const option = screen.getByText("12 Rue de l'Université, 75007 Paris, France");
+      const option = screen.getByText(
+        "12 Rue de l'Université, 75007 Paris, France",
+      );
       expect(option).toBeDefined();
       fireEvent.click(option);
     });
 
     expect(onAddressChange).toHaveBeenCalledWith(
-      "12 Rue de l'Université, 75007 Paris, France"
+      "12 Rue de l'Université, 75007 Paris, France",
     );
     expect(onCoordinatesChange).toHaveBeenCalledWith(customCoords);
   });

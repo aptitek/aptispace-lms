@@ -26,7 +26,7 @@ export interface UseMapCardEditableParams {
 export function computeBadgeRequirement(
   hasBadge?: boolean,
   accessType?: AccessType,
-  instructions?: string
+  instructions?: string,
 ): boolean {
   if (hasBadge !== undefined) {
     return hasBadge;
@@ -34,9 +34,7 @@ export function computeBadgeRequirement(
   if (accessType === "badge") {
     return true;
   }
-  return Boolean(
-    instructions && /(badge|rfid|pass|carte)/i.test(instructions)
-  );
+  return Boolean(instructions && /(badge|rfid|pass|carte)/i.test(instructions));
 }
 
 export function useMapCardEditableState(params: UseMapCardEditableParams) {
@@ -66,22 +64,24 @@ export function useMapCardEditableState(params: UseMapCardEditableParams) {
   const [localCoordinates, setLocalCoordinates] = useState<
     MapCoordinates | undefined
   >(coordinates);
-  const [localCampus, setLocalCampus] = useState<string | undefined>(campusName);
+  const [localCampus, setLocalCampus] = useState<string | undefined>(
+    campusName,
+  );
   const [localBuilding, setLocalBuilding] = useState<string | undefined>(
-    buildingName
+    buildingName,
   );
   const [localFloor, setLocalFloor] = useState<string | number | undefined>(
-    floor
+    floor,
   );
   const [localRoom, setLocalRoom] = useState<string | undefined>(room);
   const [localDoorCode, setLocalDoorCode] = useState<string | undefined>(
-    doorCode
+    doorCode,
   );
   const [localInstructions, setLocalInstructions] = useState<
     string | undefined
   >(instructions);
   const [localHasBadge, setLocalHasBadge] = useState<boolean>(() =>
-    computeBadgeRequirement(hasBadge, accessType, instructions)
+    computeBadgeRequirement(hasBadge, accessType, instructions),
   );
 
   useEffect(() => {
@@ -118,7 +118,7 @@ export function useMapCardEditableState(params: UseMapCardEditableParams) {
 
   useEffect(() => {
     setLocalHasBadge(
-      computeBadgeRequirement(hasBadge, accessType, instructions)
+      computeBadgeRequirement(hasBadge, accessType, instructions),
     );
   }, [hasBadge, accessType, instructions]);
 
@@ -127,7 +127,7 @@ export function useMapCardEditableState(params: UseMapCardEditableParams) {
       setLocalAddress(newAddress);
       onAddressChange?.(newAddress);
     },
-    [onAddressChange]
+    [onAddressChange],
   );
 
   const handleCoordinatesChange = useCallback(
@@ -135,7 +135,7 @@ export function useMapCardEditableState(params: UseMapCardEditableParams) {
       setLocalCoordinates(newCoordinates);
       onCoordinatesChange?.(newCoordinates);
     },
-    [onCoordinatesChange]
+    [onCoordinatesChange],
   );
 
   const handleBadgeChange = useCallback(
@@ -143,7 +143,7 @@ export function useMapCardEditableState(params: UseMapCardEditableParams) {
       setLocalHasBadge(hasBadgeChecked);
       onBadgeChange?.(hasBadgeChecked);
     },
-    [onBadgeChange]
+    [onBadgeChange],
   );
 
   const handleInstructionsChange = useCallback(
@@ -151,7 +151,7 @@ export function useMapCardEditableState(params: UseMapCardEditableParams) {
       setLocalInstructions(newInstructions);
       onInstructionsChange?.(newInstructions);
     },
-    [onInstructionsChange]
+    [onInstructionsChange],
   );
 
   const handleCampusChange = useCallback(
@@ -159,7 +159,7 @@ export function useMapCardEditableState(params: UseMapCardEditableParams) {
       setLocalCampus(newCampus);
       onCampusChange?.(newCampus);
     },
-    [onCampusChange]
+    [onCampusChange],
   );
 
   const handleBuildingChange = useCallback(
@@ -167,7 +167,7 @@ export function useMapCardEditableState(params: UseMapCardEditableParams) {
       setLocalBuilding(newBuilding);
       onBuildingChange?.(newBuilding);
     },
-    [onBuildingChange]
+    [onBuildingChange],
   );
 
   const handleFloorChange = useCallback(
@@ -175,7 +175,7 @@ export function useMapCardEditableState(params: UseMapCardEditableParams) {
       setLocalFloor(newFloor);
       onFloorChange?.(newFloor);
     },
-    [onFloorChange]
+    [onFloorChange],
   );
 
   const handleRoomChange = useCallback(
@@ -183,7 +183,7 @@ export function useMapCardEditableState(params: UseMapCardEditableParams) {
       setLocalRoom(newRoom);
       onRoomChange?.(newRoom);
     },
-    [onRoomChange]
+    [onRoomChange],
   );
 
   const handleDoorCodeChange = useCallback(
@@ -191,7 +191,7 @@ export function useMapCardEditableState(params: UseMapCardEditableParams) {
       setLocalDoorCode(newDoorCode);
       onDoorCodeChange?.(newDoorCode);
     },
-    [onDoorCodeChange]
+    [onDoorCodeChange],
   );
 
   return {
