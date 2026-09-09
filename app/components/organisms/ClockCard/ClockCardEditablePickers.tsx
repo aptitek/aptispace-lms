@@ -1,15 +1,8 @@
 import React from "react";
 import type { Dayjs } from "dayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-
+import DateTimeField from "../../atoms/DateTimeField";
 import type { ClockCardSize, ClockCardProps } from "./ClockCard.types";
-import {
-  EditableTimePickersRow,
-  PickerWrapper,
-  IntervalSeparator,
-} from "./ClockCard.styles";
+import { EditableTimePickersRow } from "./ClockCard.styles";
 
 export interface ClockCardEditablePickersProps {
   size: ClockCardSize;
@@ -23,10 +16,6 @@ export interface ClockCardEditablePickersProps {
   is12Hour: boolean;
   normLocale: string;
   timePickerProps?: ClockCardProps["timePickerProps"];
-}
-
-function resolvePickerFieldSize(size: ClockCardSize): "small" | "medium" {
-  return size === "large" ? "medium" : "small";
 }
 
 export function ClockCardEditablePickers({
@@ -53,60 +42,32 @@ export function ClockCardEditablePickers({
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={normLocale}>
-      <EditableTimePickersRow
-        $size={size}
-        $isHappeningNow={isHappeningNow}
-        onClick={(e) => e.stopPropagation()}
-        data-testid="time-sheet-editable-pickers"
-      >
-        <PickerWrapper $size={size} data-testid="time-sheet-start-time-picker">
-          <TimePicker
-            value={currentStartTime}
-            onChange={onStartTimeChange}
-            disabled={disabled}
-            ampm={is12Hour}
-            slotProps={{
-              textField: {
-                size: resolvePickerFieldSize(size),
-                variant: "outlined",
-                slotProps: {
-                  htmlInput: startInputProps,
-                },
-                ...timePickerProps?.slotProps?.textField,
-              },
-              ...timePickerProps?.slotProps,
-            }}
-            {...timePickerProps}
-          />
-        </PickerWrapper>
-
-        <IntervalSeparator $size={size} aria-hidden="true">
-          –
-        </IntervalSeparator>
-
-        <PickerWrapper $size={size} data-testid="time-sheet-end-time-picker">
-          <TimePicker
-            value={currentEndTime}
-            onChange={onEndTimeChange}
-            disabled={disabled}
-            ampm={is12Hour}
-            slotProps={{
-              textField: {
-                size: resolvePickerFieldSize(size),
-                variant: "outlined",
-                slotProps: {
-                  htmlInput: endInputProps,
-                },
-                ...timePickerProps?.slotProps?.textField,
-              },
-              ...timePickerProps?.slotProps,
-            }}
-            {...timePickerProps}
-          />
-        </PickerWrapper>
-      </EditableTimePickersRow>
-    </LocalizationProvider>
+    <EditableTimePickersRow
+      $size={size}
+      $isHappeningNow={isHappeningNow}
+      onClick={(e) => e.stopPropagation()}
+      data-testid="time-sheet-editable-pickers"
+    >
+      <DateTimeField
+        mode="time"
+        variant="range"
+        size={size}
+        hourFormat={is12Hour ? "12h" : "24h"}
+        disabled={disabled}
+        startValue={currentStartTime}
+        endValue={currentEndTime}
+        onStartTimeChange={onStartTimeChange}
+        onEndTimeChange={onEndTimeChange}
+        normLocale={normLocale}
+        locale={normLocale}
+        startPickerTestId="time-sheet-start-time-picker"
+        endPickerTestId="time-sheet-end-time-picker"
+        startInputProps={startInputProps}
+        endInputProps={endInputProps}
+        pickerProps={timePickerProps}
+        stopPropagation={true}
+      />
+    </EditableTimePickersRow>
   );
 }
 

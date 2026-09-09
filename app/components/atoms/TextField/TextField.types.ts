@@ -1,11 +1,31 @@
 import type { TextFieldProps as MuiTextFieldProps } from "@mui/material/TextField";
 
 export type TextFieldVariant = "outlined" | "filled" | "standard" | "search";
+export type TextFieldSize = "compact" | "small" | "medium";
 
 export interface TextFieldProps extends Omit<
   MuiTextFieldProps,
-  "variant" | "onChange"
+  "variant" | "onChange" | "size"
 > {
+  /**
+   * Field size option. "compact" creates a dense 32px height field.
+   * @default "small"
+   */
+  size?: TextFieldSize;
+
+  /**
+   * Shorthand boolean to activate compact 32px dense size variant.
+   * When true, overrides size to "compact".
+   * @default false
+   */
+  compact?: boolean;
+
+  /**
+   * Automatically fit the field width to its contents.
+   * @default false
+   */
+  fitContent?: boolean;
+
   /**
    * Data test identifier.
    */

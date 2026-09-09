@@ -1,2 +1,2 @@
-export { TextField, SearchField, default } from "./TextField";
+export { TextField, SearchField, CompactTextField, default } from "./TextField";
 export * from "./TextField.types";

@@ -4,7 +4,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
-import { styled, alpha } from "@mui/material/styles";
+import { styled, alpha, type SxProps } from "@mui/material/styles";
 import { M3_SHAPE_CORNER_STRINGS } from "~/tokens/shapes";
 import type { TextFieldProps } from "./TextField.types";
 
@@ -32,6 +32,66 @@ const StyledSearchTextField = styled(MuiTextField)(({ theme }) => ({
     },
   },
 }));
+
+const StyledCompactTextField = styled(MuiTextField)({
+  "& .MuiOutlinedInput-root": {
+    height: 32,
+    minHeight: 32,
+    fontSize: "0.8125rem",
+    borderRadius: M3_SHAPE_CORNER_STRINGS.extraSmall,
+  },
+  "& .MuiFilledInput-root": {
+    height: 32,
+    minHeight: 32,
+    fontSize: "0.8125rem",
+    borderRadius: "12px 12px 0 0",
+  },
+  "& .MuiOutlinedInput-input, & .MuiFilledInput-input": {
+    padding: "2px 8px",
+    fontSize: "0.8125rem",
+  },
+  "& .MuiInputLabel-root": {
+    fontSize: "0.75rem",
+    "&:not(.MuiInputLabel-shrink)": {
+      transform: "translate(10px, 7px) scale(0.85)",
+    },
+    "&.MuiInputLabel-shrink": {
+      transform: "translate(12px, -6px) scale(0.72)",
+    },
+  },
+  "& .MuiInputAdornment-root": {
+    marginRight: -4,
+    "& .MuiIconButton-root": {
+      width: 22,
+      height: 22,
+      minWidth: 22,
+      minHeight: 22,
+      padding: 2,
+    },
+    "& .MuiSvgIcon-root": {
+      fontSize: "1rem",
+    },
+  },
+});
+
+const StyledCompactSearchTextField = styled(StyledSearchTextField)({
+  "& .MuiOutlinedInput-root": {
+    height: 32,
+    minHeight: 32,
+    fontSize: "0.8125rem",
+  },
+  "& .MuiOutlinedInput-input": {
+    padding: "2px 8px",
+    fontSize: "0.8125rem",
+  },
+});
+
+function resolveTextFieldComponent(isSearch: boolean, isCompact: boolean) {
+  if (isSearch && isCompact) return StyledCompactSearchTextField;
+  if (isSearch) return StyledSearchTextField;
+  if (isCompact) return StyledCompactTextField;
+  return MuiTextField;
+}
 
 function resolveStartAdornment(
   isSearch: boolean,
@@ -128,11 +188,40 @@ function resolveTestId(
   return isSearch ? "search-text-field" : "text-field";
 }
 
+function resolveMuiVariant(
+  isSearch: boolean,
+  variant: "outlined" | "filled" | "standard" | "search" = "outlined",
+): "outlined" | "filled" | "standard" {
+  if (isSearch) return "outlined";
+  return variant === "search" ? "outlined" : variant;
+}
+
+function resolveMuiSize(
+  size: "compact" | "small" | "medium" = "small",
+): "small" | "medium" {
+  return size === "medium" ? "medium" : "small";
+}
+
+function resolveMergedSx(fitContent: boolean, sx: unknown) {
+  if (!fitContent) return sx;
+  const fitSx = {
+    width: "fit-content",
+    "& .MuiOutlinedInput-root, & .MuiFilledInput-root": {
+      width: "fit-content",
+    },
+  };
+  if (Array.isArray(sx)) return [...sx, fitSx];
+  if (sx && typeof sx === "object") return { ...fitSx, ...sx };
+  return fitSx;
+}
+
 export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
   function TextField(props, ref) {
     const {
       variant = "outlined",
       size = "small",
+      compact = false,
+      fitContent = false,
       value,
       onChange,
       onClear,
@@ -141,16 +230,17 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       slotProps,
       testId,
       "data-testid": dataTestId,
+      sx,
       ...rest
     } = props;
 
     delete (rest as Record<string, unknown>).InputProps;
 
     const isSearch = variant === "search";
+    const isCompact = compact || size === "compact";
     const activeTestId = resolveTestId(testId, dataTestId, isSearch);
-    const muiVariant: "outlined" | "filled" | "standard" = isSearch
-      ? "outlined"
-      : variant;
+    const muiVariant = resolveMuiVariant(isSearch, variant);
+    const muiSize = resolveMuiSize(size);
     const hasValue = determineHasValue(value);
     const handleClear = createClearHandler(onClear, onChange);
     const inputSlot = extractInputSlot(slotProps?.input);
@@ -176,18 +266,20 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       },
     };
 
-    const Component = isSearch ? StyledSearchTextField : MuiTextField;
+    const Component = resolveTextFieldComponent(isSearch, isCompact);
+    const mergedSx = resolveMergedSx(fitContent, sx);
 
     return (
       <Component
         ref={ref}
         variant={muiVariant}
-        size={size}
+        size={muiSize}
         value={value}
         onChange={onChange}
         placeholder={resolvePlaceholder(placeholder, isSearch)}
         slotProps={mergedSlotProps}
         data-testid={activeTestId}
+        sx={mergedSx as SxProps}
         {...rest}
       />
     );
@@ -203,5 +295,13 @@ export const SearchField = forwardRef<HTMLDivElement, TextFieldProps>(
 );
 
 SearchField.displayName = "SearchField";
+
+export const CompactTextField = forwardRef<HTMLDivElement, TextFieldProps>(
+  function CompactTextField(props, ref) {
+    return <TextField ref={ref} compact {...props} />;
+  },
+);
+
+CompactTextField.displayName = "CompactTextField";
 
 export default TextField;

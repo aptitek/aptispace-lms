@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import TextField from "@mui/material/TextField";
+import TextField from "~/components/atoms/TextField";
 
 const meta = {
   title: "Atoms/TextField",
@@ -8,12 +8,13 @@ const meta = {
   argTypes: {
     variant: {
       control: "radio",
-      options: ["filled", "outlined", "standard"],
+      options: ["filled", "outlined", "standard", "search"],
     },
     size: {
       control: "select",
-      options: ["small", "medium"],
+      options: ["compact", "small", "medium"],
     },
+    compact: { control: "boolean" },
     label: { control: "text" },
     placeholder: { control: "text" },
     disabled: { control: "boolean" },
@@ -50,5 +51,23 @@ export const WithError: Story = {
     error: true,
     helperText: "Invalid security clearance token",
     defaultValue: "000-XX",
+  },
+};
+
+export const CompactOutlined: Story = {
+  args: {
+    label: "Course ID",
+    size: "compact",
+    defaultValue: "CS-101",
+    helperText: "32px height compact input",
+  },
+};
+
+export const CompactSearch: Story = {
+  args: {
+    variant: "search",
+    compact: true,
+    placeholder: "Filter courses...",
+    defaultValue: "Calculus",
   },
 };
