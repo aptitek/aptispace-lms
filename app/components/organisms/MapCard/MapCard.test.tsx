@@ -1,4 +1,4 @@
-import React from "react";
+import type * as ReactType from "react";
 import {
   describe,
   it,
@@ -25,10 +25,68 @@ import MapCard, {
   formatCoordinatesDMS,
   cleanCampusName,
   cleanBuildingName,
+  getSolarizedMapStyle,
+  SOLARIZED_DARK_MAP_STYLE,
+  SOLARIZED_LIGHT_MAP_STYLE,
 } from "./index";
 import "~/i18n";
 
 const theme = createTheme();
+
+interface MockMapProps {
+  children?: ReactType.ReactNode;
+  initialViewState?: { latitude?: number; longitude?: number; zoom?: number };
+}
+
+interface MockMarkerProps {
+  children?: ReactType.ReactNode;
+  longitude?: number;
+  latitude?: number;
+}
+
+vi.mock("react-map-gl/maplibre", async () => {
+  const actualReact = await vi.importActual<typeof ReactType>("react");
+  const MockMap = actualReact.forwardRef<
+    { zoomIn: () => void; zoomOut: () => void; flyTo: () => void },
+    MockMapProps
+  >(({ children, initialViewState }, ref) => {
+    actualReact.useImperativeHandle(ref, () => ({
+      zoomIn: vi.fn(),
+      zoomOut: vi.fn(),
+      flyTo: vi.fn(),
+      resize: vi.fn(),
+      getMap: () => ({
+        dragPan: { enable: vi.fn(), disable: vi.fn() },
+        scrollZoom: { enable: vi.fn(), disable: vi.fn() },
+        doubleClickZoom: { enable: vi.fn(), disable: vi.fn() },
+        boxZoom: { enable: vi.fn(), disable: vi.fn() },
+      }),
+    }));
+    return (
+      <div
+        data-testid="maplibre-gl-map"
+        data-lat={initialViewState?.latitude}
+        data-lon={initialViewState?.longitude}
+        data-zoom={initialViewState?.zoom}
+      >
+        {children}
+      </div>
+    );
+  });
+  MockMap.displayName = "MockMap";
+
+  const MockMarker = ({ children, longitude, latitude }: MockMarkerProps) => (
+    <div data-testid="maplibre-marker" data-lat={latitude} data-lon={longitude}>
+      {children}
+    </div>
+  );
+
+  return {
+    default: MockMap,
+    Marker: MockMarker,
+    NavigationControl: () => <div data-testid="maplibre-nav-control" />,
+  };
+});
 
 function renderWithTheme(ui: React.ReactElement) {
   return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
@@ -303,7 +361,7 @@ describe("MapCard Organism", () => {
       });
     });
 
-    it("renders OSM iframe within 3D folding paper canvas", () => {
+    it("renders MapLibre vector map container within 3D folding paper canvas", () => {
       renderWithTheme(
         <MapCard
           address={defaultAddress}
@@ -314,11 +372,41 @@ describe("MapCard Organism", () => {
 
       expect(screen.getByTestId("map-perspective-wrapper")).toBeDefined();
       expect(screen.getByTestId("folding-paper-canvas")).toBeDefined();
-      const iframe = screen.getByTestId("osm-iframe");
-      expect(iframe).toBeDefined();
-      const iframeSrc =
-        iframe.getAttribute("src") || iframe.getAttribute("data-src") || "";
-      expect(iframeSrc).toContain("openstreetmap.org/export/embed.html");
+      expect(screen.getByTestId("maplibre-container")).toBeDefined();
+    });
+
+    it("renders with custom mapStyle and narrow width layout", () => {
+      const customStyle =
+        "https://api.maptiler.com/maps/basic/style.json?key=test-key";
+      renderWithTheme(
+        <MapCard
+          address={defaultAddress}
+          coordinates={defaultCoords}
+          mapStyle={customStyle}
+          mapWidth="narrow"
+        />,
+      );
+
+      const wrapper = screen.getByTestId("map-perspective-wrapper");
+      expect(wrapper).toBeDefined();
+      expect(screen.getByTestId("maplibre-container")).toBeDefined();
+    });
+
+    it("renders campus name on map pin badge by default and supports custom pinLabel", () => {
+      renderWithTheme(
+        <MapCard
+          campusName="Campus Condorcet"
+          address={defaultAddress}
+          coordinates={defaultCoords}
+        />,
+      );
+
+      // In wayfinding chip, cleanCampusName produces "Condorcet"
+      expect(screen.getByText("Condorcet")).toBeDefined();
+      // On the pin badge, the full campus name is displayed
+      expect(screen.getByTestId("map-pin-label").textContent).toBe(
+        "Campus Condorcet",
+      );
     });
 
     it("renders footer with address, copy button, and navigation FloatingActionButton", async () => {
@@ -398,6 +486,55 @@ describe("MapCard Organism", () => {
 
       const chip = screen.getByTestId("prominent-wayfinding-chip");
       expect(chip.getAttribute("data-orientation")).toBe("vertical");
+    });
+  });
+
+  describe("Solarized Map Style specifications", () => {
+    it("provides valid Solarized Dark style specification with OpenMapTiles source", () => {
+      expect(SOLARIZED_DARK_MAP_STYLE).toBeDefined();
+      const darkStyle = getSolarizedMapStyle("dark");
+      expect(darkStyle.version).toBe(8);
+      expect(darkStyle.name).toBe("Solarized Dark");
+      expect(darkStyle.sources.openmaptiles).toBeDefined();
+      const backgroundLayer = darkStyle.layers.find(
+        (l) => l.id === "background",
+      );
+      expect(backgroundLayer).toBeDefined();
+      const paint = backgroundLayer?.paint as
+        Record<string, unknown> | undefined;
+      expect(paint?.["background-color"]).toBe("#002b36");
+    });
+
+    it("provides valid Solarized Light style specification", () => {
+      expect(SOLARIZED_LIGHT_MAP_STYLE).toBeDefined();
+      const lightStyle = getSolarizedMapStyle("light");
+      expect(lightStyle.version).toBe(8);
+      expect(lightStyle.name).toBe("Solarized Light");
+      const backgroundLayer = lightStyle.layers.find(
+        (l) => l.id === "background",
+      );
+      expect(backgroundLayer).toBeDefined();
+      const paint = backgroundLayer?.paint as
+        Record<string, unknown> | undefined;
+      expect(paint?.["background-color"]).toBe("#fdf6e3");
+    });
+
+    it("injects custom MapTiler API key into vector source URL", () => {
+      const customKeyStyle = getSolarizedMapStyle("dark", {
+        apiKey: "maptiler-secret-key-123",
+      });
+      const source = customKeyStyle.sources.openmaptiles as
+        { url?: string } | undefined;
+      expect(source?.url).toContain("key=maptiler-secret-key-123");
+    });
+
+    it("injects custom vector tile provider URL", () => {
+      const customUrlStyle = getSolarizedMapStyle("light", {
+        providerUrl: "https://api.protomaps.com/tiles/v3.json",
+      });
+      const source = customUrlStyle.sources.openmaptiles as
+        { url?: string } | undefined;
+      expect(source?.url).toBe("https://api.protomaps.com/tiles/v3.json");
     });
   });
 });

@@ -5,3 +5,5 @@ export * from "./MapCard.utils";
 export { MapCardWayfinding } from "./MapCardWayfinding";
 export { MapCardViewport } from "./MapCardViewport";
 export { MapCardFooter } from "./MapCardFooter";
+export { MapCardPin } from "./MapCardPin";
+export * from "./MapCard.mapStyle";

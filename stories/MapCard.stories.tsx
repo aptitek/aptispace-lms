@@ -79,8 +79,35 @@ const meta: Meta<typeof MapCard> = {
       description: "Whether to display map zoom and fold replay controls",
     },
     zoom: {
-      control: { type: "number", min: 10, max: 19, step: 1 },
-      description: "OpenStreetMap zoom level",
+      control: { type: "number", min: 10, max: 19, step: 0.5 },
+      description: "Map zoom level (default: 14.5)",
+    },
+    pitch: {
+      control: { type: "range", min: 0, max: 85, step: 1 },
+      description: "Camera pitch in degrees for 3D tilt (default: 55)",
+    },
+    bearing: {
+      control: { type: "range", min: -180, max: 180, step: 1 },
+      description:
+        "Camera bearing in degrees for 3D ortho perspective angle (default: -25)",
+    },
+    pinColor: {
+      control: "color",
+      description: "Custom pin and pulse color (default: solarized green)",
+    },
+    mapWidth: {
+      control: "radio",
+      options: ["narrow", "standard"],
+      description: "Viewport width ratio for the map in horizontal orientation",
+    },
+    mapStyle: {
+      control: "text",
+      description:
+        "Custom MapLibre style JSON specification or remote URL (e.g. MapTiler, Stadia, Protomaps)",
+    },
+    tileProviderKey: {
+      control: "text",
+      description: "Optional API key for MapTiler / Protomaps vector tiles",
     },
   },
 };
@@ -292,5 +319,59 @@ export const CompleteClassScheduleTriad: Story = {
         />
       </Box>
     );
+  },
+};
+
+export const SolarizedNarrowMap: Story = {
+  args: {
+    address: "Rue Noetzlin, 91190 Gif-sur-Yvette, France",
+    campusName: "Campus Paris-Saclay",
+    buildingName: "Bâtiment Alan Turing",
+    room: "302",
+    doorCode: "*4829#",
+    accessType: "code",
+    instructions:
+      "Carte vectorielle MapLibre avec palette Solarized et format étroit.",
+    size: "medium",
+    orientation: "horizontal",
+    mapWidth: "narrow",
+    showControls: true,
+    coordinates: { lat: 48.7118, lon: 2.1698 },
+  },
+};
+
+export const StandardMapWidth: Story = {
+  args: {
+    address: "12 Rue de l'Université, 75007 Paris, France",
+    campusName: "Sorbonne Innovation Campus",
+    buildingName: "Pavillon Poincaré",
+    room: "204",
+    roomName: "Amphithéâtre Henri Poincaré",
+    doorCode: "3920A",
+    accessType: "code",
+    instructions: "Format standard élargi de la carte vectorielle.",
+    size: "medium",
+    orientation: "horizontal",
+    mapWidth: "standard",
+    showControls: true,
+    coordinates: { lat: 48.8584, lon: 2.2945 },
+  },
+};
+
+export const CustomStyleUrlExample: Story = {
+  args: {
+    address: "4 Place Jussieu, 75005 Paris, France",
+    campusName: "Campus Pierre et Marie Curie",
+    buildingName: "Tour Zamansky",
+    room: "1408",
+    accessType: "intercom",
+    instructions:
+      "Exemple utilisant une URL de style externe (OpenFreeMap, MapTiler, Stadia).",
+    size: "medium",
+    orientation: "horizontal",
+    mapWidth: "narrow",
+    mapStyle: "https://tiles.openfreemap.org/styles/positron",
+    showControls: true,
+    coordinates: { lat: 48.8472, lon: 2.3563 },
   },
 };

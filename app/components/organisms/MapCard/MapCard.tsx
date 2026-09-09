@@ -12,7 +12,9 @@ function normalizeCardSettings(props: MapCardProps) {
   return {
     size: props.size ?? "medium",
     orientation: props.orientation ?? "horizontal",
-    zoom: props.zoom ?? 16,
+    zoom: props.zoom,
+    pitch: props.pitch,
+    bearing: props.bearing,
     initialFolded: Boolean(props.initialFolded),
     showControls: Boolean(props.showControls),
     showInstructionBanner: Boolean(props.showInstructionBanner),
@@ -67,6 +69,8 @@ export const MapCard = forwardRef<HTMLDivElement, MapCardProps>(
       size,
       orientation,
       zoom,
+      pitch,
+      bearing,
       initialFolded,
       showControls,
       showInstructionBanner,
@@ -138,15 +142,24 @@ export const MapCard = forwardRef<HTMLDivElement, MapCardProps>(
             {children}
           </MapCardWayfinding>
 
-          {/* Right / Top side: OSM map with 3D origami paper unfolding animation */}
+          {/* Right / Top side: MapLibre vector map with 3D origami paper unfolding animation */}
           <MapCardViewport
             coordinates={coordinates}
             zoom={zoom}
+            pitch={pitch}
+            bearing={bearing}
             size={size}
             orientation={orientation}
             initialFolded={initialFolded}
             showControls={showControls}
             titleOsm={labels.titleOsm}
+            mapStyle={props.mapStyle}
+            mapWidth={props.mapWidth}
+            tileProviderKey={props.tileProviderKey}
+            pinLabel={
+              props.pinLabel !== undefined ? props.pinLabel : campusName
+            }
+            pinColor={props.pinColor ?? "var(--color-solarized-green, #859900)"}
             onFoldChange={onFoldChange}
           />
         </CardBodyWrapper>

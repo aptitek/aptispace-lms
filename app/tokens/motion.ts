@@ -297,15 +297,15 @@ export const M3_SPRINGS = {
   /** MapSheet origami perspective fold & unfold */
   mapFold: {
     type: "spring",
-    stiffness: 220,
-    damping: 24,
-    mass: 1.0,
+    stiffness: 100,
+    damping: 20,
+    mass: 1.2,
   } as const satisfies Transition,
   mapUnfold: {
     type: "spring",
-    stiffness: 180,
-    damping: 20,
-    mass: 1.0,
+    stiffness: 75,
+    damping: 18,
+    mass: 1.4,
   } as const satisfies Transition,
 
   /** Hold button cancellation snap-back */

@@ -6,6 +6,7 @@ import type { MapCardSize, MapCardOrientation } from "./MapCard.types";
 interface StyledCardProps {
   $size: MapCardSize;
   $orientation: MapCardOrientation;
+  $mapWidth?: "narrow" | "standard";
 }
 
 export const SIZE_METRICS: Record<
@@ -15,33 +16,37 @@ export const SIZE_METRICS: Record<
     minHeight: number;
     padding: number | string;
     fontSize: string;
-    mapFlex: string;
+    mapWidthNarrow: number;
+    mapWidthStandard: string;
     infoFlex: string;
   }
 > = {
   small: {
-    maxWidth: 540,
-    minHeight: 140,
-    padding: "12px 16px",
-    fontSize: "0.85rem",
-    mapFlex: "1 1 0%",
-    infoFlex: "0 0 auto",
+    maxWidth: 460,
+    minHeight: 115,
+    padding: "8px 12px",
+    fontSize: "0.8rem",
+    mapWidthNarrow: 155,
+    mapWidthStandard: "1 1 0%",
+    infoFlex: "1 1 auto",
   },
   medium: {
-    maxWidth: 680,
-    minHeight: 155,
-    padding: "12px 16px",
-    fontSize: "0.95rem",
-    mapFlex: "1 1 0%",
-    infoFlex: "0 0 auto",
+    maxWidth: 540,
+    minHeight: 125,
+    padding: "8px 12px",
+    fontSize: "0.875rem",
+    mapWidthNarrow: 175,
+    mapWidthStandard: "1 1 0%",
+    infoFlex: "1 1 auto",
   },
   large: {
-    maxWidth: 820,
-    minHeight: 175,
-    padding: "16px 24px",
-    fontSize: "1.05rem",
-    mapFlex: "1 1 0%",
-    infoFlex: "0 0 auto",
+    maxWidth: 640,
+    minHeight: 145,
+    padding: "12px 16px",
+    fontSize: "0.95rem",
+    mapWidthNarrow: 210,
+    mapWidthStandard: "1 1 0%",
+    infoFlex: "1 1 auto",
   },
 };
 
@@ -119,20 +124,18 @@ export const CardBodyWrapper = styled("div", {
  */
 export const WayfindingContainer = styled("section", {
   shouldForwardProp: (prop) => prop !== "$size" && prop !== "$orientation",
-})<StyledCardProps>(({ $size, $orientation }) => {
+})<StyledCardProps>(({ $size }) => {
   const metrics = SIZE_METRICS[$size];
-  const isHorizontal = $orientation === "horizontal";
 
   return {
-    flex: isHorizontal ? metrics.infoFlex : "1 1 auto",
+    flex: "1 1 auto",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     padding: metrics.padding,
-    gap: 8,
+    gap: 6,
     boxSizing: "border-box",
     minWidth: 0,
-    maxWidth: isHorizontal ? "65%" : "100%",
     backgroundColor: "transparent",
   };
 });
@@ -163,7 +166,7 @@ export const WayfindingTitle = styled("span")(({ theme }) => ({
 export const ChipsStack = styled("div")({
   display: "flex",
   flexDirection: "column",
-  gap: 10,
+  gap: 6,
   width: "100%",
 });
 
@@ -187,23 +190,49 @@ export const InstructionNote = styled("div")(({ theme }) => ({
   }),
 }));
 
+function computeMapFlex(
+  isHorizontal: boolean,
+  isNarrow: boolean,
+  metrics: { mapWidthNarrow: number; mapWidthStandard: string },
+): string {
+  if (!isHorizontal) {
+    return "1 1 auto";
+  }
+  return isNarrow
+    ? `0 0 ${metrics.mapWidthNarrow}px`
+    : metrics.mapWidthStandard;
+}
+
+function computeMapWidth(
+  isHorizontal: boolean,
+  isNarrow: boolean,
+  metrics: { mapWidthNarrow: number },
+): string {
+  if (!isHorizontal) {
+    return "100%";
+  }
+  return isNarrow ? `${metrics.mapWidthNarrow}px` : "auto";
+}
+
 /**
  * 3D Perspective container wrapping the unfolding map canvas
  */
 export const MapPerspectiveWrapper = styled("div", {
-  shouldForwardProp: (prop) => prop !== "$size" && prop !== "$orientation",
-})<StyledCardProps>(({ theme, $size, $orientation }) => {
+  shouldForwardProp: (prop) =>
+    prop !== "$size" && prop !== "$orientation" && prop !== "$mapWidth",
+})<StyledCardProps>(({ theme, $size, $orientation, $mapWidth = "narrow" }) => {
   const metrics = SIZE_METRICS[$size];
   const isHorizontal = $orientation === "horizontal";
+  const isNarrow = $mapWidth === "narrow";
 
   return {
     position: "relative",
-    flex: isHorizontal ? metrics.mapFlex : "1 1 auto",
+    flex: computeMapFlex(isHorizontal, isNarrow, metrics),
+    width: computeMapWidth(isHorizontal, isNarrow, metrics),
     perspective: 1200,
-    minHeight: isHorizontal ? 120 : 100,
-    minWidth: isHorizontal ? 160 : "auto",
-    height: isHorizontal ? "auto" : 130,
-    width: isHorizontal ? "auto" : "100%",
+    minHeight: isHorizontal ? 100 : 90,
+    minWidth: 130,
+    height: isHorizontal ? "auto" : 110,
     backgroundColor: alpha(theme.palette.background.default, 0.5),
     overflow: "hidden",
     boxSizing: "border-box",
@@ -216,8 +245,9 @@ export const MapPerspectiveWrapper = styled("div", {
     "@media (max-width: 768px)": {
       borderLeft: "none",
       borderBottom: `1px solid ${alpha(theme.palette.divider, 0.4)}`,
-      height: 130,
+      height: 110,
       width: "100%",
+      flex: "1 1 auto",
     },
   };
 });
@@ -234,11 +264,37 @@ export const UnifiedMapCanvas = styled(motion.div, {
   height: "100%",
   transformStyle: "preserve-3d",
   overflow: "hidden",
-  cursor: $isFolded ? "pointer" : "default",
+  cursor: $isFolded ? "pointer" : "grab",
+  "&:active": {
+    cursor: $isFolded ? "pointer" : "grabbing",
+  },
 }));
 
 /**
- * Embedded OpenStreetMap iframe - styled to clip the bottom Leaflet attribution banner
+ * WebGL MapLibre container wrapping canvas with full-bleed dimensions
+ */
+export const MapCanvasContainer = styled("div")({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  overflow: "hidden",
+  pointerEvents: "auto",
+  "& .maplibregl-map": {
+    width: "100% !important",
+    height: "100% !important",
+    fontFamily: "inherit",
+  },
+  "& .maplibregl-ctrl-attrib": {
+    display: "none !important",
+  },
+  "& .maplibregl-ctrl-logo": {
+    display: "none !important",
+  },
+});
+
+/**
+ * Embedded OpenStreetMap iframe - retained for backward compatibility
  */
 export const MapIframe = styled("iframe")({
   position: "absolute",
@@ -323,9 +379,9 @@ export const FooterActionsBar = styled("footer")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  gap: 12,
-  padding: "8px 16px",
-  minHeight: 46,
+  gap: 10,
+  padding: "6px 12px",
+  minHeight: 38,
   borderTop: `1px solid ${alpha(theme.palette.divider, 0.45)}`,
   backgroundColor: alpha(theme.palette.background.paper, 0.8),
   backdropFilter: "blur(12px)",
@@ -345,14 +401,14 @@ export const FooterActionsBar = styled("footer")(({ theme }) => ({
 export const AddressContainer = styled("div")({
   display: "flex",
   alignItems: "center",
-  gap: 8,
+  gap: 6,
   minWidth: 0,
   flex: "1 1 auto",
   overflow: "hidden",
 });
 
 export const AddressLabelText = styled("span")(({ theme }) => ({
-  fontSize: "0.85rem",
+  fontSize: "0.8rem",
   fontWeight: 500,
   color: theme.palette.text.primary,
   whiteSpace: "nowrap",
@@ -366,7 +422,7 @@ export const AddressLabelText = styled("span")(({ theme }) => ({
 export const FooterButtonsGroup = styled("div")({
   display: "flex",
   alignItems: "center",
-  gap: 8,
+  gap: 6,
   flexShrink: 0,
 });
 
@@ -374,8 +430,8 @@ export const FooterButtonsGroup = styled("div")({
  * Copy action button in footer
  */
 export const CopyActionButton = styled(IconButton)(({ theme }) => ({
-  width: 36,
-  height: 36,
+  width: 30,
+  height: 30,
   borderRadius: "8px",
   color: theme.palette.text.secondary,
   border: `1px solid ${alpha(theme.palette.divider, 0.35)}`,

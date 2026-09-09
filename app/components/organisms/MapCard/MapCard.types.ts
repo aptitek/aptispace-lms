@@ -73,9 +73,19 @@ export interface MapCardProps {
   roomNumber?: string | number;
 
   /**
-   * Initial OpenStreetMap zoom level (10-19, default: 16).
+   * Initial OpenStreetMap zoom level (10-19, default: 14.5).
    */
   zoom?: number;
+
+  /**
+   * Camera pitch angle in degrees (0 = nadir/top-down, up to 85) for 3D tilt (default: 55).
+   */
+  pitch?: number;
+
+  /**
+   * Camera bearing angle in degrees for 3D ortho perspective angle (default: -25).
+   */
+  bearing?: number;
 
   /**
    * Security door code, digicode, or entrance PIN (e.g. "*4829#", "3920A").
@@ -163,6 +173,33 @@ export interface MapCardProps {
    * Callback fired when navigation/directions action is clicked.
    */
   onDirectionsClick?: (coordinates?: MapCoordinates, address?: string) => void;
+
+  /**
+   * Optional custom MapLibre style specification object or remote style URL (e.g. MapTiler, Stadia, Protomaps).
+   * Defaults to the built-in Solarized vector tile style matching current theme mode.
+   */
+  mapStyle?: string | object;
+
+  /**
+   * Viewport width ratio for the map in horizontal orientation ("narrow" compact preview or "standard").
+   * @default "narrow"
+   */
+  mapWidth?: "narrow" | "standard";
+
+  /**
+   * Optional API key for external tile providers such as MapTiler or Protomaps.
+   */
+  tileProviderKey?: string;
+
+  /**
+   * Optional custom label displayed on the pin badge (defaults to campus name).
+   */
+  pinLabel?: string;
+
+  /**
+   * Optional custom color for the pin marker (defaults to Solarized green).
+   */
+  pinColor?: string;
 
   /**
    * Callback fired when the paper map fold state toggles.

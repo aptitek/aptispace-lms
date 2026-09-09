@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { Variants } from "framer-motion";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
@@ -6,17 +6,24 @@ import RestartAltRoundedIcon from "@mui/icons-material/RestartAltRounded";
 import ReplayRoundedIcon from "@mui/icons-material/ReplayRounded";
 import Tooltip from "@mui/material/Tooltip";
 
+import {
+  Map,
+  type MapRef,
+  DEFAULT_MAP_ZOOM,
+  DEFAULT_MAP_PITCH,
+  DEFAULT_MAP_BEARING,
+} from "~/components/atoms/Map";
 import { M3_SPRINGS } from "~/tokens/motion";
 import type {
   MapCardSize,
   MapCardOrientation,
   MapCoordinates,
 } from "./MapCard.types";
-import { buildOsmEmbedUrl } from "./MapCard.utils";
+import { DEFAULT_CAMPUS_COORDINATES } from "./MapCard.utils";
 import {
   MapPerspectiveWrapper,
   UnifiedMapCanvas,
-  MapIframe,
+  MapCanvasContainer,
   PaperCreaseLayer,
   CreaseLine,
   MapOverlayControls,
@@ -26,11 +33,19 @@ import {
 export interface MapCardViewportProps {
   coordinates?: MapCoordinates;
   zoom?: number;
+  pitch?: number;
+  bearing?: number;
   size?: MapCardSize;
   orientation?: MapCardOrientation;
   initialFolded?: boolean;
   showControls?: boolean;
   titleOsm?: string;
+  mapStyle?: string | object;
+  mapWidth?: "narrow" | "standard";
+  tileProviderKey?: string;
+  pinLabel?: string;
+  pinColor?: string;
+  roomPinLabel?: string;
   onFoldChange?: (isFolded: boolean) => void;
 }
 
@@ -53,22 +68,47 @@ const UNFOLD_VARIANTS: Variants = {
 
 function normalizeViewportProps(props: MapCardViewportProps) {
   return {
-    zoom: props.zoom ?? 16,
+    zoom: props.zoom ?? DEFAULT_MAP_ZOOM,
+    pitch: props.pitch ?? DEFAULT_MAP_PITCH,
+    bearing: props.bearing ?? DEFAULT_MAP_BEARING,
     size: props.size ?? "medium",
     orientation: props.orientation ?? "horizontal",
     initialFolded: Boolean(props.initialFolded),
     showControls: Boolean(props.showControls),
     titleOsm: props.titleOsm ?? "OpenStreetMap View",
+    mapWidth: props.mapWidth ?? "narrow",
   };
 }
 
 export function MapCardViewport(props: MapCardViewportProps) {
-  const { coordinates, onFoldChange } = props;
-  const { zoom, size, orientation, initialFolded, showControls, titleOsm } =
-    normalizeViewportProps(props);
+  const {
+    coordinates,
+    mapStyle,
+    tileProviderKey,
+    pinLabel,
+    pinColor,
+    roomPinLabel,
+    onFoldChange,
+  } = props;
+
+  const {
+    zoom,
+    pitch,
+    bearing,
+    size,
+    orientation,
+    initialFolded,
+    showControls,
+    titleOsm,
+    mapWidth,
+  } = normalizeViewportProps(props);
+
+  const mapRef = useRef<MapRef | null>(null);
 
   const [isFolded, setIsFolded] = useState<boolean>(true);
-  const [currentZoom, setCurrentZoom] = useState<number>(zoom);
+
+  const effectiveCoords = coordinates ?? DEFAULT_CAMPUS_COORDINATES;
+  const effectivePinLabel = pinLabel ?? roomPinLabel;
 
   // Unfolding sequence on mount: starts folded, then unfolds smoothly
   useEffect(() => {
@@ -81,7 +121,13 @@ export function MapCardViewport(props: MapCardViewportProps) {
     const timer = setTimeout(() => {
       setIsFolded(false);
       onFoldChange?.(false);
-    }, 150);
+      setTimeout(() => {
+        mapRef.current?.resize();
+      }, 750);
+      setTimeout(() => {
+        mapRef.current?.resize();
+      }, 1200);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [initialFolded, onFoldChange]);
@@ -90,29 +136,41 @@ export function MapCardViewport(props: MapCardViewportProps) {
     setIsFolded((prev) => {
       const next = !prev;
       onFoldChange?.(next);
+      if (!next) {
+        setTimeout(() => {
+          mapRef.current?.resize();
+        }, 750);
+        setTimeout(() => {
+          mapRef.current?.resize();
+        }, 1200);
+      }
       return next;
     });
   };
 
   const handleZoomIn = () => {
-    setCurrentZoom((z) => Math.min(z + 1, 19));
+    mapRef.current?.zoomIn();
   };
 
   const handleZoomOut = () => {
-    setCurrentZoom((z) => Math.max(z - 1, 10));
+    mapRef.current?.zoomOut();
   };
 
   const handleResetZoom = () => {
-    setCurrentZoom(zoom);
+    mapRef.current?.flyTo({
+      center: [effectiveCoords.lon, effectiveCoords.lat],
+      zoom,
+      pitch,
+      bearing,
+    });
     setIsFolded(false);
   };
-
-  const embedUrl = buildOsmEmbedUrl(coordinates, currentZoom);
 
   return (
     <MapPerspectiveWrapper
       $size={size}
       $orientation={orientation}
+      $mapWidth={mapWidth}
       data-testid="map-perspective-wrapper"
     >
       <UnifiedMapCanvas
@@ -123,12 +181,33 @@ export function MapCardViewport(props: MapCardViewportProps) {
         data-testid="folding-paper-canvas"
         onClick={isFolded ? handleToggleFold : undefined}
       >
-        <MapIframe
-          src={embedUrl}
-          title={titleOsm}
-          loading="lazy"
-          data-testid="osm-iframe"
-        />
+        <MapCanvasContainer data-testid="maplibre-container">
+          <Map
+            ref={mapRef}
+            coordinates={effectiveCoords}
+            zoom={zoom}
+            pitch={pitch}
+            bearing={bearing}
+            mapStyle={mapStyle}
+            tileProviderKey={tileProviderKey}
+            pinLabel={effectivePinLabel}
+            pinColor={pinColor ?? "var(--color-solarized-green, #859900)"}
+            pinAriaLabel={titleOsm}
+            interactive={true}
+            attributionControl={false}
+            width="100%"
+            height="100%"
+            onLoad={() => {
+              setTimeout(() => {
+                mapRef.current?.resize();
+              }, 200);
+              setTimeout(() => {
+                mapRef.current?.resize();
+              }, 500);
+            }}
+            data-testid="maplibre-gl-map"
+          />
+        </MapCanvasContainer>
 
         <PaperCreaseLayer $isFolded={isFolded} data-testid="paper-crease-layer">
           <CreaseLine $leftPercent={33.33} />
