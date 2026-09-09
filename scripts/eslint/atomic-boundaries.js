@@ -1,3 +1,5 @@
+import boundariesPlugin from "eslint-plugin-boundaries";
+
 export const boundariesSettings = {
   "boundaries/include": ["app/**/*"],
   "boundaries/elements": [
@@ -239,3 +241,14 @@ export const atomicHierarchyConfigs = [
     },
   },
 ];
+
+export const boundariesConfig = {
+  files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+  settings: boundariesSettings,
+  plugins: {
+    boundaries: boundariesPlugin,
+  },
+  rules: {
+    "boundaries/dependencies": boundariesRule,
+  },
+};

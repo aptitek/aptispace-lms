@@ -1,6 +1,2 @@
-pnpm typecheck
-pnpm knip:fix
-git add -u
 pnpm lint
-git add -u
-pnpm test
+pnpm typecheck

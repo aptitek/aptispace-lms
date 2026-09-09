@@ -1,3 +1,9 @@
+import m3ThemePlugin from "../eslint-plugin-m3-theme.js";
+import {
+  restrictedImportsRule,
+  restrictedSyntaxRule,
+} from "./restricted-rules.js";
+
 export const m3ThemeRules = {
   "m3-theme/no-action-as-container-background": [
     "error",
@@ -35,6 +41,18 @@ export const m3ThemeRules = {
   "m3-theme/enforce-elevation-levels": "off",
   "m3-theme/enforce-state-layers": "off",
   "m3-theme/enforce-minimum-touch-target": "off",
+};
+
+export const m3Config = {
+  files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+  plugins: {
+    "m3-theme": m3ThemePlugin,
+  },
+  rules: {
+    ...m3ThemeRules,
+    "no-restricted-imports": restrictedImportsRule,
+    "no-restricted-syntax": restrictedSyntaxRule,
+  },
 };
 
 export const tokensOverridesConfig = {

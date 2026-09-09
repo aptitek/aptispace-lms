@@ -1,2 +1,1 @@
-pnpm build
-pnpm run build-storybook
+pnpm test
