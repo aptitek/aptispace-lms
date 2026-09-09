@@ -196,6 +196,22 @@ export interface MapProps {
   preserveDrawingBuffer?: boolean;
 
   /**
+   * Whether the map is currently in a loading state. When true, renders MapSkeleton.
+   */
+  isLoading?: boolean;
+
+  /**
+   * Custom fallback React node rendered if WebGL is unavailable or fails.
+   * If omitted, renders the built-in MapFallback component.
+   */
+  fallback?: ReactNode;
+
+  /**
+   * Forces the map into 2D fallback mode, skipping WebGL initialization.
+   */
+  disableWebGL?: boolean;
+
+  /**
    * Test identifier for unit and e2e testing.
    */
   "data-testid"?: string;

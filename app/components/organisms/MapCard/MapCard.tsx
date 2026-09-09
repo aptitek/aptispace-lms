@@ -7,6 +7,7 @@ import { SheetCard, CardBodyWrapper } from "./MapCard.styles";
 import MapCardWayfinding from "./MapCardWayfinding";
 import MapCardViewport from "./MapCardViewport";
 import MapCardFooter from "./MapCardFooter";
+import MapCardSkeleton from "./MapCardSkeleton";
 
 function normalizeCardSettings(props: MapCardProps) {
   return {
@@ -111,6 +112,20 @@ export const MapCard = forwardRef<HTMLDivElement, MapCardProps>(
 
     const labels = resolveCardLabels(t, title);
 
+    if (props.isLoading) {
+      return (
+        <MapCardSkeleton
+          size={size}
+          orientation={orientation}
+          className={className}
+          style={style}
+          testId={
+            props.testId ? `${props.testId}-skeleton` : "map-card-skeleton"
+          }
+        />
+      );
+    }
+
     return (
       <SheetCard
         ref={ref}
@@ -160,6 +175,8 @@ export const MapCard = forwardRef<HTMLDivElement, MapCardProps>(
               props.pinLabel !== undefined ? props.pinLabel : campusName
             }
             pinColor={props.pinColor ?? "var(--color-solarized-green, #859900)"}
+            disableWebGL={props.disableWebGL}
+            fallback={props.fallback}
             onFoldChange={onFoldChange}
           />
         </CardBodyWrapper>

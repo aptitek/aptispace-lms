@@ -273,13 +273,17 @@ export const UnifiedMapCanvas = styled(motion.div, {
 /**
  * WebGL MapLibre container wrapping canvas with full-bleed dimensions
  */
-export const MapCanvasContainer = styled("div")({
+export const MapCanvasContainer = styled("div", {
+  shouldForwardProp: (prop) => prop !== "$showOverlay",
+})<{ $showOverlay?: boolean }>(({ $showOverlay = false }) => ({
   position: "absolute",
   inset: 0,
   width: "100%",
   height: "100%",
   overflow: "hidden",
-  pointerEvents: "auto",
+  opacity: $showOverlay ? 0 : 1,
+  pointerEvents: $showOverlay ? "none" : "auto",
+  transition: "opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1)",
   "& .maplibregl-map": {
     width: "100% !important",
     height: "100% !important",
@@ -291,7 +295,7 @@ export const MapCanvasContainer = styled("div")({
   "& .maplibregl-ctrl-logo": {
     display: "none !important",
   },
-});
+}));
 
 /**
  * Embedded OpenStreetMap iframe - retained for backward compatibility

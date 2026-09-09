@@ -375,3 +375,58 @@ export const CustomStyleUrlExample: Story = {
     coordinates: { lat: 48.8472, lon: 2.3563 },
   },
 };
+
+export const LoadingSkeleton: Story = {
+  args: {
+    isLoading: true,
+    address: "Rue Noetzlin, 91190 Gif-sur-Yvette, France",
+    campusName: "Campus Paris-Saclay",
+    buildingName: "Bâtiment Alan Turing",
+    room: "302",
+    size: "medium",
+    orientation: "horizontal",
+  },
+};
+
+export const LoadingSkeletonVertical: Story = {
+  args: {
+    isLoading: true,
+    address: "12 Rue de l'Université, 75007 Paris, France",
+    campusName: "Sorbonne Innovation Campus",
+    buildingName: "Pavillon Poincaré",
+    size: "medium",
+    orientation: "vertical",
+  },
+};
+
+export const NoWebGLFallback: Story = {
+  args: {
+    disableWebGL: true,
+    address: "Rue Noetzlin, 91190 Gif-sur-Yvette, France",
+    campusName: "Campus Paris-Saclay",
+    buildingName: "Bâtiment Alan Turing",
+    room: "302",
+    doorCode: "*4829#",
+    accessType: "code",
+    instructions:
+      "Affichage cartographique 2D de repli lorsque l'accélération matérielle WebGL/OpenGL est indisponible.",
+    size: "medium",
+    orientation: "horizontal",
+    coordinates: { lat: 48.7118, lon: 2.1698 },
+  },
+};
+
+export const NoWebGLFallbackVertical: Story = {
+  args: {
+    disableWebGL: true,
+    address: "12 Rue de l'Université, 75007 Paris, France",
+    campusName: "Sorbonne Innovation Campus",
+    buildingName: "Pavillon Poincaré",
+    room: "204",
+    doorCode: "3920A",
+    accessType: "code",
+    size: "medium",
+    orientation: "vertical",
+    coordinates: { lat: 48.8584, lon: 2.2945 },
+  },
+};

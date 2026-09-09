@@ -8,6 +8,9 @@ export {
   default,
 } from "./Map";
 export { MapPin } from "./MapPin";
+export { MapSkeleton, type MapSkeletonProps } from "./MapSkeleton";
+export { MapFallback, type MapFallbackProps } from "./MapFallback";
+export { isWebGLSupported } from "./webglDetection";
 export {
   getSolarizedMapStyle,
   SOLARIZED_DARK_MAP_STYLE,

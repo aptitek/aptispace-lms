@@ -257,3 +257,24 @@ const ImperativeControlsDemoComponent: React.FC = () => {
 export const ImperativeControlsDemo: Story = {
   render: () => <ImperativeControlsDemoComponent />,
 };
+
+export const LoadingSkeleton: Story = {
+  args: {
+    isLoading: true,
+    latitude: 48.7118,
+    longitude: 2.1698,
+    width: 460,
+    height: 300,
+  },
+};
+
+export const NoWebGLFallback: Story = {
+  args: {
+    disableWebGL: true,
+    latitude: 48.7118,
+    longitude: 2.1698,
+    pinLabel: "Campus Paris-Saclay",
+    width: 460,
+    height: 300,
+  },
+};

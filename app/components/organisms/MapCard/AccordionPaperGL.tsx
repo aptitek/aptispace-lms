@@ -7,6 +7,7 @@ import {
 } from "./accordionPaperShaders";
 import { TrifoldBrochurePaper } from "./TrifoldBrochurePaper";
 import { createCampusMapCanvas } from "./campusMapTexture";
+import { isWebGLSupported } from "~/components/atoms/Map";
 
 export interface AccordionPaperGLProps {
   isFolded: boolean;
@@ -14,6 +15,7 @@ export interface AccordionPaperGLProps {
   isDark?: boolean;
   onUnfoldDone: () => void;
   onClick?: () => void;
+  disableWebGL?: boolean;
 }
 
 const GLCanvasContainer = styled("div")(({ theme }) => ({
@@ -38,12 +40,71 @@ const StyledCanvas = styled("canvas")<{ $pointerEvents: "auto" | "none" }>(
 const SOLARIZED_LIGHT_RGB = [0.992, 0.965, 0.89] as const;
 const SOLARIZED_DARK_RGB = [0.0, 0.168, 0.211] as const;
 
-function easeOutCubic(x: number): number {
-  return 1 - Math.pow(1 - x, 3);
-}
-
 function easeInOutCubic(x: number): number {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
+export const ACCORDION_ANIMATION_DURATION = 1750;
+
+function initGLRenderer(canvas: HTMLCanvasElement): Renderer | null {
+  const glCheck = canvas.getContext("webgl2") || canvas.getContext("webgl");
+  if (!glCheck) return null;
+
+  try {
+    const renderer = new Renderer({
+      canvas,
+      alpha: true,
+      antialias: true,
+      dpr: Math.min(window.devicePixelRatio || 1, 2),
+    });
+    if (!renderer.gl) return null;
+    return renderer;
+  } catch {
+    return null;
+  }
+}
+
+function createAccordionMesh(
+  gl: Renderer["gl"],
+  isDark: boolean,
+  initialProgress: number,
+): { mesh: Mesh; program: Program; texture: Texture } {
+  const geometry = new Plane(gl, {
+    width: 1,
+    height: 1,
+    widthSegments: 96,
+    heightSegments: 1,
+  });
+
+  const initialMapCanvas = createCampusMapCanvas({
+    width: 1024,
+    height: 640,
+    isDark,
+  });
+  const initialTexture = new Texture(gl, {
+    image: initialMapCanvas,
+    generateMipmaps: false,
+  });
+
+  const baseRgb = isDark ? SOLARIZED_DARK_RGB : SOLARIZED_LIGHT_RGB;
+
+  const program = new Program(gl, {
+    vertex: accordionVertexShader,
+    fragment: accordionFragmentShader,
+    uniforms: {
+      uTexture: { value: initialTexture },
+      uHasTexture: { value: 1.0 },
+      uProgress: { value: initialProgress },
+      uFoldAngle: { value: 0.92 },
+      uAmplitude: { value: 2.6 },
+      uBaseColor: { value: baseRgb },
+    },
+    transparent: true,
+    cullFace: null,
+  });
+
+  const mesh = new Mesh(gl, { geometry, program });
+  return { mesh, program, texture: initialTexture };
 }
 
 export const AccordionPaperGL: React.FC<AccordionPaperGLProps> = ({
@@ -52,6 +113,7 @@ export const AccordionPaperGL: React.FC<AccordionPaperGLProps> = ({
   isDark: propIsDark,
   onUnfoldDone,
   onClick,
+  disableWebGL = false,
 }) => {
   const theme = useTheme();
   const isDark =
@@ -65,78 +127,48 @@ export const AccordionPaperGL: React.FC<AccordionPaperGLProps> = ({
   const animFrameRef = useRef<number | null>(null);
   const progressRef = useRef<number>(isFolded ? 0.0 : 1.0);
 
-  const [hasGlFailed, setHasGlFailed] = useState<boolean>(false);
+  const [hasGlFailed, setHasGlFailed] = useState<boolean>(() => {
+    if (disableWebGL) return true;
+    return !isWebGLSupported();
+  });
+
+  useEffect(() => {
+    if (disableWebGL || !isWebGLSupported()) {
+      setHasGlFailed(true);
+    }
+  }, [disableWebGL]);
+
+  useEffect(() => {
+    if (hasGlFailed && !isFolded) {
+      onUnfoldDone();
+    }
+  }, [hasGlFailed, isFolded, onUnfoldDone]);
 
   // Initialize WebGL Scene
   useEffect(() => {
+    if (disableWebGL || !isWebGLSupported()) {
+      setHasGlFailed(true);
+      return;
+    }
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const glCheck = canvas.getContext("webgl2") || canvas.getContext("webgl");
-    if (!glCheck) {
+    const renderer = initGLRenderer(canvas);
+    if (!renderer) {
       setHasGlFailed(true);
       return;
     }
+    rendererRef.current = renderer;
 
-    let renderer: Renderer;
-    try {
-      renderer = new Renderer({
-        canvas,
-        alpha: true,
-        antialias: true,
-        dpr: Math.min(window.devicePixelRatio || 1, 2),
-      });
-      rendererRef.current = renderer;
-    } catch {
-      setHasGlFailed(true);
-      return;
-    }
-
-    const { gl } = renderer;
-    if (!gl) {
-      setHasGlFailed(true);
-      return;
-    }
-
-    // High-resolution continuous mesh with 96 horizontal segments
-    const geometry = new Plane(gl, {
-      width: 1,
-      height: 1,
-      widthSegments: 96,
-      heightSegments: 1,
-    });
-
-    // Create illustrated campus map canvas texture immediately
-    const initialMapCanvas = createCampusMapCanvas({
-      width: 1024,
-      height: 640,
+    const { mesh, program, texture } = createAccordionMesh(
+      renderer.gl,
       isDark,
-    });
-    const initialTexture = new Texture(gl, {
-      image: initialMapCanvas,
-      generateMipmaps: false,
-    });
-    textureRef.current = initialTexture;
-
-    const baseRgb = isDark ? SOLARIZED_DARK_RGB : SOLARIZED_LIGHT_RGB;
-
-    const program = new Program(gl, {
-      vertex: accordionVertexShader,
-      fragment: accordionFragmentShader,
-      uniforms: {
-        uTexture: { value: initialTexture },
-        uHasTexture: { value: 1.0 },
-        uProgress: { value: progressRef.current },
-        uFoldAngle: { value: 0.38 },
-        uBaseColor: { value: baseRgb },
-      },
-      transparent: true,
-      cullFace: null,
-    });
-    programRef.current = program;
-
-    const mesh = new Mesh(gl, { geometry, program });
+      progressRef.current,
+    );
     meshRef.current = mesh;
+    programRef.current = program;
+    textureRef.current = texture;
 
     const resize = () => {
       if (!canvas.parentElement) return;
@@ -160,7 +192,7 @@ export const AccordionPaperGL: React.FC<AccordionPaperGLProps> = ({
         cancelAnimationFrame(animFrameRef.current);
       }
     };
-  }, [isDark]);
+  }, [isDark, disableWebGL]);
 
   // Update texture when snapshotUrl arrives
   useEffect(() => {
@@ -188,15 +220,14 @@ export const AccordionPaperGL: React.FC<AccordionPaperGLProps> = ({
 
   // Animate accordion progress smoothly
   const animateProgress = useCallback(
-    (target: number, duration = 850) => {
+    (target: number, duration = ACCORDION_ANIMATION_DURATION) => {
       const start = progressRef.current;
       const startTime = performance.now();
 
       const tick = (now: number) => {
         const elapsed = now - startTime;
         const rawFrac = Math.min(elapsed / duration, 1.0);
-        const frac =
-          target === 1.0 ? easeOutCubic(rawFrac) : easeInOutCubic(rawFrac);
+        const frac = easeInOutCubic(rawFrac);
         const current = start + (target - start) * frac;
         progressRef.current = current;
 
@@ -231,7 +262,7 @@ export const AccordionPaperGL: React.FC<AccordionPaperGLProps> = ({
   useEffect(() => {
     const targetProgress = isFolded ? 0.0 : 1.0;
     if (Math.abs(progressRef.current - targetProgress) > 0.001) {
-      animateProgress(targetProgress, 850);
+      animateProgress(targetProgress, ACCORDION_ANIMATION_DURATION);
     }
   }, [isFolded, animateProgress]);
 

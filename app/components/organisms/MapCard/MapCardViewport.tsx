@@ -1,4 +1,4 @@
-import React, { useRef, type RefObject } from "react";
+import React, { useState, useEffect, useRef, type RefObject } from "react";
 import type { Variants } from "framer-motion";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
@@ -49,6 +49,8 @@ export interface MapCardViewportProps {
   pinColor?: string;
   roomPinLabel?: string;
   onFoldChange?: (isFolded: boolean) => void;
+  disableWebGL?: boolean;
+  fallback?: React.ReactNode;
 }
 
 // Zoom remains strictly consistent by maintaining scale: 1 across both states
@@ -87,6 +89,7 @@ interface AccordionOverlayContainerProps {
   snapshotUrl: string | null;
   onUnfoldDone: () => void;
   onClick?: () => void;
+  disableWebGL?: boolean;
 }
 
 const AccordionOverlayContainer: React.FC<AccordionOverlayContainerProps> = ({
@@ -95,8 +98,20 @@ const AccordionOverlayContainer: React.FC<AccordionOverlayContainerProps> = ({
   snapshotUrl,
   onUnfoldDone,
   onClick,
+  disableWebGL,
 }) => {
-  if (!showOverlay) {
+  const [shouldRender, setShouldRender] = useState(showOverlay);
+
+  useEffect(() => {
+    if (showOverlay) {
+      setShouldRender(true);
+    } else {
+      const timer = setTimeout(() => setShouldRender(false), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [showOverlay]);
+
+  if (!shouldRender) {
     return null;
   }
 
@@ -106,7 +121,7 @@ const AccordionOverlayContainer: React.FC<AccordionOverlayContainerProps> = ({
     <AccordionOverlay
       initial={false}
       animate={{ opacity: showOverlay ? 1 : 0 }}
-      transition={{ duration: M3_MOTION_DURATIONS.s.medium1 }}
+      transition={{ duration: M3_MOTION_DURATIONS.s.long1 }}
       $pointerEvents={pointerEvents}
       data-testid="accordion-overlay"
     >
@@ -115,6 +130,7 @@ const AccordionOverlayContainer: React.FC<AccordionOverlayContainerProps> = ({
         snapshotUrl={snapshotUrl}
         onUnfoldDone={onUnfoldDone}
         onClick={onClick}
+        disableWebGL={disableWebGL}
       />
     </AccordionOverlay>
   );
@@ -252,7 +268,10 @@ export function MapCardViewport(props: MapCardViewportProps) {
         data-testid="folding-paper-canvas"
         onClick={clickHandler}
       >
-        <MapCanvasContainer data-testid="maplibre-container">
+        <MapCanvasContainer
+          $showOverlay={showOverlay}
+          data-testid="maplibre-container"
+        >
           <Map
             ref={mapRef}
             coordinates={effectiveCoords}
@@ -272,6 +291,8 @@ export function MapCardViewport(props: MapCardViewportProps) {
             width="100%"
             height="100%"
             onLoad={handleMapLoad}
+            disableWebGL={props.disableWebGL}
+            fallback={props.fallback}
             data-testid="maplibre-gl-map"
           />
         </MapCanvasContainer>
@@ -282,6 +303,7 @@ export function MapCardViewport(props: MapCardViewportProps) {
           snapshotUrl={snapshotUrl}
           onUnfoldDone={handleUnfoldDone}
           onClick={clickHandler}
+          disableWebGL={props.disableWebGL}
         />
 
         <PaperCreaseLayer $isFolded={false} data-testid="paper-crease-layer" />

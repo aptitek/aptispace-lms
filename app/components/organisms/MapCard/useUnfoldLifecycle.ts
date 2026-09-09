@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, type RefObject } from "react";
 import type { MapRef } from "~/components/atoms/Map";
 import { captureMapSnapshot } from "./mapSnapshotHelper";
+import { ACCORDION_ANIMATION_DURATION } from "./AccordionPaperGL";
 
 export interface UseUnfoldLifecycleOptions {
   initialFolded: boolean;
@@ -103,7 +104,7 @@ export function useUnfoldLifecycle(options: UseUnfoldLifecycleOptions) {
     setShowOverlay(true);
     setIsFolded(false);
     onFoldChange?.(false);
-    setTimeout(handleUnfoldDone, 850);
+    setTimeout(handleUnfoldDone, ACCORDION_ANIMATION_DURATION + 100);
   }, [onFoldChange, handleUnfoldDone]);
 
   const handleToggleFold = useCallback(() => {

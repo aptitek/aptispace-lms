@@ -1,5 +1,6 @@
 import React, {
   forwardRef,
+  useState,
   useRef,
   useImperativeHandle,
   useMemo,
@@ -12,6 +13,7 @@ import ReactMapGLMap, {
   Marker,
   type MapRef,
   type MapEvent,
+  type ErrorEvent,
 } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useTheme } from "@mui/material/styles";
@@ -21,6 +23,9 @@ import type { MapProps, MapCoordinates } from "./Map.types";
 import { StyledMapRoot } from "./Map.styles";
 import { getSolarizedMapStyle } from "./Map.mapStyle";
 import { MapPin } from "./MapPin";
+import { MapSkeleton } from "./MapSkeleton";
+import { MapFallback } from "./MapFallback";
+import { isWebGLSupported } from "./webglDetection";
 
 // Configure default workerUrl for MapLibre in Vite and production builds
 if (typeof window !== "undefined") {
@@ -232,6 +237,104 @@ function resolveThemeMode(
   return baseMode ?? "light";
 }
 
+function useWebGLAvailability(disableWebGL = false) {
+  const [hasWebGL, setHasWebGL] = useState<boolean>(() => {
+    if (disableWebGL) return false;
+    return isWebGLSupported();
+  });
+
+  useEffect(() => {
+    setHasWebGL(disableWebGL ? false : isWebGLSupported());
+  }, [disableWebGL]);
+
+  return [hasWebGL, setHasWebGL] as const;
+}
+
+function useMapImperativeHandle(
+  ref: React.ForwardedRef<MapRef>,
+  mapRef: RefObject<MapRef | null>,
+) {
+  useImperativeHandle(
+    ref,
+    () =>
+      new Proxy({} as MapRef, {
+        get: (_target, prop) => {
+          if (!mapRef.current) return undefined;
+          const propertyValue = (
+            mapRef.current as unknown as Record<string, unknown>
+          )[prop as string];
+          if (typeof propertyValue === "function") {
+            return (propertyValue as (...args: unknown[]) => unknown).bind(
+              mapRef.current,
+            );
+          }
+          return propertyValue;
+        },
+      }),
+    [mapRef],
+  );
+}
+
+function renderNonInteractiveView(
+  props: MapProps,
+  containerStyle: CSSProperties,
+  hasWebGL: boolean,
+) {
+  if (props.isLoading) {
+    const testId =
+      props["data-testid"] && props["data-testid"] !== "maplibre-gl-map"
+        ? `${props["data-testid"]}-skeleton`
+        : "map-skeleton";
+    return (
+      <MapSkeleton
+        width={props.width}
+        height={props.height}
+        borderRadius={props.borderRadius}
+        border={props.border}
+        boxShadow={props.boxShadow}
+        aspectRatio={props.aspectRatio}
+        className={props.className}
+        style={containerStyle}
+        testId={testId}
+      />
+    );
+  }
+
+  if (!hasWebGL) {
+    if (props.fallback) {
+      return <>{props.fallback}</>;
+    }
+    const testId =
+      props["data-testid"] && props["data-testid"] !== "maplibre-gl-map"
+        ? `${props["data-testid"]}-fallback`
+        : "map-fallback";
+    return (
+      <MapFallback
+        coordinates={props.coordinates}
+        latitude={props.latitude}
+        longitude={props.longitude}
+        zoom={props.zoom}
+        pinLabel={props.pinLabel}
+        pinColor={props.pinColor}
+        pinAriaLabel={props.pinAriaLabel}
+        width={props.width}
+        height={props.height}
+        borderRadius={props.borderRadius}
+        border={props.border}
+        boxShadow={props.boxShadow}
+        aspectRatio={props.aspectRatio}
+        className={props.className}
+        style={containerStyle}
+        testId={testId}
+      >
+        {props.children}
+      </MapFallback>
+    );
+  }
+
+  return null;
+}
+
 export const AtomicMap = forwardRef<MapRef, MapProps>((props, ref) => {
   const {
     coordinates,
@@ -259,7 +362,10 @@ export const AtomicMap = forwardRef<MapRef, MapProps>((props, ref) => {
     initialBearing,
     enable3dBuildings,
     preserveDrawingBuffer = true,
+    disableWebGL = false,
   } = props;
+
+  const [hasWebGL, setHasWebGL] = useWebGLAvailability(disableWebGL);
 
   const { zoom, pitch, bearing, maxPitch } = normalizeCameraProps(props);
   const {
@@ -272,25 +378,7 @@ export const AtomicMap = forwardRef<MapRef, MapProps>((props, ref) => {
   } = normalizeLayoutProps(props);
 
   const mapRef = useRef<MapRef | null>(null);
-  useImperativeHandle(
-    ref,
-    () =>
-      new Proxy({} as MapRef, {
-        get: (_target, prop) => {
-          if (!mapRef.current) return undefined;
-          const propertyValue = (
-            mapRef.current as unknown as Record<string, unknown>
-          )[prop as string];
-          if (typeof propertyValue === "function") {
-            return (propertyValue as (...args: unknown[]) => unknown).bind(
-              mapRef.current,
-            );
-          }
-          return propertyValue;
-        },
-      }),
-    [],
-  );
+  useMapImperativeHandle(ref, mapRef);
   useWorkerUrl(workerUrl);
 
   const theme = useTheme();
@@ -323,6 +411,18 @@ export const AtomicMap = forwardRef<MapRef, MapProps>((props, ref) => {
     onLoad?.(e);
   };
 
+  const handleMapError = (e: ErrorEvent) => {
+    const errorMsg = e.error?.message?.toLowerCase() ?? "";
+    if (
+      errorMsg.includes("webgl") ||
+      errorMsg.includes("context lost") ||
+      errorMsg.includes("could not initialize")
+    ) {
+      setHasWebGL(false);
+    }
+    onError?.(e);
+  };
+
   const containerStyle = useMemo<CSSProperties>(
     () => ({
       width,
@@ -335,6 +435,15 @@ export const AtomicMap = forwardRef<MapRef, MapProps>((props, ref) => {
     }),
     [width, height, borderRadius, border, boxShadow, aspectRatio, style],
   );
+
+  const nonInteractiveView = renderNonInteractiveView(
+    props,
+    containerStyle,
+    hasWebGL,
+  );
+  if (nonInteractiveView) {
+    return nonInteractiveView;
+  }
 
   return (
     <StyledMapRoot
@@ -376,7 +485,7 @@ export const AtomicMap = forwardRef<MapRef, MapProps>((props, ref) => {
         styleDiffing={false}
         style={MAP_CANVAS_STYLE}
         onLoad={handleMapLoad}
-        onError={onError}
+        onError={handleMapError}
         data-testid="maplibre-gl-map"
       >
         {showPin && (

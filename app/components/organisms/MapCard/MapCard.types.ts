@@ -205,4 +205,23 @@ export interface MapCardProps {
    * Callback fired when the paper map fold state toggles.
    */
   onFoldChange?: (isFolded: boolean) => void;
+
+  /**
+   * Whether the card is currently in loading state, rendering a loading skeleton.
+   * @default false
+   */
+  isLoading?: boolean;
+
+  /**
+   * Custom fallback component rendered when WebGL/OpenGL is unavailable or disabled.
+   * Defaults to the built-in 2D cartographic fallback with coordinates and OpenStreetMap link.
+   */
+  fallback?: ReactNode;
+
+  /**
+   * Explicitly disable WebGL rendering and force 2D fallback mode.
+   * Useful for low-resource environments, test runners, or user preference.
+   * @default false
+   */
+  disableWebGL?: boolean;
 }

@@ -7,3 +7,5 @@ export { MapCardViewport } from "./MapCardViewport";
 export { MapCardFooter } from "./MapCardFooter";
 export { MapCardPin } from "./MapCardPin";
 export * from "./MapCard.mapStyle";
+export { MapCardSkeleton } from "./MapCardSkeleton";
+export type { MapCardSkeletonProps } from "./MapCardSkeleton";

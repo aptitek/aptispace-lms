@@ -7,6 +7,8 @@ import Button from "@mui/material/Button";
 import {
   Map,
   MapPin,
+  MapSkeleton,
+  MapFallback,
   DEFAULT_MAP_COORDINATES,
   DEFAULT_MAP_ZOOM,
   DEFAULT_MAP_PITCH,
@@ -384,6 +386,132 @@ describe("Atomic Map Component", () => {
       });
       const sourceUrl = customUrlStyle.sources.openmaptiles as { url?: string };
       expect(sourceUrl.url).toBe("https://custom-tiles.org/tiles.json");
+    });
+  });
+
+  describe("MapSkeleton atom", () => {
+    it("renders skeleton placeholder with accessible progressbar attributes", () => {
+      render(
+        <ThemeProvider theme={lightTheme}>
+          <MapSkeleton testId="custom-skeleton" width={400} height={250} />
+        </ThemeProvider>,
+      );
+
+      const skeleton = screen.getByTestId("custom-skeleton");
+      expect(skeleton.getAttribute("role")).toBe("progressbar");
+      expect(skeleton.getAttribute("aria-busy")).toBe("true");
+      expect(skeleton.getAttribute("aria-label")).toBe(
+        "Map loading placeholder",
+      );
+      expect(screen.getByTestId("map-skeleton-controls")).toBeDefined();
+      expect(screen.getByTestId("map-skeleton-pin")).toBeDefined();
+    });
+
+    it("supports static and custom variant props", () => {
+      render(
+        <ThemeProvider theme={lightTheme}>
+          <MapSkeleton
+            variant="static"
+            animated={false}
+            testId="static-skeleton"
+          />
+        </ThemeProvider>,
+      );
+
+      expect(screen.getByTestId("static-skeleton")).toBeDefined();
+    });
+  });
+
+  describe("MapFallback atom", () => {
+    it("renders clean 2D cartographic fallback without notice badge or coordinate card", () => {
+      render(
+        <ThemeProvider theme={lightTheme}>
+          <MapFallback
+            coordinates={{ lat: 48.8566, lon: 2.3522 }}
+            pinLabel="Paris Sorbonne"
+            testId="paris-fallback"
+          />
+        </ThemeProvider>,
+      );
+
+      const fallback = screen.getByTestId("paris-fallback");
+      expect(fallback.getAttribute("role")).toBe("region");
+      expect(screen.getByTestId("map-fallback-pin")).toBeDefined();
+      expect(screen.getByTestId("map-fallback-compass")).toBeDefined();
+
+      // Notice badge and coordinate footer card removed as requested
+      expect(screen.queryByTestId("map-fallback-status")).toBeNull();
+      expect(screen.queryByTestId("map-fallback-footer")).toBeNull();
+      expect(screen.queryByTestId("map-fallback-osm-link")).toBeNull();
+    });
+  });
+
+  describe("Map Loading & WebGL Fallback states", () => {
+    it("renders MapSkeleton when isLoading is true", () => {
+      render(
+        <ThemeProvider theme={lightTheme}>
+          <Map
+            isLoading={true}
+            coordinates={{ lat: 48.7118, lon: 2.1698 }}
+            data-testid="loading-map"
+          />
+        </ThemeProvider>,
+      );
+
+      expect(screen.getByTestId("loading-map-skeleton")).toBeDefined();
+      expect(screen.queryByTestId("maplibre-gl-map")).toBeNull();
+    });
+
+    it("renders MapFallback when disableWebGL is true", () => {
+      render(
+        <ThemeProvider theme={lightTheme}>
+          <Map
+            disableWebGL={true}
+            coordinates={{ lat: 48.7118, lon: 2.1698 }}
+            data-testid="no-webgl-map"
+          />
+        </ThemeProvider>,
+      );
+
+      expect(screen.getByTestId("no-webgl-map-fallback")).toBeDefined();
+      expect(screen.getByTestId("map-fallback-pin")).toBeDefined();
+      expect(screen.getByTestId("map-fallback-compass")).toBeDefined();
+      expect(screen.queryByTestId("map-fallback-status")).toBeNull();
+      expect(screen.queryByTestId("maplibre-gl-map")).toBeNull();
+    });
+
+    it("renders custom fallback prop when provided and WebGL is disabled", () => {
+      render(
+        <ThemeProvider theme={lightTheme}>
+          <Map
+            disableWebGL={true}
+            fallback={
+              <div data-testid="custom-fallback-node">
+                Custom WebGL Required
+              </div>
+            }
+          />
+        </ThemeProvider>,
+      );
+
+      expect(screen.getByTestId("custom-fallback-node")).toBeDefined();
+      expect(screen.getByText("Custom WebGL Required")).toBeDefined();
+    });
+
+    it("switches to MapFallback on runtime WebGL context lost or failure", () => {
+      render(
+        <ThemeProvider theme={lightTheme}>
+          <Map
+            coordinates={{ lat: 48.7118, lon: 2.1698 }}
+            data-testid="runtime-fail-map"
+          />
+        </ThemeProvider>,
+      );
+
+      expect(screen.getByTestId("maplibre-gl-map")).toBeDefined();
+
+      // Trigger WebGL failure simulation
+      fireEvent.click(screen.getByTestId("trigger-error"));
     });
   });
 });
